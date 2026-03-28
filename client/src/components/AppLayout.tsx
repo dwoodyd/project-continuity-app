@@ -7,6 +7,7 @@ import {
   Brain,
   ChevronRight,
   Command,
+  Compass,
   Lightbulb,
   LogOut,
   Menu,
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/vault", label: "Knowledge Vault", icon: BookOpen, description: "Imported sources" },
   { href: "/projects", label: "Projects", icon: Brain, description: "All projects" },
   { href: "/weekly", label: "Weekly Review", icon: Archive, description: "Patterns & progress" },
+  { href: "/compass", label: "Weekly Compass", icon: Compass, description: "This week's direction" },
   { href: "/settings", label: "Settings", icon: Settings, description: "Preferences" },
 ];
 

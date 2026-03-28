@@ -5,13 +5,17 @@ import {
   BookOpen,
   CheckCircle2,
   ChevronRight,
+  Clock,
   Edit3,
+  GitBranch,
+  Layers,
   Loader2,
-  LogOut,
-  Plus,
   RefreshCw,
   Sparkles,
   Zap,
+  AlertTriangle,
+  Target,
+  Activity,
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useParams } from "wouter";
@@ -25,15 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import UnstickModal from "@/components/UnstickModal";
 
 // ─── Re-Entry Card Modal ──────────────────────────────────────────────────────
@@ -111,7 +108,10 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
               </div>
               <Button
                 className="w-full"
-                onClick={() => captureContext.mutate({ id: projectId, breadcrumb: whereLeft + (nextAction ? ' | Next: ' + nextAction : '') + (contextNote ? ' | Note: ' + contextNote : '') })}
+                onClick={() => captureContext.mutate({
+                  id: projectId,
+                  breadcrumb: whereLeft + (nextAction ? " | Next: " + nextAction : "") + (contextNote ? " | Note: " + contextNote : ""),
+                })}
                 disabled={!whereLeft.trim() || !nextAction.trim() || captureContext.isPending}
               >
                 {captureContext.isPending ? <><Loader2 className="w-4 h-4 animate-spin mr-2" />Saving...</> : "Capture & step away"}
@@ -126,8 +126,9 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
                     Generate an AI-powered catch-up summary to get back into context fast.
                   </p>
                   <Button onClick={() => generateReturn.mutate({ projectId })} className="gap-2">
-                    {generateReturn.isPending ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</> : <><Sparkles className="w-4 h-4" />Generate catch-up</>}
-
+                    {generateReturn.isPending
+                      ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
+                      : <><Sparkles className="w-4 h-4" />Generate catch-up</>}
                   </Button>
                 </div>
               ) : (
@@ -155,6 +156,27 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
   );
 }
 
+// ─── Timeline Event Icon ──────────────────────────────────────────────────────
+function TimelineEventIcon({ type }: { type: string }) {
+  const map: Record<string, { icon: React.ReactNode; color: string }> = {
+    created: { icon: <Sparkles className="w-3 h-3" />, color: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" },
+    focus_session: { icon: <Target className="w-3 h-3" />, color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400" },
+    milestone: { icon: <CheckCircle2 className="w-3 h-3" />, color: "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400" },
+    blocker: { icon: <AlertTriangle className="w-3 h-3" />, color: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" },
+    decision: { icon: <GitBranch className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
+    next_step_change: { icon: <ChevronRight className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
+    vault_import: { icon: <BookOpen className="w-3 h-3" />, color: "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" },
+    check_in: { icon: <Activity className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
+    status_change: { icon: <Layers className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
+  };
+  const entry = map[type] ?? { icon: <Clock className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" };
+  return (
+    <div className={cn("w-6 h-6 rounded-full flex items-center justify-center shrink-0", entry.color)}>
+      {entry.icon}
+    </div>
+  );
+}
+
 // ─── Main Project Detail Page ─────────────────────────────────────────────────
 export default function ProjectDetailPage() {
   const params = useParams<{ id: string }>();
@@ -165,9 +187,22 @@ export default function ProjectDetailPage() {
   const [unstickTask, setUnstickTask] = useState<{ id: string; title: string; projectId?: number | null } | null>(null);
   const [editingNext, setEditingNext] = useState(false);
   const [nextStepDraft, setNextStepDraft] = useState("");
+  const [activeTab, setActiveTab] = useState<"overview" | "timeline">("overview");
+  const [timelineFilter, setTimelineFilter] = useState<"all" | "focus_session" | "decision" | "milestone" | "blocker">("all");
 
   const { data: project, refetch } = trpc.projects.getById.useQuery({ id: projectId });
   const { data: sources } = trpc.vault.listByState.useQuery({ state: "active" });
+  const { data: timeline, refetch: refetchTimeline } = trpc.intelligence.getProjectTimeline.useQuery(
+    { projectId, filterType: timelineFilter === "all" ? undefined : timelineFilter },
+    { enabled: !!projectId && activeTab === "timeline" }
+  );
+  const buildTimeline = trpc.intelligence.buildProjectTimeline.useMutation({
+    onSuccess: (data) => {
+      toast.success(`Timeline synced — ${data.synced} events added.`);
+      refetchTimeline();
+    },
+    onError: () => toast.error("Failed to sync timeline."),
+  });
 
   const updateProject = trpc.projects.update.useMutation({
     onSuccess: () => { toast.success("Updated."); refetch(); setEditingNext(false); },
@@ -192,6 +227,14 @@ export default function ProjectDetailPage() {
     completed: "text-slate-500",
     archived: "text-muted-foreground/50",
   };
+
+  const filterOptions = [
+    { value: "all", label: "All" },
+    { value: "focus_session", label: "Focus" },
+    { value: "decision", label: "Decisions" },
+    { value: "milestone", label: "Milestones" },
+    { value: "blocker", label: "Blockers" },
+  ];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
@@ -230,111 +273,274 @@ export default function ProjectDetailPage() {
         </div>
       </div>
 
-      {/* Why it matters */}
-      {project.whyItMatters && (
-        <div className="p-4 rounded-xl bg-card border border-border">
-          <p className="text-xs font-medium text-muted-foreground mb-1.5">Why this matters</p>
-          <p className="text-sm text-foreground leading-relaxed italic">"{project.whyItMatters}"</p>
-        </div>
-      )}
-
-      {/* Next step */}
-      <div className="p-4 rounded-xl bg-card border border-border">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-medium text-muted-foreground">Next physical action</p>
+      {/* Tab switcher */}
+      <div className="flex gap-1 bg-muted rounded-xl p-1">
+        {[
+          { id: "overview" as const, label: "Overview" },
+          { id: "timeline" as const, label: "Memory Timeline" },
+        ].map(({ id, label }) => (
           <button
-            onClick={() => { setEditingNext(true); setNextStepDraft(project.nextStep ?? ""); }}
-            className="text-muted-foreground hover:text-foreground p-1 transition-colors"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-          </button>
-        </div>
-        {editingNext ? (
-          <div className="space-y-2">
-            <Input
-              value={nextStepDraft}
-              onChange={(e) => setNextStepDraft(e.target.value)}
-              className="text-sm"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === "Enter") updateProject.mutate({ id: projectId, nextStep: nextStepDraft });
-                if (e.key === "Escape") setEditingNext(false);
-              }}
-            />
-            <div className="flex gap-2">
-              <Button size="sm" onClick={() => updateProject.mutate({ id: projectId, nextStep: nextStepDraft })} disabled={updateProject.isPending}>
-                Save
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => setEditingNext(false)}>Cancel</Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-start gap-2">
-            <ChevronRight className="w-4 h-4 text-foreground/40 mt-0.5 shrink-0" />
-            <p className="text-sm text-foreground">
-              {project.nextStep ?? <span className="text-muted-foreground italic">No next step defined</span>}
-            </p>
-            {project.nextStep && (
-              <button
-                onClick={() => setUnstickTask({ id: String(project.id), title: project.nextStep!, projectId: project.id })}
-                className="ml-auto text-muted-foreground hover:text-foreground p-1 transition-colors shrink-0"
-                title="Get unstuck on this step"
-              >
-                <Zap className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Good enough threshold */}
-      {project.goodEnoughThreshold && (
-        <div className="p-4 rounded-xl bg-muted/30 border border-border/60">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Definition of "good enough"</p>
-          <p className="text-sm text-foreground">{project.goodEnoughThreshold}</p>
-        </div>
-      )}
-
-      {/* Status controls */}
-      <div className="flex gap-2 flex-wrap">
-        {(["idea", "mapped", "active", "paused", "completed"] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => updateProject.mutate({ id: projectId, status: s })}
-            disabled={project.status === s}
+            key={id}
+            onClick={() => setActiveTab(id)}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
-              project.status === s
-                ? "border-foreground/30 bg-foreground/5 text-foreground cursor-default"
-                : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+              "flex-1 py-2 rounded-lg text-sm font-medium transition-colors",
+              activeTab === id
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {s.charAt(0).toUpperCase() + s.slice(1)}
+            {label}
           </button>
         ))}
       </div>
 
-      {/* Linked sources */}
-      {sources && sources.length > 0 && (
-        <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
-            Linked sources ({sources.length})
-          </p>
-          <div className="space-y-2">
-            {sources.map((source) => (
-              <div key={source.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card">
-                <BookOpen className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {source.title ?? "Untitled source"}
-                  </p>
-                  {source.summary && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{source.summary}</p>
-                  )}
+      {/* ── Overview Tab ─────────────────────────────────────────────────────── */}
+      {activeTab === "overview" && (
+        <>
+          {/* Why it matters */}
+          {project.whyItMatters && (
+            <div className="p-4 rounded-xl bg-card border border-border">
+              <p className="text-xs font-medium text-muted-foreground mb-1.5">Why this matters</p>
+              <p className="text-sm text-foreground leading-relaxed italic">"{project.whyItMatters}"</p>
+            </div>
+          )}
+
+          {/* Next step */}
+          <div className="p-4 rounded-xl bg-card border border-border">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-muted-foreground">Next physical action</p>
+              <button
+                onClick={() => { setEditingNext(true); setNextStepDraft(project.nextStep ?? ""); }}
+                className="text-muted-foreground hover:text-foreground p-1 transition-colors"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+            {editingNext ? (
+              <div className="space-y-2">
+                <Input
+                  value={nextStepDraft}
+                  onChange={(e) => setNextStepDraft(e.target.value)}
+                  className="text-sm"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") updateProject.mutate({ id: projectId, nextStep: nextStepDraft });
+                    if (e.key === "Escape") setEditingNext(false);
+                  }}
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => updateProject.mutate({ id: projectId, nextStep: nextStepDraft })} disabled={updateProject.isPending}>
+                    Save
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditingNext(false)}>Cancel</Button>
                 </div>
               </div>
+            ) : (
+              <div className="flex items-start gap-2">
+                <ChevronRight className="w-4 h-4 text-foreground/40 mt-0.5 shrink-0" />
+                <p className="text-sm text-foreground">
+                  {project.nextStep ?? <span className="text-muted-foreground italic">No next step defined</span>}
+                </p>
+                {project.nextStep && (
+                  <button
+                    onClick={() => setUnstickTask({ id: String(project.id), title: project.nextStep!, projectId: project.id })}
+                    className="ml-auto text-muted-foreground hover:text-foreground p-1 transition-colors shrink-0"
+                    title="Get unstuck on this step"
+                  >
+                    <Zap className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Context breadcrumb */}
+          {project.contextBreadcrumb && (
+            <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+              <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1.5">Last stopping point</p>
+              <p className="text-sm text-foreground leading-relaxed">{project.contextBreadcrumb}</p>
+            </div>
+          )}
+
+          {/* Good enough threshold */}
+          {project.goodEnoughThreshold && (
+            <div className="p-4 rounded-xl bg-muted/30 border border-border/60">
+              <p className="text-xs font-medium text-muted-foreground mb-1">Definition of "good enough"</p>
+              <p className="text-sm text-foreground">{project.goodEnoughThreshold}</p>
+            </div>
+          )}
+
+          {/* Status controls */}
+          <div className="flex gap-2 flex-wrap">
+            {(["idea", "mapped", "active", "paused", "completed"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => updateProject.mutate({ id: projectId, status: s })}
+                disabled={project.status === s}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors",
+                  project.status === s
+                    ? "border-foreground/30 bg-foreground/5 text-foreground cursor-default"
+                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                )}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
             ))}
           </div>
+
+          {/* Linked sources */}
+          {sources && sources.length > 0 && (
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                Linked sources ({sources.length})
+              </p>
+              <div className="space-y-2">
+                {sources.slice(0, 5).map((source) => (
+                  <div key={source.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card">
+                    <BookOpen className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-foreground truncate">
+                        {source.title ?? "Untitled source"}
+                      </p>
+                      {source.summary && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{source.summary}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Memory Timeline Tab ───────────────────────────────────────────────── */}
+      {activeTab === "timeline" && (
+        <div className="space-y-4">
+          {/* Timeline header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">Project Memory</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Every meaningful event in this project's history</p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs"
+              onClick={() => buildTimeline.mutate({ projectId })}
+              disabled={buildTimeline.isPending}
+            >
+              {buildTimeline.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+              Sync
+            </Button>
+          </div>
+
+          {/* Insights strip */}
+          {timeline?.insights && (
+            <div className="grid grid-cols-3 gap-2">
+              {timeline.insights.lastMovement && (
+                <div className="p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/40">
+                  <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400 mb-1">Last movement</p>
+                  <p className="text-xs text-foreground line-clamp-2">{timeline.insights.lastMovement.content}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {formatDistanceToNow(new Date(timeline.insights.lastMovement.occurredAt ?? timeline.insights.lastMovement.createdAt), { addSuffix: true })}
+                  </p>
+                </div>
+              )}
+              {timeline.insights.lastDecision && (
+                <div className="p-3 rounded-xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+                  <p className="text-[10px] font-medium text-amber-700 dark:text-amber-400 mb-1">Last decision</p>
+                  <p className="text-xs text-foreground line-clamp-2">{timeline.insights.lastDecision.content}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {formatDistanceToNow(new Date(timeline.insights.lastDecision.occurredAt ?? timeline.insights.lastDecision.createdAt), { addSuffix: true })}
+                  </p>
+                </div>
+              )}
+              {timeline.insights.openLoops.length > 0 && (
+                <div className="p-3 rounded-xl bg-red-50/50 dark:bg-red-900/10 border border-red-200/60 dark:border-red-800/40">
+                  <p className="text-[10px] font-medium text-red-700 dark:text-red-400 mb-1">Open blocker</p>
+                  <p className="text-xs text-foreground line-clamp-2">{timeline.insights.openLoops[0].content}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Filter pills */}
+          <div className="flex gap-1.5 flex-wrap">
+            {filterOptions.map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => setTimelineFilter(value as any)}
+                className={cn(
+                  "px-3 py-1 rounded-full text-xs font-medium border transition-all",
+                  timelineFilter === value
+                    ? "border-foreground/30 bg-foreground/5 text-foreground"
+                    : "border-border text-muted-foreground hover:border-foreground/20"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Timeline events */}
+          {!timeline && (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {timeline && timeline.events.length === 0 && (
+            <div className="p-8 rounded-xl border border-dashed border-border text-center">
+              <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">No events yet.</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Click "Sync" to backfill this project's history from your focus sessions and check-ins.
+              </p>
+              <Button size="sm" variant="outline" onClick={() => buildTimeline.mutate({ projectId })} disabled={buildTimeline.isPending}>
+                {buildTimeline.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-2" />Syncing...</> : "Build timeline"}
+              </Button>
+            </div>
+          )}
+
+          {timeline && timeline.events.length > 0 && (
+            <div className="space-y-0">
+              {timeline.events.map((event, idx) => (
+                <div key={event.id} className="flex gap-3">
+                  {/* Connector line */}
+                  <div className="flex flex-col items-center">
+                    <TimelineEventIcon type={event.eventType} />
+                    {idx < timeline.events.length - 1 && (
+                      <div className="w-px flex-1 bg-border/50 mt-1 mb-1 min-h-[16px]" />
+                    )}
+                  </div>
+                  {/* Content */}
+                  <div className={cn("pb-4 min-w-0 flex-1", idx === timeline.events.length - 1 && "pb-0")}>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm text-foreground leading-relaxed">{event.content}</p>
+                      <p className="text-[10px] text-muted-foreground/60 shrink-0 mt-0.5">
+                        {format(new Date(event.occurredAt ?? event.createdAt), "MMM d")}
+                      </p>
+                    </div>
+                    {event.metadata && (() => {
+                      try {
+                        const meta = JSON.parse(event.metadata);
+                        if (meta.durationSeconds) {
+                          return (
+                            <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                              {Math.round(meta.durationSeconds / 60)} min · {meta.wasCompleted ? "completed" : "stepped away"}
+                            </p>
+                          );
+                        }
+                      } catch {}
+                      return null;
+                    })()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

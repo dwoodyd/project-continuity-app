@@ -10,6 +10,7 @@ import {
 import { storagePut } from "../storage";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { getDb } from "../db";
 
 const sourceTypeEnum = z.enum([
   "paste", "text", "markdown", "pdf", "docx", "google_docs",
@@ -167,15 +168,54 @@ ${content.substring(0, 3000)}`,
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
       const parsed = JSON.parse(raw);
 
+      // Derive confidence: "likely" if 1 candidate, "possible" if 2+, "needs_review" if 0
+      const candidateCount = (parsed.projectCandidates ?? []).length;
+      const mappingConfidence: "likely" | "possible" | "needs_review" =
+        candidateCount === 1 ? "likely" : candidateCount >= 2 ? "possible" : "needs_review";
+
       await updateSourceItem(input.id, ctx.user.id, {
         summary: parsed.summary,
         tags: JSON.stringify(parsed.tags ?? []),
         contentClass: parsed.contentClass as any,
         projectCandidates: JSON.stringify(parsed.projectCandidates ?? []),
+        mappingConfidence,
         state: "mapped",
       });
 
-      return { success: true, data: parsed };
+      return { success: true, data: { ...parsed, mappingConfidence } };
+    }),
+
+  reviewQueue: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return [];
+    const { and, eq, or, isNull } = await import("drizzle-orm");
+    const { sourceItems } = await import("../../drizzle/schema");
+    return db.select().from(sourceItems).where(
+      and(
+        eq(sourceItems.userId, ctx.user.id),
+        or(
+          eq(sourceItems.mappingConfidence, "needs_review"),
+          eq(sourceItems.mappingConfidence, "possible")
+        ),
+        isNull(sourceItems.reviewedAt)
+      )
+    ).orderBy(sourceItems.createdAt).limit(20);
+  }),
+
+  markReviewed: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+      confirmedProjectId: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await updateSourceItem(input.id, ctx.user.id, {
+        reviewedAt: new Date(),
+        mappingConfidence: "likely",
+        ...(input.confirmedProjectId
+          ? { linkedProjectIds: JSON.stringify([input.confirmedProjectId]) }
+          : {}),
+      });
+      return { success: true };
     }),
 
   transcribeVoice: protectedProcedure

@@ -9,6 +9,7 @@ import { aiRouter } from "./routers/ai";
 import { settingsRouter } from "./routers/settings";
 import { dailyPlanRouter } from "./routers/dailyPlan";
 import { focusSessionsRouter } from "./routers/focusSessions";
+import { intelligenceRouter } from "./routers/intelligence";
 
 export const appRouter = router({
   system: systemRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
   settings: settingsRouter,
   dailyPlan: dailyPlanRouter,
   focusSessions: focusSessionsRouter,
+  intelligence: intelligenceRouter,
 });
 
 export type AppRouter = typeof appRouter;

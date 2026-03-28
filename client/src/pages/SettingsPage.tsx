@@ -12,19 +12,153 @@ import {
   Sparkles,
   Sun,
   User,
+  FolderOpen,
+  Trash2,
+  BookOpen,
+  ArrowUpRight,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
 
+// ─── Idea Processing Card ─────────────────────────────────────────────────────
+function IdeaProcessingCard({
+  idea,
+  projects,
+  onResolve,
+  isPending,
+}: {
+  idea: any;
+  projects: any[];
+  onResolve: (action: "park" | "promote" | "discard", projectId?: number) => void;
+  isPending: boolean;
+}) {
+  const [showProjectPicker, setShowProjectPicker] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
+
+  return (
+    <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800/60 bg-amber-50/50 dark:bg-amber-900/10 space-y-3">
+      {/* Raw content */}
+      <p className="text-sm text-foreground leading-relaxed">{idea.rawContent}</p>
+
+      {/* AI-parsed intent */}
+      {idea.parsedIntent && (
+        <div className="flex items-start gap-2">
+          <Sparkles className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+          <p className="text-xs text-amber-700 dark:text-amber-300 leading-relaxed italic">
+            {idea.parsedIntent}
+          </p>
+        </div>
+      )}
+
+      {/* Metadata row */}
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground/60">
+        <span>Captured {format(new Date(idea.createdAt), "MMM d, h:mm a")}</span>
+        {idea.capturedDuringTask && (
+          <>
+            <span>·</span>
+            <Badge variant="outline" className="text-[9px] h-4 px-1.5 border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400">
+              during focus
+            </Badge>
+          </>
+        )}
+      </div>
+
+      {/* Project picker (shown when "Add to project" is clicked) */}
+      {showProjectPicker && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Which project?</p>
+          <div className="space-y-1 max-h-40 overflow-y-auto">
+            {projects.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setSelectedProjectId(p.id === selectedProjectId ? undefined : p.id)}
+                className={cn(
+                  "w-full flex items-center gap-2 p-2 rounded-lg border text-left text-xs transition-all",
+                  selectedProjectId === p.id
+                    ? "border-foreground/30 bg-foreground/5 text-foreground"
+                    : "border-border text-muted-foreground hover:border-foreground/20"
+                )}
+              >
+                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", selectedProjectId === p.id ? "bg-foreground" : "bg-muted-foreground/30")} />
+                {p.title}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              className="flex-1 text-xs h-7"
+              disabled={!selectedProjectId || isPending}
+              onClick={() => {
+                onResolve("promote", selectedProjectId);
+                setShowProjectPicker(false);
+              }}
+            >
+              Confirm
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-xs h-7"
+              onClick={() => setShowProjectPicker(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Action row */}
+      {!showProjectPicker && (
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-7 gap-1.5"
+            disabled={isPending}
+            onClick={() => onResolve("park")}
+          >
+            <BookOpen className="w-3 h-3" />
+            Add to Vault
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-xs h-7 gap-1.5"
+            disabled={isPending}
+            onClick={() => setShowProjectPicker(true)}
+          >
+            <FolderOpen className="w-3 h-3" />
+            Add to project
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs h-7 text-muted-foreground gap-1.5 ml-auto"
+            disabled={isPending}
+            onClick={() => onResolve("discard")}
+          >
+            <Trash2 className="w-3 h-3" />
+            Dismiss
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Settings Page ────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
+
   const scheduleCheckInReminders = (morning: string, midday: string, evening: string) => {
     const notifEnabled = settings?.notificationsEnabled !== false;
     scheduleCheckInNotifications({
@@ -39,9 +173,15 @@ export default function SettingsPage() {
 
   const { data: ideas, refetch: refetchIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: settings } = trpc.settings.getProfile.useQuery();
+  const { data: projects } = trpc.projects.listActive.useQuery();
 
   const resolveIdea = trpc.ai.resolveIdea.useMutation({
-    onSuccess: () => refetchIdeas(),
+    onSuccess: (_, vars) => {
+      const actionLabels = { park: "Added to Vault.", promote: "Added to project.", discard: "Dismissed." };
+      toast.success(actionLabels[vars.action]);
+      refetchIdeas();
+    },
+    onError: () => toast.error("Failed to process idea."),
   });
 
   const updateSettings = trpc.settings.updateSettings.useMutation({
@@ -50,6 +190,9 @@ export default function SettingsPage() {
   });
 
   const [activeTab, setActiveTab] = useState<"profile" | "ideas" | "preferences">("profile");
+  const [morningTime, setMorningTime] = useState("08:00");
+  const [middayTime, setMiddayTime] = useState("12:00");
+  const [eveningTime, setEveningTime] = useState("17:00");
 
   const tabs = [
     { id: "profile" as const, label: "Profile", icon: User },
@@ -57,8 +200,8 @@ export default function SettingsPage() {
     { id: "preferences" as const, label: "Preferences", icon: Settings },
   ];
 
-  const unresolvedIdeas = ideas?.filter((i) => i.resolvedAt === null) ?? [];
-  const resolvedIdeas = ideas?.filter((i) => i.resolvedAt !== null) ?? [];
+  const unresolvedIdeas = ideas?.filter((i) => !i.resolvedStatus && i.parkedStatus) ?? [];
+  const processedIdeas = ideas?.filter((i) => i.resolvedStatus) ?? [];
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
@@ -84,7 +227,7 @@ export default function SettingsPage() {
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{label}</span>
             {id === "ideas" && unresolvedIdeas.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center">
+              <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-bold">
                 {unresolvedIdeas.length}
               </span>
             )}
@@ -92,7 +235,7 @@ export default function SettingsPage() {
         ))}
       </div>
 
-      {/* Profile Tab */}
+      {/* ── Profile Tab ──────────────────────────────────────────────────────── */}
       {activeTab === "profile" && (
         <div className="space-y-4">
           <div className="p-5 rounded-xl bg-card border border-border">
@@ -105,7 +248,6 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">{user?.email ?? ""}</p>
               </div>
             </div>
-
             <div className="space-y-3">
               <div className="flex items-center justify-between py-3 border-t border-border">
                 <div className="flex items-center gap-3">
@@ -119,7 +261,6 @@ export default function SettingsPage() {
                   Switch to {theme === "dark" ? "light" : "dark"}
                 </Button>
               </div>
-
               <div className="flex items-center justify-between py-3 border-t border-border">
                 <div className="flex items-center gap-3">
                   <LogOut className="w-4 h-4 text-muted-foreground" />
@@ -137,77 +278,82 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Idea Sanctuary Tab */}
+      {/* ── Idea Sanctuary Tab ───────────────────────────────────────────────── */}
       {activeTab === "ideas" && (
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Header stats */}
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">
-              {unresolvedIdeas.length} unresolved · {resolvedIdeas.length} resolved
-            </p>
+            <div>
+              <p className="text-sm font-medium text-foreground">Idea Sanctuary</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {unresolvedIdeas.length} waiting to be processed · {processedIdeas.length} resolved
+              </p>
+            </div>
+            {unresolvedIdeas.length > 0 && (
+              <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-xs">
+                {unresolvedIdeas.length} pending
+              </Badge>
+            )}
           </div>
 
-          {unresolvedIdeas.length === 0 && resolvedIdeas.length === 0 && (
+          {/* Empty state */}
+          {unresolvedIdeas.length === 0 && processedIdeas.length === 0 && (
             <div className="p-8 rounded-xl border border-dashed border-border text-center">
               <Lightbulb className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
               <p className="text-sm font-medium text-foreground mb-1">No ideas captured yet.</p>
-              <p className="text-xs text-muted-foreground">
-                Use the quick capture button (💡) anywhere in the app to park ideas without losing focus.
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Use the lightbulb button (bottom-right) anywhere in the app to park ideas without losing focus.
+                They'll appear here for processing.
               </p>
             </div>
           )}
 
+          {/* All clear state */}
+          {unresolvedIdeas.length === 0 && processedIdeas.length > 0 && (
+            <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
+              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Processing queue is clear.</p>
+              <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1">
+                All captured ideas have been processed.
+              </p>
+            </div>
+          )}
+
+          {/* Processing queue */}
           {unresolvedIdeas.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Needs attention</p>
-              <div className="space-y-2">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Processing queue</p>
+                <p className="text-xs text-muted-foreground/60">Each idea needs one decision: Vault, Project, or Dismiss</p>
+              </div>
+              <div className="space-y-3">
                 {unresolvedIdeas.map((idea) => (
-                  <div key={idea.id} className="p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
-                    <p className="text-sm text-foreground leading-relaxed">{idea.rawContent}</p>
-                    {idea.parsedIntent && (
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">Intent: {idea.parsedIntent}</p>
-                    )}
-                    <div className="flex gap-2 mt-2.5">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs h-7"
-                        onClick={() => resolveIdea.mutate({ id: idea.id, action: "park" })}
-                      >
-                        Add to vault
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs h-7"
-                        onClick={() => resolveIdea.mutate({ id: idea.id, action: "promote" })}
-                      >
-                        Add to project
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-xs h-7 text-muted-foreground"
-                        onClick={() => resolveIdea.mutate({ id: idea.id, action: "discard" })}
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  </div>
+                  <IdeaProcessingCard
+                    key={idea.id}
+                    idea={idea}
+                    projects={projects ?? []}
+                    onResolve={(action, projectId) => resolveIdea.mutate({ id: idea.id, action, projectId })}
+                    isPending={resolveIdea.isPending}
+                  />
                 ))}
               </div>
             </div>
           )}
 
-          {resolvedIdeas.length > 0 && (
+          {/* Processed ideas archive */}
+          {processedIdeas.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Resolved</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Processed</p>
               <div className="space-y-2">
-                {resolvedIdeas.slice(0, 5).map((idea) => (
-                  <div key={idea.id} className="p-3 rounded-lg border border-border bg-muted/20 opacity-60">
-                    <p className="text-xs text-foreground line-through">{idea.rawContent}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Resolved · {format(new Date(idea.resolvedAt!), "MMM d")}
-                    </p>
+                {processedIdeas.slice(0, 8).map((idea) => (
+                  <div key={idea.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20 opacity-60">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs text-foreground line-through truncate">{idea.rawContent}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                        Processed · {format(new Date(idea.resolvedAt ?? idea.updatedAt), "MMM d")}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -216,12 +362,11 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* Preferences Tab */}
+      {/* ── Preferences Tab ──────────────────────────────────────────────────── */}
       {activeTab === "preferences" && (
         <div className="space-y-4">
           <div className="p-5 rounded-xl bg-card border border-border space-y-4">
             <p className="text-sm font-semibold text-foreground">ADHD Preferences</p>
-
             <div className="space-y-3">
               {[
                 { key: "morningCheckInEnabled", label: "Morning check-in reminder", desc: "Daily reminder to set your focus" },
@@ -258,115 +403,89 @@ export default function SettingsPage() {
               <Bell className="w-4 h-4 text-muted-foreground" />
               <p className="text-sm font-semibold text-foreground">Push Notifications</p>
             </div>
-            {!isSupported ? (
-              <p className="text-xs text-muted-foreground">
-                Push notifications are not supported in this browser.
-              </p>
-            ) : permission === "granted" ? (
+
+            {!isSupported && (
+              <p className="text-xs text-muted-foreground">Push notifications are not supported in this browser.</p>
+            )}
+
+            {isSupported && permission === "default" && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <p className="text-sm">Notifications enabled</p>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  You will receive check-in reminders at your scheduled times.
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Enable push notifications to receive check-in reminders even when the app is in the background.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    scheduleCheckInReminders(
-                      settings?.morningCheckInTime ?? "08:00",
-                      settings?.middayCheckInTime ?? "12:00",
-                      settings?.eveningCheckInTime ?? "17:00"
-                    );
-                    toast.success("Reminders rescheduled.");
-                  }}
-                  className="gap-2 text-xs"
-                >
-                  <Bell className="w-3.5 h-3.5" />
-                  Reschedule reminders
+                <Button size="sm" variant="outline" onClick={() => requestPermission()}>
+                  Enable notifications
                 </Button>
               </div>
-            ) : (
+            )}
+
+            {isSupported && permission === "denied" && (
+              <p className="text-xs text-muted-foreground">
+                Notifications are blocked. Enable them in your browser settings to receive check-in reminders.
+              </p>
+            )}
+
+            {isSupported && permission === "granted" && (
               <div className="space-y-3">
-                <p className="text-xs text-muted-foreground">
-                  Enable notifications to receive morning, midday, and evening check-in reminders — even when the app is in the background.
-                </p>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Notifications enabled</p>
+                </div>
+                <div className="space-y-2">
+                  {[
+                    { label: "Morning check-in", value: morningTime, setter: setMorningTime },
+                    { label: "Midday check-in", value: middayTime, setter: setMiddayTime },
+                    { label: "Evening closure", value: eveningTime, setter: setEveningTime },
+                  ].map(({ label, value, setter }) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">{label}</p>
+                      <Input
+                        type="time"
+                        value={value}
+                        onChange={(e) => setter(e.target.value)}
+                        className="w-28 h-7 text-xs"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    const granted = await requestPermission();
-                    if (granted) {
-                      scheduleCheckInReminders(
-                        settings?.morningCheckInTime ?? "08:00",
-                        settings?.middayCheckInTime ?? "12:00",
-                        settings?.eveningCheckInTime ?? "17:00"
-                      );
-                      toast.success("Check-in reminders scheduled.");
-                    } else {
-                      toast.error("Notification permission denied. Enable it in your browser settings.");
-                    }
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    scheduleCheckInReminders(morningTime, middayTime, eveningTime);
+                    toast.success("Check-in reminders scheduled.");
                   }}
-                  className="gap-2"
                 >
-                  <Bell className="w-4 h-4" />
-                  Enable notifications
+                  Save notification times
                 </Button>
               </div>
             )}
           </div>
 
-          {/* Check-in Times */}
+          {/* Tone preference */}
           <div className="p-5 rounded-xl bg-card border border-border space-y-3">
-            <p className="text-sm font-semibold text-foreground">Check-in Times</p>
-            <div className="grid grid-cols-3 gap-3">
+            <p className="text-sm font-semibold text-foreground">AI Tone</p>
+            <p className="text-xs text-muted-foreground">How should the AI communicate with you?</p>
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { key: "morningCheckInTime", label: "Morning", defaultVal: "08:00" },
-                { key: "middayCheckInTime", label: "Midday", defaultVal: "12:00" },
-                { key: "eveningCheckInTime", label: "Evening", defaultVal: "17:00" },
-              ].map(({ key, label, defaultVal }) => (
-                <div key={key}>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
-                  <Input
-                    type="time"
-                    defaultValue={(settings as any)?.[key] ?? defaultVal}
-                    className="text-sm"
-                    onBlur={(e) => {
-                      updateSettings.mutate({ [key]: e.target.value });
-                      if (permission === "granted") {
-                        scheduleCheckInReminders(
-                          key === "morningCheckInTime" ? e.target.value : (settings?.morningCheckInTime ?? "08:00"),
-                          key === "middayCheckInTime" ? e.target.value : (settings?.middayCheckInTime ?? "12:00"),
-                          key === "eveningCheckInTime" ? e.target.value : (settings?.eveningCheckInTime ?? "17:00")
-                        );
-                      }
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Focus Timer */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
-            <p className="text-sm font-semibold text-foreground">Focus Timer</p>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { key: "focusDuration", label: "Focus duration (min)", defaultVal: 25 },
-                { key: "breakDuration", label: "Break duration (min)", defaultVal: 5 },
-              ].map(({ key, label, defaultVal }) => (
-                <div key={key}>
-                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
-                  <Input
-                    type="number"
-                    defaultValue={(settings as any)?.[key] ?? defaultVal}
-                    min={1}
-                    max={120}
-                    className="text-sm"
-                    onBlur={(e) => updateSettings.mutate({ [key]: parseInt(e.target.value) })}
-                  />
-                </div>
+                { value: "gentle", label: "Gentle", desc: "Warm, supportive" },
+                { value: "direct", label: "Direct", desc: "Calm, factual" },
+                { value: "firm", label: "Firm", desc: "Concise, no fluff" },
+              ].map(({ value, label, desc }) => (
+                <button
+                  key={value}
+                  onClick={() => updateSettings.mutate({ tonePreference: value as any })}
+                  className={cn(
+                    "flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all",
+                    settings?.tonePreference === value
+                      ? "border-foreground/30 bg-foreground/5 text-foreground"
+                      : "border-border text-muted-foreground hover:border-foreground/20"
+                  )}
+                >
+                  <span className="text-sm font-medium">{label}</span>
+                  <span className="text-[10px] opacity-70">{desc}</span>
+                </button>
               ))}
             </div>
           </div>

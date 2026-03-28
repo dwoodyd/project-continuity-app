@@ -102,6 +102,9 @@ export const sourceItems = mysqlTable("source_items", {
   fileUrl: text("fileUrl"), // S3 URL for uploaded files
   fileKey: varchar("fileKey", { length: 500 }),
   mimeType: varchar("mimeType", { length: 100 }),
+  mappingConfidence: mysqlEnum("mappingConfidence", ["likely", "possible", "needs_review"]).default("needs_review"),
+  reviewedAt: timestamp("reviewedAt"),
+  isDuplicate: int("isDuplicate").default(0).notNull(), // tinyint(1) boolean
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -223,3 +226,83 @@ export const focusSessions = mysqlTable("focus_sessions", {
 
 export type FocusSession = typeof focusSessions.$inferSelect;
 export type InsertFocusSession = typeof focusSessions.$inferInsert;
+
+// ── Distraction Events ────────────────────────────────────────────────────────
+export const distractionEvents = mysqlTable("distraction_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"),
+  date: timestamp("date").defaultNow().notNull(),
+  checkInType: mysqlEnum("checkInType", ["midday", "evening"]).notNull(),
+  rawInput: text("rawInput").notNull(),
+  category: mysqlEnum("category", [
+    "social_media",
+    "research_rabbit_hole",
+    "unplanned_task",
+    "communication",
+    "context_switch",
+    "unknown",
+  ])
+    .default("unknown")
+    .notNull(),
+  timeOfDay: mysqlEnum("timeOfDay", ["morning", "afternoon", "evening"]).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type DistractionEvent = typeof distractionEvents.$inferSelect;
+export type InsertDistractionEvent = typeof distractionEvents.$inferInsert;
+
+// ── Project Memory Events ─────────────────────────────────────────────────────
+export const projectMemoryEvents = mysqlTable("project_memory_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId").notNull(),
+  eventType: mysqlEnum("eventType", [
+    "created",
+    "vault_import",
+    "check_in",
+    "focus_session",
+    "milestone",
+    "blocker",
+    "next_step_change",
+    "decision",
+    "status_change",
+  ]).notNull(),
+  content: text("content").notNull(),
+  metadata: text("metadata"), // JSON string for extra fields
+  occurredAt: timestamp("occurredAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectMemoryEvent = typeof projectMemoryEvents.$inferSelect;
+export type InsertProjectMemoryEvent = typeof projectMemoryEvents.$inferInsert;
+
+// ── Weekly Compass ────────────────────────────────────────────────────────────
+export const weeklyCompass = mysqlTable("weekly_compass", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekStart: timestamp("weekStart").notNull(), // Monday 00:00 UTC
+  primaryProjectId: int("primaryProjectId"),
+  secondaryProjectId: int("secondaryProjectId"),
+  adminLane: text("adminLane"), // free-text description of maintenance/admin focus
+  mustMove: text("mustMove"), // JSON array of project ids / task descriptions
+  canWait: text("canWait"),
+  shouldPark: text("shouldPark"),
+  generatedGuidance: text("generatedGuidance"),
+  userConfirmedAt: timestamp("userConfirmedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type WeeklyCompass = typeof weeklyCompass.$inferSelect;
+export type InsertWeeklyCompass = typeof weeklyCompass.$inferInsert;
+
+// ── Decisions ─────────────────────────────────────────────────────────────────
+export const decisions = mysqlTable("decisions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"),
+  content: text("content").notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  source: mysqlEnum("source", ["manual", "extracted"]).default("manual").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Decision = typeof decisions.$inferSelect;
+export type InsertDecision = typeof decisions.$inferInsert;

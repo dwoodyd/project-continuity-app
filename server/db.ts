@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, ne, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   CheckIn,
@@ -27,6 +27,20 @@ import {
   userProfiles,
   users,
   weeklyReviews,
+  focusSessions,
+  distractionEvents,
+  projectMemoryEvents,
+  weeklyCompass,
+  decisions,
+  DistractionEvent,
+  InsertDistractionEvent,
+  InsertProjectMemoryEvent,
+  ProjectMemoryEvent,
+  WeeklyCompass,
+  InsertWeeklyCompass,
+  Decision,
+  InsertDecision,
+  FocusSession,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -338,4 +352,188 @@ export async function getWeeklyCheckInPresence(userId: number): Promise<{ date: 
     .where(and(eq(checkIns.userId, userId), gte(checkIns.date, days[0]!)));
   const datesWithCheckIn = new Set(results.map((r) => r.date));
   return days.map((date) => ({ date, hasCheckIn: datesWithCheckIn.has(date) }));
+}
+
+// ── Focus Sessions ────────────────────────────────────────────────────────────
+export async function getFocusSessionsByProject(userId: number, projectId: number, limit = 10): Promise<FocusSession[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(focusSessions)
+    .where(and(eq(focusSessions.userId, userId), eq(focusSessions.projectId, projectId)))
+    .orderBy(desc(focusSessions.startedAt))
+    .limit(limit);
+}
+
+export async function getRecentFocusSessions(userId: number, limit = 20): Promise<FocusSession[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(focusSessions)
+    .where(eq(focusSessions.userId, userId))
+    .orderBy(desc(focusSessions.startedAt))
+    .limit(limit);
+}
+
+export async function saveFocusSession(session: {
+  userId: number;
+  projectId?: number | null;
+  intention: string;
+  startedAt: Date;
+  durationSeconds: number;
+  completedAt?: Date | null;
+  notes?: string | null;
+  wasCompleted: boolean;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.insert(focusSessions).values({
+    userId: session.userId,
+    projectId: session.projectId ?? null,
+    intention: session.intention,
+    startedAt: session.startedAt,
+    durationSeconds: session.durationSeconds,
+    completedAt: session.completedAt ?? null,
+    notes: session.notes ?? null,
+    wasCompleted: session.wasCompleted ? 1 : 0,
+  });
+  return (result as any).insertId ?? 0;
+}
+
+// ── Distraction Events ────────────────────────────────────────────────────────
+export async function createDistractionEvent(event: InsertDistractionEvent): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.insert(distractionEvents).values(event);
+  return (result as any).insertId ?? 0;
+}
+
+export async function getDistractionEventsByUser(userId: number, limit = 50): Promise<DistractionEvent[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(distractionEvents)
+    .where(eq(distractionEvents.userId, userId))
+    .orderBy(desc(distractionEvents.date))
+    .limit(limit);
+}
+
+export async function getDistractionWeeklyAggregates(userId: number): Promise<{
+  topCategory: string | null;
+  topTimeOfDay: string | null;
+  topProjectId: number | null;
+  totalEvents: number;
+}> {
+  const db = await getDb();
+  if (!db) return { topCategory: null, topTimeOfDay: null, topProjectId: null, totalEvents: 0 };
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const events = await db.select().from(distractionEvents)
+    .where(and(eq(distractionEvents.userId, userId), gte(distractionEvents.date, sevenDaysAgo)));
+  if (!events.length) return { topCategory: null, topTimeOfDay: null, topProjectId: null, totalEvents: 0 };
+  const catCount: Record<string, number> = {};
+  const todCount: Record<string, number> = {};
+  const projCount: Record<number, number> = {};
+  for (const e of events) {
+    catCount[e.category] = (catCount[e.category] ?? 0) + 1;
+    todCount[e.timeOfDay] = (todCount[e.timeOfDay] ?? 0) + 1;
+    if (e.projectId) projCount[e.projectId] = (projCount[e.projectId] ?? 0) + 1;
+  }
+  const topCategory = Object.entries(catCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const topTimeOfDay = Object.entries(todCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+  const topProjectId = Object.entries(projCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+  return {
+    topCategory,
+    topTimeOfDay,
+    topProjectId: topProjectId ? Number(topProjectId) : null,
+    totalEvents: events.length,
+  };
+}
+
+// ── Project Memory Events ─────────────────────────────────────────────────────
+export async function createProjectMemoryEvent(event: InsertProjectMemoryEvent): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.insert(projectMemoryEvents).values(event);
+  return (result as any).insertId ?? 0;
+}
+
+export async function getProjectMemoryEvents(userId: number, projectId: number): Promise<ProjectMemoryEvent[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectMemoryEvents)
+    .where(and(eq(projectMemoryEvents.userId, userId), eq(projectMemoryEvents.projectId, projectId)))
+    .orderBy(desc(projectMemoryEvents.occurredAt))
+    .limit(100);
+}
+
+export async function getLastDecisionForProject(userId: number, projectId: number): Promise<ProjectMemoryEvent | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(projectMemoryEvents)
+    .where(and(
+      eq(projectMemoryEvents.userId, userId),
+      eq(projectMemoryEvents.projectId, projectId),
+      eq(projectMemoryEvents.eventType, "decision"),
+    ))
+    .orderBy(desc(projectMemoryEvents.occurredAt))
+    .limit(1);
+  return result[0];
+}
+
+// ── Weekly Compass ────────────────────────────────────────────────────────────
+export async function getWeeklyCompass(userId: number, weekStart: Date): Promise<WeeklyCompass | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(weeklyCompass)
+    .where(and(eq(weeklyCompass.userId, userId), eq(weeklyCompass.weekStart, weekStart)))
+    .limit(1);
+  return result[0];
+}
+
+export async function getLatestWeeklyCompass(userId: number): Promise<WeeklyCompass | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(weeklyCompass)
+    .where(eq(weeklyCompass.userId, userId))
+    .orderBy(desc(weeklyCompass.weekStart))
+    .limit(1);
+  return result[0];
+}
+
+export async function upsertWeeklyCompass(data: InsertWeeklyCompass): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const existing = await getWeeklyCompass(data.userId, data.weekStart);
+  if (existing) {
+    await db.update(weeklyCompass)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(weeklyCompass.id, existing.id));
+    return existing.id;
+  }
+  const result = await db.insert(weeklyCompass).values(data);
+  return (result as any).insertId ?? 0;
+}
+
+// ── Decisions ─────────────────────────────────────────────────────────────────
+export async function createDecision(decision: InsertDecision): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.insert(decisions).values(decision);
+  return (result as any).insertId ?? 0;
+}
+
+export async function getDecisionsByProject(userId: number, projectId: number, limit = 20): Promise<Decision[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(decisions)
+    .where(and(eq(decisions.userId, userId), eq(decisions.projectId, projectId)))
+    .orderBy(desc(decisions.date))
+    .limit(limit);
+}
+
+export async function getRecentDecisions(userId: number, limit = 10): Promise<Decision[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(decisions)
+    .where(eq(decisions.userId, userId))
+    .orderBy(desc(decisions.date))
+    .limit(limit);
 }

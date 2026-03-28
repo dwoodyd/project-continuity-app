@@ -137,3 +137,81 @@
 - [x] End the focus session (save partial session with wasCompleted=false)
 - [x] Navigate back to Command Center
 - [x] Show toast: "Stopping point saved. You can pick up right where you left off."
+
+## Revision Brief 3 (from pasted_content_5.txt)
+
+### Capacity-Adjusted Daily Plan Generation
+- [ ] Full capacity: primary + optional secondary project, up to 3 tasks, full time blocks, drift warning
+- [ ] Partial capacity: primary only, max 2 tasks, one flex buffer, no secondary project, "One clear focus today" message
+- [ ] Low capacity: single task only, no time blocks, no secondary, "This is today's one thing" message
+- [ ] Low capacity AI bias: unblocked tasks, externally-dependent tasks, tasks carried over 2+ times
+- [ ] Carryover count tracked per task, surfaced when count > 2
+- [ ] Command Center renders visibly different layouts per capacity level
+
+### Re-Entry Card with Real Content
+- [ ] Pull last stopping point from Focus Session History (24h+ since last session)
+- [ ] Surface open decision from last check-in note for the project
+- [ ] Show "already handled" tasks (Done/Parked in last 2 sessions)
+- [ ] Next physical action as verb-first concrete statement
+- [ ] Vague task title triggers one-line clarification prompt
+- [ ] Why It Matters shown as closing line
+- [ ] First-session fallback: "This is your first session on this project."
+- [ ] Single-tap dismiss: "Ready. Begin."
+
+### Idea Sanctuary Processing Queue
+- [ ] Processing view inside Idea Sanctuary for unreviewed captures
+- [ ] One question per idea: four options (active project / future idea / one-time task / archive)
+- [ ] Sanctuary badge count reflects unreviewed items only
+- [ ] Processing prompt surfaces at end of morning check-in or evening closure when count > 3
+- [ ] Partial processing saves — can dismiss mid-queue
+- [ ] Processed ideas move to correct resolved state
+
+### Distraction Pattern Tracking — Data Layer
+- [ ] distractionEvents table: id, userId, date, checkInType, rawInput, category, timeOfDay, projectId
+- [ ] AI classification of category from raw input (6 categories + unknown)
+- [ ] Low-confidence → store as unknown, no forced categorization
+- [ ] Weekly aggregate queries: top category, top time-of-day, top interrupted project
+- [ ] Extraction runs on midday and evening check-in submissions
+- [ ] No user-facing output yet — data layer only
+
+## Revision Brief 4 (from pasted_content_4.txt)
+
+### Project Memory Timeline
+- [ ] Timeline section on every project detail page
+- [ ] Events: creation, vault imports, check-ins, focus sessions, milestone completions, blockers, next-step changes
+- [ ] Filter timeline by event type
+- [ ] Surface "last real movement" clearly
+- [ ] Surface "last decision made" clearly
+- [ ] Surface "current open loop" clearly
+- [ ] projectMemoryEvents table with type, content, timestamp, projectId
+
+### Smarter Note-to-Project Mapping
+- [ ] Confidence labels on vault clustering: "likely belongs here" / "possible overlap" / "needs review"
+- [ ] Lightweight review queue for newly imported or ambiguous items
+- [ ] Confirm / reject / remap with one tap
+- [ ] Detect likely duplicate or overlapping notes
+- [ ] Surface when disconnected notes represent one active body of work
+- [ ] Restraint: do not auto-create projects from imported material
+
+### Weekly Compass
+- [ ] Weekly Compass screen or module
+- [ ] Prompt user to choose: primary project, secondary project, one maintenance/admin lane
+- [ ] AI recommendations based on: project status, overdue blockers, recent focus sessions, note activity, unfinished prior week
+- [ ] Weekly view: what must move / what can wait / what should be parked
+- [ ] Weekly priorities feed daily planning engine
+- [ ] weeklyCompass table: userId, weekStart, primaryProjectId, secondaryProjectId, adminLane, generatedGuidance
+
+### End-of-Day Decision Capture
+- [ ] "Decisions Made Today" field in evening closure
+- [ ] AI extraction of decision statements from freeform notes
+- [ ] Save decisions as structured project memory events
+- [ ] Decisions influence tomorrow's Start Here card and next-step generation
+- [ ] Surface last meaningful decision in project detail and Memory Timeline
+- [ ] decisions table: id, userId, projectId, content, date, source (manual/extracted)
+
+### Command Center Clarity Pass
+- [ ] Start Here card stays dominant — visually primary
+- [ ] Secondary data available but not loud (collapsed or de-emphasized)
+- [ ] If multiple alerts exist, prioritize them instead of showing all at once
+- [ ] Low capacity day: single task only, no secondary project card rendered
+- [ ] App feels like relief, not administration

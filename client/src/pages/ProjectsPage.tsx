@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
 
 type ProjectStatus = "idea" | "mapped" | "active" | "paused" | "completed" | "archived";
 
@@ -187,6 +188,11 @@ function ProjectCard({ project, onClick }: { project: any; onClick: () => void }
           {project.whyItMatters && (
             <p className="text-xs text-muted-foreground/70 mt-1 line-clamp-1 italic">
               "{project.whyItMatters.substring(0, 80)}"
+            </p>
+          )}
+          {project.lastTouchedAt && (
+            <p className="text-xs text-muted-foreground/40 mt-1.5">
+              Last touched {formatDistanceToNow(new Date(project.lastTouchedAt), { addSuffix: true })}
             </p>
           )}
         </div>

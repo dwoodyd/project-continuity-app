@@ -10,6 +10,7 @@ import VaultPage from "./pages/VaultPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
 import WeeklyReviewPage from "./pages/WeeklyReviewPage";
+import WeeklyCompassPage from "./pages/WeeklyCompassPage";
 import SettingsPage from "./pages/SettingsPage";
 import FocusModePage from "./pages/FocusModePage";
 import OnboardingPage from "./pages/OnboardingPage";
@@ -27,6 +28,7 @@ function Router() {
             <Route path="/projects" component={ProjectsPage} />
             <Route path="/projects/:id" component={ProjectDetailPage} />
             <Route path="/weekly" component={WeeklyReviewPage} />
+            <Route path="/compass" component={WeeklyCompassPage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />

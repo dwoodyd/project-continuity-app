@@ -1,23 +1,21 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
+  AlertTriangle,
   BookOpen,
-  Brain,
+  CheckCircle2,
   ChevronRight,
+  Clipboard,
   FileText,
-  Filter,
   Loader2,
   Plus,
   Sparkles,
-  Tag,
   Upload,
-  X,
 } from "lucide-react";
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -56,11 +54,37 @@ const contentClassConfig: Record<string, string> = {
   archive: "bg-muted text-muted-foreground",
 };
 
+const confidenceConfig: Record<string, { label: string; className: string; Icon: React.ElementType }> = {
+  likely: {
+    label: "Likely match",
+    className: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800",
+    Icon: CheckCircle2,
+  },
+  possible: {
+    label: "Possible match",
+    className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800",
+    Icon: AlertTriangle,
+  },
+  needs_review: {
+    label: "Needs review",
+    className: "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800",
+    Icon: AlertTriangle,
+  },
+};
+
 // ─── Add Item Modal ───────────────────────────────────────────────────────────
-function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () => void }) {
+function AddItemModal({
+  onClose,
+  onAdded,
+  initialContent,
+}: {
+  onClose: () => void;
+  onAdded: () => void;
+  initialContent?: string;
+}) {
   const [mode, setMode] = useState<"paste" | "file">("paste");
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialContent ?? "");
   const [sourceType, setSourceType] = useState("paste");
   const [file, setFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -75,7 +99,22 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
     onError: () => toast.error("Failed to upload file."),
   });
 
-  const handleSubmit = async () => {
+  const handlePasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text.trim()) {
+        setContent(text);
+        setMode("paste");
+        toast.success("Clipboard content loaded.");
+      } else {
+        toast.info("Clipboard is empty.");
+      }
+    } catch {
+      toast.error("Could not read clipboard. Please paste manually.");
+    }
+  };
+
+  const handleSubmit = () => {
     if (mode === "paste") {
       if (!content.trim()) return;
       addPaste.mutate({ title: title || undefined, content, sourceType: sourceType as any });
@@ -103,7 +142,6 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
         <DialogHeader className="px-5 pt-5 pb-0">
           <DialogTitle className="text-base font-semibold">Add to Knowledge Vault</DialogTitle>
         </DialogHeader>
-
         <div className="px-5 py-4 space-y-4">
           {/* Mode toggle */}
           <div className="flex gap-2">
@@ -113,42 +151,57 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
                 onClick={() => setMode(v as any)}
                 className={cn(
                   "flex-1 py-2 rounded-lg border text-sm font-medium transition-colors",
-                  mode === v ? "border-foreground/30 bg-foreground/5 text-foreground" : "border-border text-muted-foreground hover:border-foreground/20"
+                  mode === v
+                    ? "border-foreground/30 bg-foreground/5 text-foreground"
+                    : "border-border text-muted-foreground hover:border-foreground/20"
                 )}
               >
                 {label}
               </button>
             ))}
           </div>
-
           <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Title <span className="font-normal">(optional)</span></label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Give it a name..." className="text-sm" />
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
+              Title <span className="font-normal">(optional)</span>
+            </label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Give it a name..."
+              className="text-sm"
+            />
           </div>
-
           {mode === "paste" ? (
             <>
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Source type</label>
                 <Select value={sourceType} onValueChange={setSourceType}>
-                  <SelectTrigger className="text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {["paste", "text", "markdown", "chatgpt_export", "claude_export", "notion", "transcript", "url", "other"].map((t) => (
-                      <SelectItem key={t} value={t}>{t.replace("_", " ")}</SelectItem>
+                      <SelectItem key={t} value={t}>{t.replace(/_/g, " ")}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Content</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Content</label>
+                  <button
+                    type="button"
+                    onClick={handlePasteFromClipboard}
+                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <Clipboard className="w-3 h-3" />
+                    Paste from clipboard
+                  </button>
+                </div>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   placeholder="Paste your content here — notes, exports, transcripts, links..."
                   className="min-h-[160px] resize-none text-sm"
-                  autoFocus
+                  autoFocus={!initialContent}
                 />
               </div>
             </>
@@ -181,7 +234,6 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
             </div>
           )}
         </div>
-
         <div className="px-5 pb-5 flex justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
           <Button
@@ -189,7 +241,9 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
             onClick={handleSubmit}
             disabled={isPending || (mode === "paste" ? !content.trim() : !file)}
           >
-            {isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />Adding...</> : "Add to vault"}
+            {isPending
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />Adding...</>
+              : "Add to vault"}
           </Button>
         </div>
       </DialogContent>
@@ -198,24 +252,36 @@ function AddItemModal({ onClose, onAdded }: { onClose: () => void; onAdded: () =
 }
 
 // ─── Source Item Card ─────────────────────────────────────────────────────────
-function SourceItemCard({ item, onUpdate, onProcess }: {
+function SourceItemCard({
+  item,
+  onUpdate,
+  onProcess,
+  onMarkReviewed,
+}: {
   item: any;
   onUpdate: () => void;
   onProcess: (id: number) => void;
+  onMarkReviewed?: (id: number, projectId: number | null) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const updateState = trpc.vault.updateState.useMutation({ onSuccess: onUpdate });
+  const updateState = trpc.vault.updateState.useMutation({
+    onSuccess: onUpdate,
+    onError: () => toast.error("Failed to update."),
+  });
 
-  const tags: string[] = item.tags ? JSON.parse(item.tags) : [];
-  const projectCandidates: string[] = item.projectCandidates ? JSON.parse(item.projectCandidates) : [];
+  const tags: string[] = (() => { try { return JSON.parse(item.tags ?? "[]"); } catch { return []; } })();
+  const projectCandidates: string[] = (() => { try { return JSON.parse(item.projectCandidates ?? "[]"); } catch { return []; } })();
   const stateCfg = stateConfig[item.state as SourceState] ?? stateConfig.inbox;
+  const confidenceCfg = item.mappingConfidence ? confidenceConfig[item.mappingConfidence] : null;
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-foreground/20 transition-colors">
-      <div
-        className="p-4 cursor-pointer"
-        onClick={() => setExpanded(!expanded)}
-      >
+    <div className={cn(
+      "bg-card border rounded-xl overflow-hidden hover:border-foreground/20 transition-colors",
+      item.mappingConfidence === "needs_review"
+        ? "border-amber-200/80 dark:border-amber-800/50"
+        : "border-border"
+    )}>
+      <div className="p-4 cursor-pointer" onClick={() => setExpanded(!expanded)}>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap mb-1.5">
@@ -225,6 +291,12 @@ function SourceItemCard({ item, onUpdate, onProcess }: {
               {item.contentClass && (
                 <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", contentClassConfig[item.contentClass] ?? "bg-muted text-muted-foreground")}>
                   {item.contentClass}
+                </span>
+              )}
+              {confidenceCfg && (
+                <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium border flex items-center gap-1", confidenceCfg.className)}>
+                  <confidenceCfg.Icon className="w-2.5 h-2.5" />
+                  {confidenceCfg.label}
                 </span>
               )}
               <span className="text-xs text-muted-foreground">{item.sourceType}</span>
@@ -238,7 +310,6 @@ function SourceItemCard({ item, onUpdate, onProcess }: {
           </div>
           <ChevronRight className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform mt-0.5", expanded && "rotate-90")} />
         </div>
-
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-2.5">
             {tags.map((tag) => (
@@ -260,7 +331,6 @@ function SourceItemCard({ item, onUpdate, onProcess }: {
               </p>
             </div>
           )}
-
           {projectCandidates.length > 0 && (
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-1.5">Suggested projects</p>
@@ -273,7 +343,23 @@ function SourceItemCard({ item, onUpdate, onProcess }: {
               </div>
             </div>
           )}
-
+          {/* Confidence review action */}
+          {item.mappingConfidence === "needs_review" && onMarkReviewed && (
+            <div className="flex items-center gap-2 p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <p className="text-xs text-amber-700 dark:text-amber-300 flex-1">
+                AI couldn't confidently map this to a project.
+              </p>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-7 border-amber-300 dark:border-amber-700"
+                onClick={() => onMarkReviewed(item.id, item.projectId ?? null)}
+              >
+                Mark reviewed
+              </Button>
+            </div>
+          )}
           {/* State actions */}
           <div className="flex flex-wrap gap-2 pt-1">
             {item.state === "inbox" && (
@@ -337,19 +423,47 @@ function SourceItemCard({ item, onUpdate, onProcess }: {
 // ─── Main Vault Page ──────────────────────────────────────────────────────────
 export default function VaultPage() {
   const [addOpen, setAddOpen] = useState(false);
-  const [filterState, setFilterState] = useState<SourceState | "all">("all");
+  const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
+  const [filterState, setFilterState] = useState<SourceState | "all" | "review">("all");
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
+  const { data: reviewQueue, refetch: refetchReview } = trpc.vault.reviewQueue.useQuery();
+
   const aiProcess = trpc.vault.aiProcess.useMutation({
     onSuccess: () => { toast.success("AI processed — tags and summary added."); refetch(); },
     onError: () => toast.error("AI processing failed."),
   });
 
-  const filtered = items?.filter((item) =>
-    filterState === "all" ? item.state !== "archived" : item.state === filterState
-  ) ?? [];
+  const markReviewed = trpc.vault.markReviewed.useMutation({
+    onSuccess: () => { toast.success("Marked as reviewed."); refetch(); refetchReview(); },
+    onError: () => toast.error("Failed to mark reviewed."),
+  });
+
+  const handleClipboardCapture = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text.trim()) {
+        setClipboardContent(text);
+        setAddOpen(true);
+      } else {
+        toast.info("Clipboard is empty.");
+      }
+    } catch {
+      // Fallback: open modal without pre-filled content
+      setClipboardContent(undefined);
+      setAddOpen(true);
+      toast.info("Open the modal and paste your content manually.");
+    }
+  };
+
+  const filtered = filterState === "review"
+    ? (reviewQueue ?? [])
+    : (items?.filter((item) =>
+        filterState === "all" ? item.state !== "archived" : item.state === filterState
+      ) ?? []);
 
   const inboxCount = items?.filter((i) => i.state === "inbox").length ?? 0;
+  const reviewCount = reviewQueue?.length ?? 0;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6 page-enter">
@@ -359,17 +473,30 @@ export default function VaultPage() {
           <h1 className="text-2xl font-semibold text-foreground">Knowledge Vault</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {items?.length ?? 0} items · {inboxCount} in inbox
+            {reviewCount > 0 && ` · ${reviewCount} need review`}
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)} size="sm" className="gap-1.5 shrink-0">
-          <Plus className="w-4 h-4" />
-          Add source
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 shrink-0"
+            onClick={handleClipboardCapture}
+            title="Capture from clipboard"
+          >
+            <Clipboard className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Clipboard</span>
+          </Button>
+          <Button onClick={() => { setClipboardContent(undefined); setAddOpen(true); }} size="sm" className="gap-1.5 shrink-0">
+            <Plus className="w-4 h-4" />
+            Add source
+          </Button>
+        </div>
       </div>
 
       {/* Filter tabs */}
       <div className="flex gap-1.5 flex-wrap">
-        {(["all", "inbox", "mapped", "active", "today", "parked", "done"] as const).map((state) => (
+        {(["all", "inbox", "review", "mapped", "active", "today", "parked", "done"] as const).map((state) => (
           <button
             key={state}
             onClick={() => setFilterState(state)}
@@ -380,30 +507,61 @@ export default function VaultPage() {
                 : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent"
             )}
           >
-            {state === "all" ? "All" : stateConfig[state].label}
+            {state === "all" ? "All"
+              : state === "review" ? "Needs Review"
+              : stateConfig[state as SourceState]?.label ?? state}
             {state === "inbox" && inboxCount > 0 && (
               <span className="ml-1.5 bg-foreground/20 text-current rounded-full px-1.5 py-0.5 text-[10px]">
                 {inboxCount}
+              </span>
+            )}
+            {state === "review" && reviewCount > 0 && (
+              <span className="ml-1.5 bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-full px-1.5 py-0.5 text-[10px]">
+                {reviewCount}
               </span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Items */}
+      {/* Review queue banner (when not already on review tab) */}
+      {filterState !== "review" && reviewCount > 0 && (
+        <button
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-50/60 dark:bg-amber-900/15 border border-amber-200/60 dark:border-amber-800/40 text-left hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
+          onClick={() => setFilterState("review")}
+        >
+          <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+          <p className="text-xs text-amber-700 dark:text-amber-300 flex-1">
+            <strong>{reviewCount} item{reviewCount !== 1 ? "s" : ""}</strong> couldn't be confidently mapped to a project. Review them to keep your vault clean.
+          </p>
+          <ChevronRight className="w-4 h-4 text-amber-500 shrink-0" />
+        </button>
+      )}
+
+      {/* Items list */}
       {filtered.length === 0 ? (
         <div className="p-10 rounded-xl border border-dashed border-border text-center">
           <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
           <p className="text-sm font-medium text-foreground mb-1">
-            {filterState === "all" ? "Vault is empty." : `No ${filterState} items.`}
+            {filterState === "all"
+              ? "Vault is empty."
+              : filterState === "review"
+              ? "Nothing needs review."
+              : `No ${filterState} items.`}
           </p>
           <p className="text-xs text-muted-foreground mb-4">
-            Import notes, exports, transcripts, or files to start building your knowledge base.
+            {filterState === "all"
+              ? "Import notes, exports, transcripts, or files to start building your knowledge base."
+              : filterState === "review"
+              ? "All items have been reviewed and mapped."
+              : ""}
           </p>
-          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)} className="gap-1.5">
-            <Plus className="w-3.5 h-3.5" />
-            Add first source
-          </Button>
+          {filterState === "all" && (
+            <Button size="sm" variant="outline" onClick={() => setAddOpen(true)} className="gap-1.5">
+              <Plus className="w-3.5 h-3.5" />
+              Add first source
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">
@@ -411,14 +569,21 @@ export default function VaultPage() {
             <SourceItemCard
               key={item.id}
               item={item}
-              onUpdate={refetch}
+              onUpdate={() => { refetch(); refetchReview(); }}
               onProcess={(id) => aiProcess.mutate({ id })}
+              onMarkReviewed={(id, projectId) => markReviewed.mutate({ id, confirmedProjectId: projectId ?? undefined })}
             />
           ))}
         </div>
       )}
 
-      {addOpen && <AddItemModal onClose={() => setAddOpen(false)} onAdded={refetch} />}
+      {addOpen && (
+        <AddItemModal
+          onClose={() => { setAddOpen(false); setClipboardContent(undefined); }}
+          onAdded={() => { refetch(); refetchReview(); }}
+          initialContent={clipboardContent}
+        />
+      )}
     </div>
   );
 }
