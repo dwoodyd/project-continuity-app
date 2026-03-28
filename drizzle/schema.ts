@@ -1,17 +1,17 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import {
+  boolean,
+  int,
+  json,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+} from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
+// ─── Users ────────────────────────────────────────────────────────────────────
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -25,4 +25,185 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// ─── User Profiles ────────────────────────────────────────────────────────────
+export const userProfiles = mysqlTable("user_profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  timezone: varchar("timezone", { length: 64 }).default("America/New_York"),
+  tonePreference: mysqlEnum("tonePreference", ["gentle", "direct", "firm"]).default("direct"),
+  focusHoursStart: varchar("focusHoursStart", { length: 8 }).default("09:00"),
+  focusHoursEnd: varchar("focusHoursEnd", { length: 8 }).default("17:00"),
+  morningCheckInTime: varchar("morningCheckInTime", { length: 8 }).default("08:00"),
+  middayCheckInTime: varchar("middayCheckInTime", { length: 8 }).default("12:00"),
+  eveningCheckInTime: varchar("eveningCheckInTime", { length: 8 }).default("17:00"),
+  coldProjectThresholdDays: int("coldProjectThresholdDays").default(5),
+  weeklyReviewDay: mysqlEnum("weeklyReviewDay", ["sunday", "saturday", "monday"]).default("sunday"),
+  fontSizePreference: mysqlEnum("fontSizePreference", ["small", "medium", "large"]).default("medium"),
+  notificationsEnabled: boolean("notificationsEnabled").default(true),
+  onboardingCompleted: boolean("onboardingCompleted").default(false),
+  workTypes: text("workTypes"), // JSON string of work type strings
+  distractionPatterns: text("distractionPatterns"), // JSON string
+  primaryDistraction: varchar("primaryDistraction", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserProfile = typeof userProfiles.$inferSelect;
+export type InsertUserProfile = typeof userProfiles.$inferInsert;
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+export const projects = mysqlTable("projects", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }),
+  whyItMatters: text("whyItMatters"),
+  status: mysqlEnum("status", ["idea", "mapped", "active", "paused", "completed", "archived"]).default("idea").notNull(),
+  phase: mysqlEnum("phase", ["defining", "building", "refining", "publishing", "maintaining"]).default("defining"),
+  priorityLevel: mysqlEnum("priorityLevel", ["low", "medium", "high"]).default("medium"),
+  milestones: text("milestones"), // JSON array of milestone objects
+  goodEnoughThreshold: text("goodEnoughThreshold"),
+  nextStep: text("nextStep"),
+  blockers: text("blockers"),
+  contextBreadcrumb: text("contextBreadcrumb"), // last "stepping away" note
+  lastTouchedAt: timestamp("lastTouchedAt").defaultNow(),
+  completedAt: timestamp("completedAt"),
+  archiveSummary: text("archiveSummary"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Project = typeof projects.$inferSelect;
+export type InsertProject = typeof projects.$inferInsert;
+
+// ─── Source Items (Knowledge Vault) ───────────────────────────────────────────
+export const sourceItems = mysqlTable("source_items", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  sourceType: mysqlEnum("sourceType", [
+    "paste", "text", "markdown", "pdf", "docx", "google_docs",
+    "notion", "chatgpt_export", "claude_export", "notebooklm",
+    "transcript", "voice", "url", "other"
+  ]).default("paste").notNull(),
+  title: varchar("title", { length: 500 }),
+  rawContent: text("rawContent"),
+  cleanContent: text("cleanContent"),
+  summary: text("summary"),
+  tags: text("tags"), // JSON array of tag strings
+  projectCandidates: text("projectCandidates"), // JSON array of suggested project titles
+  linkedProjectIds: text("linkedProjectIds"), // JSON array of project IDs
+  contentClass: mysqlEnum("contentClass", [
+    "idea", "draft", "research", "outline", "decision", "tasks", "archive"
+  ]).default("idea"),
+  state: mysqlEnum("state", [
+    "inbox", "mapped", "parked", "active", "today", "done", "archived"
+  ]).default("inbox").notNull(),
+  fileUrl: text("fileUrl"), // S3 URL for uploaded files
+  fileKey: varchar("fileKey", { length: 500 }),
+  mimeType: varchar("mimeType", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SourceItem = typeof sourceItems.$inferSelect;
+export type InsertSourceItem = typeof sourceItems.$inferInsert;
+
+// ─── Daily Plans ──────────────────────────────────────────────────────────────
+export const dailyPlans = mysqlTable("daily_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+  capacityLevel: mysqlEnum("capacityLevel", ["full", "partial", "low"]).default("full"),
+  primaryProjectId: int("primaryProjectId"),
+  secondaryProjectId: int("secondaryProjectId"),
+  criticalTasks: text("criticalTasks"), // JSON array of task objects {id, title, done, projectId}
+  timeBlocks: text("timeBlocks"), // JSON array of time block objects
+  likelyDistractions: text("likelyDistractions"),
+  notesToReview: text("notesToReview"), // JSON array of source item IDs
+  generatedGuidance: text("generatedGuidance"),
+  tomorrowBrief: text("tomorrowBrief"),
+  tomorrowBriefGeneratedAt: timestamp("tomorrowBriefGeneratedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DailyPlan = typeof dailyPlans.$inferSelect;
+export type InsertDailyPlan = typeof dailyPlans.$inferInsert;
+
+// ─── Check-Ins ────────────────────────────────────────────────────────────────
+export const checkIns = mysqlTable("check_ins", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  dailyPlanId: int("dailyPlanId"),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+  type: mysqlEnum("type", ["morning", "midday", "evening"]).notNull(),
+  userInput: text("userInput"), // JSON object with answers
+  alignmentStatus: mysqlEnum("alignmentStatus", ["aligned", "recovering", "redirect"]),
+  generatedResponse: text("generatedResponse"),
+  extractedNextSteps: text("extractedNextSteps"), // JSON array
+  linkedProjectIds: text("linkedProjectIds"), // JSON array
+  interruptionsNoted: text("interruptionsNoted"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CheckIn = typeof checkIns.$inferSelect;
+export type InsertCheckIn = typeof checkIns.$inferInsert;
+
+// ─── Idea Captures ────────────────────────────────────────────────────────────
+export const ideaCaptures = mysqlTable("idea_captures", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  rawContent: text("rawContent").notNull(),
+  parsedIntent: text("parsedIntent"),
+  relatedProjectId: int("relatedProjectId"),
+  capturedDuringTask: boolean("capturedDuringTask").default(false),
+  parkedStatus: boolean("parkedStatus").default(true),
+  scheduledReviewDate: varchar("scheduledReviewDate", { length: 10 }),
+  resolvedStatus: boolean("resolvedStatus").default(false),
+  resolvedAt: timestamp("resolvedAt"),
+  sourceItemId: int("sourceItemId"), // if promoted to vault
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type IdeaCapture = typeof ideaCaptures.$inferSelect;
+export type InsertIdeaCapture = typeof ideaCaptures.$inferInsert;
+
+// ─── Weekly Reviews ───────────────────────────────────────────────────────────
+export const weeklyReviews = mysqlTable("weekly_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekStartDate: varchar("weekStartDate", { length: 10 }).notNull(), // YYYY-MM-DD
+  projectsMoved: text("projectsMoved"), // JSON array of project IDs
+  projectsStalled: text("projectsStalled"), // JSON array of project IDs
+  patternsSurfaced: text("patternsSurfaced"),
+  primaryProjectIntention: int("primaryProjectIntention"), // project ID
+  userNotes: text("userNotes"),
+  generatedSummary: text("generatedSummary"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WeeklyReview = typeof weeklyReviews.$inferSelect;
+export type InsertWeeklyReview = typeof weeklyReviews.$inferInsert;
+
+// ─── Re-Entry Cards ───────────────────────────────────────────────────────────
+export const reEntryCards = mysqlTable("re_entry_cards", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId").notNull(),
+  stoppingPoint: text("stoppingPoint"),
+  unresolvedDecision: text("unresolvedDecision"),
+  whatWasRuledOut: text("whatWasRuledOut"),
+  nextPhysicalAction: text("nextPhysicalAction"),
+  whyItMattersQuote: text("whyItMattersQuote"),
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+  acknowledgedAt: timestamp("acknowledgedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ReEntryCard = typeof reEntryCards.$inferSelect;
+export type InsertReEntryCard = typeof reEntryCards.$inferInsert;

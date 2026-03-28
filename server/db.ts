@@ -1,11 +1,36 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gte, lte, ne, or } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
-import { ENV } from './_core/env';
+import {
+  CheckIn,
+  DailyPlan,
+  IdeaCapture,
+  InsertCheckIn,
+  InsertDailyPlan,
+  InsertIdeaCapture,
+  InsertProject,
+  InsertReEntryCard,
+  InsertSourceItem,
+  InsertUser,
+  InsertUserProfile,
+  InsertWeeklyReview,
+  Project,
+  ReEntryCard,
+  SourceItem,
+  UserProfile,
+  WeeklyReview,
+  checkIns,
+  dailyPlans,
+  ideaCaptures,
+  projects,
+  reEntryCards,
+  sourceItems,
+  userProfiles,
+  users,
+  weeklyReviews,
+} from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
@@ -18,75 +43,280 @@ export async function getDb() {
   return _db;
 }
 
+// ─── Users ────────────────────────────────────────────────────────────────────
 export async function upsertUser(user: InsertUser): Promise<void> {
-  if (!user.openId) {
-    throw new Error("User openId is required for upsert");
-  }
-
+  if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot upsert user: database not available");
-    return;
+  if (!db) return;
+  const values: InsertUser = { openId: user.openId };
+  const updateSet: Record<string, unknown> = {};
+  const textFields = ["name", "email", "loginMethod"] as const;
+  for (const field of textFields) {
+    const value = user[field];
+    if (value === undefined) continue;
+    const normalized = value ?? null;
+    values[field] = normalized;
+    updateSet[field] = normalized;
   }
-
-  try {
-    const values: InsertUser = {
-      openId: user.openId,
-    };
-    const updateSet: Record<string, unknown> = {};
-
-    const textFields = ["name", "email", "loginMethod"] as const;
-    type TextField = (typeof textFields)[number];
-
-    const assignNullable = (field: TextField) => {
-      const value = user[field];
-      if (value === undefined) return;
-      const normalized = value ?? null;
-      values[field] = normalized;
-      updateSet[field] = normalized;
-    };
-
-    textFields.forEach(assignNullable);
-
-    if (user.lastSignedIn !== undefined) {
-      values.lastSignedIn = user.lastSignedIn;
-      updateSet.lastSignedIn = user.lastSignedIn;
-    }
-    if (user.role !== undefined) {
-      values.role = user.role;
-      updateSet.role = user.role;
-    } else if (user.openId === ENV.ownerOpenId) {
-      values.role = 'admin';
-      updateSet.role = 'admin';
-    }
-
-    if (!values.lastSignedIn) {
-      values.lastSignedIn = new Date();
-    }
-
-    if (Object.keys(updateSet).length === 0) {
-      updateSet.lastSignedIn = new Date();
-    }
-
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
+  if (user.lastSignedIn !== undefined) {
+    values.lastSignedIn = user.lastSignedIn;
+    updateSet.lastSignedIn = user.lastSignedIn;
   }
+  if (!values.lastSignedIn) values.lastSignedIn = new Date();
+  if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
+  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
 }
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
-  if (!db) {
-    console.warn("[Database] Cannot get user: database not available");
-    return undefined;
-  }
-
+  if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-
-  return result.length > 0 ? result[0] : undefined;
+  return result[0];
 }
 
-// TODO: add feature queries here as your schema grows.
+// ─── User Profiles ────────────────────────────────────────────────────────────
+export async function getUserProfile(userId: number): Promise<UserProfile | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(userProfiles).where(eq(userProfiles.userId, userId)).limit(1);
+  return result[0];
+}
+
+export async function upsertUserProfile(profile: InsertUserProfile): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(userProfiles).values(profile).onDuplicateKeyUpdate({ set: profile });
+}
+
+export async function updateUserProfile(userId: number, updates: Partial<InsertUserProfile>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(userProfiles).set(updates).where(eq(userProfiles.userId, userId));
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+export async function getProjects(userId: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects)
+    .where(and(eq(projects.userId, userId), ne(projects.status, "archived")))
+    .orderBy(desc(projects.updatedAt));
+}
+
+export async function getActiveProjects(userId: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects)
+    .where(and(eq(projects.userId, userId), eq(projects.status, "active")))
+    .orderBy(desc(projects.lastTouchedAt));
+}
+
+export async function getProjectById(id: number, userId: number): Promise<Project | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(projects)
+    .where(and(eq(projects.id, id), eq(projects.userId, userId))).limit(1);
+  return result[0];
+}
+
+export async function createProject(project: InsertProject): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(projects).values(project);
+  return (result[0] as any).insertId;
+}
+
+export async function updateProject(id: number, userId: number, updates: Partial<InsertProject>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(projects).set({ ...updates, lastTouchedAt: new Date() })
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)));
+}
+
+export async function getColdProjects(userId: number, thresholdDays: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - thresholdDays * 24 * 60 * 60 * 1000);
+  return db.select().from(projects)
+    .where(and(
+      eq(projects.userId, userId),
+      eq(projects.status, "active"),
+      lte(projects.lastTouchedAt, cutoff)
+    ));
+}
+
+// ─── Source Items ─────────────────────────────────────────────────────────────
+export async function getSourceItems(userId: number): Promise<SourceItem[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(sourceItems)
+    .where(eq(sourceItems.userId, userId))
+    .orderBy(desc(sourceItems.createdAt));
+}
+
+export async function getSourceItemsByState(userId: number, state: SourceItem["state"]): Promise<SourceItem[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(sourceItems)
+    .where(and(eq(sourceItems.userId, userId), eq(sourceItems.state, state)))
+    .orderBy(desc(sourceItems.createdAt));
+}
+
+export async function getSourceItemById(id: number, userId: number): Promise<SourceItem | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(sourceItems)
+    .where(and(eq(sourceItems.id, id), eq(sourceItems.userId, userId))).limit(1);
+  return result[0];
+}
+
+export async function createSourceItem(item: InsertSourceItem): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(sourceItems).values(item);
+  return (result[0] as any).insertId;
+}
+
+export async function updateSourceItem(id: number, userId: number, updates: Partial<InsertSourceItem>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(sourceItems).set(updates)
+    .where(and(eq(sourceItems.id, id), eq(sourceItems.userId, userId)));
+}
+
+// ─── Daily Plans ──────────────────────────────────────────────────────────────
+export async function getDailyPlan(userId: number, date: string): Promise<DailyPlan | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(dailyPlans)
+    .where(and(eq(dailyPlans.userId, userId), eq(dailyPlans.date, date))).limit(1);
+  return result[0];
+}
+
+export async function getRecentDailyPlans(userId: number, limit = 7): Promise<DailyPlan[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(dailyPlans)
+    .where(eq(dailyPlans.userId, userId))
+    .orderBy(desc(dailyPlans.date))
+    .limit(limit);
+}
+
+export async function upsertDailyPlan(plan: InsertDailyPlan): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getDailyPlan(plan.userId, plan.date!);
+  if (existing) {
+    await db.update(dailyPlans).set(plan).where(eq(dailyPlans.id, existing.id));
+    return existing.id;
+  }
+  const result = await db.insert(dailyPlans).values(plan);
+  return (result[0] as any).insertId;
+}
+
+export async function updateDailyPlan(id: number, userId: number, updates: Partial<InsertDailyPlan>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(dailyPlans).set(updates)
+    .where(and(eq(dailyPlans.id, id), eq(dailyPlans.userId, userId)));
+}
+
+// ─── Check-Ins ────────────────────────────────────────────────────────────────
+export async function getCheckIns(userId: number, date: string): Promise<CheckIn[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(checkIns)
+    .where(and(eq(checkIns.userId, userId), eq(checkIns.date, date)))
+    .orderBy(checkIns.createdAt);
+}
+
+export async function getRecentCheckIns(userId: number, limit = 14): Promise<CheckIn[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(checkIns)
+    .where(eq(checkIns.userId, userId))
+    .orderBy(desc(checkIns.createdAt))
+    .limit(limit);
+}
+
+export async function createCheckIn(checkIn: InsertCheckIn): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(checkIns).values(checkIn);
+  return (result[0] as any).insertId;
+}
+
+export async function updateCheckIn(id: number, userId: number, updates: Partial<InsertCheckIn>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(checkIns).set(updates)
+    .where(and(eq(checkIns.id, id), eq(checkIns.userId, userId)));
+}
+
+// ─── Idea Captures ────────────────────────────────────────────────────────────
+export async function getIdeaCaptures(userId: number): Promise<IdeaCapture[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ideaCaptures)
+    .where(and(eq(ideaCaptures.userId, userId), eq(ideaCaptures.resolvedStatus, false)))
+    .orderBy(desc(ideaCaptures.createdAt));
+}
+
+export async function createIdeaCapture(idea: InsertIdeaCapture): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(ideaCaptures).values(idea);
+  return (result[0] as any).insertId;
+}
+
+export async function updateIdeaCapture(id: number, userId: number, updates: Partial<InsertIdeaCapture>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(ideaCaptures).set(updates)
+    .where(and(eq(ideaCaptures.id, id), eq(ideaCaptures.userId, userId)));
+}
+
+// ─── Weekly Reviews ───────────────────────────────────────────────────────────
+export async function getWeeklyReview(userId: number, weekStartDate: string): Promise<WeeklyReview | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(weeklyReviews)
+    .where(and(eq(weeklyReviews.userId, userId), eq(weeklyReviews.weekStartDate, weekStartDate))).limit(1);
+  return result[0];
+}
+
+export async function upsertWeeklyReview(review: InsertWeeklyReview): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getWeeklyReview(review.userId, review.weekStartDate);
+  if (existing) {
+    await db.update(weeklyReviews).set(review).where(eq(weeklyReviews.id, existing.id));
+    return existing.id;
+  }
+  const result = await db.insert(weeklyReviews).values(review);
+  return (result[0] as any).insertId;
+}
+
+// ─── Re-Entry Cards ───────────────────────────────────────────────────────────
+export async function getLatestReEntryCard(userId: number, projectId: number): Promise<ReEntryCard | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(reEntryCards)
+    .where(and(eq(reEntryCards.userId, userId), eq(reEntryCards.projectId, projectId)))
+    .orderBy(desc(reEntryCards.generatedAt)).limit(1);
+  return result[0];
+}
+
+export async function createReEntryCard(card: InsertReEntryCard): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(reEntryCards).values(card);
+  return (result[0] as any).insertId;
+}
+
+export async function acknowledgeReEntryCard(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(reEntryCards).set({ acknowledgedAt: new Date() })
+    .where(and(eq(reEntryCards.id, id), eq(reEntryCards.userId, userId)));
+}
