@@ -431,28 +431,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Weekly Presence Dots ────────────────────────────────────────── */}
-      {weeklyPresence && weeklyPresence.length > 0 && (
-        <div className="flex items-center gap-2">
-          {weeklyPresence.map((day) => {
-            const label = new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' });
-            return (
-              <div key={day.date} className="flex flex-col items-center gap-1">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    day.hasCheckIn
-                      ? 'bg-foreground/70'
-                      : 'bg-foreground/10 border border-foreground/20'
-                  }`}
-                  title={`${label}: ${day.hasCheckIn ? 'checked in' : 'no check-in'}`}
-                />
-                <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0,1)}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       {/* ── Check-In Cards ─────────────────────────────────────────────────── */}
       <div>
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Daily rhythm</p>
@@ -487,7 +465,29 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Active Check-In Form ────────────────────────────────────────────── */}
+      {/* ── Weekly Presence Dots ────────────────────────────────────────── */}
+      {weeklyPresence && weeklyPresence.length > 0 && (
+        <div className="flex items-center gap-2">
+          {weeklyPresence.map((day) => {
+            const label = new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+            return (
+              <div key={day.date} className="flex flex-col items-center gap-1">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    day.hasCheckIn
+                      ? 'bg-foreground/70'
+                      : 'bg-foreground/10 border border-foreground/20'
+                  }`}
+                  title={`${label}: ${day.hasCheckIn ? 'checked in' : 'no check-in'}`}
+                />
+                <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0,1)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Active Check-In Form ────────────────────────────────────────── */}
       {activeCheckIn && (
         <div className="p-5 rounded-xl bg-card border border-foreground/10 shadow-sm">
           <div className="flex items-center justify-between mb-4">

@@ -50,7 +50,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
         title: `Parked: ${project.title}`,
         content: lines.join("\n"),
         sourceType: "paste",
-        contentClass: "research",
+        contentClass: "idea",
       });
       setParkedIds((prev) => { const next = new Set(prev); next.add(project.id); return next; });
       toast.success(`"${project.title}" parked to your Vault inbox.`);
