@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Layers } from "lucide-react";
+import { toast } from "sonner";
+import { ArrowRight, Layers, Archive, Check } from "lucide-react";
 
 interface AmnestyScreenProps {
   gapHours: number;
@@ -18,29 +19,54 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
     reference: string | null;
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [parkedIds, setParkedIds] = useState<Set<number>>(new Set());
 
   const gapDays = Math.floor(gapHours / 24);
   const gapLabel = gapDays === 1 ? "a day" : gapDays < 7 ? `${gapDays} days` : "a while";
 
-  // Queries
+  // Queries & mutations
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
   const submitMorning = trpc.checkIns.submitMorning.useMutation();
+  const addToVault = trpc.vault.addPaste.useMutation();
   const utils = trpc.useUtils();
 
   const handleProceed = () => setStep("question");
 
+  const handleParkProject = async (project: {
+    id: number;
+    title: string;
+    nextStep?: string | null;
+    contextBreadcrumb?: string | null;
+  }) => {
+    if (parkedIds.has(project.id)) return;
+    try {
+      const lines = [
+        `Project: ${project.title}`,
+        project.nextStep ? `Next step: ${project.nextStep}` : null,
+        project.contextBreadcrumb ? `Last stopping point: ${project.contextBreadcrumb}` : null,
+        `Parked during re-entry on ${new Date().toLocaleDateString()}.`,
+      ].filter(Boolean);
+      await addToVault.mutateAsync({
+        title: `Parked: ${project.title}`,
+        content: lines.join("\n"),
+        sourceType: "paste",
+        contentClass: "research",
+      });
+      setParkedIds((prev) => { const next = new Set(prev); next.add(project.id); return next; });
+      toast.success(`"${project.title}" parked to your Vault inbox.`);
+    } catch {
+      toast.error("Could not park to Vault. Try again.");
+    }
+  };
+
   const handleGeneratePlan = async () => {
     if (!oneThingInput.trim()) return;
     setIsGenerating(true);
-
     try {
-      // Generate a minimal restart plan focused on the one thing
       await submitMorning.mutateAsync({
         capacityLevel: "partial",
         userNotes: oneThingInput.trim(),
       });
-
-      // Build the Start Here card from the first active project + the one thing
       const firstProject = activeProjects?.[0];
       setStartHereCard({
         projectTitle: firstProject?.title ?? "Your work",
@@ -48,11 +74,9 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
         estimatedTime: "25–45 min",
         reference: firstProject?.contextBreadcrumb ?? null,
       });
-
       await utils.dailyPlan.getToday.invalidate();
       setStep("start-here");
     } catch {
-      // Even if AI fails, move forward — don't block re-entry
       setStartHereCard({
         projectTitle: activeProjects?.[0]?.title ?? "Your work",
         nextMove: oneThingInput.trim(),
@@ -85,7 +109,6 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 We are starting here.
               </p>
             </div>
-
             <div className="space-y-3">
               <button
                 onClick={handleProceed}
@@ -138,23 +161,49 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 }}
               />
 
-              {/* Active projects as quick-select */}
+              {/* Active projects: quick-select + park-for-later */}
               {activeProjects && activeProjects.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-xs text-muted-foreground">Quick select from active projects:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {activeProjects.slice(0, 4).map((p) => (
-                      <button
-                        key={p.id}
-                        onClick={() => setOneThingInput(
-                          p.nextStep
-                            ? `${p.title}: ${p.nextStep}`
-                            : `Continue work on ${p.title}`
-                        )}
-                        className="text-xs px-3 py-1.5 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border border-border"
-                      >
-                        {p.title}
-                      </button>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Active projects</p>
+                    <p className="text-[10px] text-muted-foreground/50">
+                      <Archive className="w-2.5 h-2.5 inline mr-0.5" />
+                      park for later
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    {activeProjects.slice(0, 5).map((p) => (
+                      <div key={p.id} className="flex items-center gap-2">
+                        <button
+                          onClick={() => setOneThingInput(
+                            p.nextStep
+                              ? `${p.title}: ${p.nextStep}`
+                              : `Continue work on ${p.title}`
+                          )}
+                          className="flex-1 text-left text-xs px-3 py-2 rounded-lg bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border border-border truncate"
+                        >
+                          {p.title}
+                          {p.nextStep && (
+                            <span className="ml-1 opacity-50">— {p.nextStep.slice(0, 30)}{p.nextStep.length > 30 ? "…" : ""}</span>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => handleParkProject(p)}
+                          disabled={parkedIds.has(p.id) || addToVault.isPending}
+                          title={parkedIds.has(p.id) ? "Parked to Vault" : "Park for later in Vault inbox"}
+                          className={cn(
+                            "shrink-0 p-2 rounded-lg border transition-colors",
+                            parkedIds.has(p.id)
+                              ? "bg-muted text-muted-foreground/40 border-border cursor-default"
+                              : "bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground border-border"
+                          )}
+                        >
+                          {parkedIds.has(p.id)
+                            ? <Check className="w-3 h-3" />
+                            : <Archive className="w-3 h-3" />
+                          }
+                        </button>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -199,8 +248,6 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 Your day is set.
               </h1>
             </div>
-
-            {/* The card */}
             <div className="border border-border rounded-2xl p-5 space-y-4 bg-muted/20">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-foreground/8 flex items-center justify-center shrink-0 mt-0.5">
@@ -215,7 +262,6 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                   </p>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-3 pt-1">
                 <div className="space-y-0.5">
                   <p className="text-xs text-muted-foreground">Time needed</p>
@@ -229,7 +275,11 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 )}
               </div>
             </div>
-
+            {parkedIds.size > 0 && (
+              <p className="text-xs text-muted-foreground text-center">
+                {parkedIds.size} project{parkedIds.size > 1 ? "s" : ""} parked to your Vault inbox for later.
+              </p>
+            )}
             <div className="space-y-2">
               <button
                 onClick={onComplete}

@@ -347,6 +347,7 @@ export default function Home() {
   const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery();
   const { data: amnestyCheck } = trpc.ai.checkAmnesty.useQuery();
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
+  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery();
 
   const completeTask = trpc.checkIns.completeTask.useMutation({
     onSuccess: () => refetchPlan(),
@@ -427,6 +428,28 @@ export default function Home() {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
+        </div>
+      )}
+
+      {/* ── Weekly Presence Dots ────────────────────────────────────────── */}
+      {weeklyPresence && weeklyPresence.length > 0 && (
+        <div className="flex items-center gap-2">
+          {weeklyPresence.map((day) => {
+            const label = new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+            return (
+              <div key={day.date} className="flex flex-col items-center gap-1">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    day.hasCheckIn
+                      ? 'bg-foreground/70'
+                      : 'bg-foreground/10 border border-foreground/20'
+                  }`}
+                  title={`${label}: ${day.hasCheckIn ? 'checked in' : 'no check-in'}`}
+                />
+                <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0,1)}</span>
+              </div>
+            );
+          })}
         </div>
       )}
 

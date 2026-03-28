@@ -52,6 +52,9 @@ export default function FocusModePage() {
   const [sessionNotes, setSessionNotes] = useState("");
   const [sessionSaved, setSessionSaved] = useState(false);
   const [actualDuration, setActualDuration] = useState(0);
+  const [steppingAway, setSteppingAway] = useState(false);
+  const [stoppingPointInput, setStoppingPointInput] = useState("");
+  const [savingStoppingPoint, setSavingStoppingPoint] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
@@ -59,6 +62,7 @@ export default function FocusModePage() {
   const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery();
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
   const saveSession = trpc.focusSessions.save.useMutation();
+  const updateBreadcrumb = trpc.projects.updateContextBreadcrumb.useMutation();
 
   const tasks = todayPlan?.criticalTasks ? JSON.parse(todayPlan.criticalTasks) : [];
   const pendingTasks = tasks.filter((t: { done?: boolean }) => !t.done);
@@ -147,6 +151,8 @@ export default function FocusModePage() {
     setSessionNotes("");
     setSessionSaved(false);
     setActualDuration(0);
+    setSteppingAway(false);
+    setStoppingPointInput("");
     if (intervalRef.current) clearInterval(intervalRef.current);
   };
 
@@ -390,13 +396,78 @@ export default function FocusModePage() {
               </button>
             </div>
 
-            {phase === "active" && (
-              <button
-                onClick={startBreak}
-                className="text-xs text-white/30 hover:text-white/60 transition-colors"
-              >
-                End session early → take a break
-              </button>
+            {phase === "active" && !steppingAway && (
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={() => { setIsRunning(false); setSteppingAway(true); }}
+                  className="text-xs text-white/50 hover:text-white/80 transition-colors border border-white/10 hover:border-white/30 px-4 py-2 rounded-lg"
+                >
+                  Stepping away
+                </button>
+                <button
+                  onClick={startBreak}
+                  className="text-xs text-white/20 hover:text-white/50 transition-colors"
+                >
+                  End session early → take a break
+                </button>
+              </div>
+            )}
+            {phase === "active" && steppingAway && (
+              <div className="w-full max-w-sm mx-auto space-y-3 animate-in fade-in duration-300">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                  <p className="text-xs text-white/60 uppercase tracking-widest">Stepping away</p>
+                  <p className="text-sm text-white/80">Where are you leaving off?</p>
+                  <textarea
+                    value={stoppingPointInput}
+                    onChange={(e) => setStoppingPointInput(e.target.value)}
+                    placeholder="e.g. Finished the intro section, next is the data model diagram..."
+                    rows={3}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/80 placeholder:text-white/20 resize-none focus:outline-none focus:ring-1 focus:ring-white/20"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        setSavingStoppingPoint(true);
+                        try {
+                          if (stoppingPointInput.trim() && selectedProjectId) {
+                            await updateBreadcrumb.mutateAsync({
+                              id: selectedProjectId,
+                              breadcrumb: stoppingPointInput.trim(),
+                            });
+                          }
+                          await persistSession(false);
+                          toast.success("Stopping point saved. Pick up right where you left off.");
+                          navigate("/");
+                        } catch {
+                          toast.error("Could not save. Try again.");
+                        } finally {
+                          setSavingStoppingPoint(false);
+                        }
+                      }}
+                      disabled={savingStoppingPoint}
+                      className="flex-1 bg-white text-zinc-900 hover:bg-white/90 text-xs font-medium py-2 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {savingStoppingPoint ? "Saving..." : "Save & leave"}
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await persistSession(false);
+                        navigate("/");
+                      }}
+                      className="flex-1 text-white/40 hover:text-white/70 text-xs py-2 rounded-lg transition-colors border border-white/10"
+                    >
+                      Leave without saving
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => { setSteppingAway(false); setIsRunning(true); }}
+                    className="w-full text-xs text-white/25 hover:text-white/50 transition-colors"
+                  >
+                    Actually, keep going
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         )}

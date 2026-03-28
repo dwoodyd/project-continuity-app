@@ -115,3 +115,25 @@
 - [x] Show: project name, next move, estimated time, reference note / prior stopping point
 - [x] Tie to active project's context breadcrumb
 - [x] One-tap to enter Focus Mode from card
+
+## Revision Brief 2
+
+### Streak-Free Consistency Indicator
+- [ ] Add weekly check-in presence query (7 days, per-day boolean)
+- [ ] Render 7 dots on Command Center — filled if any check-in that day, empty if not
+- [ ] No streak counter, no "broken" language, no numbers — just presence dots
+- [ ] Show below the daily rhythm section
+
+### Amnesty Park-to-Vault
+- [ ] Amnesty "park for later" action calls vault.create to add item as Inbox source
+- [ ] Parked items get type="note", state="inbox", content = project title + context
+- [ ] Show confirmation: "Parked to your Vault inbox"
+- [ ] Wire in AmnestyScreen component
+
+### Stepping Away Shortcut in Focus Mode
+- [ ] Add "Stepping Away" button to active Focus Mode UI (not just completion)
+- [ ] On click: show inline prompt to capture stopping point note
+- [ ] On confirm: save note as contextBreadcrumb on the active project via tRPC
+- [ ] End the focus session (save partial session with wasCompleted=false)
+- [ ] Navigate back to Command Center
+- [ ] Show toast: "Stopping point saved. You can pick up right where you left off."

@@ -320,3 +320,22 @@ export async function acknowledgeReEntryCard(id: number, userId: number): Promis
   await db.update(reEntryCards).set({ acknowledgedAt: new Date() })
     .where(and(eq(reEntryCards.id, id), eq(reEntryCards.userId, userId)));
 }
+
+// ─── Weekly Check-In Presence ─────────────────────────────────────────────────
+export async function getWeeklyCheckInPresence(userId: number): Promise<{ date: string; hasCheckIn: boolean }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  // Build last 7 days as YYYY-MM-DD strings
+  const days: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const results = await db
+    .select({ date: checkIns.date })
+    .from(checkIns)
+    .where(and(eq(checkIns.userId, userId), gte(checkIns.date, days[0]!)));
+  const datesWithCheckIn = new Set(results.map((r) => r.date));
+  return days.map((date) => ({ date, hasCheckIn: datesWithCheckIn.has(date) }));
+}

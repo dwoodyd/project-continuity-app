@@ -4,6 +4,7 @@ import {
   getDailyPlan,
   getCheckIns,
   getRecentCheckIns,
+  getWeeklyCheckInPresence,
   updateCheckIn,
   updateDailyPlan,
   upsertDailyPlan,
@@ -316,4 +317,8 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       const allDone = updated.every((t: any) => t.done);
       return { success: true, allTasksDone: allDone };
     }),
+
+  weeklyPresence: protectedProcedure.query(async ({ ctx }) => {
+    return getWeeklyCheckInPresence(ctx.user.id);
+  }),
 });
