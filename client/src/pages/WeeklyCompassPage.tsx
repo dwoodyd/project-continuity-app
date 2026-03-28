@@ -174,6 +174,11 @@ export default function WeeklyCompassPage() {
                       {primaryProject.nextStep}
                     </p>
                   )}
+                  {primaryProject.lastTouchedAt && (
+                    <p className="text-[10px] text-muted-foreground/50 mt-1.5">
+                      Last worked {formatDistanceToNow(new Date(primaryProject.lastTouchedAt), { addSuffix: true })}
+                    </p>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"
@@ -201,6 +206,11 @@ export default function WeeklyCompassPage() {
                     <p className="text-xs text-muted-foreground mt-1 flex items-start gap-1">
                       <ChevronRight className="w-3 h-3 mt-0.5 shrink-0" />
                       {secondaryProject.nextStep}
+                    </p>
+                  )}
+                  {secondaryProject.lastTouchedAt && (
+                    <p className="text-[10px] text-muted-foreground/50 mt-1.5">
+                      Last worked {formatDistanceToNow(new Date(secondaryProject.lastTouchedAt), { addSuffix: true })}
                     </p>
                   )}
                   <Button

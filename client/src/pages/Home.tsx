@@ -255,6 +255,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   const [wasOnPlan, setWasOnPlan] = useState<boolean | null>(null);
   const [interruptions, setInterruptions] = useState("");
   const [nextMove, setNextMove] = useState("");
+  const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
       toast.success(data.response ?? "Midday check-in complete.");
@@ -315,6 +316,10 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
             toast.error("Fill in what you worked on and whether it was on plan.");
             return;
           }
+          // Fire-and-forget distraction classification if interruptions were noted
+          if (interruptions.trim()) {
+            classifyDistraction.mutate({ rawInput: interruptions, checkInType: "midday" });
+          }
           submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined });
         }}
         disabled={submit.isPending}
@@ -344,17 +349,27 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
     onError: () => toast.error("Something went wrong. Try again."),
   });
   const saveDecision = trpc.intelligence.saveDecision.useMutation();
+  const extractDecisions = trpc.intelligence.extractDecisionsFromNotes.useMutation();
+  const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const handleSubmit = async () => {
     if (!whatMoved.trim() || !tomorrowFirst.trim()) {
       toast.error("Fill in what moved and what goes first tomorrow.");
       return;
     }
-    // Save decision if captured
+    // Save explicit decision if captured
     if (decision.trim()) {
       await saveDecision.mutateAsync({
         content: decision,
         source: "manual",
       }).catch(() => {});
+    }
+    // Auto-extract decisions from "what did you learn or decide" field
+    if (whatLearned.trim() && whatLearned.length > 20) {
+      extractDecisions.mutate({ notes: whatLearned });
+    }
+    // Classify any interruptions noted in whatRemains as potential distractions
+    if (whatRemains.trim() && whatRemains.length > 10) {
+      classifyDistraction.mutate({ rawInput: whatRemains, checkInType: "evening" });
     }
     submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst });
   };
@@ -550,6 +565,22 @@ export default function Home() {
     setActiveCheckIn(null);
     refetchCheckIns();
     refetchPlan();
+    // After midday or evening check-in, gently surface unprocessed ideas
+    if ((type === "midday" || type === "evening") && pendingIdeaCount > 0) {
+      setTimeout(() => {
+        toast(
+          `${pendingIdeaCount} idea${pendingIdeaCount > 1 ? "s" : ""} waiting in your Sanctuary.`,
+          {
+            description: "Good moment to process them while you have a clear head.",
+            action: {
+              label: "Process now",
+              onClick: () => navigate("/settings?tab=ideas"),
+            },
+            duration: 6000,
+          }
+        );
+      }, 1500);
+    }
   };
 
   const capacityLevel: CapacityLevel = (todayPlan?.capacityLevel as CapacityLevel) ?? "partial";
