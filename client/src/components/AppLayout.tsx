@@ -18,7 +18,9 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
+import AmnestyScreen from "./AmnestyScreen";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
+import { trpc } from "@/lib/trpc";
 
 const navItems = [
   { href: "/", label: "Command Center", icon: Command, description: "Today's focus" },
@@ -38,6 +40,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ideaOpen, setIdeaOpen] = useState(false);
+  const [amnestyDismissed, setAmnestyDismissed] = useState(false);
+
+  // Check amnesty only when authenticated
+  const { data: amnestyData } = trpc.ai.checkAmnesty.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 60, // 1 hour
+  });
+
+  const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
 
   // Close sidebar on route change
   useEffect(() => {
@@ -263,6 +274,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       {/* ── Idea Sanctuary Modal ──────────────────────────────────────────── */}
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
+
+      {/* ── Amnesty Protocol ─────────────────────────────────────────────── */}
+      {showAmnesty && amnestyData && (
+        <AmnestyScreen
+          gapHours={amnestyData.hoursSince ?? 48}
+          onComplete={() => setAmnestyDismissed(true)}
+        />
+      )}
     </div>
   );
 }

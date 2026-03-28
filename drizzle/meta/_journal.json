@@ -15,6 +15,13 @@
       "when": 1774731917576,
       "tag": "0001_round_arclight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774738466459,
+      "tag": "0002_thin_blur",
+      "breakpoints": true
     }
   ]
 }

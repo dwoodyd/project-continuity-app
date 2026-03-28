@@ -1,22 +1,34 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
-  Archive,
   Brain,
   Calendar,
   CheckCircle2,
+  Clock,
+  Layers,
   Loader2,
   Sparkles,
-  TrendingUp,
+  Timer,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { format, subDays } from "date-fns";
+import { format, subDays, startOfWeek } from "date-fns";
+
+function formatDuration(seconds: number): string {
+  if (!seconds || seconds < 1) return "0m";
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem > 0 ? `${h}h ${rem}m` : `${h}h`;
+}
 
 export default function WeeklyReviewPage() {
   const [generating, setGenerating] = useState(false);
   const [review, setReview] = useState<string | null>(null);
+  const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }).getTime());
 
   const generateReview = trpc.ai.generateWeeklyReview.useMutation({
     onSuccess: (data) => {
@@ -31,12 +43,12 @@ export default function WeeklyReviewPage() {
 
   const { data: recentCheckIns } = trpc.checkIns.getRecent.useQuery();
   const { data: projects } = trpc.projects.list.useQuery();
+  const { data: focusStats } = trpc.focusSessions.getWeekStats.useQuery();
+  const { data: focusSessions } = trpc.focusSessions.getWeekSessions.useQuery({ weekStart });
 
   const activeProjects = projects?.filter((p) => p.status === "active") ?? [];
   const completedProjects = projects?.filter((p) => p.status === "completed") ?? [];
-
   const checkInDays = recentCheckIns?.length ?? 0;
-  const morningCheckIns = recentCheckIns?.filter((c) => c.type === "morning").length ?? 0;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
@@ -49,11 +61,22 @@ export default function WeeklyReviewPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Check-ins", value: checkInDays, icon: Calendar, sub: "this week" },
           { label: "Active projects", value: activeProjects.length, icon: Brain, sub: "in progress" },
-          { label: "Completed", value: completedProjects.length, icon: CheckCircle2, sub: "projects" },
+          {
+            label: "Focus sessions",
+            value: focusStats?.sessionCount ?? 0,
+            icon: Timer,
+            sub: `${focusStats?.completedCount ?? 0} completed`,
+          },
+          {
+            label: "Focus time",
+            value: formatDuration(focusStats?.totalSeconds ?? 0),
+            icon: Clock,
+            sub: "this week",
+          },
         ].map(({ label, value, icon: Icon, sub }) => (
           <div key={label} className="p-4 rounded-xl bg-card border border-border text-center">
             <Icon className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
@@ -77,7 +100,9 @@ export default function WeeklyReviewPage() {
             disabled={generating}
             className="gap-2"
           >
-            {generating ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</> : <><Sparkles className="w-4 h-4" />Generate review</>}
+            {generating
+              ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
+              : <><Sparkles className="w-4 h-4" />Generate review</>}
           </Button>
         </div>
       ) : (
@@ -100,6 +125,77 @@ export default function WeeklyReviewPage() {
           </Button>
         </div>
       )}
+
+      {/* Focus Blocks */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Focus Blocks</p>
+          {focusSessions && focusSessions.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {focusSessions.length} session{focusSessions.length !== 1 ? "s" : ""} this week
+            </p>
+          )}
+        </div>
+
+        {!focusSessions || focusSessions.length === 0 ? (
+          <div className="p-4 rounded-xl border border-dashed border-border text-center">
+            <Timer className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No focus sessions this week yet.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">
+              Use Single Focus Mode to log your work blocks.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {focusSessions.map((session) => {
+              const project = projects?.find((p) => p.id === session.projectId);
+              return (
+                <div
+                  key={session.id}
+                  className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card"
+                >
+                  <div className={cn(
+                    "w-2 h-2 rounded-full mt-1.5 shrink-0",
+                    session.wasCompleted ? "bg-emerald-400" : "bg-amber-400"
+                  )} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm text-foreground leading-snug">{session.intention}</p>
+                      <span className="text-xs text-muted-foreground shrink-0 font-mono tabular-nums">
+                        {formatDuration(session.durationSeconds)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(session.startedAt), "EEE, MMM d · h:mm a")}
+                      </p>
+                      {project && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground/70">
+                          <Layers className="w-3 h-3" />
+                          {project.title}
+                        </span>
+                      )}
+                      {session.wasCompleted ? (
+                        <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Completed
+                        </span>
+                      ) : (
+                        <span className="text-xs text-amber-600 dark:text-amber-400">Early end</span>
+                      )}
+                    </div>
+                    {session.notes && (
+                      <p className="text-xs text-muted-foreground/70 mt-1.5 italic line-clamp-2 border-l-2 border-border pl-2">
+                        {session.notes}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Recent check-ins */}
       {recentCheckIns && recentCheckIns.length > 0 && (

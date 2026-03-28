@@ -1,0 +1,114 @@
+import { z } from "zod";
+import { protectedProcedure, router } from "../_core/trpc";
+import { getDb } from "../db";
+import { focusSessions } from "../../drizzle/schema";
+import { eq, desc, and, gte } from "drizzle-orm";
+
+export const focusSessionsRouter = router({
+  // Save a completed focus session
+  save: protectedProcedure
+    .input(z.object({
+      intention: z.string().min(1),
+      projectId: z.number().optional(),
+      startedAt: z.number(), // Unix ms
+      durationSeconds: z.number().min(0),
+      wasCompleted: z.boolean(),
+      notes: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database unavailable");
+
+      const [result] = await db.insert(focusSessions).values({
+        userId: ctx.user.id,
+        projectId: input.projectId ?? null,
+        intention: input.intention,
+        startedAt: new Date(input.startedAt),
+        durationSeconds: input.durationSeconds,
+        completedAt: input.wasCompleted ? new Date() : null,
+        wasCompleted: input.wasCompleted ? 1 : 0,
+        notes: input.notes ?? null,
+      });
+
+      return { id: (result as { insertId: number }).insertId };
+    }),
+
+  // List sessions for the current user (last 30 days by default)
+  list: protectedProcedure
+    .input(z.object({
+      days: z.number().min(1).max(90).default(30),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return [];
+
+      const daysBack = input?.days ?? 30;
+      const since = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000);
+
+      const sessions = await db
+        .select()
+        .from(focusSessions)
+        .where(
+          and(
+            eq(focusSessions.userId, ctx.user.id),
+            gte(focusSessions.startedAt, since)
+          )
+        )
+        .orderBy(desc(focusSessions.startedAt))
+        .limit(100);
+
+      return sessions;
+    }),
+
+  // Get sessions for a specific week (for Weekly Review)
+  getWeekSessions: protectedProcedure
+    .input(z.object({
+      weekStart: z.number(), // Unix ms — start of week
+    }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return [];
+
+      const start = new Date(input.weekStart);
+      const end = new Date(input.weekStart + 7 * 24 * 60 * 60 * 1000);
+
+      const sessions = await db
+        .select()
+        .from(focusSessions)
+        .where(
+          and(
+            eq(focusSessions.userId, ctx.user.id),
+            gte(focusSessions.startedAt, start)
+          )
+        )
+        .orderBy(desc(focusSessions.startedAt));
+
+      return sessions.filter((s) => s.startedAt < end);
+    }),
+
+  // Get total focus time this week
+  getWeekStats: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return { totalSeconds: 0, sessionCount: 0, completedCount: 0 };
+
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const sessions = await db
+      .select()
+      .from(focusSessions)
+      .where(
+        and(
+          eq(focusSessions.userId, ctx.user.id),
+          gte(focusSessions.startedAt, weekAgo)
+        )
+      );
+
+    const totalSeconds = sessions.reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
+    const completedCount = sessions.filter((s) => s.wasCompleted === 1).length;
+
+    return {
+      totalSeconds,
+      sessionCount: sessions.length,
+      completedCount,
+    };
+  }),
+});

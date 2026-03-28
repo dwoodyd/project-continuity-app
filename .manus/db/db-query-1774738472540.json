@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `focus_sessions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`projectId` int,\n\t`intention` text NOT NULL,\n\t`startedAt` timestamp NOT NULL DEFAULT (now()),\n\t`durationSeconds` int NOT NULL DEFAULT 0,\n\t`completedAt` timestamp,\n\t`notes` text,\n\t`wasCompleted` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `focus_sessions_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `focus_sessions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`projectId` int,\n\t`intention` text NOT NULL,\n\t`startedAt` timestamp NOT NULL DEFAULT (now()),\n\t`durationSeconds` int NOT NULL DEFAULT 0,\n\t`completedAt` timestamp,\n\t`notes` text,\n\t`wasCompleted` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `focus_sessions_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 151
+}

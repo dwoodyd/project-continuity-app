@@ -76,3 +76,42 @@
 - [x] Error states, loading skeletons, empty states
 - [x] Vitest unit tests — 14/14 passing
 - [x] Final checkpoint and delivery
+
+## Revision Brief 1
+
+### Amnesty Protocol
+- [x] Detect 48h+ gap using lastSignedIn timestamp on login
+- [x] Show dedicated AmnestyScreen before Command Center loads
+- [x] Calm, non-shaming copy: "You have been away. Nothing is broken."
+- [x] Single question: "What is the one thing that matters today?"
+- [x] Generate minimal restart plan (1 primary + 1 optional secondary task)
+- [x] Surface one "Start Here" action tied to active project
+- [x] "Park for later" option for older unfinished items
+- [x] Bypass button: "I know where I am, take me in"
+
+### Push Notifications + Service Worker
+- [x] Register service worker (public/sw.js)
+- [x] Request Notification permission in Settings
+- [x] Schedule morning/midday/evening check-in notifications via service worker
+- [x] Drift recovery notification for missed focus block
+- [x] Respect user notification toggle settings
+- [x] Calm notification copy: "Your day is ready.", "Midday check-in is open.", etc.
+
+### Offline Capture Queuing
+- [x] Queue Idea Sanctuary captures in IndexedDB when offline
+- [x] Sync queued ideas to server when connection returns
+- [x] Visual indicator when capture is queued offline vs saved
+
+### Focus Session History
+- [x] Add focusSessions table to schema (userId, intention, projectId, startTime, duration, notes)
+- [x] Generate and apply migration
+- [x] Save session on Focus Mode completion
+- [x] tRPC router: saveFocusSession, listFocusSessions
+- [x] Surface in Weekly Review as "Focus Blocks" section (clean list, not gamified)
+- [x] Tie sessions to project progress
+
+### First Step Card
+- [x] "Start Here" card at top of Command Center (morning + post-amnesty)
+- [x] Show: project name, next move, estimated time, reference note / prior stopping point
+- [x] Tie to active project's context breadcrumb
+- [x] One-tap to enter Focus Mode from card

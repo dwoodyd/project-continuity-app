@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import {
   AlertTriangle,
+  ArrowRight,
   Battery,
   BatteryLow,
   BatteryMedium,
@@ -532,6 +533,44 @@ export default function Home() {
           <ChevronDown className="w-4 h-4 rotate-[-90deg] opacity-60 group-hover:translate-x-0.5 transition-transform" />
         </button>
       )}
+
+      {/* ── First Step Card ─────────────────────────────────────────────────── */}
+      {activeProjects && activeProjects.length > 0 && (() => {
+        const primaryProjectId = todayPlan?.primaryProjectId;
+        const topProject = primaryProjectId
+          ? activeProjects.find((p) => p.id === primaryProjectId) ?? activeProjects[0]
+          : activeProjects[0];
+        if (!topProject?.nextStep) return null;
+        return (
+          <div className="p-4 rounded-xl bg-foreground/[0.03] border border-foreground/10 space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-md bg-foreground/10 flex items-center justify-center">
+                <ArrowRight className="w-3 h-3 text-foreground/60" />
+              </div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Start here</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{topProject.title}</p>
+            </div>
+            {topProject.contextBreadcrumb && (
+              <div className="border-l-2 border-border pl-3">
+                <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
+                  Last stopping point: {topProject.contextBreadcrumb}
+                </p>
+              </div>
+            )}
+            <div className="flex items-center justify-end">
+              <button
+                onClick={() => navigate("/focus")}
+                className="text-xs text-foreground/60 hover:text-foreground transition-colors underline underline-offset-2"
+              >
+                Open in Focus Mode
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Active Projects Quick Access ────────────────────────────────────── */}
       {activeProjects && activeProjects.length > 0 && (

@@ -207,3 +207,19 @@ export const reEntryCards = mysqlTable("re_entry_cards", {
 
 export type ReEntryCard = typeof reEntryCards.$inferSelect;
 export type InsertReEntryCard = typeof reEntryCards.$inferInsert;
+
+export const focusSessions = mysqlTable("focus_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"),
+  intention: text("intention").notNull(),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  durationSeconds: int("durationSeconds").notNull().default(0),
+  completedAt: timestamp("completedAt"),
+  notes: text("notes"),
+  wasCompleted: int("wasCompleted").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FocusSession = typeof focusSessions.$inferSelect;
+export type InsertFocusSession = typeof focusSessions.$inferInsert;

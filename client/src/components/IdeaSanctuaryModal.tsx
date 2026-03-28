@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Lightbulb, Mic, MicOff, X, Send, Loader2 } from "lucide-react";
+import { Lightbulb, Mic, MicOff, Send, Loader2, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface IdeaSanctuaryModalProps {
   open: boolean;
@@ -25,8 +26,13 @@ export default function IdeaSanctuaryModal({
   const [content, setContent] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  const [queuedCount, setQueuedCount] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  const { queueOfflineIdea, getOfflineQueue, removeFromOfflineQueue } = useNotifications();
+  const utils = trpc.useUtils();
 
   const captureIdea = trpc.ai.captureIdea.useMutation({
     onSuccess: () => {
@@ -37,7 +43,21 @@ export default function IdeaSanctuaryModal({
         onClose();
       }, 1200);
     },
-    onError: () => toast.error("Failed to save idea. Try again."),
+    onError: async () => {
+      // Fall back to offline queue
+      if (content.trim()) {
+        await queueOfflineIdea(content.trim());
+        toast.info("Saved offline. Will sync when connection returns.", {
+          icon: <WifiOff className="w-4 h-4" />,
+        });
+        setSaved(true);
+        setTimeout(() => {
+          setSaved(false);
+          setContent("");
+          onClose();
+        }, 1500);
+      }
+    },
   });
 
   const transcribeVoice = trpc.vault.transcribeVoice.useMutation({
@@ -47,18 +67,90 @@ export default function IdeaSanctuaryModal({
     onError: () => toast.error("Transcription failed."),
   });
 
-  const handleSubmit = () => {
+  // Track online/offline status
+  useEffect(() => {
+    const onOnline = () => setIsOffline(false);
+    const onOffline = () => setIsOffline(true);
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
+
+  // Sync offline queue when back online
+  useEffect(() => {
+    if (isOffline) return;
+
+    const syncQueue = async () => {
+      const queue = await getOfflineQueue();
+      const pending = queue.filter((q) => !q.synced);
+      if (pending.length === 0) return;
+
+      for (const item of pending) {
+        try {
+          await captureIdea.mutateAsync({ content: item.content, capturedDuringTask: false });
+          await removeFromOfflineQueue(item.id);
+        } catch {
+          // Will retry next time
+        }
+      }
+      if (pending.length > 0) {
+        await utils.ai.listIdeas.invalidate();
+        toast.success(`${pending.length} offline idea${pending.length > 1 ? "s" : ""} synced.`);
+      }
+    };
+
+    syncQueue();
+  }, [isOffline]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Check queued count
+  useEffect(() => {
+    getOfflineQueue().then((q) => setQueuedCount(q.filter((i) => !i.synced).length));
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Listen for SW sync trigger
+  useEffect(() => {
+    const handler = () => {
+      if (!isOffline) {
+        getOfflineQueue().then(async (queue) => {
+          for (const item of queue.filter((q) => !q.synced)) {
+            try {
+              await captureIdea.mutateAsync({ content: item.content, capturedDuringTask: false });
+              await removeFromOfflineQueue(item.id);
+            } catch {}
+          }
+        });
+      }
+    };
+    window.addEventListener("continuity:sync-ideas", handler);
+    return () => window.removeEventListener("continuity:sync-ideas", handler);
+  }, [isOffline]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSubmit = async () => {
     if (!content.trim()) return;
+
+    if (isOffline) {
+      await queueOfflineIdea(content.trim());
+      toast.info("Saved offline. Will sync when connection returns.", {
+        icon: <WifiOff className="w-4 h-4" />,
+      });
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        setContent("");
+        onClose();
+      }, 1500);
+      return;
+    }
+
     captureIdea.mutate({ content: content.trim(), capturedDuringTask });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      handleSubmit();
-    }
-    if (e.key === "Escape") {
-      onClose();
-    }
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleSubmit();
+    if (e.key === "Escape") onClose();
   };
 
   const startRecording = async () => {
@@ -102,9 +194,22 @@ export default function IdeaSanctuaryModal({
             <Lightbulb className="w-4 h-4 text-amber-500" />
             Idea Sanctuary
           </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1">
-            Park this thought. It won't derail you. Back to work in seconds.
-          </p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-muted-foreground">
+              Park this thought. It won't derail you. Back to work in seconds.
+            </p>
+            {isOffline && (
+              <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
+                <WifiOff className="w-3 h-3" />
+                Offline
+              </span>
+            )}
+          </div>
+          {queuedCount > 0 && !isOffline && (
+            <p className="text-xs text-muted-foreground mt-1">
+              {queuedCount} idea{queuedCount > 1 ? "s" : ""} queued offline — syncing now.
+            </p>
+          )}
         </DialogHeader>
 
         <div className="px-5 py-4">
@@ -116,9 +221,7 @@ export default function IdeaSanctuaryModal({
             className="min-h-[100px] resize-none text-sm bg-muted/30 border-border/60 focus:border-foreground/20"
             autoFocus
           />
-          <p className="text-xs text-muted-foreground mt-1.5">
-            ⌘ + Enter to save
-          </p>
+          <p className="text-xs text-muted-foreground mt-1.5">⌘ + Enter to save</p>
         </div>
 
         <div className="px-5 pb-5 flex items-center justify-between gap-3">
@@ -155,6 +258,8 @@ export default function IdeaSanctuaryModal({
                 "Saved ✓"
               ) : captureIdea.isPending ? (
                 <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving</>
+              ) : isOffline ? (
+                <><WifiOff className="w-3.5 h-3.5" /> Save offline</>
               ) : (
                 <><Send className="w-3.5 h-3.5" /> Park it</>
               )}

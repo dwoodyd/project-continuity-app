@@ -5,12 +5,11 @@ import {
   ArrowLeft,
   Brain,
   CheckCircle2,
+  Layers,
   Lightbulb,
-  Loader2,
   Pause,
   Play,
   RotateCcw,
-  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -30,6 +29,15 @@ function formatTime(seconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  if (m < 60) return `${m} min`;
+  const h = Math.floor(m / 60);
+  const rem = m % 60;
+  return rem > 0 ? `${h}h ${rem}m` : `${h}h`;
+}
+
 export default function FocusModePage() {
   const [, navigate] = useLocation();
   const [phase, setPhase] = useState<FocusPhase>("setup");
@@ -40,13 +48,20 @@ export default function FocusModePage() {
   const [driftWarning, setDriftWarning] = useState(false);
   const [driftCount, setDriftCount] = useState(0);
   const [sessionStart, setSessionStart] = useState<Date | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(undefined);
+  const [sessionNotes, setSessionNotes] = useState("");
+  const [sessionSaved, setSessionSaved] = useState(false);
+  const [actualDuration, setActualDuration] = useState(0);
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const driftTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
   const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery();
+  const { data: activeProjects } = trpc.projects.listActive.useQuery();
+  const saveSession = trpc.focusSessions.save.useMutation();
+
   const tasks = todayPlan?.criticalTasks ? JSON.parse(todayPlan.criticalTasks) : [];
-  const pendingTasks = tasks.filter((t: any) => !t.done);
+  const pendingTasks = tasks.filter((t: { done?: boolean }) => !t.done);
 
   // Timer logic
   useEffect(() => {
@@ -56,6 +71,7 @@ export default function FocusModePage() {
           if (prev <= 1) {
             setIsRunning(false);
             if (phase === "active") {
+              persistSession(true);
               setPhase("break");
               setTimeLeft(BREAK_MINUTES * 60);
               toast.success("Focus session complete! Take a break.");
@@ -70,12 +86,11 @@ export default function FocusModePage() {
       }, 1000);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isRunning, phase]);
+  }, [isRunning, phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Drift detection — detect when user has been idle or switched context
+  // Drift detection
   useEffect(() => {
     if (phase !== "active" || !isRunning) return;
-
     const handleVisibilityChange = () => {
       if (document.hidden) {
         setDriftCount((prev) => prev + 1);
@@ -83,10 +98,28 @@ export default function FocusModePage() {
         setTimeout(() => setDriftWarning(false), 5000);
       }
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [phase, isRunning]);
+
+  const persistSession = async (wasCompleted: boolean) => {
+    if (!sessionStart || sessionSaved) return;
+    const durationSeconds = Math.round((Date.now() - sessionStart.getTime()) / 1000);
+    setActualDuration(durationSeconds);
+    try {
+      await saveSession.mutateAsync({
+        intention: intention.trim(),
+        projectId: selectedProjectId,
+        startedAt: sessionStart.getTime(),
+        durationSeconds,
+        wasCompleted,
+        notes: sessionNotes.trim() || undefined,
+      });
+      setSessionSaved(true);
+    } catch {
+      // Non-blocking — don't interrupt user's flow
+    }
+  };
 
   const startFocus = () => {
     if (!intention.trim()) {
@@ -97,6 +130,8 @@ export default function FocusModePage() {
     setTimeLeft(FOCUS_MINUTES * 60);
     setIsRunning(true);
     setSessionStart(new Date());
+    setSessionSaved(false);
+    setActualDuration(0);
     lastActivityRef.current = Date.now();
   };
 
@@ -109,10 +144,14 @@ export default function FocusModePage() {
     setDriftWarning(false);
     setDriftCount(0);
     setSessionStart(null);
+    setSessionNotes("");
+    setSessionSaved(false);
+    setActualDuration(0);
     if (intervalRef.current) clearInterval(intervalRef.current);
   };
 
-  const startBreak = () => {
+  const startBreak = async () => {
+    await persistSession(true);
     setPhase("break");
     setTimeLeft(BREAK_MINUTES * 60);
     setIsRunning(true);
@@ -143,7 +182,6 @@ export default function FocusModePage() {
           <ArrowLeft className="w-4 h-4" />
           {phase === "setup" ? "Back" : "Exit focus"}
         </button>
-
         {phase === "active" && (
           <div className="flex items-center gap-3">
             <button
@@ -202,11 +240,52 @@ export default function FocusModePage() {
               <p className="text-xs text-muted-foreground mt-1.5">⌘ + Enter to start</p>
             </div>
 
+            {/* Project selection */}
+            {activeProjects && activeProjects.length > 0 && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
+                  Link to project (optional)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedProjectId(undefined)}
+                    className={cn(
+                      "text-xs px-3 py-1.5 rounded-lg border transition-colors",
+                      selectedProjectId === undefined
+                        ? "border-foreground/30 bg-foreground/5 text-foreground"
+                        : "border-border text-muted-foreground hover:border-foreground/20"
+                    )}
+                  >
+                    No project
+                  </button>
+                  {activeProjects.slice(0, 5).map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => {
+                        setSelectedProjectId(p.id);
+                        if (!intention.trim() && p.nextStep) {
+                          setIntention(p.nextStep);
+                        }
+                      }}
+                      className={cn(
+                        "text-xs px-3 py-1.5 rounded-lg border transition-colors",
+                        selectedProjectId === p.id
+                          ? "border-foreground/30 bg-foreground/5 text-foreground font-medium"
+                          : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                      )}
+                    >
+                      {p.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {pendingTasks.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-2">Or pick from today's tasks:</p>
                 <div className="space-y-1.5">
-                  {pendingTasks.slice(0, 4).map((task: any) => (
+                  {pendingTasks.slice(0, 4).map((task: { id: string; title: string }) => (
                     <button
                       key={task.id}
                       onClick={() => setIntention(task.title)}
@@ -240,7 +319,7 @@ export default function FocusModePage() {
                 <circle
                   cx="100" cy="100" r="90"
                   fill="none"
-                  stroke={phase === "active" ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.08)"}
+                  stroke="rgba(255,255,255,0.08)"
                   strokeWidth="8"
                 />
                 <circle
@@ -275,6 +354,12 @@ export default function FocusModePage() {
               <div className="max-w-sm mx-auto">
                 <p className="text-xs text-white/30 uppercase tracking-widest mb-2">Your intention</p>
                 <p className="text-white/80 text-base leading-relaxed">{intention}</p>
+                {selectedProjectId && activeProjects && (
+                  <p className="text-xs text-white/25 mt-1 flex items-center justify-center gap-1">
+                    <Layers className="w-3 h-3" />
+                    {activeProjects.find((p) => p.id === selectedProjectId)?.title}
+                  </p>
+                )}
               </div>
             )}
 
@@ -318,25 +403,58 @@ export default function FocusModePage() {
 
         {/* Complete Phase */}
         {phase === "complete" && (
-          <div className="text-center space-y-6 max-w-sm">
+          <div className="text-center space-y-6 max-w-sm w-full">
             <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
             <div>
               <h2 className="text-2xl font-semibold text-foreground">Session complete.</h2>
               <p className="text-muted-foreground mt-2">
                 You focused on: <span className="text-foreground font-medium">"{intention}"</span>
               </p>
+              {actualDuration > 0 && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Duration: <span className="text-foreground">{formatDuration(actualDuration)}</span>
+                </p>
+              )}
               {driftCount > 0 && (
                 <p className="text-sm text-amber-600 dark:text-amber-400 mt-2">
                   {driftCount} drift{driftCount !== 1 ? "s" : ""} detected — awareness is the first step.
                 </p>
               )}
             </div>
+
+            {/* Optional notes */}
+            <div className="text-left">
+              <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                Notes from this session (optional)
+              </label>
+              <Textarea
+                value={sessionNotes}
+                onChange={(e) => setSessionNotes(e.target.value)}
+                placeholder="What did you accomplish? What's the next step?"
+                className="min-h-[80px] resize-none text-sm bg-muted/30"
+              />
+            </div>
+
             <div className="flex flex-col gap-2">
-              <Button onClick={() => { reset(); setIntention(""); }} className="w-full gap-2">
+              <Button
+                onClick={async () => {
+                  if (!sessionSaved && sessionStart) await persistSession(true);
+                  reset();
+                  setIntention("");
+                }}
+                className="w-full gap-2"
+              >
                 <Play className="w-4 h-4" />
                 Start another session
               </Button>
-              <Button variant="outline" onClick={() => navigate("/")} className="w-full">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!sessionSaved && sessionStart) await persistSession(true);
+                  navigate("/");
+                }}
+                className="w-full"
+              >
                 Back to Command Center
               </Button>
             </div>

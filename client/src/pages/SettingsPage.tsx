@@ -3,8 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
   Bell,
-  Brain,
-  ChevronRight,
+  CheckCircle2,
   Lightbulb,
   Loader2,
   LogOut,
@@ -17,14 +16,26 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
 
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
+  const scheduleCheckInReminders = (morning: string, midday: string, evening: string) => {
+    const notifEnabled = settings?.notificationsEnabled !== false;
+    scheduleCheckInNotifications({
+      morningEnabled: notifEnabled,
+      morningTime: morning,
+      middayEnabled: notifEnabled,
+      middayTime: midday,
+      eveningEnabled: notifEnabled,
+      eveningTime: evening,
+    });
+  };
 
   const { data: ideas, refetch: refetchIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: settings } = trpc.settings.getProfile.useQuery();
@@ -241,13 +252,110 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Push Notifications */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <div className="flex items-center gap-2">
+              <Bell className="w-4 h-4 text-muted-foreground" />
+              <p className="text-sm font-semibold text-foreground">Push Notifications</p>
+            </div>
+            {!isSupported ? (
+              <p className="text-xs text-muted-foreground">
+                Push notifications are not supported in this browser.
+              </p>
+            ) : permission === "granted" ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="w-4 h-4" />
+                  <p className="text-sm">Notifications enabled</p>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  You will receive check-in reminders at your scheduled times.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    scheduleCheckInReminders(
+                      settings?.morningCheckInTime ?? "08:00",
+                      settings?.middayCheckInTime ?? "12:00",
+                      settings?.eveningCheckInTime ?? "17:00"
+                    );
+                    toast.success("Reminders rescheduled.");
+                  }}
+                  className="gap-2 text-xs"
+                >
+                  <Bell className="w-3.5 h-3.5" />
+                  Reschedule reminders
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Enable notifications to receive morning, midday, and evening check-in reminders — even when the app is in the background.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const granted = await requestPermission();
+                    if (granted) {
+                      scheduleCheckInReminders(
+                        settings?.morningCheckInTime ?? "08:00",
+                        settings?.middayCheckInTime ?? "12:00",
+                        settings?.eveningCheckInTime ?? "17:00"
+                      );
+                      toast.success("Check-in reminders scheduled.");
+                    } else {
+                      toast.error("Notification permission denied. Enable it in your browser settings.");
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Bell className="w-4 h-4" />
+                  Enable notifications
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Check-in Times */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <p className="text-sm font-semibold text-foreground">Check-in Times</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { key: "morningCheckInTime", label: "Morning", defaultVal: "08:00" },
+                { key: "middayCheckInTime", label: "Midday", defaultVal: "12:00" },
+                { key: "eveningCheckInTime", label: "Evening", defaultVal: "17:00" },
+              ].map(({ key, label, defaultVal }) => (
+                <div key={key}>
+                  <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
+                  <Input
+                    type="time"
+                    defaultValue={(settings as any)?.[key] ?? defaultVal}
+                    className="text-sm"
+                    onBlur={(e) => {
+                      updateSettings.mutate({ [key]: e.target.value });
+                      if (permission === "granted") {
+                        scheduleCheckInReminders(
+                          key === "morningCheckInTime" ? e.target.value : (settings?.morningCheckInTime ?? "08:00"),
+                          key === "middayCheckInTime" ? e.target.value : (settings?.middayCheckInTime ?? "12:00"),
+                          key === "eveningCheckInTime" ? e.target.value : (settings?.eveningCheckInTime ?? "17:00")
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Focus Timer */}
           <div className="p-5 rounded-xl bg-card border border-border space-y-3">
             <p className="text-sm font-semibold text-foreground">Focus Timer</p>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { key: "focusDuration", label: "Focus duration", unit: "min", defaultVal: 25 },
-                { key: "breakDuration", label: "Break duration", unit: "min", defaultVal: 5 },
-              ].map(({ key, label, unit, defaultVal }) => (
+                { key: "focusDuration", label: "Focus duration (min)", defaultVal: 25 },
+                { key: "breakDuration", label: "Break duration (min)", defaultVal: 5 },
+              ].map(({ key, label, defaultVal }) => (
                 <div key={key}>
                   <label className="text-xs font-medium text-muted-foreground mb-1.5 block">{label}</label>
                   <Input
