@@ -473,7 +473,10 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Re-entry — {projectTitle}</p>
       </div>
       {card.isFirstSession ? (
-        <p className="text-sm text-muted-foreground">First session on this project. The next step is already set.</p>
+        <div className="space-y-2">
+          <p className="text-sm text-foreground">This is your first session on this project.</p>
+          <p className="text-xs text-muted-foreground">No history yet — the next step below is your starting point.</p>
+        </div>
       ) : (
         <>
           {card.stoppingPoint && (
@@ -505,9 +508,19 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
           )}
         </div>
       )}
-      <Button size="sm" onClick={handleAcknowledge} className="w-full">
-        Got it — enter Focus Mode
-      </Button>
+      {card.whyItMatters && (
+        <div className="pt-1 border-t border-border">
+          <p className="text-xs text-muted-foreground/70 italic leading-relaxed">Why this matters: {card.whyItMatters}</p>
+        </div>
+      )}
+      <div className="flex gap-2">
+        <Button size="sm" variant="outline" onClick={onDismiss} className="flex-1 text-xs">
+          I know where I am
+        </Button>
+        <Button size="sm" onClick={handleAcknowledge} className="flex-1">
+          Ready. Begin.
+        </Button>
+      </div>
     </div>
   );
 }
@@ -553,6 +566,8 @@ export default function Home() {
     } catch { return []; }
   }, [todayPlan?.likelyDistractions]);
 
+  // Carryover count per task — tasks carried over 2+ times get a warning
+  const getCarryoverCount = (task: any): number => task.carryoverCount ?? 0;
   const completedTasks = tasks.filter((t: any) => t.done).length;
   const allTasksDone = tasks.length > 0 && completedTasks === tasks.length;
 
@@ -584,6 +599,10 @@ export default function Home() {
   };
 
   const capacityLevel: CapacityLevel = (todayPlan?.capacityLevel as CapacityLevel) ?? "partial";
+  // Capacity-based task limits: full=3, partial=2, low=1
+  const taskLimit = capacityLevel === "full" ? 3 : capacityLevel === "partial" ? 2 : 1;
+  const visibleTasks = tasks.slice(0, taskLimit);
+  const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user?.name?.split(" ")[0] ?? "there";
 
@@ -660,8 +679,16 @@ export default function Home() {
             <p className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Low capacity day</p>
           </div>
           <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-            One task. That's the whole plan. Everything else is on hold. Showing up is enough.
+            This is today's one thing. Everything else is on hold. Showing up is enough.
           </p>
+        </div>
+      )}
+      {todayPlan && capacityLevel === "partial" && (
+        <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+          <div className="flex items-center gap-2">
+            <BatteryMedium className="w-3.5 h-3.5 text-amber-500" />
+            <p className="text-xs text-amber-700 dark:text-amber-300">One clear focus today. Secondary work waits.</p>
+          </div>
         </div>
       )}
 
@@ -766,7 +793,7 @@ export default function Home() {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Today's tasks
             </p>
-            <span className="text-xs text-muted-foreground">{completedTasks}/{tasks.length}</span>
+            <span className="text-xs text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
           </div>
           {allTasksDone ? (
             <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
@@ -778,14 +805,26 @@ export default function Home() {
             </div>
           ) : (
             <div className="space-y-2">
-              {tasks.map((task: any) => (
-                <TaskItem
-                  key={task.id}
-                  task={task}
-                  onComplete={(id) => completeTask.mutate({ taskId: id })}
-                  onUnstick={(t) => setUnstickTask(t)}
-                />
+              {visibleTasks.map((task: any) => (
+                <div key={task.id} className="relative">
+                  <TaskItem
+                    task={task}
+                    onComplete={(id) => completeTask.mutate({ taskId: id })}
+                    onUnstick={(t) => setUnstickTask(t)}
+                  />
+                  {getCarryoverCount(task) >= 2 && (
+                    <div className="absolute -top-1 -right-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700">
+                      <RotateCcw className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
+                      <span className="text-[9px] font-medium text-amber-700 dark:text-amber-300">{getCarryoverCount(task)}×</span>
+                    </div>
+                  )}
+                </div>
               ))}
+              {hiddenTaskCount > 0 && (
+                <p className="text-xs text-muted-foreground/50 text-center py-1.5">
+                  {hiddenTaskCount} more task{hiddenTaskCount > 1 ? "s" : ""} held back — {capacityLevel === "low" ? "one thing today" : "focus on these first"}
+                </p>
+              )}
             </div>
           )}
         </div>

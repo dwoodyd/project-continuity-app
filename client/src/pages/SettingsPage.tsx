@@ -35,7 +35,7 @@ function IdeaProcessingCard({
 }: {
   idea: any;
   projects: any[];
-  onResolve: (action: "park" | "promote" | "discard", projectId?: number) => void;
+  onResolve: (action: "park" | "promote" | "future" | "discard", projectId?: number) => void;
   isPending: boolean;
 }) {
   const [showProjectPicker, setShowProjectPicker] = useState(false);
@@ -139,6 +139,16 @@ function IdeaProcessingCard({
           </Button>
           <Button
             size="sm"
+            variant="outline"
+            className="text-xs h-7 gap-1.5 text-muted-foreground"
+            disabled={isPending}
+            onClick={() => onResolve("future")}
+          >
+            <ArrowUpRight className="w-3 h-3" />
+            Future idea
+          </Button>
+          <Button
+            size="sm"
             variant="ghost"
             className="text-xs h-7 text-muted-foreground gap-1.5 ml-auto"
             disabled={isPending}
@@ -177,7 +187,7 @@ export default function SettingsPage() {
 
   const resolveIdea = trpc.ai.resolveIdea.useMutation({
     onSuccess: (_, vars) => {
-      const actionLabels = { park: "Added to Vault.", promote: "Added to project.", discard: "Dismissed." };
+      const actionLabels: Record<string, string> = { park: "Added to Vault.", promote: "Added to project.", future: "Saved as future idea.", discard: "Dismissed." };
       toast.success(actionLabels[vars.action]);
       refetchIdeas();
     },

@@ -81,15 +81,25 @@ Return JSON: { parsedIntent: string (1 sentence), suggestedProject: string|null 
   resolveIdea: protectedProcedure
     .input(z.object({
       id: z.number(),
-      action: z.enum(["park", "promote", "discard"]),
+      action: z.enum(["park", "promote", "future", "discard"]),
       projectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       if (input.action === "discard") {
+        // Archive — not relevant, dismissed
         await updateIdeaCapture(input.id, ctx.user.id, { resolvedStatus: true, resolvedAt: new Date() });
       } else if (input.action === "park") {
+        // Active project — park to Vault for current work
         await updateIdeaCapture(input.id, ctx.user.id, { parkedStatus: true });
+      } else if (input.action === "future") {
+        // Future idea — save for later, no active project link
+        await updateIdeaCapture(input.id, ctx.user.id, {
+          resolvedStatus: true,
+          resolvedAt: new Date(),
+          parsedIntent: "Future idea — saved for later",
+        });
       } else if (input.action === "promote") {
+        // One-time task — link to specific project
         await updateIdeaCapture(input.id, ctx.user.id, {
           resolvedStatus: true,
           resolvedAt: new Date(),
