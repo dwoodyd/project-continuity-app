@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   createProject,
+  createProjectMemoryEvent,
   getActiveProjects,
   getColdProjects,
   getProjectById,
@@ -70,6 +71,25 @@ export const projectsRouter = router({
         nextStep: input.nextStep,
         lastTouchedAt: new Date(),
       });
+
+      // Record creation event in project memory timeline
+      try {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: id,
+          eventType: "created",
+          content: `Project created: "${input.title}"${input.description ? ` — ${input.description.substring(0, 200)}` : ""}`,
+        });
+        if (input.nextStep) {
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: id,
+            eventType: "next_step_change",
+            content: `First next step set: ${input.nextStep}`,
+          });
+        }
+      } catch (_) { /* non-blocking */ }
+
       return { id };
     }),
 
@@ -96,6 +116,35 @@ export const projectsRouter = router({
       if (milestones !== undefined) updates.milestones = JSON.stringify(milestones);
       if (rest.status === "completed") updates.completedAt = new Date();
       await updateProject(id, ctx.user.id, updates as any);
+
+      // Record meaningful changes in project memory timeline
+      try {
+        if (rest.nextStep) {
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: id,
+            eventType: "next_step_change",
+            content: `Next step updated: ${rest.nextStep}`,
+          });
+        }
+        if (rest.status === "completed") {
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: id,
+            eventType: "milestone",
+            content: `Project marked complete${rest.archiveSummary ? `: ${rest.archiveSummary.substring(0, 300)}` : ""}`,
+          });
+        }
+        if (rest.blockers) {
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: id,
+            eventType: "blocker",
+            content: `Blocker recorded: ${rest.blockers.substring(0, 300)}`,
+          });
+        }
+      } catch (_) { /* non-blocking */ }
+
       return { success: true };
     }),
 
@@ -106,6 +155,17 @@ export const projectsRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       await updateProject(input.id, ctx.user.id, { contextBreadcrumb: input.breadcrumb });
+
+      // Record stopping point in project memory timeline
+      try {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: input.id,
+          eventType: "blocker",
+          content: `Stopping point saved: ${input.breadcrumb}`,
+        });
+      } catch (_) { /* non-blocking */ }
+
       return { success: true };
     }),
 
@@ -119,6 +179,16 @@ export const projectsRouter = router({
         status: "archived",
         archiveSummary: input.archiveSummary,
       });
+
+      try {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: input.id,
+          eventType: "milestone",
+          content: `Project archived${input.archiveSummary ? `: ${input.archiveSummary.substring(0, 300)}` : ""}`,
+        });
+      } catch (_) { /* non-blocking */ }
+
       return { success: true };
     }),
 });

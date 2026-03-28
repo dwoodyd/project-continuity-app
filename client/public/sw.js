@@ -1,4 +1,4 @@
-// Project Continuity — Service Worker
+// Continuary — Service Worker
 // Handles: push notifications, offline capture queuing, background sync
 
 const CACHE_VERSION = "continuity-v1";
@@ -15,7 +15,7 @@ self.addEventListener("activate", (event) => {
 
 // ─── Push Notifications ───────────────────────────────────────────────────────
 self.addEventListener("push", (event) => {
-  let data = { title: "Project Continuity", body: "Your day is ready.", tag: "checkin" };
+  let data = { title: "Continuary", body: "Your day is ready.", tag: "checkin" };
   try {
     if (event.data) data = event.data.json();
   } catch {}

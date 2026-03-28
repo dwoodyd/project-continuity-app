@@ -428,6 +428,7 @@ export default function VaultPage() {
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
   const { data: reviewQueue, refetch: refetchReview } = trpc.vault.reviewQueue.useQuery();
+  const { data: duplicateData } = trpc.vault.detectDuplicates.useQuery();
 
   const aiProcess = trpc.vault.aiProcess.useMutation({
     onSuccess: () => { toast.success("AI processed — tags and summary added."); refetch(); },
@@ -439,12 +440,18 @@ export default function VaultPage() {
     onError: () => toast.error("Failed to mark reviewed."),
   });
 
+  // One-tap clipboard capture — saves directly to Vault inbox without opening modal
+  const captureClipboard = trpc.vault.captureClipboard.useMutation({
+    onSuccess: () => { toast.success("Saved to Vault inbox."); refetch(); },
+    onError: () => toast.error("Failed to save clipboard content."),
+  });
+
   const handleClipboardCapture = async () => {
     try {
       const text = await navigator.clipboard.readText();
       if (text.trim()) {
-        setClipboardContent(text);
-        setAddOpen(true);
+        // One-tap: save directly to inbox, no modal needed
+        captureClipboard.mutate({ text });
       } else {
         toast.info("Clipboard is empty.");
       }
@@ -455,6 +462,9 @@ export default function VaultPage() {
       toast.info("Open the modal and paste your content manually.");
     }
   };
+
+  const duplicateGroups = duplicateData?.groups ?? [];
+  const disconnectedIds = duplicateData?.disconnected ?? [];
 
   const filtered = filterState === "review"
     ? (reviewQueue ?? [])
@@ -536,6 +546,34 @@ export default function VaultPage() {
           </p>
           <ChevronRight className="w-4 h-4 text-amber-500 shrink-0" />
         </button>
+      )}
+
+      {/* Related notes / duplicate groups panel */}
+      {duplicateGroups.length > 0 && filterState === "all" && (
+        <div className="rounded-xl border border-border bg-muted/20 p-4 space-y-2">
+          <p className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">Possible related notes</p>
+          <p className="text-xs text-muted-foreground">These items may belong to the same body of work. Consider linking them to a project.</p>
+          <div className="space-y-1.5 mt-2">
+            {duplicateGroups.slice(0, 3).map((group) => (
+              <div key={group.candidate} className="flex items-center gap-2 text-xs text-foreground/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                <span className="font-medium">{group.candidate}</span>
+                <span className="text-muted-foreground">— {group.itemIds.length} items</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Disconnected notes panel */}
+      {disconnectedIds.length > 0 && filterState === "all" && (
+        <div className="rounded-xl border border-dashed border-border bg-muted/10 px-4 py-3 flex items-start gap-3">
+          <AlertTriangle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-medium text-foreground">{disconnectedIds.length} note{disconnectedIds.length !== 1 ? "s" : ""} not connected to any project</p>
+            <p className="text-xs text-muted-foreground mt-0.5">These items were AI-processed but no project match was found. They may represent a new project or can be archived.</p>
+          </div>
+        </div>
       )}
 
       {/* Items list */}

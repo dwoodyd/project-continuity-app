@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { createProjectMemoryEvent, getDb } from "../db";
 import { focusSessions } from "../../drizzle/schema";
 import { eq, desc, and, gte } from "drizzle-orm";
 
@@ -30,7 +30,21 @@ export const focusSessionsRouter = router({
         notes: input.notes ?? null,
       });
 
-      return { id: (result as { insertId: number }).insertId };
+      const sessionId = (result as { insertId: number }).insertId;
+
+      // Record project memory event for completed sessions with a project
+      if (input.projectId && input.wasCompleted) {
+        try {
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: input.projectId,
+            eventType: "focus_session",
+            content: `Focus session: "${input.intention}" — ${Math.round(input.durationSeconds / 60)} min${input.notes ? `. Notes: ${input.notes.substring(0, 200)}` : ""}`,
+          });
+        } catch (_) { /* non-blocking */ }
+      }
+
+      return { id: sessionId };
     }),
 
   // List sessions for the current user (last 30 days by default)

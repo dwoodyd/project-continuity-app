@@ -158,7 +158,7 @@ export function useNotifications() {
       const { hour, minute } = parseTime(settings.morningTime);
       scheduleLocalNotification({
         id: "morning-checkin",
-        title: "Project Continuity",
+        title: "Continuary",
         body: "Your day is ready. Morning check-in is open.",
         tag: "morning-checkin",
         scheduledHour: hour,
@@ -171,7 +171,7 @@ export function useNotifications() {
       const { hour, minute } = parseTime(settings.middayTime);
       scheduleLocalNotification({
         id: "midday-checkin",
-        title: "Project Continuity",
+        title: "Continuary",
         body: "Midday check-in is open. Still on track?",
         tag: "midday-checkin",
         scheduledHour: hour,
@@ -184,7 +184,7 @@ export function useNotifications() {
       const { hour, minute } = parseTime(settings.eveningTime);
       scheduleLocalNotification({
         id: "evening-checkin",
-        title: "Project Continuity",
+        title: "Continuary",
         body: "Close the day while the work is still near.",
         tag: "evening-checkin",
         scheduledHour: hour,

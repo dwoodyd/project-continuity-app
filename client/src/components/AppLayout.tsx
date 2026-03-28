@@ -64,7 +64,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <div className="w-12 h-12 rounded-2xl bg-foreground/5 border border-border flex items-center justify-center mx-auto mb-6">
             <Command className="w-6 h-6 text-foreground/60" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">Project Continuity</h1>
+          <h1 className="text-2xl font-semibold text-foreground mb-2">Continuary</h1>
           <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
             A command center for execution. Turn scattered notes into structured daily focus.
           </p>
@@ -105,7 +105,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <Command className="w-4 h-4 text-background" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground leading-none">Continuity</p>
+              <p className="text-sm font-semibold text-foreground leading-none">Continuary</p>
               <p className="text-xs text-muted-foreground mt-0.5">Command Center</p>
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
               <Command className="w-4 h-4 text-background" />
             </div>
-            <p className="text-sm font-semibold text-foreground">Continuity</p>
+            <p className="text-sm font-semibold text-foreground">Continuary</p>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="text-muted-foreground hover:text-foreground p-1">
             <X className="w-5 h-5" />
@@ -228,7 +228,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <div className="w-6 h-6 rounded-md bg-foreground flex items-center justify-center">
               <Command className="w-3 h-3 text-background" />
             </div>
-            <span className="text-sm font-semibold text-foreground">Continuity</span>
+            <span className="text-sm font-semibold text-foreground">Continuary</span>
           </div>
           <button onClick={toggleTheme} className="text-muted-foreground hover:text-foreground p-1">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}

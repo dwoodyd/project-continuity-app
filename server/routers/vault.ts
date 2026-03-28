@@ -126,7 +126,7 @@ export const vaultRouter = router({
         messages: [
           {
             role: "system",
-            content: `You are an AI assistant for a productivity app called Project Continuity. 
+            content: `You are an AI assistant for a productivity app called Continuary. 
 Your job is to analyze a piece of content and extract structured information from it.
 Be concise, grounded, and direct. Never use motivational language.
 Return valid JSON only.`,
@@ -216,6 +216,50 @@ ${content.substring(0, 3000)}`,
           : {}),
       });
       return { success: true };
+    }),
+
+  // Detect likely duplicate or overlapping notes — groups items sharing project candidates
+  detectDuplicates: protectedProcedure.query(async ({ ctx }) => {
+    const items = await getSourceItems(ctx.user.id);
+    if (items.length < 2) return { groups: [], disconnected: [] };
+    const fingerprints = items.map((item: any) => ({
+      id: item.id,
+      title: item.title ?? "",
+      candidates: item.projectCandidates ? JSON.parse(item.projectCandidates) : [] as string[],
+      state: item.state,
+    }));
+    // Group items that share project candidates (potential one body of work)
+    const candidateMap = new Map<string, number[]>();
+    for (const fp of fingerprints) {
+      for (const candidate of fp.candidates) {
+        const key = (candidate as string).toLowerCase().trim();
+        if (!candidateMap.has(key)) candidateMap.set(key, []);
+        candidateMap.get(key)!.push(fp.id);
+      }
+    }
+    const groups: Array<{ candidate: string; itemIds: number[] }> = [];
+    for (const [candidate, ids] of Array.from(candidateMap.entries())) {
+      if (ids.length >= 2) groups.push({ candidate, itemIds: ids });
+    }
+    // Disconnected notes: inbox items with no project candidates after AI processing
+    const disconnected = fingerprints
+      .filter((fp: any) => fp.state === "mapped" && fp.candidates.length === 0)
+      .map((fp: any) => fp.id);
+    return { groups, disconnected };
+  }),
+
+  // Clipboard capture — receives text from frontend navigator.clipboard.readText()
+  captureClipboard: protectedProcedure
+    .input(z.object({ text: z.string().min(1).max(50000) }))
+    .mutation(async ({ ctx, input }) => {
+      const id = await createSourceItem({
+        userId: ctx.user.id,
+        sourceType: "paste",
+        title: `Clipboard — ${new Date().toLocaleDateString()}`,
+        rawContent: input.text,
+        state: "inbox",
+      });
+      return { id };
     }),
 
   transcribeVoice: protectedProcedure

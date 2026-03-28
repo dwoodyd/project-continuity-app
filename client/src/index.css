@@ -43,7 +43,7 @@
 }
 
 :root {
-  /* Project Continuity — Premium Slate Palette */
+  /* Continuary — Premium Slate Palette */
   --primary: oklch(0.22 0.015 247);
   --primary-foreground: oklch(0.97 0.002 247);
   --sidebar-primary: oklch(0.22 0.015 247);
@@ -80,7 +80,7 @@
 }
 
 .dark {
-  /* Project Continuity — Dark Mode */
+  /* Continuary — Dark Mode */
   --primary: oklch(0.88 0.006 247);
   --primary-foreground: oklch(0.14 0.008 247);
   --sidebar-primary: oklch(0.88 0.006 247);
