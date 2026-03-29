@@ -104,17 +104,22 @@ export default function WeeklyCompassPage() {
 
       {/* Empty state */}
       {!isLoading && !compass && (
-        <div className="p-10 rounded-2xl border border-dashed border-border text-center">
-          <Compass className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
-          <p className="text-sm font-medium text-foreground mb-2">No compass set for this week.</p>
-          <p className="text-xs text-muted-foreground mb-6 max-w-xs mx-auto">
-            Generate your weekly compass to get AI-powered recommendations on where to focus your energy.
-          </p>
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2">
-            {generate.isPending
-              ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
-              : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
-          </Button>
+        <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <Compass className="w-7 h-7 text-white" />
+            </div>
+            <p className="text-base font-semibold text-white mb-2">No compass set for this week.</p>
+            <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto">
+              Generate your weekly compass to get AI-powered recommendations on where to focus your energy.
+            </p>
+            <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 shadow-lg shadow-black/20">
+              {generate.isPending
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
+                : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
+            </Button>
+          </div>
         </div>
       )}
 
@@ -148,10 +153,10 @@ export default function WeeklyCompassPage() {
 
           {/* AI Guidance */}
           {compass.generatedGuidance && (
-            <div className="p-5 rounded-2xl bg-card border border-border">
+            <div className="p-5 rounded-2xl border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.72 0.17 65 / 0.06) 100%)'}}>
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Weekly guidance</p>
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Weekly guidance</p>
               </div>
               <p className="text-sm text-foreground leading-relaxed">{compass.generatedGuidance}</p>
             </div>
@@ -160,10 +165,10 @@ export default function WeeklyCompassPage() {
           {/* Primary + Secondary projects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Primary */}
-            <div className="p-4 rounded-xl border border-border bg-card space-y-2">
+            <div className="p-4 rounded-xl border border-primary/25 bg-card space-y-2" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.06) 0%, transparent 100%)'}}>
               <div className="flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-foreground/60" />
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Primary focus</p>
+                <Target className="w-3.5 h-3.5 text-primary" />
+                <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Primary focus</p>
               </div>
               {primaryProject ? (
                 <div>

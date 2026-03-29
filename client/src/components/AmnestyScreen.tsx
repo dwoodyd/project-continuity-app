@@ -112,7 +112,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
             <div className="space-y-3">
               <button
                 onClick={handleProceed}
-                className="w-full flex items-center justify-between px-5 py-4 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors group"
+                className="w-full flex items-center justify-between px-5 py-4 bg-primary text-white rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors group"
               >
                 <span>Continue</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -216,7 +216,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                   className={cn(
                     "w-full flex items-center justify-between px-5 py-4 rounded-xl text-sm font-medium transition-colors group",
                     oneThingInput.trim() && !isGenerating
-                      ? "bg-foreground text-background hover:bg-foreground/90"
+                      ? "bg-primary text-white hover:bg-primary/90"
                       : "bg-muted text-muted-foreground cursor-not-allowed"
                   )}
                 >
@@ -283,7 +283,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
             <div className="space-y-2">
               <button
                 onClick={onComplete}
-                className="w-full flex items-center justify-between px-5 py-4 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors group"
+                className="w-full flex items-center justify-between px-5 py-4 bg-primary text-white rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors group"
               >
                 <span>Open Command Center</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

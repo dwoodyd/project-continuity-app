@@ -226,3 +226,57 @@
 - [ ] Wire Weekly Compass selections into daily plan generation input
 - [ ] Alert-priority resolver in Command Center — only top-priority alert shown as primary when multiple exist
 - [ ] Decisions propagate into Start Here card and next-step generation; visible in Project Detail + Timeline
+
+## Revision Brief 4 (pasted_content_7.txt)
+
+### Color System Fix
+- [ ] Inject real visible indigo+amber color — sidebar dark indigo, primary buttons indigo, amber accents visible
+
+### Weekly Compass Governs Daily Planning
+- [ ] Weekly primary project strongly shapes day plan (overrides priority algorithm)
+- [ ] Weekly secondary acts as fallback/support lane
+- [ ] Weekly maintenance lane stays bounded
+- [ ] Divergence note surfaces when day plan differs from weekly intent
+- [ ] Visible relationship between weekly primary/secondary and today's primary/secondary
+
+### Decisions Propagate Everywhere
+- [ ] Save structured decisions from evening closure and check-ins
+- [ ] Decisions influence Start Here card, next-step generation, project detail summaries, Timeline
+- [ ] Surface last meaningful decision and current decision affecting next steps
+- [ ] Prompt to confirm and save likely decisions found in freeform notes
+
+### projectMemoryEvents for Real Project Movement
+- [ ] Record events for vault imports mapped to project
+- [ ] Record events for check-ins that materially affect a project
+- [ ] Record events for blockers logged, milestones completed, decisions changing next-step logic
+- [ ] Timeline shows last real movement, last decision made, current open loop
+- [ ] Timeline is filterable and restrained
+
+### Alert-Priority Resolver
+- [ ] Single primary alert at a time on Command Center
+- [ ] Priority order: Amnesty → critical Start Here → due check-in → blocker → review reminders → Sanctuary nudge
+- [ ] Lower-priority alerts visually quiet but accessible
+- [ ] Command Center feels like guidance, not pressure
+
+### Backend Capacity-Aware Planning
+- [ ] Full/partial/low capacity produce structurally distinct plan objects
+- [ ] Flex buffer in each mode
+- [ ] Low-capacity bias: smaller concrete tasks, shorter focus blocks, lower carryover tolerance
+- [ ] Capacity mode shapes task count, focus block length, carryover tolerance
+- [ ] Capacity mode shown where helpful, without clutter
+
+### Re-Entry Card Improvements
+- [ ] 24-hour session gate logic
+- [ ] Handled tasks from last two sessions surfaced
+- [ ] Vague next tasks rewritten into concrete first moves
+- [ ] Re-entry concise and immediately actionable
+
+### Carryover Count as Diagnostic Signal
+- [ ] carryoverCount persisted at task level in schema
+- [ ] Repeated carryover surfaced in restrained way (no shame framing)
+- [ ] Carryover used to suggest task splitting, rewriting vague tasks, parking nonessential work, surfacing blockers
+
+### Idea Sanctuary Nudge
+- [ ] Gentle nudge on morning completion when unreviewed ideas > 3
+- [ ] Gentle nudge on evening completion when unreviewed ideas > 3
+- [ ] Nudge is secondary, never primary; user can defer easily

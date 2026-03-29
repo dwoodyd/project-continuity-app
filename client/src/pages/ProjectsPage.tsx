@@ -170,7 +170,7 @@ function ProjectCard({ project, onClick }: { project: any; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-foreground/20 hover:shadow-sm shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-all duration-150 group"
+      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-all duration-200 group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -244,8 +244,8 @@ export default function ProjectsPage() {
             className={cn(
               "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
               filter === s
-                ? "bg-foreground text-background"
-                : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent"
+                ? "bg-primary text-white shadow-sm"
+                : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent hover:border-primary/20"
             )}
           >
             {s === "all" ? "All" : statusConfig[s].label}

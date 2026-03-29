@@ -513,7 +513,7 @@ export default function VaultPage() {
             className={cn(
               "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
               filterState === state
-                ? "bg-foreground text-background"
+                ? "bg-primary text-white shadow-sm"
                 : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent"
             )}
           >

@@ -74,7 +74,7 @@ export default function OnboardingPage() {
         <div className="text-center max-w-sm">
           <Command className="w-10 h-10 text-foreground/40 mx-auto mb-4" />
           <h1 className="text-xl font-semibold text-foreground mb-2">Sign in to continue</h1>
-          <a href={getLoginUrl()} className="inline-flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors">
+          <a href={getLoginUrl()} className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 shadow-md shadow-primary/25 transition-colors">
             Sign in <ChevronRight className="w-4 h-4" />
           </a>
         </div>

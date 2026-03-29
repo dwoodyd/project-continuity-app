@@ -46,20 +46,6 @@ function ContinuaryMark({ className }: { className?: string }) {
   );
 }
 
-// ── Wordmark lockup ───────────────────────────────────────────────────────────
-function ContinuaryLogo({ size = "default" }: { size?: "default" | "sm" | "lg" }) {
-  const markSize = size === "sm" ? "w-5 h-3" : size === "lg" ? "w-10 h-6" : "w-7 h-4.5";
-  const textSize = size === "sm" ? "text-sm" : size === "lg" ? "text-xl" : "text-[15px]";
-  return (
-    <div className="flex items-center gap-2.5">
-      <ContinuaryMark className={cn(markSize, "text-foreground")} />
-      <span className={cn(textSize, "font-semibold tracking-[-0.02em] text-foreground leading-none")}>
-        Continuary
-      </span>
-    </div>
-  );
-}
-
 const navItems = [
   { href: "/", label: "Command Center", icon: Brain, description: "Today's focus" },
   { href: "/vault", label: "Knowledge Vault", icon: BookOpen, description: "Imported sources" },
@@ -97,22 +83,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
-          {/* Card */}
-          <div className="bg-card border border-border rounded-2xl p-8 shadow-sm">
-            {/* Logo */}
+          <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
             <div className="flex justify-center mb-8">
               <div className="flex flex-col items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center shadow-md">
-                  <ContinuaryMark className="w-8 h-5 text-background" />
+                {/* Indigo icon badge */}
+                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+                  <ContinuaryMark className="w-9 h-6 text-white" />
                 </div>
                 <div className="text-center">
                   <h1 className="text-xl font-semibold tracking-[-0.02em] text-foreground">Continuary</h1>
-                  <p className="text-xs text-muted-foreground mt-0.5 tracking-wide uppercase">Command Center</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 tracking-widest uppercase">Command Center</p>
                 </div>
               </div>
             </div>
 
-            {/* Divider */}
             <div className="border-t border-border mb-6" />
 
             <p className="text-sm text-muted-foreground text-center mb-6 leading-relaxed">
@@ -121,7 +105,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
             <a
               href={getLoginUrl()}
-              className="flex items-center justify-center gap-2 w-full bg-foreground text-background px-5 py-3 rounded-xl text-sm font-medium hover:bg-foreground/90 active:scale-[0.98] transition-all"
+              className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
             >
               Sign in to continue
               <ChevronRight className="w-4 h-4" />
@@ -139,72 +123,70 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
 
-  const navLinkClass = (href: string) => cn(
-    "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group",
-    isActive(href)
-      ? "bg-foreground/[0.07] text-foreground font-medium"
-      : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
-  );
-
-  const mobileNavLinkClass = (href: string) => cn(
-    "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-0",
-    isActive(href) ? "text-foreground" : "text-muted-foreground"
-  );
+  // Sidebar nav link — uses sidebar-scoped tokens so colors are correct on dark sidebar
+  const SidebarNavLink = ({ item }: { item: typeof navItems[0] }) => {
+    const Icon = item.icon;
+    const active = isActive(item.href);
+    return (
+      <Link
+        href={item.href}
+        className={cn(
+          "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group",
+          active
+            ? "bg-white/10 text-white font-medium"
+            : "text-white/60 hover:text-white hover:bg-white/[0.06]"
+        )}
+      >
+        {/* Amber active indicator bar */}
+        {active && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-amber-400" />
+        )}
+        <Icon className={cn(
+          "w-4 h-4 shrink-0 transition-colors",
+          active ? "text-amber-400" : "text-white/50 group-hover:text-white/80"
+        )} />
+        <span>{item.label}</span>
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* ── Desktop Sidebar ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-border bg-sidebar h-screen sticky top-0">
+      {/* ── Desktop Sidebar — dark indigo ───────────────────────────────────── */}
+      <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0"
+        style={{ background: "var(--sidebar)" }}>
         {/* Logo lockup */}
-        <div className="px-5 py-5 border-b border-border">
+        <div className="px-5 py-5 border-b border-white/10">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md transition-shadow">
-              <ContinuaryMark className="w-5 h-3 text-background" />
+            <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 shadow-md group-hover:bg-amber-300 transition-colors">
+              <ContinuaryMark className="w-5 h-3 text-amber-950" />
             </div>
             <div>
-              <p className="text-[14px] font-semibold tracking-[-0.02em] text-foreground leading-none">Continuary</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 tracking-wide uppercase">Command Center</p>
+              <p className="text-[14px] font-semibold tracking-[-0.02em] text-white leading-none">Continuary</p>
+              <p className="text-[10px] text-white/40 mt-0.5 tracking-widest uppercase">Command Center</p>
             </div>
           </Link>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={navLinkClass(item.href)}
-              >
-                {/* Active indicator */}
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-[oklch(0.72_0.14_65)]" />
-                )}
-                <Icon className={cn(
-                  "w-4 h-4 shrink-0 transition-colors",
-                  active ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
-                )} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          {navItems.map((item) => (
+            <SidebarNavLink key={item.href} item={item} />
+          ))}
         </nav>
 
         {/* Bottom actions */}
-        <div className="px-3 py-4 border-t border-border space-y-0.5">
+        <div className="px-3 py-4 border-t border-white/10 space-y-0.5">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
           </button>
           <button
             onClick={() => logout()}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign out</span>
@@ -215,27 +197,28 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* ── Mobile Sidebar Overlay ───────────────────────────────────────────── */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-sidebar border-r border-border flex flex-col transition-transform duration-200 lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-200 lg:hidden border-r border-white/10",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{ background: "var(--sidebar)" }}
       >
-        <div className="px-5 py-5 border-b border-border flex items-center justify-between">
+        <div className="px-5 py-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center shadow-sm">
-              <ContinuaryMark className="w-5 h-3 text-background" />
+            <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shadow-md">
+              <ContinuaryMark className="w-5 h-3 text-amber-950" />
             </div>
             <div>
-              <p className="text-[14px] font-semibold tracking-[-0.02em] text-foreground leading-none">Continuary</p>
-              <p className="text-[10px] text-muted-foreground mt-0.5 tracking-wide uppercase">Command Center</p>
+              <p className="text-[14px] font-semibold tracking-[-0.02em] text-white leading-none">Continuary</p>
+              <p className="text-[10px] text-white/40 mt-0.5 tracking-widest uppercase">Command Center</p>
             </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/[0.04] transition-colors">
+          <button onClick={() => setSidebarOpen(false)} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -250,33 +233,33 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-colors",
                   active
-                    ? "bg-foreground/[0.07] text-foreground font-medium"
-                    : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04]"
+                    ? "bg-white/10 text-white font-medium"
+                    : "text-white/60 hover:text-white hover:bg-white/[0.06]"
                 )}
               >
                 {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r-full bg-[oklch(0.72_0.14_65)]" />
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-amber-400" />
                 )}
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className={cn("w-4 h-4 shrink-0", active ? "text-amber-400" : "text-white/50")} />
                 <div>
                   <p>{item.label}</p>
-                  <p className="text-xs text-muted-foreground">{item.description}</p>
+                  <p className="text-xs text-white/40">{item.description}</p>
                 </div>
               </Link>
             );
           })}
         </nav>
-        <div className="px-3 py-4 border-t border-border space-y-0.5">
+        <div className="px-3 py-4 border-t border-white/10 space-y-0.5">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
           </button>
           <button
             onClick={() => logout()}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-foreground/[0.04] transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
           >
             <LogOut className="w-4 h-4" />
             <span>Sign out</span>
@@ -286,18 +269,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       {/* ── Main Content ─────────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-sidebar/95 backdrop-blur-sm sticky top-0 z-30">
-          <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/[0.04] transition-colors">
+        {/* Mobile header — dark indigo strip */}
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 sticky top-0 z-30"
+          style={{ background: "var(--sidebar)" }}>
+          <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center shadow-sm">
-              <ContinuaryMark className="w-4 h-2.5 text-background" />
+            <div className="w-7 h-7 rounded-md bg-amber-400 flex items-center justify-center shadow-sm">
+              <ContinuaryMark className="w-4 h-2.5 text-amber-950" />
             </div>
-            <span className="text-[14px] font-semibold tracking-[-0.02em] text-foreground">Continuary</span>
+            <span className="text-[14px] font-semibold tracking-[-0.02em] text-white">Continuary</span>
           </div>
-          <button onClick={toggleTheme} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/[0.04] transition-colors">
+          <button onClick={toggleTheme} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
         </header>
@@ -308,18 +292,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </main>
       </div>
 
-      {/* ── Quick Capture FAB ─────────────────────────────────────────────────── */}
+      {/* ── Quick Capture FAB — amber ─────────────────────────────────────────── */}
       <button
         onClick={() => setIdeaOpen(true)}
-        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40 w-12 h-12 rounded-full bg-foreground text-background shadow-lg hover:bg-foreground/90 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background"
+        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
         title="Quick Capture (Idea Sanctuary)"
         aria-label="Capture an idea"
       >
         <Lightbulb className="w-5 h-5" />
       </button>
 
-      {/* ── Mobile Bottom Nav ─────────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-sidebar/95 backdrop-blur-sm border-t border-border">
+      {/* ── Mobile Bottom Nav — dark indigo ──────────────────────────────────── */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-white/10"
+        style={{ background: "var(--sidebar)" }}>
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.slice(0, 4).map((item) => {
             const Icon = item.icon;
@@ -328,14 +313,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={mobileNavLinkClass(item.href)}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-0",
+                  active ? "text-amber-400" : "text-white/50"
+                )}
               >
-                <Icon className={cn("w-5 h-5", active && "text-foreground")} />
-                <span className={cn("text-[10px] font-medium truncate", active && "text-foreground")}>{item.label.split(" ")[0]}</span>
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium truncate">{item.label.split(" ")[0]}</span>
               </Link>
             );
           })}
-          <Link href="/settings" className={mobileNavLinkClass("/settings")}>
+          <Link href="/settings" className={cn(
+            "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-0",
+            isActive("/settings") ? "text-amber-400" : "text-white/50"
+          )}>
             <Settings className="w-5 h-5" />
             <span className="text-[10px] font-medium">Settings</span>
           </Link>

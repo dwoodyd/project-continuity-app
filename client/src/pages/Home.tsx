@@ -146,29 +146,32 @@ function CheckInCard({
       className={cn(
         "flex-1 flex flex-col items-start gap-1.5 p-3.5 rounded-xl border text-left transition-all duration-150",
         completed
-          ? "bg-foreground/[0.02] border-border opacity-55 cursor-default"
+          ? "bg-muted/40 border-border opacity-60 cursor-default"
           : active
-            ? "bg-card border-foreground/25 hover:border-foreground/40 shadow-sm cursor-pointer ring-1 ring-foreground/5"
-            : "bg-foreground/[0.02] border-border hover:bg-foreground/[0.04] hover:border-foreground/15 cursor-pointer"
+            ? "bg-primary border-primary hover:bg-primary/90 shadow-md shadow-primary/20 cursor-pointer"
+            : "bg-card border-border hover:bg-accent/50 hover:border-primary/20 cursor-pointer"
       )}
     >
       <div className="flex items-center gap-1.5 w-full">
         <Icon className={cn(
           "w-3.5 h-3.5 shrink-0",
-          completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground"
+          completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
         )} />
         <span className={cn(
           "text-xs font-medium tracking-[-0.01em]",
-          completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground"
+          completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
         )}>
           {label}
         </span>
         {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
         {active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{background: 'oklch(0.72 0.14 65)'}} />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse bg-amber-300" />
         )}
       </div>
-      <p className="text-[10px] text-muted-foreground/55 leading-tight pl-0.5">{timeHint}</p>
+      <p className={cn(
+        "text-[10px] leading-tight pl-0.5",
+        active ? "text-white/70" : "text-muted-foreground/55"
+      )}>{timeHint}</p>
     </button>
   );
 }
@@ -201,8 +204,8 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
                 className={cn(
                   "flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all",
                   capacity === level
-                    ? cn("border-foreground/30 bg-foreground/5", cfg.color)
-                    : "border-border hover:border-foreground/20"
+                    ? cn("border-primary/40 bg-primary/[0.06] shadow-sm", cfg.color)
+                    : "border-border hover:border-primary/20 hover:bg-primary/[0.02]"
                 )}
               >
                 <Icon className={cn("w-5 h-5", capacity === level ? cfg.color : "text-muted-foreground")} />
@@ -227,11 +230,11 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
                 className={cn(
                   "w-full flex items-center gap-2 p-2.5 rounded-lg border text-left text-sm transition-all",
                   primaryId === p.id
-                    ? "border-foreground/30 bg-foreground/5 text-foreground"
-                    : "border-border hover:border-foreground/20 text-muted-foreground"
+                    ? "border-primary/40 bg-primary/[0.06] text-foreground"
+                    : "border-border hover:border-primary/20 text-muted-foreground"
                 )}
               >
-                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", primaryId === p.id ? "bg-foreground" : "bg-muted-foreground/30")} />
+                <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", primaryId === p.id ? "bg-primary" : "bg-muted-foreground/30")} />
                 <span className="truncate">{p.title}</span>
               </button>
             ))}
@@ -251,7 +254,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       <Button
         onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined })}
         disabled={submit.isPending}
-        className="w-full"
+        className="w-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/25"
         size="sm"
       >
         {submit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
@@ -627,7 +630,7 @@ export default function Home() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
-            {greeting}, {firstName}.
+            {greeting}, <span className="text-primary">{firstName}</span>.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {format(now, "EEEE, MMMM d")}
@@ -673,10 +676,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance ────────────────────────────────────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden" style={{background: 'linear-gradient(135deg, oklch(0.18 0.04 252 / 0.05) 0%, oklch(0.72 0.14 65 / 0.04) 100%)', border: '1px solid oklch(0.875 0.007 252)'}}>
+        <div className="relative p-4 rounded-xl overflow-hidden border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.12) 0%, oklch(0.72 0.17 65 / 0.08) 100%)'}}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -746,7 +749,7 @@ export default function Home() {
               <div key={day.date} className="flex flex-col items-center gap-1">
                 <div
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    day.hasCheckIn ? "bg-foreground/70" : "bg-foreground/10 border border-foreground/20"
+                    day.hasCheckIn ? "bg-primary" : "bg-foreground/10 border border-foreground/20"
                   }`}
                   title={`${label}: ${day.hasCheckIn ? "checked in" : "no check-in"}`}
                 />
@@ -845,7 +848,7 @@ export default function Home() {
       {tasks.length > 0 && !allTasksDone && (
         <button
           onClick={() => navigate("/focus")}
-          className="w-full flex items-center justify-between p-4 rounded-xl bg-foreground text-background hover:bg-foreground/90 transition-colors group"
+          className="w-full flex items-center justify-between p-4 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors group shadow-md shadow-primary/20"
         >
           <div className="flex items-center gap-3">
             <Brain className="w-5 h-5" />
@@ -866,12 +869,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl bg-foreground/[0.03] border border-foreground/10 space-y-3">
+          <div className="p-4 rounded-xl border border-primary/30 space-y-3" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-foreground/10 flex items-center justify-center">
-                <ArrowRight className="w-3 h-3 text-foreground/60" />
+              <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
+                <ArrowRight className="w-3 h-3 text-white" />
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Start here</p>
+              <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Start here</p>
             </div>
             <div>
               <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>
@@ -894,7 +897,7 @@ export default function Home() {
               <span className="text-muted-foreground/30">·</span>
               <button
                 onClick={() => navigate("/focus")}
-                className="text-xs text-foreground/60 hover:text-foreground transition-colors underline underline-offset-2"
+                className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
               >
                 Open in Focus Mode
               </button>
@@ -965,13 +968,19 @@ export default function Home() {
 
       {/* ── Empty state — no plan yet ───────────────────────────────────────── */}
       {!todayPlan && !activeCheckIn && (
-        <div className="p-6 rounded-xl border border-dashed border-border text-center">
-          <Sun className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium text-foreground mb-1">No plan for today yet.</p>
-          <p className="text-xs text-muted-foreground mb-4">Start with the morning check-in to set your capacity and focus.</p>
-          <Button size="sm" onClick={() => setActiveCheckIn("morning")}>
-            Start morning check-in
-          </Button>
+        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+          {/* Subtle texture overlay */}
+          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
+          <div className="relative">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <Sun className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-base font-semibold text-white mb-1">No plan for today yet.</p>
+            <p className="text-sm text-white/70 mb-5">Start with the morning check-in to set your capacity and focus.</p>
+            <Button size="sm" onClick={() => setActiveCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
+              Start morning check-in
+            </Button>
+          </div>
         </div>
       )}
 

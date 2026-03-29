@@ -78,8 +78,8 @@ export default function WeeklyReviewPage() {
             sub: "this week",
           },
         ].map(({ label, value, icon: Icon, sub }) => (
-          <div key={label} className="p-4 rounded-xl bg-card border border-border text-center">
-            <Icon className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
+          <div key={label} className="p-4 rounded-xl bg-card border border-border text-center hover:border-primary/20 transition-colors">
+            <Icon className="w-5 h-5 text-primary mx-auto mb-2" />
             <p className="text-2xl font-bold text-foreground">{value}</p>
             <p className="text-xs text-muted-foreground">{label}</p>
             <p className="text-xs text-muted-foreground/60">{sub}</p>
@@ -89,27 +89,32 @@ export default function WeeklyReviewPage() {
 
       {/* Generate AI Review */}
       {!review ? (
-        <div className="p-6 rounded-xl border border-dashed border-border text-center">
-          <Sparkles className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium text-foreground mb-1">Generate your weekly review</p>
-          <p className="text-xs text-muted-foreground mb-4">
-            AI will analyze your check-ins, projects, and patterns from the past 7 days.
-          </p>
-          <Button
-            onClick={() => { setGenerating(true); generateReview.mutate(); }}
-            disabled={generating}
-            className="gap-2"
-          >
-            {generating
-              ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
-              : <><Sparkles className="w-4 h-4" />Generate review</>}
-          </Button>
+        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
+          <div className="relative">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <p className="text-base font-semibold text-white mb-1">Generate your weekly review</p>
+            <p className="text-sm text-white/70 mb-5">
+              AI will analyze your check-ins, projects, and patterns from the past 7 days.
+            </p>
+            <Button
+              onClick={() => { setGenerating(true); generateReview.mutate(); }}
+              disabled={generating}
+              className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 shadow-lg shadow-black/20"
+            >
+              {generating
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
+                : <><Sparkles className="w-4 h-4" />Generate review</>}
+            </Button>
+          </div>
         </div>
       ) : (
-        <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+        <div className="p-5 rounded-xl border border-primary/30 space-y-4" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.72 0.17 65 / 0.06) 100%)'}}>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">AI Weekly Review</p>
+            <Sparkles className="w-4 h-4 text-primary" />
+            <p className="text-xs font-medium text-primary uppercase tracking-wide">AI Weekly Review</p>
           </div>
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{review}</p>

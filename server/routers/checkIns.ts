@@ -10,6 +10,11 @@ import {
   upsertDailyPlan,
   getActiveProjects,
   getUserProfile,
+  getLatestWeeklyCompass,
+  getRecentDecisions,
+  createProjectMemoryEvent,
+  getRecentDailyPlans,
+  getProjectById,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
@@ -37,8 +42,14 @@ export const checkInsRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const date = getTodayDate();
-      const profile = await getUserProfile(ctx.user.id);
-      const activeProjects = await getActiveProjects(ctx.user.id);
+      const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
+        getUserProfile(ctx.user.id),
+        getActiveProjects(ctx.user.id),
+        getLatestWeeklyCompass(ctx.user.id),
+        getRecentDecisions(ctx.user.id, 5),
+        getRecentDailyPlans(ctx.user.id, 3),
+      ]);
+
       const toneMap = {
         gentle: "warm and supportive, but never chirpy",
         direct: "calm and direct",
@@ -46,19 +57,80 @@ export const checkInsRouter = router({
       };
       const tone = toneMap[profile?.tonePreference ?? "direct"];
 
-      // Generate AI plan guidance
+      // ── Weekly Compass context ─────────────────────────────────────────────
+      let compassContext = "";
+      let compassPrimaryId: number | undefined;
+      let compassSecondaryId: number | undefined;
+      if (weeklyCompass) {
+        compassPrimaryId = weeklyCompass.primaryProjectId ?? undefined;
+        compassSecondaryId = weeklyCompass.secondaryProjectId ?? undefined;
+        const primaryProj = compassPrimaryId
+          ? activeProjects.find((p) => p.id === compassPrimaryId)
+          : null;
+        const secondaryProj = compassSecondaryId
+          ? activeProjects.find((p) => p.id === compassSecondaryId)
+          : null;
+        compassContext = `
+Weekly Compass (this week's direction):
+- Primary project this week: ${primaryProj ? `"${primaryProj.title}"` : "not set"}
+- Secondary project this week: ${secondaryProj ? `"${secondaryProj.title}"` : "not set"}
+- Maintenance lane: ${weeklyCompass.adminLane ?? "none"}
+- Must move: ${weeklyCompass.mustMove ?? "none"}
+- Can wait: ${weeklyCompass.canWait ?? "none"}
+IMPORTANT: The weekly primary project MUST appear in today's tasks unless capacity is "low" and it's not feasible. The secondary project may appear as a support task. The maintenance lane should not exceed 1 task.`;
+      }
+
+      // ── Carryover context from previous days ──────────────────────────────
+      let carryoverContext = "";
+      if (recentPlans.length > 0) {
+        const yesterday = recentPlans[0];
+        if (yesterday) {
+          const yesterdayTasks: any[] = (() => {
+            try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
+          })();
+          const unfinished = yesterdayTasks.filter((t) => !t.done);
+          if (unfinished.length > 0) {
+            carryoverContext = `\nCarryover from yesterday (unfinished): ${unfinished.map((t) => `"${t.title}" (carried ${(t.carryoverCount ?? 0) + 1}x)`).join(", ")}.`;
+            // Bias: if a task has been carried 2+ times, suggest splitting or parking
+            const repeatedCarryovers = unfinished.filter((t) => (t.carryoverCount ?? 0) >= 2);
+            if (repeatedCarryovers.length > 0) {
+              carryoverContext += ` Note: "${repeatedCarryovers.map((t) => t.title).join('", "')}" have been carried 2+ times — consider splitting, rewriting, or parking them.`;
+            }
+          }
+        }
+      }
+
+      // ── Recent decisions context ───────────────────────────────────────────
+      const decisionsContext = recentDecisions.length > 0
+        ? `\nRecent decisions affecting next steps: ${recentDecisions.slice(0, 3).map((d) => `"${d.content}"`).join("; ")}.`
+        : "";
+
+      // ── Capacity-specific task rules ──────────────────────────────────────
+      const capacityRules = {
+        full: "Up to 3 tasks. Include primary + secondary project. Focus blocks up to 90 min. Flex buffer: 30 min.",
+        partial: "1-2 tasks maximum. Primary project only. Focus blocks 45-60 min. Include a rest permission statement. Flex buffer: 45 min.",
+        low: "1 task only — the single most concrete, smallest-scope task available. Prefer tasks that can be completed in under 30 min. No secondary project. Include a rest permission statement. Flex buffer: 60 min.",
+      };
+
+      // ── Divergence detection ──────────────────────────────────────────────
+      const userPrimaryId = input.primaryProjectId;
+      const divergenceNote = compassPrimaryId && userPrimaryId && compassPrimaryId !== userPrimaryId
+        ? `Note: The user selected a different primary project than the weekly compass primary. Acknowledge this briefly in the guidance (1 sentence) — don't judge, just note the shift.`
+        : "";
+
       const planPrompt = `You are a thoughtful productivity assistant for someone with ADHD. 
 Tone: ${tone}. Never use exclamation points, gamification, or motivational poster language.
 The user's capacity today is: ${input.capacityLevel}.
+Capacity rules: ${capacityRules[input.capacityLevel]}
+${compassContext}
 Active projects: ${activeProjects.slice(0, 5).map(p => `"${p.title}" (next step: ${p.nextStep ?? "not set"})`).join(", ") || "none yet"}.
-User notes: ${input.userNotes ?? "none"}.
+User notes: ${input.userNotes ?? "none"}.${carryoverContext}${decisionsContext}
+${divergenceNote}
 
-Generate a morning guidance message (2-3 sentences) and suggest 1-3 critical tasks based on capacity:
-- full: up to 3 tasks, primary + secondary project
-- partial: 1-2 tasks, primary project only
-- low: 1 task only, rest permission statement
+Generate a morning guidance message (2-3 sentences) and suggest tasks based on capacity rules above.
+For each task, include a carryoverCount field (0 for new tasks, or the count from carryover context if applicable).
 
-Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: number|null}], timeBlocks: [{label: string, duration: string}] }`;
+Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{title: string, projectId: number|null, carryoverCount: number}], timeBlocks: [{label: string, duration: string}] }`;
 
       const response = await invokeLLM({
         messages: [
@@ -74,6 +146,7 @@ Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: numb
               type: "object",
               properties: {
                 guidance: { type: "string" },
+                divergenceNote: { type: ["string", "null"] },
                 criticalTasks: {
                   type: "array",
                   items: {
@@ -81,8 +154,9 @@ Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: numb
                     properties: {
                       title: { type: "string" },
                       projectId: { type: ["number", "null"] },
+                      carryoverCount: { type: "number" },
                     },
-                    required: ["title", "projectId"],
+                    required: ["title", "projectId", "carryoverCount"],
                     additionalProperties: false,
                   },
                 },
@@ -99,7 +173,7 @@ Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: numb
                   },
                 },
               },
-              required: ["guidance", "criticalTasks", "timeBlocks"],
+              required: ["guidance", "divergenceNote", "criticalTasks", "timeBlocks"],
               additionalProperties: false,
             },
           },
@@ -109,23 +183,34 @@ Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: numb
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
       const parsed = JSON.parse(raw);
 
-      // Assign project IDs from input if provided
+      // Assign project IDs from input if provided; preserve carryoverCount
       const tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => ({
         ...t,
         id: `task-${Date.now()}-${i}`,
         done: false,
         projectId: t.projectId ?? input.primaryProjectId ?? null,
+        carryoverCount: t.carryoverCount ?? 0,
       }));
+
+      // Combine guidance with divergence note if present
+      const fullGuidance = parsed.divergenceNote
+        ? `${parsed.guidance} ${parsed.divergenceNote}`
+        : parsed.guidance;
+
+      // Determine secondary project: use compass secondary if user didn't specify one
+      const secondaryProjectId = input.capacityLevel === "full"
+        ? (input.secondaryProjectId ?? compassSecondaryId)
+        : undefined;
 
       const planId = await upsertDailyPlan({
         userId: ctx.user.id,
         date,
         capacityLevel: input.capacityLevel,
-        primaryProjectId: input.primaryProjectId,
-        secondaryProjectId: input.capacityLevel === "full" ? input.secondaryProjectId : undefined,
+        primaryProjectId: input.primaryProjectId ?? compassPrimaryId,
+        secondaryProjectId,
         criticalTasks: JSON.stringify(tasksWithIds),
         timeBlocks: JSON.stringify(parsed.timeBlocks),
-        generatedGuidance: parsed.guidance,
+        generatedGuidance: fullGuidance,
       });
 
       const checkInId = await createCheckIn({
@@ -134,11 +219,11 @@ Return JSON: { guidance: string, criticalTasks: [{title: string, projectId: numb
         date,
         type: "morning",
         userInput: JSON.stringify({ capacityLevel: input.capacityLevel, notes: input.userNotes }),
-        generatedResponse: parsed.guidance,
+        generatedResponse: fullGuidance,
         completedAt: new Date(),
       });
 
-      return { checkInId, planId, guidance: parsed.guidance, criticalTasks: tasksWithIds, timeBlocks: parsed.timeBlocks };
+      return { checkInId, planId, guidance: fullGuidance, criticalTasks: tasksWithIds, timeBlocks: parsed.timeBlocks };
     }),
 
   submitMidday: protectedProcedure
@@ -211,6 +296,17 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
         completedAt: new Date(),
       });
 
+      // Record project memory event if midday check-in mentions a specific project
+      if (plan?.primaryProjectId) {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: plan.primaryProjectId,
+          eventType: "check_in",
+          content: `Midday check-in: worked on "${input.workedOn}". Status: ${parsed.alignmentStatus}.`,
+          metadata: JSON.stringify({ checkInId, alignmentStatus: parsed.alignmentStatus }),
+        });
+      }
+
       return { checkInId, ...parsed };
     }),
 
@@ -247,10 +343,11 @@ What goes first tomorrow: "${input.tomorrowFirst}"
 Generate:
 1. A 2-sentence progress summary
 2. The tomorrow brief (2-3 sentences that will greet the user tomorrow morning)
-3. 1-3 specific carryover tasks
+3. 1-3 specific carryover tasks (verb-first, concrete)
 4. Any patterns or insights worth noting
+5. Any decisions detected in the "what was learned or decided" field (explicit choices, rulings, commitments)
 
-Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[], insights: string }`,
+Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[], insights: string, detectedDecisions: string[] }`,
           },
         ],
         response_format: {
@@ -265,8 +362,9 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
                 tomorrowBrief: { type: "string" },
                 carryoverTasks: { type: "array", items: { type: "string" } },
                 insights: { type: "string" },
+                detectedDecisions: { type: "array", items: { type: "string" } },
               },
-              required: ["summary", "tomorrowBrief", "carryoverTasks", "insights"],
+              required: ["summary", "tomorrowBrief", "carryoverTasks", "insights", "detectedDecisions"],
               additionalProperties: false,
             },
           },
@@ -295,7 +393,23 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
         });
       }
 
-      return { checkInId, ...parsed };
+      // Record project memory event for primary project
+      if (plan?.primaryProjectId) {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: plan.primaryProjectId,
+          eventType: "check_in",
+          content: `Evening closure: "${input.whatMoved}" moved. Remaining: "${input.whatRemains}".`,
+          metadata: JSON.stringify({ checkInId, insights: parsed.insights }),
+        });
+      }
+
+      return {
+        checkInId,
+        ...parsed,
+        // Return detected decisions so the frontend can prompt the user to confirm them
+        detectedDecisions: (parsed.detectedDecisions ?? []) as string[],
+      };
     }),
 
   completeTask: protectedProcedure

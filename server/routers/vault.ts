@@ -6,6 +6,8 @@ import {
   getSourceItems,
   getSourceItemsByState,
   updateSourceItem,
+  createProjectMemoryEvent,
+  getProjectById,
 } from "../db";
 import { storagePut } from "../storage";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -106,11 +108,32 @@ export const vaultRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const { id, tags, linkedProjectIds, ...rest } = input;
+      // Fetch item before update to detect new project mapping
+      const existingItem = await getSourceItemById(id, ctx.user.id);
       const updates: Record<string, unknown> = { ...rest };
       if (tags !== undefined) updates.tags = JSON.stringify(tags);
       if (linkedProjectIds !== undefined) updates.linkedProjectIds = JSON.stringify(linkedProjectIds);
       if (rest.state === "mapped") updates.state = "mapped";
       await updateSourceItem(id, ctx.user.id, updates as any);
+      // Record projectMemoryEvent when a vault item is mapped to a project for the first time
+      if (linkedProjectIds && linkedProjectIds.length > 0) {
+        const prevLinked: number[] = existingItem?.linkedProjectIds
+          ? (() => { try { return JSON.parse(existingItem.linkedProjectIds); } catch { return []; } })()
+          : [];
+        const newlyLinked = linkedProjectIds.filter((pid) => !prevLinked.includes(pid));
+        for (const projectId of newlyLinked) {
+          const project = await getProjectById(projectId, ctx.user.id);
+          if (project) {
+            await createProjectMemoryEvent({
+              userId: ctx.user.id,
+              projectId,
+              eventType: "vault_import",
+              content: `Vault item "${existingItem?.title ?? "Untitled"}" mapped to this project.`,
+              metadata: JSON.stringify({ sourceItemId: id, contentClass: existingItem?.contentClass }),
+            });
+          }
+        }
+      }
       return { success: true };
     }),
 
@@ -208,6 +231,7 @@ ${content.substring(0, 3000)}`,
       confirmedProjectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const item = await getSourceItemById(input.id, ctx.user.id);
       await updateSourceItem(input.id, ctx.user.id, {
         reviewedAt: new Date(),
         mappingConfidence: "likely",
@@ -215,6 +239,16 @@ ${content.substring(0, 3000)}`,
           ? { linkedProjectIds: JSON.stringify([input.confirmedProjectId]) }
           : {}),
       });
+      // Record memory event when vault item is confirmed to a project
+      if (input.confirmedProjectId && item) {
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId: input.confirmedProjectId,
+          eventType: "vault_import",
+          content: `Vault item "${item.title ?? "Untitled"}" confirmed and mapped to this project.`,
+          metadata: JSON.stringify({ sourceItemId: input.id, contentClass: item.contentClass }),
+        });
+      }
       return { success: true };
     }),
 
