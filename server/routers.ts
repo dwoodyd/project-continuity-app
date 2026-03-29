@@ -10,6 +10,7 @@ import { settingsRouter } from "./routers/settings";
 import { dailyPlanRouter } from "./routers/dailyPlan";
 import { focusSessionsRouter } from "./routers/focusSessions";
 import { intelligenceRouter } from "./routers/intelligence";
+import { notificationsRouter } from "./routers/notifications";
 
 export const appRouter = router({
   system: systemRouter,
@@ -29,6 +30,7 @@ export const appRouter = router({
   dailyPlan: dailyPlanRouter,
   focusSessions: focusSessionsRouter,
   intelligence: intelligenceRouter,
+  notifications: notificationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

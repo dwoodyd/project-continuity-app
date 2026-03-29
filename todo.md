@@ -280,3 +280,39 @@
 - [x] Gentle nudge on morning completion when unreviewed ideas > 3
 - [x] Gentle nudge on evening completion when unreviewed ideas > 3
 - [x] Nudge is secondary, never primary; user can defer easily
+
+## Revision Brief 5 — Arrival, Navigation, and Live Notifications
+
+### Item 1 — Onboarding
+- [x] Schema: add work_style, preferred_focus_hours, onboarding_completed to userProfiles; add notification schedule fields
+- [x] Three-step wizard renders on first login only (onboarding_completed gate)
+- [x] Step 1: name field + work_style selection (5 options)
+- [x] Step 2: tone_preference selection + preferred_focus_hours time-of-day selector
+- [x] Step 3: first project name + why it matters + optional next step + Skip option
+- [x] Completion screen: calm single line, then routes to Command Center
+- [x] work_style saves from Step 1
+- [x] tone_preference and preferred_focus_hours save from Step 2
+- [x] First project creates with Active status and Why It Matters populated
+- [x] Skip on Step 3 does not break Command Center load
+- [x] onboarding_completed flag prevents re-render
+- [x] Command Center Start Here card populated from onboarding data on first load
+
+### Item 2 — Mobile Bottom Tab Bar
+- [x] Fixed bottom tab bar renders on viewport < 768px; sidebar renders at >= 768px
+- [x] Four tabs: Today (Command Center), Projects, Vault, Compass
+- [x] Active tab uses amber indicator consistent with sidebar
+- [x] Tapping active tab scrolls to top of current view
+- [x] Tab bar hidden in Single Focus Mode
+- [x] Safe area inset applied (env(safe-area-inset-bottom))
+- [x] All five notification tap routes wired and resolving
+
+### Item 3 — Push Notification Scheduling
+- [x] Cron job runs every minute (aligned to wall-clock)
+- [x] Three scheduled notification types fire at correct times in user timezone
+- [x] Message rotation: 4 calm variants per type, rotates per user
+- [x] In-app check-in completion suppresses same-type notification for the day
+- [x] Cold project notification fires once per cold crossing
+- [x] Sanctuary notification suppressed when morning check-in already completed
+- [x] Toggled-off types skipped by cron
+- [x] Permission denial state renders correctly in Settings
+- [x] Notification tap routes resolve to correct in-app destination

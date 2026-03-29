@@ -15,30 +15,26 @@ export const settingsRouter = router({
       focusHoursEnd: z.string(),
       tonePreference: z.enum(["gentle", "direct", "firm"]),
       timezone: z.string().optional(),
+      workStyle: z.enum(["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]).optional(),
+      preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const profileData: Record<string, unknown> = {
+        workTypes: JSON.stringify(input.workTypes),
+        distractionPatterns: JSON.stringify(input.distractionPatterns),
+        focusHoursStart: input.focusHoursStart,
+        focusHoursEnd: input.focusHoursEnd,
+        tonePreference: input.tonePreference,
+        timezone: input.timezone ?? "America/New_York",
+        onboardingCompleted: true,
+      };
+      if (input.workStyle) profileData.workStyle = input.workStyle;
+      if (input.preferredFocusHours) profileData.preferredFocusHours = input.preferredFocusHours;
       const existing = await getUserProfile(ctx.user.id);
       if (existing) {
-        await updateUserProfile(ctx.user.id, {
-          workTypes: JSON.stringify(input.workTypes),
-          distractionPatterns: JSON.stringify(input.distractionPatterns),
-          focusHoursStart: input.focusHoursStart,
-          focusHoursEnd: input.focusHoursEnd,
-          tonePreference: input.tonePreference,
-          timezone: input.timezone ?? "America/New_York",
-          onboardingCompleted: true,
-        });
+        await updateUserProfile(ctx.user.id, profileData as any);
       } else {
-        await upsertUserProfile({
-          userId: ctx.user.id,
-          workTypes: JSON.stringify(input.workTypes),
-          distractionPatterns: JSON.stringify(input.distractionPatterns),
-          focusHoursStart: input.focusHoursStart,
-          focusHoursEnd: input.focusHoursEnd,
-          tonePreference: input.tonePreference,
-          timezone: input.timezone ?? "America/New_York",
-          onboardingCompleted: true,
-        });
+        await upsertUserProfile({ userId: ctx.user.id, ...profileData } as any);
       }
       return { success: true };
     }),

@@ -41,6 +41,8 @@ import {
   Decision,
   InsertDecision,
   FocusSession,
+  pushSubscriptions,
+  notificationLog,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -536,4 +538,76 @@ export async function getRecentDecisions(userId: number, limit = 10): Promise<De
     .where(eq(decisions.userId, userId))
     .orderBy(desc(decisions.date))
     .limit(limit);
+}
+
+// ── Push Subscriptions ────────────────────────────────────────────────────────
+export async function upsertPushSubscription(data: {
+  userId: number;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Delete old subscription for this user+endpoint combo, then insert fresh
+  await db.delete(pushSubscriptions).where(
+    and(eq(pushSubscriptions.userId, data.userId), eq(pushSubscriptions.endpoint, data.endpoint))
+  );
+  await db.insert(pushSubscriptions).values(data);
+}
+
+export async function deletePushSubscription(userId: number, endpoint: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(pushSubscriptions).where(
+    and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.endpoint, endpoint))
+  );
+}
+
+export async function getPushSubscriptionsForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+}
+
+export async function getAllUsersWithPushSubscriptions() {
+  const db = await getDb();
+  if (!db) return [];
+  // Return distinct user IDs that have at least one push subscription
+  const rows = await db.selectDistinct({ userId: pushSubscriptions.userId })
+    .from(pushSubscriptions);
+  return rows.map((r) => r.userId);
+}
+
+// ── Notification Log ──────────────────────────────────────────────────────────
+export async function logNotificationSent(data: {
+  userId: number;
+  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary";
+  projectId?: number;
+  suppressedBy?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(notificationLog).values(data);
+}
+
+export async function getRecentNotificationLog(
+  userId: number,
+  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary",
+  sinceMs: number
+): Promise<{ sentAt: Date }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const since = new Date(Date.now() - sinceMs);
+  return db.select({ sentAt: notificationLog.sentAt })
+    .from(notificationLog)
+    .where(
+      and(
+        eq(notificationLog.userId, userId),
+        eq(notificationLog.type, type),
+        gte(notificationLog.sentAt, since)
+      )
+    )
+    .orderBy(desc(notificationLog.sentAt))
+    .limit(1);
 }

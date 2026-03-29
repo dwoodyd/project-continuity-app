@@ -168,8 +168,11 @@ export default function SettingsPage() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
+  const updateSchedule = trpc.notifications.updateSchedule.useMutation();
+  const { data: pushStatus, refetch: refetchPushStatus } = trpc.notifications.getPushStatus.useQuery();
+  const registerPush = trpc.notifications.registerPush.useMutation();
 
-  const scheduleCheckInReminders = (morning: string, midday: string, evening: string) => {
+  const scheduleCheckInReminders = async (morning: string, midday: string, evening: string) => {
     const notifEnabled = settings?.notificationsEnabled !== false;
     scheduleCheckInNotifications({
       morningEnabled: notifEnabled,
@@ -179,6 +182,33 @@ export default function SettingsPage() {
       eveningEnabled: notifEnabled,
       eveningTime: evening,
     });
+    // Save schedule to server for server-side push delivery
+    await updateSchedule.mutateAsync({ morningTime: morning, middayTime: midday, eveningTime: evening });
+    // Register push subscription server-side if not already registered
+    if (permission === "granted" && !pushStatus?.registered) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+        if (vapidKey) {
+          const sub = await reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: vapidKey,
+          });
+          const key = sub.getKey("p256dh");
+          const authKey = sub.getKey("auth");
+          if (key && authKey) {
+            await registerPush.mutateAsync({
+              endpoint: sub.endpoint,
+              p256dh: btoa(String.fromCharCode(...Array.from(new Uint8Array(key)))),
+              auth: btoa(String.fromCharCode(...Array.from(new Uint8Array(authKey)))),
+            });
+            refetchPushStatus();
+          }
+        }
+      } catch (e) {
+        console.warn("[Push] Could not register server-side push:", e);
+      }
+    }
   };
 
   const { data: ideas, refetch: refetchIdeas } = trpc.ai.listIdeas.useQuery();

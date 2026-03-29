@@ -71,12 +71,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 60,
   });
+  const { data: profile } = trpc.settings.getProfile.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 5,
+  });
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
 
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
+
+  // Onboarding gate: redirect first-time users before rendering the main app
+  const [, navigate] = useLocation();
+  useEffect(() => {
+    if (isAuthenticated && profile && profile.onboardingCompleted === false) {
+      navigate("/onboarding");
+    }
+  }, [isAuthenticated, profile, navigate]);
 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
   if (!isAuthenticated) {
@@ -295,41 +307,46 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* ── Quick Capture FAB — amber ─────────────────────────────────────────── */}
       <button
         onClick={() => setIdeaOpen(true)}
-        className="fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+        className="fixed bottom-[72px] right-4 lg:bottom-6 lg:right-6 z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
         title="Quick Capture (Idea Sanctuary)"
         aria-label="Capture an idea"
       >
         <Lightbulb className="w-5 h-5" />
       </button>
 
-      {/* ── Mobile Bottom Nav — dark indigo ──────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-white/10"
-        style={{ background: "var(--sidebar)" }}>
-        <div className="flex items-center justify-around px-2 py-2">
-          {navItems.slice(0, 4).map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
+      {/* ── Mobile Bottom Nav — 4 core tabs ─────────────────────────────────── */}
+      <nav
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-white/10"
+        style={{ background: "var(--sidebar)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
+        <div className="flex items-stretch justify-around px-1">
+          {([
+            { href: "/", label: "Today", icon: Brain },
+            { href: "/projects", label: "Projects", icon: Archive },
+            { href: "/vault", label: "Vault", icon: BookOpen },
+            { href: "/compass", label: "Compass", icon: Compass },
+          ] as const).map(({ href, label, icon: Icon }) => {
+            const active = isActive(href);
             return (
               <Link
-                key={item.href}
-                href={item.href}
+                key={href}
+                href={href}
+                onClick={() => {
+                  if (active) window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-0",
-                  active ? "text-amber-400" : "text-white/50"
+                  "flex flex-col items-center gap-1 flex-1 py-2.5 transition-all duration-150 relative",
+                  active ? "text-amber-400" : "text-white/40 hover:text-white/70"
                 )}
               >
+                {active && (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full bg-amber-400" />
+                )}
                 <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium truncate">{item.label.split(" ")[0]}</span>
+                <span className="text-[10px] font-medium tracking-wide">{label}</span>
               </Link>
             );
           })}
-          <Link href="/settings" className={cn(
-            "flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors min-w-0",
-            isActive("/settings") ? "text-amber-400" : "text-white/50"
-          )}>
-            <Settings className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Settings</span>
-          </Link>
         </div>
       </nav>
 

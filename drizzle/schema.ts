@@ -40,7 +40,15 @@ export const userProfiles = mysqlTable("user_profiles", {
   weeklyReviewDay: mysqlEnum("weeklyReviewDay", ["sunday", "saturday", "monday"]).default("sunday"),
   fontSizePreference: mysqlEnum("fontSizePreference", ["small", "medium", "large"]).default("medium"),
   notificationsEnabled: boolean("notificationsEnabled").default(true),
+  morningNotifEnabled: boolean("morningNotifEnabled").default(true),
+  middayNotifEnabled: boolean("middayNotifEnabled").default(true),
+  eveningNotifEnabled: boolean("eveningNotifEnabled").default(true),
+  coldProjectNotifEnabled: boolean("coldProjectNotifEnabled").default(true),
+  sanctuaryNotifEnabled: boolean("sanctuaryNotifEnabled").default(true),
+  notifMessageRotation: text("notifMessageRotation"), // JSON: {morning:0,midday:0,evening:0}
   onboardingCompleted: boolean("onboardingCompleted").default(false),
+  workStyle: mysqlEnum("workStyle", ["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]),
+  preferredFocusHours: mysqlEnum("preferredFocusHours", ["morning", "midday", "afternoon", "evening", "varies"]).default("morning"),
   workTypes: text("workTypes"), // JSON string of work type strings
   distractionPatterns: text("distractionPatterns"), // JSON string
   primaryDistraction: varchar("primaryDistraction", { length: 255 }),
@@ -306,3 +314,26 @@ export const decisions = mysqlTable("decisions", {
 });
 export type Decision = typeof decisions.$inferSelect;
 export type InsertDecision = typeof decisions.$inferInsert;
+// ── Push Subscriptions ────────────────────────────────────────────────────────
+export const pushSubscriptions = mysqlTable("push_subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+// ── Notification Log ──────────────────────────────────────────────────────────
+export const notificationLog = mysqlTable("notification_log", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", ["morning", "midday", "evening", "cold_project", "sanctuary"]).notNull(),
+  sentAt: timestamp("sentAt").defaultNow().notNull(),
+  projectId: int("projectId"), // for cold_project type
+  suppressedBy: varchar("suppressedBy", { length: 64 }), // e.g. "in_app_checkin"
+});
+export type NotificationLog = typeof notificationLog.$inferSelect;
+export type InsertNotificationLog = typeof notificationLog.$inferInsert;

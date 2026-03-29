@@ -1,80 +1,128 @@
 import { trpc } from "@/lib/trpc";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import {
-  ArrowRight,
-  Battery,
-  Brain,
-  CheckCircle2,
-  ChevronRight,
-  Command,
-  Loader2,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, ChevronRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
-const STEPS = [
-  { id: "welcome", title: "Welcome to Continuity" },
-  { id: "context", title: "Your context" },
-  { id: "challenges", title: "Your ADHD profile" },
-  { id: "projects", title: "First project" },
-  { id: "done", title: "You're set up" },
-];
+function ContinuaryMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" strokeWidth="4" stroke="currentColor" fill="none" />
+      <path d="M21 12 A9 9 0 1 1 28.36 5.64" strokeWidth="4" stroke="currentColor" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+const WORK_STYLES = [
+  { value: "writing_creative", label: "Writing or creative work" },
+  { value: "business_product", label: "Building a business or product" },
+  { value: "ministry_coaching", label: "Ministry, coaching, or speaking" },
+  { value: "consulting_client", label: "Consulting or client work" },
+  { value: "multiple", label: "Multiple things at once" },
+] as const;
+
+const TONE_OPTIONS = [
+  { value: "gentle", label: "Gentle", description: "Calm, patient, no pressure language" },
+  { value: "direct", label: "Direct", description: "Clear and honest, no softening" },
+  { value: "firm", label: "Firm", description: "Straightforward accountability, no filler" },
+] as const;
+
+const FOCUS_HOURS = [
+  { value: "morning", label: "Morning" },
+  { value: "midday", label: "Midday" },
+  { value: "afternoon", label: "Afternoon" },
+  { value: "evening", label: "Evening" },
+  { value: "varies", label: "It varies" },
+] as const;
+
+function StepDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={cn(
+            "rounded-full transition-all duration-300",
+            i === current
+              ? "w-5 h-1.5 bg-amber-500"
+              : i < current
+              ? "w-1.5 h-1.5 bg-primary/40"
+              : "w-1.5 h-1.5 bg-border"
+          )}
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function OnboardingPage() {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const [step, setStep] = useState(0);
 
-  // Form state
-  const [primaryRole, setPrimaryRole] = useState("");
-  const [biggestChallenge, setBiggestChallenge] = useState("");
-  const [primaryDistraction, setPrimaryDistraction] = useState("");
-  const [bestFocusTime, setBestFocusTime] = useState<"morning" | "afternoon" | "evening" | "variable">("morning");
-  const [tonePreference, setTonePreference] = useState<"gentle" | "direct" | "firm">("gentle");
+  const [name, setName] = useState(user?.name?.split(" ")[0] ?? "");
+  const [workStyle, setWorkStyle] = useState<string>("");
+  const [tonePreference, setTonePreference] = useState<"gentle" | "direct" | "firm">("direct");
+  const [preferredFocusHours, setPreferredFocusHours] = useState<string>("morning");
   const [projectTitle, setProjectTitle] = useState("");
   const [projectWhy, setProjectWhy] = useState("");
   const [projectNext, setProjectNext] = useState("");
 
   const completeOnboarding = trpc.settings.completeOnboarding.useMutation({
-    onSuccess: () => navigate("/"),
-    onError: () => toast.error("Something went wrong. Try again."),
+    onError: () => toast.error("Something went wrong. Please try again."),
   });
-
   const createProject = trpc.projects.create.useMutation();
 
-  const handleFinish = async () => {
-    if (projectTitle.trim()) {
-      await createProject.mutateAsync({
-        title: projectTitle,
-        whyItMatters: projectWhy,
-        nextStep: projectNext,
-        status: "active",
-        priorityLevel: "high",
+  const focusStartMap: Record<string, string> = {
+    morning: "08:00", midday: "11:00", afternoon: "13:00", evening: "17:00", varies: "09:00",
+  };
+  const focusEndMap: Record<string, string> = {
+    morning: "12:00", midday: "14:00", afternoon: "17:00", evening: "21:00", varies: "17:00",
+  };
+
+  const finishOnboarding = async (skipProject = false) => {
+    try {
+      if (!skipProject && projectTitle.trim()) {
+        await createProject.mutateAsync({
+          title: projectTitle,
+          whyItMatters: projectWhy,
+          nextStep: projectNext || undefined,
+          status: "active",
+          priorityLevel: "high",
+        });
+      }
+      await completeOnboarding.mutateAsync({
+        workTypes: workStyle ? [workStyle] : [],
+        distractionPatterns: [],
+        focusHoursStart: focusStartMap[preferredFocusHours] ?? "09:00",
+        focusHoursEnd: focusEndMap[preferredFocusHours] ?? "17:00",
+        tonePreference,
       });
+      setStep(3);
+    } catch {
+      // error already toasted
     }
-    completeOnboarding.mutate({
-      workTypes: primaryRole ? [primaryRole] : [],
-      distractionPatterns: primaryDistraction ? [primaryDistraction] : [],
-      focusHoursStart: bestFocusTime === "morning" ? "09:00" : bestFocusTime === "afternoon" ? "13:00" : bestFocusTime === "evening" ? "18:00" : "09:00",
-      focusHoursEnd: bestFocusTime === "morning" ? "12:00" : bestFocusTime === "afternoon" ? "17:00" : bestFocusTime === "evening" ? "21:00" : "17:00",
-      tonePreference,
-    });
   };
 
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="text-center max-w-sm">
-          <Command className="w-10 h-10 text-foreground/40 mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-foreground mb-2">Sign in to continue</h1>
-          <a href={getLoginUrl()} className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 shadow-md shadow-primary/25 transition-colors">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg mx-auto mb-5">
+            <ContinuaryMark className="w-8 h-5 text-white" />
+          </div>
+          <h1 className="text-xl font-semibold tracking-[-0.02em] text-foreground mb-2">Continuary</h1>
+          <p className="text-sm text-muted-foreground mb-6">Sign in to get started.</p>
+          <a
+            href={getLoginUrl()}
+            className="inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary/90 shadow-md shadow-primary/25 transition-all"
+          >
             Sign in <ChevronRight className="w-4 h-4" />
           </a>
         </div>
@@ -82,222 +130,236 @@ export default function OnboardingPage() {
     );
   }
 
-  const currentStep = STEPS[step]!;
-  const firstName = user?.name?.split(" ")[0] ?? "there";
+  const isPending = completeOnboarding.isPending || createProject.isPending;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Progress bar */}
-      <div className="h-1 bg-muted">
-        <div
-          className="h-full bg-foreground transition-all duration-500"
-          style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md">
-          {/* Step indicator */}
-          <p className="text-xs text-muted-foreground text-center mb-8">
-            Step {step + 1} of {STEPS.length}
-          </p>
-
-          {/* Step 0: Welcome */}
-          {step === 0 && (
-            <div className="text-center space-y-6">
-              <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center mx-auto">
-                <Command className="w-7 h-7 text-background" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-semibold text-foreground">Welcome, {firstName}.</h1>
-                <p className="text-muted-foreground mt-3 leading-relaxed">
-                  Continuity is your command center for execution. It's built for the way ADHD brains actually work — not how productivity gurus think they should.
-                </p>
-              </div>
-              <div className="space-y-3 text-left">
-                {[
-                  { icon: Brain, text: "Daily rhythm with morning, midday, and evening check-ins" },
-                  { icon: Sparkles, text: "AI that adapts your plan to your actual capacity" },
-                  { icon: Battery, text: "Re-Entry Cards so interruptions don't derail you" },
-                ].map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex items-start gap-3 p-3 rounded-xl bg-muted/30">
-                    <Icon className="w-4 h-4 text-foreground/60 shrink-0 mt-0.5" />
-                    <p className="text-sm text-foreground">{text}</p>
-                  </div>
-                ))}
-              </div>
-              <Button onClick={() => setStep(1)} className="w-full gap-2" size="lg">
-                Let's set it up <ArrowRight className="w-4 h-4" />
-              </Button>
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="flex justify-center mb-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
+              <ContinuaryMark className="w-6 h-4 text-white" />
             </div>
-          )}
+            <span className="text-lg font-semibold tracking-[-0.02em] text-foreground">Continuary</span>
+          </div>
+        </div>
 
-          {/* Step 1: Context */}
-          {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">What do you do?</h2>
-                <p className="text-sm text-muted-foreground mt-1">This helps personalize your daily plans.</p>
+        <div className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden">
+          <div className="h-0.5 bg-border">
+            <div
+              className="h-full bg-primary transition-all duration-500 ease-out"
+              style={{ width: step >= 3 ? "100%" : `${((step + 1) / 3) * 100}%` }}
+            />
+          </div>
+
+          <div className="p-8">
+            {step < 3 && (
+              <div className="flex justify-between items-center mb-8">
+                <StepDots current={step} total={3} />
+                <span className="text-xs text-muted-foreground tracking-widest uppercase">
+                  Step {step + 1} of 3
+                </span>
               </div>
+            )}
 
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Your primary role or work</label>
-                <Input
-                  value={primaryRole}
-                  onChange={(e) => setPrimaryRole(e.target.value)}
-                  placeholder="e.g. Freelance designer, startup founder, student..."
-                  className="text-sm"
-                  autoFocus
-                />
+            {/* Step 1: Who You Are */}
+            {step === 0 && (
+              <div className="space-y-7">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground leading-tight">
+                    Welcome to Continuary.
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                    Let's set this up for the way you actually work.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                    What's your name?
+                  </label>
+                  <Input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="First name is fine"
+                    className="text-base"
+                    autoFocus
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                    What best describes your work right now?
+                  </label>
+                  <div className="space-y-2">
+                    {WORK_STYLES.map((ws) => (
+                      <button
+                        key={ws.value}
+                        onClick={() => setWorkStyle(ws.value)}
+                        className={cn(
+                          "w-full text-left px-4 py-3 rounded-xl border text-sm transition-all",
+                          workStyle === ws.value
+                            ? "border-primary bg-primary/8 text-foreground font-medium"
+                            : "border-border bg-transparent text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        )}
+                      >
+                        {ws.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <Button onClick={() => setStep(1)} disabled={!name.trim()} className="w-full gap-2" size="lg">
+                  Continue <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
+            )}
 
-              <div>
-                <p className="text-sm font-medium text-foreground mb-2">When is your best focus time?</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["morning", "afternoon", "evening", "variable"] as const).map((t) => (
+            {/* Step 2: Tone + Focus Hours */}
+            {step === 1 && (
+              <div className="space-y-7">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground leading-tight">
+                    How direct should Continuary be with you?
+                  </h2>
+                </div>
+                <div className="space-y-2">
+                  {TONE_OPTIONS.map((tone) => (
                     <button
-                      key={t}
-                      onClick={() => setBestFocusTime(t)}
+                      key={tone.value}
+                      onClick={() => setTonePreference(tone.value)}
                       className={cn(
-                        "py-2.5 rounded-lg border text-sm font-medium transition-colors capitalize",
-                        bestFocusTime === t
-                          ? "border-foreground/30 bg-foreground/5 text-foreground"
-                          : "border-border text-muted-foreground hover:border-foreground/20"
+                        "w-full text-left px-4 py-3.5 rounded-xl border transition-all",
+                        tonePreference === tone.value
+                          ? "border-primary bg-primary/8"
+                          : "border-border hover:border-primary/40"
                       )}
                     >
-                      {t}
+                      <div className={cn("text-sm font-medium", tonePreference === tone.value ? "text-foreground" : "text-foreground/80")}>
+                        {tone.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">{tone.description}</div>
                     </button>
                   ))}
                 </div>
+                <div className="space-y-3">
+                  <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                    When do you do your best focused work?
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FOCUS_HOURS.map((fh) => (
+                      <button
+                        key={fh.value}
+                        onClick={() => setPreferredFocusHours(fh.value)}
+                        className={cn(
+                          "px-3 py-2.5 rounded-xl border text-sm transition-all",
+                          preferredFocusHours === fh.value
+                            ? "border-primary bg-primary/8 text-foreground font-medium"
+                            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        )}
+                      >
+                        {fh.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(0)} className="flex-1">Back</Button>
+                  <Button onClick={() => setStep(2)} className="flex-[2] gap-2">
+                    Continue <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
+            )}
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">Back</Button>
-                <Button onClick={() => setStep(2)} className="flex-1 gap-2">
-                  Continue <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: ADHD Profile */}
-          {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">Your ADHD profile</h2>
-                <p className="text-sm text-muted-foreground mt-1">No judgment. This makes the AI actually useful.</p>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">What's your biggest challenge?</label>
-                <Textarea
-                  value={biggestChallenge}
-                  onChange={(e) => setBiggestChallenge(e.target.value)}
-                  placeholder="e.g. Starting tasks, staying on one thing, losing context after interruptions..."
-                  className="text-sm min-h-[80px] resize-none"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">What most often derails you?</label>
-                <Input
-                  value={primaryDistraction}
-                  onChange={(e) => setPrimaryDistraction(e.target.value)}
-                  placeholder="e.g. Phone notifications, context switching, rabbit holes..."
-                  className="text-sm"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">Back</Button>
-                <Button onClick={() => setStep(3)} className="flex-1 gap-2">
-                  Continue <ArrowRight className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: First Project */}
-          {step === 3 && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold text-foreground">Your first project</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  What's the one thing that most needs your attention right now?
-                </p>
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Project name *</label>
-                <Input
-                  value={projectTitle}
-                  onChange={(e) => setProjectTitle(e.target.value)}
-                  placeholder="What is this project called?"
-                  className="text-sm"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Why does it matter?</label>
-                <Textarea
-                  value={projectWhy}
-                  onChange={(e) => setProjectWhy(e.target.value)}
-                  placeholder="What changes if this gets done?"
-                  className="text-sm min-h-[70px] resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Next physical action</label>
-                <Input
-                  value={projectNext}
-                  onChange={(e) => setProjectNext(e.target.value)}
-                  placeholder="The single most specific first step..."
-                  className="text-sm"
-                />
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(2)} className="flex-1">Back</Button>
-                <Button
-                  onClick={handleFinish}
-                  disabled={!projectTitle.trim() || completeOnboarding.isPending || createProject.isPending}
-                  className="flex-1 gap-2"
+            {/* Step 3: First Project */}
+            {step === 2 && (
+              <div className="space-y-7">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground leading-tight">
+                    What's one thing you're actively working on right now?
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                      Project name
+                    </label>
+                    <Input
+                      value={projectTitle}
+                      onChange={(e) => setProjectTitle(e.target.value)}
+                      placeholder="What is this project called?"
+                      className="text-base"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                      Why does it matter?
+                    </label>
+                    <Textarea
+                      value={projectWhy}
+                      onChange={(e) => setProjectWhy(e.target.value)}
+                      placeholder="What would change if this got finished?"
+                      className="text-sm min-h-[80px] resize-none"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                      What's the next step?{" "}
+                      <span className="normal-case font-normal text-muted-foreground/60">(optional)</span>
+                    </label>
+                    <Input
+                      value={projectNext}
+                      onChange={(e) => setProjectNext(e.target.value)}
+                      placeholder="Can be added later"
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={() => setStep(1)} className="flex-1">Back</Button>
+                  <Button
+                    onClick={() => finishOnboarding(false)}
+                    disabled={!projectTitle.trim() || isPending}
+                    className="flex-[2] gap-2"
+                  >
+                    {isPending ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Setting up&hellip;</>
+                    ) : (
+                      <>Finish setup <ArrowRight className="w-4 h-4" /></>
+                    )}
+                  </Button>
+                </div>
+                <button
+                  onClick={() => finishOnboarding(true)}
+                  disabled={isPending}
+                  className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
                 >
-                  {completeOnboarding.isPending || createProject.isPending
-                    ? <><Loader2 className="w-4 h-4 animate-spin" />Setting up...</>
-                    : <>Finish setup <ArrowRight className="w-4 h-4" /></>
-                  }
+                  Skip for now &mdash; I'll add projects later
+                </button>
+              </div>
+            )}
+
+            {/* Done */}
+            {step === 3 && (
+              <div className="text-center space-y-8 py-4">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+                  <ContinuaryMark className="w-8 h-5 text-primary" />
+                </div>
+                <p className="text-lg text-foreground font-medium tracking-[-0.01em]">
+                  Continuary is ready.{projectTitle.trim() ? " Your first project is waiting." : ""}
+                </p>
+                <Button onClick={() => navigate("/")} className="w-full gap-2" size="lg">
+                  Open Command Center <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
-
-              <button
-                onClick={() => completeOnboarding.mutate({ workTypes: primaryRole ? [primaryRole] : [], distractionPatterns: primaryDistraction ? [primaryDistraction] : [], focusHoursStart: "09:00", focusHoursEnd: "17:00", tonePreference })}
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Skip — I'll add projects later
-              </button>
-            </div>
-          )}
-
-          {/* Step 4: Done */}
-          {step === 4 && (
-            <div className="text-center space-y-6">
-              <CheckCircle2 className="w-14 h-14 text-emerald-500 mx-auto" />
-              <div>
-                <h2 className="text-2xl font-semibold text-foreground">You're all set.</h2>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
-                  Your command center is ready. Start with the morning check-in to set your capacity and focus for today.
-                </p>
-              </div>
-              <Button onClick={() => navigate("/")} className="w-full gap-2" size="lg">
-                Open Command Center <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {step < 3 && (
+          <p className="text-center text-xs text-muted-foreground/40 mt-5">
+            Built for minds that move fast.
+          </p>
+        )}
       </div>
     </div>
   );

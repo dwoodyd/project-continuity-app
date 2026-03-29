@@ -36,6 +36,13 @@
       "when": 1774740100991,
       "tag": "0004_yielding_shiva",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774745852547,
+      "tag": "0005_new_northstar",
+      "breakpoints": true
     }
   ]
 }
