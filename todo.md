@@ -357,3 +357,13 @@
 - [x] Quick note field, private, minimal
 - [x] Saves to database with timestamp
 - [x] No major feature — just a lightweight capture hook
+
+## PWA Support
+
+- [x] Generate app icons (192x192, 512x512, 180x180 apple-touch-icon, 32x32 favicon)
+- [x] Upload icons to CDN
+- [x] Create manifest.json with name, icons, display:standalone, theme_color, background_color
+- [x] Add iOS/Android meta tags to index.html (apple-mobile-web-app-capable, theme-color, viewport)
+- [x] Update service worker to cache app shell (HTML, CSS, JS) for offline support
+- [x] Add in-app install prompt banner (beforeinstallprompt)
+- [x] Update todo.md and save checkpoint

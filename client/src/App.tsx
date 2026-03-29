@@ -15,6 +15,7 @@ import SettingsPage from "./pages/SettingsPage";
 import FocusModePage from "./pages/FocusModePage";
 import OnboardingPage from "./pages/OnboardingPage";
 import WelcomePage from "./pages/WelcomePage";
+import PWAInstallBanner from "./components/PWAInstallBanner";
 
 function Router() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <TooltipProvider>
           <Toaster position="top-right" richColors />
           <Router />
+          <PWAInstallBanner />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
