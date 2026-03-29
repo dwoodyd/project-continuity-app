@@ -57,6 +57,13 @@
       "when": 1774761901712,
       "tag": "0007_omniscient_rhino",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1774765327712,
+      "tag": "0008_dapper_puck",
+      "breakpoints": true
     }
   ]
 }

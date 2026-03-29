@@ -28,6 +28,8 @@ export const settingsRouter = router({
       coldProjectNotifEnabled: true,
       sanctuaryNotifEnabled: true,
       notifMessageRotation: null,
+      focusModeEnabled: true,
+      driftDetectionEnabled: true,
       onboardingCompleted: false,
       workStyle: null,
       preferredFocusHours: "morning" as const,
@@ -83,6 +85,11 @@ export const settingsRouter = router({
       weeklyReviewDay: z.enum(["sunday", "saturday", "monday"]).optional(),
       fontSizePreference: z.enum(["small", "medium", "large"]).optional(),
       notificationsEnabled: z.boolean().optional(),
+      morningNotifEnabled: z.boolean().optional(),
+      middayNotifEnabled: z.boolean().optional(),
+      eveningNotifEnabled: z.boolean().optional(),
+      focusModeEnabled: z.boolean().optional(),
+      driftDetectionEnabled: z.boolean().optional(),
       timezone: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {

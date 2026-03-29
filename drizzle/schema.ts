@@ -46,6 +46,8 @@ export const userProfiles = mysqlTable("user_profiles", {
   coldProjectNotifEnabled: boolean("coldProjectNotifEnabled").default(true),
   sanctuaryNotifEnabled: boolean("sanctuaryNotifEnabled").default(true),
   notifMessageRotation: text("notifMessageRotation"), // JSON: {morning:0,midday:0,evening:0}
+  focusModeEnabled: boolean("focusModeEnabled").default(true),
+  driftDetectionEnabled: boolean("driftDetectionEnabled").default(true),
   onboardingCompleted: boolean("onboardingCompleted").default(false),
   workStyle: mysqlEnum("workStyle", ["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]),
   preferredFocusHours: mysqlEnum("preferredFocusHours", ["morning", "midday", "afternoon", "evening", "varies"]).default("morning"),

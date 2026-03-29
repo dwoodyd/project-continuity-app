@@ -458,9 +458,9 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-foreground">ADHD Preferences</p>
             <div className="space-y-3">
               {[
-                { key: "morningCheckInEnabled", label: "Morning check-in reminder", desc: "Daily reminder to set your focus" },
-                { key: "middayCheckInEnabled", label: "Midday alignment pulse", desc: "Midday reminder to check your plan" },
-                { key: "eveningCheckInEnabled", label: "Evening closure reminder", desc: "End-of-day reflection prompt" },
+                { key: "morningNotifEnabled", label: "Morning check-in reminder", desc: "Daily reminder to set your focus" },
+                { key: "middayNotifEnabled", label: "Midday alignment pulse", desc: "Midday reminder to check your plan" },
+                { key: "eveningNotifEnabled", label: "Evening closure reminder", desc: "End-of-day reflection prompt" },
                 { key: "focusModeEnabled", label: "Single Focus Mode", desc: "Distraction-free task execution" },
                 { key: "driftDetectionEnabled", label: "Drift detection", desc: "Alert when you stray from declared intention" },
               ].map(({ key, label, desc }) => (

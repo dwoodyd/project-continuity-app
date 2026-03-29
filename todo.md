@@ -384,3 +384,12 @@
 - [x] Register /intelligence route in App.tsx
 - [x] Add health score badge (colour-coded dot) to ProjectsPage project cards
 - [x] Write vitest tests for new procedures (covered by existing 21-test suite)
+
+## Settings Toggle Fixes
+
+- [x] Add focusModeEnabled column to user_profiles schema (boolean, default true)
+- [x] Add driftDetectionEnabled column to user_profiles schema (boolean, default true)
+- [x] Generate migration SQL and apply via webdev_execute_sql
+- [x] Add focusModeEnabled + driftDetectionEnabled to updateSettings z.object input schema
+- [x] Fix SettingsPage ADHD toggle keys: morningCheckInEnabled → morningNotifEnabled, middayCheckInEnabled → middayNotifEnabled, eveningCheckInEnabled → eveningNotifEnabled
+- [x] Verify all 5 toggles read back correctly from settings.getProfile response
