@@ -78,36 +78,40 @@ function TaskItem({
 }) {
   return (
     <div className={cn(
-      "flex items-start gap-3 p-3 rounded-xl border transition-colors group",
+      "flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group",
       task.done
-        ? "bg-foreground/[0.02] border-border opacity-60"
+        ? "bg-foreground/[0.02] border-border opacity-50"
         : isCarryover
-          ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50"
-          : "bg-card border-border hover:border-foreground/20"
+          ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
+          : "bg-card border-border hover:border-foreground/20 hover:shadow-sm shadow-[0_1px_2px_oklch(0_0_0/0.04)]"
     )}>
       <button
         onClick={() => !task.done && onComplete(task.id)}
         className={cn(
-          "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-colors",
+          "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-150 flex items-center justify-center",
           task.done
-            ? "bg-foreground/20 border-foreground/20"
-            : "border-foreground/30 hover:border-foreground/60"
+            ? "bg-emerald-500/20 border-emerald-500/40"
+            : "border-foreground/25 hover:border-foreground/50 hover:bg-foreground/5"
         )}
+        aria-label={task.done ? "Mark incomplete" : "Mark complete"}
       >
-        {task.done && <CheckCircle2 className="w-3 h-3 text-foreground/40 -mt-0.5 -ml-0.5" />}
+        {task.done && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
       </button>
       <div className="flex-1 min-w-0">
-        <p className={cn("text-sm leading-snug", task.done && "line-through text-muted-foreground")}>
+        <p className={cn(
+          "text-sm leading-snug tracking-[-0.005em]",
+          task.done && "line-through text-muted-foreground"
+        )}>
           {task.title}
         </p>
         {isCarryover && !task.done && (
-          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">carried over</span>
+          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5 block">carried over</span>
         )}
       </div>
       {!task.done && (
         <button
           onClick={() => onUnstick({ id: task.id, title: task.title, projectId: task.projectId })}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 shrink-0"
+          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/5 shrink-0"
           title="Get unstuck"
         >
           <AlertTriangle className="w-3.5 h-3.5" />
@@ -140,23 +144,31 @@ function CheckInCard({
       onClick={!completed ? onOpen : undefined}
       disabled={completed}
       className={cn(
-        "flex-1 flex flex-col items-start gap-1 p-3 rounded-xl border text-left transition-all",
+        "flex-1 flex flex-col items-start gap-1.5 p-3.5 rounded-xl border text-left transition-all duration-150",
         completed
-          ? "bg-foreground/[0.03] border-border opacity-60 cursor-default"
+          ? "bg-foreground/[0.02] border-border opacity-55 cursor-default"
           : active
-            ? "bg-card border-foreground/20 hover:border-foreground/40 shadow-sm cursor-pointer"
-            : "bg-foreground/[0.02] border-border hover:border-foreground/20 cursor-pointer"
+            ? "bg-card border-foreground/25 hover:border-foreground/40 shadow-sm cursor-pointer ring-1 ring-foreground/5"
+            : "bg-foreground/[0.02] border-border hover:bg-foreground/[0.04] hover:border-foreground/15 cursor-pointer"
       )}
     >
       <div className="flex items-center gap-1.5 w-full">
-        <Icon className={cn("w-3.5 h-3.5", completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground")} />
-        <span className={cn("text-xs font-medium", completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground")}>
+        <Icon className={cn(
+          "w-3.5 h-3.5 shrink-0",
+          completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground"
+        )} />
+        <span className={cn(
+          "text-xs font-medium tracking-[-0.01em]",
+          completed ? "text-muted-foreground" : active ? "text-foreground" : "text-muted-foreground"
+        )}>
           {label}
         </span>
-        {completed && <CheckCircle2 className="w-3 h-3 text-emerald-500 ml-auto" />}
-        {active && !completed && <div className="w-1.5 h-1.5 rounded-full bg-foreground/60 ml-auto animate-pulse" />}
+        {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
+        {active && !completed && (
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{background: 'oklch(0.72 0.14 65)'}} />
+        )}
       </div>
-      <p className="text-[10px] text-muted-foreground/60 leading-tight">{timeHint}</p>
+      <p className="text-[10px] text-muted-foreground/55 leading-tight pl-0.5">{timeHint}</p>
     </button>
   );
 }
@@ -454,7 +466,7 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
       <div className="p-4 rounded-xl bg-card border border-border space-y-3">
         <div className="flex items-center gap-2">
           <RotateCcw className="w-4 h-4 text-muted-foreground" />
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Re-entry card</p>
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Re-entry card</p>
         </div>
         <p className="text-sm text-foreground">Returning to <span className="font-medium">{projectTitle}</span>?</p>
         <p className="text-xs text-muted-foreground">Get a quick summary of where you left off before entering Focus Mode.</p>
@@ -470,7 +482,7 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
     <div className="p-4 rounded-xl bg-card border border-foreground/10 space-y-3">
       <div className="flex items-center gap-2">
         <RotateCcw className="w-4 h-4 text-muted-foreground" />
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Re-entry — {projectTitle}</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Re-entry — {projectTitle}</p>
       </div>
       {card.isFirstSession ? (
         <div className="space-y-2">
@@ -614,7 +626,7 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
             {greeting}, {firstName}.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -649,23 +661,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Tomorrow Brief (shown in morning before check-in) ──────────────── */}
+       {/* ── Tomorrow Brief (shown in morning before check-in) ──────────────── */}
       {tomorrowBrief && !morningDone && (
-        <div className="p-4 rounded-xl bg-card border border-border">
+        <div className="p-4 rounded-xl bg-card border border-border shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <Moon className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Yesterday's brief for today</p>
+            <Moon className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{tomorrowBrief}</p>
         </div>
       )}
-
       {/* ── AI Guidance ────────────────────────────────────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="p-4 rounded-xl bg-card border border-border">
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{background: 'linear-gradient(135deg, oklch(0.18 0.04 252 / 0.05) 0%, oklch(0.72 0.14 65 / 0.04) 100%)', border: '1px solid oklch(0.875 0.007 252)'}}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -694,7 +705,7 @@ export default function Home() {
 
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Daily rhythm</p>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Daily Rhythm</p>
         <div className="flex gap-2">
           <CheckInCard
             type="morning"
@@ -768,7 +779,7 @@ export default function Home() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <RotateCcw className="w-3.5 h-3.5 text-amber-500" />
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
               Carried over from yesterday
             </p>
           </div>
@@ -790,7 +801,7 @@ export default function Home() {
       {tasks.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
               Today's tasks
             </p>
             <span className="text-xs text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
@@ -860,7 +871,7 @@ export default function Home() {
               <div className="w-5 h-5 rounded-md bg-foreground/10 flex items-center justify-center">
                 <ArrowRight className="w-3 h-3 text-foreground/60" />
               </div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Start here</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Start here</p>
             </div>
             <div>
               <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>

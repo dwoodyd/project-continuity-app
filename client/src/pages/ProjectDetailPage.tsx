@@ -257,7 +257,7 @@ export default function ProjectDetailPage() {
               <span className="text-muted-foreground/30">·</span>
               <span className="text-xs text-muted-foreground capitalize">{project.priorityLevel} priority</span>
             </div>
-            <h1 className="text-2xl font-semibold text-foreground">{project.title}</h1>
+            <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">{project.title}</h1>
           </div>
           <div className="flex gap-2 shrink-0">
             <Button
@@ -392,7 +392,7 @@ export default function ProjectDetailPage() {
           {/* Linked sources */}
           {sources && sources.length > 0 && (
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
                 Linked sources ({sources.length})
               </p>
               <div className="space-y-2">

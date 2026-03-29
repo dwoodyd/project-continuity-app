@@ -480,7 +480,7 @@ export default function VaultPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Knowledge Vault</h1>
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Knowledge Vault</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {items?.length ?? 0} items · {inboxCount} in inbox
             {reviewCount > 0 && ` · ${reviewCount} need review`}

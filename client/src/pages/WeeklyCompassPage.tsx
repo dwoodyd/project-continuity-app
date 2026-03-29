@@ -78,7 +78,7 @@ export default function WeeklyCompassPage() {
               Week of {format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Weekly Compass</h1>
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Compass</h1>
           <p className="text-sm text-muted-foreground mt-1">
             One clear direction for the week. Not a schedule — a compass.
           </p>
@@ -151,7 +151,7 @@ export default function WeeklyCompassPage() {
             <div className="p-5 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Weekly guidance</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Weekly guidance</p>
               </div>
               <p className="text-sm text-foreground leading-relaxed">{compass.generatedGuidance}</p>
             </div>
@@ -163,7 +163,7 @@ export default function WeeklyCompassPage() {
             <div className="p-4 rounded-xl border border-border bg-card space-y-2">
               <div className="flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5 text-foreground/60" />
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Primary focus</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Primary focus</p>
               </div>
               {primaryProject ? (
                 <div>
@@ -197,7 +197,7 @@ export default function WeeklyCompassPage() {
             <div className="p-4 rounded-xl border border-border bg-card space-y-2">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-foreground/60" />
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Secondary focus</p>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Secondary focus</p>
               </div>
               {secondaryProject ? (
                 <div>
@@ -231,7 +231,7 @@ export default function WeeklyCompassPage() {
           {/* Admin lane */}
           {compass.adminLane && (
             <div className="p-4 rounded-xl border border-border/60 bg-muted/20">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Admin lane</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">Admin lane</p>
               <p className="text-sm text-foreground">{compass.adminLane}</p>
             </div>
           )}

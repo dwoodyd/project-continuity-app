@@ -217,7 +217,7 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
+        <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Settings</h1>
         <p className="text-sm text-muted-foreground mt-1">Manage your account and preferences</p>
       </div>
 

@@ -170,7 +170,7 @@ function ProjectCard({ project, onClick }: { project: any; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-foreground/20 hover:bg-accent transition-all group"
+      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-foreground/20 hover:shadow-sm shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-all duration-150 group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -224,7 +224,7 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Projects</h1>
+          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Projects</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {projects?.filter((p) => p.status === "active").length ?? 0} active · {projects?.length ?? 0} total
           </p>
