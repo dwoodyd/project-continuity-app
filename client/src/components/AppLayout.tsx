@@ -7,6 +7,7 @@ import {
   Brain,
   ChevronRight,
   Compass,
+  Home,
   Lightbulb,
   LogOut,
   Menu,
@@ -52,6 +53,7 @@ const navItems = [
   { href: "/projects", label: "Projects", icon: Archive, description: "All projects" },
   { href: "/weekly", label: "Weekly Review", icon: Archive, description: "Patterns & progress" },
   { href: "/compass", label: "Weekly Compass", icon: Compass, description: "This week's direction" },
+  { href: "/welcome", label: "About Continuary", icon: Home, description: "Orientation & overview" },
   { href: "/settings", label: "Settings", icon: Settings, description: "Preferences" },
 ];
 

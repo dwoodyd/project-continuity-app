@@ -143,12 +143,15 @@ export default function WeeklyReviewPage() {
         </div>
 
         {!focusSessions || focusSessions.length === 0 ? (
-          <div className="p-4 rounded-xl border border-dashed border-border text-center">
-            <Timer className="w-6 h-6 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No focus sessions this week yet.</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Use Single Focus Mode to log your work blocks.
-            </p>
+          <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
+                <Timer className="w-5 h-5 text-white" />
+              </div>
+              <p className="text-sm font-semibold text-white mb-1">No focus sessions this week yet.</p>
+              <p className="text-xs text-white/70">Use Single Focus Mode to log your work blocks.</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-2">

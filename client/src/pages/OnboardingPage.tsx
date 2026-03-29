@@ -74,10 +74,12 @@ export default function OnboardingPage() {
   const [projectWhy, setProjectWhy] = useState("");
   const [projectNext, setProjectNext] = useState("");
 
+  const [generatedNextStep, setGeneratedNextStep] = useState<string | null>(null);
   const completeOnboarding = trpc.settings.completeOnboarding.useMutation({
     onError: () => toast.error("Something went wrong. Please try again."),
   });
   const createProject = trpc.projects.create.useMutation();
+  const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();
 
   const focusStartMap: Record<string, string> = {
     morning: "08:00", midday: "11:00", afternoon: "13:00", evening: "17:00", varies: "09:00",
@@ -88,14 +90,16 @@ export default function OnboardingPage() {
 
   const finishOnboarding = async (skipProject = false) => {
     try {
+      let createdProjectId: number | null = null;
       if (!skipProject && projectTitle.trim()) {
-        await createProject.mutateAsync({
+        const result = await createProject.mutateAsync({
           title: projectTitle,
           whyItMatters: projectWhy,
           nextStep: projectNext || undefined,
           status: "active",
           priorityLevel: "high",
         });
+        createdProjectId = result?.id ?? null;
       }
       await completeOnboarding.mutateAsync({
         workTypes: workStyle ? [workStyle] : [],
@@ -104,6 +108,22 @@ export default function OnboardingPage() {
         focusHoursEnd: focusEndMap[preferredFocusHours] ?? "17:00",
         tonePreference,
       });
+      // Generate AI first action if a project was created
+      if (createdProjectId) {
+        try {
+          const result = await generateStartHere.mutateAsync({
+            projectId: createdProjectId,
+            projectTitle,
+            whyItMatters: projectWhy || undefined,
+            userNextStep: projectNext || undefined,
+            tonePreference,
+            workStyle: workStyle || undefined,
+          });
+          setGeneratedNextStep(result.nextStep);
+        } catch {
+          // non-fatal — proceed without generated step
+        }
+      }
       setStep(3);
     } catch {
       // error already toasted
@@ -344,10 +364,25 @@ export default function OnboardingPage() {
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
                   <ContinuaryMark className="w-8 h-5 text-primary" />
                 </div>
-                <p className="text-lg text-foreground font-medium tracking-[-0.01em]">
-                  Continuary is ready.{projectTitle.trim() ? " Your first project is waiting." : ""}
-                </p>
-                <Button onClick={() => navigate("/")} className="w-full gap-2" size="lg">
+                <div className="space-y-2">
+                  <p className="text-lg text-foreground font-medium tracking-[-0.01em]">
+                    Continuary is ready.
+                  </p>
+                  {(generatedNextStep || projectTitle.trim()) && (
+                    <p className="text-sm text-muted-foreground">
+                      {generatedNextStep
+                        ? `Your first action: ${generatedNextStep}`
+                        : "Your first project is waiting in the Command Center."}
+                    </p>
+                  )}
+                </div>
+                {generateStartHere.isPending && (
+                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Preparing your first action…
+                  </div>
+                )}
+                <Button onClick={() => navigate("/")} className="w-full gap-2" size="lg" disabled={generateStartHere.isPending}>
                   Open Command Center <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>

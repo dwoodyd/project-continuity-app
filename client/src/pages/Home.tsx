@@ -24,8 +24,10 @@ import {
   Lightbulb,
   BookOpen,
   BarChart2,
+  Bell,
+  X,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -558,6 +560,24 @@ export default function Home() {
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [completedCheckIns, setCompletedCheckIns] = useState<Set<CheckInStep>>(new Set());
   const [reEntryProjectId, setReEntryProjectId] = useState<number | null>(null);
+  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+
+  const handleNotifPromptAccept = async () => {
+    setShowNotifPrompt(false);
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        toast.success('Reminders enabled. We\'ll check in at the right moments.');
+      }
+    } catch {
+      // browser may not support
+    }
+  };
+
+  const handleNotifPromptDefer = () => {
+    setShowNotifPrompt(false);
+    localStorage.setItem('continuary_notif_defer', Date.now().toString());
+  };
 
   const now = new Date();
   const hour = now.getHours();
@@ -598,6 +618,18 @@ export default function Home() {
   const morningDone = todayCheckIns?.some((c) => c.type === "morning") ?? completedCheckIns.has("morning");
   const middayDone = todayCheckIns?.some((c) => c.type === "midday") ?? completedCheckIns.has("midday");
   const eveningDone = todayCheckIns?.some((c) => c.type === "evening") ?? completedCheckIns.has("evening");
+
+  // Show notification permission prompt 2s after first morning check-in completes
+  // 48h defer window stored in localStorage
+  useEffect(() => {
+    if (!morningDone) return;
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'default') return;
+    const deferred = localStorage.getItem('continuary_notif_defer');
+    if (deferred && Date.now() - parseInt(deferred, 10) < 48 * 60 * 60 * 1000) return;
+    const timer = setTimeout(() => setShowNotifPrompt(true), 2000);
+    return () => clearTimeout(timer);
+  }, [morningDone]);
 
   const handleCheckInComplete = (type: CheckInStep) => {
     setCompletedCheckIns((prev) => { const s = new Set(prev); s.add(type); return s; });
@@ -1068,6 +1100,45 @@ export default function Home() {
             <Button size="sm" onClick={() => setActiveCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
               Start morning check-in
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Notification Permission Prompt ─────────────────────────────────── */}
+      {showNotifPrompt && (
+        <div className="relative p-5 rounded-2xl border border-primary/20 shadow-lg overflow-hidden" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Bell className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground mb-1">Stay in rhythm with reminders</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Continuary can nudge you at morning, midday, and evening — so you never lose the thread of your day.
+              </p>
+              <div className="flex items-center gap-3 mt-4">
+                <Button
+                  size="sm"
+                  onClick={handleNotifPromptAccept}
+                  className="bg-primary text-white hover:bg-primary/90 text-xs h-8 px-4 font-medium"
+                >
+                  Enable reminders
+                </Button>
+                <button
+                  onClick={handleNotifPromptDefer}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={handleNotifPromptDefer}
+              className="text-muted-foreground/50 hover:text-muted-foreground transition-colors p-1 shrink-0"
+              aria-label="Dismiss"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

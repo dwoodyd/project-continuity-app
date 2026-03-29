@@ -477,13 +477,14 @@ export default function SettingsPage() {
                     { label: "Midday check-in", value: middayTime, setter: setMiddayTime },
                     { label: "Evening closure", value: eveningTime, setter: setEveningTime },
                   ].map(({ label, value, setter }) => (
-                    <div key={label} className="flex items-center justify-between">
+                    <div key={label} className="flex items-center justify-between gap-4">
                       <p className="text-xs text-muted-foreground">{label}</p>
-                      <Input
+                      <input
                         type="time"
                         value={value}
                         onChange={(e) => setter(e.target.value)}
-                        className="w-28 h-7 text-xs"
+                        style={{colorScheme: 'light dark'}}
+                        className="h-8 rounded-lg border border-border bg-background px-2.5 text-xs text-foreground font-medium tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-colors cursor-pointer"
                       />
                     </div>
                   ))}

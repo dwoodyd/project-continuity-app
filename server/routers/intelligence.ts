@@ -31,6 +31,7 @@ import {
   getLatestReEntryCard,
   acknowledgeReEntryCard,
   getUserProfile,
+  updateProject,
 } from "../db";
 
 // ── Distraction Classification ─────────────────────────────────────────────────
@@ -549,5 +550,64 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
     .mutation(async ({ ctx, input }) => {
       await acknowledgeReEntryCard(input.cardId, ctx.user.id);
       return { success: true };
+    }),
+
+  // ── Onboarding: generate first concrete next step ────────────────────────
+  generateOnboardingStartHere: protectedProcedure
+    .input(z.object({
+      projectId: z.number(),
+      projectTitle: z.string(),
+      whyItMatters: z.string().optional(),
+      userNextStep: z.string().optional(),
+      tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
+      workStyle: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { projectId, projectTitle, whyItMatters, userNextStep, tonePreference, workStyle } = input;
+      // If the user already gave a concrete next step (>10 chars), use it directly
+      if (userNextStep && userNextStep.trim().length > 10) {
+        return { nextStep: userNextStep.trim() };
+      }
+      const toneMap: Record<string, string> = {
+        gentle: "warm and supportive",
+        direct: "calm and factual",
+        firm: "concise and direct",
+      };
+      const tone = toneMap[tonePreference ?? "gentle"] ?? "calm and clear";
+      try {
+        const response = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a calm, structured productivity assistant. Your tone is ${tone}. Generate a single concrete first action for a new project. Requirements:
+- Specific and physical (not "think about" or "plan")
+- Completable in 20-60 minutes
+- The absolute smallest useful first move
+- Written as an imperative sentence
+- Maximum 12 words
+Return only the action text, no explanation, no quotes, no punctuation at end.`,
+            },
+            {
+              role: "user",
+              content: `Project: ${projectTitle}${whyItMatters ? `\nWhy it matters: ${whyItMatters}` : ""}${workStyle ? `\nWork style: ${workStyle}` : ""}`,
+            },
+          ],
+        });
+        const rawContent = response.choices?.[0]?.message?.content;
+        const nextStep = (typeof rawContent === "string" ? rawContent.trim() : null)
+          ?? `Open a blank document and write the first sentence for ${projectTitle}`;
+        // Persist to the project record
+        await updateProject(projectId, ctx.user.id, { nextStep });
+        // Log to project memory timeline
+        await createProjectMemoryEvent({
+          userId: ctx.user.id,
+          projectId,
+          eventType: "next_step_change",
+          content: `First action generated on onboarding: ${nextStep}`,
+        });
+        return { nextStep };
+      } catch {
+        return { nextStep: `Open a blank document and write the first line for ${projectTitle}` };
+      }
     }),
 });

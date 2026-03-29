@@ -578,29 +578,32 @@ export default function VaultPage() {
 
       {/* Items list */}
       {filtered.length === 0 ? (
-        <div className="p-10 rounded-xl border border-dashed border-border text-center">
-          <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium text-foreground mb-1">
-            {filterState === "all"
-              ? "Vault is empty."
-              : filterState === "review"
-              ? "Nothing needs review."
-              : `No ${filterState} items.`}
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            {filterState === "all"
-              ? "Import notes, exports, transcripts, or files to start building your knowledge base."
-              : filterState === "review"
-              ? "All items have been reviewed and mapped."
-              : ""}
-          </p>
-          {filterState === "all" && (
-            <Button size="sm" variant="outline" onClick={() => setAddOpen(true)} className="gap-1.5">
-              <Plus className="w-3.5 h-3.5" />
-              Add first source
-            </Button>
-          )}
-        </div>
+        filterState === "all" ? (
+          <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-base font-semibold text-white mb-1">Your Vault is empty.</p>
+              <p className="text-sm text-white/70 mb-5">Import notes, transcripts, or files to start building your knowledge base.</p>
+              <Button size="sm" onClick={() => setAddOpen(true)} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0 gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                Add first source
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 rounded-xl border border-dashed border-border text-center">
+            <BookOpen className="w-7 h-7 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">
+              {filterState === "review" ? "Nothing needs review." : `No ${filterState} items.`}
+            </p>
+            {filterState === "review" && (
+              <p className="text-xs text-muted-foreground/60 mt-1">All items have been reviewed and mapped.</p>
+            )}
+          </div>
+        )
       ) : (
         <div className="space-y-3">
           {filtered.map((item) => (

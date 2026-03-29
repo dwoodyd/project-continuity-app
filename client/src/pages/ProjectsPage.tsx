@@ -258,19 +258,27 @@ export default function ProjectsPage() {
 
       {/* Projects list */}
       {filtered.length === 0 ? (
-        <div className="p-10 rounded-xl border border-dashed border-border text-center">
-          <Brain className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-sm font-medium text-foreground mb-1">
-            {filter === "all" ? "No projects yet." : `No ${filter} projects.`}
-          </p>
-          <p className="text-xs text-muted-foreground mb-4">
-            Projects are the containers for your work. Start by defining one.
-          </p>
-          <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)} className="gap-1.5">
-            <Plus className="w-3.5 h-3.5" />
-            Create first project
-          </Button>
-        </div>
+        filter === "all" ? (
+          <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
+            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
+                <Brain className="w-6 h-6 text-white" />
+              </div>
+              <p className="text-base font-semibold text-white mb-1">No projects yet.</p>
+              <p className="text-sm text-white/70 mb-5">Projects are the containers for your work. Start by defining one.</p>
+              <Button size="sm" onClick={() => setCreateOpen(true)} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0 gap-1.5">
+                <Plus className="w-3.5 h-3.5" />
+                Create first project
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 rounded-xl border border-dashed border-border text-center">
+            <Brain className="w-7 h-7 text-muted-foreground/40 mx-auto mb-3" />
+            <p className="text-sm text-muted-foreground">No {filter} projects.</p>
+          </div>
+        )
       ) : (
         <div className="space-y-2.5">
           {filtered.map((project) => (
