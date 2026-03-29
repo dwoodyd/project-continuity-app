@@ -236,8 +236,8 @@
 - [x] Weekly primary project strongly shapes day plan (overrides priority algorithm)
 - [x] Weekly secondary acts as fallback/support lane
 - [x] Weekly maintenance lane stays bounded
-- [ ] Divergence note surfaces when day plan differs from weekly intent
-- [ ] Visible relationship between weekly primary/secondary and today's primary/secondary
+- [x] Divergence note surfaces when day plan differs from weekly intent
+- [x] Visible relationship between weekly primary/secondary and today's primary/secondary
 
 ### Decisions Propagate Everywhere
 - [x] Save structured decisions from evening closure and check-ins

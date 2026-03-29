@@ -26,6 +26,7 @@ export default function WeeklyCompassPage() {
 
   const { data: compass, refetch, isLoading } = trpc.intelligence.getWeeklyCompass.useQuery();
   const { data: allProjects } = trpc.projects.list.useQuery();
+  const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery();
 
   const generate = trpc.intelligence.generateWeeklyCompass.useMutation({
     onSuccess: () => {
@@ -294,6 +295,69 @@ export default function WeeklyCompassPage() {
               )}
             </div>
           </div>
+
+          {/* Divergence note: surface when today's plan differs from weekly intent */}
+          {todayPlan && compass && (() => {
+            const todayPrimaryId = todayPlan.primaryProjectId;
+            const weeklyPrimaryId = compass.primaryProjectId;
+            const todaySecondaryId = todayPlan.secondaryProjectId;
+            const weeklySecondaryId = compass.secondaryProjectId;
+            const primaryDiverges = weeklyPrimaryId && todayPrimaryId && todayPrimaryId !== weeklyPrimaryId;
+            const secondaryDiverges = weeklySecondaryId && todaySecondaryId && todaySecondaryId !== weeklySecondaryId;
+            if (!primaryDiverges && !secondaryDiverges) return null;
+            const todayPrimaryProject = allProjects?.find((p) => p.id === todayPrimaryId);
+            const todaySecondaryProject = allProjects?.find((p) => p.id === todaySecondaryId);
+            return (
+              <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                  <p className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-widest">Today diverges from weekly intent</p>
+                </div>
+                <div className="space-y-1.5">
+                  {primaryDiverges && (
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Today's primary: <strong>{todayPrimaryProject?.title ?? "Unknown"}</strong> — weekly primary: <strong>{primaryProject?.title ?? "Unknown"}</strong>
+                    </p>
+                  )}
+                  {secondaryDiverges && (
+                    <p className="text-xs text-amber-700 dark:text-amber-300">
+                      Today's secondary: <strong>{todaySecondaryProject?.title ?? "Unknown"}</strong> — weekly secondary: <strong>{secondaryProject?.title ?? "Unknown"}</strong>
+                    </p>
+                  )}
+                </div>
+                <p className="text-[10px] text-amber-600/70 dark:text-amber-400/70 mt-2">This is fine — just worth noticing.</p>
+              </div>
+            );
+          })()}
+
+          {/* Weekly → Daily relationship strip */}
+          {todayPlan && compass && (
+            <div className="p-4 rounded-xl border border-border bg-card">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">This week → today</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Weekly primary</p>
+                  <p className="text-sm font-medium text-foreground">{primaryProject?.title ?? <span className="italic text-muted-foreground">Not set</span>}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Today's primary</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {allProjects?.find((p) => p.id === todayPlan.primaryProjectId)?.title ?? <span className="italic text-muted-foreground">No plan yet</span>}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Weekly secondary</p>
+                  <p className="text-sm font-medium text-foreground">{secondaryProject?.title ?? <span className="italic text-muted-foreground">Not set</span>}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground mb-1">Today's secondary</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {allProjects?.find((p) => p.id === todayPlan.secondaryProjectId)?.title ?? <span className="italic text-muted-foreground">—</span>}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Confirm dialog */}
           {confirming && (
