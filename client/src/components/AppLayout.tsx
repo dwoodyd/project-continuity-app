@@ -22,6 +22,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import AmnestyScreen from "./AmnestyScreen";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ── Continuary logo mark (open infinity loop) ─────────────────────────────────
 function ContinuaryMark({ className }: { className?: string }) {
@@ -91,6 +92,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
       navigate("/onboarding");
     }
   }, [isAuthenticated, profile, navigate]);
+
+  // Show auth error toast if redirected back with ?auth_error=...
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("auth_error");
+    if (authError) {
+      toast.error(authError, { duration: 6000 });
+      // Remove the param from the URL without a reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth_error");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
   if (!isAuthenticated) {

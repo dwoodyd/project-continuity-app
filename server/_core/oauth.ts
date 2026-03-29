@@ -45,9 +45,11 @@ export function registerOAuthRoutes(app: Express) {
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
       res.redirect(302, "/");
-    } catch (error) {
-      console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+    } catch (error: any) {
+      const detail = error?.response?.data ?? error?.message ?? String(error);
+      console.error("[OAuth] Callback failed", JSON.stringify(detail));
+      // Redirect to a user-friendly error page instead of showing raw JSON
+      res.redirect(302, `/?auth_error=${encodeURIComponent("Sign-in failed. Please try again.")}`);
     }
   });
 }
