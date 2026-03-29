@@ -412,10 +412,24 @@ Return JSON: {
 
       const isFirstSession = sessions.length === 0;
       const lastSession = sessions[0];
+
+      // 24h session gate: only show full re-entry context if last session was 24h+ ago
+      const hoursSinceLastSession = lastSession
+        ? (Date.now() - new Date(lastSession.startedAt).getTime()) / (1000 * 60 * 60)
+        : Infinity;
+      const isReturning = isFirstSession || hoursSinceLastSession >= 24;
+
+      // Handled tasks from last 2 sessions: completed intentions
+      const lastTwoSessions = sessions.slice(0, 2);
+      const handledItems = lastTwoSessions
+        .filter((s) => s.wasCompleted && s.intention)
+        .map((s) => s.intention)
+        .slice(0, 3);
+
       const projectCheckIns = checkIns.filter((c) => {
         try {
-          const input = JSON.parse(c.userInput ?? "{}");
-          return input.primaryProjectId === project.id;
+          const inp = JSON.parse(c.userInput ?? "{}");
+          return inp.primaryProjectId === project.id;
         } catch { return false; }
       });
       const lastCheckInNote = projectCheckIns[0]?.userInput
@@ -436,10 +450,8 @@ Return JSON: {
         stoppingPoint = project.contextBreadcrumb ?? lastSession?.notes ?? null;
         unresolvedDecision = lastCheckInNote ?? null;
 
-        // What was ruled out — tasks marked done in recent sessions (from notes)
-        if (lastSession?.notes) {
-          whatWasRuledOut = null; // will be populated by AI below
-        }
+        // What was ruled out — completed intentions from last 2 sessions
+        whatWasRuledOut = handledItems.length > 0 ? handledItems.join("; ") : null;
 
         // Check if next step is vague
         const vaguePhrases = ["work on", "look at", "think about", "deal with", "handle", "do the"];
@@ -520,6 +532,8 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
       return {
         cardId,
         isFirstSession,
+        isReturning,
+        hoursSinceLastSession: Math.round(hoursSinceLastSession),
         stoppingPoint,
         unresolvedDecision,
         whatWasRuledOut,

@@ -196,6 +196,10 @@ export default function ProjectDetailPage() {
     { projectId, filterType: timelineFilter === "all" ? undefined : timelineFilter },
     { enabled: !!projectId && activeTab === "timeline" }
   );
+  const { data: projectDecisions } = trpc.intelligence.getDecisionsForProject.useQuery(
+    { projectId },
+    { enabled: !!projectId }
+  );
   const buildTimeline = trpc.intelligence.buildProjectTimeline.useMutation({
     onSuccess: (data) => {
       toast.success(`Timeline synced — ${data.synced} events added.`);
@@ -389,6 +393,28 @@ export default function ProjectDetailPage() {
             ))}
           </div>
 
+          {/* Decisions list */}
+          {projectDecisions && projectDecisions.length > 0 && (
+            <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">
+                Decisions ({projectDecisions.length})
+              </p>
+              <div className="space-y-2">
+                {projectDecisions.slice(0, 5).map((d: any) => (
+                  <div key={d.id} className="flex items-start gap-3 p-3 rounded-xl border border-amber-200/60 dark:border-amber-800/40 bg-amber-50/30 dark:bg-amber-900/10">
+                    <GitBranch className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm text-foreground leading-snug">{d.content}</p>
+                      {d.context && <p className="text-xs text-muted-foreground mt-0.5">{d.context}</p>}
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">
+                        {formatDistanceToNow(new Date(d.createdAt), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {/* Linked sources */}
           {sources && sources.length > 0 && (
             <div>

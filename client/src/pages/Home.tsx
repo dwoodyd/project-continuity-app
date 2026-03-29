@@ -23,6 +23,7 @@ import {
   RotateCcw,
   Lightbulb,
   BookOpen,
+  BarChart2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
@@ -492,7 +493,15 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
           <p className="text-sm text-foreground">This is your first session on this project.</p>
           <p className="text-xs text-muted-foreground">No history yet — the next step below is your starting point.</p>
         </div>
+      ) : !card.isReturning ? (
+        // Recent session (< 24h) — show brief context only
+        <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            You were here recently ({card.hoursSinceLastSession}h ago). Picking up where you left off.
+          </p>
+        </div>
       ) : (
+        // Returning after 24h+ — show full context
         <>
           {card.stoppingPoint && (
             <div className="border-l-2 border-border pl-3">
@@ -595,8 +604,8 @@ export default function Home() {
     setActiveCheckIn(null);
     refetchCheckIns();
     refetchPlan();
-    // After midday or evening check-in, gently surface unprocessed ideas
-    if ((type === "midday" || type === "evening") && pendingIdeaCount > 0) {
+    // After morning or evening check-in, gently surface unprocessed ideas when count > 3
+    if ((type === "morning" || type === "evening") && pendingIdeaCount > 3) {
       setTimeout(() => {
         toast(
           `${pendingIdeaCount} idea${pendingIdeaCount > 1 ? "s" : ""} waiting in your Sanctuary.`,
@@ -620,9 +629,29 @@ export default function Home() {
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user?.name?.split(" ")[0] ?? "there";
-
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
+
+  // ── Alert-priority resolver ────────────────────────────────────────────────
+  // Priority order: Amnesty (handled before this page) → due check-in → capacity banner → blocker → review reminder → tomorrow brief → sanctuary nudge
+  // Only one primary alert is shown at a time; lower-priority items are de-emphasized
+  const hasBlockedProject = activeProjects?.some((p) => p.status === "active" && p.nextStep?.toLowerCase().includes("blocked"));
+  const weeklyReviewDue = (() => {
+    // Prompt weekly review on Sundays or if last review was >7 days ago
+    const dayOfWeek = now.getDay(); // 0 = Sunday
+    return dayOfWeek === 0;
+  })();
+  type AlertType = "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
+  const topAlert: AlertType = (() => {
+    if (!morningDone && activePeriod === "morning") return "check_in_due";
+    if (todayPlan && capacityLevel === "low") return "capacity_low";
+    if (todayPlan && capacityLevel === "partial") return "capacity_partial";
+    if (hasBlockedProject) return "blocker";
+    if (weeklyReviewDue && morningDone) return "weekly_review";
+    if (tomorrowBrief && !morningDone) return "tomorrow_brief";
+    if (pendingIdeaCount > 3) return "sanctuary_nudge";
+    return null;
+  })();
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
@@ -664,29 +693,17 @@ export default function Home() {
         </div>
       </div>
 
-       {/* ── Tomorrow Brief (shown in morning before check-in) ──────────────── */}
-      {tomorrowBrief && !morningDone && (
-        <div className="p-4 rounded-xl bg-card border border-border shadow-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <Moon className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
+      {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
+      {topAlert === "check_in_due" && (
+        <div className="p-4 rounded-xl border border-primary/40" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
+          <div className="flex items-center gap-2 mb-1">
+            <Sun className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Morning plan ready</p>
           </div>
-          <p className="text-sm text-foreground leading-relaxed">{tomorrowBrief}</p>
+          <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </div>
       )}
-      {/* ── AI Guidance ────────────────────────────────────────────────────── */}
-      {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.12) 0%, oklch(0.72 0.17 65 / 0.08) 100%)'}}>
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
-          </div>
-          <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
-        </div>
-      )}
-
-      {/* ── Capacity-Adaptive Layout Banner ────────────────────────────────── */}
-      {todayPlan && capacityLevel === "low" && (
+      {topAlert === "capacity_low" && (
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800">
           <div className="flex items-center gap-2 mb-1">
             <BatteryLow className="w-4 h-4 text-red-500" />
@@ -697,12 +714,72 @@ export default function Home() {
           </p>
         </div>
       )}
-      {todayPlan && capacityLevel === "partial" && (
+      {topAlert === "capacity_partial" && (
         <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
           <div className="flex items-center gap-2">
             <BatteryMedium className="w-3.5 h-3.5 text-amber-500" />
             <p className="text-xs text-amber-700 dark:text-amber-300">One clear focus today. Secondary work waits.</p>
           </div>
+        </div>
+      )}
+      {topAlert === "blocker" && (() => {
+        const blockedProject = activeProjects?.find((p) => p.status === "active" && p.nextStep?.toLowerCase().includes("blocked"));
+        if (!blockedProject) return null;
+        return (
+          <div className="p-4 rounded-xl bg-red-50/60 dark:bg-red-900/10 border border-red-200/60 dark:border-red-800/40">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
+              <p className="text-[10px] font-semibold text-red-700 dark:text-red-300 uppercase tracking-widest">Blocker detected</p>
+            </div>
+            <p className="text-sm text-red-700 dark:text-red-300">{blockedProject.title} — {blockedProject.nextStep}</p>
+          </div>
+        );
+      })()}
+      {topAlert === "weekly_review" && (
+        <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-900/10 border border-purple-200/60 dark:border-purple-800/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <BarChart2 className="w-3.5 h-3.5 text-purple-500" />
+              <p className="text-xs text-purple-700 dark:text-purple-300">Weekly review is ready for this week.</p>
+            </div>
+            <button
+              onClick={() => navigate("/weekly-review")}
+              className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-medium"
+            >Open</button>
+          </div>
+        </div>
+      )}
+      {topAlert === "tomorrow_brief" && tomorrowBrief && (
+        <div className="p-4 rounded-xl bg-card border border-border shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <Moon className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">{tomorrowBrief}</p>
+        </div>
+      )}
+      {topAlert === "sanctuary_nudge" && (
+        <div className="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/40">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
+              <p className="text-xs text-amber-700 dark:text-amber-300">{pendingIdeaCount} ideas waiting in your Sanctuary.</p>
+            </div>
+            <button
+              onClick={() => navigate("/settings?tab=ideas")}
+              className="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-medium"
+            >Process now</button>
+          </div>
+        </div>
+      )}
+      {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
+      {todayPlan?.generatedGuidance && (
+        <div className="relative p-4 rounded-xl overflow-hidden border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.12) 0%, oklch(0.72 0.17 65 / 0.08) 100%)'}}>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
+          </div>
+          <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
       )}
 
@@ -887,6 +964,17 @@ export default function Home() {
                 </p>
               </div>
             )}
+            {/* Inject most recent decision for this project into Start Here */}
+            {recentDecisions && (() => {
+              const projectDecision = recentDecisions.find((d: any) => d.projectId === topProject.id);
+              if (!projectDecision) return null;
+              return (
+                <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-3">
+                  <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Last decision</p>
+                  <p className="text-xs text-foreground/80 leading-snug">{projectDecision.content}</p>
+                </div>
+              );
+            })()}
             <div className="flex items-center gap-2 justify-end">
               <button
                 onClick={() => setReEntryProjectId(reEntryProjectId === topProject.id ? null : topProject.id)}
