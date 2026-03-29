@@ -233,6 +233,16 @@ export default function SettingsPage() {
   const [morningTime, setMorningTime] = useState("08:00");
   const [middayTime, setMiddayTime] = useState("12:00");
   const [eveningTime, setEveningTime] = useState("17:00");
+  const [frictionOpen, setFrictionOpen] = useState(false);
+  const [frictionNote, setFrictionNote] = useState("");
+  const submitFriction = trpc.friction.submit.useMutation({
+    onSuccess: () => {
+      toast.success("Noted. Thank you.");
+      setFrictionNote("");
+      setFrictionOpen(false);
+    },
+    onError: () => toast.error("Could not save note."),
+  });
 
   const tabs = [
     { id: "profile" as const, label: "Profile", icon: User },
@@ -314,6 +324,45 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Friction log */}
+          <div className="p-4 rounded-xl border border-dashed border-border">
+            {!frictionOpen ? (
+              <button
+                onClick={() => setFrictionOpen(true)}
+                className="w-full text-left text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+              >
+                Something felt off? <span className="underline underline-offset-2">Leave a quick note</span>
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-foreground">What felt off?</p>
+                <textarea
+                  value={frictionNote}
+                  onChange={(e) => setFrictionNote(e.target.value)}
+                  placeholder="Anything confusing, broken, or frustrating — even small things..."
+                  rows={3}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-colors"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="text-xs h-7 bg-primary text-white hover:bg-primary/90"
+                    disabled={!frictionNote.trim() || submitFriction.isPending}
+                    onClick={() => submitFriction.mutate({ note: frictionNote, pageContext: "settings" })}
+                  >
+                    Send note
+                  </Button>
+                  <button
+                    onClick={() => { setFrictionOpen(false); setFrictionNote(""); }}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

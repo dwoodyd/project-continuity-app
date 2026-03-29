@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `friction_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`note` text NOT NULL,\n\t`pageContext` varchar(255),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `friction_logs_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `friction_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`note` text NOT NULL,\n\t`pageContext` varchar(255),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `friction_logs_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 139
+}

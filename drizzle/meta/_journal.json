@@ -43,6 +43,13 @@
       "when": 1774745852547,
       "tag": "0005_new_northstar",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774750223755,
+      "tag": "0006_puzzling_gravity",
+      "breakpoints": true
     }
   ]
 }

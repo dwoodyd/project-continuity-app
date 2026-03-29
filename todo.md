@@ -320,40 +320,40 @@
 ## Revision Brief 6 — Test-Drive Readiness Pass
 
 ### P1: Welcome / Home / Hero Page
-- [ ] Create WelcomePage.tsx with 5 sections: Hero, How It Works, Core Spaces, Daily Rhythm, Soft Guidance
-- [ ] Hero: app name, one-sentence description, short paragraph, primary CTA (Get Started / Open Command Center)
-- [ ] How It Works: 4 steps (gather → choose → check in → carry forward)
-- [ ] Core Spaces: Command Center + Knowledge Vault explanations
-- [ ] Daily Rhythm: Morning / Midday / Evening cards
-- [ ] Soft Guidance: "here to help you continue, not just collect"
-- [ ] Entry actions: Get Started, Open Command Center, View Projects, Explore Knowledge Vault
-- [ ] Returning user: fast path to Command Center, not obstructed
-- [ ] Revisitable from sidebar (Home / Welcome link)
-- [ ] Design: elegant, spacious, aligned with Continuary brand (indigo + amber)
+- [x] Create WelcomePage.tsx with 5 sections: Hero, How It Works, Core Spaces, Daily Rhythm, Soft Guidance
+- [x] Hero: app name, one-sentence description, short paragraph, primary CTA (Get Started / Open Command Center)
+- [x] How It Works: 4 steps (gather → choose → check in → carry forward)
+- [x] Core Spaces: Command Center + Knowledge Vault explanations
+- [x] Daily Rhythm: Morning / Midday / Evening cards
+- [x] Soft Guidance: "here to help you continue, not just collect"
+- [x] Entry actions: Get Started, Open Command Center, View Projects, Explore Knowledge Vault
+- [x] Returning user: fast path to Command Center, not obstructed
+- [x] Revisitable from sidebar (Home / Welcome link)
+- [x] Design: elegant, spacious, aligned with Continuary brand (indigo + amber)
 
 ### P2: Onboarding-Generated Start Here Card
-- [ ] After onboarding completes, call AI to generate first Start Here card
-- [ ] Use project title, Why It Matters, work style, tone, focus hours
-- [ ] First action: concrete, small, easy to begin
-- [ ] Fallback: "Define what done looks like for the first phase of [project]" if sparse data
-- [ ] No empty Command Center on first landing
+- [x] After onboarding completes, call AI to generate first Start Here card
+- [x] Use project title, Why It Matters, work style, tone, focus hours
+- [x] First action: concrete, small, easy to begin
+- [x] Fallback: "Define what done looks like for the first phase of [project]" if sparse data
+- [x] No empty Command Center on first landing
 
 ### P3: Notification Permission Prompt
-- [ ] Inline prompt on Command Center after first morning check-in (not a modal)
-- [ ] Copy: "Get reminded at the right moments. Enable notifications?"
-- [ ] Two options: "Yes, enable" and "Maybe later"
-- [ ] Yes: trigger browser permission request
-- [ ] Later: dismiss, do not surface again for 48 hours
-- [ ] Not shown before first morning check-in is complete
+- [x] Inline prompt on Command Center after first morning check-in (not a modal)
+- [x] Copy: "Get reminded at the right moments. Enable notifications?"
+- [x] Two options: "Yes, enable" and "Maybe later"
+- [x] Yes: trigger browser permission request
+- [x] Later: dismiss, do not surface again for 48 hours
+- [x] Not shown before first morning check-in is complete
 
 ### P4: Settings Time Picker Polish
-- [ ] Replace text inputs for morning/midday/evening times with native <input type="time">
-- [ ] Styled to match navy + amber design system
-- [ ] Mobile triggers native time picker
-- [ ] Desktop renders cleanly inline
+- [x] Replace text inputs for morning/midday/evening times with native <input type="time">
+- [x] Styled to match navy + amber design system
+- [x] Mobile triggers native time picker
+- [x] Desktop renders cleanly inline
 
 ### P5: Tester Friction Log
-- [ ] Small "Something felt off?" link in Settings
-- [ ] Quick note field, private, minimal
-- [ ] Saves to database with timestamp
-- [ ] No major feature — just a lightweight capture hook
+- [x] Small "Something felt off?" link in Settings
+- [x] Quick note field, private, minimal
+- [x] Saves to database with timestamp
+- [x] No major feature — just a lightweight capture hook

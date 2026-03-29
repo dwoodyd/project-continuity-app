@@ -337,3 +337,14 @@ export const notificationLog = mysqlTable("notification_log", {
 });
 export type NotificationLog = typeof notificationLog.$inferSelect;
 export type InsertNotificationLog = typeof notificationLog.$inferInsert;
+
+// ─── Friction Logs ────────────────────────────────────────────────────────────
+export const frictionLogs = mysqlTable("friction_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  note: text("note").notNull(),
+  pageContext: varchar("pageContext", { length: 255 }), // optional: which page/feature
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FrictionLog = typeof frictionLogs.$inferSelect;
+export type InsertFrictionLog = typeof frictionLogs.$inferInsert;

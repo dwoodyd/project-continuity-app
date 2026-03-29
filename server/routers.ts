@@ -11,6 +11,7 @@ import { dailyPlanRouter } from "./routers/dailyPlan";
 import { focusSessionsRouter } from "./routers/focusSessions";
 import { intelligenceRouter } from "./routers/intelligence";
 import { notificationsRouter } from "./routers/notifications";
+import { frictionRouter } from "./routers/friction";
 
 export const appRouter = router({
   system: systemRouter,
@@ -31,6 +32,7 @@ export const appRouter = router({
   focusSessions: focusSessionsRouter,
   intelligence: intelligenceRouter,
   notifications: notificationsRouter,
+  friction: frictionRouter,
 });
 
 export type AppRouter = typeof appRouter;
