@@ -4,7 +4,39 @@ import { protectedProcedure, router } from "../_core/trpc";
 
 export const settingsRouter = router({
   getProfile: protectedProcedure.query(async ({ ctx }) => {
-    return getUserProfile(ctx.user.id);
+    const existing = await getUserProfile(ctx.user.id);
+    if (existing) return existing;
+    // Auto-create a default profile so tRPC never returns undefined
+    await upsertUserProfile({ userId: ctx.user.id });
+    return (await getUserProfile(ctx.user.id)) ?? {
+      id: 0,
+      userId: ctx.user.id,
+      timezone: "America/New_York",
+      tonePreference: "direct" as const,
+      focusHoursStart: "09:00",
+      focusHoursEnd: "17:00",
+      morningCheckInTime: "08:00",
+      middayCheckInTime: "12:00",
+      eveningCheckInTime: "17:00",
+      coldProjectThresholdDays: 5,
+      weeklyReviewDay: "sunday" as const,
+      fontSizePreference: "medium" as const,
+      notificationsEnabled: true,
+      morningNotifEnabled: true,
+      middayNotifEnabled: true,
+      eveningNotifEnabled: true,
+      coldProjectNotifEnabled: true,
+      sanctuaryNotifEnabled: true,
+      notifMessageRotation: null,
+      onboardingCompleted: false,
+      workStyle: null,
+      preferredFocusHours: "morning" as const,
+      workTypes: null,
+      distractionPatterns: null,
+      primaryDistraction: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
   }),
 
   completeOnboarding: protectedProcedure
