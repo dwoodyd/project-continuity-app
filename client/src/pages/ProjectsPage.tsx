@@ -162,8 +162,20 @@ function CreateProjectModal({ onClose, onCreated }: { onClose: () => void; onCre
   );
 }
 
+// ─── Health Score Dot ────────────────────────────────────────────────────────
+function HealthDot({ score }: { score?: number }) {
+  if (score === undefined) return null;
+  const color = score >= 70 ? "bg-emerald-400" : score >= 45 ? "bg-amber-400" : "bg-red-400";
+  return (
+    <span
+      title={`Health score: ${score}`}
+      className={cn("w-2 h-2 rounded-full shrink-0 ring-1 ring-white/20", color)}
+    />
+  );
+}
+
 // ─── Project Card ─────────────────────────────────────────────────────────────
-function ProjectCard({ project, onClick }: { project: any; onClick: () => void }) {
+function ProjectCard({ project, onClick, healthScore }: { project: any; onClick: () => void; healthScore?: number }) {
   const cfg = statusConfig[project.status as ProjectStatus] ?? statusConfig.idea;
   const priorityCfg = priorityConfig[project.priorityLevel as keyof typeof priorityConfig] ?? priorityConfig.medium;
 
@@ -177,6 +189,12 @@ function ProjectCard({ project, onClick }: { project: any; onClick: () => void }
           <div className="flex items-center gap-2 mb-1.5">
             <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
             <span className={cn("text-xs font-medium", cfg.color)}>{cfg.label}</span>
+            {healthScore !== undefined && (
+              <span className="flex items-center gap-1 ml-1">
+                <HealthDot score={healthScore} />
+                <span className="text-xs text-muted-foreground/60">{healthScore}</span>
+              </span>
+            )}
             <span className={cn("text-xs font-medium ml-auto", priorityCfg)}>{project.priorityLevel}</span>
           </div>
           <p className="text-sm font-semibold text-foreground">{project.title}</p>
@@ -209,6 +227,12 @@ export default function ProjectsPage() {
   const [filter, setFilter] = useState<ProjectStatus | "all">("all");
 
   const { data: projects, refetch } = trpc.projects.list.useQuery();
+  const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
+
+  // Build projectId → score map
+  const scoreMap = new Map<number, number>(
+    (healthScores ?? []).map((hs: any) => [hs.projectId, hs.score])
+  );
 
   const filtered = projects?.filter((p) =>
     filter === "all" ? p.status !== "archived" : p.status === filter
@@ -285,6 +309,7 @@ export default function ProjectsPage() {
             <ProjectCard
               key={project.id}
               project={project}
+              healthScore={scoreMap.get(project.id)}
               onClick={() => navigate(`/projects/${project.id}`)}
             />
           ))}

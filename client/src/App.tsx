@@ -16,6 +16,7 @@ import FocusModePage from "./pages/FocusModePage";
 import OnboardingPage from "./pages/OnboardingPage";
 import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
+import IntelligencePage from "./pages/IntelligencePage";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
             <Route path="/weekly" component={WeeklyReviewPage} />
             <Route path="/compass" component={WeeklyCompassPage} />
             <Route path="/welcome" component={WelcomePage} />
+            <Route path="/intelligence" component={IntelligencePage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />

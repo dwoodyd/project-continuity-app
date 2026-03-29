@@ -348,3 +348,43 @@ export const frictionLogs = mysqlTable("friction_logs", {
 });
 export type FrictionLog = typeof frictionLogs.$inferSelect;
 export type InsertFrictionLog = typeof frictionLogs.$inferInsert;
+
+// ─── Project Health Scores ────────────────────────────────────────────────────
+export const projectHealthScores = mysqlTable("project_health_scores", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId").notNull(),
+  score: int("score").notNull().default(50), // 0-100
+  momentum: mysqlEnum("momentum", ["rising", "steady", "fading", "stalled"]).default("steady"),
+  riskLevel: mysqlEnum("riskLevel", ["low", "medium", "high"]).default("low"),
+  completionRate: int("completionRate").default(0), // 0-100 percent
+  stalledDays: int("stalledDays").default(0),
+  lastActivityAt: timestamp("lastActivityAt"),
+  narrative: text("narrative"), // short AI-generated sentence
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+});
+export type ProjectHealthScore = typeof projectHealthScores.$inferSelect;
+export type InsertProjectHealthScore = typeof projectHealthScores.$inferInsert;
+
+// ─── Pattern Insights ─────────────────────────────────────────────────────────
+export const patternInsights = mysqlTable("pattern_insights", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: mysqlEnum("type", [
+    "distraction_pattern",
+    "stall_pattern",
+    "decision_debt",
+    "capacity_mismatch",
+    "momentum_drop",
+    "cross_project_conflict",
+    "positive_pattern",
+  ]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  body: text("body").notNull(),
+  affectedProjectIds: json("affectedProjectIds").$type<number[]>().default([]),
+  severity: mysqlEnum("severity", ["info", "warning", "critical"]).default("info"),
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+  dismissedAt: timestamp("dismissedAt"),
+});
+export type PatternInsight = typeof patternInsights.$inferSelect;
+export type InsertPatternInsight = typeof patternInsights.$inferInsert;

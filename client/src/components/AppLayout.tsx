@@ -54,6 +54,7 @@ const navItems = [
   { href: "/projects", label: "Projects", icon: Archive, description: "All projects" },
   { href: "/weekly", label: "Weekly Review", icon: Archive, description: "Patterns & progress" },
   { href: "/compass", label: "Weekly Compass", icon: Compass, description: "This week's direction" },
+  { href: "/intelligence", label: "Intelligence", icon: Lightbulb, description: "Patterns & health scores" },
   { href: "/welcome", label: "About Continuary", icon: Home, description: "Orientation & overview" },
   { href: "/settings", label: "Settings", icon: Settings, description: "Preferences" },
 ];

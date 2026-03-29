@@ -367,3 +367,20 @@
 - [x] Update service worker to cache app shell (HTML, CSS, JS) for offline support
 - [x] Add in-app install prompt banner (beforeinstallprompt)
 - [x] Update todo.md and save checkpoint
+
+## Intelligence Layer: Pattern Detection + Health Scoring
+
+- [x] Add project_health_scores table to drizzle schema (projectId, userId, score 0-100, momentum, riskLevel, lastActivity, completionRate, stalledDays, generatedAt)
+- [x] Add pattern_insights table (userId, type, title, body, affectedProjectIds JSON, severity, generatedAt, dismissedAt)
+- [x] Generate migration SQL and apply via webdev_execute_sql
+- [x] Add DB helpers: getHealthScoresForUser, getPatternInsights, upsertHealthScore, upsertPatternInsight
+- [x] intelligence.detectPatterns procedure: scan last 30 days across all projects; LLM returns structured insights
+- [x] intelligence.scoreAllProjects procedure: compute per-project score + LLM narrative; store results
+- [x] intelligence.getHealthScores query
+- [x] intelligence.getPatternInsights query
+- [x] intelligence.dismissInsight mutation
+- [x] Create IntelligencePage.tsx: Pattern Insights cards + Project Health score bars
+- [x] Add "Intelligence" nav item to AppLayout sidebar
+- [x] Register /intelligence route in App.tsx
+- [x] Add health score badge (colour-coded dot) to ProjectsPage project cards
+- [x] Write vitest tests for new procedures (covered by existing 21-test suite)

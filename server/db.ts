@@ -43,6 +43,12 @@ import {
   FocusSession,
   pushSubscriptions,
   notificationLog,
+  projectHealthScores,
+  patternInsights,
+  ProjectHealthScore,
+  InsertProjectHealthScore,
+  PatternInsight,
+  InsertPatternInsight,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -610,4 +616,69 @@ export async function getRecentNotificationLog(
     )
     .orderBy(desc(notificationLog.sentAt))
     .limit(1);
+}
+
+// ─── Project Health Scores ────────────────────────────────────────────────────
+export async function getHealthScoresForUser(userId: number): Promise<ProjectHealthScore[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projectHealthScores)
+    .where(eq(projectHealthScores.userId, userId))
+    .orderBy(desc(projectHealthScores.generatedAt));
+}
+
+export async function getHealthScoreForProject(userId: number, projectId: number): Promise<ProjectHealthScore | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(projectHealthScores)
+    .where(and(eq(projectHealthScores.userId, userId), eq(projectHealthScores.projectId, projectId)))
+    .orderBy(desc(projectHealthScores.generatedAt))
+    .limit(1);
+  return result[0];
+}
+
+export async function upsertHealthScore(data: InsertProjectHealthScore): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Delete old score for this project first, then insert fresh
+  await db.delete(projectHealthScores)
+    .where(and(eq(projectHealthScores.userId, data.userId), eq(projectHealthScores.projectId, data.projectId!)));
+  await db.insert(projectHealthScores).values(data);
+}
+
+// ─── Pattern Insights ─────────────────────────────────────────────────────────
+export async function getActivePatternInsights(userId: number): Promise<PatternInsight[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(patternInsights)
+    .where(and(
+      eq(patternInsights.userId, userId),
+      sql`${patternInsights.dismissedAt} IS NULL`
+    ))
+    .orderBy(desc(patternInsights.generatedAt))
+    .limit(20);
+}
+
+export async function insertPatternInsight(data: InsertPatternInsight): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(patternInsights).values(data);
+  return (result[0] as any).insertId;
+}
+
+export async function dismissPatternInsight(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(patternInsights)
+    .set({ dismissedAt: new Date() })
+    .where(and(eq(patternInsights.id, id), eq(patternInsights.userId, userId)));
+}
+
+export async function clearOldPatternInsights(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Remove insights older than 14 days
+  const cutoff = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+  await db.delete(patternInsights)
+    .where(and(eq(patternInsights.userId, userId), lte(patternInsights.generatedAt, cutoff)));
 }
