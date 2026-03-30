@@ -413,3 +413,8 @@
 - [x] Update PWA manifest icons with real brand icon CDN URLs
 - [x] Update apple-touch-icon and favicon with real brand icon CDN URLs
 - [x] Save checkpoint
+
+## Logo Polish
+
+- [x] Enlarge sidebar horizontal lockup logo (h-9 → h-11)
+- [x] Login screen: remove card background shading from icon, icon sits clean on page background, increase icon size

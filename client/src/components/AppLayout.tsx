@@ -92,38 +92,36 @@ export default function AppLayout({ children }: AppLayoutProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
-          <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
-            <div className="flex justify-center mb-8">
-              <div className="flex flex-col items-center gap-4">
-                {/* Real brand icon */}
-                <img
-                  src={BRAND_ICON}
-                  alt="Continuary"
-                  className="w-20 h-20 object-contain"
-                />
-                <div className="text-center">
-                  <h1 className="text-2xl font-brand font-medium text-foreground" style={{ fontFamily: "'Lora', Georgia, serif" }}>Continuary</h1>
-                  <p className="text-xs text-muted-foreground mt-0.5 tracking-widest uppercase">Command Center</p>
-                </div>
+          <div className="flex flex-col items-center gap-6">
+            {/* Brand icon — clean, no card/shadow behind it */}
+            <div className="flex flex-col items-center gap-3">
+              <img
+                src={BRAND_ICON}
+                alt="Continuary"
+                className="w-28 h-28 object-contain"
+              />
+              <div className="text-center">
+                <h1 className="text-3xl font-medium text-foreground" style={{ fontFamily: "'Lora', Georgia, serif" }}>Continuary</h1>
+                <p className="text-xs text-muted-foreground mt-1 tracking-widest uppercase">Command Center</p>
               </div>
             </div>
 
-            <div className="border-t border-border mb-6" />
-
-            <p className="text-sm text-muted-foreground text-center mb-6 leading-relaxed">
-              A structured command center for execution. Turn scattered notes into daily focus.
-            </p>
-
-            <a
-              href={getLoginUrl()}
-              className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
-            >
-              Sign in to continue
-              <ChevronRight className="w-4 h-4" />
-            </a>
+            {/* Sign-in card */}
+            <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg">
+              <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
+                A structured command center for execution. Turn scattered notes into daily focus.
+              </p>
+              <a
+                href={getLoginUrl()}
+                className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
+              >
+                Sign in to continue
+                <ChevronRight className="w-4 h-4" />
+              </a>
+            </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground/50 mt-4">
+          <p className="text-center text-xs text-muted-foreground/50 mt-6">
             Built for minds that move fast.
           </p>
         </div>
@@ -167,12 +165,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0"
         style={{ background: "var(--sidebar)" }}>
         {/* Logo lockup — horizontal brand logo */}
-        <div className="px-4 py-4 border-b border-white/10">
+        <div className="px-4 py-5 border-b border-white/10">
           <Link href="/" className="flex items-center group">
             <img
               src={BRAND_LOGO_DARK}
               alt="Continuary"
-              className="h-9 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
+              className="h-11 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
             />
           </Link>
         </div>
@@ -217,11 +215,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
         )}
         style={{ background: "var(--sidebar)" }}
       >
-        <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="px-4 py-5 border-b border-white/10 flex items-center justify-between">
           <img
             src={BRAND_LOGO_DARK}
             alt="Continuary"
-            className="h-8 w-auto object-contain"
+            className="h-10 w-auto object-contain"
           />
           <button onClick={() => setSidebarOpen(false)} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <X className="w-5 h-5" />
