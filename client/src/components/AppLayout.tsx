@@ -24,29 +24,9 @@ import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
-// ── Continuary logo mark (open infinity loop) ─────────────────────────────────
-function ContinuaryMark({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 40 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-hidden="true"
-    >
-      {/* Left full circle */}
-      <circle cx="12" cy="12" r="9" strokeWidth="4" stroke="currentColor" fill="none" />
-      {/* Right open arc — gap at top-right ~40deg */}
-      <path
-        d="M21 12 A9 9 0 1 1 28.36 5.64"
-        strokeWidth="4"
-        stroke="currentColor"
-        fill="none"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
+// ── Brand CDN URLs ───────────────────────────────────────────────────────────
+const BRAND_ICON = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_71cad82a.png";
+const BRAND_LOGO_DARK = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-horizontal-dark-web_9b727cb8.png";
 
 const navItems = [
   { href: "/", label: "Command Center", icon: Brain, description: "Today's focus" },
@@ -115,12 +95,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <div className="bg-card border border-border rounded-2xl p-8 shadow-lg">
             <div className="flex justify-center mb-8">
               <div className="flex flex-col items-center gap-4">
-                {/* Indigo icon badge */}
-                <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-                  <ContinuaryMark className="w-9 h-6 text-white" />
-                </div>
+                {/* Real brand icon */}
+                <img
+                  src={BRAND_ICON}
+                  alt="Continuary"
+                  className="w-20 h-20 object-contain"
+                />
                 <div className="text-center">
-                  <h1 className="text-xl font-semibold tracking-[-0.02em] text-foreground">Continuary</h1>
+                  <h1 className="text-2xl font-brand font-medium text-foreground" style={{ fontFamily: "'Lora', Georgia, serif" }}>Continuary</h1>
                   <p className="text-xs text-muted-foreground mt-0.5 tracking-widest uppercase">Command Center</p>
                 </div>
               </div>
@@ -184,16 +166,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* ── Desktop Sidebar — dark indigo ───────────────────────────────────── */}
       <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0"
         style={{ background: "var(--sidebar)" }}>
-        {/* Logo lockup */}
-        <div className="px-5 py-5 border-b border-white/10">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shrink-0 shadow-md group-hover:bg-amber-300 transition-colors">
-              <ContinuaryMark className="w-5 h-3 text-amber-950" />
-            </div>
-            <div>
-              <p className="text-[14px] font-semibold tracking-[-0.02em] text-white leading-none">Continuary</p>
-              <p className="text-[10px] text-white/40 mt-0.5 tracking-widest uppercase">Command Center</p>
-            </div>
+        {/* Logo lockup — horizontal brand logo */}
+        <div className="px-4 py-4 border-b border-white/10">
+          <Link href="/" className="flex items-center group">
+            <img
+              src={BRAND_LOGO_DARK}
+              alt="Continuary"
+              className="h-9 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
+            />
           </Link>
         </div>
 
@@ -237,16 +217,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
         )}
         style={{ background: "var(--sidebar)" }}
       >
-        <div className="px-5 py-5 border-b border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-400 flex items-center justify-center shadow-md">
-              <ContinuaryMark className="w-5 h-3 text-amber-950" />
-            </div>
-            <div>
-              <p className="text-[14px] font-semibold tracking-[-0.02em] text-white leading-none">Continuary</p>
-              <p className="text-[10px] text-white/40 mt-0.5 tracking-widest uppercase">Command Center</p>
-            </div>
-          </div>
+        <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between">
+          <img
+            src={BRAND_LOGO_DARK}
+            alt="Continuary"
+            className="h-8 w-auto object-contain"
+          />
           <button onClick={() => setSidebarOpen(false)} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <X className="w-5 h-5" />
           </button>
@@ -304,12 +280,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-amber-400 flex items-center justify-center shadow-sm">
-              <ContinuaryMark className="w-4 h-2.5 text-amber-950" />
-            </div>
-            <span className="text-[14px] font-semibold tracking-[-0.02em] text-white">Continuary</span>
-          </div>
+          <img
+            src={BRAND_LOGO_DARK}
+            alt="Continuary"
+            className="h-7 w-auto object-contain"
+          />
           <button onClick={toggleTheme} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>

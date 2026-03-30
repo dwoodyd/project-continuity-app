@@ -59,24 +59,24 @@
 :root {
   --radius: 0.625rem;
 
-  /* ── Brand indigo ── */
-  --primary: oklch(0.51 0.24 264);          /* #4F46E5 indigo-600 */
+  /* ── Brand navy (Continuary brand primary) ── */
+  --primary: oklch(0.28 0.07 264);          /* #1B2A4A deep navy */
   --primary-foreground: oklch(0.99 0 0);
 
-  /* ── Warm amber accent ── */
-  --brand: oklch(0.72 0.17 65);             /* amber-500 */
-  --brand-foreground: oklch(0.15 0.02 65);
-  --brand-muted: oklch(0.95 0.06 65);       /* amber-50 */
+  /* ── Warm amber accent (bird eye dot) ── */
+  --brand: oklch(0.72 0.15 55);             /* #D4A853 warm gold-amber */
+  --brand-foreground: oklch(0.15 0.02 55);
+  --brand-muted: oklch(0.96 0.04 55);       /* amber-50 */
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.72 0.17 65);
-  --amber-foreground: oklch(0.15 0.02 65);
+  --amber: oklch(0.72 0.15 55);
+  --amber-foreground: oklch(0.15 0.02 55);
   --emerald: oklch(0.60 0.17 155);
   --emerald-foreground: oklch(0.99 0 0);
 
   /* ── Page surfaces ── */
-  --background: oklch(0.975 0.005 80);      /* warm off-white */
-  --foreground: oklch(0.15 0.015 264);      /* near-black with indigo tint */
+  --background: oklch(0.975 0.005 80);      /* warm cream off-white */
+  --foreground: oklch(0.18 0.05 264);       /* near-black with navy tint */
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.015 264);
@@ -100,15 +100,15 @@
   --input: oklch(0.88 0.012 264);
   --ring: oklch(0.51 0.24 264);
 
-  /* ── Sidebar: dark indigo ── */
-  --sidebar: oklch(0.21 0.06 264);          /* indigo-950 */
-  --sidebar-foreground: oklch(0.92 0.01 264);
-  --sidebar-primary: oklch(0.72 0.17 65);   /* amber active */
-  --sidebar-primary-foreground: oklch(0.15 0.02 65);
-  --sidebar-accent: oklch(0.28 0.07 264);   /* indigo-900 hover */
-  --sidebar-accent-foreground: oklch(0.92 0.01 264);
-  --sidebar-border: oklch(0.30 0.07 264);
-  --sidebar-ring: oklch(0.72 0.17 65);
+  /* ── Sidebar: brand navy ── */
+  --sidebar: oklch(0.18 0.05 264);          /* #1B2A4A brand navy */
+  --sidebar-foreground: oklch(0.93 0.01 264);
+  --sidebar-primary: oklch(0.72 0.15 55);   /* amber active */
+  --sidebar-primary-foreground: oklch(0.15 0.02 55);
+  --sidebar-accent: oklch(0.24 0.06 264);   /* navy hover */
+  --sidebar-accent-foreground: oklch(0.93 0.01 264);
+  --sidebar-border: oklch(0.28 0.07 264);
+  --sidebar-ring: oklch(0.72 0.15 55);
 
   /* ── Charts ── */
   --chart-1: oklch(0.51 0.24 264);
@@ -198,6 +198,10 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
     line-height: 1.6;
+  }
+  /* Brand serif — used for wordmark, page headings, and brand moments */
+  .font-brand {
+    font-family: 'Lora', Georgia, 'Times New Roman', serif;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

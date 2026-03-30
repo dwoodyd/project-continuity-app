@@ -400,3 +400,16 @@
 - [x] Fix completeOnboarding mutation to reliably persist onboardingCompleted=true
 - [x] Fix onboarding gate to not re-show wizard once flag is set
 - [x] Verify fix works for new users on published domain
+
+## Brand Asset Update
+
+- [x] Review all 7 brand PDFs (icon, horizontal lockup, stacked lockup, wordmark variants, dark bg horizontal)
+- [x] Convert PDFs to high-res PNG assets using poppler/ImageMagick
+- [x] Upload all brand assets to CDN via manus-upload-file --webdev
+- [x] Replace placeholder SVG ContinuaryMark with real icon in AppLayout, OnboardingPage, AppLayout login screen
+- [x] Apply brand typography (Lora serif loaded via Google Fonts, font-brand utility class added)
+- [x] Update sidebar logo to use horizontal dark lockup
+- [x] Update login/auth screen to use real icon + Lora wordmark
+- [x] Update PWA manifest icons with real brand icon CDN URLs
+- [x] Update apple-touch-icon and favicon with real brand icon CDN URLs
+- [x] Save checkpoint
