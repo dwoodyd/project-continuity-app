@@ -89,10 +89,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Onboarding gate: redirect first-time users before rendering the main app
   const [, navigate] = useLocation();
   useEffect(() => {
-    if (isAuthenticated && profile && profile.onboardingCompleted === false) {
+    if (isAuthenticated && profile && profile.onboardingCompleted === false && location !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [isAuthenticated, profile, navigate]);
+  }, [isAuthenticated, profile, navigate, location]);
 
   // Show auth error toast if redirected back with ?auth_error=...
   useEffect(() => {

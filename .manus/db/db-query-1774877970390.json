@@ -1,0 +1,9 @@
+{
+  "query": "SELECT userId, COUNT(*) as cnt FROM user_profiles GROUP BY userId HAVING cnt > 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT userId, COUNT(*) as cnt FROM user_profiles GROUP BY userId HAVING cnt > 1;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 174
+}

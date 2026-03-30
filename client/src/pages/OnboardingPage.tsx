@@ -64,6 +64,7 @@ function StepDots({ current, total }: { current: number; total: number }) {
 export default function OnboardingPage() {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const [step, setStep] = useState(0);
 
   const [name, setName] = useState(user?.name?.split(" ")[0] ?? "");
@@ -108,6 +109,9 @@ export default function OnboardingPage() {
         focusHoursEnd: focusEndMap[preferredFocusHours] ?? "17:00",
         tonePreference,
       });
+      // Invalidate the profile cache so AppLayout reads the updated onboardingCompleted=true
+      // before navigating, preventing the redirect loop
+      await utils.settings.getProfile.invalidate();
       // Generate AI first action if a project was created
       if (createdProjectId) {
         try {

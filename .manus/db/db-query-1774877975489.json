@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, userId, onboardingCompleted, createdAt, updatedAt FROM user_profiles ORDER BY userId, createdAt;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT id, userId, onboardingCompleted, createdAt, updatedAt FROM user_profiles ORDER BY userId, createdAt;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "1",
+      "onboardingCompleted": "1",
+      "createdAt": "2026-03-29 02:28:45",
+      "updatedAt": "2026-03-29 06:35:06"
+    },
+    {
+      "id": "30001",
+      "userId": "240001",
+      "onboardingCompleted": "1",
+      "createdAt": "2026-03-30 13:16:08",
+      "updatedAt": "2026-03-30 13:17:20"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tonboardingCompleted\tcreatedAt\tupdatedAt\n1\t1\t1\t2026-03-29 02:28:45\t2026-03-29 06:35:06\n30001\t240001\t1\t2026-03-30 13:16:08\t2026-03-30 13:17:20\n",
+  "stderr": "",
+  "execution_time_ms": 140
+}

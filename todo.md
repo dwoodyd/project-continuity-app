@@ -393,3 +393,10 @@
 - [x] Add focusModeEnabled + driftDetectionEnabled to updateSettings z.object input schema
 - [x] Fix SettingsPage ADHD toggle keys: morningCheckInEnabled → morningNotifEnabled, middayCheckInEnabled → middayNotifEnabled, eveningCheckInEnabled → eveningNotifEnabled
 - [x] Verify all 5 toggles read back correctly from settings.getProfile response
+
+## Bug: Onboarding Loop
+
+- [x] Diagnose why onboarding wizard loops back to Step 1 after completion
+- [x] Fix completeOnboarding mutation to reliably persist onboardingCompleted=true
+- [x] Fix onboarding gate to not re-show wizard once flag is set
+- [x] Verify fix works for new users on published domain
