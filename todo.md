@@ -418,3 +418,7 @@
 
 - [x] Enlarge sidebar horizontal lockup logo (h-9 → h-11)
 - [x] Login screen: remove card background shading from icon, icon sits clean on page background, increase icon size
+
+## Install App Button
+
+- [x] Add "Install App" button to Settings page — triggers beforeinstallprompt on Android, shows Share sheet tip on iOS

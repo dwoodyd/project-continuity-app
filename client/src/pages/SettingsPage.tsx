@@ -16,6 +16,8 @@ import {
   Trash2,
   BookOpen,
   ArrowUpRight,
+  Smartphone,
+  Share,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -229,6 +231,36 @@ export default function SettingsPage() {
     onError: () => toast.error("Failed to save settings."),
   });
 
+  // PWA install state
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [showIOSTip, setShowIOSTip] = useState(false);
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
+
+  // Capture the install prompt on Android/Chrome
+  useState(() => {
+    if (isInStandalone) { setIsInstalled(true); return; }
+    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
+    window.addEventListener('beforeinstallprompt', handler as EventListener);
+    return () => window.removeEventListener('beforeinstallprompt', handler as EventListener);
+  });
+
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowIOSTip(true);
+      return;
+    }
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') { setIsInstalled(true); toast.success('App installed!'); }
+      setDeferredPrompt(null);
+    } else {
+      toast.info('Open this page in Chrome or Safari to install the app.');
+    }
+  };
+
   const [activeTab, setActiveTab] = useState<"profile" | "ideas" | "preferences">("profile");
   const [morningTime, setMorningTime] = useState("08:00");
   const [middayTime, setMiddayTime] = useState("12:00");
@@ -311,6 +343,29 @@ export default function SettingsPage() {
                   Switch to {theme === "dark" ? "light" : "dark"}
                 </Button>
               </div>
+              {/* Install App row */}
+              {!isInstalled && (
+                <div className="flex items-center justify-between py-3 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Install App</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isIOS ? "Add to your home screen" : "Install as a native app"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleInstallClick}>
+                    {isIOS ? <><Share className="w-3.5 h-3.5 mr-1" />Install</> : "Install"}
+                  </Button>
+                </div>
+              )}
+              {/* iOS install tip */}
+              {showIOSTip && (
+                <div className="mx-0 px-4 py-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 leading-relaxed border-t border-border">
+                  Tap the <strong>Share</strong> button <span className="inline-block">⬆</span> at the bottom of Safari, then tap <strong>"Add to Home Screen"</strong>.
+                </div>
+              )}
               <div className="flex items-center justify-between py-3 border-t border-border">
                 <div className="flex items-center gap-3">
                   <LogOut className="w-4 h-4 text-muted-foreground" />
