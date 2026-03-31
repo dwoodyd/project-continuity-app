@@ -422,3 +422,7 @@
 ## Install App Button
 
 - [x] Add "Install App" button to Settings page — triggers beforeinstallprompt on Android, shows Share sheet tip on iOS
+
+## Typography Polish
+
+- [x] Apply Lora serif to Command Center greeting heading

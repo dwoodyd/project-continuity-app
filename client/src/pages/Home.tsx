@@ -690,7 +690,7 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
+          <h1 className="text-[1.6rem] font-medium tracking-[-0.01em] text-foreground leading-tight" style={{ fontFamily: "'Lora', Georgia, serif" }}>
             {greeting}, <span className="text-primary">{firstName}</span>.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
