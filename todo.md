@@ -426,3 +426,9 @@
 ## Typography Polish
 
 - [x] Apply Lora serif to Command Center greeting heading
+
+## Bug: Install App Button Not Visible
+
+- [x] Fix useState misused as useEffect (event listener never registers)
+- [x] Remove {!isInstalled} condition hiding the button — always show when not in standalone mode
+- [x] Button shows "Install" on Android/Chrome, "Add to Home Screen" tip on iOS

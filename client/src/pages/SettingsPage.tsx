@@ -19,7 +19,7 @@ import {
   Smartphone,
   Share,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -233,31 +233,30 @@ export default function SettingsPage() {
 
   // PWA install state
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
   const [showIOSTip, setShowIOSTip] = useState(false);
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const isInStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
 
-  // Capture the install prompt on Android/Chrome
-  useState(() => {
-    if (isInStandalone) { setIsInstalled(true); return; }
+  // Capture the beforeinstallprompt event on Android/Chrome
+  useEffect(() => {
     const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler as EventListener);
     return () => window.removeEventListener('beforeinstallprompt', handler as EventListener);
-  });
+  }, []);
 
   const handleInstallClick = async () => {
     if (isIOS) {
-      setShowIOSTip(true);
+      setShowIOSTip((v) => !v);
       return;
     }
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') { setIsInstalled(true); toast.success('App installed!'); }
+      if (outcome === 'accepted') toast.success('App installed! Check your home screen.');
       setDeferredPrompt(null);
     } else {
-      toast.info('Open this page in Chrome or Safari to install the app.');
+      // Fallback: guide user manually
+      setShowIOSTip(true);
     }
   };
 
@@ -343,8 +342,8 @@ export default function SettingsPage() {
                   Switch to {theme === "dark" ? "light" : "dark"}
                 </Button>
               </div>
-              {/* Install App row */}
-              {!isInstalled && (
+              {/* Install App row — always show unless already running as installed PWA */}
+              {!isInStandalone && (
                 <div className="flex items-center justify-between py-3 border-t border-border">
                   <div className="flex items-center gap-3">
                     <Smartphone className="w-4 h-4 text-muted-foreground" />
