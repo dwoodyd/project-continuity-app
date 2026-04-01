@@ -1007,12 +1007,19 @@ export default function Home() {
                 </div>
               );
             })()}
-            <div className="flex items-center gap-2 justify-end">
+            <div className="flex items-center gap-2 justify-end flex-wrap">
               <button
                 onClick={() => setReEntryProjectId(reEntryProjectId === topProject.id ? null : topProject.id)}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 {reEntryProjectId === topProject.id ? "Hide re-entry card" : "Show re-entry card"}
+              </button>
+              <span className="text-muted-foreground/30">·</span>
+              <button
+                onClick={() => navigate("/clarity")}
+                className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors font-medium"
+              >
+                ⚡ Need clarity first?
               </button>
               <span className="text-muted-foreground/30">·</span>
               <button
@@ -1097,9 +1104,17 @@ export default function Home() {
             </div>
             <p className="text-base font-semibold text-white mb-1">No plan for today yet.</p>
             <p className="text-sm text-white/70 mb-5">Start with the morning check-in to set your capacity and focus.</p>
-            <Button size="sm" onClick={() => setActiveCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
-              Start morning check-in
-            </Button>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <Button size="sm" onClick={() => setActiveCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
+                Start morning check-in
+              </Button>
+              <button
+                onClick={() => navigate("/clarity")}
+                className="text-sm text-white/70 hover:text-white transition-colors underline underline-offset-2"
+              >
+                ⚡ Feeling scattered? Open Clarity Engine
+              </button>
+            </div>
           </div>
         </div>
       )}

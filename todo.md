@@ -444,3 +444,8 @@
 - [x] Register /clarity route in App.tsx
 - [x] Add Clarity-to-Action handoff (convert session output to next step / project note / compass item)
 - [x] Run tests and save checkpoint
+
+## Clarity Engine — Command Center Integration
+
+- [x] Add "Feeling scattered? Open Clarity Engine" link to the Start Here card in Home.tsx
+- [x] Also show the link on the empty-plan state (no morning check-in yet)
