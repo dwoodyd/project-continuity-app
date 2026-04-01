@@ -13,6 +13,7 @@ import { intelligenceRouter } from "./routers/intelligence";
 import { notificationsRouter } from "./routers/notifications";
 import { frictionRouter } from "./routers/friction";
 import { intelligenceInsightsRouter } from "./routers/intelligenceInsights";
+import { clarityRouter } from "./routers/clarity";
 
 export const appRouter = router({
   system: systemRouter,
@@ -35,6 +36,7 @@ export const appRouter = router({
   notifications: notificationsRouter,
   friction: frictionRouter,
   insights: intelligenceInsightsRouter,
+  clarity: clarityRouter,
 });
 
 export type AppRouter = typeof appRouter;

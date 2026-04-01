@@ -15,6 +15,7 @@ import {
   Settings,
   Sun,
   X,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -35,6 +36,7 @@ const navItems = [
   { href: "/weekly", label: "Weekly Review", icon: Archive, description: "Patterns & progress" },
   { href: "/compass", label: "Weekly Compass", icon: Compass, description: "This week's direction" },
   { href: "/intelligence", label: "Intelligence", icon: Lightbulb, description: "Patterns & health scores" },
+  { href: "/clarity", label: "Clarity Engine", icon: Zap, description: "Find clarity, take action" },
   { href: "/welcome", label: "About Continuary", icon: Home, description: "Orientation & overview" },
   { href: "/settings", label: "Settings", icon: Settings, description: "Preferences" },
 ];

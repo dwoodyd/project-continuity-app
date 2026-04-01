@@ -432,3 +432,15 @@
 - [x] Fix useState misused as useEffect (event listener never registers)
 - [x] Remove {!isInstalled} condition hiding the button — always show when not in standalone mode
 - [x] Button shows "Install" on Android/Chrome, "Add to Home Screen" tip on iOS
+
+## Clarity Engine (Core Build)
+
+- [x] Add clarity_sessions table to drizzle schema
+- [x] Generate migration SQL and apply via webdev_execute_sql
+- [x] Create server/routers/clarity.ts with runSession, getSessions, getSession, convertToAction procedures
+- [x] Wire clarityRouter into main appRouter
+- [x] Create ClarityEnginePage.tsx: Brain Dump textarea, 6 mode selector, 4-Part Map output, Signal Line, progress marker, history list
+- [x] Add Clarity Engine sidebar nav item
+- [x] Register /clarity route in App.tsx
+- [x] Add Clarity-to-Action handoff (convert session output to next step / project note / compass item)
+- [x] Run tests and save checkpoint

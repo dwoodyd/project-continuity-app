@@ -17,6 +17,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import IntelligencePage from "./pages/IntelligencePage";
+import ClarityEnginePage from "./pages/ClarityEnginePage";
 
 function Router() {
   return (
@@ -34,6 +35,7 @@ function Router() {
             <Route path="/compass" component={WeeklyCompassPage} />
             <Route path="/welcome" component={WelcomePage} />
             <Route path="/intelligence" component={IntelligencePage} />
+            <Route path="/clarity" component={ClarityEnginePage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />

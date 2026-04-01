@@ -390,3 +390,40 @@ export const patternInsights = mysqlTable("pattern_insights", {
 });
 export type PatternInsight = typeof patternInsights.$inferSelect;
 export type InsertPatternInsight = typeof patternInsights.$inferInsert;
+
+// ─── Clarity Engine ───────────────────────────────────────────────────────────
+export const claritySessions = mysqlTable("clarity_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"), // optional link to a project
+  mode: mysqlEnum("mode", [
+    "overwhelm",
+    "decision",
+    "creative_block",
+    "identity_drift",
+    "relationship_tension",
+    "purpose_fog",
+  ]).notNull(),
+  brainDump: text("brainDump").notNull(),
+  whatIsHappening: text("whatIsHappening"),
+  whatYouFeel: text("whatYouFeel"),
+  whatYouNeed: text("whatYouNeed"),
+  nextRightStep: text("nextRightStep"),
+  signalLine: text("signalLine"),
+  progressMarker: mysqlEnum("progressMarker", [
+    "clearer",
+    "still_unsure",
+    "ready_to_act",
+    "need_to_revisit",
+  ]),
+  convertedTo: mysqlEnum("convertedTo", [
+    "next_step",
+    "todays_focus",
+    "project_note",
+    "compass_item",
+    "journal_reflection",
+  ]),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ClaritySession = typeof claritySessions.$inferSelect;
+export type InsertClaritySession = typeof claritySessions.$inferInsert;
