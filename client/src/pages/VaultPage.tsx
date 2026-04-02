@@ -138,11 +138,11 @@ function AddItemModal({
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0">
-        <DialogHeader className="px-5 pt-5 pb-0">
+      <DialogContent className="sm:max-w-lg p-0 flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="text-base font-semibold">Add to Knowledge Vault</DialogTitle>
         </DialogHeader>
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
           {/* Mode toggle */}
           <div className="flex gap-2">
             {[{ v: "paste", label: "Paste / Text" }, { v: "file", label: "Upload File" }].map(({ v, label }) => (

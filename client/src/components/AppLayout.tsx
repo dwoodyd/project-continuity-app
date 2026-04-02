@@ -162,7 +162,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="h-screen bg-background flex overflow-hidden">
       {/* ── Desktop Sidebar — dark indigo ───────────────────────────────────── */}
       <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0"
         style={{ background: "var(--sidebar)" }}>
@@ -227,7 +227,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <X className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -273,9 +273,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* ── Main Content ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Mobile header — dark indigo strip */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 sticky top-0 z-30"
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0 z-30"
           style={{ background: "var(--sidebar)" }}>
           <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
             <Menu className="w-5 h-5" />
@@ -291,7 +291,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto pb-24 lg:pb-6">
+        <main className="flex-1 overflow-y-auto overscroll-contain pb-24 lg:pb-6">
           {children}
         </main>
       </div>

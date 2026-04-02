@@ -449,3 +449,22 @@
 
 - [x] Add "Feeling scattered? Open Clarity Engine" link to the Start Here card in Home.tsx
 - [x] Also show the link on the empty-plan state (no morning check-in yet)
+
+## Scrolling Fixes
+
+- [x] AppLayout: ensure main content area scrolls independently of sidebar
+- [x] Vault note/paste modal: textarea + submit button must be reachable when text is long (modal itself scrolls)
+- [x] Unstuck protocol modal: step list must scroll when it overflows viewport
+- [x] All modals/dialogs: DialogContent must have max-h and overflow-y-auto so tall content is always scrollable
+- [x] ClarityEnginePage: Brain Dump textarea and results area scroll correctly on mobile
+- [x] Focus Mode: full-screen layout scrolls on small screens
+- [x] Settings page: all tabs scroll on mobile
+
+## Clarity Engine Layer 2
+
+- [x] Feature 5: Morning check-in expanded with emotional state, mental load, clarity mode suggestion, optional brain dump
+- [x] Feature 6: Stuck-state intervention — detect rollover tasks / inactivity, prompt Clarity session
+- [x] Feature 8: Pattern recognition across clarity sessions (repeated themes, modes, projects)
+- [x] Feature 9: Weekly Clarity Summary (most used mode, repeated blockers, patterns, progress signals)
+- [x] Feature 13: Project attachment UI on Clarity session form
+- [x] Momentum score surfaced on Command Center active projects list

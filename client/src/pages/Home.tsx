@@ -180,20 +180,92 @@ function CheckInCard({
 }
 
 // ─── Morning Check-In Form ────────────────────────────────────────────────────
+type EmotionalState = "focused" | "anxious" | "foggy" | "energized" | "drained";
+type MentalLoad = "light" | "moderate" | "heavy";
+
+const emotionalStateConfig: Record<EmotionalState, { label: string; emoji: string; color: string; clarityHint?: string }> = {
+  focused:   { label: "Focused",   emoji: "🎯", color: "text-emerald-500" },
+  energized: { label: "Energized", emoji: "⚡", color: "text-amber-500" },
+  foggy:     { label: "Foggy",     emoji: "🌫", color: "text-slate-400",  clarityHint: "Purpose Fog mode may help" },
+  anxious:   { label: "Anxious",   emoji: "😰", color: "text-orange-500", clarityHint: "Overwhelm mode may help" },
+  drained:   { label: "Drained",   emoji: "🪫", color: "text-red-400",    clarityHint: "Overwhelm mode may help" },
+};
+
 function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
   const [capacity, setCapacity] = useState<CapacityLevel>("partial");
   const [notes, setNotes] = useState("");
   const [primaryId, setPrimaryId] = useState<number | undefined>();
+  const [emotionalState, setEmotionalState] = useState<EmotionalState | undefined>();
+  const [mentalLoad, setMentalLoad] = useState<MentalLoad | undefined>();
+  const [, navigate] = useLocation();
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
-    onSuccess: () => {
-      toast.success("Morning plan set. Let's go.");
+    onSuccess: (data) => {
+      toast.success("Morning plan set.");
+      // If clarity mode was suggested and state is anxious/foggy/drained, offer nudge
+      if (data.clarityModeSuggestion) {
+        setTimeout(() => {
+          toast(
+            emotionalStateConfig[emotionalState!]?.clarityHint ?? "Clarity Engine is available.",
+            {
+              description: "A quick clarity session might help before you dive in.",
+              action: { label: "Open", onClick: () => navigate("/clarity") },
+              duration: 7000,
+            }
+          );
+        }, 1200);
+      }
       onComplete();
     },
     onError: () => toast.error("Something went wrong. Try again."),
   });
   return (
     <div className="space-y-5">
+      {/* Emotional State */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-2">How are you feeling right now? <span className="font-normal opacity-60">(optional)</span></p>
+        <div className="flex flex-wrap gap-2">
+          {(Object.entries(emotionalStateConfig) as [EmotionalState, typeof emotionalStateConfig[EmotionalState]][]).map(([state, cfg]) => (
+            <button
+              key={state}
+              onClick={() => setEmotionalState(emotionalState === state ? undefined : state)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all",
+                emotionalState === state
+                  ? "border-primary/40 bg-primary/[0.08] text-foreground"
+                  : "border-border text-muted-foreground hover:border-primary/20"
+              )}
+            >
+              <span>{cfg.emoji}</span>
+              <span>{cfg.label}</span>
+            </button>
+          ))}
+        </div>
+        {emotionalState && emotionalStateConfig[emotionalState]?.clarityHint && (
+          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+            <span>💡</span> {emotionalStateConfig[emotionalState].clarityHint}
+          </p>
+        )}
+      </div>
+      {/* Mental Load */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-2">Mental load today? <span className="font-normal opacity-60">(optional)</span></p>
+        <div className="flex gap-2">
+          {(["light", "moderate", "heavy"] as MentalLoad[]).map((load) => (
+            <button
+              key={load}
+              onClick={() => setMentalLoad(mentalLoad === load ? undefined : load)}
+              className={cn(
+                "flex-1 py-1.5 rounded-lg border text-xs font-medium capitalize transition-all",
+                mentalLoad === load
+                  ? "border-primary/40 bg-primary/[0.08] text-foreground"
+                  : "border-border text-muted-foreground hover:border-primary/20"
+              )}
+            >{load}</button>
+          ))}
+        </div>
+      </div>
+      {/* Capacity */}
       <div>
         <p className="text-xs font-medium text-muted-foreground mb-3">How's your capacity today?</p>
         <div className="grid grid-cols-3 gap-2">
@@ -255,7 +327,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
         />
       </div>
       <Button
-        onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined })}
+        onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad })}
         disabled={submit.isPending}
         className="w-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/25"
         size="sm"
@@ -590,6 +662,14 @@ export default function Home() {
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery();
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
+  const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
+
+  // Map projectId → momentum for quick lookup
+  const momentumByProject = useMemo(() => {
+    const map: Record<number, string> = {};
+    if (healthScores) for (const s of healthScores) if (s.projectId) map[s.projectId] = s.momentum ?? "steady";
+    return map;
+  }, [healthScores]);
 
   const completeTask = trpc.checkIns.completeTask.useMutation({
     onSuccess: () => refetchPlan(),
@@ -909,6 +989,27 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── Stuck-State Intervention ────────────────────────────────────────── */}
+      {tasks.some((t: any) => getCarryoverCount(t) >= 3) && (
+        <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-300/40 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/10">
+          <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-foreground leading-snug">
+              Some tasks have been carried over 3+ times.
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              That's often a signal — not a failure. A quick clarity session can help surface what's actually in the way.
+            </p>
+            <button
+              onClick={() => navigate("/clarity")}
+              className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors flex items-center gap-1"
+            >
+              Open Clarity Engine <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── Today's Tasks ───────────────────────────────────────────────────── */}
       {tasks.length > 0 && (
         <div>
@@ -1057,8 +1158,23 @@ export default function Home() {
                 onClick={() => navigate(`/projects/${project.id}`)}
                 className="w-full flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-foreground/20 hover:bg-accent transition-colors text-left group"
               >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{project.title}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-foreground truncate">{project.title}</p>
+                    {momentumByProject[project.id] && (
+                      <span className={`text-[9px] font-semibold uppercase tracking-wide shrink-0 ${
+                        momentumByProject[project.id] === 'rising' ? 'text-emerald-500' :
+                        momentumByProject[project.id] === 'fading' ? 'text-amber-500' :
+                        momentumByProject[project.id] === 'stalled' ? 'text-red-400' :
+                        'text-muted-foreground'
+                      }`}>
+                        {momentumByProject[project.id] === 'rising' ? '↑' :
+                         momentumByProject[project.id] === 'fading' ? '↓' :
+                         momentumByProject[project.id] === 'stalled' ? '⚠' : '→'}
+                        {' '}{momentumByProject[project.id]}
+                      </span>
+                    )}
+                  </div>
                   {project.nextStep && (
                     <p className="text-xs text-muted-foreground truncate mt-0.5">Next: {project.nextStep}</p>
                   )}

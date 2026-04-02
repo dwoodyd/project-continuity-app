@@ -137,10 +137,12 @@ export const dailyPlans = mysqlTable("daily_plans", {
   generatedGuidance: text("generatedGuidance"),
   tomorrowBrief: text("tomorrowBrief"),
   tomorrowBriefGeneratedAt: timestamp("tomorrowBriefGeneratedAt"),
+  emotionalState: mysqlEnum("emotionalState", ["focused", "anxious", "foggy", "energized", "drained"]),
+  mentalLoad: mysqlEnum("mentalLoad", ["light", "moderate", "heavy"]),
+  clarityModeSuggestion: varchar("clarityModeSuggestion", { length: 50 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
-
 export type DailyPlan = typeof dailyPlans.$inferSelect;
 export type InsertDailyPlan = typeof dailyPlans.$inferInsert;
 

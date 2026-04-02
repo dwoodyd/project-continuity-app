@@ -26,8 +26,8 @@ export default function UnstickModal({ task, onClose }: UnstickModalProps) {
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
-        <DialogHeader className="px-5 pt-5 pb-0">
+      <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <Zap className="w-4 h-4 text-amber-500" />
             Unstick Protocol
@@ -37,7 +37,7 @@ export default function UnstickModal({ task, onClose }: UnstickModalProps) {
           </p>
         </DialogHeader>
 
-        <div className="px-5 py-4">
+        <div className="px-5 py-4 overflow-y-auto flex-1">
           {!unstick.data && !unstick.isPending && (
             <div className="text-center py-4">
               <p className="text-sm text-muted-foreground mb-4">

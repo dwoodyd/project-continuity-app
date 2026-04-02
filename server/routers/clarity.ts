@@ -247,4 +247,122 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
         content: session.nextRightStep ?? "",
       };
     }),
+
+  // ── Analyze patterns across clarity sessions ──────────────────────────────
+  analyzePatterns: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      const sessions = await db
+        .select()
+        .from(claritySessions)
+        .where(eq(claritySessions.userId, ctx.user.id))
+        .orderBy(desc(claritySessions.createdAt))
+        .limit(50);
+      if (sessions.length < 3) return null;
+
+      // Build a compact summary for the LLM
+      const sessionSummaries = sessions.map((s) => ({
+        mode: s.mode,
+        signalLine: s.signalLine ?? "",
+        whatIsHappening: (s.whatIsHappening ?? "").slice(0, 120),
+        whatYouNeed: (s.whatYouNeed ?? "").slice(0, 80),
+        progressMarker: s.progressMarker ?? "unknown",
+        date: s.createdAt.toISOString().split("T")[0],
+      }));
+
+      const response = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a thoughtful analyst reviewing someone's Clarity Engine sessions. Your job is to identify recurring patterns, themes, and growth signals — without judgment or diagnosis. Be warm, honest, and specific. Return valid JSON only.`,
+          },
+          {
+            role: "user",
+            content: `Here are ${sessions.length} clarity sessions (most recent first):\n${JSON.stringify(sessionSummaries, null, 2)}\n\nIdentify:\n1. The most frequently used clarity mode\n2. Recurring themes or phrases across sessions\n3. Progress signals (modes shifting, markers improving)\n4. One honest observation about what keeps coming up\n5. One encouraging pattern you notice`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "clarity_patterns",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                mostUsedMode: { type: "string" },
+                recurringThemes: { type: "array", items: { type: "string" } },
+                progressSignals: { type: "array", items: { type: "string" } },
+                honestObservation: { type: "string" },
+                encouragingPattern: { type: "string" },
+                sessionCount: { type: "number" },
+              },
+              required: ["mostUsedMode", "recurringThemes", "progressSignals", "honestObservation", "encouragingPattern", "sessionCount"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+
+      const raw = response?.choices?.[0]?.message?.content ?? "{}";
+      try {
+        const result = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        return { ...result, sessionCount: sessions.length };
+      } catch {
+        return null;
+      }
+    }),
+
+  // ── Weekly Clarity Summary ─────────────────────────────────────────────────
+  getWeeklySummary: protectedProcedure
+    .query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return null;
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const sessions = await db
+        .select()
+        .from(claritySessions)
+        .where(
+          and(
+            eq(claritySessions.userId, ctx.user.id),
+          )
+        )
+        .orderBy(desc(claritySessions.createdAt))
+        .limit(20);
+
+      const weekSessions = sessions.filter(
+        (s) => new Date(s.createdAt) >= sevenDaysAgo
+      );
+
+      if (weekSessions.length === 0) return null;
+
+      // Count modes
+      const modeCounts: Record<string, number> = {};
+      for (const s of weekSessions) {
+        modeCounts[s.mode] = (modeCounts[s.mode] ?? 0) + 1;
+      }
+      const topMode = Object.entries(modeCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+
+      // Count progress markers
+      const markerCounts: Record<string, number> = {};
+      for (const s of weekSessions) {
+        if (s.progressMarker) {
+          markerCounts[s.progressMarker] = (markerCounts[s.progressMarker] ?? 0) + 1;
+        }
+      }
+
+      // Collect signal lines
+      const signalLines = weekSessions
+        .filter((s) => s.signalLine)
+        .map((s) => s.signalLine!);
+
+      return {
+        sessionCount: weekSessions.length,
+        topMode,
+        modeCounts,
+        markerCounts,
+        signalLines,
+        convertedCount: weekSessions.filter((s) => s.convertedTo).length,
+      };
+    }),
 });

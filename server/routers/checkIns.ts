@@ -39,6 +39,8 @@ export const checkInsRouter = router({
       primaryProjectId: z.number().optional(),
       secondaryProjectId: z.number().optional(),
       userNotes: z.string().optional(),
+      emotionalState: z.enum(["focused", "anxious", "foggy", "energized", "drained"]).optional(),
+      mentalLoad: z.enum(["light", "moderate", "heavy"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const date = getTodayDate();
@@ -202,6 +204,16 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
         ? (input.secondaryProjectId ?? compassSecondaryId)
         : undefined;
 
+      // Suggest clarity mode based on emotional state
+      const clarityModeMap: Record<string, string> = {
+        anxious: "overwhelm",
+        foggy: "purpose_fog",
+        drained: "overwhelm",
+        focused: "",
+        energized: "",
+      };
+      const clarityModeSuggestion = input.emotionalState ? (clarityModeMap[input.emotionalState] || "") : "";
+
       const planId = await upsertDailyPlan({
         userId: ctx.user.id,
         date,
@@ -211,6 +223,9 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
         criticalTasks: JSON.stringify(tasksWithIds),
         timeBlocks: JSON.stringify(parsed.timeBlocks),
         generatedGuidance: fullGuidance,
+        emotionalState: input.emotionalState,
+        mentalLoad: input.mentalLoad,
+        clarityModeSuggestion: clarityModeSuggestion || undefined,
       });
 
       const checkInId = await createCheckIn({
@@ -223,7 +238,7 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
         completedAt: new Date(),
       });
 
-      return { checkInId, planId, guidance: fullGuidance, criticalTasks: tasksWithIds, timeBlocks: parsed.timeBlocks };
+      return { checkInId, planId, guidance: fullGuidance, criticalTasks: tasksWithIds, timeBlocks: parsed.timeBlocks, clarityModeSuggestion: clarityModeSuggestion || null };
     }),
 
   submitMidday: protectedProcedure

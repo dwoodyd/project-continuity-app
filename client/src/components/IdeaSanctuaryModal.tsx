@@ -188,8 +188,8 @@ export default function IdeaSanctuaryModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden">
-        <DialogHeader className="px-5 pt-5 pb-0">
+      <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <Lightbulb className="w-4 h-4 text-amber-500" />
             Idea Sanctuary

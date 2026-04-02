@@ -67,15 +67,15 @@ function CreateProjectModal({ onClose, onCreated }: { onClose: () => void; onCre
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0">
-        <DialogHeader className="px-5 pt-5 pb-0">
+      <DialogContent className="sm:max-w-lg p-0 flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="text-base font-semibold">New Project</DialogTitle>
           <p className="text-xs text-muted-foreground mt-1 font-normal">
             Define the project before you start. The "why" is the anchor.
           </p>
         </DialogHeader>
 
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">Project title *</label>
             <Input
@@ -147,7 +147,7 @@ function CreateProjectModal({ onClose, onCreated }: { onClose: () => void; onCre
           </div>
         </div>
 
-        <div className="px-5 pb-5 flex justify-end gap-2">
+        <div className="px-5 pb-5 flex justify-end gap-2 shrink-0">
           <Button variant="ghost" size="sm" onClick={onClose}>Cancel</Button>
           <Button
             size="sm"

@@ -52,15 +52,15 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg p-0">
-        <DialogHeader className="px-5 pt-5 pb-0">
+      <DialogContent className="sm:max-w-lg p-0 flex flex-col max-h-[85vh]">
+        <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
             <RefreshCw className="w-4 h-4 text-blue-500" />
             Re-Entry Card
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-5 py-3 flex gap-2">
+        <div className="px-5 py-3 flex gap-2 shrink-0">
           {[{ v: "capture", label: "Capture context" }, { v: "return", label: "Return to project" }].map(({ v, label }) => (
             <button
               key={v}
@@ -75,7 +75,7 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
           ))}
         </div>
 
-        <div className="px-5 py-4 space-y-4">
+        <div className="px-5 py-4 space-y-4 overflow-y-auto flex-1">
           {mode === "capture" ? (
             <>
               <div>
