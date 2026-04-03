@@ -285,6 +285,25 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
       };
     }),
 
+  // ── Query: sessions linked to a specific project ───────────────────────────
+  getByProject: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return [];
+      return db
+        .select()
+        .from(claritySessions)
+        .where(
+          and(
+            eq(claritySessions.userId, ctx.user.id),
+            eq(claritySessions.projectId, input.projectId)
+          )
+        )
+        .orderBy(desc(claritySessions.createdAt))
+        .limit(30);
+    }),
+
   // ── Analyze patterns across clarity sessions ──────────────────────────────
   analyzePatterns: protectedProcedure
     .query(async ({ ctx }) => {

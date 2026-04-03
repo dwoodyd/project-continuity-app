@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -15,12 +15,14 @@ import {
   Info,
   CheckCircle2,
   Zap,
+  Heart,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Momentum = "rising" | "steady" | "fading" | "stalled";
 type RiskLevel = "low" | "medium" | "high";
 type Severity = "info" | "warning" | "critical";
+type EmotionalState = "focused" | "energized" | "foggy" | "anxious" | "drained";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function scoreColor(score: number): string {
@@ -76,6 +78,78 @@ function insightTypeLabel(type: string): string {
   return map[type] ?? type;
 }
 
+// ── Emotional State Sparkline ──────────────────────────────────────────────────
+const EMOTIONAL_ORDER: EmotionalState[] = ["energized", "focused", "foggy", "anxious", "drained"];
+const EMOTIONAL_COLORS: Record<EmotionalState, string> = {
+  energized: "#34d399",  // emerald-400
+  focused: "#818cf8",    // indigo-400
+  foggy: "#94a3b8",      // slate-400
+  anxious: "#fb923c",    // orange-400
+  drained: "#f87171",    // red-400
+};
+const EMOTIONAL_LABELS: Record<EmotionalState, string> = {
+  energized: "Energized",
+  focused: "Focused",
+  foggy: "Foggy",
+  anxious: "Anxious",
+  drained: "Drained",
+};
+
+function emotionalY(state: EmotionalState): number {
+  // Higher = more positive (inverted for SVG: lower y = higher on screen)
+  const idx = EMOTIONAL_ORDER.indexOf(state);
+  return idx === -1 ? 2 : idx; // 0 = energized (top), 4 = drained (bottom)
+}
+
+function EmotionalSparkline({ data }: { data: Array<{ date: string; emotionalState: string | null }> }) {
+  if (data.length === 0) return null;
+  const W = 280;
+  const H = 64;
+  const PAD = 12;
+  const innerW = W - PAD * 2;
+  const innerH = H - PAD * 2;
+  const n = data.length;
+
+  const points = data.map((d, i) => {
+    const state = (d.emotionalState ?? "foggy") as EmotionalState;
+    const x = PAD + (n === 1 ? innerW / 2 : (i / (n - 1)) * innerW);
+    const y = PAD + (emotionalY(state) / 4) * innerH;
+    return { x, y, state, date: d.date };
+  });
+
+  const pathD = points
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`)
+    .join(" ");
+
+  const lastState = points[points.length - 1]?.state ?? "foggy";
+  const lastColor = EMOTIONAL_COLORS[lastState];
+
+  return (
+    <div className="relative">
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
+        {/* Y-axis labels */}
+        <text x={0} y={PAD + 4} fontSize="8" fill="#94a3b8" textAnchor="start">Energized</text>
+        <text x={0} y={H - PAD + 4} fontSize="8" fill="#94a3b8" textAnchor="start">Drained</text>
+        {/* Line */}
+        <path d={pathD} fill="none" stroke={lastColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+        {/* Dots */}
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r="3" fill={EMOTIONAL_COLORS[p.state]} />
+        ))}
+      </svg>
+      {/* Legend row */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+        {EMOTIONAL_ORDER.map(s => (
+          <div key={s} className="flex items-center gap-1">
+            <div className="w-2 h-2 rounded-full" style={{ background: EMOTIONAL_COLORS[s] }} />
+            <span className="text-xs text-muted-foreground">{EMOTIONAL_LABELS[s]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Component ──────────────────────────────────────────────────────────────────
 export default function IntelligencePage() {
   const utils = trpc.useUtils();
@@ -83,6 +157,7 @@ export default function IntelligencePage() {
   const healthQuery = trpc.insights.getHealthScores.useQuery();
   const insightsQuery = trpc.insights.getPatternInsights.useQuery();
   const projectsQuery = trpc.projects.list.useQuery();
+  const emotionalTrendQuery = trpc.insights.getEmotionalTrend.useQuery();
 
   const [scoringLoading, setScoringLoading] = useState(false);
   const [patternsLoading, setPatternsLoading] = useState(false);
@@ -118,12 +193,21 @@ export default function IntelligencePage() {
   const healthScores = healthQuery.data ?? [];
   const insights = insightsQuery.data ?? [];
   const projects = projectsQuery.data ?? [];
+  const emotionalTrend = emotionalTrendQuery.data ?? [];
 
   // Build a projectId → title map
   const projectMap = new Map(projects.map((p: any) => [p.id, p.title]));
 
   const hasScores = healthScores.length > 0;
   const hasInsights = insights.length > 0;
+  const hasTrend = emotionalTrend.length > 0;
+
+  // Compute most common emotional state in the last 14 days
+  const stateCounts: Record<string, number> = {};
+  for (const d of emotionalTrend) {
+    if (d.emotionalState) stateCounts[d.emotionalState] = (stateCounts[d.emotionalState] ?? 0) + 1;
+  }
+  const dominantState = Object.entries(stateCounts).sort((a, b) => b[1] - a[1])[0]?.[0] as EmotionalState | undefined;
 
   return (
     <div className="px-4 py-6 space-y-10">
@@ -139,6 +223,46 @@ export default function IntelligencePage() {
           </p>
         </div>
       </div>
+
+      {/* ── Emotional Trend ───────────────────────────────────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Heart className="w-4 h-4 text-rose-400" />
+          <h2 className="text-base font-medium text-foreground">Emotional Trend</h2>
+          <span className="text-xs text-muted-foreground ml-1">Last 14 days</span>
+        </div>
+
+        {emotionalTrendQuery.isLoading ? (
+          <div className="h-20 rounded-xl bg-muted/30 animate-pulse" />
+        ) : !hasTrend ? (
+          <Card className="border-dashed border-border/50 bg-transparent">
+            <CardContent className="flex flex-col items-center justify-center py-8 text-center gap-2">
+              <Heart className="w-5 h-5 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
+                No emotional data yet. Complete a morning check-in to start tracking.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card/60 border-border/50">
+            <CardContent className="pt-4 pb-4">
+              {dominantState && (
+                <div className="flex items-center gap-2 mb-3">
+                  <div
+                    className="w-2.5 h-2.5 rounded-full"
+                    style={{ background: EMOTIONAL_COLORS[dominantState] }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Most common: <span className="text-foreground font-medium">{EMOTIONAL_LABELS[dominantState]}</span>
+                    {" "}({stateCounts[dominantState]}×)
+                  </span>
+                </div>
+              )}
+              <EmotionalSparkline data={emotionalTrend} />
+            </CardContent>
+          </Card>
+        )}
+      </section>
 
       {/* ── Pattern Insights ─────────────────────────────────────────────────── */}
       <section className="space-y-4">
@@ -243,7 +367,7 @@ export default function IntelligencePage() {
             }}
           >
             <RefreshCw className={`w-3.5 h-3.5 ${scoringLoading ? "animate-spin" : ""}`} />
-            {scoringLoading ? "Scoring…" : "Score Projects"}
+            {scoringLoading ? "Scoring…" : "Refresh Scores"}
           </Button>
         </div>
 

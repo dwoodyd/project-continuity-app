@@ -486,3 +486,11 @@
 - [x] Home.tsx: ensure content fits phone width without horizontal scroll
 - [x] Quick Capture: floating button stays above bottom tab bar
 - [x] More menu: slide-up sheet for secondary nav items (Weekly Review, Intelligence, Settings, etc.)
+
+## Next 3 Features
+
+- [x] Backend: generateHealthScores procedure — compute score/momentum/riskLevel per project and upsert into project_health_scores
+- [x] Backend: getEmotionalTrend procedure — return last 14 days of emotionalState from daily_plans
+- [x] Intelligence page: "Refresh scores" button calls generateHealthScores mutation
+- [x] Intelligence page: 14-day emotional trend sparkline using emotionalState data
+- [x] Project Detail page: Clarity tab listing all sessions linked to that project

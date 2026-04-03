@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   BookOpen,
+  Brain,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -187,7 +188,7 @@ export default function ProjectDetailPage() {
   const [unstickTask, setUnstickTask] = useState<{ id: string; title: string; projectId?: number | null } | null>(null);
   const [editingNext, setEditingNext] = useState(false);
   const [nextStepDraft, setNextStepDraft] = useState("");
-  const [activeTab, setActiveTab] = useState<"overview" | "timeline">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "clarity">("overview");
   const [timelineFilter, setTimelineFilter] = useState<"all" | "focus_session" | "decision" | "milestone" | "blocker">("all");
 
   const { data: project, refetch } = trpc.projects.getById.useQuery({ id: projectId });
@@ -199,6 +200,10 @@ export default function ProjectDetailPage() {
   const { data: projectDecisions } = trpc.intelligence.getDecisionsForProject.useQuery(
     { projectId },
     { enabled: !!projectId }
+  );
+  const { data: claritySessions } = trpc.clarity.getByProject.useQuery(
+    { projectId },
+    { enabled: !!projectId && activeTab === "clarity" }
   );
   const buildTimeline = trpc.intelligence.buildProjectTimeline.useMutation({
     onSuccess: (data) => {
@@ -281,7 +286,8 @@ export default function ProjectDetailPage() {
       <div className="flex gap-1 bg-muted rounded-xl p-1">
         {[
           { id: "overview" as const, label: "Overview" },
-          { id: "timeline" as const, label: "Memory Timeline" },
+          { id: "timeline" as const, label: "Timeline" },
+          { id: "clarity" as const, label: "Clarity" },
         ].map(({ id, label }) => (
           <button
             key={id}
@@ -565,6 +571,82 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Clarity Sessions Tab ───────────────────────────────────────────────── */}
+      {activeTab === "clarity" && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Brain className="w-4 h-4 text-indigo-400" />
+            <p className="text-sm font-medium text-foreground">Clarity Sessions</p>
+            <span className="text-xs text-muted-foreground ml-1">linked to this project</span>
+          </div>
+          {!claritySessions ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : claritySessions.length === 0 ? (
+            <div className="p-8 rounded-xl border border-dashed border-border text-center">
+              <Brain className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">No clarity sessions linked</p>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                When you run a Clarity Engine session and attach this project, it will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {claritySessions.map((session: any) => {
+                const modeLabels: Record<string, string> = {
+                  overwhelm: "Overwhelm",
+                  decision: "Decision",
+                  creative_block: "Creative Block",
+                  identity_drift: "Identity Drift",
+                  relationship_tension: "Relationship",
+                  purpose_fog: "Purpose Fog",
+                };
+                const markerColors: Record<string, string> = {
+                  clearer: "text-emerald-400",
+                  ready_to_act: "text-indigo-400",
+                  still_unsure: "text-amber-400",
+                  need_to_revisit: "text-rose-400",
+                };
+                return (
+                  <div key={session.id} className="p-4 rounded-xl bg-card border border-border/60 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-medium text-indigo-400 capitalize">
+                        {modeLabels[session.mode] ?? session.mode}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {new Date(session.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {session.signalLine && (
+                      <p className="text-sm text-foreground italic leading-snug">“{session.signalLine}”</p>
+                    )}
+                    {session.nextRightStep && (
+                      <div className="pt-1">
+                        <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Next right step</p>
+                        <p className="text-xs text-foreground">{session.nextRightStep}</p>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-3 pt-1">
+                      {session.progressMarker && (
+                        <span className={cn("text-[10px] font-medium capitalize", markerColors[session.progressMarker] ?? "text-muted-foreground")}>
+                          {session.progressMarker.replace(/_/g, " ")}
+                        </span>
+                      )}
+                      {session.convertedTo && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Converted → {session.convertedTo.replace(/_/g, " ")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

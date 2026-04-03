@@ -22,6 +22,7 @@ import {
   getFocusSessionsByProject,
   getDecisionsByProject,
   getProjectMemoryEvents,
+  getRecentDailyPlans,
 } from "../db";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -260,5 +261,19 @@ Rules:
     }
 
     return { insights, count: savedIds.length };
+  }),
+
+  // ── Query: 14-day emotional state trend ────────────────────────────────────
+  getEmotionalTrend: protectedProcedure.query(async ({ ctx }) => {
+    const plans = await getRecentDailyPlans(ctx.user.id, 14);
+    // Return oldest-first so sparkline renders left-to-right
+    return plans
+      .filter(p => p.emotionalState !== null)
+      .map(p => ({
+        date: p.date,
+        emotionalState: p.emotionalState,
+        mentalLoad: p.mentalLoad,
+      }))
+      .reverse();
   }),
 });
