@@ -126,7 +126,7 @@ export default function IntelligencePage() {
   const hasInsights = insights.length > 0;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+    <div className="px-4 py-6 space-y-10">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>

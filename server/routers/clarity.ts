@@ -6,7 +6,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
-import { getDb } from "../db";
+import { getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
 import { claritySessions } from "../../drizzle/schema";
 import { eq, desc, and } from "drizzle-orm";
 
@@ -241,10 +241,47 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
 
       if (!session) throw new Error("Session not found");
 
+      const nextStep = session.nextRightStep ?? "";
+      const resolvedProjectId = input.projectId ?? session.projectId ?? null;
+
+      // ── Feature 7: Clarity-to-Project deep link ──────────────────────────
+      // When converting to 'next_step' or 'project_note' and a project is
+      // linked, write the nextRightStep into the project's nextStep field and
+      // log a memory event so it surfaces on the Command Center immediately.
+      let projectTitle: string | null = null;
+      if (
+        resolvedProjectId &&
+        (input.convertTo === "next_step" || input.convertTo === "project_note")
+      ) {
+        const project = await getProjectById(resolvedProjectId, ctx.user.id);
+        if (project) {
+          projectTitle = project.title;
+          // Update project nextStep
+          await updateProject(resolvedProjectId, ctx.user.id, {
+            nextStep,
+          });
+          // Log a memory event
+          await createProjectMemoryEvent({
+            userId: ctx.user.id,
+            projectId: resolvedProjectId,
+            eventType: "next_step_change",
+            content: `Clarity Engine → ${nextStep}`,
+            metadata: JSON.stringify({
+              source: "clarity_engine",
+              sessionId: session.id,
+              mode: session.mode,
+              signalLine: session.signalLine ?? "",
+            }),
+          });
+        }
+      }
+
       return {
         success: true,
         convertedTo: input.convertTo,
-        content: session.nextRightStep ?? "",
+        content: nextStep,
+        projectTitle,
+        projectUpdated: !!projectTitle,
       };
     }),
 

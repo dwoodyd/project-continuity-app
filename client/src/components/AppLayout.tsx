@@ -1,3 +1,11 @@
+/**
+ * AppLayout — mobile-first shell
+ *
+ * Layout philosophy:
+ * - Primary target: phone (375–430px wide)
+ * - Desktop: centered max-w-md column, same bottom-tab nav, no sidebar
+ * - The app feels like a native phone app on every screen size
+ */
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { cn } from "@/lib/utils";
@@ -10,8 +18,8 @@ import {
   Home,
   Lightbulb,
   LogOut,
-  Menu,
   Moon,
+  MoreHorizontal,
   Settings,
   Sun,
   X,
@@ -29,16 +37,22 @@ import { toast } from "sonner";
 const BRAND_ICON = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_71cad82a.png";
 const BRAND_LOGO_DARK = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-horizontal-dark-web_9b727cb8.png";
 
-const navItems = [
-  { href: "/", label: "Command Center", icon: Brain, description: "Today's focus" },
-  { href: "/vault", label: "Knowledge Vault", icon: BookOpen, description: "Imported sources" },
-  { href: "/projects", label: "Projects", icon: Archive, description: "All projects" },
-  { href: "/weekly", label: "Weekly Review", icon: Archive, description: "Patterns & progress" },
-  { href: "/compass", label: "Weekly Compass", icon: Compass, description: "This week's direction" },
-  { href: "/intelligence", label: "Intelligence", icon: Lightbulb, description: "Patterns & health scores" },
-  { href: "/clarity", label: "Clarity Engine", icon: Zap, description: "Find clarity, take action" },
-  { href: "/welcome", label: "About Continuary", icon: Home, description: "Orientation & overview" },
-  { href: "/settings", label: "Settings", icon: Settings, description: "Preferences" },
+// ── Primary bottom-tab items (5 visible) ────────────────────────────────────
+const PRIMARY_TABS = [
+  { href: "/",          label: "Today",    icon: Brain },
+  { href: "/projects",  label: "Projects", icon: Archive },
+  { href: "/clarity",   label: "Clarity",  icon: Zap },
+  { href: "/vault",     label: "Vault",    icon: BookOpen },
+  { href: "/more",      label: "More",     icon: MoreHorizontal },
+] as const;
+
+// ── Secondary items shown in the "More" sheet ────────────────────────────────
+const MORE_ITEMS = [
+  { href: "/compass",      label: "Weekly Compass",  icon: Compass },
+  { href: "/weekly",       label: "Weekly Review",   icon: Archive },
+  { href: "/intelligence", label: "Intelligence",    icon: Lightbulb },
+  { href: "/welcome",      label: "About Continuary",icon: Home },
+  { href: "/settings",     label: "Settings",        icon: Settings },
 ];
 
 interface AppLayoutProps {
@@ -47,10 +61,11 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const [location] = useLocation();
+  const [, navigate] = useLocation();
   const { isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ideaOpen, setIdeaOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [amnestyDismissed, setAmnestyDismissed] = useState(false);
 
   const { data: amnestyData } = trpc.ai.checkAmnesty.useQuery(undefined, {
@@ -64,25 +79,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
 
+  // Close more sheet on navigation
   useEffect(() => {
-    setSidebarOpen(false);
+    setMoreOpen(false);
   }, [location]);
 
-  // Onboarding gate: redirect first-time users before rendering the main app
-  const [, navigate] = useLocation();
+  // Onboarding gate
   useEffect(() => {
     if (isAuthenticated && profile && profile.onboardingCompleted === false && location !== "/onboarding") {
       navigate("/onboarding");
     }
   }, [isAuthenticated, profile, navigate, location]);
 
-  // Show auth error toast if redirected back with ?auth_error=...
+  // Auth error toast
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("auth_error");
     if (authError) {
       toast.error(authError, { duration: 6000 });
-      // Remove the param from the URL without a reload
       const url = new URL(window.location.href);
       url.searchParams.delete("auth_error");
       window.history.replaceState({}, "", url.toString());
@@ -95,20 +109,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6">
-            {/* Brand icon — clean, no card/shadow behind it */}
             <div className="flex flex-col items-center gap-3">
-              <img
-                src={BRAND_ICON}
-                alt="Continuary"
-                className="w-28 h-28 object-contain"
-              />
+              <img src={BRAND_ICON} alt="Continuary" className="w-28 h-28 object-contain" />
               <div className="text-center">
                 <h1 className="text-3xl font-medium text-foreground" style={{ fontFamily: "'Lora', Georgia, serif" }}>Continuary</h1>
                 <p className="text-xs text-muted-foreground mt-1 tracking-widest uppercase">Command Center</p>
               </div>
             </div>
-
-            {/* Sign-in card */}
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg">
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
                 A structured command center for execution. Turn scattered notes into daily focus.
@@ -122,10 +129,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </a>
             </div>
           </div>
-
-          <p className="text-center text-xs text-muted-foreground/50 mt-6">
-            Built for minds that move fast.
-          </p>
+          <p className="text-center text-xs text-muted-foreground/50 mt-6">Built for minds that move fast.</p>
         </div>
       </div>
     );
@@ -134,215 +138,181 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
 
-  // Sidebar nav link — uses sidebar-scoped tokens so colors are correct on dark sidebar
-  const SidebarNavLink = ({ item }: { item: typeof navItems[0] }) => {
-    const Icon = item.icon;
-    const active = isActive(item.href);
-    return (
-      <Link
-        href={item.href}
-        className={cn(
-          "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 group",
-          active
-            ? "bg-white/10 text-white font-medium"
-            : "text-white/60 hover:text-white hover:bg-white/[0.06]"
-        )}
-      >
-        {/* Amber active indicator bar */}
-        {active && (
-          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-amber-400" />
-        )}
-        <Icon className={cn(
-          "w-4 h-4 shrink-0 transition-colors",
-          active ? "text-amber-400" : "text-white/50 group-hover:text-white/80"
-        )} />
-        <span>{item.label}</span>
-      </Link>
-    );
-  };
+  // "More" tab is active when on any secondary page
+  const isMoreActive = MORE_ITEMS.some((item) => isActive(item.href));
 
   return (
-    <div className="h-screen bg-background flex overflow-hidden">
-      {/* ── Desktop Sidebar — dark indigo ───────────────────────────────────── */}
-      <aside className="hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0"
-        style={{ background: "var(--sidebar)" }}>
-        {/* Logo lockup — horizontal brand logo */}
-        <div className="px-4 py-5 border-b border-white/10">
-          <Link href="/" className="flex items-center group">
-            <img
-              src={BRAND_LOGO_DARK}
-              alt="Continuary"
-              className="h-11 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
-            />
+    /**
+     * Outer shell: full viewport, dark sidebar background.
+     * On desktop this creates a "phone bezel" effect — the centered column
+     * sits on a dark background just like holding a phone.
+     */
+    <div
+      className="h-screen w-full flex flex-col items-center overflow-hidden"
+      style={{ background: "var(--sidebar)" }}
+    >
+      {/* ── Phone column ─────────────────────────────────────────────────────── */}
+      {/*
+        max-w-md (448px) on all screen sizes — matches a large phone width.
+        On desktop this is a centered column with the dark sidebar bg visible on sides.
+      */}
+      <div className="w-full max-w-md h-full flex flex-col bg-background relative overflow-hidden shadow-2xl">
+
+        {/* ── Top header bar ─────────────────────────────────────────────────── */}
+        <header
+          className="flex items-center justify-between px-4 shrink-0 z-30 border-b border-white/10"
+          style={{
+            background: "var(--sidebar)",
+            paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
+            paddingBottom: "12px",
+          }}
+        >
+          {/* Brand logo */}
+          <Link href="/" className="flex items-center">
+            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-7 w-auto object-contain" />
           </Link>
-        </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => (
-            <SidebarNavLink key={item.href} item={item} />
-          ))}
-        </nav>
-
-        {/* Bottom actions */}
-        <div className="px-3 py-4 border-t border-white/10 space-y-0.5">
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-          </button>
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Mobile Sidebar Overlay ───────────────────────────────────────────── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-      <aside
-        className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 flex flex-col transition-transform duration-200 lg:hidden border-r border-white/10",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-        style={{ background: "var(--sidebar)" }}
-      >
-        <div className="px-4 py-5 border-b border-white/10 flex items-center justify-between">
-          <img
-            src={BRAND_LOGO_DARK}
-            alt="Continuary"
-            className="h-10 w-auto object-contain"
-          />
-          <button onClick={() => setSidebarOpen(false)} className="text-white/50 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "relative flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition-colors",
-                  active
-                    ? "bg-white/10 text-white font-medium"
-                    : "text-white/60 hover:text-white hover:bg-white/[0.06]"
-                )}
-              >
-                {active && (
-                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-amber-400" />
-                )}
-                <Icon className={cn("w-4 h-4 shrink-0", active ? "text-amber-400" : "text-white/50")} />
-                <div>
-                  <p>{item.label}</p>
-                  <p className="text-xs text-white/40">{item.description}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-3 py-4 border-t border-white/10 space-y-0.5">
-          <button
-            onClick={toggleTheme}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-          </button>
-          <button
-            onClick={() => logout()}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.06] transition-colors w-full"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign out</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main Content ─────────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Mobile header — dark indigo strip */}
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0 z-30"
-          style={{ background: "var(--sidebar)" }}>
-          <button onClick={() => setSidebarOpen(true)} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
-            <Menu className="w-5 h-5" />
-          </button>
-          <img
-            src={BRAND_LOGO_DARK}
-            alt="Continuary"
-            className="h-7 w-auto object-contain"
-          />
-          <button onClick={toggleTheme} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
-            {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-          </button>
+          {/* Right actions */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "dark" ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+            </button>
+            <button
+              onClick={() => logout()}
+              className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain pb-24 lg:pb-6">
+        {/* ── Page content ───────────────────────────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto overscroll-contain pb-4">
           {children}
         </main>
+
+        {/* ── Bottom tab bar ─────────────────────────────────────────────────── */}
+        <nav
+          className="shrink-0 border-t border-white/10 z-30"
+          style={{
+            background: "var(--sidebar)",
+            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+          }}
+        >
+          <div className="flex items-stretch justify-around px-1">
+            {PRIMARY_TABS.map(({ href, label, icon: Icon }) => {
+              const active = href === "/more" ? isMoreActive : isActive(href);
+              return (
+                <button
+                  key={href}
+                  onClick={() => {
+                    if (href === "/more") {
+                      setMoreOpen((o) => !o);
+                    } else {
+                      setMoreOpen(false);
+                      if (active) window.scrollTo({ top: 0, behavior: "smooth" });
+                      else navigate(href);
+                    }
+                  }}
+                  className={cn(
+                    "flex flex-col items-center gap-1 flex-1 pt-2.5 pb-1 transition-all duration-150 relative min-h-[52px]",
+                    active ? "text-amber-400" : "text-white/40 hover:text-white/70"
+                  )}
+                >
+                  {active && (
+                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full bg-amber-400" />
+                  )}
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-medium tracking-wide">{label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
       </div>
 
-      {/* ── Quick Capture FAB — amber ─────────────────────────────────────────── */}
+      {/* ── "More" slide-up sheet ─────────────────────────────────────────────── */}
+      {moreOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => setMoreOpen(false)}
+          />
+          {/* Sheet — anchored to the bottom of the phone column */}
+          <div
+            className="fixed bottom-0 z-50 w-full max-w-md bg-card border border-border rounded-t-2xl shadow-2xl"
+            style={{ left: "50%", transform: "translateX(-50%)" }}
+          >
+            {/* Handle */}
+            <div className="flex justify-center pt-3 pb-1">
+              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+            </div>
+
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+              <p className="text-sm font-semibold text-foreground">More</p>
+              <button
+                onClick={() => setMoreOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Nav items */}
+            <div className="px-3 py-3 space-y-0.5">
+              {MORE_ITEMS.map(({ href, label, icon: Icon }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors",
+                      active
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "text-foreground hover:bg-accent"
+                    )}
+                  >
+                    <Icon className={cn("w-4.5 h-4.5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
+                    <span>{label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Bottom padding for safe area */}
+            <div style={{ height: "max(env(safe-area-inset-bottom, 0px), 12px)" }} />
+          </div>
+        </>
+      )}
+
+      {/* ── Quick Capture FAB ────────────────────────────────────────────────── */}
+      {/*
+        Positioned above the bottom tab bar, anchored to the right edge of
+        the phone column. On desktop the column is centered, so we use
+        a fixed position with a right offset that tracks the column edge.
+      */}
       <button
         onClick={() => setIdeaOpen(true)}
-        className="fixed bottom-[72px] right-4 lg:bottom-6 lg:right-6 z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+        className="fixed z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+        style={{
+          bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 12px)",
+          right: "max(calc(50vw - 224px + 12px), 12px)",
+        }}
         title="Quick Capture (Idea Sanctuary)"
         aria-label="Capture an idea"
       >
         <Lightbulb className="w-5 h-5" />
       </button>
 
-      {/* ── Mobile Bottom Nav — 4 core tabs ─────────────────────────────────── */}
-      <nav
-        className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-white/10"
-        style={{ background: "var(--sidebar)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-      >
-        <div className="flex items-stretch justify-around px-1">
-          {([
-            { href: "/", label: "Today", icon: Brain },
-            { href: "/projects", label: "Projects", icon: Archive },
-            { href: "/vault", label: "Vault", icon: BookOpen },
-            { href: "/compass", label: "Compass", icon: Compass },
-          ] as const).map(({ href, label, icon: Icon }) => {
-            const active = isActive(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => {
-                  if (active) window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className={cn(
-                  "flex flex-col items-center gap-1 flex-1 py-2.5 transition-all duration-150 relative",
-                  active ? "text-amber-400" : "text-white/40 hover:text-white/70"
-                )}
-              >
-                {active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full bg-amber-400" />
-                )}
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium tracking-wide">{label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* ── Idea Sanctuary Modal ──────────────────────────────────────────────── */}
+      {/* ── Idea Sanctuary Modal ─────────────────────────────────────────────── */}
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
 
       {/* ── Amnesty Protocol ─────────────────────────────────────────────────── */}

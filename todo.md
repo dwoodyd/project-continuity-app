@@ -468,3 +468,21 @@
 - [x] Feature 9: Weekly Clarity Summary (most used mode, repeated blockers, patterns, progress signals)
 - [x] Feature 13: Project attachment UI on Clarity session form
 - [x] Momentum score surfaced on Command Center active projects list
+
+## Layer 2 Feature 7
+
+- [x] Backend: convertToAction writes nextRightStep to project.nextStep when convertTo is 'next_step' or 'project_note' and a projectId is present
+- [x] Backend: convertToAction also adds a project memory event (type: next_step_change) with the session signal line + nextRightStep
+- [x] UI: ClarityEnginePage shows confirmation toast "Next step saved to [project name]" after conversion
+- [x] UI: Convert button for 'next_step' shows project name when session has a linked project
+
+## Mobile-First Redesign
+
+- [x] AppLayout: replace sidebar with bottom tab bar (5 tabs: Home, Vault, Projects, Clarity, More)
+- [x] AppLayout: desktop shows centered max-w-md column with top header bar (no sidebar)
+- [x] AppLayout: touch-friendly tap targets (min 44px height on interactive elements)
+- [x] AppLayout: safe-area padding for iOS notch/home indicator
+- [x] All pages: remove any sidebar-dependent layout assumptions
+- [x] Home.tsx: ensure content fits phone width without horizontal scroll
+- [x] Quick Capture: floating button stays above bottom tab bar
+- [x] More menu: slide-up sheet for secondary nav items (Weekly Review, Intelligence, Settings, etc.)

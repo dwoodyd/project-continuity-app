@@ -215,7 +215,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="px-4 py-6">
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
@@ -241,7 +241,7 @@ export default function ProjectDetailPage() {
   ];
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-6 page-enter">
+    <div className="px-4 py-6 space-y-6 page-enter">
       {/* Header */}
       <div>
         <button

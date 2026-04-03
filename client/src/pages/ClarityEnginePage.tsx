@@ -162,10 +162,20 @@ export default function ClarityEnginePage() {
 
   const convertToAction = trpc.clarity.convertToAction.useMutation({
     onSuccess: (result) => {
-      toast.success(
-        `Added to ${CONVERT_OPTIONS.find((o) => o.id === result.convertedTo)?.label ?? "your plan"}`
-      );
+      if (result.projectUpdated && result.projectTitle) {
+        // Feature 7: project was updated — richer confirmation
+        toast.success(`Next step saved to “${result.projectTitle}”`, {
+          description: "It will appear on your Command Center immediately.",
+          duration: 5000,
+        });
+      } else {
+        toast.success(
+          `Added to ${CONVERT_OPTIONS.find((o) => o.id === result.convertedTo)?.label ?? "your plan"}`
+        );
+      }
       utils.clarity.getSession.invalidate({ id: activeSessionId! });
+      // Also refresh projects so Command Center picks up the new nextStep
+      utils.projects.listActive.invalidate();
     },
   });
 
@@ -183,7 +193,7 @@ export default function ClarityEnginePage() {
 
   // ── New session form ──────────────────────────────────────────────────────
   const NewSessionView = () => (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-brand font-medium text-foreground mb-2">
           Clarity Engine
@@ -345,7 +355,7 @@ export default function ClarityEnginePage() {
     const modeInfo = MODES.find((m) => m.id === session.mode);
 
     return (
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-brand font-medium text-foreground">
@@ -468,22 +478,36 @@ export default function ClarityEnginePage() {
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {CONVERT_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  onClick={() =>
-                    convertToAction.mutate({
-                      sessionId: session.id,
-                      convertTo: opt.id,
-                    })
-                  }
-                  disabled={convertToAction.isPending}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border border-border bg-card text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground transition-all"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                  {opt.label}
-                </button>
-              ))}
+              {CONVERT_OPTIONS.map((opt) => {
+                // Feature 7: for next_step and project_note, show project name if linked
+                const linkedProject = session.projectId && projects
+                  ? projects.find((p) => p.id === session.projectId)
+                  : null;
+                const showProjectHint =
+                  linkedProject &&
+                  (opt.id === "next_step" || opt.id === "project_note");
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() =>
+                      convertToAction.mutate({
+                        sessionId: session.id,
+                        convertTo: opt.id,
+                      })
+                    }
+                    disabled={convertToAction.isPending}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                      showProjectHint
+                        ? "border-amber-500/40 bg-amber-500/5 text-amber-300 hover:border-amber-500/60"
+                        : "border-border bg-card text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
+                    }`}
+                    title={showProjectHint ? `Saves next step to "${linkedProject!.title}" and updates Command Center` : undefined}
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                    {showProjectHint ? `${opt.label} → ${linkedProject!.title}` : opt.label}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -506,7 +530,7 @@ export default function ClarityEnginePage() {
 
   // ── History view ──────────────────────────────────────────────────────────
   const HistoryView = () => (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-brand font-medium text-foreground">
           Clarity History
@@ -590,7 +614,7 @@ export default function ClarityEnginePage() {
 
   // ── Pattern Analysis view ─────────────────────────────────────────────────
   const PatternsView = () => (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-brand font-medium text-foreground">Clarity Patterns</h1>
@@ -667,7 +691,7 @@ export default function ClarityEnginePage() {
 
   // ── Weekly Summary view ────────────────────────────────────────────────────
   const WeeklyView = () => (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-brand font-medium text-foreground">This Week in Clarity</h1>
