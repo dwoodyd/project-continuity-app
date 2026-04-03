@@ -627,3 +627,10 @@
 - [x] Audit and fix all other textareas in Home.tsx (morning notes, evening fields — already top-level, no fix needed)
 - [x] Audit all other pages with textareas for same issue (FocusModePage, OnboardingPage, ProjectDetailPage, ProjectsPage, VaultPage — all clean)
 - [x] Verify fix across all affected fields — 83 tests passing, zero TypeScript errors
+
+## Bug: Focus lost after every keystroke (textarea loses focus on each character)
+
+- [x] Find the true root cause: QueryClient created without defaultOptions; React Query's default refetchOnWindowFocus:true was active. Every keystroke caused a window focus event → stale-query refetches → AppLayout re-render → textarea lost focus.
+- [x] Fix: set refetchOnWindowFocus:false in QueryClient defaultOptions in main.tsx
+- [x] Audit all other textareas — same root cause, same fix covers all
+- [x] Verify fix — 83 tests passing, zero TypeScript errors

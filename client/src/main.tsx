@@ -8,7 +8,17 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // Prevent React Query from refetching on every window-focus event.
+      // Without this, typing in any textarea causes the window to receive a
+      // focus event, which triggers stale-query refetches that re-render
+      // AppLayout and steal focus from the active input after each character.
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
   if (!(error instanceof TRPCClientError)) return;
