@@ -25,8 +25,9 @@ import { getLoginUrl } from "@/const";
 import { useEffect, useRef } from "react";
 
 // ── Brand CDN URLs ────────────────────────────────────────────────────────────
+// Dark-background stacked lockup: navy arch + white bird + wordmark (reads on dark hero bg)
 const BRAND_LOGO_DARK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/ContinuaryStackedFullLogo_54351425.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-dark-bg-stacked_3630c4d9.png";
 
 // ── Intersection-observer fade-in hook ────────────────────────────────────────
 function useFadeIn() {

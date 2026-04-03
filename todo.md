@@ -522,3 +522,11 @@
 - [x] Replace all BRAND_LOGO_DARK references with new stacked logo URL
 - [x] Update sign-in landing screen logo
 - [x] Update welcome page hero and footer logo
+
+## Favicon + PWA Manifest
+
+- [ ] Generate favicon.ico and PNG icon sizes from the Continuary bird mark
+- [ ] Upload icon PNGs to CDN (192x192 and 512x512 for PWA)
+- [ ] Add manifest.json with app name, icons, display:standalone, theme_color
+- [ ] Update index.html with PWA meta tags (apple-touch-icon, theme-color, manifest link)
+- [ ] Update index.html favicon link to use new icon
