@@ -6,6 +6,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
 import { claritySessions } from "../../drizzle/schema";
 import { eq, desc, and } from "drizzle-orm";
@@ -40,14 +41,14 @@ export const clarityRouter = router({
     .input(
       z.object({
         mode: z.enum(MODES),
-        brainDump: z.string().min(10, "Please share at least a few sentences"),
+        brainDump: z.string().min(10, "Please share at least a few sentences").max(8000, "Brain dump must be under 8,000 characters"),
         projectId: z.number().optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
-
       const modeContext = MODE_CONTEXT[input.mode];
 
       const systemPrompt = `You are the Clarity Engine inside Continuary — a calm, perceptive guide that helps people move from inner noise to clear action.
@@ -67,59 +68,63 @@ Respond ONLY with valid JSON in this exact shape:
 
 Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSON only.`;
 
-      const response = await invokeLLM({
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: `Mode: ${input.mode}\n\nBrain dump:\n${input.brainDump}`,
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "clarity_map",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                whatIsHappening: { type: "string" },
-                whatYouFeel: { type: "string" },
-                whatYouNeed: { type: "string" },
-                nextRightStep: { type: "string" },
-                signalLine: { type: "string" },
-              },
-              required: [
-                "whatIsHappening",
-                "whatYouFeel",
-                "whatYouNeed",
-                "nextRightStep",
-                "signalLine",
-              ],
-              additionalProperties: false,
-            },
-          },
-        },
-      });
+      // Default fallback map used when LLM is unavailable or returns bad JSON
+      const FALLBACK_MAP = {
+        whatIsHappening: "Something is weighing on you right now.",
+        whatYouFeel: "There is more here than words can easily capture.",
+        whatYouNeed: "Space, clarity, and one honest next step.",
+        nextRightStep: "Take a breath and name the one thing that matters most today.",
+        signalLine: "You already know more than you think.",
+      };
 
-      const raw = response?.choices?.[0]?.message?.content ?? "{}";
       let map: {
         whatIsHappening: string;
         whatYouFeel: string;
         whatYouNeed: string;
         nextRightStep: string;
         signalLine: string;
-      };
+      } = FALLBACK_MAP;
+
       try {
-        map = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: `Mode: ${input.mode}\n\nBrain dump:\n${input.brainDump}`,
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "clarity_map",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  whatIsHappening: { type: "string" },
+                  whatYouFeel: { type: "string" },
+                  whatYouNeed: { type: "string" },
+                  nextRightStep: { type: "string" },
+                  signalLine: { type: "string" },
+                },
+                required: [
+                  "whatIsHappening",
+                  "whatYouFeel",
+                  "whatYouNeed",
+                  "nextRightStep",
+                  "signalLine",
+                ],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+        const raw = response?.choices?.[0]?.message?.content ?? "{}";
+        const parsed = JSON.parse(typeof raw === "string" ? raw : JSON.stringify(raw));
+        if (parsed.whatIsHappening) map = parsed;
       } catch {
-        map = {
-          whatIsHappening: "Something is weighing on you right now.",
-          whatYouFeel: "There is more here than words can easily capture.",
-          whatYouNeed: "Space, clarity, and one honest next step.",
-          nextRightStep: "Take a breath and name the one thing that matters most today.",
-          signalLine: "You already know more than you think.",
-        };
+        // LLM unavailable or returned malformed JSON — use fallback map
       }
 
       const [result] = await db

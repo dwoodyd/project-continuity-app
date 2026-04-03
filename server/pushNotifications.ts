@@ -145,19 +145,50 @@ async function sendPushToUser(
   await logNotificationSent({ userId, type });
 }
 
+// ── Backoff state for DB failures ────────────────────────────────────────────
+let _consecutiveDbFailures = 0;
+const MAX_BACKOFF_TICKS = 5; // skip up to 5 consecutive ticks (~5 min) after DB failure
+
 // ── Main cron tick ────────────────────────────────────────────────────────────
 export async function runNotificationCronTick(): Promise<void> {
   const vapidReady = initVapid();
   if (!vapidReady) return;
 
-  const userIds = await getAllUsersWithPushSubscriptions();
+  // If DB has been failing repeatedly, back off to avoid log spam
+  if (_consecutiveDbFailures > 0 && _consecutiveDbFailures <= MAX_BACKOFF_TICKS) {
+    _consecutiveDbFailures++;
+    if (_consecutiveDbFailures > MAX_BACKOFF_TICKS) _consecutiveDbFailures = 0;
+    return;
+  }
+
+  let userIds: number[];
+  try {
+    userIds = await getAllUsersWithPushSubscriptions();
+  } catch (err) {
+    _consecutiveDbFailures++;
+    // Only log once per backoff window to avoid console spam
+    if (_consecutiveDbFailures === 1) {
+      console.warn("[Push] DB unavailable — backing off push cron:", (err as Error).message);
+    }
+    return;
+  }
+
+  // DB is healthy — reset failure counter
+  _consecutiveDbFailures = 0;
+
   if (!userIds.length) return;
 
   await Promise.allSettled(userIds.map((userId) => processUserNotifications(userId)));
 }
 
 async function processUserNotifications(userId: number): Promise<void> {
-  const profile = await getUserProfile(userId);
+  let profile;
+  try {
+    profile = await getUserProfile(userId);
+  } catch (err) {
+    console.warn(`[Push] Failed to load profile for user ${userId}:`, (err as Error).message);
+    return;
+  }
   if (!profile) return;
   if (!profile.notificationsEnabled) return;
 

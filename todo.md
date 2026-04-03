@@ -540,3 +540,14 @@
 - [x] Upload all new icon sizes to CDN
 - [x] Update manifest.json with new CDN icon URLs (all 11 sizes)
 - [x] Update index.html favicon, apple-touch-icon, OG image with new CDN URLs
+
+## Beta Readiness Fixes
+
+- [x] Add .max() input guards to all LLM-feeding string fields (brainDump, vault content, intelligence notes, checkIn fields)
+- [x] Wrap clarity.runSession LLM call in try/catch with graceful user-facing error
+- [x] Build per-user LLM rate limiter (10 calls/min in-memory) and apply to all 15 AI mutation procedures
+- [x] Fix pushNotifications.ts ECONNRESET loop with try/catch + exponential backoff (5-tick skip window)
+- [x] Add "Delete my account" to Settings page (wipes all user data, requires typing DELETE)
+- [x] Add deleteAccount tRPC procedure that removes all rows for ctx.user.id in FK-safe order
+- [x] Create minimal /privacy page accessible without login
+- [x] Register /privacy route in App.tsx

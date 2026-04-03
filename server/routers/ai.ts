@@ -15,6 +15,7 @@ import {
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 
 function getTodayDate(): string {
   return new Date().toISOString().split("T")[0]!;
@@ -24,7 +25,7 @@ export const aiRouter = router({
   // ─── Idea Sanctuary ─────────────────────────────────────────────────────────
   captureIdea: protectedProcedure
     .input(z.object({
-      content: z.string().min(1),
+      content: z.string().min(1).max(5000, "Idea must be under 5,000 characters"),
       capturedDuringTask: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -199,9 +200,9 @@ Return JSON: { stoppingPoint, unresolvedDecision, whatWasRuledOut, nextPhysicalA
   // ─── Unstick Protocol ────────────────────────────────────────────────────────
   unstickTask: protectedProcedure
     .input(z.object({
-      taskTitle: z.string(),
+      taskTitle: z.string().max(500, "Task title must be under 500 characters"),
       projectId: z.number().optional(),
-      context: z.string().optional(),
+      context: z.string().max(2000).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const project = input.projectId ? await getProjectById(input.projectId, ctx.user.id) : null;
@@ -337,6 +338,7 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
 
   // ─── Weekly Review Generation ─────────────────────────────────────────────────
   generateWeeklyReview: protectedProcedure.mutation(async ({ ctx }) => {
+    checkLLMRateLimit(ctx.user.id);
     const projects = await getActiveProjects(ctx.user.id);
     const recentCheckIns = await getRecentCheckIns(ctx.user.id, 21);
     const recentPlans = await getRecentDailyPlans(ctx.user.id, 7);

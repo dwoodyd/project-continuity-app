@@ -682,3 +682,41 @@ export async function clearOldPatternInsights(userId: number): Promise<void> {
   await db.delete(patternInsights)
     .where(and(eq(patternInsights.userId, userId), lte(patternInsights.generatedAt, cutoff)));
 }
+
+// ─── Account Deletion ─────────────────────────────────────────────────────────
+import {
+  frictionLogs,
+  claritySessions,
+} from "../drizzle/schema";
+
+/**
+ * Hard-delete all data owned by a user, then delete the user record itself.
+ * Order matters: delete child rows before parent rows to avoid FK violations.
+ */
+export async function deleteAllUserData(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+
+  // Leaf tables first (no FK children)
+  await db.delete(notificationLog).where(eq(notificationLog.userId, userId));
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.userId, userId));
+  await db.delete(frictionLogs).where(eq(frictionLogs.userId, userId));
+  await db.delete(patternInsights).where(eq(patternInsights.userId, userId));
+  await db.delete(projectHealthScores).where(eq(projectHealthScores.userId, userId));
+  await db.delete(claritySessions).where(eq(claritySessions.userId, userId));
+  await db.delete(distractionEvents).where(eq(distractionEvents.userId, userId));
+  await db.delete(decisions).where(eq(decisions.userId, userId));
+  await db.delete(projectMemoryEvents).where(eq(projectMemoryEvents.userId, userId));
+  await db.delete(focusSessions).where(eq(focusSessions.userId, userId));
+  await db.delete(weeklyCompass).where(eq(weeklyCompass.userId, userId));
+  await db.delete(reEntryCards).where(eq(reEntryCards.userId, userId));
+  await db.delete(weeklyReviews).where(eq(weeklyReviews.userId, userId));
+  await db.delete(ideaCaptures).where(eq(ideaCaptures.userId, userId));
+  await db.delete(checkIns).where(eq(checkIns.userId, userId));
+  await db.delete(dailyPlans).where(eq(dailyPlans.userId, userId));
+  await db.delete(sourceItems).where(eq(sourceItems.userId, userId));
+  await db.delete(projects).where(eq(projects.userId, userId));
+  // Parent tables last
+  await db.delete(userProfiles).where(eq(userProfiles.userId, userId));
+  await db.delete(users).where(eq(users.id, userId));
+}

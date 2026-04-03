@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { getUserProfile, updateUserProfile, upsertUserProfile } from "../db";
+import { getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 
 export const settingsRouter = router({
   getProfile: protectedProcedure.query(async ({ ctx }) => {
@@ -71,6 +72,24 @@ export const settingsRouter = router({
         await upsertUserProfile({ userId: ctx.user.id, ...profileData } as any);
       }
       return { success: true };
+    }),
+
+  deleteAccount: protectedProcedure
+    .input(z.object({
+      // Require the user to type "DELETE" as a confirmation safeguard
+      confirmation: z.literal("DELETE"),
+    }))
+    .mutation(async ({ ctx }) => {
+      try {
+        await deleteAllUserData(ctx.user.id);
+        return { success: true };
+      } catch (err) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Account deletion failed. Please try again or contact support.",
+          cause: err,
+        });
+      }
     }),
 
   updateSettings: protectedProcedure

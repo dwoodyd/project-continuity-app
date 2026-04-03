@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import {
   createDistractionEvent,
@@ -44,6 +45,7 @@ export const intelligenceRouter = router({
       projectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const hour = new Date().getHours();
       const timeOfDay: "morning" | "afternoon" | "evening" =
         hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
@@ -107,7 +109,7 @@ Return JSON only: { category: string, confidence: "high"|"medium"|"low" }`,
   // ── Decision Capture ──────────────────────────────────────────────────────────
   saveDecision: protectedProcedure
     .input(z.object({
-      content: z.string().min(1),
+      content: z.string().min(1).max(5000, "Decision must be under 5,000 characters"),
       projectId: z.number().optional(),
       source: z.enum(["manual", "extracted"]).default("manual"),
     }))
@@ -132,10 +134,11 @@ Return JSON only: { category: string, confidence: "high"|"medium"|"low" }`,
 
   extractDecisionsFromNotes: protectedProcedure
     .input(z.object({
-      notes: z.string(),
+      notes: z.string().max(10000, "Notes must be under 10,000 characters"),
       projectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       if (!input.notes.trim()) return { decisions: [] };
       try {
         const response = await invokeLLM({
@@ -188,8 +191,8 @@ Return JSON: { decisions: string[] }`,
     .input(z.object({
       projectId: z.number(),
       eventType: z.enum(["created", "vault_import", "check_in", "focus_session", "milestone", "blocker", "next_step_change", "decision", "status_change"]),
-      content: z.string(),
-      metadata: z.string().optional(),
+      content: z.string().max(5000),
+      metadata: z.string().max(2000).optional(),
       occurredAt: z.number().optional(), // unix ms
     }))
     .mutation(async ({ ctx, input }) => {
@@ -284,6 +287,7 @@ Return JSON: { decisions: string[] }`,
   }),
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
+    checkLLMRateLimit(ctx.user.id);
     const [activeProjects, recentSessions, recentPlans, profile] = await Promise.all([
       getActiveProjects(ctx.user.id),
       getRecentFocusSessions(ctx.user.id, 20),
@@ -403,6 +407,7 @@ Return JSON: {
   generateReEntryCard: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const [project, sessions, checkIns] = await Promise.all([
         getProjectById(input.projectId, ctx.user.id),
         getFocusSessionsByProject(ctx.user.id, input.projectId, 5),
@@ -563,6 +568,7 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
       workStyle: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const { projectId, projectTitle, whyItMatters, userNextStep, tonePreference, workStyle } = input;
       // If the user already gave a concrete next step (>10 chars), use it directly
       if (userNextStep && userNextStep.trim().length > 10) {

@@ -22,6 +22,7 @@ import {
   getProjectMemoryEvents,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 
 function getTodayDate(): string {
@@ -43,11 +44,12 @@ export const checkInsRouter = router({
       capacityLevel: z.enum(["full", "partial", "low"]),
       primaryProjectId: z.number().optional(),
       secondaryProjectId: z.number().optional(),
-      userNotes: z.string().optional(),
+      userNotes: z.string().max(2000).optional(),
       emotionalState: z.enum(["focused", "anxious", "foggy", "energized", "drained"]).optional(),
       mentalLoad: z.enum(["light", "moderate", "heavy"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const date = getTodayDate();
       const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
         getUserProfile(ctx.user.id),
@@ -248,12 +250,13 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
 
   submitMidday: protectedProcedure
     .input(z.object({
-      workedOn: z.string(),
+      workedOn: z.string().max(2000),
       wasOnPlan: z.boolean(),
-      interruptions: z.string().optional(),
-      nextMove: z.string().optional(),
+      interruptions: z.string().max(2000).optional(),
+      nextMove: z.string().max(1000).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const date = getTodayDate();
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
@@ -332,12 +335,13 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
 
   submitEvening: protectedProcedure
     .input(z.object({
-      whatMoved: z.string(),
-      whatRemains: z.string(),
-      whatLearned: z.string(),
-      tomorrowFirst: z.string(),
+      whatMoved: z.string().max(2000),
+      whatRemains: z.string().max(2000),
+      whatLearned: z.string().max(2000),
+      tomorrowFirst: z.string().max(1000),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const date = getTodayDate();
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);

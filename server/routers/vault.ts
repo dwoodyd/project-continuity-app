@@ -11,6 +11,7 @@ import {
 } from "../db";
 import { storagePut } from "../storage";
 import { protectedProcedure, router } from "../_core/trpc";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import { getDb } from "../db";
 
@@ -44,8 +45,8 @@ export const vaultRouter = router({
 
   addPaste: protectedProcedure
     .input(z.object({
-      title: z.string().optional(),
-      content: z.string().min(1),
+      title: z.string().max(500).optional(),
+      content: z.string().min(1).max(50000, "Content must be under 50,000 characters"),
       sourceType: sourceTypeEnum.optional(),
       contentClass: contentClassEnum.optional(),
     }))
@@ -63,10 +64,11 @@ export const vaultRouter = router({
 
   addFile: protectedProcedure
     .input(z.object({
-      title: z.string().optional(),
-      fileDataBase64: z.string(),
-      mimeType: z.string(),
-      fileName: z.string(),
+      title: z.string().max(500).optional(),
+      // base64 of 16MB file ≈ 22MB string; cap at 25M chars (~18MB decoded)
+      fileDataBase64: z.string().max(25_000_000, "File must be under 18 MB"),
+      mimeType: z.string().max(100),
+      fileName: z.string().max(255),
       sourceType: sourceTypeEnum,
     }))
     .mutation(async ({ ctx, input }) => {
@@ -99,8 +101,8 @@ export const vaultRouter = router({
   updateItem: protectedProcedure
     .input(z.object({
       id: z.number(),
-      title: z.string().optional(),
-      summary: z.string().optional(),
+      title: z.string().max(500).optional(),
+      summary: z.string().max(2000).optional(),
       tags: z.array(z.string()).optional(),
       linkedProjectIds: z.array(z.number()).optional(),
       contentClass: contentClassEnum.optional(),
@@ -140,6 +142,7 @@ export const vaultRouter = router({
   aiProcess: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const item = await getSourceItemById(input.id, ctx.user.id);
       if (!item) throw new TRPCError({ code: "NOT_FOUND" });
       const content = item.rawContent ?? item.cleanContent ?? "";

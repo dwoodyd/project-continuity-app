@@ -266,6 +266,15 @@ export default function SettingsPage() {
   const [eveningTime, setEveningTime] = useState("17:00");
   const [frictionOpen, setFrictionOpen] = useState(false);
   const [frictionNote, setFrictionNote] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const deleteAccount = trpc.settings.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success("Account deleted. Goodbye.");
+      setTimeout(() => logout(), 1200);
+    },
+    onError: (err) => toast.error(err.message ?? "Deletion failed. Please try again."),
+  });
   const submitFriction = trpc.friction.submit.useMutation({
     onSuccess: () => {
       toast.success("Noted. Thank you.");
@@ -410,6 +419,75 @@ export default function SettingsPage() {
                   </Button>
                   <button
                     onClick={() => { setFrictionOpen(false); setFrictionNote(""); }}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Privacy link */}
+          <div className="flex items-center justify-between py-2">
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+            >
+              Privacy Policy
+            </a>
+          </div>
+
+          {/* Danger zone — delete account */}
+          <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/5 space-y-3">
+            <p className="text-xs font-medium text-destructive">Danger zone</p>
+            {!deleteOpen ? (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Delete account</p>
+                  <p className="text-xs text-muted-foreground">Permanently remove all your data. Cannot be undone.</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-destructive/40 text-destructive hover:bg-destructive/10"
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  Delete
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-foreground leading-relaxed">
+                  This will permanently delete your account, all projects, check-ins, vault items, and AI sessions.
+                  Type <strong>DELETE</strong> to confirm.
+                </p>
+                <Input
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="text-sm h-8"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="text-xs h-7"
+                    disabled={deleteConfirmText !== "DELETE" || deleteAccount.isPending}
+                    onClick={() => deleteAccount.mutate({ confirmation: "DELETE" })}
+                  >
+                    {deleteAccount.isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5 mr-1" />
+                    )}
+                    Permanently delete
+                  </Button>
+                  <button
+                    onClick={() => { setDeleteOpen(false); setDeleteConfirmText(""); }}
                     className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Cancel

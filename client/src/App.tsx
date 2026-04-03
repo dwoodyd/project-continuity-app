@@ -18,12 +18,14 @@ import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import IntelligencePage from "./pages/IntelligencePage";
 import ClarityEnginePage from "./pages/ClarityEnginePage";
+import PrivacyPage from "./pages/PrivacyPage";
 
 function Router() {
   return (
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/focus" component={FocusModePage} />
+      <Route path="/privacy" component={PrivacyPage} />
       <Route>
         <AppLayout>
           <Switch>
