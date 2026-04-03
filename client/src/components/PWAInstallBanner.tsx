@@ -94,7 +94,7 @@ export default function PWAInstallBanner() {
     >
       <div className="max-w-lg mx-auto rounded-2xl border border-white/10 bg-[oklch(0.20_0.06_264)] shadow-2xl shadow-black/40 p-4 flex items-start gap-3">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96x96_2086d45d.png"
+          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_e5c53296.png"
           alt="Continuary"
           className="w-12 h-12 rounded-xl shrink-0"
         />

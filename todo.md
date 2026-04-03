@@ -600,3 +600,11 @@
 - [x] Empty state and "New Project" CTA remain full-width
 - [x] Single-column stacking on mobile (below lg breakpoint)
 - [x] All 66 tests passing, zero TypeScript errors
+
+## Old Logo/Icon Replacement
+
+- [x] Found 2 files with old icon URLs: PWAInstallBanner.tsx and sw.js
+- [x] PWAInstallBanner.tsx: replaced icon-96x96_2086d45d with icon-96_e5c53296 (new DarkBackgroundMonochrome)
+- [x] sw.js push notification handler: replaced icon-192x192_1aa1c846 and icon-96x96_2086d45d with new CDN URLs
+- [x] Full scan confirms zero remaining old icon filenames across all client files
+- [x] manifest.json, index.html, AppLayout.tsx, WelcomePage.tsx were already using correct new icons

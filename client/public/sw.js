@@ -97,8 +97,8 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       tag: data.tag ?? "continuity",
-      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-192x192_1aa1c846.png",
-      badge: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96x96_2086d45d.png",
+      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-192_8a0141d4.png",
+      badge: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_e5c53296.png",
       silent: false,
       requireInteraction: false,
       data: data.url ? { url: data.url } : undefined,
