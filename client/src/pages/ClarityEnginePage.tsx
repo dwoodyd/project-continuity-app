@@ -814,7 +814,7 @@ export default function ClarityEnginePage() {
   );
 
   return (
-    <div className="p-6 md:p-8 min-h-screen">
+    <div className="p-6 md:p-8 min-h-screen max-w-4xl mx-auto">
       {view === "new" && <NewSessionView />}
       {view === "result" && activeSession && <ResultView />}
       {view === "history" && <HistoryView />}

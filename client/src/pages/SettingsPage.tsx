@@ -311,7 +311,7 @@ export default function SettingsPage() {
   const processedIdeas = ideas?.filter((i) => i.resolvedStatus) ?? [];
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter">
+    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
         <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Settings</h1>
@@ -531,7 +531,7 @@ export default function SettingsPage() {
               <Input
                 value={inviteLabel}
                 onChange={(e) => setInviteLabel(e.target.value)}
-                placeholder="Label (optional — e.g. Sarah M.)"
+                placeholder="Label (optional - e.g. Sarah M.)"
                 className="text-sm flex-1"
                 onKeyDown={(e) => e.key === "Enter" && generateInvite.mutate({ label: inviteLabel || undefined })}
               />

@@ -476,7 +476,7 @@ export default function VaultPage() {
   const reviewCount = reviewQueue?.length ?? 0;
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter">
+    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

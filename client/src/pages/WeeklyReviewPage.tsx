@@ -51,7 +51,7 @@ export default function WeeklyReviewPage() {
   const checkInDays = recentCheckIns?.length ?? 0;
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter">
+    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
         <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>

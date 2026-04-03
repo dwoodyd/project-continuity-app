@@ -568,3 +568,15 @@
 - [x] Add invite code input field to onboarding UI (step -1, before profile setup steps)
 - [x] Add invite code management panel to Settings (admin only: generate with label, copy, list with status)
 - [x] Write 13 regression tests for invite gate and 5 for session revocation (66 total tests, all passing)
+
+## Desktop Layout Mode
+
+- [x] Audit AppLayout for max-width constraints and mobile-only padding (was locked to max-w-md on all screens)
+- [x] Auto-expand to full-width sidebar + content layout on lg+ screens (auto on >= 1024px)
+- [x] Add compact/expanded view toggle: Monitor icon in compact header, PanelLeft in desktop sidebar footer
+- [x] Persist layout preference in localStorage under "continuary-layout-mode"
+- [x] Widen content grids on desktop: max-w-4xl mx-auto on all 9 major pages
+- [x] Desktop sidebar: full labeled nav with Command/Review sections, user avatar, admin badge
+- [x] Mobile bottom nav shows only in compact mode; desktop sidebar shows only in desktop mode
+- [x] Fix JSX parse error (em dash in SettingsPage placeholder caused Babel parse failure)
+- [x] All 66 tests passing, zero TypeScript errors
