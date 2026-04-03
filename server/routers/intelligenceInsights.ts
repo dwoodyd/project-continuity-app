@@ -23,6 +23,7 @@ import {
   getDecisionsByProject,
   getProjectMemoryEvents,
   getRecentDailyPlans,
+  getDistractionWeeklyAggregates,
 } from "../db";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -261,6 +262,38 @@ Rules:
     }
 
     return { insights, count: savedIds.length };
+  }),
+
+  // ── Query: distraction patterns (last 7 days) ────────────────────────────
+  getDistractionPatterns: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.user.id;
+    const agg = await getDistractionWeeklyAggregates(userId);
+    // Also get per-category breakdown for the bar chart
+    const events = await getDistractionEventsByUser(userId, 100);
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recent = events.filter(e => new Date(e.date) >= sevenDaysAgo);
+    const catCount: Record<string, number> = {};
+    const todCount: Record<string, number> = {};
+    for (const e of recent) {
+      catCount[e.category] = (catCount[e.category] ?? 0) + 1;
+      todCount[e.timeOfDay] = (todCount[e.timeOfDay] ?? 0) + 1;
+    }
+    const categories = Object.entries(catCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => ({ name, count }));
+    const timeBreakdown = Object.entries(todCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([time, count]) => ({ time, count }));
+    return {
+      totalEvents: agg.totalEvents,
+      topCategory: agg.topCategory,
+      topTimeOfDay: agg.topTimeOfDay,
+      topProjectId: agg.topProjectId,
+      categories,
+      timeBreakdown,
+      hasData: recent.length > 0,
+    };
   }),
 
   // ── Query: 14-day emotional state trend ────────────────────────────────────

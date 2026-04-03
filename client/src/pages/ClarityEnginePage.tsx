@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Folder,
   ChevronDown,
+  Copy,
 } from "lucide-react";
 
 
@@ -372,16 +373,42 @@ export default function ClarityEnginePage() {
               {format(new Date(session.createdAt), "MMM d, h:mm a")}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setView("new");
-              setActiveSessionId(null);
-            }}
-          >
-            New session
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                const session = activeSession;
+                if (!session) return;
+                const parts = [
+                  session.signalLine ? `Signal: "${session.signalLine}"` : null,
+                  session.whatIsHappening ? `What's happening: ${session.whatIsHappening}` : null,
+                  session.whatYouFeel ? `What I feel: ${session.whatYouFeel}` : null,
+                  session.whatYouNeed ? `What I need: ${session.whatYouNeed}` : null,
+                  session.nextRightStep ? `Next right step: ${session.nextRightStep}` : null,
+                ].filter(Boolean);
+                navigator.clipboard.writeText(parts.join("\n\n")).then(() => {
+                  toast.success("Session summary copied to clipboard.");
+                }).catch(() => {
+                  toast.error("Copy failed — please try again.");
+                });
+              }}
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Copy
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setView("new");
+                setActiveSessionId(null);
+              }}
+            >
+              New session
+            </Button>
+          </div>
         </div>
 
         {/* Signal Line */}

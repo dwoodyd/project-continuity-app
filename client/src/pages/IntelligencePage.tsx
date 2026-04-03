@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Zap,
   Heart,
+  ShieldAlert,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -158,6 +159,7 @@ export default function IntelligencePage() {
   const insightsQuery = trpc.insights.getPatternInsights.useQuery();
   const projectsQuery = trpc.projects.list.useQuery();
   const emotionalTrendQuery = trpc.insights.getEmotionalTrend.useQuery();
+  const distractionQuery = trpc.insights.getDistractionPatterns.useQuery();
 
   const [scoringLoading, setScoringLoading] = useState(false);
   const [patternsLoading, setPatternsLoading] = useState(false);
@@ -201,6 +203,8 @@ export default function IntelligencePage() {
   const hasScores = healthScores.length > 0;
   const hasInsights = insights.length > 0;
   const hasTrend = emotionalTrend.length > 0;
+  const distractionData = distractionQuery.data;
+  const hasDistractionData = distractionData?.hasData ?? false;
 
   // Compute most common emotional state in the last 14 days
   const stateCounts: Record<string, number> = {};
@@ -259,6 +263,89 @@ export default function IntelligencePage() {
                 </div>
               )}
               <EmotionalSparkline data={emotionalTrend} />
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
+      {/* ── Distraction Patterns ──────────────────────────────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4 text-orange-400" />
+          <h2 className="text-base font-medium text-foreground">Distraction Patterns</h2>
+          <span className="text-xs text-muted-foreground ml-1">Last 7 days</span>
+        </div>
+
+        {distractionQuery.isLoading ? (
+          <div className="h-28 rounded-xl bg-muted/30 animate-pulse" />
+        ) : !hasDistractionData ? (
+          <Card className="border-dashed border-border/50 bg-transparent">
+            <CardContent className="flex flex-col items-center justify-center py-8 text-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
+                No distraction data yet. Midday and evening check-ins capture distraction patterns automatically.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card/60 border-border/50">
+            <CardContent className="pt-4 pb-4 space-y-4">
+              {/* Summary row */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-foreground tabular-nums">{distractionData!.totalEvents}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Total events</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-orange-400 capitalize">
+                    {distractionData!.topCategory?.replace(/_/g, " ") ?? "—"}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Top category</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm font-semibold text-amber-400 capitalize">
+                    {distractionData!.topTimeOfDay ?? "—"}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">Peak time</div>
+                </div>
+              </div>
+
+              {/* Category breakdown bar chart */}
+              {distractionData!.categories.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">By category</p>
+                  {distractionData!.categories.map((cat: { name: string; count: number }) => {
+                    const maxCount = distractionData!.categories[0]?.count ?? 1;
+                    const pct = Math.round((cat.count / maxCount) * 100);
+                    return (
+                      <div key={cat.name} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-foreground capitalize">{cat.name.replace(/_/g, " ")}</span>
+                          <span className="text-muted-foreground tabular-nums">{cat.count}×</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-orange-500/70 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Most-interrupted project */}
+              {distractionData!.topProjectId && (
+                <div className="pt-1 border-t border-border/30">
+                  <p className="text-xs text-muted-foreground">
+                    Most interrupted project:{" "}
+                    <span className="text-foreground font-medium">
+                      {projectMap.get(distractionData!.topProjectId) ?? `Project ${distractionData!.topProjectId}`}
+                    </span>
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

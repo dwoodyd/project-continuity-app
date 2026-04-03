@@ -494,3 +494,11 @@
 - [x] Intelligence page: "Refresh scores" button calls generateHealthScores mutation
 - [x] Intelligence page: 14-day emotional trend sparkline using emotionalState data
 - [x] Project Detail page: Clarity tab listing all sessions linked to that project
+
+## Next Batch: Distraction Dashboard + Clarity Export + Auto Health Scores
+
+- [x] Backend: getDistractionPatterns procedure — aggregate last 7 days of distractionEvents by category, timeOfDay, projectId
+- [x] Backend: auto-call scoreAllProjects at end of evening closure (submitEvening mutation)
+- [x] Intelligence page: Distraction Patterns card — top category, peak time-of-day, most-interrupted project
+- [x] ClarityEnginePage: "Copy summary" button on completed session — copies signal line + next right step to clipboard
+- [x] ClarityEnginePage: toast confirmation "Copied to clipboard" after copy

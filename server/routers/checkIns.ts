@@ -15,6 +15,11 @@ import {
   createProjectMemoryEvent,
   getRecentDailyPlans,
   getProjectById,
+  getHealthScoreForProject,
+  upsertHealthScore,
+  getFocusSessionsByProject,
+  getDecisionsByProject,
+  getProjectMemoryEvents,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
@@ -418,6 +423,50 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
           metadata: JSON.stringify({ checkInId, insights: parsed.insights }),
         });
       }
+
+      // Auto-refresh health scores in background (fire-and-forget, non-blocking)
+      const userId = ctx.user.id;
+      void (async () => {
+        try {
+          const allProjects = await getActiveProjects(userId);
+          const now = new Date();
+          for (const p of allProjects) {
+            const sessions = await getFocusSessionsByProject(userId, p.id, 10);
+            const stalledDays = p.lastTouchedAt
+              ? Math.floor((Date.now() - new Date(p.lastTouchedAt).getTime()) / 86400000)
+              : 999;
+            const completionRate = sessions.length > 0
+              ? Math.min(100, sessions.filter(s => s.wasCompleted).length * 20)
+              : 0;
+            const recentSessionCount = sessions.filter(
+              s => Math.floor((Date.now() - new Date(s.startedAt).getTime()) / 86400000) <= 14
+            ).length;
+            let score = 70;
+            if (stalledDays > 14) score -= 30;
+            else if (stalledDays > 7) score -= 15;
+            if (recentSessionCount === 0) score -= 10;
+            if (completionRate > 60) score += 10;
+            if (!p.nextStep) score -= 10;
+            score = Math.max(0, Math.min(100, score));
+            const momentum = stalledDays > 14 ? "stalled" : stalledDays > 7 ? "fading" : recentSessionCount > 2 ? "rising" : "steady";
+            const riskLevel = stalledDays > 14 || !p.nextStep ? "high" : stalledDays > 7 ? "medium" : "low";
+            await upsertHealthScore({
+              userId,
+              projectId: p.id,
+              score,
+              momentum,
+              riskLevel,
+              narrative: "Auto-refreshed after evening closure.",
+              completionRate,
+              stalledDays,
+              lastActivityAt: stalledDays < 999 ? new Date(Date.now() - stalledDays * 86400000) : null,
+              generatedAt: now,
+            });
+          }
+        } catch {
+          // Silently ignore — this is a background refresh, not critical
+        }
+      })();
 
       return {
         checkInId,
