@@ -41,7 +41,7 @@ export const intelligenceRouter = router({
 
   classifyAndSaveDistraction: protectedProcedure
     .input(z.object({
-      rawInput: z.string(),
+      rawInput: z.string().max(2000, "Input must be under 2,000 characters"),
       checkInType: z.enum(["midday", "evening"]),
       projectId: z.number().optional(),
     }))
@@ -562,11 +562,11 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
   generateOnboardingStartHere: protectedProcedure
     .input(z.object({
       projectId: z.number(),
-      projectTitle: z.string(),
-      whyItMatters: z.string().optional(),
-      userNextStep: z.string().optional(),
+      projectTitle: z.string().max(500, "Project title must be under 500 characters"),
+      whyItMatters: z.string().max(2000).optional(),
+      userNextStep: z.string().max(2000).optional(),
       tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
-      workStyle: z.string().optional(),
+      workStyle: z.string().max(500).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
