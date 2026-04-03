@@ -35,6 +35,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import IdeaSanctuaryModal from "@/components/IdeaSanctuaryModal";
 import UnstickModal from "@/components/UnstickModal";
+import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -317,7 +318,13 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
         </div>
       )}
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">Anything to note? <span className="font-normal opacity-60">(optional)</span></p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-medium text-muted-foreground">Anything to note? <span className="font-normal opacity-60">(optional)</span></p>
+          <VoiceDictationButton
+            onTranscript={(text) => setNotes((prev) => (prev ? `${prev} ${text}` : text))}
+            disabled={submit.isPending}
+          />
+        </div>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -466,7 +473,13 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What moved today?</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs font-medium text-muted-foreground">What moved today?</p>
+          <VoiceDictationButton
+            onTranscript={(text) => setWhatMoved((prev) => (prev ? `${prev} ${text}` : text))}
+            disabled={submit.isPending}
+          />
+        </div>
         <Textarea value={whatMoved} onChange={(e) => setWhatMoved(e.target.value)} placeholder="What actually got done..." className="text-sm resize-none" rows={2} />
       </div>
       <div>

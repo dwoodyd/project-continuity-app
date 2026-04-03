@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   acknowledgeReEntryCard,
@@ -335,6 +336,91 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
         : null,
     };
   }),
+
+  // ─── Direct Voice Transcription (no S3 storage) ─────────────────────────────
+  // Accepts base64-encoded WebM audio, calls Whisper, returns transcript text.
+  // Audio is discarded after transcription — zero storage cost.
+  transcribeVoiceDirect: protectedProcedure
+    .input(
+      z.object({
+        // Base64-encoded audio data (WebM format from MediaRecorder)
+        audioBase64: z.string().min(1).max(20_000_000, "Audio data too large (max ~15 MB)"),
+        // Optional language hint for better accuracy
+        language: z.string().max(10).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
+
+      const { ENV } = await import("../_core/env");
+      if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Voice transcription service is not configured",
+        });
+      }
+
+      // Decode base64 to buffer
+      let audioBuffer: Buffer;
+      try {
+        audioBuffer = Buffer.from(input.audioBase64, "base64");
+      } catch {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid audio data encoding",
+        });
+      }
+
+      // Enforce 16 MB limit (Whisper hard limit)
+      const sizeMB = audioBuffer.length / (1024 * 1024);
+      if (sizeMB > 16) {
+        throw new TRPCError({
+          code: "PAYLOAD_TOO_LARGE",
+          message: `Recording is ${sizeMB.toFixed(1)} MB — please keep recordings under 16 MB (roughly 90 seconds).`,
+        });
+      }
+
+      // Build multipart form for Whisper API
+      const formData = new FormData();
+      const audioBlob = new Blob([new Uint8Array(audioBuffer)], { type: "audio/webm" });
+      formData.append("file", audioBlob, "recording.webm");
+      formData.append("model", "whisper-1");
+      formData.append("response_format", "json");
+      if (input.language) {
+        formData.append("language", input.language);
+      }
+
+      const baseUrl = ENV.forgeApiUrl.endsWith("/") ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`;
+      const whisperUrl = new URL("v1/audio/transcriptions", baseUrl).toString();
+
+      const response = await fetch(whisperUrl, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${ENV.forgeApiKey}`,
+          "Accept-Encoding": "identity",
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "");
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: `Transcription failed: ${response.status}${errorText ? ` — ${errorText.slice(0, 200)}` : ""}`,
+        });
+      }
+
+      const result = (await response.json()) as { text: string };
+      if (!result.text || typeof result.text !== "string") {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Transcription service returned an unexpected response",
+        });
+      }
+
+      // Return only the text — audio buffer is GC'd immediately
+      return { transcript: result.text.trim() };
+    }),
 
   // ─── Weekly Review Generation ─────────────────────────────────────────────────
   generateWeeklyReview: protectedProcedure.mutation(async ({ ctx }) => {

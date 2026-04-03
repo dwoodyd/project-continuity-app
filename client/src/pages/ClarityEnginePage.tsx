@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -242,9 +243,17 @@ export default function ClarityEnginePage() {
 
       {/* Brain dump textarea */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-          Brain dump — say everything
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Brain dump — say everything
+          </p>
+          <VoiceDictationButton
+            onTranscript={(text) =>
+              setBrainDump((prev) => (prev ? `${prev} ${text}` : text))
+            }
+            disabled={runSession.isPending}
+          />
+        </div>
         <Textarea
           value={brainDump}
           onChange={(e) => setBrainDump(e.target.value)}

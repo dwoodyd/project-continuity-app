@@ -608,3 +608,14 @@
 - [x] sw.js push notification handler: replaced icon-192x192_1aa1c846 and icon-96x96_2086d45d with new CDN URLs
 - [x] Full scan confirms zero remaining old icon filenames across all client files
 - [x] manifest.json, index.html, AppLayout.tsx, WelcomePage.tsx were already using correct new icons
+
+## Voice Dictation for Brain Dump
+
+- [x] Add `transcribeDirectly` tRPC procedure: accepts base64 audio string, calls Whisper, returns transcript text (no S3 storage)
+- [x] Build reusable `VoiceDictationButton` component: mic icon, recording pulse animation, stop button, loading spinner, error toast
+- [x] Wire `VoiceDictationButton` into Clarity Engine brain dump textarea (appends transcript to existing text)
+- [x] Wire `VoiceDictationButton` into morning check-in "What's on your mind?" field
+- [x] Wire `VoiceDictationButton` into evening closure notes field
+- [x] Handle mic permission denied gracefully (show instructional toast)
+- [x] Handle recording too short (<1s) gracefully
+- [x] Write vitest for transcribeDirectly procedure (mock Whisper, verify no S3 call)
