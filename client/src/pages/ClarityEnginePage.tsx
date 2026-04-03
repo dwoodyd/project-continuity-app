@@ -116,71 +116,34 @@ const MODE_LABEL: Record<Mode, string> = {
   purpose_fog: "Purpose Fog",
 };
 
-export default function ClarityEnginePage() {
-  const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly">("new");
-  const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
-  const [brainDump, setBrainDump] = useState("");
-  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
-  const [showProjectPicker, setShowProjectPicker] = useState(false);
-
-  const { data: projects } = trpc.projects.listActive.useQuery();
-  const { data: patterns, isLoading: patternsLoading } = trpc.clarity.analyzePatterns.useQuery(
-    undefined,
-    { enabled: view === "patterns" }
-  );
-  const { data: weeklySummary } = trpc.clarity.getWeeklySummary.useQuery(
-    undefined,
-    { enabled: view === "weekly" }
-  );
-
-  const utils = trpc.useUtils();
-
-  const { data: sessions, isLoading: sessionsLoading } =
-    trpc.clarity.getSessions.useQuery({ limit: 30 });
-
-  const { data: activeSession } = trpc.clarity.getSession.useQuery(
-    { id: activeSessionId! },
-    { enabled: !!activeSessionId }
-  );
-
-  const runSession = trpc.clarity.runSession.useMutation({
-    onSuccess: (session) => {
-      setActiveSessionId(session.id);
-      setView("result");
-      utils.clarity.getSessions.invalidate();
-      setBrainDump("");
-      setSelectedMode(null);
-    },
-    onError: (err) => {
-      toast.error("Something went wrong. Please try again.");
-      console.error(err);
-    },
-  });
-
-  const setProgressMarker = trpc.clarity.setProgressMarker.useMutation({
-    onSuccess: () => utils.clarity.getSession.invalidate({ id: activeSessionId! }),
-  });
-
-  const convertToAction = trpc.clarity.convertToAction.useMutation({
-    onSuccess: (result) => {
-      if (result.projectUpdated && result.projectTitle) {
-        // Feature 7: project was updated — richer confirmation
-        toast.success(`Next step saved to “${result.projectTitle}”`, {
-          description: "It will appear on your Command Center immediately.",
-          duration: 5000,
-        });
-      } else {
-        toast.success(
-          `Added to ${CONVERT_OPTIONS.find((o) => o.id === result.convertedTo)?.label ?? "your plan"}`
-        );
-      }
-      utils.clarity.getSession.invalidate({ id: activeSessionId! });
-      // Also refresh projects so Command Center picks up the new nextStep
-      utils.projects.listActive.invalidate();
-    },
-  });
-
+// ── New session form ──────────────────────────────────────────────────────────
+function NewSessionView({
+  selectedMode,
+  setSelectedMode,
+  brainDump,
+  setBrainDump,
+  selectedProjectId,
+  setSelectedProjectId,
+  showProjectPicker,
+  setShowProjectPicker,
+  projects,
+  sessions,
+  runSession,
+  setView,
+}: {
+  selectedMode: Mode | null;
+  setSelectedMode: (m: Mode) => void;
+  brainDump: string;
+  setBrainDump: (v: string | ((prev: string) => string)) => void;
+  selectedProjectId: number | undefined;
+  setSelectedProjectId: (id: number | undefined) => void;
+  showProjectPicker: boolean;
+  setShowProjectPicker: (v: boolean) => void;
+  projects: { id: number; title: string }[] | undefined;
+  sessions: { id: number }[] | undefined;
+  runSession: { isPending: boolean; mutate: (args: { mode: Mode; brainDump: string; projectId?: number }) => void };
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+}) {
   const handleRun = () => {
     if (!selectedMode) {
       toast.error("Please select a clarity mode first");
@@ -193,8 +156,7 @@ export default function ClarityEnginePage() {
     runSession.mutate({ mode: selectedMode, brainDump: brainDump.trim(), projectId: selectedProjectId });
   };
 
-  // ── New session form ──────────────────────────────────────────────────────
-  const NewSessionView = () => (
+  return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-brand font-medium text-foreground mb-2">
@@ -356,216 +318,241 @@ export default function ClarityEnginePage() {
       </div>
     </div>
   );
+}
 
-  // ── Session result ────────────────────────────────────────────────────────
-  const ResultView = () => {
-    const session = activeSession;
-    if (!session) return null;
+// ── Session result ────────────────────────────────────────────────────────────
+function ResultView({
+  activeSession,
+  projects,
+  sessions,
+  setView,
+  setActiveSessionId,
+  setProgressMarker,
+  convertToAction,
+}: {
+  activeSession: any;
+  projects: { id: number; title: string }[] | undefined;
+  sessions: { id: number }[] | undefined;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setActiveSessionId: (id: number | null) => void;
+  setProgressMarker: { mutate: (args: { sessionId: number; marker: "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit" }) => void };
+  convertToAction: { isPending: boolean; mutate: (args: { sessionId: number; convertTo: ConvertTo }) => void };
+}) {
+  const session = activeSession;
+  if (!session) return null;
 
-    const modeInfo = MODES.find((m) => m.id === session.mode);
+  const modeInfo = MODES.find((m) => m.id === session.mode);
 
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-brand font-medium text-foreground">
-              Your Clarity Map
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {modeInfo && (
-                <span className="inline-flex items-center gap-1.5">
-                  <modeInfo.icon className={`w-3.5 h-3.5 ${modeInfo.color}`} />
-                  {modeInfo.label}
-                </span>
-              )}
-              {" · "}
-              {format(new Date(session.createdAt), "MMM d, h:mm a")}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                const session = activeSession;
-                if (!session) return;
-                const parts = [
-                  session.signalLine ? `Signal: "${session.signalLine}"` : null,
-                  session.whatIsHappening ? `What's happening: ${session.whatIsHappening}` : null,
-                  session.whatYouFeel ? `What I feel: ${session.whatYouFeel}` : null,
-                  session.whatYouNeed ? `What I need: ${session.whatYouNeed}` : null,
-                  session.nextRightStep ? `Next right step: ${session.nextRightStep}` : null,
-                ].filter(Boolean);
-                navigator.clipboard.writeText(parts.join("\n\n")).then(() => {
-                  toast.success("Session summary copied to clipboard.");
-                }).catch(() => {
-                  toast.error("Copy failed — please try again.");
-                });
-              }}
-            >
-              <Copy className="w-3.5 h-3.5" />
-              Copy
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setView("new");
-                setActiveSessionId(null);
-              }}
-            >
-              New session
-            </Button>
-          </div>
-        </div>
-
-        {/* Signal Line */}
-        {session.signalLine && (
-          <div className="bg-gradient-to-r from-indigo-900/40 to-indigo-800/20 border border-indigo-500/30 rounded-xl p-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">
-              Signal Line
-            </p>
-            <p className="text-lg font-brand font-medium text-foreground italic leading-relaxed">
-              "{session.signalLine}"
-            </p>
-          </div>
-        )}
-
-        {/* 4-Part Clarity Map */}
-        <div className="space-y-4">
-          {[
-            {
-              label: "What's actually happening",
-              content: session.whatIsHappening,
-              color: "border-l-blue-400",
-            },
-            {
-              label: "What you actually feel",
-              content: session.whatYouFeel,
-              color: "border-l-purple-400",
-            },
-            {
-              label: "What you actually need",
-              content: session.whatYouNeed,
-              color: "border-l-teal-400",
-            },
-            {
-              label: "Your next right step",
-              content: session.nextRightStep,
-              color: "border-l-amber-400",
-            },
-          ].map((part) => (
-            <div
-              key={part.label}
-              className={`bg-card border border-border border-l-4 ${part.color} rounded-xl p-4`}
-            >
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
-                {part.label}
-              </p>
-              <p className="text-foreground leading-relaxed">{part.content}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Progress marker */}
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            How do you feel after this session?
+          <h1 className="text-2xl font-brand font-medium text-foreground">
+            Your Clarity Map
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {modeInfo && (
+              <span className="inline-flex items-center gap-1.5">
+                <modeInfo.icon className={`w-3.5 h-3.5 ${modeInfo.color}`} />
+                {modeInfo.label}
+              </span>
+            )}
+            {" · "}
+            {format(new Date(session.createdAt), "MMM d, h:mm a")}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            onClick={() => {
+              const parts = [
+                session.signalLine ? `Signal: "${session.signalLine}"` : null,
+                session.whatIsHappening ? `What's happening: ${session.whatIsHappening}` : null,
+                session.whatYouFeel ? `What I feel: ${session.whatYouFeel}` : null,
+                session.whatYouNeed ? `What I need: ${session.whatYouNeed}` : null,
+                session.nextRightStep ? `Next right step: ${session.nextRightStep}` : null,
+              ].filter(Boolean);
+              navigator.clipboard.writeText(parts.join("\n\n")).then(() => {
+                toast.success("Session summary copied to clipboard.");
+              }).catch(() => {
+                toast.error("Copy failed — please try again.");
+              });
+            }}
+          >
+            <Copy className="w-3.5 h-3.5" />
+            Copy
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setView("new");
+              setActiveSessionId(null);
+            }}
+          >
+            New session
+          </Button>
+        </div>
+      </div>
+
+      {/* Signal Line */}
+      {session.signalLine && (
+        <div className="bg-gradient-to-r from-indigo-900/40 to-indigo-800/20 border border-indigo-500/30 rounded-xl p-5">
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">
+            Signal Line
+          </p>
+          <p className="text-lg font-brand font-medium text-foreground italic leading-relaxed">
+            "{session.signalLine}"
+          </p>
+        </div>
+      )}
+
+      {/* 4-Part Clarity Map */}
+      <div className="space-y-4">
+        {[
+          {
+            label: "What's actually happening",
+            content: session.whatIsHappening,
+            color: "border-l-blue-400",
+          },
+          {
+            label: "What you actually feel",
+            content: session.whatYouFeel,
+            color: "border-l-purple-400",
+          },
+          {
+            label: "What you actually need",
+            content: session.whatYouNeed,
+            color: "border-l-teal-400",
+          },
+          {
+            label: "Your next right step",
+            content: session.nextRightStep,
+            color: "border-l-amber-400",
+          },
+        ].map((part) => (
+          <div
+            key={part.label}
+            className={`bg-card border border-border border-l-4 ${part.color} rounded-xl p-4`}
+          >
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1.5">
+              {part.label}
+            </p>
+            <p className="text-foreground leading-relaxed">{part.content}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Progress marker */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+          How do you feel after this session?
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {PROGRESS_MARKERS.map((marker) => {
+            const isSelected = session.progressMarker === marker.id;
+            return (
+              <button
+                key={marker.id}
+                onClick={() =>
+                  setProgressMarker.mutate({
+                    sessionId: session.id,
+                    marker: marker.id as "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit",
+                  })
+                }
+                className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                  isSelected
+                    ? "bg-amber-500/20 border-amber-500 text-amber-300"
+                    : "bg-card border-border text-muted-foreground hover:border-muted-foreground/40"
+                }`}
+              >
+                <span className="mr-1.5">{marker.emoji}</span>
+                {marker.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Clarity-to-Action handoff */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+          Convert your next right step into
+        </p>
+        {session.convertedTo ? (
+          <div className="flex items-center gap-2 text-sm text-emerald-400">
+            <CheckCircle2 className="w-4 h-4" />
+            Added to{" "}
+            <span className="font-medium">
+              {CONVERT_OPTIONS.find((o) => o.id === session.convertedTo)?.label}
+            </span>
+          </div>
+        ) : (
           <div className="flex flex-wrap gap-2">
-            {PROGRESS_MARKERS.map((marker) => {
-              const isSelected = session.progressMarker === marker.id;
+            {CONVERT_OPTIONS.map((opt) => {
+              const linkedProject = session.projectId && projects
+                ? projects.find((p) => p.id === session.projectId)
+                : null;
+              const showProjectHint =
+                linkedProject &&
+                (opt.id === "next_step" || opt.id === "project_note");
               return (
                 <button
-                  key={marker.id}
+                  key={opt.id}
                   onClick={() =>
-                    setProgressMarker.mutate({
+                    convertToAction.mutate({
                       sessionId: session.id,
-                      marker: marker.id as "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit",
+                      convertTo: opt.id,
                     })
                   }
-                  className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
-                    isSelected
-                      ? "bg-amber-500/20 border-amber-500 text-amber-300"
-                      : "bg-card border-border text-muted-foreground hover:border-muted-foreground/40"
+                  disabled={convertToAction.isPending}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-all ${
+                    showProjectHint
+                      ? "border-amber-500/40 bg-amber-500/5 text-amber-300 hover:border-amber-500/60"
+                      : "border-border bg-card text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
                   }`}
+                  title={showProjectHint ? `Saves next step to "${linkedProject!.title}" and updates Command Center` : undefined}
                 >
-                  <span className="mr-1.5">{marker.emoji}</span>
-                  {marker.label}
+                  <ChevronRight className="w-3.5 h-3.5" />
+                  {showProjectHint ? `${opt.label} → ${linkedProject!.title}` : opt.label}
                 </button>
               );
             })}
           </div>
-        </div>
-
-        {/* Clarity-to-Action handoff */}
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-            Convert your next right step into
-          </p>
-          {session.convertedTo ? (
-            <div className="flex items-center gap-2 text-sm text-emerald-400">
-              <CheckCircle2 className="w-4 h-4" />
-              Added to{" "}
-              <span className="font-medium">
-                {CONVERT_OPTIONS.find((o) => o.id === session.convertedTo)?.label}
-              </span>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {CONVERT_OPTIONS.map((opt) => {
-                // Feature 7: for next_step and project_note, show project name if linked
-                const linkedProject = session.projectId && projects
-                  ? projects.find((p) => p.id === session.projectId)
-                  : null;
-                const showProjectHint =
-                  linkedProject &&
-                  (opt.id === "next_step" || opt.id === "project_note");
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() =>
-                      convertToAction.mutate({
-                        sessionId: session.id,
-                        convertTo: opt.id,
-                      })
-                    }
-                    disabled={convertToAction.isPending}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-all ${
-                      showProjectHint
-                        ? "border-amber-500/40 bg-amber-500/5 text-amber-300 hover:border-amber-500/60"
-                        : "border-border bg-card text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground"
-                    }`}
-                    title={showProjectHint ? `Saves next step to "${linkedProject!.title}" and updates Command Center` : undefined}
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                    {showProjectHint ? `${opt.label} → ${linkedProject!.title}` : opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* View history link */}
-        {sessions && sessions.length > 1 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setView("history")}
-            className="text-muted-foreground"
-          >
-            <Clock className="w-4 h-4 mr-2" />
-            View all sessions
-          </Button>
         )}
       </div>
-    );
-  };
 
-  // ── History view ──────────────────────────────────────────────────────────
-  const HistoryView = () => (
+      {/* View history link */}
+      {sessions && sessions.length > 1 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setView("history")}
+          className="text-muted-foreground"
+        >
+          <Clock className="w-4 h-4 mr-2" />
+          View all sessions
+        </Button>
+      )}
+    </div>
+  );
+}
+
+// ── History view ──────────────────────────────────────────────────────────────
+function HistoryView({
+  sessions,
+  sessionsLoading,
+  setView,
+  setActiveSessionId,
+}: {
+  sessions: any[] | undefined;
+  sessionsLoading: boolean;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setActiveSessionId: (id: number) => void;
+}) {
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-brand font-medium text-foreground">
@@ -647,9 +634,19 @@ export default function ClarityEnginePage() {
       )}
     </div>
   );
+}
 
-  // ── Pattern Analysis view ─────────────────────────────────────────────────
-  const PatternsView = () => (
+// ── Pattern Analysis view ─────────────────────────────────────────────────────
+function PatternsView({
+  patterns,
+  patternsLoading,
+  setView,
+}: {
+  patterns: any;
+  patternsLoading: boolean;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+}) {
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -724,9 +721,17 @@ export default function ClarityEnginePage() {
       )}
     </div>
   );
+}
 
-  // ── Weekly Summary view ────────────────────────────────────────────────────
-  const WeeklyView = () => (
+// ── Weekly Summary view ────────────────────────────────────────────────────────
+function WeeklyView({
+  weeklySummary,
+  setView,
+}: {
+  weeklySummary: any;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+}) {
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -821,14 +826,122 @@ export default function ClarityEnginePage() {
       )}
     </div>
   );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+export default function ClarityEnginePage() {
+  const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly">("new");
+  const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
+  const [brainDump, setBrainDump] = useState("");
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
+  const [showProjectPicker, setShowProjectPicker] = useState(false);
+
+  const { data: projects } = trpc.projects.listActive.useQuery();
+  const { data: patterns, isLoading: patternsLoading } = trpc.clarity.analyzePatterns.useQuery(
+    undefined,
+    { enabled: view === "patterns" }
+  );
+  const { data: weeklySummary } = trpc.clarity.getWeeklySummary.useQuery(
+    undefined,
+    { enabled: view === "weekly" }
+  );
+
+  const utils = trpc.useUtils();
+
+  const { data: sessions, isLoading: sessionsLoading } =
+    trpc.clarity.getSessions.useQuery({ limit: 30 });
+
+  const { data: activeSession } = trpc.clarity.getSession.useQuery(
+    { id: activeSessionId! },
+    { enabled: !!activeSessionId }
+  );
+
+  const runSession = trpc.clarity.runSession.useMutation({
+    onSuccess: (session) => {
+      setActiveSessionId(session.id);
+      setView("result");
+      utils.clarity.getSessions.invalidate();
+      setBrainDump("");
+      setSelectedMode(null);
+    },
+    onError: (err) => {
+      toast.error("Something went wrong. Please try again.");
+      console.error(err);
+    },
+  });
+
+  const setProgressMarker = trpc.clarity.setProgressMarker.useMutation({
+    onSuccess: () => utils.clarity.getSession.invalidate({ id: activeSessionId! }),
+  });
+
+  const convertToAction = trpc.clarity.convertToAction.useMutation({
+    onSuccess: (result) => {
+      if (result.projectUpdated && result.projectTitle) {
+        toast.success(`Next step saved to "${result.projectTitle}"`, {
+          description: "It will appear on your Command Center immediately.",
+          duration: 5000,
+        });
+      } else {
+        toast.success(
+          `Added to ${CONVERT_OPTIONS.find((o) => o.id === result.convertedTo)?.label ?? "your plan"}`
+        );
+      }
+      utils.clarity.getSession.invalidate({ id: activeSessionId! });
+      utils.projects.listActive.invalidate();
+    },
+  });
 
   return (
     <div className="p-6 md:p-8 min-h-screen max-w-4xl mx-auto">
-      {view === "new" && <NewSessionView />}
-      {view === "result" && activeSession && <ResultView />}
-      {view === "history" && <HistoryView />}
-      {view === "patterns" && <PatternsView />}
-      {view === "weekly" && <WeeklyView />}
+      {view === "new" && (
+        <NewSessionView
+          selectedMode={selectedMode}
+          setSelectedMode={setSelectedMode}
+          brainDump={brainDump}
+          setBrainDump={setBrainDump}
+          selectedProjectId={selectedProjectId}
+          setSelectedProjectId={setSelectedProjectId}
+          showProjectPicker={showProjectPicker}
+          setShowProjectPicker={setShowProjectPicker}
+          projects={projects}
+          sessions={sessions}
+          runSession={runSession}
+          setView={setView}
+        />
+      )}
+      {view === "result" && activeSession && (
+        <ResultView
+          activeSession={activeSession}
+          projects={projects}
+          sessions={sessions}
+          setView={setView}
+          setActiveSessionId={setActiveSessionId}
+          setProgressMarker={setProgressMarker}
+          convertToAction={convertToAction}
+        />
+      )}
+      {view === "history" && (
+        <HistoryView
+          sessions={sessions}
+          sessionsLoading={sessionsLoading}
+          setView={setView}
+          setActiveSessionId={setActiveSessionId}
+        />
+      )}
+      {view === "patterns" && (
+        <PatternsView
+          patterns={patterns}
+          patternsLoading={patternsLoading}
+          setView={setView}
+        />
+      )}
+      {view === "weekly" && (
+        <WeeklyView
+          weeklySummary={weeklySummary}
+          setView={setView}
+        />
+      )}
     </div>
   );
 }

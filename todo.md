@@ -619,3 +619,11 @@
 - [x] Handle mic permission denied gracefully (show instructional toast)
 - [x] Handle recording too short (<1s) gracefully
 - [x] Write vitest for transcribeDirectly procedure (mock Whisper, verify no S3 call)
+
+## Bug: One-character-at-a-time typing in textareas
+
+- [x] Diagnose root cause of single-character typing bug in brain dump textarea (inline sub-components inside parent caused remount on every render)
+- [x] Fix ClarityEnginePage brain dump textarea (hoisted NewSessionView, ResultView, HistoryView, PatternsView, WeeklyView to top-level)
+- [x] Audit and fix all other textareas in Home.tsx (morning notes, evening fields — already top-level, no fix needed)
+- [x] Audit all other pages with textareas for same issue (FocusModePage, OnboardingPage, ProjectDetailPage, ProjectsPage, VaultPage — all clean)
+- [x] Verify fix across all affected fields — 83 tests passing, zero TypeScript errors
