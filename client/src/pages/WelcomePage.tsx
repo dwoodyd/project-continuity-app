@@ -26,7 +26,7 @@ import { useEffect, useRef } from "react";
 
 // ── Brand CDN URLs ────────────────────────────────────────────────────────────
 const BRAND_LOGO_DARK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-horizontal-dark-web_9b727cb8.png";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/ContinuaryStackedFullLogo_54351425.png";
 
 // ── Intersection-observer fade-in hook ────────────────────────────────────────
 function useFadeIn() {
@@ -244,7 +244,7 @@ export default function WelcomePage() {
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-20">
           {/* Logo */}
           <div className="flex justify-center mb-12 animate-fade-slide-up">
-            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-10 w-auto object-contain" />
+            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-20 w-auto object-contain" />
           </div>
 
           {/* Hero content + phone mockup */}
@@ -484,7 +484,7 @@ export default function WelcomePage() {
       {/* ── Footer ──────────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-7 w-auto object-contain opacity-70" />
+          <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-12 w-auto object-contain opacity-70" />
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {isAuthenticated ? (

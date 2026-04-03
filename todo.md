@@ -515,3 +515,10 @@
 - [x] Public /welcome page: "How it works" 3-step section
 - [x] Public /welcome page: final CTA section
 - [x] Public /welcome page: accessible without authentication (no redirect)
+
+## Logo Update
+
+- [x] Upload stacked Continuary logo to CDN
+- [x] Replace all BRAND_LOGO_DARK references with new stacked logo URL
+- [x] Update sign-in landing screen logo
+- [x] Update welcome page hero and footer logo

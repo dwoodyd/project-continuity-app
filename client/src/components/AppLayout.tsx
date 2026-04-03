@@ -35,7 +35,7 @@ import { toast } from "sonner";
 
 // ── Brand CDN URLs ───────────────────────────────────────────────────────────
 const BRAND_ICON = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_71cad82a.png";
-const BRAND_LOGO_DARK = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-horizontal-dark-web_9b727cb8.png";
+const BRAND_LOGO_DARK = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/ContinuaryStackedFullLogo_54351425.png";
 
 // ── Primary bottom-tab items (5 visible) ────────────────────────────────────
 const PRIMARY_TABS = [
@@ -110,7 +110,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up">
-              <img src={BRAND_LOGO_DARK} alt="Continuary" className="w-64 object-contain" />
+              <img src={BRAND_LOGO_DARK} alt="Continuary" className="w-36 object-contain" />
               <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
             </div>
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
@@ -166,7 +166,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         >
           {/* Brand logo */}
           <Link href="/" className="flex items-center">
-            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-7 w-auto object-contain" />
+            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-8 w-auto object-contain" />
           </Link>
 
           {/* Right actions */}
