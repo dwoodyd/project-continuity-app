@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { createProjectMemoryEvent, getDb } from "../db";
 import { focusSessions } from "../../drizzle/schema";
 import { eq, desc, and, gte } from "drizzle-orm";
@@ -17,7 +18,7 @@ export const focusSessionsRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
 
       const [result] = await db.insert(focusSessions).values({
         userId: ctx.user.id,

@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
@@ -48,7 +49,7 @@ export const clarityRouter = router({
      .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
       const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
       const modeContext = MODE_CONTEXT[input.mode];
 
       const systemPrompt = `You are the Clarity Engine inside Continuary — a calm, perceptive guide that helps people move from inner noise to clear action.
@@ -194,7 +195,7 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
       await db
         .update(claritySessions)
         .set({ progressMarker: input.marker })
@@ -224,7 +225,7 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
     )
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
-      if (!db) throw new Error("Database unavailable");
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
 
       // Mark the session as converted
       await db
@@ -244,7 +245,7 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
         .where(eq(claritySessions.id, input.sessionId))
         .limit(1);
 
-      if (!session) throw new Error("Session not found");
+      if (!session) throw new TRPCError({ code: "NOT_FOUND", message: "Session not found." });
 
       const nextStep = session.nextRightStep ?? "";
       const resolvedProjectId = input.projectId ?? session.projectId ?? null;

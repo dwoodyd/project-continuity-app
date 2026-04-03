@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { TRPCError } from "@trpc/server";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import {
@@ -414,7 +415,7 @@ Return JSON: {
         getRecentCheckIns(ctx.user.id, 10),
       ]);
 
-      if (!project) throw new Error("Project not found");
+      if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found." });
 
       const isFirstSession = sessions.length === 0;
       const lastSession = sessions[0];

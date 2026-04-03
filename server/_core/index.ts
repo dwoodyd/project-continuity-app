@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import helmet from "helmet";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -31,6 +32,25 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Security headers via Helmet
+  app.use(
+    helmet({
+      // Allow inline scripts for Vite HMR in development; lock down in production
+      contentSecurityPolicy: process.env.NODE_ENV === "production",
+      // Prevent clickjacking
+      frameguard: { action: "deny" },
+      // Disable MIME sniffing
+      noSniff: true,
+      // Force HTTPS (only meaningful behind a TLS-terminating proxy)
+      hsts: process.env.NODE_ENV === "production"
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false,
+      // Prevent browsers from sending the Referer header to cross-origin destinations
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+    })
+  );
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

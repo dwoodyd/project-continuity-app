@@ -24,6 +24,38 @@ const sourceTypeEnum = z.enum([
 const stateEnum = z.enum(["inbox", "mapped", "parked", "active", "today", "done", "archived"]);
 const contentClassEnum = z.enum(["idea", "draft", "research", "outline", "decision", "tasks", "archive"]);
 
+// Allowlisted MIME types for file uploads — prevents executable/script uploads
+const ALLOWED_FILE_MIMES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+  "text/markdown",
+  "text/csv",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
+// Allowlisted MIME types for voice uploads
+const ALLOWED_AUDIO_MIMES = new Set([
+  "audio/webm",
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/ogg",
+  "audio/wav",
+  "audio/x-m4a",
+]);
+
+// Sanitize filename: strip path separators and null bytes, keep only safe chars
+function sanitizeFileName(name: string): string {
+  return name
+    .replace(/[/\\\x00]/g, "")  // strip path traversal chars and null bytes
+    .replace(/[^a-zA-Z0-9._\-\s]/g, "_")  // replace unsafe chars with underscore
+    .slice(0, 200);  // hard cap
+}
+
 export const vaultRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
     return getSourceItems(ctx.user.id);
@@ -72,14 +104,20 @@ export const vaultRouter = router({
       sourceType: sourceTypeEnum,
     }))
     .mutation(async ({ ctx, input }) => {
+      // Enforce MIME allowlist — reject executable/script types
+      if (!ALLOWED_FILE_MIMES.has(input.mimeType)) {
+        const { TRPCError } = await import("@trpc/server");
+        throw new TRPCError({ code: "BAD_REQUEST", message: "File type not allowed." });
+      }
       const buffer = Buffer.from(input.fileDataBase64, "base64");
       const suffix = Date.now().toString(36);
-      const fileKey = `vault/${ctx.user.id}/${suffix}-${input.fileName}`;
+      const safeFileName = sanitizeFileName(input.fileName);
+      const fileKey = `vault/${ctx.user.id}/${suffix}-${safeFileName}`;
       const { url } = await storagePut(fileKey, buffer, input.mimeType);
       const id = await createSourceItem({
         userId: ctx.user.id,
         sourceType: input.sourceType,
-        title: input.title ?? input.fileName,
+        title: input.title ?? safeFileName,
         fileUrl: url,
         fileKey,
         mimeType: input.mimeType,
@@ -301,14 +339,21 @@ ${content.substring(0, 3000)}`,
 
   transcribeVoice: protectedProcedure
     .input(z.object({
-      audioBase64: z.string(),
-      mimeType: z.string(),
-      fileName: z.string(),
+      // base64 of 16MB audio ≈ 22MB string; cap at 22M chars
+      audioBase64: z.string().max(22_000_000, "Audio file must be under 16 MB"),
+      mimeType: z.string().max(100),
+      fileName: z.string().max(255),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Enforce audio MIME allowlist
+      if (!ALLOWED_AUDIO_MIMES.has(input.mimeType)) {
+        const { TRPCError } = await import("@trpc/server");
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Audio type not allowed." });
+      }
       const buffer = Buffer.from(input.audioBase64, "base64");
       const suffix = Date.now().toString(36);
-      const fileKey = `voice/${ctx.user.id}/${suffix}-${input.fileName}`;
+      const safeFileName = sanitizeFileName(input.fileName);
+      const fileKey = `voice/${ctx.user.id}/${suffix}-${safeFileName}`;
       const { url } = await storagePut(fileKey, buffer, input.mimeType);
 
       const { transcribeAudio } = await import("../_core/voiceTranscription");
