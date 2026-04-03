@@ -304,7 +304,7 @@ export default function ProjectsPage() {
           </div>
         )
       ) : (
-        <div className="space-y-2.5">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2.5">
           {filtered.map((project) => (
             <ProjectCard
               key={project.id}

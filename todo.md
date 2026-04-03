@@ -591,3 +591,12 @@
 - [x] Single-column stacking on mobile (below lg breakpoint)
 - [x] Fix JSX inline comments on closing div tags (caused Babel parse error)
 - [x] All 66 tests passing, zero TypeScript errors
+
+## Two-Column Projects Page Layout
+
+- [x] Audit ProjectsPage card structure and filter/header layout
+- [x] Apply lg:grid-cols-2 to the project card list (line 307)
+- [x] Status/phase filter bar stays full-width above the grid
+- [x] Empty state and "New Project" CTA remain full-width
+- [x] Single-column stacking on mobile (below lg breakpoint)
+- [x] All 66 tests passing, zero TypeScript errors
