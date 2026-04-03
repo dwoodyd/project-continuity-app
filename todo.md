@@ -525,8 +525,18 @@
 
 ## Favicon + PWA Manifest
 
-- [ ] Generate favicon.ico and PNG icon sizes from the Continuary bird mark
-- [ ] Upload icon PNGs to CDN (192x192 and 512x512 for PWA)
-- [ ] Add manifest.json with app name, icons, display:standalone, theme_color
-- [ ] Update index.html with PWA meta tags (apple-touch-icon, theme-color, manifest link)
-- [ ] Update index.html favicon link to use new icon
+- [x] Generate favicon.ico and PNG icon sizes from the Continuary bird mark (DarkBackgroundMonochrome.png source)
+- [x] Upload icon PNGs to CDN (all 11 sizes: 16, 32, 72, 96, 128, 144, 152, 180, 192, 384, 512px)
+- [x] Add manifest.json with app name, icons, display:standalone, theme_color
+- [x] Update index.html with PWA meta tags (apple-touch-icon, theme-color, manifest link)
+- [x] Update index.html favicon link to use new icon
+
+## Brand Asset Update (New Logo Files)
+
+- [x] Wire DarkBackgroundMonochrome.png (white bird on navy rounded square) as app icon in header
+- [x] Wire ContinuaryDark-backgroundstackedlockup.png as sign-in screen logo
+- [x] Update WelcomePage hero and footer to use dark-background stacked lockup
+- [x] Regenerate all 11 PWA icon sizes from DarkBackgroundMonochrome.png
+- [x] Upload all new icon sizes to CDN
+- [x] Update manifest.json with new CDN icon URLs (all 11 sizes)
+- [x] Update index.html favicon, apple-touch-icon, OG image with new CDN URLs
