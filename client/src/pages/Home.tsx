@@ -766,7 +766,7 @@ export default function Home() {
   })();
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-4 py-6 page-enter max-w-4xl mx-auto space-y-6">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
@@ -929,27 +929,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Weekly Presence Dots ────────────────────────────────────────────── */}
-      {weeklyPresence && weeklyPresence.length > 0 && (
-        <div className="flex items-center gap-2">
-          {weeklyPresence.map((day) => {
-            const label = new Date(day.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
-            return (
-              <div key={day.date} className="flex flex-col items-center gap-1">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    day.hasCheckIn ? "bg-primary" : "bg-foreground/10 border border-foreground/20"
-                  }`}
-                  title={`${label}: ${day.hasCheckIn ? "checked in" : "no check-in"}`}
-                />
-                <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0, 1)}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {/* ──────────────────────────────────────────────────────────────────────────────
+           Two-column grid on desktop: left = primary, right = supporting
+      ───────────────────────────────────────────────────────────────────────────── */}
+      <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-6 lg:items-start space-y-6 lg:space-y-0">
 
-      {/* ── Active Check-In Form ────────────────────────────────────────────── */}
+        {/* ════ LEFT COLUMN ════ */}
+        <div className="space-y-6">
+
+      {/* ── Active Check-In Form─────────────────────────────────────── */}
       {activeCheckIn && (
         <div className="p-5 rounded-xl bg-card border border-foreground/10 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -1147,7 +1135,34 @@ export default function Home() {
         );
       })()}
 
-      {/* ── Active Projects Quick Access ────────────────────────────────────── */}
+        </div>
+
+        {/* ════ RIGHT COLUMN ════ */}
+        <div className="space-y-4">
+
+      {/* ── Weekly Presence Dots ────────────────────────────────────────────────────────── */}
+      {weeklyPresence && weeklyPresence.length > 0 && (
+        <div className="p-4 rounded-xl border border-border bg-card">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">This week</p>
+          <div className="flex items-center gap-2">
+            {weeklyPresence.map((day) => {
+              const label = new Date(day.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
+              return (
+                <div key={day.date} className="flex flex-col items-center gap-1.5 flex-1">
+                  <div
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      day.hasCheckIn ? "bg-primary" : "bg-foreground/10 border border-foreground/20"
+                    }`}
+                    title={`${label}: ${day.hasCheckIn ? "checked in" : "no check-in"}`}
+                  />
+                  <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0, 1)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {/* ── Active Projects Quick Access (right col) ────────────────────────────────────────────────────────── */}
       {activeProjects && activeProjects.length > 0 && (
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Active projects</p>
@@ -1191,7 +1206,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Recent Decisions ────────────────────────────────────────────────── */}
+      {/* ── Recent Decisions (right col) ────────────────────────────────────────────────────────── */}
       {recentDecisions && recentDecisions.length > 0 && (
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent decisions</p>
@@ -1209,10 +1224,12 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Empty state — no plan yet ───────────────────────────────────────── */}
+        </div>
+      </div>
+
+      {/* ── Empty state — no plan yet (full width below grid) ───────────────────────────────────────── */}
       {!todayPlan && !activeCheckIn && (
         <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-          {/* Subtle texture overlay */}
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
           <div className="relative">
             <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
@@ -1274,7 +1291,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Modals ──────────────────────────────────────────────────────────── */}
+      {/* ── Modals ────────────────────────────────────────────────────────────────────────────────────────── */}
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} capturedDuringTask={true} />
       {unstickTask && (
         <UnstickModal task={unstickTask} onClose={() => setUnstickTask(null)} />

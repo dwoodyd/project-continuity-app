@@ -580,3 +580,14 @@
 - [x] Mobile bottom nav shows only in compact mode; desktop sidebar shows only in desktop mode
 - [x] Fix JSX parse error (em dash in SettingsPage placeholder caused Babel parse failure)
 - [x] All 66 tests passing, zero TypeScript errors
+
+## Two-Column Today Page Layout
+
+- [x] Audit Today page sections and plan left/right column split
+- [x] Implement lg:grid-cols-[3fr_2fr] responsive grid on Today page (lines 935-1228)
+- [x] Left column (60%): Check-in form, Carryover tasks, Stuck-state, Today tasks, Focus CTA, First Step card, Re-Entry card
+- [x] Right column (40%): Weekly Presence Dots, Active Projects quick access, Recent Decisions
+- [x] Full-width below grid: Empty state, Notification prompt, Modals
+- [x] Single-column stacking on mobile (below lg breakpoint)
+- [x] Fix JSX inline comments on closing div tags (caused Babel parse error)
+- [x] All 66 tests passing, zero TypeScript errors
