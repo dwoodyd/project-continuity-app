@@ -385,7 +385,7 @@ export const patternInsights = mysqlTable("pattern_insights", {
   ]).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   body: text("body").notNull(),
-  affectedProjectIds: json("affectedProjectIds").$type<number[]>().default([]),
+  affectedProjectIds: json("affectedProjectIds").$type<number[]>(),
   severity: mysqlEnum("severity", ["info", "warning", "critical"]).default("info"),
   generatedAt: timestamp("generatedAt").defaultNow().notNull(),
   dismissedAt: timestamp("dismissedAt"),
