@@ -551,3 +551,20 @@
 - [x] Add deleteAccount tRPC procedure that removes all rows for ctx.user.id in FK-safe order
 - [x] Create minimal /privacy page accessible without login
 - [x] Register /privacy route in App.tsx
+
+## Post-Audit Hardening (Pass 2)
+
+- [x] Update @aws-sdk/client-s3 to 3.1024.0 (fast-xml-parser 5.5.8, above patched threshold 5.3.5)
+- [x] Verify pnpm audit shows no runtime CVEs after update
+- [x] Add beta_invites table to drizzle schema (code, label, usedAt, usedByUserId, createdAt)
+- [x] Add revoked_sessions table to drizzle schema (jti, userId, revokedAt, expiresAt)
+- [x] Generate and apply migration SQL for both new tables (0011_previous_logan.sql)
+- [x] Add db helpers: createInviteCode, validateInviteCode, markInviteUsed, listInviteCodes
+- [x] Add db helpers: revokeSession, isSessionRevoked
+- [x] Add invites tRPC router (admin: generate, list; public: validate; protected: redeem)
+- [x] Wire invite code validation into onboarding UI (validate before profile setup, redeem on finish)
+- [x] Update logout mutation to insert jti into revoked_sessions
+- [x] Update authenticateRequest to check revoked_sessions blacklist on every request
+- [x] Add invite code input field to onboarding UI (step -1, before profile setup steps)
+- [x] Add invite code management panel to Settings (admin only: generate with label, copy, list with status)
+- [x] Write 13 regression tests for invite gate and 5 for session revocation (66 total tests, all passing)

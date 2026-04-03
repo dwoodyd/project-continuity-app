@@ -65,7 +65,14 @@ export default function OnboardingPage() {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
-  const [step, setStep] = useState(0);
+  // step -1 = invite gate (shown first), 0-2 = profile setup, 3 = done
+  const [step, setStep] = useState(-1);
+
+  // Invite gate state
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteValidated, setInviteValidated] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteChecking, setInviteChecking] = useState(false);
 
   const [name, setName] = useState(user?.name?.split(" ")[0] ?? "");
   const [workStyle, setWorkStyle] = useState<string>("");
@@ -79,8 +86,25 @@ export default function OnboardingPage() {
   const completeOnboarding = trpc.settings.completeOnboarding.useMutation({
     onError: () => toast.error("Something went wrong. Please try again."),
   });
+  const redeemInvite = trpc.invites.redeem.useMutation();
   const createProject = trpc.projects.create.useMutation();
   const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();
+
+  const checkInviteCode = async () => {
+    const code = inviteCode.trim().toUpperCase();
+    if (!code) return;
+    setInviteChecking(true);
+    setInviteError(null);
+    try {
+      await utils.invites.validate.fetch({ code });
+      setInviteValidated(true);
+      setStep(0);
+    } catch {
+      setInviteError("This code is invalid or has already been used. Please check and try again.");
+    } finally {
+      setInviteChecking(false);
+    }
+  };
 
   const focusStartMap: Record<string, string> = {
     morning: "08:00", midday: "11:00", afternoon: "13:00", evening: "17:00", varies: "09:00",
@@ -109,6 +133,12 @@ export default function OnboardingPage() {
         focusHoursEnd: focusEndMap[preferredFocusHours] ?? "17:00",
         tonePreference,
       });
+      // Redeem the invite code now that onboarding is complete
+      if (inviteValidated && inviteCode.trim()) {
+        await redeemInvite.mutateAsync({ code: inviteCode.trim().toUpperCase() }).catch(() => {
+          // Non-fatal: onboarding is already complete; log but don't block
+        });
+      }
       // Invalidate the profile cache so AppLayout reads the updated onboardingCompleted=true
       // before navigating, preventing the redirect loop
       await utils.settings.getProfile.invalidate();
@@ -128,7 +158,7 @@ export default function OnboardingPage() {
           // non-fatal — proceed without generated step
         }
       }
-      setStep(3);
+      setStep(4); // done screen (was 3, shifted by invite gate step)
     } catch {
       // error already toasted
     }
@@ -172,17 +202,67 @@ export default function OnboardingPage() {
           <div className="h-0.5 bg-border">
             <div
               className="h-full bg-primary transition-all duration-500 ease-out"
-              style={{ width: step >= 3 ? "100%" : `${((step + 1) / 3) * 100}%` }}
+              style={{ width: step >= 4 ? "100%" : step < 0 ? "0%" : `${((step + 1) / 3) * 100}%` }}
             />
           </div>
 
           <div className="p-8">
-            {step < 3 && (
+            {step >= 0 && step < 4 && (
               <div className="flex justify-between items-center mb-8">
                 <StepDots current={step} total={3} />
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
                   Step {step + 1} of 3
                 </span>
+              </div>
+            )}
+
+            {/* Invite Gate */}
+            {step === -1 && (
+              <div className="space-y-7">
+                <div>
+                  <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground leading-tight">
+                    Welcome to Continuary.
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+                    This is a private beta. Enter your invite code to continue.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground tracking-widest uppercase">
+                    Invite code
+                  </label>
+                  <Input
+                    value={inviteCode}
+                    onChange={(e) => {
+                      setInviteCode(e.target.value.toUpperCase());
+                      setInviteError(null);
+                    }}
+                    onKeyDown={(e) => e.key === "Enter" && checkInviteCode()}
+                    placeholder="e.g. A1B2C3D4E5F6"
+                    className={cn("text-base font-mono tracking-widest", inviteError && "border-destructive")}
+                    autoFocus
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                  {inviteError && (
+                    <p className="text-xs text-destructive">{inviteError}</p>
+                  )}
+                </div>
+                <Button
+                  onClick={checkInviteCode}
+                  disabled={!inviteCode.trim() || inviteChecking}
+                  className="w-full gap-2"
+                  size="lg"
+                >
+                  {inviteChecking ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Checking&hellip;</>
+                  ) : (
+                    <>Continue <ArrowRight className="w-4 h-4" /></>
+                  )}
+                </Button>
+                <p className="text-center text-xs text-muted-foreground/50">
+                  Don&rsquo;t have a code? Reach out to the Continuary team.
+                </p>
               </div>
             )}
 
@@ -363,7 +443,7 @@ export default function OnboardingPage() {
             )}
 
             {/* Done */}
-            {step === 3 && (
+            {step === 4 && (
               <div className="text-center space-y-8 py-4">
                 <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
                   <ContinuaryMark className="w-8 h-5 text-primary" />
@@ -394,7 +474,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        {step < 3 && (
+        {step < 4 && (
           <p className="text-center text-xs text-muted-foreground/40 mt-5">
             Built for minds that move fast.
           </p>

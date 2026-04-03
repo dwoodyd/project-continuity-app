@@ -14,14 +14,28 @@ import { notificationsRouter } from "./routers/notifications";
 import { frictionRouter } from "./routers/friction";
 import { intelligenceInsightsRouter } from "./routers/intelligenceInsights";
 import { clarityRouter } from "./routers/clarity";
+import { invitesRouter } from "./routers/invites";
+import { revokeSession } from "./db";
+import { protectedProcedure } from "./_core/trpc";
 
 export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
+    logout: publicProcedure.mutation(async ({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      // Server-side session revocation: add jti to the blacklist so the JWT
+      // cannot be replayed even if the cookie is somehow retained.
+      if (ctx.user && ctx.sessionJti && ctx.sessionExp) {
+        await revokeSession(
+          ctx.sessionJti,
+          ctx.user.id,
+          new Date(ctx.sessionExp * 1000)
+        ).catch(() => {
+          // Non-fatal: cookie is already cleared; revocation is defence-in-depth
+        });
+      }
       return { success: true } as const;
     }),
   }),
@@ -37,6 +51,7 @@ export const appRouter = router({
   friction: frictionRouter,
   insights: intelligenceInsightsRouter,
   clarity: clarityRouter,
+  invites: invitesRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   CheckIn,
@@ -49,6 +49,12 @@ import {
   InsertProjectHealthScore,
   PatternInsight,
   InsertPatternInsight,
+  betaInvites,
+  BetaInvite,
+  InsertBetaInvite,
+  revokedSessions,
+  RevokedSession,
+  InsertRevokedSession,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -719,4 +725,112 @@ export async function deleteAllUserData(userId: number): Promise<void> {
   // Parent tables last
   await db.delete(userProfiles).where(eq(userProfiles.userId, userId));
   await db.delete(users).where(eq(users.id, userId));
+}
+
+// ─── Beta Invite Helpers ──────────────────────────────────────────────────────
+
+export async function createInviteCode(
+  createdByUserId: number,
+  label?: string
+): Promise<BetaInvite> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const { randomBytes } = await import("crypto");
+  // 12 random bytes → 24 hex chars, easy to read/share
+  const code = randomBytes(12).toString("hex").toUpperCase();
+  await db.insert(betaInvites).values({ code, createdByUserId, label });
+  const [row] = await db
+    .select()
+    .from(betaInvites)
+    .where(eq(betaInvites.code, code))
+    .limit(1);
+  return row;
+}
+
+export async function getInviteCodes(
+  createdByUserId: number
+): Promise<BetaInvite[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(betaInvites)
+    .where(eq(betaInvites.createdByUserId, createdByUserId))
+    .orderBy(desc(betaInvites.createdAt));
+}
+
+/**
+ * Validates a code and returns it if it is valid and unused.
+ * Returns null if the code does not exist or has already been used.
+ */
+export async function validateInviteCode(
+  code: string
+): Promise<BetaInvite | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db
+    .select()
+    .from(betaInvites)
+    .where(eq(betaInvites.code, code.toUpperCase().trim()))
+    .limit(1);
+  if (!row || row.usedAt !== null) return null;
+  return row;
+}
+
+/**
+ * Atomically marks an invite code as used by a specific user.
+ * Returns false if the code was already used (race-condition guard).
+ */
+export async function markInviteUsed(
+  code: string,
+  userId: number
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db
+    .update(betaInvites)
+    .set({ usedByUserId: userId, usedAt: new Date() })
+    .where(
+      and(
+        eq(betaInvites.code, code.toUpperCase().trim()),
+        isNull(betaInvites.usedAt)
+      )
+    );
+  // affectedRows === 1 means we won the race; 0 means already used
+  return (result as any)[0]?.affectedRows === 1;
+}
+
+// ─── Session Revocation Helpers ───────────────────────────────────────────────
+
+/**
+ * Records a JWT jti as revoked. expiresAt should match the token's exp claim
+ * so that a background job can prune old rows without breaking active sessions.
+ */
+export async function revokeSession(
+  jti: string,
+  userId: number,
+  expiresAt: Date
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // INSERT IGNORE: if the jti is already revoked, silently skip
+  await db
+    .insert(revokedSessions)
+    .values({ jti, userId, expiresAt })
+    .onDuplicateKeyUpdate({ set: { revokedAt: new Date() } });
+}
+
+/**
+ * Returns true if the given jti has been revoked.
+ * Called on every authenticated request.
+ */
+export async function isSessionRevoked(jti: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const [row] = await db
+    .select({ id: revokedSessions.id })
+    .from(revokedSessions)
+    .where(eq(revokedSessions.jti, jti))
+    .limit(1);
+  return !!row;
 }

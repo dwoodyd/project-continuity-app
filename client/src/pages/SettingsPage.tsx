@@ -268,6 +268,23 @@ export default function SettingsPage() {
   const [frictionNote, setFrictionNote] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  // Invite management (admin only)
+  const isAdmin = (user as any)?.role === "admin";
+  const [inviteLabel, setInviteLabel] = useState("");
+  const { data: inviteCodes, refetch: refetchInvites } = trpc.invites.list.useQuery(
+    undefined,
+    { enabled: isAdmin }
+  );
+  const generateInvite = trpc.invites.generate.useMutation({
+    onSuccess: () => {
+      toast.success("Invite code generated.");
+      setInviteLabel("");
+      refetchInvites();
+    },
+    onError: (err) => toast.error(err.message ?? "Could not generate code."),
+  });
+
   const deleteAccount = trpc.settings.deleteAccount.useMutation({
     onSuccess: () => {
       toast.success("Account deleted. Goodbye.");
@@ -496,6 +513,89 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* ── Admin: Invite Management ──────────────────────────────────────── */}
+      {activeTab === "profile" && isAdmin && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 tracking-widest uppercase">Admin</span>
+            <span className="text-xs text-muted-foreground">— Invite Codes</span>
+          </div>
+
+          {/* Generate new code */}
+          <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <p className="text-sm font-medium text-foreground">Generate invite code</p>
+            <div className="flex gap-2">
+              <Input
+                value={inviteLabel}
+                onChange={(e) => setInviteLabel(e.target.value)}
+                placeholder="Label (optional — e.g. Sarah M.)"
+                className="text-sm flex-1"
+                onKeyDown={(e) => e.key === "Enter" && generateInvite.mutate({ label: inviteLabel || undefined })}
+              />
+              <Button
+                size="sm"
+                onClick={() => generateInvite.mutate({ label: inviteLabel || undefined })}
+                disabled={generateInvite.isPending}
+                className="shrink-0"
+              >
+                {generateInvite.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Generate"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Code list */}
+          {inviteCodes && inviteCodes.length > 0 && (
+            <div className="bg-card border border-border rounded-xl overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-border">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                  {inviteCodes.length} code{inviteCodes.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <div className="divide-y divide-border">
+                {inviteCodes.map((code) => (
+                  <div key={code.id} className="flex items-center justify-between px-4 py-3 gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-mono font-medium text-foreground tracking-widest">{code.code}</p>
+                      {code.label && (
+                        <p className="text-xs text-muted-foreground mt-0.5 truncate">{code.label}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {code.usedAt ? (
+                        <Badge variant="secondary" className="text-xs">
+                          Used
+                        </Badge>
+                      ) : (
+                        <>
+                          <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15 text-xs border-0">
+                            Available
+                          </Badge>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(code.code);
+                              toast.success("Copied to clipboard.");
+                            }}
+                            className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted"
+                          >
+                            Copy
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {inviteCodes?.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-4">
+              No invite codes yet. Generate one above.
+            </p>
+          )}
         </div>
       )}
 

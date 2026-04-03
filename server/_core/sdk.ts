@@ -4,6 +4,7 @@ import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
 import type { Request } from "express";
 import { SignJWT, jwtVerify } from "jose";
+import { randomUUID } from "crypto";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
@@ -22,6 +23,15 @@ export type SessionPayload = {
   openId: string;
   appId: string;
   name: string;
+};
+
+/** Extended payload returned from verifySession — includes jti and exp for revocation */
+export type VerifiedSession = {
+  openId: string;
+  appId: string;
+  name: string;
+  jti: string;
+  exp: number;
 };
 
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
@@ -186,6 +196,8 @@ class SDKServer {
     const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
     const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1000);
     const secretKey = this.getSessionSecret();
+    // Include a jti (JWT ID) so individual sessions can be revoked server-side
+    const jti = randomUUID();
 
     return new SignJWT({
       openId: payload.openId,
@@ -194,12 +206,17 @@ class SDKServer {
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setExpirationTime(expirationSeconds)
+      .setJti(jti)
       .sign(secretKey);
   }
 
+  /**
+   * Verifies the session cookie and returns the full payload including jti and exp.
+   * Returns null if the token is missing, invalid, or expired.
+   */
   async verifySession(
     cookieValue: string | undefined | null
-  ): Promise<{ openId: string; appId: string; name: string } | null> {
+  ): Promise<VerifiedSession | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -210,7 +227,7 @@ class SDKServer {
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
       });
-      const { openId, appId, name } = payload as Record<string, unknown>;
+      const { openId, appId, name, jti, exp } = payload as Record<string, unknown>;
 
       if (
         !isNonEmptyString(openId) ||
@@ -225,6 +242,10 @@ class SDKServer {
         openId,
         appId,
         name,
+        // jti may be absent on tokens issued before this change; fall back to a
+        // deterministic placeholder so the revocation check is always safe.
+        jti: isNonEmptyString(jti) ? jti : `legacy-${openId}`,
+        exp: typeof exp === "number" ? exp : 0,
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
@@ -256,7 +277,13 @@ class SDKServer {
     } as GetUserInfoWithJwtResponse;
   }
 
-  async authenticateRequest(req: Request): Promise<User> {
+  /**
+   * Authenticates the request and returns the User.
+   * Also returns sessionJti and sessionExp for revocation on logout.
+   */
+  async authenticateRequest(
+    req: Request
+  ): Promise<User & { _sessionJti: string; _sessionExp: number }> {
     // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
@@ -264,6 +291,12 @@ class SDKServer {
 
     if (!session) {
       throw ForbiddenError("Invalid session cookie");
+    }
+
+    // Check session revocation blacklist
+    const revoked = await db.isSessionRevoked(session.jti).catch(() => false);
+    if (revoked) {
+      throw ForbiddenError("Session has been revoked");
     }
 
     const sessionUserId = session.openId;
@@ -297,7 +330,11 @@ class SDKServer {
       lastSignedIn: signedInAt,
     });
 
-    return user;
+    // Attach jti and exp to the returned user so context.ts can forward them
+    return Object.assign(user, {
+      _sessionJti: session.jti,
+      _sessionExp: session.exp,
+    });
   }
 }
 

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `beta_invites` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`code` varchar(32) NOT NULL,\n\t`createdByUserId` int NOT NULL,\n\t`usedByUserId` int,\n\t`usedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`label` varchar(255),\n\tCONSTRAINT `beta_invites_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `beta_invites_code_unique` UNIQUE(`code`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `beta_invites` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`code` varchar(32) NOT NULL,\n\t`createdByUserId` int NOT NULL,\n\t`usedByUserId` int,\n\t`usedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`label` varchar(255),\n\tCONSTRAINT `beta_invites_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `beta_invites_code_unique` UNIQUE(`code`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 640
+}

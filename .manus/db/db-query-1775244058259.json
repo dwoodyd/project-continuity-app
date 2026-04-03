@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `revoked_sessions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`jti` varchar(64) NOT NULL,\n\t`userId` int NOT NULL,\n\t`revokedAt` timestamp NOT NULL DEFAULT (now()),\n\t`expiresAt` timestamp NOT NULL,\n\tCONSTRAINT `revoked_sessions_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `revoked_sessions_jti_unique` UNIQUE(`jti`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `revoked_sessions` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`jti` varchar(64) NOT NULL,\n\t`userId` int NOT NULL,\n\t`revokedAt` timestamp NOT NULL DEFAULT (now()),\n\t`expiresAt` timestamp NOT NULL,\n\tCONSTRAINT `revoked_sessions_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `revoked_sessions_jti_unique` UNIQUE(`jti`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 117
+}

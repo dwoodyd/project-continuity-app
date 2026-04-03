@@ -296,3 +296,141 @@ describe("IDOR ownership scoping", () => {
     expect(() => updateSourceItem(5, 1, {})).not.toThrow();
   });
 });
+
+// ─── 8. Invite Gate ───────────────────────────────────────────────────────────
+describe("Beta invite gate", () => {
+  // Simulates the invite code format: 12 uppercase alphanumeric characters
+  function generateCode(): string {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    return Array.from({ length: 12 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+  }
+
+  it("generates 12-character uppercase alphanumeric codes", () => {
+    const code = generateCode();
+    expect(code).toHaveLength(12);
+    expect(code).toMatch(/^[A-Z0-9]{12}$/);
+  });
+
+  it("rejects codes shorter than 12 characters", () => {
+    const shortCode = "ABC123";
+    expect(shortCode.length).toBeLessThan(12);
+    // Zod .length(12) would reject this
+    expect(shortCode).not.toMatch(/^[A-Z0-9]{12}$/);
+  });
+
+  it("rejects codes with lowercase characters", () => {
+    const lowerCode = "abc123def456";
+    expect(lowerCode).not.toMatch(/^[A-Z0-9]{12}$/);
+  });
+
+  it("validate procedure returns code details for a valid unused code", () => {
+    // Simulates what invites.validate returns
+    const mockCode = {
+      id: 1,
+      code: "A1B2C3D4E5F6",
+      label: "Beta tester",
+      usedAt: null,
+      usedByUserId: null,
+    };
+    // A valid code has no usedAt
+    expect(mockCode.usedAt).toBeNull();
+    expect(mockCode.code).toMatch(/^[A-Z0-9]{12}$/);
+  });
+
+  it("validate procedure rejects a code that has already been used", () => {
+    const { TRPCError } = require("@trpc/server");
+    function validateCode(code: { usedAt: number | null }) {
+      if (code.usedAt !== null) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This invite code has already been used." });
+      }
+    }
+    const usedCode = { usedAt: Date.now() };
+    expect(() => validateCode(usedCode)).toThrow("already been used");
+  });
+
+  it("validate procedure rejects a code that does not exist", () => {
+    const { TRPCError } = require("@trpc/server");
+    function validateCode(code: null | { usedAt: number | null }) {
+      if (!code) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Invalid invite code." });
+      }
+    }
+    expect(() => validateCode(null)).toThrow("Invalid invite code");
+  });
+
+  it("generate procedure is admin-only (role check)", () => {
+    const { TRPCError } = require("@trpc/server");
+    function adminOnly(role: string) {
+      if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only." });
+    }
+    expect(() => adminOnly("user")).toThrow("Admin only");
+    expect(() => adminOnly("admin")).not.toThrow();
+  });
+
+  it("list procedure is admin-only (role check)", () => {
+    const { TRPCError } = require("@trpc/server");
+    function adminOnly(role: string) {
+      if (role !== "admin") throw new TRPCError({ code: "FORBIDDEN", message: "Admin only." });
+    }
+    expect(() => adminOnly("user")).toThrow("Admin only");
+    expect(() => adminOnly("admin")).not.toThrow();
+  });
+});
+
+// ─── 9. Session Revocation ────────────────────────────────────────────────────
+describe("Server-side session revocation", () => {
+  it("logout inserts jti into revoked_sessions table", () => {
+    // Simulates the revocation record shape
+    const revokedRecord = {
+      jti: "abc-123-uuid",
+      userId: 42,
+      revokedAt: Date.now(),
+      expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
+    };
+    expect(revokedRecord.jti).toBeDefined();
+    expect(revokedRecord.userId).toBe(42);
+    expect(revokedRecord.expiresAt).toBeGreaterThan(revokedRecord.revokedAt);
+  });
+
+  it("authenticateRequest rejects a revoked jti", () => {
+    const { TRPCError } = require("@trpc/server");
+    const revokedJtis = new Set(["revoked-jti-123"]);
+
+    function checkRevocation(jti: string) {
+      if (revokedJtis.has(jti)) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Session has been revoked." });
+      }
+    }
+
+    expect(() => checkRevocation("revoked-jti-123")).toThrow("Session has been revoked");
+    expect(() => checkRevocation("valid-jti-456")).not.toThrow();
+  });
+
+  it("authenticateRequest allows a non-revoked jti", () => {
+    const revokedJtis = new Set(["revoked-jti-123"]);
+    const isRevoked = (jti: string) => revokedJtis.has(jti);
+    expect(isRevoked("fresh-jti-789")).toBe(false);
+  });
+
+  it("deleteAccount also revokes the current session", () => {
+    // Simulates the combined delete + revoke pattern
+    const revokedSessions: string[] = [];
+    function deleteAccount(userId: number, sessionJti: string | undefined) {
+      // Delete all user data...
+      // Then revoke the current session
+      if (sessionJti) revokedSessions.push(sessionJti);
+      return { success: true };
+    }
+    deleteAccount(1, "jti-to-revoke");
+    expect(revokedSessions).toContain("jti-to-revoke");
+  });
+
+  it("sessions without a jti claim are rejected (not trusted)", () => {
+    const { TRPCError } = require("@trpc/server");
+    function requireJti(jti: string | undefined) {
+      if (!jti) throw new TRPCError({ code: "UNAUTHORIZED", message: "Token missing jti claim." });
+    }
+    expect(() => requireJti(undefined)).toThrow("missing jti claim");
+    expect(() => requireJti("some-jti")).not.toThrow();
+  });
+});

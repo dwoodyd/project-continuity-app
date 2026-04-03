@@ -429,3 +429,33 @@ export const claritySessions = mysqlTable("clarity_sessions", {
 });
 export type ClaritySession = typeof claritySessions.$inferSelect;
 export type InsertClaritySession = typeof claritySessions.$inferInsert;
+
+// ─── Beta Invites ─────────────────────────────────────────────────────────────
+// Each row is one invite code. Codes are single-use; usedAt/usedByUserId are
+// set atomically when a new user completes onboarding with the code.
+export const betaInvites = mysqlTable("beta_invites", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  createdByUserId: int("createdByUserId").notNull(), // admin who generated it
+  usedByUserId: int("usedByUserId"),                 // null until redeemed
+  usedAt: timestamp("usedAt"),                       // null until redeemed
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  // Optional: label so admins know who they sent the code to
+  label: varchar("label", { length: 255 }),
+});
+export type BetaInvite = typeof betaInvites.$inferSelect;
+export type InsertBetaInvite = typeof betaInvites.$inferInsert;
+
+// ─── Revoked Sessions ─────────────────────────────────────────────────────────
+// Stores JWT `jti` claims for sessions that have been explicitly logged out.
+// authenticateRequest checks this table before accepting any JWT.
+export const revokedSessions = mysqlTable("revoked_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  jti: varchar("jti", { length: 64 }).notNull().unique(),
+  userId: int("userId").notNull(),
+  revokedAt: timestamp("revokedAt").defaultNow().notNull(),
+  // expiresAt lets a background job prune old rows safely
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+export type RevokedSession = typeof revokedSessions.$inferSelect;
+export type InsertRevokedSession = typeof revokedSessions.$inferInsert;
