@@ -110,11 +110,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-3">
-              <img src={BRAND_ICON} alt="Continuary" className="w-28 h-28 object-contain" />
-              <div className="text-center">
-                <h1 className="text-3xl font-medium text-foreground" style={{ fontFamily: "'Lora', Georgia, serif" }}>Continuary</h1>
-                <p className="text-xs text-muted-foreground mt-1 tracking-widest uppercase">Command Center</p>
-              </div>
+              <img src={BRAND_LOGO_DARK} alt="Continuary" className="w-64 object-contain" />
+              <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
             </div>
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg">
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">

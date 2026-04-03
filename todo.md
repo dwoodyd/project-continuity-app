@@ -502,3 +502,7 @@
 - [x] Intelligence page: Distraction Patterns card — top category, peak time-of-day, most-interrupted project
 - [x] ClarityEnginePage: "Copy summary" button on completed session — copies signal line + next right step to clipboard
 - [x] ClarityEnginePage: toast confirmation "Copied to clipboard" after copy
+
+## Splash Screen Fix
+
+- [x] Update splash/loading screen to use the correct logo with typography instead of the old icon
