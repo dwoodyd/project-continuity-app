@@ -109,11 +109,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center gap-3">
+            <div className="flex flex-col items-center gap-3 animate-fade-slide-up">
               <img src={BRAND_LOGO_DARK} alt="Continuary" className="w-64 object-contain" />
               <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
             </div>
-            <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
                 A structured command center for execution. Turn scattered notes into daily focus.
               </p>
@@ -126,7 +126,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </a>
             </div>
           </div>
-          <p className="text-center text-xs text-muted-foreground/50 mt-6">Built for minds that move fast.</p>
+          <p className="text-center text-xs text-muted-foreground/50 mt-6 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
         </div>
       </div>
     );

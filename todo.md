@@ -506,3 +506,12 @@
 ## Splash Screen Fix
 
 - [x] Update splash/loading screen to use the correct logo with typography instead of the old icon
+
+## Landing Screen Animation + Public Welcome Page
+
+- [x] Sign-in landing screen: staggered fade-in animation on logo, tagline, and sign-in card
+- [x] Public /welcome page: hero section with logo, tagline, and sign-in CTA
+- [x] Public /welcome page: feature highlights (6 core features with icons)
+- [x] Public /welcome page: "How it works" 3-step section
+- [x] Public /welcome page: final CTA section
+- [x] Public /welcome page: accessible without authentication (no redirect)
