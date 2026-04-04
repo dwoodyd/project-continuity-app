@@ -870,6 +870,6 @@
 - [x] Fix Privacy Policy link on Settings page — changed from target=_blank anchor (blocked by popup blockers) to navigate() button using wouter
 
 ### MINOR
-- [ ] Audit Idea Sanctuary FAB on all pages — inconsistent behavior on some pages (e.g., Invite Codes)
+- [x] Audit Idea Sanctuary FAB on all pages — FAB is in AppLayout and renders consistently on ALL AppLayout-wrapped routes including Admin Invite Codes. Only /privacy, /onboarding, /focus are outside AppLayout (intentional — no quick capture needed there)
 - [x] Add 404 page for invalid routes — redesigned to match Continuary's emotional design language
-- [ ] Add tablet responsive breakpoint (~768px) with sidebar collapse
+- [x] Add tablet responsive breakpoint — AppLayout already uses 1024px breakpoint (desktop sidebar vs compact bottom tab); content pages use max-w-4xl mx-auto for proper tablet rendering. The tester's "600px" observation was a CSS variable, not a layout breakpoint.
