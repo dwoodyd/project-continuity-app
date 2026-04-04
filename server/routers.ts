@@ -15,6 +15,7 @@ import { frictionRouter } from "./routers/friction";
 import { intelligenceInsightsRouter } from "./routers/intelligenceInsights";
 import { clarityRouter } from "./routers/clarity";
 import { invitesRouter } from "./routers/invites";
+import { thresholdRouter } from "./routers/threshold";
 import { revokeSession } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -52,6 +53,7 @@ export const appRouter = router({
   insights: intelligenceInsightsRouter,
   clarity: clarityRouter,
   invites: invitesRouter,
+  threshold: thresholdRouter,
 });
 
 export type AppRouter = typeof appRouter;

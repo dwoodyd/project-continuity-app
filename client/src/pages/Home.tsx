@@ -36,6 +36,8 @@ import { toast } from "sonner";
 import IdeaSanctuaryModal from "@/components/IdeaSanctuaryModal";
 import UnstickModal from "@/components/UnstickModal";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
+import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
+import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -646,6 +648,12 @@ export default function Home() {
   const [completedCheckIns, setCompletedCheckIns] = useState<Set<CheckInStep>>(new Set());
   const [reEntryProjectId, setReEntryProjectId] = useState<number | null>(null);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
+  const [fmsOpen, setFmsOpen] = useState(false);
+  const [fmsTask, setFmsTask] = useState("");
+  const [fmsProjectId, setFmsProjectId] = useState<number | undefined>();
+  const [thresholdOpen, setThresholdOpen] = useState(false);
+  const [thresholdTask, setThresholdTask] = useState("");
+  const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
 
   const handleNotifPromptAccept = async () => {
     setShowNotifPrompt(false);
@@ -1118,10 +1126,25 @@ export default function Home() {
               </button>
               <span className="text-muted-foreground/30">·</span>
               <button
-                onClick={() => navigate("/clarity")}
+                onClick={() => {
+                  setFmsTask(topProject.nextStep ?? "");
+                  setFmsProjectId(topProject.id);
+                  setFmsOpen(true);
+                }}
+                className="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 transition-colors font-medium"
+              >
+                🪶 First movable step
+              </button>
+              <span className="text-muted-foreground/30">·</span>
+              <button
+                onClick={() => {
+                  setThresholdTask(topProject.nextStep ?? "");
+                  setThresholdProjectId(topProject.id);
+                  setThresholdOpen(true);
+                }}
                 className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors font-medium"
               >
-                ⚡ Need clarity first?
+                🚪 What's blocking me?
               </button>
               <span className="text-muted-foreground/30">·</span>
               <button
@@ -1308,6 +1331,22 @@ export default function Home() {
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} capturedDuringTask={true} />
       {unstickTask && (
         <UnstickModal task={unstickTask} onClose={() => setUnstickTask(null)} />
+      )}
+      <FirstMovableStepModal
+        open={fmsOpen}
+        onOpenChange={setFmsOpen}
+        initialTask={fmsTask}
+        projectId={fmsProjectId}
+        onStartSession={() => navigate("/focus")}
+      />
+      {thresholdOpen && thresholdTask && (
+        <ThresholdDiagnosisFlow
+          open={thresholdOpen}
+          onOpenChange={setThresholdOpen}
+          taskDescription={thresholdTask}
+          projectId={thresholdProjectId}
+          onStartSession={() => navigate("/focus")}
+        />
       )}
     </div>
   );

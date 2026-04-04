@@ -634,3 +634,42 @@
 - [x] Fix: set refetchOnWindowFocus:false in QueryClient defaultOptions in main.tsx
 - [x] Audit all other textareas — same root cause, same fix covers all
 - [x] Verify fix — 83 tests passing, zero TypeScript errors
+
+## Premium Social Media Graphic (Upgraded)
+
+- [x] Locate brand logo asset (CDN URL or local file)
+- [x] Generate 1080x1350 luxury-minimal graphic with new copy: "Starting shouldn't / feel this hard.", body copy, BETA CTA pill, tagline, continuary.app URL
+- [x] Deliver final graphic to user
+
+## Manus Mega-Prompt: Continuary Beta Landing Page
+
+- [x] Draft full Manus mega-prompt for soulengineer.online/continuary landing page
+- [x] Include complete image asset specification list
+- [x] Update graphic: remove continuary.app, replace with continuary.soulengineer.online
+
+## Feature: First Movable Step Generator (Book Companion — Ch. 6)
+
+- [x] Add `first_movable_steps` table to drizzle schema
+- [x] Generate and apply migration SQL
+- [x] Add DB helpers: createFirstMovableStep, markFirstMovableStepUsed, getFirstMovableStepHistory
+- [x] Add `threshold.generateFirstMovableStep` tRPC procedure
+- [x] Add `threshold.markUsed` tRPC mutation
+- [x] Build `FirstMovableStepCard` component: theMove (large, verb-first), whereItEnds, "Start session" CTA, MVC fallback
+- [x] Build `FirstMovableStepModal` sheet: avoidedTask input → generate → show card → start session or dismiss
+- [x] Wire into Home.tsx Start Here card (🪶 button)
+- [x] Wire into ProjectDetailPage next step row (🪶 button)
+- [x] Wire into ClarityEnginePage result screen
+
+## Feature: Threshold Diagnosis (Book Companion — Ch. 3–4)
+
+- [x] Add `threshold_diagnoses` table to drizzle schema
+- [x] Generate and apply migration SQL
+- [x] Add DB helpers: createThresholdDiagnosis, getThresholdDiagnosisHistory
+- [x] Add `threshold.diagnose` tRPC procedure: 3 responses → ThresholdCard (6 patterns)
+- [x] Build `ThresholdDiagnosisFlow` component: 3 plain-language questions, max 90 seconds, no multi-select
+- [x] ThresholdCard: pattern name, protection sentence, calibrated FMS, "You have permission to begin."
+- [x] Wire into Home.tsx Start Here card (🚪 button)
+- [x] Wire into ProjectDetailPage next step row (🚪 button)
+- [ ] Auto-surface "What's at the door?" on Command Center when task avoided 2+ days (deferred — requires avoided-task tracking)
+- [x] ThresholdCard → FirstMovableStepCard handoff (Threshold output feeds FMS session start)
+- [x] Write 30 vitest tests for threshold logic (LLM parsing, pattern validation, input validation, 4-quality structure, all 6 patterns)

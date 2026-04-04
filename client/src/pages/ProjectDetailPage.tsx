@@ -33,6 +33,8 @@ import {
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import UnstickModal from "@/components/UnstickModal";
+import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
+import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 
 // ─── Re-Entry Card Modal ──────────────────────────────────────────────────────
 function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () => void }) {
@@ -190,6 +192,8 @@ export default function ProjectDetailPage() {
   const [nextStepDraft, setNextStepDraft] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "clarity">("overview");
   const [timelineFilter, setTimelineFilter] = useState<"all" | "focus_session" | "decision" | "milestone" | "blocker">("all");
+  const [fmsOpen, setFmsOpen] = useState(false);
+  const [thresholdOpen, setThresholdOpen] = useState(false);
 
   const { data: project, refetch } = trpc.projects.getById.useQuery({ id: projectId });
   const { data: sources } = trpc.vault.listByState.useQuery({ state: "active" });
@@ -352,13 +356,29 @@ export default function ProjectDetailPage() {
                   {project.nextStep ?? <span className="text-muted-foreground italic">No next step defined</span>}
                 </p>
                 {project.nextStep && (
-                  <button
-                    onClick={() => setUnstickTask({ id: String(project.id), title: project.nextStep!, projectId: project.id })}
-                    className="ml-auto text-muted-foreground hover:text-foreground p-1 transition-colors shrink-0"
-                    title="Get unstuck on this step"
-                  >
-                    <Zap className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="ml-auto flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => setFmsOpen(true)}
+                      className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 p-1 transition-colors"
+                      title="Find my first movable step"
+                    >
+                      <span className="text-xs">🪶</span>
+                    </button>
+                    <button
+                      onClick={() => setThresholdOpen(true)}
+                      className="text-amber-500 hover:text-amber-400 p-1 transition-colors"
+                      title="What's blocking me?"
+                    >
+                      <span className="text-xs">🚪</span>
+                    </button>
+                    <button
+                      onClick={() => setUnstickTask({ id: String(project.id), title: project.nextStep!, projectId: project.id })}
+                      className="text-muted-foreground hover:text-foreground p-1 transition-colors"
+                      title="Get unstuck on this step"
+                    >
+                      <Zap className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -655,6 +675,22 @@ export default function ProjectDetailPage() {
       {/* Modals */}
       {reEntryOpen && <ReEntryModal projectId={projectId} onClose={() => setReEntryOpen(false)} />}
       {unstickTask && <UnstickModal task={unstickTask} onClose={() => setUnstickTask(null)} />}
+      <FirstMovableStepModal
+        open={fmsOpen}
+        onOpenChange={setFmsOpen}
+        initialTask={project.nextStep ?? ""}
+        projectId={projectId}
+        onStartSession={() => navigate("/focus")}
+      />
+      {project.nextStep && thresholdOpen && (
+        <ThresholdDiagnosisFlow
+          open={thresholdOpen}
+          onOpenChange={setThresholdOpen}
+          taskDescription={project.nextStep}
+          projectId={projectId}
+          onStartSession={() => navigate("/focus")}
+        />
+      )}
     </div>
   );
 }

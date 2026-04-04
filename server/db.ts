@@ -55,6 +55,12 @@ import {
   revokedSessions,
   RevokedSession,
   InsertRevokedSession,
+  firstMovableSteps,
+  FirstMovableStep,
+  InsertFirstMovableStep,
+  thresholdDiagnoses,
+  ThresholdDiagnosis,
+  InsertThresholdDiagnosis,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -833,4 +839,76 @@ export async function isSessionRevoked(jti: string): Promise<boolean> {
     .where(eq(revokedSessions.jti, jti))
     .limit(1);
   return !!row;
+}
+
+// ─── First Movable Steps ──────────────────────────────────────────────────────
+
+export async function createFirstMovableStep(
+  data: InsertFirstMovableStep
+): Promise<FirstMovableStep> {
+  const db = await getDb();
+  const [result] = await db!.insert(firstMovableSteps).values(data);
+  const [row] = await db!
+    .select()
+    .from(firstMovableSteps)
+    .where(eq(firstMovableSteps.id, (result as any).insertId))
+    .limit(1);
+  return row;
+}
+
+export async function markFirstMovableStepUsed(
+  id: number,
+  userId: number
+): Promise<void> {
+  const db = await getDb();
+  await db!
+    .update(firstMovableSteps)
+    .set({ usedAt: new Date() })
+    .where(
+      and(
+        eq(firstMovableSteps.id, id),
+        eq(firstMovableSteps.userId, userId)
+      )
+    );
+}
+
+export async function getRecentFirstMovableSteps(
+  userId: number,
+  limit = 10
+): Promise<FirstMovableStep[]> {
+  const db = await getDb();
+  return db!
+    .select()
+    .from(firstMovableSteps)
+    .where(eq(firstMovableSteps.userId, userId))
+    .orderBy(desc(firstMovableSteps.createdAt))
+    .limit(limit);
+}
+
+// ─── Threshold Diagnoses ──────────────────────────────────────────────────────
+
+export async function createThresholdDiagnosis(
+  data: InsertThresholdDiagnosis
+): Promise<ThresholdDiagnosis> {
+  const db = await getDb();
+  const [result] = await db!.insert(thresholdDiagnoses).values(data);
+  const [row] = await db!
+    .select()
+    .from(thresholdDiagnoses)
+    .where(eq(thresholdDiagnoses.id, (result as any).insertId))
+    .limit(1);
+  return row;
+}
+
+export async function getRecentThresholdDiagnoses(
+  userId: number,
+  limit = 10
+): Promise<ThresholdDiagnosis[]> {
+  const db = await getDb();
+  return db!
+    .select()
+    .from(thresholdDiagnoses)
+    .where(eq(thresholdDiagnoses.userId, userId))
+    .orderBy(desc(thresholdDiagnoses.createdAt))
+    .limit(limit);
 }

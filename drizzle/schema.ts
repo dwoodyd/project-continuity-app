@@ -459,3 +459,50 @@ export const revokedSessions = mysqlTable("revoked_sessions", {
 });
 export type RevokedSession = typeof revokedSessions.$inferSelect;
 export type InsertRevokedSession = typeof revokedSessions.$inferInsert;
+
+// ─── First Movable Steps ──────────────────────────────────────────────────────
+// Each row is one AI-generated First Movable Step. Tied to an optional project.
+// isTooHeavy=true means the user indicated the primary move was still too much;
+// minimumViableContact is the lighter fallback generated alongside it.
+export const firstMovableSteps = mysqlTable("first_movable_steps", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"),                       // nullable — not always project-linked
+  avoidedTask: text("avoidedTask").notNull(),         // what the user is stuck on
+  theMove: text("theMove").notNull(),                 // verb-first, specific, bounded action
+  whereItEnds: varchar("whereItEnds", { length: 255 }).notNull(), // named finish line
+  isTooHeavy: boolean("isTooHeavy").default(false).notNull(),
+  minimumViableContact: text("minimumViableContact"), // lighter fallback if isTooHeavy
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  usedAt: timestamp("usedAt"),                        // set when user taps "Start session"
+});
+export type FirstMovableStep = typeof firstMovableSteps.$inferSelect;
+export type InsertFirstMovableStep = typeof firstMovableSteps.$inferInsert;
+
+// ─── Threshold Diagnoses ──────────────────────────────────────────────────────
+// Each row is one Threshold Diagnosis session. Three plain-language questions
+// are asked; the LLM maps responses to one of six patterns from the book.
+export const thresholdDiagnoses = mysqlTable("threshold_diagnoses", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  projectId: int("projectId"),                       // nullable
+  taskDescription: text("taskDescription").notNull(),
+  q1Response: text("q1Response").notNull(),           // "What does starting this feel like?"
+  q2Response: text("q2Response").notNull(),           // "What are you afraid will happen?"
+  q3Response: text("q3Response").notNull(),           // "What would make this feel lighter?"
+  pattern: mysqlEnum("pattern", [
+    "perfectionism",
+    "ambiguity",
+    "emotional_weight",
+    "executive_function",
+    "shame_spiral",
+    "permission_deficit",
+  ]).notNull(),
+  patternLabel: varchar("patternLabel", { length: 100 }).notNull(), // plain-language name
+  protectionSentence: text("protectionSentence").notNull(), // what the resistance is protecting
+  firstMove: text("firstMove").notNull(),             // calibrated FMS for this pattern
+  whereItEnds: varchar("whereItEnds", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ThresholdDiagnosis = typeof thresholdDiagnoses.$inferSelect;
+export type InsertThresholdDiagnosis = typeof thresholdDiagnoses.$inferInsert;
