@@ -793,3 +793,20 @@
 ### Block 6: Dependencies & Redirects
 - [x] 19. Run npm audit; fix all critical/high vulnerabilities — 14 high in dev/build tooling only (not runtime)
 - [x] 20. Audit OAuth callback and post-login redirect logic for open redirect vulnerabilities — PASS
+
+## Security Hardening Round 2
+
+### CSP Hardening
+- [x] Add explicit script-src 'self' + CDN domain to Helmet CSP config
+- [x] Add img-src restricted to 'self', CDN domain, and data: URIs
+- [x] Add connect-src for tRPC/API and CDN endpoints
+- [x] Add font-src for Google Fonts CDN
+- [x] Add media-src for S3/CDN audio/video
+- [x] Add frame-ancestors 'none' to prevent clickjacking
+- [x] Verify CSP does not break any existing functionality
+
+### Push Subscription Endpoint Validation
+- [x] Add ALLOWED_PUSH_ENDPOINTS allowlist (fcm.googleapis.com, push.apple.com, updates.push.services.mozilla.com, notify.windows.com)
+- [x] Validate endpoint URL hostname in notifications.subscribe procedure before saving
+- [x] Throw TRPC BAD_REQUEST if endpoint domain not in allowlist
+- [x] Write vitest test for endpoint validation logic

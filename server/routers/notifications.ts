@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import {
   upsertPushSubscription,
@@ -7,6 +8,29 @@ import {
   getUserProfile,
   updateUserProfile,
 } from "../db";
+
+/**
+ * Allowlist of known Web Push service domains.
+ * Endpoints from outside this list are rejected to prevent abuse.
+ * Sources: Chrome (FCM), Firefox (Mozilla), Safari (Apple), Edge (Windows).
+ */
+export const ALLOWED_PUSH_ENDPOINT_HOSTS = new Set([
+  "fcm.googleapis.com",          // Chrome / Android (Google FCM)
+  "updates.push.services.mozilla.com", // Firefox
+  "push.services.mozilla.com",   // Firefox (alternate)
+  "notify.windows.com",          // Edge / Windows
+  "web.push.apple.com",          // Safari (macOS / iOS)
+  "api.push.apple.com",          // Safari (alternate)
+]);
+
+function isAllowedPushEndpoint(endpoint: string): boolean {
+  try {
+    const url = new URL(endpoint);
+    return url.protocol === "https:" && ALLOWED_PUSH_ENDPOINT_HOSTS.has(url.hostname);
+  } catch {
+    return false;
+  }
+}
 
 export const notificationsRouter = router({
   /**
@@ -20,6 +44,15 @@ export const notificationsRouter = router({
       auth: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Validate that the push endpoint comes from a known push service.
+      // This prevents abuse where an attacker registers an arbitrary URL
+      // as a "push endpoint" and receives notification payloads.
+      if (!isAllowedPushEndpoint(input.endpoint)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Push endpoint domain is not from a recognised push service.",
+        });
+      }
       await upsertPushSubscription({
         userId: ctx.user.id,
         endpoint: input.endpoint,
