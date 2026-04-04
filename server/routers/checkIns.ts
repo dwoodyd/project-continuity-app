@@ -21,6 +21,8 @@ import {
   getDecisionsByProject,
   getProjectMemoryEvents,
   upsertEvidenceSummary,
+  getDistractionWeeklyAggregates,
+  getDistractionEventsByUser,
 } from "../db";
 import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -524,5 +526,88 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
 
   weeklyPresence: protectedProcedure.query(async ({ ctx }) => {
     return getWeeklyCheckInPresence(ctx.user.id);
+  }),
+
+  /**
+   * Returns distraction insights for the past 7 days:
+   * top category, time-of-day breakdown, full category breakdown, and an insight sentence.
+   */
+  getWeeklyDistractionInsights: protectedProcedure.query(async ({ ctx }) => {
+    const aggregates = await getDistractionWeeklyAggregates(ctx.user.id);
+    if (aggregates.totalEvents === 0) {
+      return {
+        hasData: false as const,
+        topCategory: null,
+        topCategoryLabel: null,
+        topCategoryCount: 0,
+        totalEvents: 0,
+        timeOfDayCounts: { morning: 0, afternoon: 0, evening: 0 },
+        topTimeOfDay: null,
+        categoryBreakdown: [] as Array<{ category: string; label: string; count: number; pct: number }>,
+        insightSentence: null,
+      };
+    }
+
+    // Fetch raw events for the last 7 days to build the full breakdown
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const allEvents = await getDistractionEventsByUser(ctx.user.id, 200);
+    const weekEvents = allEvents.filter(e => new Date(e.date) >= sevenDaysAgo);
+
+    const catCount: Record<string, number> = {};
+    const todCount: Record<string, number> = { morning: 0, afternoon: 0, evening: 0 };
+    for (const e of weekEvents) {
+      catCount[e.category] = (catCount[e.category] ?? 0) + 1;
+      if (e.timeOfDay in todCount) todCount[e.timeOfDay]++;
+    }
+
+    const categoryLabels: Record<string, string> = {
+      social_media: "Social media",
+      research_rabbit_hole: "Research rabbit hole",
+      unplanned_task: "Unplanned task",
+      communication: "Communication",
+      context_switch: "Context switching",
+      unknown: "Other",
+    };
+
+    const categoryBreakdown = Object.entries(catCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([cat, count]) => ({
+        category: cat,
+        label: categoryLabels[cat] ?? cat,
+        count,
+        pct: Math.round((count / weekEvents.length) * 100),
+      }));
+
+    const topCat = categoryBreakdown[0];
+    const topTod = Object.entries(todCount).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+    const todLabels: Record<string, string> = {
+      morning: "mornings",
+      afternoon: "afternoons",
+      evening: "evenings",
+    };
+
+    const insightSentence = topCat
+      ? `This week, ${topCat.label.toLowerCase()} accounted for ${topCat.pct}% of your distractions${
+          topTod ? `, most often in the ${todLabels[topTod] ?? topTod}` : ""
+        }.`
+      : null;
+
+    return {
+      hasData: true as const,
+      topCategory: topCat?.category ?? null,
+      topCategoryLabel: topCat?.label ?? null,
+      topCategoryCount: topCat?.count ?? 0,
+      totalEvents: weekEvents.length,
+      timeOfDayCounts: {
+        morning: todCount.morning ?? 0,
+        afternoon: todCount.afternoon ?? 0,
+        evening: todCount.evening ?? 0,
+      },
+      topTimeOfDay: topTod,
+      categoryBreakdown,
+      insightSentence,
+    };
   }),
 });

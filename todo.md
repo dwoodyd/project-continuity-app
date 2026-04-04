@@ -810,3 +810,12 @@
 - [x] Validate endpoint URL hostname in notifications.subscribe procedure before saving
 - [x] Throw TRPC BAD_REQUEST if endpoint domain not in allowlist
 - [x] Write vitest test for endpoint validation logic
+
+## Weekly Distraction Insights Card
+
+- [x] Audit distraction data schema (distractionEvents table with category + timeOfDay columns)
+- [x] Add `checkIns.getWeeklyDistractionInsights` tRPC query: top category + time-of-day pattern for last 7 days
+- [x] Build DistractionInsightsCard component: top category pill, time-of-day bar chart, category breakdown mini-bars, insight sentence
+- [x] Wire card into WeeklyReviewPage between AI review and Focus Blocks sections
+- [x] Show empty state when no distraction data exists for the week
+- [x] Write vitest tests for the insights aggregation logic (10 tests)

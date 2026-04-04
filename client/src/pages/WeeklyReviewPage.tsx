@@ -14,6 +14,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, subDays, startOfWeek } from "date-fns";
+import DistractionInsightsCard from "@/components/DistractionInsightsCard";
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds < 1) return "0m";
@@ -130,6 +131,12 @@ export default function WeeklyReviewPage() {
           </Button>
         </div>
       )}
+
+      {/* Distraction Insights */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Distraction Insights</p>
+        <DistractionInsightsCard />
+      </div>
 
       {/* Focus Blocks */}
       <div>
