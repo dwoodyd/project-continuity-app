@@ -723,3 +723,8 @@
 - [x] Use existing push notification subscription logic (VAPID) — request permission on click
 - [x] Show only when Notification API is supported and permission is not yet granted
 - [x] Style as a low-friction banner or CTA row near the bottom of the Welcome page
+
+## Bug Fix: PWA Icon Shows Old/Wrong Icon on Home Screen
+
+- [x] Update manifest.json to use correct Continuary icon CDN URLs for all sizes
+- [x] Bump service worker cache version to force icon refresh on existing installs
