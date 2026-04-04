@@ -896,10 +896,18 @@
 
 ## Personal Study Tracker — Owner Only (Apr 4, 2026)
 
-- [ ] DB: studyDayLogs table (userId, day 1-30, capacity, learned, built, drifted, driftWhere, returnStep, whatMoved, fuzzy, summary, carryForward, completedAt)
-- [ ] DB: studyFocusBlocks table (userId, date, startTime, duration, capacity, lesson, tinyProject, intention, actualWork, drifted, driftWhere, returnPoint, whatMoved, nextStep)
-- [ ] DB: studyWeeklyReviews table (userId, weekNum, meaningfulMovement, lessonsCompleted, buildsCompleted, fuzzy, driftedMost, whatHelped, newUnderstanding, openLoop, startHereNext)
-- [ ] Backend: study router with CRUD for all 3 tables
-- [ ] Frontend: StudyTrackerPage — admin-only route /study-tracker
-- [ ] Frontend: 5 tabs — Daily Tracker, Weekly Compass (static content), Focus Log, Weekly Review, Re-Entry + Success Markers
-- [ ] Nav: add Study Tracker link to sidebar (admin only)
+- [x] DB: studyDayLogs table (userId, day 1-30, capacity, learned, built, drifted, driftWhere, returnStep, whatMoved, fuzzy, summary, carryForward, completedAt)
+- [x] DB: studyFocusBlocks table (userId, date, startTime, duration, capacity, lesson, tinyProject, intention, actualWork, drifted, driftWhere, returnPoint, whatMoved, nextStep)
+- [x] DB: studyWeeklyReviews table (userId, weekNum, meaningfulMovement, lessonsCompleted, buildsCompleted, fuzzy, driftedMost, whatHelped, newUnderstanding, openLoop, startHereNext)
+- [x] Backend: study router with CRUD for all 3 tables
+- [x] Frontend: StudyTrackerPage — admin-only at /admin/study with 5 tabs
+- [x] Frontend: 5 tabs — Daily Tracker (30-day curriculum), Weekly Compass (static content), Focus Log, Weekly Review, Re-Entry + Success Markers
+- [x] Nav: Study Tracker link added to admin sidebar section (GraduationCap icon, amber highlight)
+
+## Invite-Only Hard Gate (Apr 4, 2026)
+
+- [x] Backend: inviteCode field already on users table; gate is enforced on the frontend via user object from auth.me
+- [x] Frontend: InviteGatePage created at /invite-gate — clean dark-mode page with code entry form, instant validation feedback, and sign-out option
+- [x] Frontend: AppLayout useEffect gate — authenticated non-admin users with inviteCode === null are redirected to /invite-gate; fires after onboarding check
+- [x] Admin accounts bypass the gate entirely (user.role === "admin" check)
+- [x] On successful redemption: auth.me is invalidated and user is redirected to / after 600ms

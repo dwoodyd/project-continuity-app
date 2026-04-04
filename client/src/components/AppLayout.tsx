@@ -169,6 +169,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   }, [isAuthenticated, profile, navigate, location]);
 
+  // Invite-only gate: block non-admin users who have not redeemed an invite code
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      user &&
+      user.role !== "admin" &&
+      user.inviteCode === null &&
+      location !== "/invite-gate" &&
+      location !== "/onboarding"
+    ) {
+      navigate("/invite-gate");
+    }
+  }, [isAuthenticated, user, navigate, location]);
+
   // Auth error toast
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

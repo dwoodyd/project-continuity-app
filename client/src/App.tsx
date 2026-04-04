@@ -22,6 +22,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import EvidenceLogPage from "./pages/EvidenceLogPage";
 import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
 import StudyTrackerPage from "./pages/StudyTrackerPage";
+import InviteGatePage from "./pages/InviteGatePage";
 
 function Router() {
   return (
@@ -29,6 +30,7 @@ function Router() {
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/focus" component={FocusModePage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/invite-gate" component={InviteGatePage} />
       <Route>
         <AppLayout>
           <Switch>
