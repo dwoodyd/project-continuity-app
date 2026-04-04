@@ -506,3 +506,20 @@ export const thresholdDiagnoses = mysqlTable("threshold_diagnoses", {
 });
 export type ThresholdDiagnosis = typeof thresholdDiagnoses.$inferSelect;
 export type InsertThresholdDiagnosis = typeof thresholdDiagnoses.$inferInsert;
+
+// ─── Evidence Log Summaries ───────────────────────────────────────────────────
+// One row per user per calendar month. Stores computed session stats and the
+// AI-generated single identity sentence that reframes the data as evidence.
+export const evidenceLogSummaries = mysqlTable("evidence_log_summaries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  month: varchar("month", { length: 7 }).notNull(),          // "YYYY-MM"
+  sessionsStarted: int("sessionsStarted").default(0).notNull(),
+  returnsAfterGap: int("returnsAfterGap").default(0).notNull(), // sessions after 48h+ gap
+  hardDaySessions: int("hardDaySessions").default(0).notNull(), // sessions on low-capacity days
+  genuinePermissions: int("genuinePermissions").default(0).notNull(), // sessions stopped at timer
+  summaryLine: text("summaryLine"),                          // AI identity sentence
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+});
+export type EvidenceLogSummary = typeof evidenceLogSummaries.$inferSelect;
+export type InsertEvidenceLogSummary = typeof evidenceLogSummaries.$inferInsert;

@@ -16,6 +16,7 @@ import { intelligenceInsightsRouter } from "./routers/intelligenceInsights";
 import { clarityRouter } from "./routers/clarity";
 import { invitesRouter } from "./routers/invites";
 import { thresholdRouter } from "./routers/threshold";
+import { evidenceRouter } from "./routers/evidence";
 import { revokeSession } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -54,6 +55,7 @@ export const appRouter = router({
   clarity: clarityRouter,
   invites: invitesRouter,
   threshold: thresholdRouter,
+  evidence: evidenceRouter,
 });
 
 export type AppRouter = typeof appRouter;

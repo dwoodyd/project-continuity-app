@@ -20,7 +20,9 @@ import {
   getFocusSessionsByProject,
   getDecisionsByProject,
   getProjectMemoryEvents,
+  upsertEvidenceSummary,
 } from "../db";
+import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
@@ -469,6 +471,26 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
           }
         } catch {
           // Silently ignore — this is a background refresh, not critical
+        }
+      })();
+
+      // Auto-generate Evidence Log summary for current month (fire-and-forget)
+      const evidenceUserId = ctx.user.id;
+      void (async () => {
+        try {
+          const month = new Date().toISOString().slice(0, 7);
+          const stats = await computeStats(evidenceUserId, month);
+          const summaryLine = stats.sessionsStarted > 0
+            ? await generateIdentitySentence(month, stats)
+            : null;
+          await upsertEvidenceSummary({
+            userId: evidenceUserId,
+            month,
+            ...stats,
+            summaryLine,
+          });
+        } catch {
+          // Silently ignore — evidence log is non-critical
         }
       })();
 

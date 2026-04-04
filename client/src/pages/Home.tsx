@@ -681,6 +681,7 @@ export default function Home() {
   const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery();
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery();
+  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery();
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
   const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
@@ -1219,6 +1220,13 @@ export default function Home() {
               );
             })}
           </div>
+        </div>
+      )}
+      {/* ── Evidence Log monthly sentence ─────────────────────────────────────────────────────────────────── */}
+      {evidenceMonth?.summaryLine && (
+        <div className="px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5">
+          <p className="text-[10px] font-semibold text-amber-400/70 uppercase tracking-widest mb-1">Your evidence</p>
+          <p className="text-xs text-foreground/70 italic leading-relaxed">{evidenceMonth.summaryLine}</p>
         </div>
       )}
       {/* ── Active Projects Quick Access (right col) ────────────────────────────────────────────────────────── */}

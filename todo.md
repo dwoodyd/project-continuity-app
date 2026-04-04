@@ -680,3 +680,18 @@
 - [x] Auto-surface ThresholdDiagnosisFlow on Command Center / Start Here card when a task has carryoverCount >= 2
 - [x] Add Threshold History tab to ClarityEnginePage: "Threshold log" nav button appears once diagnoses exist; full history with pattern frequency bar chart, individual diagnosis cards with protection sentence + first move + permission line
 - [x] Run all tests (113 passing), verify 0 TypeScript errors, save publish-ready checkpoint
+
+## Feature: Evidence Log (Book Companion — Identity Evidence)
+
+- [x] Add `evidence_log_summaries` table to drizzle schema: id, userId, month (YYYY-MM), sessionsStarted, returnsAfterGap, hardDaySessions, genuinePermissions, summaryLine (AI-generated), generatedAt
+- [x] Generate and apply migration SQL
+- [x] Add DB helpers: upsertEvidenceSummary, getEvidenceSummaries, getEvidenceSummaryForMonth
+- [x] Add `evidence.getMonthly` tRPC query: returns last 6 months of summaries
+- [x] Add `evidence.generateSummary` tRPC mutation: computes stats for a given month, calls LLM to produce the single identity sentence, upserts result
+- [x] Add `evidence.getStreakData` tRPC query: returns raw session/check-in data for the last 30 days for the heatmap
+- [x] Build EvidenceLogPage.tsx: monthly summary sentence (large, serif), stat row (sessions started / returns after gap / hard-day sessions / genuine permissions), 6-month history list, 30-day presence heatmap
+- [x] Add "Evidence" nav item to AppLayout (sidebar + mobile More menu)
+- [x] Register /evidence route in App.tsx
+- [x] Auto-generate current month summary after evening closure completes (call evidence.generateSummary in submitEvening mutation)
+- [x] Surface current month's summary sentence on Command Center (below presence dots, small italic)
+- [x] Write vitest tests for evidence.generateSummary (stat computation, LLM parsing, month boundary logic)

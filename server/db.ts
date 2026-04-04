@@ -61,6 +61,9 @@ import {
   thresholdDiagnoses,
   ThresholdDiagnosis,
   InsertThresholdDiagnosis,
+  evidenceLogSummaries,
+  EvidenceLogSummary,
+  InsertEvidenceLogSummary,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -911,4 +914,102 @@ export async function getRecentThresholdDiagnoses(
     .where(eq(thresholdDiagnoses.userId, userId))
     .orderBy(desc(thresholdDiagnoses.createdAt))
     .limit(limit);
+}
+
+// ─── Evidence Log Summaries ───────────────────────────────────────────────────
+export async function upsertEvidenceSummary(
+  data: InsertEvidenceLogSummary
+): Promise<EvidenceLogSummary> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Try update first
+  const existing = await db
+    .select()
+    .from(evidenceLogSummaries)
+    .where(
+      and(
+        eq(evidenceLogSummaries.userId, data.userId),
+        eq(evidenceLogSummaries.month, data.month!)
+      )
+    )
+    .limit(1);
+  if (existing[0]) {
+    await db
+      .update(evidenceLogSummaries)
+      .set({ ...data, generatedAt: new Date() })
+      .where(eq(evidenceLogSummaries.id, existing[0].id));
+    const [updated] = await db
+      .select()
+      .from(evidenceLogSummaries)
+      .where(eq(evidenceLogSummaries.id, existing[0].id))
+      .limit(1);
+    return updated;
+  }
+  const result = await db.insert(evidenceLogSummaries).values(data);
+  const [row] = await db
+    .select()
+    .from(evidenceLogSummaries)
+    .where(eq(evidenceLogSummaries.id, (result[0] as any).insertId))
+    .limit(1);
+  return row;
+}
+
+export async function getEvidenceSummaries(
+  userId: number,
+  limit = 6
+): Promise<EvidenceLogSummary[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(evidenceLogSummaries)
+    .where(eq(evidenceLogSummaries.userId, userId))
+    .orderBy(desc(evidenceLogSummaries.month))
+    .limit(limit);
+}
+
+export async function getEvidenceSummaryForMonth(
+  userId: number,
+  month: string
+): Promise<EvidenceLogSummary | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(evidenceLogSummaries)
+    .where(
+      and(
+        eq(evidenceLogSummaries.userId, userId),
+        eq(evidenceLogSummaries.month, month)
+      )
+    )
+    .limit(1);
+  return result[0];
+}
+
+// Evidence streak data: returns focus sessions for the last 30 days
+export async function getEvidenceStreakData(
+  userId: number
+): Promise<{ date: string; sessionsCount: number }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const sessions = await db
+    .select()
+    .from(focusSessions)
+    .where(
+      and(
+        eq(focusSessions.userId, userId),
+        gte(focusSessions.startedAt, cutoff)
+      )
+    )
+    .orderBy(focusSessions.startedAt);
+
+  // Group by date
+  const byDate: Record<string, number> = {};
+  for (const s of sessions) {
+    const d = s.startedAt.toISOString().slice(0, 10);
+    byDate[d] = (byDate[d] ?? 0) + 1;
+  }
+  return Object.entries(byDate).map(([date, sessionsCount]) => ({ date, sessionsCount }));
 }
