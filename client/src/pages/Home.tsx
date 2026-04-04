@@ -697,6 +697,17 @@ export default function Home() {
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
     staleTime: 30 * 60 * 1000,
   });
+  const [clarityNudgeDismissed, setClarityNudgeDismissed] = useState<boolean>(() => {
+    try {
+      const ts = localStorage.getItem("continuary-nudge-dismissed");
+      if (!ts) return false;
+      return Date.now() - Number(ts) < 24 * 60 * 60 * 1000;
+    } catch { return false; }
+  });
+  const dismissClarityNudge = () => {
+    try { localStorage.setItem("continuary-nudge-dismissed", String(Date.now())); } catch { /* ignore */ }
+    setClarityNudgeDismissed(true);
+  };
 
   // Map projectId → momentum for quick lookup
   const momentumByProject = useMemo(() => {
@@ -1286,13 +1297,20 @@ export default function Home() {
       )}
 
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
-      {clarityRec && (
+      {clarityRec && !clarityNudgeDismissed && (
         <div className="relative overflow-hidden p-4 rounded-xl border border-primary/20 bg-primary/5">
+          <button
+            onClick={dismissClarityNudge}
+            className="absolute top-2 right-2 p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-foreground/5 transition-colors"
+            aria-label="Dismiss for 24 hours"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
               <Sparkles className="w-4 h-4 text-primary" />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 pr-4">
               <p className="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-1">Pattern detected</p>
               <p className="text-sm font-medium text-foreground mb-1">{clarityRec.modeLabel}</p>
               <p className="text-xs text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>

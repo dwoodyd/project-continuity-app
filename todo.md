@@ -887,3 +887,9 @@
 - [x] Frontend: ClarityNudge card in Command Center right column — Sparkles icon, "Pattern detected" label, mode label, nudge text, context line, "Start a session" link
 - [x] Frontend: one-tap link navigates to /clarity?mode=<mode> which pre-selects the mode via URL search param on page init
 - [x] Tests: 6 unit tests covering null (< 5 sessions), day_pattern, overall_pattern, null (no dominant mode), and mode priority; 182/182 passing
+
+## Final Polish (Apr 4, 2026)
+
+- [x] ClarityNudge dismiss button (X) — hides card for 24h via localStorage; clarityNudgeDismissed state initialized from localStorage on mount
+- [x] Distraction pattern insights card in Weekly Review — DistractionInsightsCard component already fully implemented and placed in WeeklyReviewPage (confirmed existing)
+- [x] Project health score badge — HealthDot component (green ≥70, amber ≥45, red <45) already rendering on every project card via trpc.insights.getHealthScores (confirmed existing)
