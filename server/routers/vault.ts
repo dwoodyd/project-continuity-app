@@ -384,4 +384,47 @@ ${content.substring(0, 3000)}`,
 
       return { id, transcript };
     }),
+
+  // ── Inbox Bankruptcy ─────────────────────────────────────────────────────
+  // Archives all inbox items older than the given cutoff date.
+  // This is the "declare inbox bankruptcy" ritual for new users overwhelmed
+  // by a large backlog. Items are not deleted — they move to "archived" state.
+  archiveBankruptcy: protectedProcedure
+    .input(z.object({
+      // Archive items older than this many days (default: 30)
+      olderThanDays: z.number().min(1).max(365).default(30),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) return { archivedCount: 0 };
+
+      const cutoff = new Date(Date.now() - input.olderThanDays * 24 * 60 * 60 * 1000);
+      const inboxItems = await getSourceItemsByState(ctx.user.id, "inbox");
+
+      const toArchive = inboxItems.filter(item => item.createdAt < cutoff);
+
+      let archivedCount = 0;
+      for (const item of toArchive) {
+        await updateSourceItem(item.id, ctx.user.id, { state: "archived" });
+        archivedCount++;
+      }
+
+      return { archivedCount };
+    }),
+
+  // Returns count of inbox items older than the given cutoff (for the ritual preview)
+  getBankruptcyPreview: protectedProcedure
+    .input(z.object({
+      olderThanDays: z.number().min(1).max(365).default(30),
+    }))
+    .query(async ({ ctx, input }) => {
+      const cutoff = new Date(Date.now() - input.olderThanDays * 24 * 60 * 60 * 1000);
+      const inboxItems = await getSourceItemsByState(ctx.user.id, "inbox");
+      const oldItems = inboxItems.filter(item => item.createdAt < cutoff);
+      return {
+        totalInbox: inboxItems.length,
+        eligibleToArchive: oldItems.length,
+        cutoffDate: cutoff.toISOString().split("T")[0],
+      };
+    }),
 });

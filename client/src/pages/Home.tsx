@@ -110,9 +110,21 @@ function TaskItem({
         )}>
           {task.title}
         </p>
-        {isCarryover && !task.done && (
-          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium mt-0.5 block">carried over</span>
-        )}
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          {isCarryover && !task.done && (
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">carried over</span>
+          )}
+          {task.energyTag && !task.done && (
+            <span className={cn(
+              "text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border",
+              task.energyTag === "high" ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800" :
+              task.energyTag === "low" ? "text-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
+              "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+            )}>
+              {task.energyTag === "high" ? "⚡ high" : task.energyTag === "low" ? "🌙 low" : "📊 medium"}
+            </span>
+          )}
+        </div>
       </div>
       {!task.done && (
         <button
@@ -697,6 +709,17 @@ export default function Home() {
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
     staleTime: 30 * 60 * 1000,
   });
+  const utils = trpc.useUtils();
+  const { data: profile } = trpc.settings.getProfile.useQuery();
+  const updateSettings = trpc.settings.updateSettings.useMutation({
+    onSuccess: () => utils.settings.getProfile.invalidate(),
+  });
+  const isPlanningMode = profile?.planningMode ?? false;
+  const togglePlanningMode = () => updateSettings.mutate({ planningMode: !isPlanningMode });
+  const { data: nextBestStep } = trpc.dailyPlan.getNextBestStep.useQuery(
+    { currentEnergyLevel: hour < 12 ? "high" : "low" },
+    { enabled: !!todayPlan, staleTime: 5 * 60 * 1000 }
+  );
   const [clarityNudgeDismissed, setClarityNudgeDismissed] = useState<boolean>(() => {
     try {
       const ts = localStorage.getItem("continuary-nudge-dismissed");
@@ -1110,6 +1133,26 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── Next Best Step Engine ──────────────────────────────────────────── */}
+      {nextBestStep && tasks.length > 0 && !allTasksDone && (
+        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+          <div className="flex items-center gap-2">
+            <Zap className="w-3.5 h-3.5 text-emerald-500" />
+            <p className="text-[10px] font-semibold text-emerald-500/80 uppercase tracking-widest">Next best step</p>
+            {nextBestStep.isStale && (
+              <span className="ml-auto text-[9px] text-amber-500/70 font-medium">waiting a while</span>
+            )}
+          </div>
+          <p className="text-sm font-medium text-foreground leading-snug">{nextBestStep.title}</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">{nextBestStep.reason}</p>
+          {nextBestStep.estimatedMinutes && (
+            <p className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+              <Clock className="w-2.5 h-2.5" />{nextBestStep.estimatedMinutes} min
+            </p>
+          )}
+        </div>
+      )}
+
       {/* ── Single Focus Mode CTA ───────────────────────────────────────────── */}
       {tasks.length > 0 && !allTasksDone && (
         <button
@@ -1344,9 +1387,37 @@ export default function Home() {
         </div>
       )}
 
+       {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────── */}
+      <div className="p-4 rounded-xl border border-border bg-card">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold text-foreground">
+              {isPlanningMode ? "⚡ Planning Mode" : "🎯 Doing Mode"}
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">
+              {isPlanningMode ? "Thinking, mapping, deciding" : "Executing, building, shipping"}
+            </p>
+          </div>
+          <button
+            onClick={togglePlanningMode}
+            disabled={updateSettings.isPending}
+            className={cn(
+              "relative w-10 h-5.5 rounded-full transition-colors border",
+              isPlanningMode
+                ? "bg-primary border-primary/60"
+                : "bg-foreground/10 border-border"
+            )}
+            aria-label="Toggle planning mode"
+          >
+            <span className={cn(
+              "absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+              isPlanningMode ? "translate-x-5" : "translate-x-0.5"
+            )} />
+          </button>
         </div>
       </div>
-
+        </div>
+      </div>
       {/* ── Empty state — no plan yet (full width below grid) ───────────────────────────────────────── */}
       {!todayPlan && !activeCheckIn && (
         <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>

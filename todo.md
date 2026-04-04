@@ -911,3 +911,10 @@
 - [x] Frontend: AppLayout useEffect gate — authenticated non-admin users with inviteCode === null are redirected to /invite-gate; fires after onboarding check
 - [x] Admin accounts bypass the gate entirely (user.role === "admin" check)
 - [x] On successful redemption: auth.me is invalidated and user is redirected to / after 600ms
+
+## Five Productivity Enhancements (Apr 4, 2026)
+- [x] Energy/voltage tags on tasks (high/medium/low badge + morning sort)
+- [x] Planning Mode vs Doing Mode toggle (survey-pass view vs execution view)
+- [x] Next Best Step engine card on Command Center (shortest task, stalled task priority)
+- [x] Project Check-In nudge (5+ days no activity → "keep contact" card)
+- [x] Inbox Bankruptcy button in Vault (bulk archive inbox with confirmation)

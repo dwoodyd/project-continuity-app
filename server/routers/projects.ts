@@ -191,4 +191,47 @@ export const projectsRouter = router({
 
       return { success: true };
     }),
+
+  // ── Project Check-In Nudge ─────────────────────────────────────────────────
+  // Returns projects that haven't been touched in 15+ minutes during an active
+  // session, prompting a quick context refresh ("Where did you leave off?")
+  getCheckInNudges: protectedProcedure.query(async ({ ctx }) => {
+    const active = await getActiveProjects(ctx.user.id);
+    const nudges: Array<{
+      projectId: number;
+      projectTitle: string;
+      lastTouchedAt: Date | null;
+      minutesSinceTouch: number;
+      lastContextNote: string | null;
+    }> = [];
+
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    for (const project of active) {
+      const lastTouched = project.lastTouchedAt;
+      if (!lastTouched) continue;
+
+      // Only nudge projects touched recently (within 24h) but not in last 15 min
+      // This catches "I was just working on this" scenarios
+      const touchedRecently = lastTouched > oneDayAgo;
+      const notTouchedIn15 = lastTouched < fifteenMinutesAgo;
+
+      if (touchedRecently && notTouchedIn15) {
+        const minutesSinceTouch = Math.floor((Date.now() - lastTouched.getTime()) / 60000);
+        nudges.push({
+          projectId: project.id,
+          projectTitle: project.title,
+          lastTouchedAt: lastTouched,
+          minutesSinceTouch,
+          lastContextNote: project.contextBreadcrumb ?? null,
+        });
+      }
+    }
+
+    // Return at most 2 nudges, sorted by most recently touched
+    return nudges
+      .sort((a, b) => (b.lastTouchedAt?.getTime() ?? 0) - (a.lastTouchedAt?.getTime() ?? 0))
+      .slice(0, 2);
+  }),
 });

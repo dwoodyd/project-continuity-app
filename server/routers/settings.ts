@@ -32,6 +32,7 @@ export const settingsRouter = router({
       focusModeEnabled: true,
       driftDetectionEnabled: true,
       onboardingCompleted: false,
+      planningMode: false,
       workStyle: null,
       preferredFocusHours: "morning" as const,
       workTypes: null,
@@ -110,6 +111,7 @@ export const settingsRouter = router({
       focusModeEnabled: z.boolean().optional(),
       driftDetectionEnabled: z.boolean().optional(),
       timezone: z.string().optional(),
+      planningMode: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const existing = await getUserProfile(ctx.user.id);

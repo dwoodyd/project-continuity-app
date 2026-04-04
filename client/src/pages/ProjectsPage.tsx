@@ -228,6 +228,10 @@ export default function ProjectsPage() {
 
   const { data: projects, refetch } = trpc.projects.list.useQuery();
   const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
+  const { data: checkInNudges } = trpc.projects.getCheckInNudges.useQuery(
+    undefined,
+    { staleTime: 10 * 60 * 1000 }
+  );
 
   // Build projectId → score map
   const scoreMap = new Map<number, number>(
@@ -279,6 +283,31 @@ export default function ProjectsPage() {
           </button>
         ))}
       </div>
+
+      {/* ── Project Check-In Nudges ────────────────────────────────────────────────────── */}
+      {checkInNudges && checkInNudges.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Needs attention</p>
+          {checkInNudges.slice(0, 3).map((nudge: any) => (
+            <div
+              key={nudge.projectId}
+              className="flex items-start gap-3 p-3.5 rounded-xl border border-amber-300/40 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-800/40"
+            >
+              <span className="text-base mt-0.5">⏰</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">{nudge.projectTitle}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{nudge.nudgeMessage}</p>
+              </div>
+              <button
+                onClick={() => navigate(`/projects/${nudge.projectId}`)}
+                className="text-xs text-primary hover:text-primary/80 font-medium shrink-0"
+              >
+                Review
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Projects list */}
       {filtered.length === 0 ? (

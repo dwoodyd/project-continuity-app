@@ -440,6 +440,16 @@ export default function VaultPage() {
     onError: () => toast.error("Failed to mark reviewed."),
   });
 
+  const [bankruptcyOpen, setBankruptcyOpen] = useState(false);
+  const inboxBankruptcy = trpc.vault.archiveBankruptcy.useMutation({
+    onSuccess: (data: { archivedCount: number }) => {
+      toast.success(`Inbox cleared. ${data.archivedCount} items archived.`);
+      setBankruptcyOpen(false);
+      refetch();
+    },
+    onError: () => toast.error("Inbox bankruptcy failed."),
+  });
+
   // One-tap clipboard capture — saves directly to Vault inbox without opening modal
   const captureClipboard = trpc.vault.captureClipboard.useMutation({
     onSuccess: () => { toast.success("Saved to Vault inbox."); refetch(); },
@@ -497,6 +507,18 @@ export default function VaultPage() {
             <Clipboard className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Clipboard</span>
           </Button>
+          {inboxCount > 5 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 shrink-0 text-amber-600 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-800 dark:hover:bg-amber-900/20"
+              onClick={() => setBankruptcyOpen(true)}
+              title="Declare inbox bankruptcy"
+            >
+              <span className="text-xs">🗑️</span>
+              <span className="hidden sm:inline">Inbox bankruptcy</span>
+            </Button>
+          )}
           <Button onClick={() => { setClipboardContent(undefined); setAddOpen(true); }} size="sm" className="gap-1.5 shrink-0">
             <Plus className="w-4 h-4" />
             Add source
@@ -624,6 +646,40 @@ export default function VaultPage() {
           onAdded={() => { refetch(); refetchReview(); }}
           initialContent={clipboardContent}
         />
+      )}
+
+      {/* Inbox Bankruptcy Confirmation Dialog */}
+      {bankruptcyOpen && (
+        <Dialog open onOpenChange={(v) => !v && setBankruptcyOpen(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold">🗑️ Declare Inbox Bankruptcy</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Archive all inbox items older than 30 days. They won’t be deleted — you can still find them in the Archived view.
+              </p>
+              <p className="text-sm text-foreground font-medium">
+                {inboxCount} item{inboxCount !== 1 ? "s" : ""} currently in inbox.
+              </p>
+              <p className="text-xs text-muted-foreground/70 italic">
+                This is a fresh start, not a deletion. Use it when the backlog feels overwhelming.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="ghost" size="sm" onClick={() => setBankruptcyOpen(false)}>Cancel</Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-amber-600 border-amber-300 hover:bg-amber-50 dark:text-amber-400 dark:border-amber-800"
+                onClick={() => inboxBankruptcy.mutate({ olderThanDays: 30 })}
+                disabled={inboxBankruptcy.isPending}
+              >
+                {inboxBankruptcy.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />Archiving...</> : "Archive old inbox items"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
