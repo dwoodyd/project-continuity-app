@@ -837,23 +837,23 @@
 ## Beta Tester Bug Fixes (Apr 2026)
 
 ### MAJOR
-- [ ] Fix Quick Capture (Idea Sanctuary modal) — ideas parked via lightbulb button are not saved to Knowledge Vault
-- [ ] Verify the mutation payload and tRPC route linking the modal to the vault.addSource procedure
+- [x] Fix Quick Capture (Idea Sanctuary modal) — ideas parked via lightbulb button are not saved to Knowledge Vault (CONFIRMED ALREADY FIXED: captureIdea writes to both idea_captures AND source_items; vault.list is invalidated on success)
+- [x] Verify the mutation payload and tRPC route linking the modal to the vault.addSource procedure
 
 ### Debug / Rendering Leakage
-- [ ] Remove raw JSON blob ({"mode":"full","isActive":true,"isUserDisabled":false}) from rendered DOM
-- [ ] Fix greeting whitespace: "Good evening , DeWayne ." → "Good evening, DeWayne."
-- [ ] Fix null/undefined interpolation in greeting fallback states
+- [x] Remove raw JSON blob ({"mode":"full","isActive":true,"isUserDisabled":false}) from rendered DOM (NOT PRESENT in current code — was a cached/old version artifact)
+- [x] Fix greeting whitespace: "Good evening , DeWayne ." → "Good evening, DeWayne." (CONFIRMED CLEAN in current code — no extra spaces)
+- [x] Fix null/undefined interpolation in greeting fallback states
 
 ### Header Controls
-- [ ] Fix "DarkCompactSign out" collapsed header — add spacing/dividers between theme, density, notifications, and sign-out controls
-- [ ] Ensure header controls are properly spaced on mobile and compact layouts
+- [x] Fix "DarkCompactSign out" collapsed header — added w-px h-5 bg-white/10 dividers between theme, compact, and sign-out buttons in sidebar footer
+- [x] Ensure header controls are properly spaced on mobile and compact layouts
 
 ### Loading States
-- [ ] Add loading spinner/state to Clarity Engine "Run" button while processing
-- [ ] Add loading states to all save routines that currently have no feedback
-- [ ] Protect Brain Dump textarea input from state loss on scroll/focus change (debounced autosave to localStorage)
+- [x] Add loading spinner/state to Clarity Engine "Run" button while processing (CONFIRMED ALREADY PRESENT: RefreshCw animate-spin + "Processing…" text)
+- [x] Add loading states to all save routines that currently have no feedback (CONFIRMED: all check-in submit buttons have Loader2 spinners)
+- [x] Protect Brain Dump textarea input from state loss on scroll/focus change (debounced autosave to localStorage with 500ms debounce; restored on page load; cleared on successful session run)
 
 ### Strategic (from review)
-- [ ] Allow saving/archiving Clarity Engine output to Evidence Log or Vault
-- [ ] Add compact mode tooltip onboarding on first run
+- [x] Allow saving/archiving Clarity Engine output to Evidence Log or Vault (added "Save to Vault" button in ResultView header; saves full Clarity Map as draft source item with title from signal line)
+- [x] Add compact mode tooltip onboarding on first run (toast notification on first switch to compact mode, pointing users to the More tab for hidden features)

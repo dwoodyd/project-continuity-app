@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
@@ -25,6 +25,8 @@ import {
   ChevronDown,
   Copy,
   DoorOpen,
+  BookOpen,
+  Save,
 } from "lucide-react";
 
 
@@ -334,7 +336,7 @@ function NewSessionView({
   );
 }
 
-// ── Session result ────────────────────────────────────────────────────────────
+/// ── Session result ────────────────────────────────────────────────────────────
 function ResultView({
   activeSession,
   projects,
@@ -343,6 +345,7 @@ function ResultView({
   setActiveSessionId,
   setProgressMarker,
   convertToAction,
+  saveToVault,
 }: {
   activeSession: any;
   projects: { id: number; title: string }[] | undefined;
@@ -351,14 +354,30 @@ function ResultView({
   setActiveSessionId: (id: number | null) => void;
   setProgressMarker: { mutate: (args: { sessionId: number; marker: "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit" }) => void };
   convertToAction: { isPending: boolean; mutate: (args: { sessionId: number; convertTo: ConvertTo }) => void };
+  saveToVault: { isPending: boolean; mutate: (args: { title?: string; content: string; contentClass?: "idea" | "draft" | "research" | "outline" | "decision" | "tasks" | "archive" }) => void };
 }) {
   const session = activeSession;
   if (!session) return null;
-
   const modeInfo = MODES.find((m) => m.id === session.mode);
   const [thresholdOpen, setThresholdOpen] = useState(false);
+  const [savedToVault, setSavedToVault] = useState(false);
   // Use the next right step (or signal line) as the task description for threshold diagnosis
   const thresholdTask = session.nextRightStep || session.signalLine || "the task I need to start";
+  const handleSaveToVault = () => {
+    const parts = [
+      session.signalLine ? `Signal: "${session.signalLine}"` : null,
+      session.whatIsHappening ? `What's happening:\n${session.whatIsHappening}` : null,
+      session.whatYouFeel ? `What I feel:\n${session.whatYouFeel}` : null,
+      session.whatYouNeed ? `What I need:\n${session.whatYouNeed}` : null,
+      session.nextRightStep ? `Next right step:\n${session.nextRightStep}` : null,
+    ].filter(Boolean);
+    const content = `Clarity Map — ${modeInfo?.label ?? session.mode}\n${format(new Date(session.createdAt), "MMM d, yyyy h:mm a")}\n\n${parts.join("\n\n")}`;
+    const title = session.signalLine
+      ? session.signalLine.substring(0, 100)
+      : `Clarity Map — ${format(new Date(session.createdAt), "MMM d")}` ;
+    saveToVault.mutate({ title, content, contentClass: "draft" });
+    setSavedToVault(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -400,6 +419,21 @@ function ResultView({
           >
             <Copy className="w-3.5 h-3.5" />
             Copy
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSaveToVault}
+            disabled={saveToVault.isPending || savedToVault}
+            className={savedToVault ? "gap-1.5 border-emerald-500/50 text-emerald-400" : "gap-1.5"}
+          >
+            {savedToVault ? (
+              <><CheckCircle2 className="w-3.5 h-3.5" />Saved to Vault</>
+            ) : saveToVault.isPending ? (
+              <><RefreshCw className="w-3.5 h-3.5 animate-spin" />Saving…</>
+            ) : (
+              <><BookOpen className="w-3.5 h-3.5" />Save to Vault</>
+            )}
           </Button>
           <Button
             variant="outline"
@@ -981,12 +1015,27 @@ function WeeklyView({
     </div>
   );
 }
-
-// ── Main page ─────────────────────────────────────────────────────────────────
+const BRAIN_DUMP_STORAGE_KEY = "continuary-clarity-brain-dump";
+// -- Main page --
 export default function ClarityEnginePage() {
   const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly" | "threshold_history">("new");
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
-  const [brainDump, setBrainDump] = useState("");
+  // Initialise from localStorage so a page refresh or accidental navigation doesn't lose the draft
+  const [brainDump, setBrainDumpRaw] = useState<string>(() => {
+    try { return localStorage.getItem(BRAIN_DUMP_STORAGE_KEY) ?? ""; } catch { return ""; }
+  });
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Debounced autosave: write to localStorage 500 ms after the user stops typing
+  const setBrainDump = (v: string | ((prev: string) => string)) => {
+    setBrainDumpRaw((prev) => {
+      const next = typeof v === "function" ? v(prev) : v;
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+      autosaveTimer.current = setTimeout(() => {
+        try { localStorage.setItem(BRAIN_DUMP_STORAGE_KEY, next); } catch { /* quota exceeded */ }
+      }, 500);
+      return next;
+    });
+  };
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
   const [showProjectPicker, setShowProjectPicker] = useState(false);
@@ -1022,6 +1071,8 @@ export default function ClarityEnginePage() {
       utils.clarity.getSessions.invalidate();
       setBrainDump("");
       setSelectedMode(null);
+      // Clear the autosaved draft now that the session has been submitted
+      try { localStorage.removeItem(BRAIN_DUMP_STORAGE_KEY); } catch { /* ignore */ }
     },
     onError: (err) => {
       toast.error("Something went wrong. Please try again.");
@@ -1048,6 +1099,16 @@ export default function ClarityEnginePage() {
       utils.clarity.getSession.invalidate({ id: activeSessionId! });
       utils.projects.listActive.invalidate();
     },
+  });
+  const saveToVault = trpc.vault.addPaste.useMutation({
+    onSuccess: () => {
+      toast.success("Clarity Map saved to Knowledge Vault.", {
+        description: "Find it in the Vault inbox.",
+        duration: 4000,
+      });
+      utils.vault.list.invalidate();
+    },
+    onError: () => toast.error("Could not save to Vault. Please try again."),
   });
 
   return (
@@ -1078,6 +1139,7 @@ export default function ClarityEnginePage() {
           setActiveSessionId={setActiveSessionId}
           setProgressMarker={setProgressMarker}
           convertToAction={convertToAction}
+          saveToVault={saveToVault}
         />
       )}
       {view === "history" && (

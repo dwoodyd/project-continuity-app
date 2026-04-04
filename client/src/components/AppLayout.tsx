@@ -110,10 +110,26 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Effective layout: user preference wins on large screens; small screens always compact
   const isDesktopMode = isLargeScreen && (userLayoutPref !== "compact");
 
+  // First-run tooltip: show a brief toast when user enters compact mode for the first time
+  const COMPACT_ONBOARDED_KEY = "continuary-compact-onboarded";
   const toggleLayoutMode = () => {
     const next = isDesktopMode ? "compact" : "desktop";
     setUserLayoutPref(next);
     localStorage.setItem(LAYOUT_STORAGE_KEY, next);
+    // Show first-run orientation tip when switching TO compact mode for the first time
+    if (next === "compact") {
+      try {
+        if (!localStorage.getItem(COMPACT_ONBOARDED_KEY)) {
+          localStorage.setItem(COMPACT_ONBOARDED_KEY, "1");
+          setTimeout(() => {
+            toast("Compact mode active", {
+              description: "All features are still here. Tap the ⋯ More tab to access Evidence, Compass, Intelligence, and Settings.",
+              duration: 7000,
+            });
+          }, 400);
+        }
+      } catch { /* ignore */ }
+    }
   };
 
   const { data: amnestyData } = trpc.ai.checkAmnesty.useQuery(undefined, {
