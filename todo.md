@@ -893,3 +893,13 @@
 - [x] ClarityNudge dismiss button (X) — hides card for 24h via localStorage; clarityNudgeDismissed state initialized from localStorage on mount
 - [x] Distraction pattern insights card in Weekly Review — DistractionInsightsCard component already fully implemented and placed in WeeklyReviewPage (confirmed existing)
 - [x] Project health score badge — HealthDot component (green ≥70, amber ≥45, red <45) already rendering on every project card via trpc.insights.getHealthScores (confirmed existing)
+
+## Personal Study Tracker — Owner Only (Apr 4, 2026)
+
+- [ ] DB: studyDayLogs table (userId, day 1-30, capacity, learned, built, drifted, driftWhere, returnStep, whatMoved, fuzzy, summary, carryForward, completedAt)
+- [ ] DB: studyFocusBlocks table (userId, date, startTime, duration, capacity, lesson, tinyProject, intention, actualWork, drifted, driftWhere, returnPoint, whatMoved, nextStep)
+- [ ] DB: studyWeeklyReviews table (userId, weekNum, meaningfulMovement, lessonsCompleted, buildsCompleted, fuzzy, driftedMost, whatHelped, newUnderstanding, openLoop, startHereNext)
+- [ ] Backend: study router with CRUD for all 3 tables
+- [ ] Frontend: StudyTrackerPage — admin-only route /study-tracker
+- [ ] Frontend: 5 tabs — Daily Tracker, Weekly Compass (static content), Focus Log, Weekly Review, Re-Entry + Success Markers
+- [ ] Nav: add Study Tracker link to sidebar (admin only)

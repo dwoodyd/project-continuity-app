@@ -525,3 +525,67 @@ export const evidenceLogSummaries = mysqlTable("evidence_log_summaries", {
 });
 export type EvidenceLogSummary = typeof evidenceLogSummaries.$inferSelect;
 export type InsertEvidenceLogSummary = typeof evidenceLogSummaries.$inferInsert;
+
+// ─── Study Tracker (Owner-only personal learning tracker) ─────────────────────
+export const studyDayLogs = mysqlTable("study_day_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  dayNum: int("dayNum").notNull(),
+  logDate: varchar("logDate", { length: 10 }),
+  capacity: varchar("capacity", { length: 20 }),
+  firstMove: text("firstMove"),
+  whatLearned: text("whatLearned"),
+  whatBuilt: text("whatBuilt"),
+  stayedOnLesson: varchar("stayedOnLesson", { length: 20 }),
+  driftedWhere: text("driftedWhere"),
+  returnStep: text("returnStep"),
+  whatMoved: text("whatMoved"),
+  stillFuzzy: text("stillFuzzy"),
+  summary: text("summary"),
+  carryForward: text("carryForward"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type StudyDayLog = typeof studyDayLogs.$inferSelect;
+export type InsertStudyDayLog = typeof studyDayLogs.$inferInsert;
+
+export const studyFocusBlocks = mysqlTable("study_focus_blocks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  logDate: varchar("logDate", { length: 10 }).notNull(),
+  startTime: varchar("startTime", { length: 10 }),
+  duration: varchar("duration", { length: 30 }),
+  capacity: varchar("capacity", { length: 20 }),
+  lesson: text("lesson"),
+  tinyProject: text("tinyProject"),
+  intention: text("intention"),
+  actualWork: text("actualWork"),
+  drifted: varchar("drifted", { length: 20 }),
+  driftedWhere: text("driftedWhere"),
+  returnPoint: text("returnPoint"),
+  whatMoved: text("whatMoved"),
+  nextStep: text("nextStep"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type StudyFocusBlock = typeof studyFocusBlocks.$inferSelect;
+export type InsertStudyFocusBlock = typeof studyFocusBlocks.$inferInsert;
+
+export const studyWeeklyReviews = mysqlTable("study_weekly_reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  weekNum: int("weekNum").notNull(),
+  meaningfulMovement: text("meaningfulMovement"),
+  lessonsCompleted: text("lessonsCompleted"),
+  buildsCompleted: text("buildsCompleted"),
+  stillFuzzy: text("stillFuzzy"),
+  driftedMost: text("driftedMost"),
+  whatHelped: text("whatHelped"),
+  newUnderstanding: text("newUnderstanding"),
+  openLoop: text("openLoop"),
+  startHereNext: text("startHereNext"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type StudyWeeklyReview = typeof studyWeeklyReviews.$inferSelect;
+export type InsertStudyWeeklyReview = typeof studyWeeklyReviews.$inferInsert;

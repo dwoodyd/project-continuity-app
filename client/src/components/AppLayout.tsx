@@ -30,6 +30,7 @@ import {
   Ticket,
   X,
   Zap,
+  GraduationCap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -289,6 +290,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   <Ticket className={cn("w-4 h-4 shrink-0", isActive("/admin/invites") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
                   <span>Invite Codes</span>
                   {isActive("/admin/invites") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                </Link>
+                <Link
+                  href="/admin/study"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
+                    isActive("/admin/study") ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
+                  )}
+                >
+                  <GraduationCap className={cn("w-4 h-4 shrink-0", isActive("/admin/study") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <span>Study Tracker</span>
+                  {isActive("/admin/study") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
                 </Link>
               </>
             )}
