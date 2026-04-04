@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
+import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -355,6 +356,9 @@ function ResultView({
   if (!session) return null;
 
   const modeInfo = MODES.find((m) => m.id === session.mode);
+  const [thresholdOpen, setThresholdOpen] = useState(false);
+  // Use the next right step (or signal line) as the task description for threshold diagnosis
+  const thresholdTask = session.nextRightStep || session.signalLine || "the task I need to start";
 
   return (
     <div className="space-y-6">
@@ -537,6 +541,23 @@ function ResultView({
         )}
       </div>
 
+      {/* Threshold Diagnosis entry point */}
+      <div className="border border-border/50 rounded-xl p-4 bg-card/40">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Still not starting?</p>
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+          If you know what to do but still can't begin, something is at the door. A 3-question diagnosis takes under 90 seconds.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setThresholdOpen(true)}
+          className="gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/50"
+        >
+          <DoorOpen className="w-3.5 h-3.5" />
+          What's at the door?
+        </Button>
+      </div>
+
       {/* View history link */}
       {sessions && sessions.length > 1 && (
         <Button
@@ -549,6 +570,14 @@ function ResultView({
           View all sessions
         </Button>
       )}
+
+      {/* Threshold Diagnosis modal */}
+      <ThresholdDiagnosisFlow
+        open={thresholdOpen}
+        onOpenChange={setThresholdOpen}
+        taskDescription={thresholdTask}
+        projectId={session.projectId ?? undefined}
+      />
     </div>
   );
 }

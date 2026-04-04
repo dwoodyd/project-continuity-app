@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft } from "lucide-react";
+import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2 } from "lucide-react";
 import { Link } from "wouter";
+import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -111,6 +112,7 @@ function MonthlyEvidenceCard({
   isRegenerating?: boolean;
 }) {
   const isCurrent = isCurrentMonth(summary.month);
+  const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <Card className="border-border/60 bg-card/80">
@@ -124,6 +126,17 @@ function MonthlyEvidenceCard({
               <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-400">
                 This month
               </Badge>
+            )}
+            {summary.summaryLine && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-amber-400/70 hover:text-amber-400"
+                onClick={() => setShareOpen(true)}
+                title="Share your evidence"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+              </Button>
             )}
             {onRegenerate && (
               <Button
@@ -184,6 +197,16 @@ function MonthlyEvidenceCard({
           />
         </div>
       </CardContent>
+
+      {/* Share modal */}
+      {summary.summaryLine && (
+        <ShareEvidenceModal
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          summaryLine={summary.summaryLine}
+          month={summary.month}
+        />
+      )}
     </Card>
   );
 }

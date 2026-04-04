@@ -695,3 +695,17 @@
 - [x] Auto-generate current month summary after evening closure completes (call evidence.generateSummary in submitEvening mutation)
 - [x] Surface current month's summary sentence on Command Center (below presence dots, small italic)
 - [x] Write vitest tests for evidence.generateSummary (stat computation, LLM parsing, month boundary logic)
+
+## Feature: Threshold Diagnosis on Clarity Engine Result Screen
+
+- [x] Add "What's at the door?" button to ClarityEnginePage ResultView
+- [x] Wire ThresholdDiagnosisModal into the Clarity Engine result screen
+- [x] Show button only when result is available (not on loading/empty states)
+
+## Feature: Evidence Log Share Card
+
+- [x] Add "Share your evidence" button to EvidenceLogPage (current month card)
+- [x] Build ShareEvidenceModal: renders identity sentence in a styled card preview
+- [x] Add copy-to-clipboard for the sentence text
+- [x] Add canvas-based image generation (draw sentence + Continuary branding onto canvas, download as PNG)
+- [x] Show only when summaryLine exists for the current month
