@@ -709,3 +709,17 @@
 - [x] Add copy-to-clipboard for the sentence text
 - [x] Add canvas-based image generation (draw sentence + Continuary branding onto canvas, download as PNG)
 - [x] Show only when summaryLine exists for the current month
+
+## Welcome Page SEO: OG Image + Social Meta Tags
+
+- [x] Add og:image, og:title, og:description, og:url meta tags to index.html
+- [x] Add twitter:card, twitter:image, twitter:title, twitter:description meta tags
+- [x] Use existing brand CDN image as og:image (1200x630 or closest available)
+- [x] Set canonical URL to the deployed domain
+
+## Push Notification Opt-In on Welcome Page
+
+- [x] Add a subtle "Get notified when we launch" / opt-in section to WelcomePage
+- [x] Use existing push notification subscription logic (VAPID) — request permission on click
+- [x] Show only when Notification API is supported and permission is not yet granted
+- [x] Style as a low-friction banner or CTA row near the bottom of the Welcome page

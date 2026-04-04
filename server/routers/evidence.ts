@@ -157,7 +157,8 @@ export const evidenceRouter = router({
 
   /** Get the current month's summary (may be null if not yet generated) */
   getCurrentMonth: protectedProcedure.query(async ({ ctx }) => {
-    return getEvidenceSummaryForMonth(ctx.user.id, currentMonth());
+    const result = await getEvidenceSummaryForMonth(ctx.user.id, currentMonth());
+    return result ?? null;
   }),
 
   /** Compute stats + generate identity sentence for a given month, upsert result */

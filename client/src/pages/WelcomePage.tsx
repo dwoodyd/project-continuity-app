@@ -22,7 +22,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 // ── Brand CDN URLs ────────────────────────────────────────────────────────────
 // Dark-background stacked lockup: navy arch + white bird + wordmark (reads on dark hero bg)
@@ -215,6 +215,40 @@ function PhoneMockup() {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function WelcomePage() {
   const { isAuthenticated } = useAuth();
+
+  // ── Push notification opt-in (pre-login) ─────────────────────────────────
+  const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(
+    typeof window !== "undefined" && "Notification" in window
+      ? Notification.permission
+      : "unsupported"
+  );
+  const [notifLoading, setNotifLoading] = useState(false);
+
+  const handleNotifOptIn = useCallback(async () => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+    setNotifLoading(true);
+    try {
+      const result = await Notification.requestPermission();
+      setNotifPermission(result);
+      if (result === "granted") {
+        // Try to register push subscription if service worker is available
+        try {
+          const reg = await navigator.serviceWorker.ready;
+          const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+          if (vapidKey) {
+            await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: vapidKey,
+            });
+          }
+        } catch {
+          // SW not ready yet — permission is still saved, subscription can be registered on next login
+        }
+      }
+    } finally {
+      setNotifLoading(false);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -482,7 +516,47 @@ export default function WelcomePage() {
         </FadeSection>
       </section>
 
-      {/* ── Footer ──────────────────────────────────────────────────────────── */}
+      {/* ── Push notification opt-in (pre-login, non-intrusive) ───────────────────── */}
+      {!isAuthenticated && notifPermission === "default" && (
+        <FadeSection className="py-10 px-6">
+          <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl border border-border/60 bg-card/60">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Get notified when we launch</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                One notification when Continuary opens to the public. No marketing, no drip campaigns.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleNotifOptIn}
+              disabled={notifLoading}
+              className="shrink-0 border-amber-500/40 text-amber-400 hover:bg-amber-500/10 hover:border-amber-500/60 gap-1.5"
+            >
+              {notifLoading ? (
+                <span className="w-3.5 h-3.5 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin inline-block" />
+              ) : (
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              )}
+              Notify me
+            </Button>
+          </div>
+        </FadeSection>
+      )}
+      {!isAuthenticated && notifPermission === "granted" && (
+        <FadeSection className="py-6 px-6">
+          <div className="max-w-xl mx-auto flex items-center gap-3 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <p className="text-sm text-emerald-300">
+              You're on the list. We'll send one notification when Continuary opens.
+            </p>
+          </div>
+        </FadeSection>
+      )}
+
+      {/* ── Footer ─────────────────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-12 w-auto object-contain opacity-70" />
