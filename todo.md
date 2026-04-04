@@ -833,3 +833,27 @@
 - [x] Update daily rhythm steps to reflect the full morning/midday/evening + evidence loop (4 steps)
 - [x] Keep "who it's for" personas but update copy to reference the new features
 - [x] Ensure all new sections are visually distinct and use the existing design tokens
+
+## Beta Tester Bug Fixes (Apr 2026)
+
+### MAJOR
+- [ ] Fix Quick Capture (Idea Sanctuary modal) — ideas parked via lightbulb button are not saved to Knowledge Vault
+- [ ] Verify the mutation payload and tRPC route linking the modal to the vault.addSource procedure
+
+### Debug / Rendering Leakage
+- [ ] Remove raw JSON blob ({"mode":"full","isActive":true,"isUserDisabled":false}) from rendered DOM
+- [ ] Fix greeting whitespace: "Good evening , DeWayne ." → "Good evening, DeWayne."
+- [ ] Fix null/undefined interpolation in greeting fallback states
+
+### Header Controls
+- [ ] Fix "DarkCompactSign out" collapsed header — add spacing/dividers between theme, density, notifications, and sign-out controls
+- [ ] Ensure header controls are properly spaced on mobile and compact layouts
+
+### Loading States
+- [ ] Add loading spinner/state to Clarity Engine "Run" button while processing
+- [ ] Add loading states to all save routines that currently have no feedback
+- [ ] Protect Brain Dump textarea input from state loss on scroll/focus change (debounced autosave to localStorage)
+
+### Strategic (from review)
+- [ ] Allow saving/archiving Clarity Engine output to Evidence Log or Vault
+- [ ] Add compact mode tooltip onboarding on first run

@@ -278,10 +278,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 {theme === "dark" ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
                 <span>{theme === "dark" ? "Light" : "Dark"}</span>
               </button>
+              <div className="w-px h-5 bg-white/10 shrink-0" />
               <button onClick={toggleLayoutMode} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
                 <PanelLeft className="w-3.5 h-3.5" />
                 <span>Compact</span>
               </button>
+              <div className="w-px h-5 bg-white/10 shrink-0" />
               <button onClick={() => logout()} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Sign out</span>

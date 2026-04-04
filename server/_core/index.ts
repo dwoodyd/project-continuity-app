@@ -122,6 +122,8 @@ async function startServer() {
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
+    validate: { xForwardedForHeader: false },
     message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
   });
 
@@ -132,6 +134,8 @@ async function startServer() {
     max: 300,
     standardHeaders: true,
     legacyHeaders: false,
+    // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
+    validate: { xForwardedForHeader: false },
     message: { error: "Too many requests. Please slow down." },
   });
 

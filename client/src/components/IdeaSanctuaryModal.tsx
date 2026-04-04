@@ -37,6 +37,9 @@ export default function IdeaSanctuaryModal({
   const captureIdea = trpc.ai.captureIdea.useMutation({
     onSuccess: () => {
       setSaved(true);
+      // Invalidate vault list so the new idea appears immediately
+      utils.vault.list.invalidate();
+      utils.vault.listByState.invalidate();
       setTimeout(() => {
         setSaved(false);
         setContent("");

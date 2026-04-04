@@ -4,6 +4,7 @@ import {
   acknowledgeReEntryCard,
   createIdeaCapture,
   createReEntryCard,
+  createSourceItem,
   getActiveProjects,
   getIdeaCaptures,
   getLatestReEntryCard,
@@ -30,12 +31,30 @@ export const aiRouter = router({
       capturedDuringTask: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Derive a short title from the first line or first 60 chars
+      const firstLine = input.content.split("\n")[0]?.trim() ?? "";
+      const title = firstLine.length > 0
+        ? firstLine.substring(0, 120)
+        : input.content.substring(0, 60) + (input.content.length > 60 ? "…" : "");
+
+      // 1. Save to idea_captures (legacy / offline sync)
       const id = await createIdeaCapture({
         userId: ctx.user.id,
         rawContent: input.content,
         capturedDuringTask: input.capturedDuringTask ?? false,
         parkedStatus: true,
         resolvedStatus: false,
+      });
+
+      // 2. Also save to source_items so it appears in the Knowledge Vault
+      const sourceId = await createSourceItem({
+        userId: ctx.user.id,
+        sourceType: "text",
+        title,
+        rawContent: input.content,
+        contentClass: "idea",
+        state: "inbox",
+        mappingConfidence: "needs_review",
       });
 
       // Background AI parsing (non-blocking feel — we do it inline but quickly)
@@ -73,7 +92,7 @@ Return JSON: { parsedIntent: string (1 sentence), suggestedProject: string|null 
         // Silent fail — idea is already saved
       }
 
-      return { id, message: "Saved. Back to the current step." };
+      return { id, sourceId, message: "Saved. Back to the current step." };
     }),
 
   listIdeas: protectedProcedure.query(async ({ ctx }) => {
