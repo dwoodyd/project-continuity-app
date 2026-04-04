@@ -20,6 +20,7 @@ import IntelligencePage from "./pages/IntelligencePage";
 import ClarityEnginePage from "./pages/ClarityEnginePage";
 import PrivacyPage from "./pages/PrivacyPage";
 import EvidenceLogPage from "./pages/EvidenceLogPage";
+import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
 
 function Router() {
   return (
@@ -40,6 +41,7 @@ function Router() {
             <Route path="/intelligence" component={IntelligencePage} />
             <Route path="/clarity" component={ClarityEnginePage} />
             <Route path="/evidence" component={EvidenceLogPage} />
+            <Route path="/admin/invites" component={AdminInviteCodesPage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />

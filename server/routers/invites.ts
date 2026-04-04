@@ -18,6 +18,7 @@ import {
   getInviteCodes,
   validateInviteCode,
   markInviteUsed,
+  setUserInviteCode,
 } from "../db";
 
 export const invitesRouter = router({
@@ -88,6 +89,8 @@ export const invitesRouter = router({
           message: "This invite code was just used by another account. Please request a new code.",
         });
       }
+      // Record which code this user redeemed (for audit trail)
+      await setUserInviteCode(ctx.user.id, input.code.toUpperCase().trim());
       return { redeemed: true };
     }),
 });

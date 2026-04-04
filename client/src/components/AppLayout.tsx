@@ -27,6 +27,7 @@ import {
   ScrollText,
   Settings,
   Sun,
+  Ticket,
   X,
   Zap,
 } from "lucide-react";
@@ -239,6 +240,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </Link>
               );
             })}
+
+            {/* Admin-only section */}
+            {user?.role === "admin" && (
+              <>
+                <p className="px-3 py-1.5 mt-3 text-[10px] font-semibold text-amber-400/40 uppercase tracking-widest">Admin</p>
+                <Link
+                  href="/admin/invites"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
+                    isActive("/admin/invites") ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
+                  )}
+                >
+                  <Ticket className={cn("w-4 h-4 shrink-0", isActive("/admin/invites") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <span>Invite Codes</span>
+                  {isActive("/admin/invites") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Sidebar footer */}
@@ -413,6 +432,24 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </Link>
                 );
               })}
+              {/* Admin-only entry */}
+              {user?.role === "admin" && (
+                <>
+                  <div className="px-3 pt-3 pb-1">
+                    <p className="text-[10px] font-semibold text-amber-500/60 uppercase tracking-widest">Admin</p>
+                  </div>
+                  <Link
+                    href="/admin/invites"
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors",
+                      isActive("/admin/invites") ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-accent"
+                    )}
+                  >
+                    <Ticket className={cn("w-4.5 h-4.5 shrink-0", isActive("/admin/invites") ? "text-primary" : "text-amber-500")} />
+                    <span>Invite Codes</span>
+                  </Link>
+                </>
+              )}
             </div>
             <div style={{ height: "max(env(safe-area-inset-bottom, 0px), 12px)" }} />
           </div>

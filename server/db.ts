@@ -111,6 +111,18 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function markWelcomeNotified(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ welcomeNotified: true }).where(eq(users.id, userId));
+}
+
+export async function setUserInviteCode(userId: number, code: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ inviteCode: code }).where(eq(users.id, userId));
+}
+
 // ─── User Profiles ────────────────────────────────────────────────────────────
 export async function getUserProfile(userId: number): Promise<UserProfile | undefined> {
   const db = await getDb();

@@ -728,3 +728,34 @@
 
 - [x] Update manifest.json to use correct Continuary icon CDN URLs for all sizes
 - [x] Bump service worker cache version to force icon refresh on existing installs
+
+## Apple Touch Icon + iOS Meta Tags
+
+- [x] Add apple-touch-icon link tag to index.html pointing to 180px CDN icon
+- [x] Add apple-mobile-web-app-capable and apple-mobile-web-app-status-bar-style meta tags
+- [x] Add apple-mobile-web-app-title meta tag
+
+## Welcome Notification on First Login
+
+- [x] Add `welcomeNotified` boolean column to users table in drizzle schema
+- [x] Generate and apply migration SQL
+- [x] In the OAuth callback: detect new user (no existing row before upsert)
+- [x] Fire notifyOwner with new user details (name, email) after first login
+- [x] Mark welcomeNotified = true so it only fires once per user
+
+## Invite-Only Gate
+
+- [x] Add `beta_invites` table to drizzle schema: id, code (unique), createdByUserId, usedByUserId (nullable), usedAt (nullable), createdAt, label
+- [x] Generate and apply migration SQL
+- [x] Add DB helpers: createInviteCode, getInviteCodes, validateInviteCode, markInviteUsed, setUserInviteCode, markWelcomeNotified
+- [x] Add `invites.validate` public tRPC query: checks if code is valid and unused
+- [x] Add `invites.redeem` protected tRPC mutation: marks code as used by current user, stores code on user record
+- [x] Add `invites.generate` admin tRPC mutation: generates a new invite code with optional label
+- [x] Add `invites.list` admin tRPC query: lists all codes with status
+- [x] Add `inviteCode` column to users table to record which code they used
+- [x] Invite gate enforced in OnboardingPage (step -1): new users must enter valid code before proceeding
+- [x] Build AdminInviteCodesPage: stats (available/redeemed), generate form with label, code list with copy button
+- [x] Add admin-only Invite Codes nav item to AppLayout sidebar (amber Admin section, Ticket icon)
+- [x] Add admin-only Invite Codes entry to mobile More sheet
+- [x] Register /admin/invites route in App.tsx
+- [x] Write vitest tests for invite code format, validation logic, race condition guard, welcome notification gate

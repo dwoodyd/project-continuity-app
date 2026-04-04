@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { notifyOwner } from "./notification";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,6 +29,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Check if this is a brand-new user (no row yet)
+      const existingUser = await db.getUserByOpenId(userInfo.openId);
+      const isNewUser = !existingUser;
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -35,6 +40,23 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Fire a one-time welcome notification to the owner when a new user signs up
+      if (isNewUser) {
+        const freshUser = await db.getUserByOpenId(userInfo.openId);
+        if (freshUser && !freshUser.welcomeNotified) {
+          try {
+            await notifyOwner({
+              title: "New Continuary user joined",
+              content: `${userInfo.name || "Someone"} (${userInfo.email || userInfo.openId}) just signed in for the first time via ${userInfo.loginMethod ?? userInfo.platform ?? "OAuth"}.`,
+            });
+            await db.markWelcomeNotified(freshUser.id);
+          } catch (notifErr) {
+            // Non-fatal: log but don't block the login
+            console.warn("[OAuth] Welcome notification failed:", notifErr);
+          }
+        }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

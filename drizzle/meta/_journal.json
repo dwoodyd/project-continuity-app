@@ -99,6 +99,13 @@
       "when": 1775273739490,
       "tag": "0013_useful_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1775276678369,
+      "tag": "0014_shallow_talkback",
+      "breakpoints": true
     }
   ]
 }
