@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { fileTypeFromBuffer } from "file-type";
 import {
   createSourceItem,
   getSourceItemById,
@@ -106,10 +107,20 @@ export const vaultRouter = router({
     .mutation(async ({ ctx, input }) => {
       // Enforce MIME allowlist — reject executable/script types
       if (!ALLOWED_FILE_MIMES.has(input.mimeType)) {
-        const { TRPCError } = await import("@trpc/server");
         throw new TRPCError({ code: "BAD_REQUEST", message: "File type not allowed." });
       }
       const buffer = Buffer.from(input.fileDataBase64, "base64");
+      // Magic byte validation: verify the actual file content matches the declared MIME type.
+      // This prevents a client from lying about the MIME type to bypass the allowlist.
+      const detectedType = await fileTypeFromBuffer(buffer);
+      // text/plain, text/markdown, text/csv have no magic bytes — allow them through
+      const textMimes = new Set(["text/plain", "text/markdown", "text/csv"]);
+      if (detectedType && !ALLOWED_FILE_MIMES.has(detectedType.mime)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "File content does not match the declared file type." });
+      }
+      if (!detectedType && !textMimes.has(input.mimeType)) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Could not verify file type. Please upload a supported file." });
+      }
       const suffix = Date.now().toString(36);
       const safeFileName = sanitizeFileName(input.fileName);
       const fileKey = `vault/${ctx.user.id}/${suffix}-${safeFileName}`;

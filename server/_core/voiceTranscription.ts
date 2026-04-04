@@ -75,18 +75,11 @@ export async function transcribeAudio(
 ): Promise<TranscriptionResponse | TranscriptionError> {
   try {
     // Step 1: Validate environment configuration
-    if (!ENV.forgeApiUrl) {
+    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
+      console.error("[voiceTranscription] Service not configured: missing BUILT_IN_FORGE_API_URL or BUILT_IN_FORGE_API_KEY");
       return {
-        error: "Voice transcription service is not configured",
+        error: "Voice transcription service is not available",
         code: "SERVICE_ERROR",
-        details: "BUILT_IN_FORGE_API_URL is not set"
-      };
-    }
-    if (!ENV.forgeApiKey) {
-      return {
-        error: "Voice transcription service authentication is missing",
-        code: "SERVICE_ERROR",
-        details: "BUILT_IN_FORGE_API_KEY is not set"
       };
     }
 
@@ -116,10 +109,11 @@ export async function transcribeAudio(
         };
       }
     } catch (error) {
+      console.error("[voiceTranscription] Failed to fetch audio file:", error);
       return {
         error: "Failed to fetch audio file",
         code: "SERVICE_ERROR",
-        details: error instanceof Error ? error.message : "Unknown error"
+        details: "Could not retrieve the audio file. Please try again."
       };
     }
 
@@ -163,10 +157,11 @@ export async function transcribeAudio(
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
+      console.error(`[voiceTranscription] Transcription failed: ${response.status} ${response.statusText}${errorText ? `: ${errorText}` : ""}`);
       return {
         error: "Transcription service request failed",
         code: "TRANSCRIPTION_FAILED",
-        details: `${response.status} ${response.statusText}${errorText ? `: ${errorText}` : ""}`
+        details: "The transcription service is temporarily unavailable. Please try again."
       };
     }
 
@@ -185,11 +180,11 @@ export async function transcribeAudio(
     return whisperResponse; // Return native Whisper API response directly
 
   } catch (error) {
-    // Handle unexpected errors
+    console.error("[voiceTranscription] Unexpected error:", error);
     return {
       error: "Voice transcription failed",
       code: "SERVICE_ERROR",
-      details: error instanceof Error ? error.message : "An unexpected error occurred"
+      details: "An unexpected error occurred during transcription. Please try again."
     };
   }
 }

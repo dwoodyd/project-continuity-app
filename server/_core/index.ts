@@ -3,6 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -33,6 +34,10 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // Trust the reverse proxy (Manus platform sits behind a load balancer that sets X-Forwarded-For)
+  // This allows express-rate-limit to use the real client IP rather than the proxy IP.
+  app.set("trust proxy", 1);
+
   // Security headers via Helmet
   app.use(
     helmet({
@@ -54,11 +59,36 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // ── Rate limiting ────────────────────────────────────────────────────────────
+  // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.
+  // This prevents brute-force code enumeration and replay attacks.
+  const oauthLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
+  });
+
+  // Broader limit on the tRPC API: 300 requests per minute per IP.
+  // Prevents automated scraping and runaway clients without affecting normal usage.
+  const apiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests. Please slow down." },
+  });
+
   // OAuth callback under /api/oauth/callback
+  app.use("/api/oauth", oauthLimiter);
   registerOAuthRoutes(app);
+
   // tRPC API
   app.use(
     "/api/trpc",
+    apiLimiter,
     createExpressMiddleware({
       router: appRouter,
       createContext,

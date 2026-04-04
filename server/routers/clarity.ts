@@ -238,11 +238,16 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
           )
         );
 
-      // Fetch the session to get the nextRightStep
+      // Fetch the session to get the nextRightStep — include userId to prevent IDOR
       const [session] = await db
         .select()
         .from(claritySessions)
-        .where(eq(claritySessions.id, input.sessionId))
+        .where(
+          and(
+            eq(claritySessions.id, input.sessionId),
+            eq(claritySessions.userId, ctx.user.id)
+          )
+        )
         .limit(1);
 
       if (!session) throw new TRPCError({ code: "NOT_FOUND", message: "Session not found." });
