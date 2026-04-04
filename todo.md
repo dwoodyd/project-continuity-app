@@ -879,3 +879,11 @@
 - [x] Streak counter: days-in-motion badge in Command Center header — getStreak() db helper computes current + longest streak from dailyPlans; badge shown in sidebar header and compact bottom bar
 - [x] Clarity Engine history search — search bar appears when >2 sessions exist; real-time client-side filtering by signal line, mode, or next step; shows result count and clear button
 - [x] Weekly digest — weeklyDigest.ts compiles last week's completed tasks, Clarity sessions, active projects; cron fires Monday 8 AM; manual trigger button added to Settings > Preferences tab; delivered via Manus notification system
+
+## Clarity Engine Mode Recommendations (Apr 4, 2026)
+
+- [x] Backend: getModeRecommendation tRPC procedure analyzes last 20 sessions; day-of-week pattern (2+ occurrences) takes priority over overall frequency pattern (35%+ threshold)
+- [x] Backend: returns modeLabel, nudge copy, context line, mode key, and confidence level; returns null when < 5 sessions (not enough data)
+- [x] Frontend: ClarityNudge card in Command Center right column — Sparkles icon, "Pattern detected" label, mode label, nudge text, context line, "Start a session" link
+- [x] Frontend: one-tap link navigates to /clarity?mode=<mode> which pre-selects the mode via URL search param on page init
+- [x] Tests: 6 unit tests covering null (< 5 sessions), day_pattern, overall_pattern, null (no dominant mode), and mode priority; 182/182 passing

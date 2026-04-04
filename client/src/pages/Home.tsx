@@ -694,6 +694,9 @@ export default function Home() {
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
   const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
+  const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
+    staleTime: 30 * 60 * 1000,
+  });
 
   // Map projectId → momentum for quick lookup
   const momentumByProject = useMemo(() => {
@@ -1278,6 +1281,29 @@ export default function Home() {
                 {activeProjects.length - 1} other project{activeProjects.length - 1 > 1 ? "s" : ""} paused for today
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
+      {clarityRec && (
+        <div className="relative overflow-hidden p-4 rounded-xl border border-primary/20 bg-primary/5">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-1">Pattern detected</p>
+              <p className="text-sm font-medium text-foreground mb-1">{clarityRec.modeLabel}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>
+              <p className="text-[10px] text-muted-foreground/50 italic mb-3">{clarityRec.context}</p>
+              <button
+                onClick={() => navigate(`/clarity?mode=${clarityRec.mode}`)}
+                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+              >
+                Start a session <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
       )}

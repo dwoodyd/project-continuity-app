@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
@@ -1053,7 +1054,18 @@ const BRAIN_DUMP_STORAGE_KEY = "continuary-clarity-brain-dump";
 // -- Main page --
 export default function ClarityEnginePage() {
   const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly" | "threshold_history">("new");
-  const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
+  const [location] = useLocation();
+  // Pre-fill mode from ?mode= query param (e.g., from Command Center nudge)
+  const [selectedMode, setSelectedMode] = useState<Mode | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const m = params.get("mode");
+      if (m && ["overwhelm","decision","creative_block","identity_drift","relationship_tension","purpose_fog"].includes(m)) {
+        return m as Mode;
+      }
+    } catch { /* ignore */ }
+    return null;
+  });
   // Initialise from localStorage so a page refresh or accidental navigation doesn't lose the draft
   const [brainDump, setBrainDumpRaw] = useState<string>(() => {
     try { return localStorage.getItem(BRAIN_DUMP_STORAGE_KEY) ?? ""; } catch { return ""; }

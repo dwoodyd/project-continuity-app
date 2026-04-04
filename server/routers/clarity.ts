@@ -432,4 +432,80 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
         convertedCount: weekSessions.filter((s) => s.convertedTo).length,
       };
     }),
+
+  // ── Mode recommendation: day-of-week + recency pattern analysis ─────────
+  getModeRecommendation: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return null;
+
+    const sessions = await db
+      .select({ mode: claritySessions.mode, createdAt: claritySessions.createdAt })
+      .from(claritySessions)
+      .where(eq(claritySessions.userId, ctx.user.id))
+      .orderBy(desc(claritySessions.createdAt))
+      .limit(20);
+
+    if (sessions.length < 5) return null;
+
+    const today = new Date();
+    const todayDow = today.getDay();
+
+    const dowCounts: Record<string, number> = {};
+    const overallCounts: Record<string, number> = {};
+
+    for (const s of sessions) {
+      const dow = new Date(s.createdAt).getDay();
+      overallCounts[s.mode] = (overallCounts[s.mode] ?? 0) + 1;
+      if (dow === todayDow) {
+        dowCounts[s.mode] = (dowCounts[s.mode] ?? 0) + 1;
+      }
+    }
+
+    const dowEntries = Object.entries(dowCounts).filter(([, c]) => c >= 2);
+    const overallEntries = Object.entries(overallCounts);
+
+    let recommendedMode: string | null = null;
+    let confidence: "day_pattern" | "overall_pattern" | null = null;
+
+    if (dowEntries.length > 0) {
+      recommendedMode = dowEntries.sort(([, a], [, b]) => b - a)[0][0];
+      confidence = "day_pattern";
+    } else {
+      const top = overallEntries.sort(([, a], [, b]) => b - a)[0];
+      if (top && top[1] / sessions.length >= 0.35) {
+        recommendedMode = top[0];
+        confidence = "overall_pattern";
+      }
+    }
+
+    if (!recommendedMode || !confidence) return null;
+
+    const DOW_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const MODE_LABELS: Record<string, string> = {
+      overwhelm: "Overwhelm",
+      decision: "Decision Loop",
+      creative_block: "Creative Block",
+      identity_drift: "Identity Drift",
+      relationship_tension: "Relationship Tension",
+      purpose_fog: "Purpose Fog",
+    };
+    const MODE_NUDGES: Record<string, string> = {
+      overwhelm: "You often carry a lot on this day. A quick clarity pass might help you find the one real thing.",
+      decision: "Decisions tend to pile up for you around now. A session could help you cut through the noise.",
+      creative_block: "Your creative energy sometimes needs a reset at this point in the week. Worth checking in.",
+      identity_drift: "You've used the engine to reconnect with your direction before. Might be worth a moment today.",
+      relationship_tension: "Interpersonal weight has come up for you on days like this. A clarity pass can help you name it.",
+      purpose_fog: "Purpose questions tend to surface for you around this time. A session could bring some ground.",
+    };
+
+    return {
+      mode: recommendedMode,
+      modeLabel: MODE_LABELS[recommendedMode] ?? recommendedMode,
+      nudge: MODE_NUDGES[recommendedMode] ?? "A clarity session might help right now.",
+      confidence,
+      context: confidence === "day_pattern"
+        ? `You've run ${dowCounts[recommendedMode]} sessions on ${DOW_NAMES[todayDow]}s in ${MODE_LABELS[recommendedMode] ?? recommendedMode} mode.`
+        : `${MODE_LABELS[recommendedMode] ?? recommendedMode} is your most-used mode across recent sessions.`,
+    };
+  }),
 });
