@@ -23,6 +23,7 @@ import {
   upsertEvidenceSummary,
   getDistractionWeeklyAggregates,
   getDistractionEventsByUser,
+  getStreak,
 } from "../db";
 import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -609,5 +610,9 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       categoryBreakdown,
       insightSentence,
     };
+  }),
+
+  getStreak: protectedProcedure.query(async ({ ctx }) => {
+    return getStreak(ctx.user.id);
   }),
 });

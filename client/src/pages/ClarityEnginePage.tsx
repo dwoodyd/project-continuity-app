@@ -27,6 +27,7 @@ import {
   DoorOpen,
   BookOpen,
   Save,
+  Search,
 } from "lucide-react";
 
 
@@ -628,6 +629,16 @@ function HistoryView({
   setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
   setActiveSessionId: (id: number) => void;
 }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredSessions = sessions?.filter((s) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (s.signalLine ?? "").toLowerCase().includes(q) ||
+      (MODE_LABEL[s.mode as Mode] ?? s.mode ?? "").toLowerCase().includes(q) ||
+      (s.nextRightStep ?? "").toLowerCase().includes(q)
+    );
+  });
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -643,15 +654,32 @@ function HistoryView({
         </Button>
       </div>
 
+      {/* Search bar - only show when there are enough sessions to warrant searching */}
+      {sessions && sessions.length > 2 && (
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by signal line, mode, or next step..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-400/40"
+          />
+        </div>
+      )}
+
       {sessionsLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-20 bg-card rounded-xl animate-pulse" />
           ))}
         </div>
-      ) : sessions && sessions.length > 0 ? (
+      ) : filteredSessions && filteredSessions.length > 0 ? (
         <div className="space-y-3">
-          {sessions.map((s) => {
+          {searchQuery && (
+            <p className="text-xs text-muted-foreground">{filteredSessions.length} result{filteredSessions.length !== 1 ? "s" : ""} for "{searchQuery}"</p>
+          )}
+          {filteredSessions.map((s) => {
             const modeInfo = MODES.find((m) => m.id === s.mode);
             const Icon = modeInfo?.icon ?? Brain;
             return (
@@ -694,6 +722,12 @@ function HistoryView({
               </button>
             );
           })}
+        </div>
+      ) : searchQuery ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <Search className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p>No sessions match "{searchQuery}".</p>
+          <Button variant="ghost" onClick={() => setSearchQuery("")} className="mt-2">Clear search</Button>
         </div>
       ) : (
         <div className="text-center py-16 text-muted-foreground">

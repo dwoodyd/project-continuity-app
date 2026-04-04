@@ -18,6 +18,7 @@ import {
   ArrowUpRight,
   Smartphone,
   Share,
+  Mail,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -162,6 +163,46 @@ function IdeaProcessingCard({
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Weekly Digest Card ──────────────────────────────────────────────────────
+function WeeklyDigestCard() {
+  const sendDigest = trpc.system.sendWeeklyDigest.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success("Digest sent! Check your Manus notifications.");
+      } else {
+        toast.error("Could not send digest. Try again later.");
+      }
+    },
+    onError: () => toast.error("Failed to send digest."),
+  });
+
+  return (
+    <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+      <div className="flex items-center gap-2">
+        <Mail className="w-4 h-4 text-muted-foreground" />
+        <p className="text-sm font-semibold text-foreground">Weekly Digest</p>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Every Monday at 8 AM, Continuary sends you a summary of last week — completed tasks, Clarity insights, and active projects. You can also trigger it manually anytime.
+      </p>
+      <Button
+        size="sm"
+        variant="outline"
+        className="w-full gap-2"
+        disabled={sendDigest.isPending}
+        onClick={() => sendDigest.mutate()}
+      >
+        {sendDigest.isPending ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <Mail className="w-3.5 h-3.5" />
+        )}
+        Send digest now
+      </Button>
     </div>
   );
 }
@@ -784,6 +825,9 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
+
+          {/* Weekly Digest */}
+          <WeeklyDigestCard />
 
           {/* Tone preference */}
           <div className="p-5 rounded-xl bg-card border border-border space-y-3">

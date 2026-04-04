@@ -1025,3 +1025,47 @@ export async function getEvidenceStreakData(
   }
   return Object.entries(byDate).map(([date, sessionsCount]) => ({ date, sessionsCount }));
 }
+
+// ── Streak ────────────────────────────────────────────────────────────────────
+/** Returns the current consecutive-days streak based on daily plans. */
+export async function getStreak(userId: number): Promise<{ streak: number; longestStreak: number }> {
+  const db = await getDb();
+  if (!db) return { streak: 0, longestStreak: 0 };
+  const rows = await db
+    .select({ date: dailyPlans.date })
+    .from(dailyPlans)
+    .where(eq(dailyPlans.userId, userId))
+    .orderBy(desc(dailyPlans.date))
+    .limit(365);
+  if (rows.length === 0) return { streak: 0, longestStreak: 0 };
+  const dates = new Set(rows.map((r) => r.date));
+  // Current streak: count consecutive days ending today or yesterday
+  let streak = 0;
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  if (!dates.has(cursor.toISOString().slice(0, 10))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  while (dates.has(cursor.toISOString().slice(0, 10))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  // Longest streak over all history
+  const sorted = Array.from(dates).sort();
+  let longest = 0, current = 0;
+  let prev: Date | null = null;
+  for (const d of sorted) {
+    const dt = new Date(d);
+    if (prev) {
+      const diff = (dt.getTime() - prev.getTime()) / 86400000;
+      current = diff === 1 ? current + 1 : 1;
+    } else {
+      current = 1;
+    }
+    if (current > longest) longest = current;
+    prev = dt;
+  }
+  return { streak, longestStreak: longest };
+}
+
+

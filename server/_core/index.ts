@@ -10,6 +10,9 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startNotificationCron } from "../pushNotifications";
+import { startWeeklyDigestCron } from "../weeklyDigest";
+import { getUserByOpenId } from "../db";
+import { ENV } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -170,6 +173,12 @@ async function startServer() {
     console.log(`Server running on http://localhost:${port}/`);
     // Start push notification cron (fires every minute, aligned to wall-clock minutes)
     startNotificationCron();
+    // Start weekly digest cron — sends Monday 8 AM summary to owner
+    if (ENV.ownerOpenId) {
+      getUserByOpenId(ENV.ownerOpenId).then((owner) => {
+        if (owner) startWeeklyDigestCron(owner.id);
+      }).catch(console.error);
+    }
   });
 }
 

@@ -148,6 +148,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
+  const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 10,
+  });
+  const streak = streakData?.streak ?? 0;
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
 
@@ -223,6 +228,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
               <span className="text-sm font-semibold text-white/90 truncate tracking-wide">Continuary</span>
             </Link>
+            {streak > 0 && (
+              <span className="ml-auto shrink-0 flex items-center gap-1 bg-amber-400/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full" title={`${streak}-day streak`}>
+                🔥 {streak}d
+              </span>
+            )}
           </div>
 
           {/* Nav */}
@@ -356,8 +366,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
             paddingBottom: "12px",
           }}
         >
-          <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
             <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
+            {streak > 0 && (
+              <span className="flex items-center gap-0.5 bg-amber-400/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full" title={`${streak}-day streak`}>
+                🔥 {streak}d
+              </span>
+            )}
           </Link>
           <div className="flex items-center gap-1">
             {isLargeScreen && (

@@ -873,3 +873,9 @@
 - [x] Audit Idea Sanctuary FAB on all pages — FAB is in AppLayout and renders consistently on ALL AppLayout-wrapped routes including Admin Invite Codes. Only /privacy, /onboarding, /focus are outside AppLayout (intentional — no quick capture needed there)
 - [x] Add 404 page for invalid routes — redesigned to match Continuary's emotional design language
 - [x] Add tablet responsive breakpoint — AppLayout already uses 1024px breakpoint (desktop sidebar vs compact bottom tab); content pages use max-w-4xl mx-auto for proper tablet rendering. The tester's "600px" observation was a CSS variable, not a layout breakpoint.
+
+## New Features (Apr 4, 2026 - Round 2)
+
+- [x] Streak counter: days-in-motion badge in Command Center header — getStreak() db helper computes current + longest streak from dailyPlans; badge shown in sidebar header and compact bottom bar
+- [x] Clarity Engine history search — search bar appears when >2 sessions exist; real-time client-side filtering by signal line, mode, or next step; shows result count and clear button
+- [x] Weekly digest — weeklyDigest.ts compiles last week's completed tasks, Clarity sessions, active projects; cron fires Monday 8 AM; manual trigger button added to Settings > Preferences tab; delivered via Manus notification system
