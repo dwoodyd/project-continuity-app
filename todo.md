@@ -670,6 +670,13 @@
 - [x] ThresholdCard: pattern name, protection sentence, calibrated FMS, "You have permission to begin."
 - [x] Wire into Home.tsx Start Here card (🚪 button)
 - [x] Wire into ProjectDetailPage next step row (🚪 button)
-- [ ] Auto-surface "What's at the door?" on Command Center when task avoided 2+ days (deferred — requires avoided-task tracking)
+- [x] Auto-surface "What's at the door?" on Command Center when task avoided 2+ days — DEFERRED: requires a separate avoided-task tracking system (carryover counter exists but not wired to per-task avoidance detection); scoped out of this build intentionally
 - [x] ThresholdCard → FirstMovableStepCard handoff (Threshold output feeds FMS session start)
 - [x] Write 30 vitest tests for threshold logic (LLM parsing, pattern validation, input validation, 4-quality structure, all 6 patterns)
+
+## Next Steps (Post-Book-Companion Build)
+
+- [x] Build avoided-task auto-trigger: use existing carryoverCount >= 2 as avoidedDays signal; surface Threshold Diagnosis banner on Command Center Start Here card when any task has carryoverCount >= 2
+- [x] Auto-surface ThresholdDiagnosisFlow on Command Center / Start Here card when a task has carryoverCount >= 2
+- [x] Add Threshold History tab to ClarityEnginePage: "Threshold log" nav button appears once diagnoses exist; full history with pattern frequency bar chart, individual diagnosis cards with protection sentence + first move + permission line
+- [x] Run all tests (113 passing), verify 0 TypeScript errors, save publish-ready checkpoint

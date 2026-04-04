@@ -998,26 +998,49 @@ export default function Home() {
         </div>
       )}
 
-      {/* ── Stuck-State Intervention ────────────────────────────────────────── */}
-      {tasks.some((t: any) => getCarryoverCount(t) >= 3) && (
-        <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-300/40 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/10">
-          <Zap className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground leading-snug">
-              Some tasks have been carried over 3+ times.
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              That's often a signal — not a failure. A quick clarity session can help surface what's actually in the way.
-            </p>
-            <button
-              onClick={() => navigate("/clarity")}
-              className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors flex items-center gap-1"
-            >
-              Open Clarity Engine <ArrowRight className="w-3 h-3" />
-            </button>
+      {/* ── Stuck-State Intervention (auto-trigger Threshold Diagnosis) ───────── */}
+      {(() => {
+        const stuckTasks = tasks.filter((t: any) => !t.done && getCarryoverCount(t) >= 2);
+        if (stuckTasks.length === 0) return null;
+        const mostStuck = stuckTasks.reduce((a: any, b: any) =>
+          getCarryoverCount(a) >= getCarryoverCount(b) ? a : b
+        );
+        return (
+          <div className="flex items-start gap-3 p-4 rounded-xl border border-amber-300/40 dark:border-amber-700/40 bg-amber-50/60 dark:bg-amber-900/10">
+            <span className="text-lg shrink-0 mt-0.5">🚪</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground leading-snug">
+                Something is at the door.
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                &ldquo;{mostStuck.title}&rdquo; has been carried {getCarryoverCount(mostStuck)} time{getCarryoverCount(mostStuck) !== 1 ? 's' : ''}. That's not a discipline problem — it's a threshold pattern. Let's find out what's actually in the way.
+              </p>
+              <div className="mt-2.5 flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => {
+                    setThresholdTask(mostStuck.title);
+                    setThresholdProjectId(mostStuck.projectId ?? undefined);
+                    setThresholdOpen(true);
+                  }}
+                  className="text-xs font-medium text-amber-700 dark:text-amber-300 hover:text-amber-600 dark:hover:text-amber-200 transition-colors flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/40 border border-amber-300/60 dark:border-amber-700/60"
+                >
+                  What's at the door? <ArrowRight className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => {
+                    setFmsTask(mostStuck.title);
+                    setFmsProjectId(mostStuck.projectId ?? undefined);
+                    setFmsOpen(true);
+                  }}
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Just give me a first move
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ── Today's Tasks ───────────────────────────────────────────────────── */}
       {tasks.length > 0 && (

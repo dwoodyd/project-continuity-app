@@ -23,6 +23,7 @@ import {
   Folder,
   ChevronDown,
   Copy,
+  DoorOpen,
 } from "lucide-react";
 
 
@@ -128,6 +129,7 @@ function NewSessionView({
   setShowProjectPicker,
   projects,
   sessions,
+  thresholdDiagnoses,
   runSession,
   setView,
 }: {
@@ -141,8 +143,9 @@ function NewSessionView({
   setShowProjectPicker: (v: boolean) => void;
   projects: { id: number; title: string }[] | undefined;
   sessions: { id: number }[] | undefined;
+  thresholdDiagnoses: { id: number }[] | undefined;
   runSession: { isPending: boolean; mutate: (args: { mode: Mode; brainDump: string; projectId?: number }) => void };
-  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
 }) {
   const handleRun = () => {
     if (!selectedMode) {
@@ -315,6 +318,16 @@ function NewSessionView({
             This week
           </Button>
         )}
+        {thresholdDiagnoses && thresholdDiagnoses.length > 0 && (
+          <Button
+            variant="ghost"
+            onClick={() => setView("threshold_history")}
+            className="text-muted-foreground"
+          >
+            <DoorOpen className="w-4 h-4 mr-2" />
+            Threshold log
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -333,7 +346,7 @@ function ResultView({
   activeSession: any;
   projects: { id: number; title: string }[] | undefined;
   sessions: { id: number }[] | undefined;
-  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
   setActiveSessionId: (id: number | null) => void;
   setProgressMarker: { mutate: (args: { sessionId: number; marker: "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit" }) => void };
   convertToAction: { isPending: boolean; mutate: (args: { sessionId: number; convertTo: ConvertTo }) => void };
@@ -549,7 +562,7 @@ function HistoryView({
 }: {
   sessions: any[] | undefined;
   sessionsLoading: boolean;
-  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
   setActiveSessionId: (id: number) => void;
 }) {
   return (
@@ -644,7 +657,7 @@ function PatternsView({
 }: {
   patterns: any;
   patternsLoading: boolean;
-  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
 }) {
   return (
     <div className="space-y-6">
@@ -723,13 +736,125 @@ function PatternsView({
   );
 }
 
-// ── Weekly Summary view ────────────────────────────────────────────────────────
+//// ── Threshold History view ───────────────────────────────────────────────────
+const PATTERN_COLORS: Record<string, string> = {
+  perfectionism: "border-l-rose-400",
+  ambiguity: "border-l-amber-400",
+  emotional_weight: "border-l-purple-400",
+  executive_function: "border-l-blue-400",
+  shame_spiral: "border-l-red-400",
+  permission_deficit: "border-l-teal-400",
+};
+
+function ThresholdHistoryView({
+  diagnoses,
+  diagnosesLoading,
+  setView,
+}: {
+  diagnoses: any[] | undefined;
+  diagnosesLoading: boolean;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-brand font-medium text-foreground">Threshold Log</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Your crossing patterns over time</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => setView("new")}>New session</Button>
+      </div>
+
+      {diagnosesLoading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-24 bg-card rounded-xl animate-pulse" />)}
+        </div>
+      ) : !diagnoses || diagnoses.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground">
+          <DoorOpen className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="font-medium">No threshold diagnoses yet</p>
+          <p className="text-sm mt-1">Use the 🚪 button on any stuck task to begin.</p>
+          <Button variant="ghost" onClick={() => setView("new")} className="mt-4">Back to Clarity Engine</Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Pattern frequency summary */}
+          {(() => {
+            const counts: Record<string, number> = {};
+            diagnoses.forEach((d: any) => { counts[d.pattern] = (counts[d.pattern] ?? 0) + 1; });
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+            if (sorted.length < 2) return null;
+            return (
+              <div className="bg-card border border-border rounded-xl p-5">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Your threshold patterns</p>
+                <div className="space-y-2">
+                  {sorted.map(([pattern, count]) => {
+                    const pct = Math.round((count / diagnoses.length) * 100);
+                    return (
+                      <div key={pattern} className="flex items-center gap-3">
+                        <span className="text-sm text-foreground w-52 truncate">{PATTERN_LABELS[pattern] ?? pattern}</span>
+                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="text-xs text-muted-foreground w-6 text-right">{count}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Individual diagnosis cards */}
+          {diagnoses.map((d: any) => (
+            <div
+              key={d.id}
+              className={`bg-card border border-border border-l-4 ${PATTERN_COLORS[d.pattern] ?? "border-l-muted"} rounded-xl p-5 space-y-3`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{d.patternLabel}</p>
+                  <p className="text-sm font-medium text-foreground mt-1 leading-snug">“{d.taskDescription}”</p>
+                </div>
+                <p className="text-xs text-muted-foreground shrink-0">{format(new Date(d.createdAt), "MMM d")}</p>
+              </div>
+              {d.protectionSentence && (
+                <p className="text-sm text-muted-foreground italic border-l-2 border-muted pl-3">{d.protectionSentence}</p>
+              )}
+              {d.firstMove && (
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">First move</p>
+                  <p className="text-sm text-foreground">{d.firstMove}</p>
+                  {d.whereItEnds && (
+                    <p className="text-xs text-muted-foreground mt-1">Done when: {d.whereItEnds}</p>
+                  )}
+                </div>
+              )}
+              <p className="text-xs text-amber-400/80 italic">You have permission to begin.</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const PATTERN_LABELS: Record<string, string> = {
+  perfectionism: "The Perfectionism Threshold",
+  ambiguity: "The Ambiguity Threshold",
+  emotional_weight: "The Emotional Weight Threshold",
+  executive_function: "The Executive Function Threshold",
+  shame_spiral: "The Shame Spiral Threshold",
+  permission_deficit: "The Permission Deficit Threshold",
+};
+
+// ── Weekly Summary view ─────────────────────────────────────────────────────
 function WeeklyView({
   weeklySummary,
   setView,
 }: {
   weeklySummary: any;
-  setView: (v: "new" | "result" | "history" | "patterns" | "weekly") => void;
+  setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
 }) {
   return (
     <div className="space-y-6">
@@ -830,7 +955,7 @@ function WeeklyView({
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ClarityEnginePage() {
-  const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly">("new");
+  const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly" | "threshold_history">("new");
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null);
   const [brainDump, setBrainDump] = useState("");
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
@@ -845,6 +970,10 @@ export default function ClarityEnginePage() {
   const { data: weeklySummary } = trpc.clarity.getWeeklySummary.useQuery(
     undefined,
     { enabled: view === "weekly" }
+  );
+  const { data: thresholdDiagnoses, isLoading: diagnosesLoading } = trpc.threshold.getRecentDiagnoses.useQuery(
+    undefined,
+    { enabled: view === "threshold_history" || view === "new" }
   );
 
   const utils = trpc.useUtils();
@@ -906,6 +1035,7 @@ export default function ClarityEnginePage() {
           setShowProjectPicker={setShowProjectPicker}
           projects={projects}
           sessions={sessions}
+          thresholdDiagnoses={thresholdDiagnoses}
           runSession={runSession}
           setView={setView}
         />
@@ -939,6 +1069,13 @@ export default function ClarityEnginePage() {
       {view === "weekly" && (
         <WeeklyView
           weeklySummary={weeklySummary}
+          setView={setView}
+        />
+      )}
+      {view === "threshold_history" && (
+        <ThresholdHistoryView
+          diagnoses={thresholdDiagnoses}
+          diagnosesLoading={diagnosesLoading}
           setView={setView}
         />
       )}
