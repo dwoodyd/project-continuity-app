@@ -857,3 +857,19 @@
 ### Strategic (from review)
 - [x] Allow saving/archiving Clarity Engine output to Evidence Log or Vault (added "Save to Vault" button in ResultView header; saves full Clarity Map as draft source item with title from signal line)
 - [x] Add compact mode tooltip onboarding on first run (toast notification on first switch to compact mode, pointing users to the More tab for hidden features)
+
+## QA Review Fixes (Apr 4, 2026)
+
+### CRITICAL
+- [x] Fix re-entry screen routing bug — persisted amnestyDismissed in sessionStorage; page refresh no longer re-shows the screen within the same browser session
+- [x] Fix theme persistence — added anti-flash inline script to index.html that applies dark class before first paint; changed ThemeProvider defaultTheme to "dark" to match app design
+
+### MEDIUM
+- [x] Fix Morning Check-In textarea — code audit confirmed textarea is correctly wired; root cause was scroll position (form renders at top, CTA is at bottom). Fixed by adding checkInRef + openCheckIn() that scrolls form into view on open
+- [x] Fix "Start morning check-in" CTA button — now uses openCheckIn() which scrolls to the form after opening
+- [x] Fix Privacy Policy link on Settings page — changed from target=_blank anchor (blocked by popup blockers) to navigate() button using wouter
+
+### MINOR
+- [ ] Audit Idea Sanctuary FAB on all pages — inconsistent behavior on some pages (e.g., Invite Codes)
+- [x] Add 404 page for invalid routes — redesigned to match Continuary's emotional design language
+- [ ] Add tablet responsive breakpoint (~768px) with sidebar collapse

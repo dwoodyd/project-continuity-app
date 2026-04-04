@@ -51,6 +51,17 @@
     <meta name="twitter:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/continuary-og-image_55856216.png" />
     <meta name="twitter:image:alt" content="Continuary — Permission to Start" />
 
+    <!-- Anti-flash theme: apply saved theme class synchronously before first paint -->
+    <script>
+      (function(){
+        try{
+          var t=localStorage.getItem('theme');
+          // Default to dark for new users (app default)
+          if(t==='dark'||!t) document.documentElement.classList.add('dark');
+        }catch(e){}
+      })();
+    </script>
+
     <!-- Fonts: Inter (UI) + Lora (brand serif for wordmark/headings) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

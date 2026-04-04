@@ -91,7 +91,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-  const [amnestyDismissed, setAmnestyDismissed] = useState(false);
+  // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
+  // browser session doesn't force the user through the re-entry screen again.
+  const [amnestyDismissed, setAmnestyDismissed] = useState<boolean>(() => {
+    try { return sessionStorage.getItem("continuary-amnesty-dismissed") === "1"; } catch { return false; }
+  });
+  const dismissAmnesty = () => {
+    try { sessionStorage.setItem("continuary-amnesty-dismissed", "1"); } catch { /* ignore */ }
+    setAmnestyDismissed(true);
+  };
 
   // ── Desktop layout state ──────────────────────────────────────────────────
   const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth >= 1024);
@@ -325,7 +333,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
         {showAmnesty && amnestyData && (
-          <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={() => setAmnestyDismissed(true)} />
+          <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
         )}
       </div>
     );
@@ -490,7 +498,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
       {showAmnesty && amnestyData && (
-        <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={() => setAmnestyDismissed(true)} />
+        <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
       )}
     </div>
   );

@@ -20,6 +20,7 @@ import {
   Share,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -168,6 +169,7 @@ function IdeaProcessingCard({
 // ─── Settings Page ────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
   const { theme, toggleTheme } = useTheme();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
   const updateSchedule = trpc.notifications.updateSchedule.useMutation();
@@ -447,14 +449,12 @@ export default function SettingsPage() {
 
           {/* Privacy link */}
           <div className="flex items-center justify-between py-2">
-            <a
-              href="/privacy"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => navigate("/privacy")}
               className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
             >
               Privacy Policy
-            </a>
+            </button>
           </div>
 
           {/* Danger zone — delete account */}

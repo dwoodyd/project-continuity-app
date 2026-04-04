@@ -27,7 +27,7 @@ import {
   Bell,
   X,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -654,6 +654,15 @@ export default function Home() {
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [thresholdTask, setThresholdTask] = useState("");
   const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
+  // Ref to scroll the check-in form into view when opened from the bottom CTA
+  const checkInRef = useRef<HTMLDivElement>(null);
+  const openCheckIn = useCallback((type: CheckInStep) => {
+    setActiveCheckIn(type);
+    // Scroll to form after React renders it
+    setTimeout(() => {
+      checkInRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }, []);
 
   const handleNotifPromptAccept = async () => {
     setShowNotifPrompt(false);
@@ -928,7 +937,7 @@ export default function Home() {
             timeHint="Set capacity + focus"
             completed={morningDone}
             active={activePeriod === "morning" && !morningDone}
-            onOpen={() => setActiveCheckIn("morning")}
+            onOpen={() => openCheckIn("morning")}
           />
           <CheckInCard
             type="midday"
@@ -937,7 +946,7 @@ export default function Home() {
             timeHint="Alignment pulse — on plan?"
             completed={middayDone}
             active={activePeriod === "midday" && morningDone && !middayDone}
-            onOpen={() => setActiveCheckIn("midday")}
+            onOpen={() => openCheckIn("midday")}
           />
           <CheckInCard
             type="evening"
@@ -946,7 +955,7 @@ export default function Home() {
             timeHint="Close the day, set tomorrow"
             completed={eveningDone}
             active={activePeriod === "evening" && !eveningDone}
-            onOpen={() => setActiveCheckIn("evening")}
+            onOpen={() => openCheckIn("evening")}
           />
         </div>
       </div>
@@ -961,7 +970,7 @@ export default function Home() {
 
       {/* ── Active Check-In Form─────────────────────────────────────── */}
       {activeCheckIn && (
-        <div className="p-5 rounded-xl bg-card border border-foreground/10 shadow-sm">
+        <div ref={checkInRef} className="p-5 rounded-xl bg-card border border-foreground/10 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground capitalize">
               {activeCheckIn} check-in
@@ -1305,7 +1314,7 @@ export default function Home() {
             <p className="text-base font-semibold text-white mb-1">No plan for today yet.</p>
             <p className="text-sm text-white/70 mb-5">Start with the morning check-in to set your capacity and focus.</p>
             <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Button size="sm" onClick={() => setActiveCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
+              <Button size="sm" onClick={() => openCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
                 Start morning check-in
               </Button>
               <button
