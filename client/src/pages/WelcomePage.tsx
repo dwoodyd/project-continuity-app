@@ -1,6 +1,7 @@
 /**
  * WelcomePage — public-facing product page
- * Accessible without authentication. App Store preview quality.
+ * Narrative-first redesign: leads with Evidence Log + Threshold Diagnosis
+ * as the signature differentiators from the book "Permission to Start".
  */
 import { Link } from "wouter";
 import {
@@ -18,6 +19,12 @@ import {
   Shield,
   Sparkles,
   ChevronRight,
+  ScrollText,
+  DoorOpen,
+  HeartHandshake,
+  Target,
+  Layers,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -25,7 +32,6 @@ import { getLoginUrl } from "@/const";
 import { useEffect, useRef, useState, useCallback } from "react";
 
 // ── Brand CDN URLs ────────────────────────────────────────────────────────────
-// Dark-background stacked lockup: navy arch + white bird + wordmark (reads on dark hero bg)
 const BRAND_LOGO_DARK =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-dark-bg-stacked_3630c4d9.png";
 
@@ -42,7 +48,7 @@ function useFadeIn() {
           obs.disconnect();
         }
       },
-      { threshold: 0.12 }
+      { threshold: 0.1 }
     );
     obs.observe(el);
     return () => obs.disconnect();
@@ -50,21 +56,16 @@ function useFadeIn() {
   return ref;
 }
 
-// ── Animated section wrapper ──────────────────────────────────────────────────
 function FadeSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const ref = useFadeIn();
   return (
-    <div
-      ref={ref}
-      className={`welcome-fade ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
+    <div ref={ref} className={`welcome-fade ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </div>
   );
 }
 
-// ── Feature data ──────────────────────────────────────────────────────────────
+// ── Full feature list ─────────────────────────────────────────────────────────
 const FEATURES = [
   {
     icon: Brain,
@@ -96,17 +97,38 @@ const FEATURES = [
   },
   {
     icon: BarChart3,
-    title: "Intelligence",
-    desc: "Pattern recognition across your work. See your emotional trends, distraction patterns, and project health scores — all in one place.",
+    title: "Distraction Insights",
+    desc: "Weekly pattern recognition across your work. See your top distraction category and the time of day it peaks — then do something about it.",
     color: "text-violet-500",
     bg: "bg-violet-500/10",
   },
   {
     icon: Lightbulb,
     title: "Idea Sanctuary",
-    desc: "A quick-capture FAB that's always one tap away. Ideas land safely without interrupting your current work session.",
+    desc: "A quick-capture button that's always one tap away. Ideas land safely without interrupting your current work session.",
     color: "text-orange-400",
     bg: "bg-orange-400/10",
+  },
+  {
+    icon: DoorOpen,
+    title: "Re-Entry Card",
+    desc: "Every project remembers exactly where you left off. The Re-Entry Card surfaces your last context, open loops, and the next right step the moment you return.",
+    color: "text-sky-400",
+    bg: "bg-sky-400/10",
+  },
+  {
+    icon: Target,
+    title: "Single Focus Mode",
+    desc: "Collapse the noise. Lock into one project with a dedicated timer, distraction log, and session brief — so the middle of your day stays uninterrupted.",
+    color: "text-rose-400",
+    bg: "bg-rose-400/10",
+  },
+  {
+    icon: Layers,
+    title: "Project Memory",
+    desc: "Every project carries its own timeline of sessions, decisions, and breakthroughs. Nothing gets lost between sittings.",
+    color: "text-teal-400",
+    bg: "bg-teal-400/10",
   },
 ];
 
@@ -117,7 +139,7 @@ const STEPS = [
     title: "Morning — Set your intent",
     desc: "Declare your capacity, choose your primary project, and let the AI generate a structured plan shaped to your energy level.",
     color: "text-amber-500",
-    accent: "bg-amber-500",
+    accentColor: "oklch(0.72 0.14 65)",
   },
   {
     icon: Clock,
@@ -125,7 +147,7 @@ const STEPS = [
     title: "Midday — Alignment pulse",
     desc: "A two-minute check. On plan? Any blockers? The midday pulse recalibrates without derailing your momentum.",
     color: "text-primary",
-    accent: "bg-primary",
+    accentColor: "oklch(0.55 0.18 252)",
   },
   {
     icon: Moon,
@@ -133,18 +155,22 @@ const STEPS = [
     title: "Evening — Close the loop",
     desc: "Reflect on what moved. Capture carryovers. The evening closure writes tomorrow's brief so you start the next day with context, not confusion.",
     color: "text-indigo-400",
-    accent: "bg-indigo-400",
+    accentColor: "oklch(0.6 0.18 270)",
+  },
+  {
+    icon: ScrollText,
+    step: "04",
+    title: "Monthly — Build your evidence",
+    desc: "At the end of each month, Continuary generates a single identity sentence from your data. Not a streak. Proof of who you are becoming.",
+    color: "text-emerald-400",
+    accentColor: "oklch(0.65 0.18 155)",
   },
 ];
 
-// ── Phone mockup component ────────────────────────────────────────────────────
+// ── Phone mockup ──────────────────────────────────────────────────────────────
 function PhoneMockup() {
   return (
-    <div
-      className="relative mx-auto"
-      style={{ width: 220, height: 440 }}
-    >
-      {/* Phone frame */}
+    <div className="relative mx-auto" style={{ width: 220, height: 440 }}>
       <div
         className="absolute inset-0 rounded-[36px] border-[6px] shadow-2xl overflow-hidden"
         style={{
@@ -153,7 +179,6 @@ function PhoneMockup() {
           boxShadow: "0 40px 80px oklch(0.1 0.08 252 / 0.6), 0 0 0 1px oklch(0.3 0.06 252 / 0.4)",
         }}
       >
-        {/* Status bar */}
         <div className="h-8 flex items-center justify-between px-5 pt-1">
           <span className="text-[8px] font-semibold text-white/60">9:41</span>
           <div className="w-16 h-3 rounded-full bg-black/60 mx-auto absolute left-1/2 -translate-x-1/2 top-1" />
@@ -163,23 +188,16 @@ function PhoneMockup() {
             </div>
           </div>
         </div>
-
-        {/* Screen content */}
         <div className="px-3 pt-2 pb-4 space-y-2">
-          {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="h-3 w-20 rounded-full bg-white/20" />
             <div className="w-5 h-5 rounded-full bg-amber-400/80" />
           </div>
-
-          {/* Start Here card */}
           <div className="rounded-xl p-3" style={{ background: "oklch(0.22 0.06 252)" }}>
             <div className="h-2 w-16 rounded-full mb-2" style={{ background: "oklch(0.72 0.14 65 / 0.6)" }} />
             <div className="h-3 w-full rounded-full bg-white/20 mb-1.5" />
             <div className="h-3 w-3/4 rounded-full bg-white/15" />
           </div>
-
-          {/* Project cards */}
           {[1, 2, 3].map((i) => (
             <div key={i} className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: "oklch(0.19 0.04 252)" }}>
               <div className="w-6 h-6 rounded-lg shrink-0" style={{ background: `oklch(${0.45 + i * 0.1} 0.15 ${220 + i * 30})` }} />
@@ -190,8 +208,6 @@ function PhoneMockup() {
               <div className="w-4 h-4 rounded-full shrink-0" style={{ background: `oklch(${0.6 + i * 0.05} 0.12 ${140 + i * 20} / 0.4)` }} />
             </div>
           ))}
-
-          {/* Check-in bar */}
           <div className="rounded-lg p-2.5 flex items-center justify-around" style={{ background: "oklch(0.19 0.04 252)" }}>
             {["☀️", "🕐", "🌙"].map((emoji, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
@@ -202,12 +218,99 @@ function PhoneMockup() {
           </div>
         </div>
       </div>
+      <div className="absolute -inset-8 -z-10 rounded-full blur-3xl opacity-30" style={{ background: "oklch(0.55 0.2 252)" }} />
+    </div>
+  );
+}
 
-      {/* Glow */}
-      <div
-        className="absolute -inset-8 -z-10 rounded-full blur-3xl opacity-30"
-        style={{ background: "oklch(0.55 0.2 252)" }}
-      />
+// ── Evidence Log mockup card ───────────────────────────────────────────────────
+function EvidenceCard() {
+  return (
+    <div
+      className="rounded-2xl p-6 shadow-2xl max-w-sm mx-auto"
+      style={{
+        background: "oklch(0.16 0.05 252)",
+        border: "1px solid oklch(0.28 0.06 252)",
+        boxShadow: "0 32px 64px oklch(0.08 0.06 252 / 0.8)",
+      }}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 65)" }}>Evidence Log</p>
+          <p className="text-xs text-white/40 mt-0.5">March 2025</p>
+        </div>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 65 / 0.15)" }}>
+          <ScrollText className="w-4 h-4" style={{ color: "oklch(0.72 0.14 65)" }} />
+        </div>
+      </div>
+
+      {/* Identity sentence */}
+      <div className="mb-5 p-4 rounded-xl" style={{ background: "oklch(0.20 0.06 252)" }}>
+        <p className="text-xs text-white/40 mb-2 font-medium">This month's identity sentence</p>
+        <p className="text-sm font-medium leading-relaxed italic" style={{ color: "oklch(0.88 0.06 65)", fontFamily: "Lora, serif" }}>
+          "Someone who shows up for their work even when the conditions aren't perfect."
+        </p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { label: "Sessions started", value: "23" },
+          { label: "Returns after gap", value: "7" },
+          { label: "Hard-day sessions", value: "4" },
+          { label: "Genuine permissions", value: "11" },
+        ].map(({ label, value }) => (
+          <div key={label} className="rounded-lg p-2.5 text-center" style={{ background: "oklch(0.22 0.05 252)" }}>
+            <p className="text-lg font-bold text-white">{value}</p>
+            <p className="text-[9px] text-white/40 leading-tight mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Threshold Diagnosis mockup ────────────────────────────────────────────────
+function ThresholdCard() {
+  return (
+    <div
+      className="rounded-2xl p-6 shadow-2xl max-w-sm mx-auto"
+      style={{
+        background: "oklch(0.16 0.05 252)",
+        border: "1px solid oklch(0.28 0.06 252)",
+        boxShadow: "0 32px 64px oklch(0.08 0.06 252 / 0.8)",
+      }}
+    >
+      <div className="flex items-center gap-3 mb-5">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 65 / 0.15)" }}>
+          <DoorOpen className="w-4 h-4" style={{ color: "oklch(0.72 0.14 65)" }} />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-white">Threshold Diagnosis</p>
+          <p className="text-[10px] text-white/40">What's at the door?</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {[
+          { q: "What task are you avoiding?", a: "Writing the intro chapter" },
+          { q: "What's actually in the way?", a: "Fear it won't be good enough" },
+          { q: "What's the smallest true step?", a: "Write one honest sentence" },
+        ].map(({ q, a }, i) => (
+          <div key={i} className="rounded-xl p-3" style={{ background: "oklch(0.20 0.06 252)" }}>
+            <p className="text-[9px] text-white/40 mb-1">{q}</p>
+            <p className="text-xs font-medium text-white/85">{a}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-xl p-3 flex items-center gap-2" style={{ background: "oklch(0.72 0.14 65 / 0.12)", border: "1px solid oklch(0.72 0.14 65 / 0.25)" }}>
+        <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.72 0.14 65)" }} />
+        <p className="text-[10px] font-medium" style={{ color: "oklch(0.85 0.12 65)" }}>
+          Named. Now you can begin.
+        </p>
+      </div>
     </div>
   );
 }
@@ -216,7 +319,6 @@ function PhoneMockup() {
 export default function WelcomePage() {
   const { isAuthenticated } = useAuth();
 
-  // ── Push notification opt-in (pre-login) ─────────────────────────────────
   const [notifPermission, setNotifPermission] = useState<NotificationPermission | "unsupported">(
     typeof window !== "undefined" && "Notification" in window
       ? Notification.permission
@@ -231,18 +333,14 @@ export default function WelcomePage() {
       const result = await Notification.requestPermission();
       setNotifPermission(result);
       if (result === "granted") {
-        // Try to register push subscription if service worker is available
         try {
           const reg = await navigator.serviceWorker.ready;
           const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
           if (vapidKey) {
-            await reg.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: vapidKey,
-            });
+            await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey });
           }
         } catch {
-          // SW not ready yet — permission is still saved, subscription can be registered on next login
+          // SW not ready yet — permission saved, subscription registered on next login
         }
       }
     } finally {
@@ -250,109 +348,92 @@ export default function WelcomePage() {
     }
   }, []);
 
+  const ctaButton = isAuthenticated ? (
+    <Link href="/">
+      <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+        Open Command Center <ArrowRight className="w-4 h-4" />
+      </Button>
+    </Link>
+  ) : (
+    <div className="flex flex-col sm:flex-row items-center gap-3">
+      <a href={getLoginUrl()}>
+        <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+          Get Started Free <ArrowRight className="w-4 h-4" />
+        </Button>
+      </a>
+      <a href={getLoginUrl()}>
+        <Button size="lg" variant="outline" className="gap-2 px-8 text-sm border-white/20 text-white hover:bg-white/10">
+          Sign In
+        </Button>
+      </a>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ── Global animation styles ─────────────────────────────────────────── */}
       <style>{`
         .welcome-fade {
           opacity: 0;
           transform: translateY(24px);
           transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .welcome-fade.is-visible {
-          opacity: 1;
-          transform: translateY(0);
+        .welcome-fade.is-visible { opacity: 1; transform: translateY(0); }
+        @keyframes animate-fade-slide-up {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
+        .animate-fade-slide-up { animation: animate-fade-slide-up 0.8s cubic-bezier(0.16,1,0.3,1) both; }
+        .animate-delay-100 { animation-delay: 100ms; }
+        .animate-delay-200 { animation-delay: 200ms; }
       `}</style>
 
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
-        style={{
-          background: "linear-gradient(160deg, oklch(0.18 0.06 252) 0%, oklch(0.22 0.08 265) 50%, oklch(0.20 0.05 252) 100%)",
-        }}
+        style={{ background: "linear-gradient(160deg, oklch(0.18 0.06 252) 0%, oklch(0.22 0.08 265) 50%, oklch(0.20 0.05 252) 100%)" }}
       >
-        {/* Decorative orbs */}
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.6 0.2 265)", transform: "translate(30%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(-30%, 30%)" }} />
 
-        <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-20">
-          {/* Logo */}
+        <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
           <div className="flex justify-center mb-12 animate-fade-slide-up">
             <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-20 w-auto object-contain" />
           </div>
 
-          {/* Hero content + phone mockup */}
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-            {/* Left: copy */}
             <div className="flex-1 text-center lg:text-left animate-fade-slide-up animate-delay-100">
               <div
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
                 style={{ background: "oklch(0.72 0.14 65 / 0.15)", borderColor: "oklch(0.72 0.14 65 / 0.3)", color: "oklch(0.85 0.12 65)" }}
               >
                 <Sparkles className="w-3 h-3" />
-                Built for deep work
+                Companion app to "Permission to Start"
               </div>
 
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-6">
-                Your work has a thread.
+                You don't need more productivity.
                 <br />
-                <span style={{ color: "oklch(0.82 0.14 65)" }}>Continuary keeps it.</span>
+                <span style={{ color: "oklch(0.82 0.14 65)" }}>You need proof you're already moving.</span>
               </h1>
 
               <p className="text-base text-white/65 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">
-                A calm, structured workspace for people who do deep work across multiple projects — and need to pick up exactly where they left off, every single day.
+                Continuary is a structured daily workspace that collects evidence of your identity as someone who keeps going — even when starting feels impossible.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
-                {isAuthenticated ? (
-                  <>
-                    <Link href="/">
-                      <Button
-                        size="lg"
-                        className="gap-2 px-8 font-semibold shadow-lg text-sm"
-                        style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}
-                      >
-                        Open Command Center <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <a href={getLoginUrl()}>
-                      <Button
-                        size="lg"
-                        className="gap-2 px-8 font-semibold shadow-lg text-sm"
-                        style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}
-                      >
-                        Get Started Free <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </a>
-                    <a href={getLoginUrl()}>
-                      <Button
-                        size="lg"
-                        variant="outline"
-                        className="gap-2 px-8 text-sm border-white/20 text-white hover:bg-white/10"
-                      >
-                        Sign In
-                      </Button>
-                    </a>
-                  </>
-                )}
+                {ctaButton}
               </div>
 
-              {/* Social proof */}
               <div className="flex items-center gap-4 mt-8 justify-center lg:justify-start">
                 <div className="flex -space-x-2">
                   {["oklch(0.6 0.15 265)", "oklch(0.55 0.18 30)", "oklch(0.5 0.15 140)", "oklch(0.58 0.2 300)"].map((c, i) => (
                     <div key={i} className="w-7 h-7 rounded-full border-2 border-white/20" style={{ background: c }} />
                   ))}
                 </div>
-                <p className="text-xs text-white/50">Trusted by multi-project professionals</p>
+                <p className="text-xs text-white/50">Built for multi-project professionals</p>
               </div>
             </div>
 
-            {/* Right: phone mockup */}
             <div className="shrink-0 animate-fade-slide-up animate-delay-200">
               <PhoneMockup />
             </div>
@@ -360,13 +441,168 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ── Feature grid ────────────────────────────────────────────────────── */}
+      {/* ── Signature Feature 1: Evidence Log ───────────────────────────────── */}
+      <section
+        className="py-24 px-6 relative overflow-hidden"
+        style={{ background: "linear-gradient(160deg, oklch(0.13 0.05 252) 0%, oklch(0.17 0.07 265) 100%)" }}
+      >
+        <div className="absolute top-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.65 0.18 155)", transform: "translate(-30%, -30%)" }} />
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <div className="flex-1 text-center lg:text-left">
+              <FadeSection>
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
+                  style={{ background: "oklch(0.65 0.18 155 / 0.15)", borderColor: "oklch(0.65 0.18 155 / 0.3)", color: "oklch(0.78 0.14 155)" }}
+                >
+                  <ScrollText className="w-3 h-3" />
+                  Signature feature
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-snug mb-5">
+                  The Evidence Log
+                </h2>
+                <p className="text-base text-white/60 leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
+                  Every month, Continuary looks at your actual behaviour — sessions started, returns after gaps, hard-day work, genuine rest — and generates a single identity sentence. Not a streak counter. Not a score. A sentence that tells you who you are becoming, in your own evidence.
+                </p>
+                <div className="space-y-3 max-w-lg mx-auto lg:mx-0">
+                  {[
+                    "Tracks 4 identity-evidence metrics automatically",
+                    "AI generates one sentence from your real data",
+                    "6-month history so you can see the arc, not just the day",
+                    "One-tap share card for your community",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "oklch(0.72 0.14 65)" }} />
+                      <p className="text-sm text-white/70">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </FadeSection>
+            </div>
+            <FadeSection delay={150} className="shrink-0 w-full lg:w-auto">
+              <EvidenceCard />
+            </FadeSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Signature Feature 2: Threshold Diagnosis ────────────────────────── */}
+      <section className="py-24 px-6 bg-background relative overflow-hidden">
+        <div className="absolute bottom-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-10 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(20%, 20%)" }} />
+        <div className="max-w-5xl mx-auto">
+          <div className="flex flex-col lg:flex-row-reverse items-center gap-16">
+            <div className="flex-1 text-center lg:text-left">
+              <FadeSection>
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
+                  style={{ background: "oklch(0.72 0.14 65 / 0.12)", borderColor: "oklch(0.72 0.14 65 / 0.3)", color: "oklch(0.82 0.12 65)" }}
+                >
+                  <DoorOpen className="w-3 h-3" />
+                  Signature feature
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-snug mb-5">
+                  Threshold Diagnosis
+                </h2>
+                <p className="text-base text-muted-foreground leading-relaxed mb-6 max-w-lg mx-auto lg:mx-0">
+                  Most productivity tools help you plan. Continuary helps you start. The Threshold Diagnosis is a three-question flow that names what's actually in the doorway — the real blocker underneath the task you're avoiding — and converts it into the smallest true step you can take right now.
+                </p>
+                <div className="space-y-3 max-w-lg mx-auto lg:mx-0">
+                  {[
+                    "Surfaces from the Clarity Engine result screen",
+                    "Three questions that name the real blocker",
+                    "Converts the diagnosis into a concrete next step",
+                    "Based on the Permission to Start framework",
+                  ].map((item) => (
+                    <div key={item} className="flex items-start gap-3">
+                      <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+                      <p className="text-sm text-muted-foreground">{item}</p>
+                    </div>
+                  ))}
+                </div>
+              </FadeSection>
+            </div>
+            <FadeSection delay={150} className="shrink-0 w-full lg:w-auto">
+              <ThresholdCard />
+            </FadeSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Amnesty Protocol callout ─────────────────────────────────────────── */}
+      <section
+        className="py-16 px-6"
+        style={{ background: "oklch(0.97 0.01 252)" }}
+      >
+        <div className="max-w-3xl mx-auto">
+          <FadeSection>
+            <div
+              className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-start gap-6"
+              style={{
+                background: "linear-gradient(135deg, oklch(0.20 0.06 252) 0%, oklch(0.24 0.08 270) 100%)",
+                border: "1px solid oklch(0.30 0.07 252)",
+              }}
+            >
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "oklch(0.72 0.14 65 / 0.15)" }}>
+                <HeartHandshake className="w-6 h-6" style={{ color: "oklch(0.72 0.14 65)" }} />
+              </div>
+              <div>
+                <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "oklch(0.72 0.14 65)" }}>
+                  Amnesty Protocol
+                </p>
+                <h3 className="text-xl font-bold text-white mb-3 leading-snug">
+                  You came back. That's the whole thing.
+                </h3>
+                <p className="text-sm text-white/60 leading-relaxed">
+                  When you return after a gap — a day, a week, a month — Continuary doesn't show you how far behind you are. It shows you the Re-Entry Card: your last context, your open loops, and one gentle next step. No shame spiral. No productivity debt. Just the door, open.
+                </p>
+              </div>
+            </div>
+          </FadeSection>
+        </div>
+      </section>
+
+      {/* ── Daily rhythm ─────────────────────────────────────────────────────── */}
       <section className="py-20 px-6 bg-background">
+        <div className="max-w-4xl mx-auto">
+          <FadeSection className="text-center mb-14">
+            <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Daily rhythm</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Three check-ins. One complete day. One month of evidence.
+            </h2>
+            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
+              Each check-in takes two to three minutes. The fourth step happens automatically — your evidence accumulates while you work.
+            </p>
+          </FadeSection>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+            {STEPS.map(({ icon: Icon, step, title, desc, color, accentColor }, i) => (
+              <FadeSection key={step} delay={i * 80}>
+                <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-md transition-all h-full">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center relative z-10"
+                      style={{ background: `${accentColor}20`, border: `2px solid ${accentColor}50` }}
+                    >
+                      <Icon className={`w-5 h-5 ${color}`} />
+                    </div>
+                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{step}</span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">{title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </FadeSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Full feature grid ─────────────────────────────────────────────────── */}
+      <section className="py-20 px-6" style={{ background: "oklch(0.97 0.01 252)" }}>
         <div className="max-w-4xl mx-auto">
           <FadeSection className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Everything you need</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Six spaces. One continuous thread.
+              Nine spaces. One continuous thread.
             </h2>
             <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
               Each space does one thing well. Together they create a system that holds your work without holding you back.
@@ -375,7 +611,7 @@ export default function WelcomePage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map(({ icon: Icon, title, desc, color, bg }, i) => (
-              <FadeSection key={title} delay={i * 60}>
+              <FadeSection key={title} delay={i * 50}>
                 <div className="h-full p-6 rounded-2xl border border-border bg-card hover:border-primary/30 hover:shadow-lg transition-all duration-300 group">
                   <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                     <Icon className={`w-5 h-5 ${color}`} />
@@ -389,50 +625,13 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ── Daily rhythm ────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6" style={{ background: "oklch(0.97 0.01 252)" }}>
-        <div className="max-w-4xl mx-auto">
-          <FadeSection className="text-center mb-14">
-            <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Daily rhythm</p>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Three check-ins. One complete day.
-            </h2>
-            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
-              Each check-in takes two to three minutes. Together they create a structure that holds your work without holding you back.
-            </p>
-          </FadeSection>
-
-          <div className="relative">
-            {/* Connector line */}
-            <div className="absolute top-8 left-8 right-8 h-px bg-border hidden sm:block" />
-
-            <div className="grid sm:grid-cols-3 gap-6 relative">
-              {STEPS.map(({ icon: Icon, step, title, desc, color, accent }, i) => (
-                <FadeSection key={step} delay={i * 100}>
-                  <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3 mb-5">
-                      <div className={`w-10 h-10 rounded-xl bg-card border-2 flex items-center justify-center relative z-10`} style={{ borderColor: `var(--${accent.replace("bg-", "")})` }}>
-                        <Icon className={`w-5 h-5 ${color}`} />
-                      </div>
-                      <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{step}</span>
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">{title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
-                  </div>
-                </FadeSection>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Who it's for ────────────────────────────────────────────────────── */}
+      {/* ── Who it's for ─────────────────────────────────────────────────────── */}
       <section className="py-20 px-6 bg-background">
         <div className="max-w-4xl mx-auto">
           <FadeSection className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Who it's for</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Built for minds that move fast.
+              Built for minds that keep going.
             </h2>
           </FadeSection>
 
@@ -441,21 +640,21 @@ export default function WelcomePage() {
               {
                 icon: Brain,
                 label: "The multi-project mind",
-                desc: "You work across several things at once. Continuary holds the context for all of them so you don't have to.",
+                desc: "You work across several things at once. Project Memory and the Re-Entry Card hold the context for all of them so you don't have to.",
               },
               {
-                icon: CheckCircle2,
-                label: "The returner",
-                desc: "You step away and come back. The Re-Entry Card and Tomorrow Brief make re-entry effortless every time.",
+                icon: TrendingUp,
+                label: "The identity builder",
+                desc: "You're not just trying to finish tasks. You're trying to become someone. The Evidence Log gives you monthly proof that you already are.",
               },
               {
                 icon: Shield,
                 label: "The deep worker",
-                desc: "You need long uninterrupted blocks. Continuary structures the edges so the middle stays clear.",
+                desc: "You need long uninterrupted blocks. Single Focus Mode and Distraction Insights structure the edges so the middle stays clear.",
               },
             ].map(({ icon: Icon, label, desc }, i) => (
               <FadeSection key={label} delay={i * 80}>
-                <div className="p-6 rounded-2xl border border-border bg-card text-center hover:border-primary/30 hover:shadow-md transition-all">
+                <div className="p-6 rounded-2xl border border-border bg-card text-center hover:border-primary/30 hover:shadow-md transition-all h-full">
                   <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
@@ -468,62 +667,52 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      {/* ── Final CTA ───────────────────────────────────────────────────────── */}
+      {/* ── Final CTA ────────────────────────────────────────────────────────── */}
       <section
         className="py-24 px-6 relative overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, oklch(0.20 0.06 252) 0%, oklch(0.25 0.08 270) 100%)",
-        }}
+        style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 252) 0%, oklch(0.25 0.08 270) 100%)" }}
       >
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(20%, -20%)" }} />
 
         <FadeSection className="max-w-2xl mx-auto text-center relative">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: "oklch(0.72 0.14 65)" }}>
-            <Zap className="w-7 h-7" style={{ color: "oklch(0.18 0.05 252)" }} />
+            <ScrollText className="w-7 h-7" style={{ color: "oklch(0.18 0.05 252)" }} />
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-5 leading-snug">
-            Ready to keep the thread?
+            Start building your evidence.
           </h2>
           <p className="text-base text-white/65 leading-relaxed mb-10 max-w-lg mx-auto">
-            Most productivity tools are good at capturing. Continuary is built for the harder problem: returning. Getting back into a project after two days away. Knowing which of your five active projects deserves today.
+            Every session you complete, every return after a gap, every hard day you showed up — it all becomes data. At the end of the month, Continuary turns that data into a sentence that tells you who you are. Not who you're trying to be. Who you already are.
           </p>
 
           {isAuthenticated ? (
             <Link href="/">
-              <Button
-                size="lg"
-                className="gap-2 px-10 font-semibold shadow-xl text-base"
-                style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}
-              >
+              <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
                 Open Command Center <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a href={getLoginUrl()}>
-                <Button
-                  size="lg"
-                  className="gap-2 px-10 font-semibold shadow-xl text-base"
-                  style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}
-                >
+                <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
                   Get Started Free <ArrowRight className="w-5 h-5" />
                 </Button>
               </a>
-              <p className="text-xs text-white/40">No credit card required</p>
+              <p className="text-xs text-white/40">Invite required during beta</p>
             </div>
           )}
         </FadeSection>
       </section>
 
-      {/* ── Push notification opt-in (pre-login, non-intrusive) ───────────────────── */}
+      {/* ── Push notification opt-in ─────────────────────────────────────────── */}
       {!isAuthenticated && notifPermission === "default" && (
         <FadeSection className="py-10 px-6">
           <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl border border-border/60 bg-card/60">
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Get notified when we launch</p>
+              <p className="text-sm font-semibold text-foreground">Get notified when we open to the public</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                One notification when Continuary opens to the public. No marketing, no drip campaigns.
+                One notification when Continuary opens beyond beta. No marketing, no drip campaigns.
               </p>
             </div>
             <Button
@@ -550,17 +739,16 @@ export default function WelcomePage() {
           <div className="max-w-xl mx-auto flex items-center gap-3 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/5">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <p className="text-sm text-emerald-300">
-              You're on the list. We'll send one notification when Continuary opens.
+              You're on the list. We'll send one notification when Continuary opens publicly.
             </p>
           </div>
         </FadeSection>
       )}
 
-      {/* ── Footer ─────────────────────────────────────────────────────────────────── */}
+      {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-12 w-auto object-contain opacity-70" />
-
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {isAuthenticated ? (
               <>
@@ -569,7 +757,7 @@ export default function WelcomePage() {
                   { href: "/vault", label: "Vault" },
                   { href: "/projects", label: "Projects" },
                   { href: "/clarity", label: "Clarity" },
-                  { href: "/intelligence", label: "Intelligence" },
+                  { href: "/evidence", label: "Evidence" },
                   { href: "/settings", label: "Settings" },
                 ].map(({ href, label }) => (
                   <Link key={href} href={href} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -583,8 +771,7 @@ export default function WelcomePage() {
               </a>
             )}
           </div>
-
-          <p className="text-xs text-muted-foreground/50">Built for minds that move fast.</p>
+          <p className="text-xs text-muted-foreground/50">Built for minds that keep going.</p>
         </div>
       </footer>
     </div>

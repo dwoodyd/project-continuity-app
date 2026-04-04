@@ -819,3 +819,17 @@
 - [x] Wire card into WeeklyReviewPage between AI review and Focus Blocks sections
 - [x] Show empty state when no distraction data exists for the week
 - [x] Write vitest tests for the insights aggregation logic (10 tests)
+
+## Welcome Page Restructure
+
+- [x] Rewrite hero section: lead with identity-change framing ("You don't need more productivity. You need proof you're already moving.")
+- [x] Add signature feature spotlight: Evidence Log — large, prominent, explains the monthly identity sentence concept
+- [x] Add signature feature spotlight: Threshold Diagnosis — explains the "What's at the door?" blocker identification flow
+- [x] Add Amnesty Protocol section — non-shaming return after a gap
+- [x] Add Re-Entry Card as a named feature in the features grid
+- [x] Add Single Focus Mode to the features grid
+- [x] Add Project Memory Timeline to the features grid
+- [x] Add Distraction Insights to the Intelligence/features section
+- [x] Update daily rhythm steps to reflect the full morning/midday/evening + evidence loop (4 steps)
+- [x] Keep "who it's for" personas but update copy to reference the new features
+- [x] Ensure all new sections are visually distinct and use the existing design tokens
