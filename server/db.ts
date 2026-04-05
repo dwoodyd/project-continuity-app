@@ -606,10 +606,9 @@ export async function getPushSubscriptionsForUser(userId: number) {
 export async function getAllUsersWithPushSubscriptions() {
   const db = await getDb();
   if (!db) return [];
-  // Return distinct user IDs that have at least one push subscription
-  const rows = await db.selectDistinct({ userId: pushSubscriptions.userId })
-    .from(pushSubscriptions);
-  return rows.map((r) => r.userId);
+  // Use raw SQL for distinct — Drizzle selectDistinct has a MySQL driver issue
+  const result = await db.execute(sql`SELECT DISTINCT userId FROM push_subscriptions`);
+  return (result[0] as unknown as Array<{ userId: number }>).map((r) => r.userId);
 }
 
 // ── Notification Log ──────────────────────────────────────────────────────────
