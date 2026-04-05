@@ -52,6 +52,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   driftDetectionEnabled: boolean("driftDetectionEnabled").default(true),
   onboardingCompleted: boolean("onboardingCompleted").default(false),
   planningMode: boolean("planningMode").default(false),
+  seenAbout: boolean("seenAbout").default(false),
   workStyle: mysqlEnum("workStyle", ["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]),
   preferredFocusHours: mysqlEnum("preferredFocusHours", ["morning", "midday", "afternoon", "evening", "varies"]).default("morning"),
   workTypes: text("workTypes"), // JSON string of work type strings

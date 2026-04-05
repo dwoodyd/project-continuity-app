@@ -33,6 +33,7 @@ export const settingsRouter = router({
       driftDetectionEnabled: true,
       onboardingCompleted: false,
       planningMode: false,
+      seenAbout: false,
       workStyle: null,
       preferredFocusHours: "morning" as const,
       workTypes: null,
@@ -122,4 +123,14 @@ export const settingsRouter = router({
       }
       return { success: true };
     }),
+
+  markAboutSeen: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await getUserProfile(ctx.user.id);
+    if (existing) {
+      await updateUserProfile(ctx.user.id, { seenAbout: true });
+    } else {
+      await upsertUserProfile({ userId: ctx.user.id, seenAbout: true });
+    }
+    return { success: true };
+  }),
 });

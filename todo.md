@@ -918,3 +918,10 @@
 - [x] Next Best Step engine card on Command Center (shortest task, stalled task priority)
 - [x] Project Check-In nudge (5+ days no activity → "keep contact" card)
 - [x] Inbox Bankruptcy button in Vault (bulk archive inbox with confirmation)
+
+## First-Login About Screen (Apr 5, 2026)
+- [x] Add `seenAbout` boolean column to user_profiles table
+- [x] Add `markAboutSeen` tRPC mutation (sets seenAbout = true)
+- [x] Build /about-app page: About Continuary content + "Enter the app" CTA
+- [x] Wire AppLayout: redirect new users (seenAbout = false) to /about-app after first sign-in
+- [x] Ensure admin users also see it once (same flag)

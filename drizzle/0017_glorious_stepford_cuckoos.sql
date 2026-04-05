@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` ADD `seenAbout` boolean DEFAULT false;

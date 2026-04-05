@@ -169,6 +169,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   }, [isAuthenticated, profile, navigate, location]);
 
+  // About Continuary gate: show once to every new user after onboarding
+  useEffect(() => {
+    if (
+      isAuthenticated &&
+      profile &&
+      profile.onboardingCompleted === true &&
+      profile.seenAbout === false &&
+      location !== "/about-app" &&
+      location !== "/onboarding" &&
+      location !== "/invite-gate"
+    ) {
+      navigate("/about-app");
+    }
+  }, [isAuthenticated, profile, navigate, location]);
+
   // Invite-only gate: block non-admin users who have not redeemed an invite code
   useEffect(() => {
     if (
@@ -177,7 +192,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       user.role !== "admin" &&
       user.inviteCode === null &&
       location !== "/invite-gate" &&
-      location !== "/onboarding"
+      location !== "/onboarding" &&
+      location !== "/about-app"
     ) {
       navigate("/invite-gate");
     }
