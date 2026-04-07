@@ -30,7 +30,7 @@ export const dailyPlanRouter = router({
   }),
 
   getByDate: protectedProcedure
-    .input(z.object({ date: z.string().max(10) }))
+    .input(z.object({ date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format") }))
     .query(async ({ ctx, input }) => {
       const plan = await getDailyPlan(ctx.user.id, input.date);
       return plan ?? null;
@@ -51,7 +51,7 @@ export const dailyPlanRouter = router({
 
   updateTasks: protectedProcedure
     .input(z.object({
-      date: z.string().optional(),
+      date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
       criticalTasks: z.array(taskSchema),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -71,7 +71,7 @@ export const dailyPlanRouter = router({
   // 3. Stalled tasks (added > 2 days ago, not done) get a bump
   getNextBestStep: protectedProcedure
     .input(z.object({
-      date: z.string().optional(),
+      date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
       currentEnergyLevel: z.enum(["high", "low", "any"]).optional(),
     }))
     .query(async ({ ctx, input }) => {

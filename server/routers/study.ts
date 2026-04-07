@@ -25,7 +25,7 @@ export const studyRouter = router({
     .input(
       z.object({
         dayNum: z.number().int().min(1).max(30),
-        logDate: z.string().optional(),
+        logDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
         capacity: z.string().optional(),
         firstMove: z.string().optional(),
         whatLearned: z.string().optional(),
@@ -67,7 +67,7 @@ export const studyRouter = router({
   addFocusBlock: protectedProcedure
     .input(
       z.object({
-        logDate: z.string().max(10),
+        logDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format"),
         startTime: z.string().optional(),
         duration: z.string().optional(),
         capacity: z.string().optional(),

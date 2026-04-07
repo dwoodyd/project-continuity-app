@@ -508,7 +508,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
   completeTask: protectedProcedure
     .input(z.object({
       taskId: z.string().max(100),
-      date: z.string().optional(),
+      date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const date = input.date ?? getTodayDate();

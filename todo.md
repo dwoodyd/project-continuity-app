@@ -963,3 +963,6 @@
 - [x] Add .max() length constraints to 15 bare z.string() inputs (oversized string vector)
 - [x] Reduce express body limit from 50mb to 10mb (only audio uploads need large bodies; scope it)
 - [x] Add null guard before updateSourceItem in vault.ts line 287 (item used without check)
+
+## Security Hardening Round 2 (Apr 7, 2026)
+- [x] Add z.string().regex(/^\d{4}-\d{2}-\d{2}$/) to all date inputs in dailyPlan and study routers
