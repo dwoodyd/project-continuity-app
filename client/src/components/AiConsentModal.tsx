@@ -63,8 +63,12 @@ export default function AiConsentModal({ onAccept, onDecline }: AiConsentModalPr
             Review our{" "}
             <a href="/privacy" className="text-primary underline underline-offset-2 inline-flex items-center gap-0.5">
               Privacy Policy <ExternalLink className="w-3 h-3" />
-            </a>{" "}
-            for full details.
+            </a>
+            {" "}and{" "}
+            <a href="/terms" className="text-primary underline underline-offset-2 inline-flex items-center gap-0.5">
+              Terms of Service <ExternalLink className="w-3 h-3" />
+            </a>
+            {" "}for full details.
           </p>
           <p className="text-xs text-muted-foreground/70 border-t border-border pt-3">
             <strong className="text-muted-foreground">EU / GDPR:</strong> The lawful basis for this processing is your explicit

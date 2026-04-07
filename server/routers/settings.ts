@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData } from "../db";
+import {
+  getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData,
+  getProjects, getSourceItems, getRecentCheckIns, getRecentDailyPlans,
+  getIdeaCaptures, getRecentFocusSessions,
+} from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 
@@ -152,5 +156,29 @@ export const settingsRouter = router({
       await upsertUserProfile({ userId: ctx.user.id, aiConsentGiven: false });
     }
     return { success: true };
+  }),
+  // ── Data export (GDPR Art. 20 portability) ────────────────────────────────────
+  exportData: protectedProcedure.query(async ({ ctx }) => {
+    const uid = ctx.user.id;
+    const [profile, projects, vaultItems, checkIns, dailyPlans, ideas, focusSessions] =
+      await Promise.all([
+        getUserProfile(uid),
+        getProjects(uid),
+        getSourceItems(uid),
+        getRecentCheckIns(uid, 500),
+        getRecentDailyPlans(uid, 365),
+        getIdeaCaptures(uid),
+        getRecentFocusSessions(uid, 500),
+      ]);
+    return {
+      exportedAt: new Date().toISOString(),
+      profile,
+      projects,
+      vaultItems,
+      checkIns,
+      dailyPlans,
+      ideas,
+      focusSessions,
+    };
   }),
 });

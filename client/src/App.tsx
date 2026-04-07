@@ -19,6 +19,7 @@ import PWAInstallBanner from "./components/PWAInstallBanner";
 import IntelligencePage from "./pages/IntelligencePage";
 import ClarityEnginePage from "./pages/ClarityEnginePage";
 import PrivacyPage from "./pages/PrivacyPage";
+import TermsPage from "./pages/TermsPage";
 import EvidenceLogPage from "./pages/EvidenceLogPage";
 import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
 import StudyTrackerPage from "./pages/StudyTrackerPage";
@@ -31,6 +32,7 @@ function Router() {
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/focus" component={FocusModePage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/terms" component={TermsPage} />
       <Route path="/invite-gate" component={InviteGatePage} />
       <Route path="/about-app" component={AboutAppPage} />
       <Route>

@@ -244,6 +244,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
           </div>
           <p className="text-center text-xs text-muted-foreground/50 mt-6 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
+          <p className="text-center text-xs text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
+            <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy Policy</a>
+            {" · "}
+            <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms of Service</a>
+          </p>
         </div>
       </div>
     );

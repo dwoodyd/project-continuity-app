@@ -211,6 +211,7 @@ function WeeklyDigestCard() {
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
+  const utils = trpc.useUtils();
   const { theme, toggleTheme } = useTheme();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
   const updateSchedule = trpc.notifications.updateSchedule.useMutation();
@@ -526,12 +527,35 @@ export default function SettingsPage() {
                 </button>
               )}
             </div>
-            <button
-              onClick={() => navigate("/privacy")}
-              className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
-            >
-              Privacy Policy
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate("/privacy")}
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+              >
+                Privacy Policy
+              </button>
+              <span className="text-muted-foreground/30 text-xs">·</span>
+              <button
+                onClick={async () => {
+                  try {
+                    const data = await utils.settings.exportData.fetch();
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `continuary-export-${new Date().toISOString().slice(0, 10)}.json`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success("Data exported successfully.");
+                  } catch {
+                    toast.error("Export failed. Please try again.");
+                  }
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+              >
+                Export my data
+              </button>
+            </div>
           </div>
 
           {/* Danger zone — delete account */}

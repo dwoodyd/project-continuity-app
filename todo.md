@@ -985,3 +985,8 @@
 - [x] Add revokeAiConsent procedure + Settings toggle (AI Data & Privacy section with revoke/enable)
 - [x] Write Privacy Policy page content (AI data processing section: Google Gemini, retention, GDPR)
 - [x] Add GDPR Article 6(1)(a) paragraph to AiConsentModal for EU distribution
+
+## App Store Compliance Round 3 (Apr 7, 2026)
+- [x] Data export: settings.exportData procedure + Settings download button
+- [x] Consent regression tests: revokeAiConsent + giveAiConsent in security3.integration.test.ts
+- [x] Terms of Service page (/terms) + links from consent modal and sign-in screen

@@ -385,3 +385,77 @@ describe("auth.me — sensitive field leakage regression", () => {
     expect(unexpectedFields).toEqual([]);
   });
 });
+
+// =============================================================================
+// 4. AI CONSENT TOGGLE REGRESSION
+// =============================================================================
+
+describe("settings — AI consent toggle", () => {
+  it("giveAiConsent calls updateUserProfile with aiConsentGiven:true when profile exists", async () => {
+    const { updateUserProfile, getUserProfile } = await import("./db");
+    (getUserProfile as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ id: 1, userId: 1 });
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.settings.giveAiConsent();
+    expect(result).toEqual({ success: true });
+    expect(updateUserProfile).toHaveBeenCalledWith(1, { aiConsentGiven: true });
+  });
+
+  it("giveAiConsent calls upsertUserProfile when profile does not exist", async () => {
+    const { upsertUserProfile, getUserProfile } = await import("./db");
+    (getUserProfile as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
+    const caller = appRouter.createCaller(makeCtx());
+    await caller.settings.giveAiConsent();
+    expect(upsertUserProfile).toHaveBeenCalledWith(expect.objectContaining({ aiConsentGiven: true }));
+  });
+
+  it("revokeAiConsent calls updateUserProfile with aiConsentGiven:false when profile exists", async () => {
+    const { updateUserProfile, getUserProfile } = await import("./db");
+    (getUserProfile as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ id: 1, userId: 1 });
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.settings.revokeAiConsent();
+    expect(result).toEqual({ success: true });
+    expect(updateUserProfile).toHaveBeenCalledWith(1, { aiConsentGiven: false });
+  });
+
+  it("revokeAiConsent calls upsertUserProfile when profile does not exist", async () => {
+    const { upsertUserProfile, getUserProfile } = await import("./db");
+    (getUserProfile as ReturnType<typeof vi.fn>).mockResolvedValueOnce(undefined);
+    const caller = appRouter.createCaller(makeCtx());
+    await caller.settings.revokeAiConsent();
+    expect(upsertUserProfile).toHaveBeenCalledWith(expect.objectContaining({ aiConsentGiven: false }));
+  });
+
+  it("giveAiConsent returns UNAUTHORIZED for unauthenticated caller", async () => {
+    const caller = appRouter.createCaller(makeAnonCtx());
+    await expect(caller.settings.giveAiConsent()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("revokeAiConsent returns UNAUTHORIZED for unauthenticated caller", async () => {
+    const caller = appRouter.createCaller(makeAnonCtx());
+    await expect(caller.settings.revokeAiConsent()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+});
+
+// =============================================================================
+// 5. DATA EXPORT REGRESSION
+// =============================================================================
+
+describe("settings.exportData", () => {
+  it("returns UNAUTHORIZED for unauthenticated caller", async () => {
+    const caller = appRouter.createCaller(makeAnonCtx());
+    await expect(caller.settings.exportData()).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+  });
+
+  it("returns exportedAt ISO string and all data buckets for authenticated user", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.settings.exportData();
+    expect(result).toHaveProperty("exportedAt");
+    expect(typeof result.exportedAt).toBe("string");
+    expect(result).toHaveProperty("projects");
+    expect(result).toHaveProperty("vaultItems");
+    expect(result).toHaveProperty("checkIns");
+    expect(result).toHaveProperty("dailyPlans");
+    expect(result).toHaveProperty("ideas");
+    expect(result).toHaveProperty("focusSessions");
+  });
+});
