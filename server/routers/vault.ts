@@ -9,6 +9,7 @@ import {
   updateSourceItem,
   createProjectMemoryEvent,
   getProjectById,
+  getProjects,
 } from "../db";
 import { storagePut } from "../storage";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -411,6 +412,82 @@ ${content.substring(0, 3000)}`,
 
       return { archivedCount };
     }),
+
+  // Graph view: returns nodes (items + projects) and edges (tag co-occurrence, project links)
+  getGraphData: protectedProcedure.query(async ({ ctx }) => {
+    const [items, projects] = await Promise.all([
+      getSourceItems(ctx.user.id),
+      getProjects(ctx.user.id),
+    ]);
+
+    type GraphNode = {
+      id: string; label: string; type: "item" | "project";
+      state: string; contentClass?: string; updatedAt: string;
+    };
+    type GraphEdge = { source: string; target: string; type: "project_link" | "tag" };
+
+    const nodes: GraphNode[] = [];
+    const edges: GraphEdge[] = [];
+    const tagMap = new Map<string, string[]>(); // tag -> nodeIds
+
+    for (const item of items) {
+      if (item.state === "archived") continue;
+      const nodeId = `item-${item.id}`;
+      nodes.push({
+        id: nodeId,
+        label: item.title ?? item.summary?.slice(0, 60) ?? "Untitled",
+        type: "item",
+        state: item.state,
+        contentClass: item.contentClass ?? undefined,
+        updatedAt: item.updatedAt.toISOString(),
+      });
+      // Project link edges
+      if (item.linkedProjectIds) {
+        try {
+          const ids: number[] = JSON.parse(item.linkedProjectIds);
+          for (const pid of ids) edges.push({ source: nodeId, target: `project-${pid}`, type: "project_link" });
+        } catch { /* skip */ }
+      }
+      // Collect tags for co-occurrence
+      if (item.tags) {
+        try {
+          const tags: string[] = JSON.parse(item.tags);
+          for (const tag of tags) {
+            const t = tag.toLowerCase().trim();
+            if (!tagMap.has(t)) tagMap.set(t, []);
+            tagMap.get(t)!.push(nodeId);
+          }
+        } catch { /* skip */ }
+      }
+    }
+
+    for (const p of projects) {
+      if (p.status === "archived") continue;
+      nodes.push({
+        id: `project-${p.id}`,
+        label: p.title,
+        type: "project",
+        state: p.status,
+        updatedAt: p.updatedAt.toISOString(),
+      });
+    }
+
+    // Tag co-occurrence edges (items sharing a tag are connected)
+    for (const [, itemIds] of Array.from(tagMap)) {
+      if (itemIds.length < 2) continue;
+      for (let i = 0; i < itemIds.length - 1; i++) {
+        for (let j = i + 1; j < itemIds.length; j++) {
+          edges.push({ source: itemIds[i], target: itemIds[j], type: "tag" });
+        }
+      }
+    }
+
+    // Remove edges pointing to non-existent nodes
+    const nodeIds = new Set(nodes.map(n => n.id));
+    const validEdges = edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target));
+
+    return { nodes, edges: validEdges };
+  }),
 
   // Returns count of inbox items older than the given cutoff (for the ritual preview)
   getBankruptcyPreview: protectedProcedure

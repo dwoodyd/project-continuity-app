@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { VaultGraph } from "@/components/VaultGraph";
 import {
   AlertTriangle,
   BookOpen,
@@ -424,7 +425,8 @@ function SourceItemCard({
 export default function VaultPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
-  const [filterState, setFilterState] = useState<SourceState | "all" | "review">("all");
+  const [filterState, setFilterState] = useState<SourceState | "all" | "review" | "graph">("all");
+  const { data: graphData } = trpc.vault.getGraphData.useQuery(undefined, { enabled: filterState === "graph" });
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
   const { data: reviewQueue, refetch: refetchReview } = trpc.vault.reviewQueue.useQuery();
@@ -554,7 +556,45 @@ export default function VaultPage() {
             )}
           </button>
         ))}
+        {/* Graph tab */}
+        <button
+          onClick={() => setFilterState("graph")}
+          className={cn(
+            "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1",
+            filterState === "graph"
+              ? "bg-primary text-white shadow-sm"
+              : "bg-muted text-muted-foreground hover:text-foreground hover:bg-accent"
+          )}
+        >
+          <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="8" cy="8" r="2" />
+            <circle cx="2" cy="4" r="1.5" />
+            <circle cx="14" cy="3" r="1.5" />
+            <circle cx="13" cy="13" r="1.5" />
+            <circle cx="3" cy="13" r="1.5" />
+            <line x1="8" y1="6" x2="3" y2="4.5" />
+            <line x1="8" y1="6" x2="13" y2="4" />
+            <line x1="8" y1="10" x2="12.5" y2="12" />
+            <line x1="8" y1="10" x2="3.5" y2="12" />
+          </svg>
+          Graph
+        </button>
       </div>
+
+      {/* Graph view */}
+      {filterState === "graph" && (
+        <VaultGraph
+          nodes={graphData?.nodes ?? []}
+          edges={graphData?.edges ?? []}
+          onNodeClick={(id, type) => {
+            if (type === "item") {
+              const numId = parseInt(id.replace("item-", ""), 10);
+              const item = items?.find((i) => i.id === numId);
+              if (item) toast.info(item.title ?? "Vault item", { description: item.summary ?? item.state });
+            }
+          }}
+        />
+      )}
 
       {/* Review queue banner (when not already on review tab) */}
       {filterState !== "review" && reviewCount > 0 && (

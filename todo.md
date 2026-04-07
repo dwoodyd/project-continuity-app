@@ -925,3 +925,9 @@
 - [x] Build /about-app page: About Continuary content + "Enter the app" CTA
 - [x] Wire AppLayout: redirect new users (seenAbout = false) to /about-app after first sign-in
 - [x] Ensure admin users also see it once (same flag)
+
+## Vault Graph View
+- [x] Add `vault.getGraphData` tRPC procedure (nodes + edges from items, projects, tags)
+- [x] Build VaultGraph D3.js force-directed component
+- [x] Add "Graph" tab to VaultPage filter tabs
+- [x] Node click shows item title/state toast
