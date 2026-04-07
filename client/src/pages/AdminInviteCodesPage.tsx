@@ -1,8 +1,12 @@
 /**
  * AdminInviteCodesPage — admin-only page for managing beta invite codes.
  *
- * Displays all invite codes created by the current admin, allows generating
- * new codes with an optional label, and shows usage status.
+ * Features:
+ *  - Single code generation with optional label
+ *  - Bulk generation (1–20 codes at once) with optional label prefix
+ *  - Copy individual codes to clipboard
+ *  - Copy all unused codes to clipboard as a plain list
+ *  - Usage stats (available vs redeemed)
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -12,13 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Copy, Plus, Ticket, CheckCircle2, Clock } from "lucide-react";
+import { Copy, Plus, Ticket, CheckCircle2, Clock, Layers, ClipboardList } from "lucide-react";
 import { useLocation } from "wouter";
 
 export default function AdminInviteCodesPage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [label, setLabel] = useState("");
+  const [bulkCount, setBulkCount] = useState(5);
+  const [bulkPrefix, setBulkPrefix] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
 
   // Redirect non-admins
@@ -40,10 +46,30 @@ export default function AdminInviteCodesPage() {
     onError: (err) => toast.error(err.message),
   });
 
+  const bulkGenerate = trpc.invites.bulkGenerate.useMutation({
+    onSuccess: (result) => {
+      toast.success(`${result.count} codes generated`);
+      setBulkPrefix("");
+      refetch();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code).then(() => {
       setCopied(code);
       setTimeout(() => setCopied(null), 2000);
+    });
+  };
+
+  const handleCopyAll = () => {
+    const unused = codes?.filter((c) => c.usedAt === null).map((c) => c.code) ?? [];
+    if (unused.length === 0) {
+      toast.info("No unused codes to copy.");
+      return;
+    }
+    navigator.clipboard.writeText(unused.join("\n")).then(() => {
+      toast.success(`${unused.length} codes copied to clipboard`);
     });
   };
 
@@ -64,7 +90,7 @@ export default function AdminInviteCodesPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         <Card className="bg-card border-border">
           <CardContent className="pt-5 pb-4">
             <p className="text-2xl font-bold text-foreground">{unusedCount}</p>
@@ -77,12 +103,21 @@ export default function AdminInviteCodesPage() {
             <p className="text-xs text-muted-foreground mt-0.5">Redeemed</p>
           </CardContent>
         </Card>
+        <Card className="bg-card border-border">
+          <CardContent className="pt-5 pb-4">
+            <p className="text-2xl font-bold text-foreground">{codes?.length ?? 0}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Total</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Generate new code */}
+      {/* Single code generation */}
       <Card className="bg-card border-border">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Generate a new code</CardTitle>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Plus className="w-4 h-4 text-primary" />
+            Generate a single code
+          </CardTitle>
           <CardDescription className="text-xs">
             Add an optional label (e.g. the reader's name) to track who you sent it to.
           </CardDescription>
@@ -108,11 +143,63 @@ export default function AdminInviteCodesPage() {
         </CardContent>
       </Card>
 
+      {/* Bulk generation */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" />
+            Bulk generate codes
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Create multiple codes at once for your first beta cohort. Max 20 per batch.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-muted-foreground shrink-0 w-14">Count</label>
+            <Input
+              type="number"
+              min={1}
+              max={20}
+              value={bulkCount}
+              onChange={(e) => setBulkCount(Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
+              className="w-20"
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-muted-foreground shrink-0 w-14">Prefix</label>
+            <Input
+              value={bulkPrefix}
+              onChange={(e) => setBulkPrefix(e.target.value)}
+              placeholder="Optional — e.g. Beta Wave 1"
+              className="flex-1"
+            />
+          </div>
+          <Button
+            onClick={() => bulkGenerate.mutate({ count: bulkCount, labelPrefix: bulkPrefix.trim() || undefined })}
+            disabled={bulkGenerate.isPending}
+            variant="outline"
+            className="w-full gap-1.5"
+          >
+            <Layers className="w-4 h-4" />
+            {bulkGenerate.isPending ? "Generating..." : `Generate ${bulkCount} codes`}
+          </Button>
+        </CardContent>
+      </Card>
+
       {/* Code list */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest px-0.5">
-          All codes ({codes?.length ?? 0})
-        </p>
+        <div className="flex items-center justify-between px-0.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            All codes ({codes?.length ?? 0})
+          </p>
+          {unusedCount > 0 && (
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5" onClick={handleCopyAll}>
+              <ClipboardList className="w-3.5 h-3.5" />
+              Copy all unused ({unusedCount})
+            </Button>
+          )}
+        </div>
 
         {isLoading && (
           <div className="space-y-2">

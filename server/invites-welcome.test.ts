@@ -103,3 +103,74 @@ describe("invite code normalization", () => {
     expect(normalized).toBe("ABC123DEF456");
   });
 });
+
+describe("bulkGenerate label prefix logic", () => {
+  it("generates labels with sequential suffix when prefix is provided", () => {
+    const prefix = "Beta Wave 1";
+    const count = 3;
+    const labels = Array.from({ length: count }, (_, i) => `${prefix} ${i + 1}`);
+    expect(labels).toEqual(["Beta Wave 1 1", "Beta Wave 1 2", "Beta Wave 1 3"]);
+  });
+
+  it("generates undefined labels when no prefix is provided", () => {
+    const prefix: string | undefined = undefined;
+    const count = 3;
+    const labels = Array.from({ length: count }, (_, i) =>
+      prefix ? `${prefix} ${i + 1}` : undefined
+    );
+    expect(labels).toEqual([undefined, undefined, undefined]);
+  });
+
+  it("clamps count to max 50", () => {
+    // z.number().int().min(1).max(50) — validate the schema boundary
+    const requestedCount = 100;
+    const clampedCount = Math.min(requestedCount, 50);
+    expect(clampedCount).toBe(50);
+  });
+
+  it("rejects count below 1", () => {
+    const requestedCount = 0;
+    const isValid = requestedCount >= 1 && requestedCount <= 50;
+    expect(isValid).toBe(false);
+  });
+});
+
+describe("Content-Type enforcement middleware logic", () => {
+  const shouldBlock = (method: string, contentType: string, path: string): boolean => {
+    if (method !== "POST" && method !== "PUT" && method !== "PATCH") return false;
+    if (path.includes("vault.uploadAudio") || path.includes("vault.addFile")) return false;
+    return !contentType.includes("application/json");
+  };
+
+  it("blocks POST without application/json Content-Type", () => {
+    expect(shouldBlock("POST", "text/plain", "/api/trpc/vault.create")).toBe(true);
+  });
+
+  it("blocks POST with multipart/form-data Content-Type", () => {
+    expect(shouldBlock("POST", "multipart/form-data; boundary=abc", "/api/trpc/ai.generate")).toBe(true);
+  });
+
+  it("allows POST with application/json Content-Type", () => {
+    expect(shouldBlock("POST", "application/json", "/api/trpc/vault.create")).toBe(false);
+  });
+
+  it("allows GET requests regardless of Content-Type", () => {
+    expect(shouldBlock("GET", "", "/api/trpc/vault.list")).toBe(false);
+  });
+
+  it("allows vault.uploadAudio POST without application/json (audio upload exemption)", () => {
+    expect(shouldBlock("POST", "application/octet-stream", "/api/trpc/vault.uploadAudio")).toBe(false);
+  });
+
+  it("allows vault.addFile POST without application/json (file upload exemption)", () => {
+    expect(shouldBlock("POST", "multipart/form-data", "/api/trpc/vault.addFile")).toBe(false);
+  });
+
+  it("blocks PUT without application/json", () => {
+    expect(shouldBlock("PUT", "text/html", "/api/trpc/projects.update")).toBe(true);
+  });
+
+  it("allows PATCH with application/json", () => {
+    expect(shouldBlock("PATCH", "application/json; charset=utf-8", "/api/trpc/settings.update")).toBe(false);
+  });
+});

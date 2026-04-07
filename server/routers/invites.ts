@@ -2,8 +2,9 @@
  * Invites router — beta invite code management
  *
  * Admin procedures:
- *   invites.generate  — create a new single-use invite code
- *   invites.list      — list all codes created by the current admin
+ *   invites.generate      — create a new single-use invite code
+ *   invites.bulkGenerate  — create N codes at once (max 50)
+ *   invites.list          — list all codes created by the current admin
  *
  * Protected procedures:
  *   invites.validate  — check whether a code is valid and unused (used during onboarding)
@@ -22,31 +23,40 @@ import {
 } from "../db";
 
 export const invitesRouter = router({
-  // ── Admin: generate a new code ────────────────────────────────────────────
+  // ── Admin: generate a single new code ────────────────────────────────────
   generate: protectedProcedure
-    .input(
-      z.object({
-        label: z.string().max(255).optional(),
-      })
-    )
+    .input(z.object({ label: z.string().max(255).optional() }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Only admins can generate invite codes.",
-        });
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can generate invite codes." });
       }
       const invite = await createInviteCode(ctx.user.id, input.label);
       return invite;
     }),
 
+  // ── Admin: bulk generate N codes at once (max 50) ────────────────────────
+  bulkGenerate: protectedProcedure
+    .input(z.object({
+      count: z.number().int().min(1).max(50),
+      labelPrefix: z.string().max(100).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can generate invite codes." });
+      }
+      const codes = [];
+      for (let i = 0; i < input.count; i++) {
+        const label = input.labelPrefix ? `${input.labelPrefix} ${i + 1}` : undefined;
+        const invite = await createInviteCode(ctx.user.id, label);
+        codes.push(invite);
+      }
+      return { codes, count: codes.length };
+    }),
+
   // ── Admin: list all codes created by this admin ───────────────────────────
   list: protectedProcedure.query(async ({ ctx }) => {
     if (ctx.user.role !== "admin") {
-      throw new TRPCError({
-        code: "FORBIDDEN",
-        message: "Only admins can view invite codes.",
-      });
+      throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can view invite codes." });
     }
     return getInviteCodes(ctx.user.id);
   }),

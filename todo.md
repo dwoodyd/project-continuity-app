@@ -968,6 +968,11 @@
 - [x] Add z.string().regex(/^\d{4}-\d{2}-\d{2}$/) to all date inputs in dailyPlan and study routers
 
 ## Performance Engineering (Apr 7, 2026)
-- [ ] Fix confirmed N+1 queries
-- [ ] LLM streaming for aiProcess procedure
-- [ ] React memo/callback optimizations on hotspot components
+- [x] Fix confirmed N+1 queries (archiveBankruptcy + buildProjectTimeline batch ops)
+- [x] LLM streaming for aiProcess procedure (skipped — returns small structured JSON, not suitable for streaming)
+- [x] React memo/callback optimizations on hotspot components (TaskItem + SourceItemCard wrapped with React.memo)
+
+## Pre-Beta Launch Steps (Apr 7, 2026)
+- [x] Content-Type enforcement middleware on /api/trpc (reject non-JSON POST requests)
+- [x] Invite code admin UI enhanced with bulk generate (1-20 at once), copy-all button, 3-stat grid
+- [x] Custom domain CNAME setup instructions provided to user

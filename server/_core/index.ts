@@ -149,6 +149,27 @@ async function startServer() {
   app.use("/api/oauth", oauthLimiter);
   registerOAuthRoutes(app);
 
+  // ── Content-Type enforcement ────────────────────────────────────────────────
+  // Reject POST/PUT/PATCH requests to the tRPC API that don't declare application/json.
+  // This prevents content-type confusion attacks (e.g. multipart smuggling) and ensures
+  // all mutation payloads are parsed by the JSON body parser above.
+  // GET requests (tRPC queries) and the audio upload path are exempt.
+  app.use("/api/trpc", (req, res, next) => {
+    const method = req.method;
+    if (method === "POST" || method === "PUT" || method === "PATCH") {
+      // Audio upload path sends base64 JSON — already handled by the 50mb parser above, allow through
+      if (req.path.includes("vault.uploadAudio") || req.path.includes("vault.addFile")) {
+        return next();
+      }
+      const ct = req.headers["content-type"] ?? "";
+      if (!ct.includes("application/json")) {
+        res.status(415).json({ error: "Unsupported Media Type. Content-Type must be application/json." });
+        return;
+      }
+    }
+    next();
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",
