@@ -955,3 +955,6 @@
 - [x] Multi-project linking in graph node drawer (multi-select, not single select)
 - [x] Tag filter lens dropdown above graph (hides non-matching nodes)
 - [x] D3 node entry animation (fade-in from opacity 0 over 300ms on first load)
+
+## About Screen Copy (Apr 7, 2026)
+- [x] Write and apply three personalised core principles to AboutAppPage

@@ -92,9 +92,9 @@ const SPACES = [
 ];
 
 const PRINCIPLES = [
-  "You are not behind. You are starting from here.",
-  "One task completed is better than ten tasks planned.",
-  "Continuity is the skill. Continuary is the container.",
+  "You don't need more time. You need a clearer next step.",
+  "Progress is not measured in streaks — it is measured in returns.",
+  "The work is never lost. It is waiting for you to come back.",
 ];
 
 export default function AboutAppPage() {
