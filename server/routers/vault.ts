@@ -422,7 +422,7 @@ ${content.substring(0, 3000)}`,
 
     type GraphNode = {
       id: string; label: string; type: "item" | "project";
-      state: string; contentClass?: string; updatedAt: string;
+      state: string; contentClass?: string; updatedAt: string; tags?: string[];
     };
     type GraphEdge = { source: string; target: string; type: "project_link" | "tag" };
 
@@ -433,6 +433,8 @@ ${content.substring(0, 3000)}`,
     for (const item of items) {
       if (item.state === "archived") continue;
       const nodeId = `item-${item.id}`;
+      let parsedTags: string[] = [];
+      if (item.tags) { try { parsedTags = JSON.parse(item.tags); } catch { /* skip */ } }
       nodes.push({
         id: nodeId,
         label: item.title ?? item.summary?.slice(0, 60) ?? "Untitled",
@@ -440,6 +442,7 @@ ${content.substring(0, 3000)}`,
         state: item.state,
         contentClass: item.contentClass ?? undefined,
         updatedAt: item.updatedAt.toISOString(),
+        tags: parsedTags,
       });
       // Project link edges
       if (item.linkedProjectIds) {
@@ -449,15 +452,10 @@ ${content.substring(0, 3000)}`,
         } catch { /* skip */ }
       }
       // Collect tags for co-occurrence
-      if (item.tags) {
-        try {
-          const tags: string[] = JSON.parse(item.tags);
-          for (const tag of tags) {
-            const t = tag.toLowerCase().trim();
-            if (!tagMap.has(t)) tagMap.set(t, []);
-            tagMap.get(t)!.push(nodeId);
-          }
-        } catch { /* skip */ }
+      for (const tag of parsedTags) {
+        const t = tag.toLowerCase().trim();
+        if (!tagMap.has(t)) tagMap.set(t, []);
+        tagMap.get(t)!.push(nodeId);
       }
     }
 

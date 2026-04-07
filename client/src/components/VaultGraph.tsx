@@ -2,9 +2,10 @@
  * VaultGraph — D3.js force-directed knowledge graph for the Vault.
  * Nodes: item (circle) | project (diamond)
  * Edges: project_link (solid gold) | tag (dashed muted)
+ * Features: search/highlight, tag clustering, PNG export
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import * as d3 from "d3";
 
 export type GraphNode = {
@@ -14,6 +15,7 @@ export type GraphNode = {
   state: string;
   contentClass?: string;
   updatedAt: string;
+  tags?: string[]; // injected by parent for clustering
 };
 
 export type GraphEdge = {
@@ -22,7 +24,10 @@ export type GraphEdge = {
   type: "project_link" | "tag";
 };
 
-interface SimNode extends GraphNode, d3.SimulationNodeDatum {}
+interface SimNode extends GraphNode, d3.SimulationNodeDatum {
+  clusterX?: number;
+  clusterY?: number;
+}
 
 interface SimLink extends d3.SimulationLinkDatum<SimNode> {
   type: "project_link" | "tag";
@@ -48,13 +53,56 @@ const STATE_COLOR: Record<string, string> = {
 };
 const stateColor = (s: string) => STATE_COLOR[s] ?? "#6B7280";
 
+// Assign a cluster center per unique tag (first tag wins)
+function buildClusterCenters(nodes: GraphNode[], width: number, height: number) {
+  const tags = Array.from(new Set(nodes.flatMap((n) => n.tags ?? []))).slice(0, 12);
+  const centers: Record<string, { x: number; y: number }> = {};
+  tags.forEach((tag, i) => {
+    const angle = (i / tags.length) * 2 * Math.PI;
+    const r = Math.min(width, height) * 0.32;
+    centers[tag] = { x: width / 2 + r * Math.cos(angle), y: height / 2 + r * Math.sin(angle) };
+  });
+  return centers;
+}
+
 export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [showTagEdges, setShowTagEdges] = useState(true);
   const [showProjectEdges, setShowProjectEdges] = useState(true);
+  const [clusterByTag, setClusterByTag] = useState(false);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; label: string; state: string } | null>(null);
   const [search, setSearch] = useState("");
   const searchLower = search.trim().toLowerCase();
+
+  const exportPng = useCallback(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const serializer = new XMLSerializer();
+    // Inline a dark background so the PNG isn't transparent
+    const clone = el.cloneNode(true) as SVGSVGElement;
+    const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("width", "100%");
+    bg.setAttribute("height", "100%");
+    bg.setAttribute("fill", "#0f1117");
+    clone.insertBefore(bg, clone.firstChild);
+    const svgStr = serializer.serializeToString(clone);
+    const blob = new Blob([svgStr], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = el.clientWidth || 800;
+      canvas.height = el.clientHeight || 560;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      const a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = `continuary-vault-graph-${new Date().toISOString().slice(0, 10)}.png`;
+      a.click();
+    };
+    img.src = url;
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -76,6 +124,9 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .map((e) => ({ source: nodeById.get(e.source)!, target: nodeById.get(e.target)!, type: e.type }))
       .filter((e) => e.source && e.target);
 
+    // Cluster centers (only used when clusterByTag is on)
+    const clusterCenters = clusterByTag ? buildClusterCenters(nodes, width, height) : {};
+
     const simulation = d3
       .forceSimulation<SimNode>(simNodes)
       .force(
@@ -88,6 +139,20 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .force("charge", d3.forceManyBody<SimNode>().strength(-180))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide<SimNode>(24));
+
+    // Tag clustering: pull each node toward its tag's cluster center
+    if (clusterByTag) {
+      simulation.force("cluster", () => {
+        simNodes.forEach((d) => {
+          const tag = (d.tags ?? [])[0];
+          if (!tag || !clusterCenters[tag]) return;
+          const { x: cx, y: cy } = clusterCenters[tag];
+          const strength = 0.12;
+          d.vx = (d.vx ?? 0) + (cx - (d.x ?? 0)) * strength;
+          d.vy = (d.vy ?? 0) + (cy - (d.y ?? 0)) * strength;
+        });
+      });
+    }
 
     const g = svg.append("g");
 
@@ -114,6 +179,21 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         .attr("fill", t === "project_link" ? "rgba(234,179,8,0.6)" : "rgba(107,114,128,0.35)");
     });
 
+    // Cluster label rings (shown when clustering is active)
+    if (clusterByTag) {
+      const clusterG = g.append("g").attr("opacity", 0.18);
+      Object.entries(clusterCenters).forEach(([tag, { x, y }]) => {
+        clusterG.append("circle")
+          .attr("cx", x).attr("cy", y).attr("r", 70)
+          .attr("fill", "none").attr("stroke", "rgba(255,255,255,0.3)").attr("stroke-dasharray", "4 3");
+        clusterG.append("text")
+          .attr("x", x).attr("y", y - 74)
+          .attr("text-anchor", "middle").attr("font-size", "9px")
+          .attr("fill", "rgba(255,255,255,0.5)")
+          .text(`#${tag}`);
+      });
+    }
+
     // Edges
     const link = g
       .append("g")
@@ -130,17 +210,12 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .drag<SVGGElement, SimNode>()
       .on("start", (event, d) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.fx = d.x;
-        d.fy = d.y;
+        d.fx = d.x; d.fy = d.y;
       })
-      .on("drag", (event, d) => {
-        d.fx = event.x;
-        d.fy = event.y;
-      })
+      .on("drag", (event, d) => { d.fx = event.x; d.fy = event.y; })
       .on("end", (event, d) => {
         if (!event.active) simulation.alphaTarget(0);
-        d.fx = null;
-        d.fy = null;
+        d.fx = null; d.fy = null;
       });
 
     // Node groups
@@ -162,15 +237,10 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
     node
       .filter((d) => d.type === "project")
       .append("rect")
-      .attr("width", 18)
-      .attr("height", 18)
-      .attr("x", -9)
-      .attr("y", -9)
+      .attr("width", 18).attr("height", 18).attr("x", -9).attr("y", -9)
       .attr("transform", "rotate(45)")
       .attr("fill", (d) => stateColor(d.state))
-      .attr("stroke", "#EAB308")
-      .attr("stroke-width", 2)
-      .attr("opacity", 0.9);
+      .attr("stroke", "#EAB308").attr("stroke-width", 2).attr("opacity", 0.9);
 
     // Item → circle
     node
@@ -181,23 +251,20 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         return age < 86400000 ? 9 : 7;
       })
       .attr("fill", (d) => stateColor(d.state))
-      .attr("stroke", "rgba(255,255,255,0.12)")
-      .attr("stroke-width", 1)
+      .attr("stroke", "rgba(255,255,255,0.12)").attr("stroke-width", 1)
       .attr("opacity", (d) => {
         if (!searchLower) return 0.85;
         return d.label.toLowerCase().includes(searchLower) ? 1 : 0.1;
       });
 
-    // Labels for projects + short-label items
+    // Labels
     node
       .filter((d) => d.type === "project" || d.label.length < 20)
       .append("text")
       .text((d) => (d.label.length > 22 ? d.label.slice(0, 20) + "…" : d.label))
       .attr("dy", (d) => (d.type === "project" ? -14 : -11))
-      .attr("text-anchor", "middle")
-      .attr("font-size", "9px")
-      .attr("fill", "rgba(250,250,250,0.65)")
-      .attr("pointer-events", "none");
+      .attr("text-anchor", "middle").attr("font-size", "9px")
+      .attr("fill", "rgba(250,250,250,0.65)").attr("pointer-events", "none");
 
     simulation.on("tick", () => {
       link
@@ -209,7 +276,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
     });
 
     return () => { simulation.stop(); };
-  }, [nodes, edges, showTagEdges, showProjectEdges, onNodeClick, searchLower]);
+  }, [nodes, edges, showTagEdges, showProjectEdges, clusterByTag, onNodeClick, searchLower]);
 
   const itemCount = nodes.filter((n) => n.type === "item").length;
   const projectCount = nodes.filter((n) => n.type === "project").length;
@@ -217,7 +284,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
   return (
     <div className="relative w-full" style={{ height: 560 }}>
       {/* Controls */}
-      <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground max-w-[calc(100%-120px)]">
+      <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground max-w-[calc(100%-130px)]">
         <span className="font-medium text-foreground">{itemCount} items · {projectCount} projects</span>
         <span className="w-px h-4 bg-border" />
         <input
@@ -237,8 +304,26 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         </label>
         <label className="flex items-center gap-1.5 cursor-pointer select-none">
           <input type="checkbox" checked={showTagEdges} onChange={(e) => setShowTagEdges(e.target.checked)} className="w-3 h-3 accent-gray-400" />
-          <span>Tag clusters</span>
+          <span>Tag edges</span>
         </label>
+        <label className="flex items-center gap-1.5 cursor-pointer select-none">
+          <input type="checkbox" checked={clusterByTag} onChange={(e) => setClusterByTag(e.target.checked)} className="w-3 h-3 accent-violet-400" />
+          <span className="text-violet-400">Group by tag</span>
+        </label>
+      </div>
+
+      {/* PNG Export button */}
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-2">
+        <button
+          onClick={exportPng}
+          title="Save as PNG"
+          className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-background/60 backdrop-blur border border-border rounded px-2 py-1 hover:text-foreground hover:border-foreground/30 transition-colors"
+        >
+          <svg className="w-3 h-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M8 2v8M5 7l3 3 3-3M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Save PNG
+        </button>
       </div>
 
       {/* Legend */}
@@ -263,7 +348,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       </div>
 
       {/* Hint */}
-      <div className="absolute top-3 right-3 z-10 text-[10px] text-muted-foreground bg-background/60 backdrop-blur px-2 py-1 rounded">
+      <div className="absolute bottom-3 right-3 z-10 text-[10px] text-muted-foreground bg-background/60 backdrop-blur px-2 py-1 rounded">
         Scroll to zoom · Drag to pan · Click to open
       </div>
 

@@ -438,6 +438,11 @@ export default function VaultPage() {
     onSuccess: () => { refetch(); },
     onError: () => toast.error("Failed to update."),
   });
+  const { data: allProjects } = trpc.projects.list.useQuery();
+  const graphItemUpdateItem = trpc.vault.updateItem.useMutation({
+    onSuccess: () => { refetch(); },
+    onError: () => toast.error("Failed to link project."),
+  });
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
   const { data: reviewQueue, refetch: refetchReview } = trpc.vault.reviewQueue.useQuery();
@@ -813,6 +818,30 @@ export default function VaultPage() {
                         <span key={p} className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800">{p}</span>
                       ))}
                     </div>
+                  </div>
+                )}
+                {/* Project link selector */}
+                {item.type !== "project" && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Link to project</p>
+                    <Select
+                      value={(() => { try { const ids = JSON.parse(item.linkedProjectIds ?? "[]"); return ids[0]?.toString() ?? "none"; } catch { return "none"; } })()}
+                      onValueChange={(val) => {
+                        const newIds = val === "none" ? [] : [parseInt(val)];
+                        graphItemUpdateItem.mutate({ id: item.id, linkedProjectIds: newIds });
+                        setSelectedGraphItem((prev: any) => prev ? { ...prev, linkedProjectIds: JSON.stringify(newIds) } : null);
+                      }}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="No project linked" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No project</SelectItem>
+                        {(allProjects ?? []).filter((p: any) => p.state !== "archived" && p.state !== "completed").map((p: any) => (
+                          <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-border">

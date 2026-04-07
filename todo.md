@@ -936,3 +936,8 @@
 - [x] Click-to-open item detail panel from graph node (slide-in drawer)
 - [x] Search/highlight input in VaultGraph (dims non-matching nodes)
 - [x] Onboarding nudge to Graph tab after 10+ vault items
+
+## Graph Enhancement Round 3
+- [x] Project link selector in graph node drawer
+- [x] Tag clustering toggle in VaultGraph
+- [x] Export graph as PNG button
