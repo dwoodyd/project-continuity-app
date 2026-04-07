@@ -809,16 +809,14 @@ describe("intelligence router — TC-1: 401 for unauthenticated requests", () =>
 });
 
 describe("intelligence router — TC-2: IDOR prevention", () => {
-  it("intelligence.buildProjectTimeline returns synced:0 when project belongs to another user", async () => {
-    // buildProjectTimeline returns { synced: 0 } (not an error) when project not found
-    // This is by design — the userId scoping happens inside getProjectById
+  it("intelligence.buildProjectTimeline throws NOT_FOUND when project belongs to another user", async () => {
+    // After hardening: buildProjectTimeline now throws NOT_FOUND instead of silently returning synced:0
     vi.mocked(db.getProjectById).mockResolvedValueOnce(undefined);
     vi.mocked(db.getFocusSessionsByProject).mockResolvedValueOnce([]);
     vi.mocked(db.getRecentCheckIns).mockResolvedValueOnce([]);
     const caller = appRouter.createCaller(makeCtx({ id: 1 }));
-    const result = await caller.intelligence.buildProjectTimeline({ projectId: 999 });
-    // Returns empty result, not an error — but crucially, getProjectById was called with userId=1
-    expect(result).toEqual({ synced: 0 });
+    await expect(caller.intelligence.buildProjectTimeline({ projectId: 999 })).rejects.toMatchObject({ code: "NOT_FOUND" });
+    // Crucially, getProjectById was called with userId=1 (not a raw lookup)
     expect(db.getProjectById).toHaveBeenCalledWith(999, 1);
   });
 

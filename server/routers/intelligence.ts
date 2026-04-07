@@ -245,7 +245,7 @@ Return JSON: { decisions: string[] }`,
         getRecentCheckIns(ctx.user.id, 30),
       ]);
 
-      if (!project) return { synced: 0 };
+      if (!project) throw new TRPCError({ code: "NOT_FOUND", message: "Project not found or does not belong to you." });
       let synced = 0;
 
       // Log project creation if no events exist
