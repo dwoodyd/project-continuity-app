@@ -931,3 +931,8 @@
 - [x] Build VaultGraph D3.js force-directed component
 - [x] Add "Graph" tab to VaultPage filter tabs
 - [x] Node click shows item title/state toast
+
+## Vault Graph Follow-ups
+- [x] Click-to-open item detail panel from graph node (slide-in drawer)
+- [x] Search/highlight input in VaultGraph (dims non-matching nodes)
+- [x] Onboarding nudge to Graph tab after 10+ vault items

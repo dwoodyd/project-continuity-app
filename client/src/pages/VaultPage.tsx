@@ -24,6 +24,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -426,7 +432,12 @@ export default function VaultPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
   const [filterState, setFilterState] = useState<SourceState | "all" | "review" | "graph">("all");
+  const [selectedGraphItem, setSelectedGraphItem] = useState<any | null>(null);
   const { data: graphData } = trpc.vault.getGraphData.useQuery(undefined, { enabled: filterState === "graph" });
+  const graphItemUpdateState = trpc.vault.updateState.useMutation({
+    onSuccess: () => { refetch(); },
+    onError: () => toast.error("Failed to update."),
+  });
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
   const { data: reviewQueue, refetch: refetchReview } = trpc.vault.reviewQueue.useQuery();
@@ -486,7 +497,11 @@ export default function VaultPage() {
 
   const inboxCount = items?.filter((i) => i.state === "inbox").length ?? 0;
   const reviewCount = reviewQueue?.length ?? 0;
-
+  const totalItems = items?.length ?? 0;
+  const [graphNudgeDismissed, setGraphNudgeDismissed] = useState(() =>
+    typeof window !== "undefined" ? !!localStorage.getItem("vault-graph-nudge-dismissed") : false
+  );
+  const showGraphNudge = totalItems >= 10 && !graphNudgeDismissed && filterState !== "graph";
   return (
     <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
       {/* Header */}
@@ -527,6 +542,33 @@ export default function VaultPage() {
           </Button>
         </div>
       </div>
+
+      {/* Graph onboarding nudge */}
+      {showGraphNudge && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/8 border border-primary/20 text-sm">
+          <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="8" cy="8" r="2" /><circle cx="2" cy="4" r="1.5" /><circle cx="14" cy="3" r="1.5" />
+            <circle cx="13" cy="13" r="1.5" /><circle cx="3" cy="13" r="1.5" />
+            <line x1="8" y1="6" x2="3" y2="4.5" /><line x1="8" y1="6" x2="13" y2="4" />
+            <line x1="8" y1="10" x2="12.5" y2="12" /><line x1="8" y1="10" x2="3.5" y2="12" />
+          </svg>
+          <p className="flex-1 text-foreground">
+            <strong>Your vault is connected.</strong> You have {totalItems} items — see how they relate.
+          </p>
+          <button
+            className="text-xs text-primary font-medium hover:underline shrink-0"
+            onClick={() => setFilterState("graph")}
+          >
+            Open Graph →
+          </button>
+          <button
+            className="text-xs text-muted-foreground hover:text-foreground shrink-0 ml-1"
+            onClick={() => { setGraphNudgeDismissed(true); localStorage.setItem("vault-graph-nudge-dismissed", "1"); }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Filter tabs */}
       <div className="flex gap-1.5 flex-wrap">
@@ -590,7 +632,7 @@ export default function VaultPage() {
             if (type === "item") {
               const numId = parseInt(id.replace("item-", ""), 10);
               const item = items?.find((i) => i.id === numId);
-              if (item) toast.info(item.title ?? "Vault item", { description: item.summary ?? item.state });
+              if (item) setSelectedGraphItem(item);
             }
           }}
         />
@@ -721,6 +763,89 @@ export default function VaultPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Graph item detail drawer */}
+      <Sheet open={!!selectedGraphItem} onOpenChange={(open) => { if (!open) setSelectedGraphItem(null); }}>
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+          {selectedGraphItem && (() => {
+            const item = selectedGraphItem;
+            const tags: string[] = (() => { try { return JSON.parse(item.tags ?? "[]"); } catch { return []; } })();
+            const projectCandidates: string[] = (() => { try { return JSON.parse(item.projectCandidates ?? "[]"); } catch { return []; } })();
+            const stateCfg = stateConfig[item.state as SourceState] ?? stateConfig.inbox;
+            const updateState = graphItemUpdateState;
+            return (
+              <div className="space-y-4 pt-2">
+                <SheetHeader>
+                  <SheetTitle className="text-left leading-snug">
+                    {item.title ?? `Untitled — ${format(new Date(item.createdAt), "MMM d")}`}
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", stateCfg.className)}>{stateCfg.label}</span>
+                  {item.contentClass && (
+                    <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", contentClassConfig[item.contentClass] ?? "bg-muted text-muted-foreground")}>{item.contentClass}</span>
+                  )}
+                  <span className="text-xs text-muted-foreground">{item.sourceType}</span>
+                </div>
+                {item.summary && (
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.summary}</p>
+                )}
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {tags.map((tag: string) => (
+                      <span key={tag} className="text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">#{tag}</span>
+                    ))}
+                  </div>
+                )}
+                {item.rawContent && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Content preview</p>
+                    <p className="text-xs text-foreground/70 leading-relaxed font-mono bg-muted/40 rounded-lg p-3 border border-border/60 whitespace-pre-wrap">
+                      {item.rawContent.substring(0, 800)}{item.rawContent.length > 800 ? "..." : ""}
+                    </p>
+                  </div>
+                )}
+                {projectCandidates.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Suggested projects</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {projectCandidates.map((p: string) => (
+                        <span key={p} className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800">{p}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
+                  {item.state === "inbox" && (
+                    <Button size="sm" variant="outline" className="text-xs h-7 gap-1.5"
+                      onClick={() => { aiProcess.mutate({ id: item.id }); setSelectedGraphItem(null); }}>
+                      <Sparkles className="w-3 h-3" />AI Process
+                    </Button>
+                  )}
+                  {(["inbox", "parked"] as SourceState[]).includes(item.state) && (
+                    <Button size="sm" variant="outline" className="text-xs h-7"
+                      onClick={() => updateState.mutate({ id: item.id, state: "active" })}>
+                      Set Active
+                    </Button>
+                  )}
+                  {item.state === "active" && (
+                    <Button size="sm" variant="outline" className="text-xs h-7"
+                      onClick={() => updateState.mutate({ id: item.id, state: "done" })}>
+                      Mark Done
+                    </Button>
+                  )}
+                  {item.state !== "archived" && (
+                    <Button size="sm" variant="ghost" className="text-xs h-7 text-muted-foreground"
+                      onClick={() => { updateState.mutate({ id: item.id, state: "archived" }); setSelectedGraphItem(null); }}>
+                      Archive
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -53,6 +53,8 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
   const [showTagEdges, setShowTagEdges] = useState(true);
   const [showProjectEdges, setShowProjectEdges] = useState(true);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; label: string; state: string } | null>(null);
+  const [search, setSearch] = useState("");
+  const searchLower = search.trim().toLowerCase();
 
   useEffect(() => {
     if (!svgRef.current) return;
@@ -181,7 +183,10 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .attr("fill", (d) => stateColor(d.state))
       .attr("stroke", "rgba(255,255,255,0.12)")
       .attr("stroke-width", 1)
-      .attr("opacity", 0.85);
+      .attr("opacity", (d) => {
+        if (!searchLower) return 0.85;
+        return d.label.toLowerCase().includes(searchLower) ? 1 : 0.1;
+      });
 
     // Labels for projects + short-label items
     node
@@ -204,7 +209,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
     });
 
     return () => { simulation.stop(); };
-  }, [nodes, edges, showTagEdges, showProjectEdges, onNodeClick]);
+  }, [nodes, edges, showTagEdges, showProjectEdges, onNodeClick, searchLower]);
 
   const itemCount = nodes.filter((n) => n.type === "item").length;
   const projectCount = nodes.filter((n) => n.type === "project").length;
@@ -212,8 +217,19 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
   return (
     <div className="relative w-full" style={{ height: 560 }}>
       {/* Controls */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground">
+      <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground max-w-[calc(100%-120px)]">
         <span className="font-medium text-foreground">{itemCount} items · {projectCount} projects</span>
+        <span className="w-px h-4 bg-border" />
+        <input
+          type="text"
+          placeholder="Search nodes…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-6 w-36 rounded border border-border bg-background/60 px-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+        />
+        {search && (
+          <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground text-[10px]">✕ clear</button>
+        )}
         <span className="w-px h-4 bg-border" />
         <label className="flex items-center gap-1.5 cursor-pointer select-none">
           <input type="checkbox" checked={showProjectEdges} onChange={(e) => setShowProjectEdges(e.target.checked)} className="w-3 h-3 accent-yellow-500" />
