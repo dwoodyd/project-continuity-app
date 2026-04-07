@@ -56,8 +56,8 @@ export const settingsRouter = router({
       focusHoursStart: z.string().max(10),
       focusHoursEnd: z.string().max(10),
       tonePreference: z.enum(["gentle", "direct", "firm"]),
-      timezone: z.string().optional(),
-      workStyle: z.enum(["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]).optional(),
+      timezone: z.string().max(50).optional(),
+      workStyle: z.string().max(500).optional(),
       preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -102,11 +102,11 @@ export const settingsRouter = router({
   updateSettings: protectedProcedure
     .input(z.object({
       tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
-      focusHoursStart: z.string().optional(),
-      focusHoursEnd: z.string().optional(),
-      morningCheckInTime: z.string().optional(),
-      middayCheckInTime: z.string().optional(),
-      eveningCheckInTime: z.string().optional(),
+      focusHoursStart: z.string().max(10).optional(),
+      focusHoursEnd: z.string().max(10).optional(),
+      morningCheckInTime: z.string().max(10).optional(),
+      middayCheckInTime: z.string().max(10).optional(),
+      eveningCheckInTime: z.string().max(10).optional(),
       coldProjectThresholdDays: z.number().min(1).max(30).optional(),
       weeklyReviewDay: z.enum(["sunday", "saturday", "monday"]).optional(),
       fontSizePreference: z.enum(["small", "medium", "large"]).optional(),
@@ -116,8 +116,8 @@ export const settingsRouter = router({
       eveningNotifEnabled: z.boolean().optional(),
       focusModeEnabled: z.boolean().optional(),
       driftDetectionEnabled: z.boolean().optional(),
-      timezone: z.string().optional(),
       planningMode: z.boolean().optional(),
+      timezone: z.string().max(50).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const existing = await getUserProfile(ctx.user.id);

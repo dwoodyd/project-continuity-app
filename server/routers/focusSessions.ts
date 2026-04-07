@@ -9,12 +9,12 @@ export const focusSessionsRouter = router({
   // Save a completed focus session
   save: protectedProcedure
     .input(z.object({
-      intention: z.string().min(1),
+      intention: z.string().min(1).max(500, "Intention must be under 500 characters"),
       projectId: z.number().optional(),
       startedAt: z.number(), // Unix ms
       durationSeconds: z.number().min(0),
       wasCompleted: z.boolean(),
-      notes: z.string().optional(),
+      notes: z.string().max(2000, "Notes must be under 2,000 characters").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();

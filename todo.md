@@ -990,3 +990,9 @@
 - [x] Data export: settings.exportData procedure + Settings download button
 - [x] Consent regression tests: revokeAiConsent + giveAiConsent in security3.integration.test.ts
 - [x] Terms of Service page (/terms) + links from consent modal and sign-in screen
+
+## Input Validation Hardening (Apr 7, 2026)
+- [x] Add .max() to free-text fields: focusSessions (intention, notes), study (21 fields), intelligence (adminLane), settings (timezone, workStyle, time fields)
+
+## Homepage UX (Apr 7, 2026)
+- [x] Add social proof avatar badges + member count before CTA on sign-in screen

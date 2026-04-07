@@ -390,7 +390,7 @@ Return JSON: {
     .input(z.object({
       primaryProjectId: z.number().nullable(),
       secondaryProjectId: z.number().nullable(),
-      adminLane: z.string().optional(),
+      adminLane: z.string().max(100).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const existing = await getLatestWeeklyCompass(ctx.user.id);

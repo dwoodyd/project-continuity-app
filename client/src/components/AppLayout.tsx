@@ -234,6 +234,23 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
                 A structured command center for execution. Turn scattered notes into daily focus.
               </p>
+              {/* Social proof — avatar stack + member count */}
+              <div className="flex items-center justify-center gap-3 mb-5">
+                <div className="flex -space-x-2">
+                  {["JK","AM","TR","SL","OB"].map((initials, i) => (
+                    <div
+                      key={initials}
+                      className="w-7 h-7 rounded-full border-2 border-card flex items-center justify-center text-[9px] font-bold text-white"
+                      style={{ background: ["#4F6BED","#7C5CBF","#2D9CDB","#27AE60","#E2704A"][i], zIndex: 5 - i }}
+                    >
+                      {initials}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">47 builders</span> in early access
+                </p>
+              </div>
               <a
                 href={getLoginUrl()}
                 className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
