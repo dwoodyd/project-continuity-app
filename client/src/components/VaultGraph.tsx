@@ -2,7 +2,8 @@
  * VaultGraph — D3.js force-directed knowledge graph for the Vault.
  * Nodes: item (circle) | project (diamond)
  * Edges: project_link (solid gold) | tag (dashed muted)
- * Features: search/highlight, tag clustering, PNG export
+ * Features: search/highlight, tag clustering, PNG export,
+ *           tag filter lens, D3 node entry animation
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -15,7 +16,7 @@ export type GraphNode = {
   state: string;
   contentClass?: string;
   updatedAt: string;
-  tags?: string[]; // injected by parent for clustering
+  tags?: string[];
 };
 
 export type GraphEdge = {
@@ -53,7 +54,6 @@ const STATE_COLOR: Record<string, string> = {
 };
 const stateColor = (s: string) => STATE_COLOR[s] ?? "#6B7280";
 
-// Assign a cluster center per unique tag (first tag wins)
 function buildClusterCenters(nodes: GraphNode[], width: number, height: number) {
   const tags = Array.from(new Set(nodes.flatMap((n) => n.tags ?? []))).slice(0, 12);
   const centers: Record<string, { x: number; y: number }> = {};
@@ -72,13 +72,27 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
   const [clusterByTag, setClusterByTag] = useState(false);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; label: string; state: string } | null>(null);
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState<string>("all");
+
   const searchLower = search.trim().toLowerCase();
+
+  // Collect all unique tags for the filter dropdown
+  const allTags = Array.from(new Set(nodes.flatMap((n) => n.tags ?? []))).sort();
+
+  // Nodes visible under the tag filter lens
+  const filteredNodes = tagFilter === "all"
+    ? nodes
+    : nodes.filter((n) => n.type === "project" || (n.tags ?? []).includes(tagFilter));
+
+  const filteredNodeIds = new Set(filteredNodes.map((n) => n.id));
+  const filteredEdges = edges.filter(
+    (e) => filteredNodeIds.has(e.source) && filteredNodeIds.has(e.target)
+  );
 
   const exportPng = useCallback(() => {
     const el = svgRef.current;
     if (!el) return;
     const serializer = new XMLSerializer();
-    // Inline a dark background so the PNG isn't transparent
     const clone = el.cloneNode(true) as SVGSVGElement;
     const bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     bg.setAttribute("width", "100%");
@@ -113,19 +127,18 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
     const width = el.clientWidth || 800;
     const height = el.clientHeight || 560;
 
-    const visibleEdges = edges.filter(
+    const visibleEdges = filteredEdges.filter(
       (e) => (e.type === "project_link" && showProjectEdges) || (e.type === "tag" && showTagEdges)
     );
 
-    const simNodes: SimNode[] = nodes.map((n) => ({ ...n }));
+    const simNodes: SimNode[] = filteredNodes.map((n) => ({ ...n }));
     const nodeById = new Map(simNodes.map((n) => [n.id, n]));
 
     const simLinks: SimLink[] = visibleEdges
       .map((e) => ({ source: nodeById.get(e.source)!, target: nodeById.get(e.target)!, type: e.type }))
       .filter((e) => e.source && e.target);
 
-    // Cluster centers (only used when clusterByTag is on)
-    const clusterCenters = clusterByTag ? buildClusterCenters(nodes, width, height) : {};
+    const clusterCenters = clusterByTag ? buildClusterCenters(filteredNodes, width, height) : {};
 
     const simulation = d3
       .forceSimulation<SimNode>(simNodes)
@@ -140,7 +153,6 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collision", d3.forceCollide<SimNode>(24));
 
-    // Tag clustering: pull each node toward its tag's cluster center
     if (clusterByTag) {
       simulation.force("cluster", () => {
         simNodes.forEach((d) => {
@@ -162,7 +174,6 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         .on("zoom", (event) => g.attr("transform", event.transform))
     );
 
-    // Arrow markers
     const defs = svg.append("defs");
     (["project_link", "tag"] as const).forEach((t) => {
       defs
@@ -179,7 +190,6 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         .attr("fill", t === "project_link" ? "rgba(234,179,8,0.6)" : "rgba(107,114,128,0.35)");
     });
 
-    // Cluster label rings (shown when clustering is active)
     if (clusterByTag) {
       const clusterG = g.append("g").attr("opacity", 0.18);
       Object.entries(clusterCenters).forEach(([tag, { x, y }]) => {
@@ -194,7 +204,6 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       });
     }
 
-    // Edges
     const link = g
       .append("g")
       .selectAll<SVGLineElement, SimLink>("line")
@@ -205,7 +214,6 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       .attr("stroke-dasharray", (d) => (d.type === "tag" ? "4 3" : null))
       .attr("marker-end", (d) => `url(#arrow-${d.type})`);
 
-    // Drag
     const drag = d3
       .drag<SVGGElement, SimNode>()
       .on("start", (event, d) => {
@@ -218,13 +226,14 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         d.fx = null; d.fy = null;
       });
 
-    // Node groups
     const node = g
       .append("g")
       .selectAll<SVGGElement, SimNode>("g")
       .data(simNodes)
       .join("g")
       .style("cursor", "pointer")
+      // ── Entry animation: fade in from opacity 0 ──
+      .attr("opacity", 0)
       .call(drag)
       .on("click", (_event, d) => onNodeClick?.(d.id, d.type))
       .on("mouseenter", (event: MouseEvent, d) => {
@@ -232,6 +241,12 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         setTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, label: d.label, state: d.state });
       })
       .on("mouseleave", () => setTooltip(null));
+
+    // Animate nodes in after a short delay
+    node.transition()
+      .delay((_d, i) => i * 18)
+      .duration(300)
+      .attr("opacity", 1);
 
     // Project → diamond
     node
@@ -276,10 +291,10 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
     });
 
     return () => { simulation.stop(); };
-  }, [nodes, edges, showTagEdges, showProjectEdges, clusterByTag, onNodeClick, searchLower]);
+  }, [filteredNodes, filteredEdges, showTagEdges, showProjectEdges, clusterByTag, onNodeClick, searchLower]);
 
-  const itemCount = nodes.filter((n) => n.type === "item").length;
-  const projectCount = nodes.filter((n) => n.type === "project").length;
+  const itemCount = filteredNodes.filter((n) => n.type === "item").length;
+  const projectCount = filteredNodes.filter((n) => n.type === "project").length;
 
   return (
     <div className="relative w-full" style={{ height: 560 }}>
@@ -287,19 +302,43 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       <div className="absolute top-3 left-3 z-10 flex flex-wrap items-center gap-3 bg-background/80 backdrop-blur border border-border rounded-lg px-3 py-2 text-xs text-muted-foreground max-w-[calc(100%-130px)]">
         <span className="font-medium text-foreground">{itemCount} items · {projectCount} projects</span>
         <span className="w-px h-4 bg-border" />
+
+        {/* Search */}
         <input
           type="text"
           placeholder="Search nodes…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-6 w-36 rounded border border-border bg-background/60 px-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          className="h-6 w-32 rounded border border-border bg-background/60 px-2 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
         />
         {search && (
-          <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground text-[10px]">✕ clear</button>
+          <button onClick={() => setSearch("")} className="text-muted-foreground hover:text-foreground text-[10px]">✕</button>
         )}
+
         <span className="w-px h-4 bg-border" />
+
+        {/* Tag filter lens */}
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground">Tag lens:</span>
+          <select
+            value={tagFilter}
+            onChange={(e) => setTagFilter(e.target.value)}
+            className="h-6 rounded border border-border bg-background/60 px-1.5 text-[10px] text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          >
+            <option value="all">All tags</option>
+            {allTags.map((t) => (
+              <option key={t} value={t}>#{t}</option>
+            ))}
+          </select>
+          {tagFilter !== "all" && (
+            <button onClick={() => setTagFilter("all")} className="text-muted-foreground hover:text-foreground text-[10px]">✕</button>
+          )}
+        </div>
+
+        <span className="w-px h-4 bg-border" />
+
         <label className="flex items-center gap-1.5 cursor-pointer select-none">
-          <input type="checkbox" checked={showProjectEdges} onChange={(e) => setShowProjectEdges(e.target.checked)} className="w-3 h-3 accent-yellow-500" />
+          <input type="checkbox" checked={showProjectEdges} onChange={(e) => setShowProjectEdges(e.target.checked)} className="w-3 h-3 accent-yellow-400" />
           <span className="text-yellow-500">Project links</span>
         </label>
         <label className="flex items-center gap-1.5 cursor-pointer select-none">
@@ -364,9 +403,9 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       )}
 
       {/* Empty state */}
-      {nodes.length === 0 && (
+      {filteredNodes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
-          Add vault items to see the graph.
+          {tagFilter !== "all" ? `No items tagged #${tagFilter}.` : "Add vault items to see the graph."}
         </div>
       )}
 

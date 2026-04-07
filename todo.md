@@ -943,10 +943,15 @@
 - [x] Export graph as PNG button
 
 ## Premium UI Redesign (Orizon-inspired)
-- [ ] Rewrite index.css global tokens: dark palette, Inter variable font, spacing, radius, shadows, animations
-- [ ] Redesign AppLayout sidebar: dark bg, accent active states, smooth transitions
-- [ ] Redesign Command Center (Home): premium card hierarchy, motion, typography
-- [ ] Redesign Vault page: dark cards, graph tab polish
-- [ ] Redesign Projects page: status badges, timeline polish
-- [ ] Redesign Settings, Weekly Review, onboarding, About page
-- [ ] Polish modals, dialogs, drawers, toasts
+- [x] Rewrite index.css global tokens: dark palette, Inter variable font, spacing, radius, shadows, animations
+- [x] Redesign AppLayout sidebar: dark bg, accent active states, smooth transitions
+- [x] Redesign Command Center (Home): premium card hierarchy, motion, typography
+- [x] Redesign Vault page: dark cards, graph tab polish
+- [x] Redesign Projects page: status badges, timeline polish
+- [x] Redesign Settings, Weekly Review, onboarding, About page
+- [x] Polish modals, dialogs, drawers, toasts
+
+## Graph Enhancement Round 4 (Final)
+- [x] Multi-project linking in graph node drawer (multi-select, not single select)
+- [x] Tag filter lens dropdown above graph (hides non-matching nodes)
+- [x] D3 node entry animation (fade-in from opacity 0 over 300ms on first load)

@@ -820,30 +820,39 @@ export default function VaultPage() {
                     </div>
                   </div>
                 )}
-                {/* Project link selector */}
-                {item.type !== "project" && (
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground mb-1.5">Link to project</p>
-                    <Select
-                      value={(() => { try { const ids = JSON.parse(item.linkedProjectIds ?? "[]"); return ids[0]?.toString() ?? "none"; } catch { return "none"; } })()}
-                      onValueChange={(val) => {
-                        const newIds = val === "none" ? [] : [parseInt(val)];
-                        graphItemUpdateItem.mutate({ id: item.id, linkedProjectIds: newIds });
-                        setSelectedGraphItem((prev: any) => prev ? { ...prev, linkedProjectIds: JSON.stringify(newIds) } : null);
-                      }}
-                    >
-                      <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="No project linked" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No project</SelectItem>
-                        {(allProjects ?? []).filter((p: any) => p.state !== "archived" && p.state !== "completed").map((p: any) => (
-                          <SelectItem key={p.id} value={p.id.toString()}>{p.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+                {/* Multi-project link selector */}
+                {item.type !== "project" && (() => {
+                  const linkedIds: number[] = (() => { try { return JSON.parse(item.linkedProjectIds ?? "[]"); } catch { return []; } })();
+                  const activeProjects = (allProjects ?? []).filter((p: any) => p.status !== "archived" && p.status !== "completed");
+                  if (activeProjects.length === 0) return null;
+                  return (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Link to projects</p>
+                      <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                        {activeProjects.map((p: any) => {
+                          const checked = linkedIds.includes(p.id);
+                          return (
+                            <label key={p.id} className="flex items-center gap-2 cursor-pointer group">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => {
+                                  const newIds = checked
+                                    ? linkedIds.filter((id) => id !== p.id)
+                                    : [...linkedIds, p.id];
+                                  graphItemUpdateItem.mutate({ id: item.id, linkedProjectIds: newIds });
+                                  setSelectedGraphItem((prev: any) => prev ? { ...prev, linkedProjectIds: JSON.stringify(newIds) } : null);
+                                }}
+                                className="w-3.5 h-3.5 rounded accent-primary"
+                              />
+                              <span className="text-xs text-foreground group-hover:text-primary transition-colors truncate">{p.title}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                   {item.state === "inbox" && (
                     <Button size="sm" variant="outline" className="text-xs h-7 gap-1.5"
