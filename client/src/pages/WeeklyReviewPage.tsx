@@ -52,10 +52,10 @@ export default function WeeklyReviewPage() {
   const checkInDays = recentCheckIns?.length ?? 0;
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
+        <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
         <p className="text-sm text-muted-foreground mt-1">
           {format(subDays(new Date(), 7), "MMM d")} – {format(new Date(), "MMM d, yyyy")}
         </p>

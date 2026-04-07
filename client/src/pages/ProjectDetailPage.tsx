@@ -224,7 +224,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="px-4 py-6">
+      <div className="px-5 py-7">
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
         </div>
@@ -250,7 +250,7 @@ export default function ProjectDetailPage() {
   ];
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
         <button
@@ -270,7 +270,7 @@ export default function ProjectDetailPage() {
               <span className="text-muted-foreground/30">·</span>
               <span className="text-xs text-muted-foreground capitalize">{project.priorityLevel} priority</span>
             </div>
-            <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">{project.title}</h1>
+            <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">{project.title}</h1>
           </div>
           <div className="flex gap-2 shrink-0">
             <Button

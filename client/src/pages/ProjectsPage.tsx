@@ -182,7 +182,7 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 shadow-[0_1px_2px_oklch(0_0_0/0.04)] transition-all duration-200 group"
+      className="w-full text-left p-4 rounded-xl border border-border bg-card card-interactive card-shadow transition-all duration-200 group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -248,11 +248,11 @@ export default function ProjectsPage() {
   }, {} as Partial<Record<ProjectStatus, number>>) ?? {};
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Projects</h1>
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Projects</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {projects?.filter((p) => p.status === "active").length ?? 0} active · {projects?.length ?? 0} total
           </p>

@@ -250,17 +250,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="h-screen w-full flex overflow-hidden bg-background">
         {/* Left Sidebar */}
         <aside
-          className="w-60 shrink-0 flex flex-col h-full border-r border-white/10 overflow-y-auto"
-          style={{ background: "var(--sidebar)" }}
+          className="w-60 shrink-0 flex flex-col h-full overflow-y-auto"
+          style={{ background: "var(--sidebar)", borderRight: "1px solid oklch(1 0 0 / 0.06)" }}
         >
           {/* Brand header */}
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+          <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
-              <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
-              <span className="text-sm font-semibold text-white/90 truncate tracking-wide">Continuary</span>
+              <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" style={{ boxShadow: "0 0 0 1px oklch(1 0 0 / 0.10)" }} />
+              <span className="text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
             </Link>
             {streak > 0 && (
-              <span className="ml-auto shrink-0 flex items-center gap-1 bg-amber-400/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full" title={`${streak}-day streak`}>
+              <span className="ml-auto shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.17 65)" }} title={`${streak}-day streak`}>
                 🔥 {streak}d
               </span>
             )}
@@ -268,40 +268,42 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
           {/* Nav */}
           <nav className="flex-1 px-2 py-3 space-y-0.5">
-            <p className="px-3 py-1.5 text-[10px] font-semibold text-white/30 uppercase tracking-widest">Command</p>
+            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Command</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "primary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
-                    active ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
-                  )}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                  style={active
+                    ? { background: "oklch(0.68 0.20 270 / 0.14)", color: "oklch(0.80 0.18 270)", fontWeight: 500 }
+                    : { color: "oklch(1 0 0 / 0.48)" }
+                  }
                 >
-                  <Icon className={cn("w-4 h-4 shrink-0", active ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
                   <span>{label}</span>
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.80 0.18 270)" }} />}
                 </Link>
               );
             })}
 
-            <p className="px-3 py-1.5 mt-3 text-[10px] font-semibold text-white/30 uppercase tracking-widest">Review</p>
+            <p className="px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "secondary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
-                    active ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
-                  )}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                  style={active
+                    ? { background: "oklch(0.68 0.20 270 / 0.14)", color: "oklch(0.80 0.18 270)", fontWeight: 500 }
+                    : { color: "oklch(1 0 0 / 0.48)" }
+                  }
                 >
-                  <Icon className={cn("w-4 h-4 shrink-0", active ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
                   <span>{label}</span>
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.80 0.18 270)" }} />}
                 </Link>
               );
             })}
@@ -337,15 +339,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
           </nav>
 
           {/* Sidebar footer */}
-          <div className="px-2 pb-3 pt-2 border-t border-white/10 space-y-1">
+          <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
             {user && (
               <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl">
-                <div className="w-7 h-7 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-semibold text-amber-400">{(user.name ?? "U").charAt(0).toUpperCase()}</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.68 0.20 270 / 0.18)" }}>
+                  <span className="text-xs font-semibold" style={{ color: "oklch(0.80 0.18 270)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-white/80 truncate">{user.name ?? "User"}</p>
-                  {user.role === "admin" && <p className="text-[10px] text-amber-400/70 font-medium">Admin</p>}
+                  <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
+                  {user.role === "admin" && <p className="text-[10px] font-medium" style={{ color: "oklch(0.80 0.17 65 / 0.65)" }}>Admin</p>}
                 </div>
               </div>
             )}
@@ -376,7 +378,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {/* FAB */}
         <button
           onClick={() => setIdeaOpen(true)}
-          className="fixed z-40 bottom-6 right-6 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+          className="fixed z-40 bottom-6 right-6 w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
+          style={{ background: "oklch(0.52 0.22 270)", boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.45), 0 0 0 2px var(--background)" }}
           title="Quick Capture (Idea Sanctuary)"
           aria-label="Capture an idea"
         >

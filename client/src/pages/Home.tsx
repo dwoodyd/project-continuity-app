@@ -84,12 +84,12 @@ function TaskItem({
 }) {
   return (
     <div className={cn(
-      "flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group",
+      "flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group card-interactive",
       task.done
         ? "bg-foreground/[0.02] border-border opacity-50"
         : isCarryover
           ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
-          : "bg-card border-border hover:border-foreground/20 hover:shadow-sm shadow-[0_1px_2px_oklch(0_0_0/0.04)]"
+          : "bg-card border-border hover:border-foreground/20 card-shadow"
     )}>
       <button
         onClick={() => !task.done && onComplete(task.id)}
@@ -834,12 +834,12 @@ export default function Home() {
   })();
 
   return (
-    <div className="px-4 py-6 page-enter max-w-4xl mx-auto space-y-6">
+    <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[1.6rem] font-medium tracking-[-0.01em] text-foreground leading-tight" style={{ fontFamily: "'Lora', Georgia, serif" }}>
-            {greeting}, <span className="text-primary">{firstName}</span>.
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
+            {greeting}, <span style={{ background: "linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{firstName}</span>.
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {format(now, "EEEE, MMMM d")}
@@ -875,10 +875,10 @@ export default function Home() {
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
       {topAlert === "check_in_due" && (
-        <div className="p-4 rounded-xl border border-primary/40" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
+        <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.68 0.20 270 / 0.28)", background: "linear-gradient(135deg, oklch(0.68 0.20 270 / 0.08) 0%, oklch(0.68 0.20 270 / 0.03) 100%)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Sun className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Morning plan ready</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Morning plan ready</p>
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </div>
@@ -930,7 +930,7 @@ export default function Home() {
         </div>
       )}
       {topAlert === "tomorrow_brief" && tomorrowBrief && (
-        <div className="p-4 rounded-xl bg-card border border-border shadow-sm">
+        <div className="p-4 rounded-xl bg-card border border-border card-shadow">
           <div className="flex items-center gap-2 mb-2">
             <Moon className="w-3.5 h-3.5 text-muted-foreground" />
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
@@ -1135,10 +1135,10 @@ export default function Home() {
 
       {/* ── Next Best Step Engine ──────────────────────────────────────────── */}
       {nextBestStep && tasks.length > 0 && !allTasksDone && (
-        <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 space-y-2">
+        <div className="p-4 rounded-xl border space-y-2" style={{ borderColor: "oklch(0.68 0.17 155 / 0.25)", background: "oklch(0.68 0.17 155 / 0.05)" }}>
           <div className="flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-emerald-500" />
-            <p className="text-[10px] font-semibold text-emerald-500/80 uppercase tracking-widest">Next best step</p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.68 0.17 155 / 0.80)" }}>Next best step</p>
             {nextBestStep.isStale && (
               <span className="ml-auto text-[9px] text-amber-500/70 font-medium">waiting a while</span>
             )}
@@ -1178,12 +1178,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border border-primary/30 space-y-3" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.68 0.20 270 / 0.25)", background: "linear-gradient(135deg, oklch(0.68 0.20 270 / 0.08) 0%, oklch(0.68 0.20 270 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-white" />
               </div>
-              <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Start here</p>
+              <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Start here</p>
             </div>
             <div>
               <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>

@@ -941,3 +941,12 @@
 - [x] Project link selector in graph node drawer
 - [x] Tag clustering toggle in VaultGraph
 - [x] Export graph as PNG button
+
+## Premium UI Redesign (Orizon-inspired)
+- [ ] Rewrite index.css global tokens: dark palette, Inter variable font, spacing, radius, shadows, animations
+- [ ] Redesign AppLayout sidebar: dark bg, accent active states, smooth transitions
+- [ ] Redesign Command Center (Home): premium card hierarchy, motion, typography
+- [ ] Redesign Vault page: dark cards, graph tab polish
+- [ ] Redesign Projects page: status badges, timeline polish
+- [ ] Redesign Settings, Weekly Review, onboarding, About page
+- [ ] Polish modals, dialogs, drawers, toasts

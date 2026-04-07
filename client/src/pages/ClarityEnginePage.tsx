@@ -1158,7 +1158,7 @@ export default function ClarityEnginePage() {
   });
 
   return (
-    <div className="p-6 md:p-8 min-h-screen max-w-4xl mx-auto">
+    <div className="px-5 py-7 max-w-4xl mx-auto">
       {view === "new" && (
         <NewSessionView
           selectedMode={selectedMode}

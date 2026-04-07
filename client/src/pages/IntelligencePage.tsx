@@ -214,7 +214,7 @@ export default function IntelligencePage() {
   const dominantState = Object.entries(stateCounts).sort((a, b) => b[1] - a[1])[0]?.[0] as EmotionalState | undefined;
 
   return (
-    <div className="px-4 py-6 space-y-10 max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-10 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>

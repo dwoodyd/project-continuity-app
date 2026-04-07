@@ -508,11 +508,11 @@ export default function VaultPage() {
   );
   const showGraphNudge = totalItems >= 10 && !graphNudgeDismissed && filterState !== "graph";
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Knowledge Vault</h1>
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Knowledge Vault</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {items?.length ?? 0} items · {inboxCount} in inbox
             {reviewCount > 0 && ` · ${reviewCount} need review`}
@@ -550,7 +550,7 @@ export default function VaultPage() {
 
       {/* Graph onboarding nudge */}
       {showGraphNudge && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/8 border border-primary/20 text-sm">
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border text-sm" style={{ borderColor: "oklch(0.68 0.20 270 / 0.25)", background: "oklch(0.68 0.20 270 / 0.06)" }}>
           <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="2" /><circle cx="2" cy="4" r="1.5" /><circle cx="14" cy="3" r="1.5" />
             <circle cx="13" cy="13" r="1.5" /><circle cx="3" cy="13" r="1.5" />

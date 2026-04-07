@@ -69,7 +69,7 @@ export default function WeeklyCompassPage() {
   })();
 
   return (
-    <div className="px-4 py-6 space-y-6 page-enter max-w-4xl mx-auto">
+    <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -79,7 +79,7 @@ export default function WeeklyCompassPage() {
               Week of {format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}
             </span>
           </div>
-          <h1 className="text-[1.6rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Compass</h1>
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Compass</h1>
           <p className="text-sm text-muted-foreground mt-1">
             One clear direction for the week. Not a schedule — a compass.
           </p>
