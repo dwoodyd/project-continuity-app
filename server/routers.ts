@@ -32,6 +32,8 @@ export const appRouter = router({
         name: u.name,
         email: u.email,
         role: u.role,
+        // Expose only a boolean — the raw code value is never needed by the frontend
+        hasRedeemedInvite: u.inviteCode !== null,
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         lastSignedIn: u.lastSignedIn,

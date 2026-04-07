@@ -190,7 +190,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       isAuthenticated &&
       user &&
       user.role !== "admin" &&
-      user.inviteCode === null &&
+      !user.hasRedeemedInvite &&
       location !== "/invite-gate" &&
       location !== "/onboarding" &&
       location !== "/about-app"

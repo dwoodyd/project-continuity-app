@@ -379,7 +379,7 @@ describe("auth.me — sensitive field leakage regression", () => {
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.auth.me() as Record<string, unknown> | null;
     expect(result).not.toBeNull();
-    const SAFE_FIELDS = new Set(["id", "name", "email", "role", "createdAt", "updatedAt", "lastSignedIn"]);
+    const SAFE_FIELDS = new Set(["id", "name", "email", "role", "hasRedeemedInvite", "createdAt", "updatedAt", "lastSignedIn"]);
     const returnedFields = Object.keys(result!);
     const unexpectedFields = returnedFields.filter(f => !SAFE_FIELDS.has(f));
     expect(unexpectedFields).toEqual([]);
