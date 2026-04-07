@@ -40,8 +40,8 @@ export const notificationsRouter = router({
   registerPush: protectedProcedure
     .input(z.object({
       endpoint: z.string().url(),
-      p256dh: z.string(),
-      auth: z.string(),
+      p256dh: z.string().max(200),
+      auth: z.string().max(100),
     }))
     .mutation(async ({ ctx, input }) => {
       // Validate that the push endpoint comes from a known push service.
@@ -66,7 +66,7 @@ export const notificationsRouter = router({
    * Unregister a specific push subscription (e.g. on logout or settings toggle).
    */
   unregisterPush: protectedProcedure
-    .input(z.object({ endpoint: z.string() }))
+    .input(z.object({ endpoint: z.string().max(500) }))
     .mutation(async ({ ctx, input }) => {
       await deletePushSubscription(ctx.user.id, input.endpoint);
       return { success: true };

@@ -113,9 +113,12 @@ async function startServer() {
     })
   );
 
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Default body limit: 10 MB covers all JSON payloads.
+  // Voice transcription uploads (audio blobs) are scoped to a higher 50 MB limit on their specific path.
+  app.use("/api/trpc/vault.uploadAudio", express.json({ limit: "50mb" }));
+  app.use("/api/trpc/vault.uploadAudio", express.urlencoded({ limit: "50mb", extended: true }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
   // ── Rate limiting ────────────────────────────────────────────────────────────
   // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.

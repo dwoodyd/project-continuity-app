@@ -958,3 +958,8 @@
 
 ## About Screen Copy (Apr 7, 2026)
 - [x] Write and apply three personalised core principles to AboutAppPage
+
+## Security Audit Fixes (Apr 7, 2026)
+- [x] Add .max() length constraints to 15 bare z.string() inputs (oversized string vector)
+- [x] Reduce express body limit from 50mb to 10mb (only audio uploads need large bodies; scope it)
+- [x] Add null guard before updateSourceItem in vault.ts line 287 (item used without check)

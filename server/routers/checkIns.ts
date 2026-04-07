@@ -507,7 +507,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
 
   completeTask: protectedProcedure
     .input(z.object({
-      taskId: z.string(),
+      taskId: z.string().max(100),
       date: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {

@@ -67,7 +67,7 @@ export const studyRouter = router({
   addFocusBlock: protectedProcedure
     .input(
       z.object({
-        logDate: z.string(),
+        logDate: z.string().max(10),
         startTime: z.string().optional(),
         duration: z.string().optional(),
         capacity: z.string().optional(),

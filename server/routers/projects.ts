@@ -16,8 +16,8 @@ const projectPhaseEnum = z.enum(["defining", "building", "refining", "publishing
 const priorityEnum = z.enum(["low", "medium", "high"]);
 
 const milestoneSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+  id: z.string().max(100),
+  title: z.string().max(200),
   done: z.boolean().default(false),
   goodEnoughThreshold: z.string().optional(),
 });
@@ -151,7 +151,7 @@ export const projectsRouter = router({
   updateContextBreadcrumb: protectedProcedure
     .input(z.object({
       id: z.number(),
-      breadcrumb: z.string(),
+      breadcrumb: z.string().max(500),
     }))
     .mutation(async ({ ctx, input }) => {
       await updateProject(input.id, ctx.user.id, { contextBreadcrumb: input.breadcrumb });

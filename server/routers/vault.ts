@@ -285,6 +285,7 @@ ${content.substring(0, 3000)}`,
     }))
     .mutation(async ({ ctx, input }) => {
       const item = await getSourceItemById(input.id, ctx.user.id);
+      if (!item) throw new TRPCError({ code: "NOT_FOUND" });
       await updateSourceItem(input.id, ctx.user.id, {
         reviewedAt: new Date(),
         mappingConfidence: "likely",

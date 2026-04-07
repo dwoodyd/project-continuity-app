@@ -46,10 +46,10 @@ export const settingsRouter = router({
 
   completeOnboarding: protectedProcedure
     .input(z.object({
-      workTypes: z.array(z.string()),
-      distractionPatterns: z.array(z.string()),
-      focusHoursStart: z.string(),
-      focusHoursEnd: z.string(),
+      workTypes: z.array(z.string().max(100)),
+      distractionPatterns: z.array(z.string().max(200)),
+      focusHoursStart: z.string().max(10),
+      focusHoursEnd: z.string().max(10),
       tonePreference: z.enum(["gentle", "direct", "firm"]),
       timezone: z.string().optional(),
       workStyle: z.enum(["writing_creative", "business_product", "ministry_coaching", "consulting_client", "multiple"]).optional(),

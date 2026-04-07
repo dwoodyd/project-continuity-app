@@ -13,8 +13,8 @@ function getTodayDate(): string {
 
 // Task schema extended with energyLevel for Voltage Mode
 const taskSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+  id: z.string().max(100),
+  title: z.string().max(200),
   done: z.boolean(),
   projectId: z.number().nullable().optional(),
   energyLevel: z.enum(["high", "low", "any"]).optional(),
@@ -30,7 +30,7 @@ export const dailyPlanRouter = router({
   }),
 
   getByDate: protectedProcedure
-    .input(z.object({ date: z.string() }))
+    .input(z.object({ date: z.string().max(10) }))
     .query(async ({ ctx, input }) => {
       const plan = await getDailyPlan(ctx.user.id, input.date);
       return plan ?? null;
