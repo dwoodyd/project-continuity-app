@@ -328,6 +328,14 @@ export default function SettingsPage() {
     onError: (err) => toast.error(err.message ?? "Could not generate code."),
   });
 
+  const revokeAiConsent = trpc.settings.revokeAiConsent.useMutation({
+    onSuccess: () => toast.success("AI consent revoked. The consent notice will reappear on next login."),
+    onError: () => toast.error("Failed to update AI consent."),
+  });
+  const giveAiConsentSettings = trpc.settings.giveAiConsent.useMutation({
+    onSuccess: () => toast.success("AI features enabled."),
+    onError: () => toast.error("Failed to update AI consent."),
+  });
   const deleteAccount = trpc.settings.deleteAccount.useMutation({
     onSuccess: () => {
       toast.success("Account deleted. Goodbye.");
@@ -488,8 +496,36 @@ export default function SettingsPage() {
             )}
           </div>
 
-          {/* Privacy link */}
-          <div className="flex items-center justify-between py-2">
+          {/* AI Data & Privacy */}
+          <div className="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
+            <p className="text-xs font-medium text-foreground">AI Data &amp; Privacy</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm text-foreground">AI-assisted features</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {settings?.aiConsentGiven
+                    ? "Your notes and check-in answers are sent to Google Gemini (via Manus) to generate plans and insights."
+                    : "AI features are disabled. Enable to allow note content to be sent to Google Gemini for plan generation."}
+                </p>
+              </div>
+              {settings?.aiConsentGiven ? (
+                <button
+                  onClick={() => revokeAiConsent.mutate()}
+                  disabled={revokeAiConsent.isPending}
+                  className="text-xs text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors shrink-0"
+                >
+                  {revokeAiConsent.isPending ? "Saving…" : "Revoke"}
+                </button>
+              ) : (
+                <button
+                  onClick={() => giveAiConsentSettings.mutate()}
+                  disabled={giveAiConsentSettings.isPending}
+                  className="text-xs text-primary hover:text-primary/80 underline underline-offset-2 transition-colors shrink-0"
+                >
+                  {giveAiConsentSettings.isPending ? "Saving…" : "Enable AI"}
+                </button>
+              )}
+            </div>
             <button
               onClick={() => navigate("/privacy")}
               className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"

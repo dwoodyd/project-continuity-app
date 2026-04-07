@@ -53,14 +53,39 @@ export default function PrivacyPage() {
           <div>
             <h2 className="text-base font-semibold mb-2">How we use your data</h2>
             <ul className="list-disc list-inside space-y-1 text-foreground/80">
-              <li>To provide the app's features (AI check-ins, project memory, Clarity Engine)</li>
+              <li>To provide the app’s features (AI check-ins, project memory, Clarity Engine)</li>
               <li>To send push notifications you have opted into</li>
               <li>To improve the product during the beta period based on aggregate patterns</li>
             </ul>
-            <p className="mt-2">
-              Your notes and check-in content are sent to an AI language model to generate
-              personalised guidance. This content is processed in real time and is not used to train
-              AI models.
+          </div>
+
+          <div>
+            <h2 className="text-base font-semibold mb-2">AI data processing (third-party service)</h2>
+            <p className="mb-2">
+              When you use AI-assisted features (daily planning, check-in responses, Clarity Engine,
+              project insights), relevant portions of your data are sent to a third-party AI service
+              for processing:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-foreground/80 mb-2">
+              <li><strong>Service:</strong> Google Gemini, accessed via the Manus AI platform proxy</li>
+              <li><strong>Data sent:</strong> Project titles, descriptions, next steps; check-in answers; vault item summaries (not raw file content)</li>
+              <li><strong>Retention:</strong> Data is processed in real time for your response only. Google does not store or use your content to train models under the Manus API agreement.</li>
+              <li><strong>Purpose:</strong> Generating personalised plans, insights, and guidance</li>
+            </ul>
+            <p className="mb-2">
+              You can disable AI features at any time in{" "}
+              <a href="/settings" className="underline underline-offset-2 hover:text-foreground">Settings → AI Data &amp; Privacy</a>.
+              Disabling AI features does not affect manual note capture, project tracking, or focus sessions.
+            </p>
+            <p className="text-foreground/70">
+              <strong>EU / GDPR users:</strong> The lawful basis for processing your data via the AI
+              service is your explicit consent under GDPR Article 6(1)(a), given when you accepted
+              the AI data transparency notice on first use. You may withdraw this consent at any time
+              via the Settings page; withdrawal does not affect the lawfulness of processing carried
+              out before withdrawal. For data subject requests (access, rectification, erasure,
+              portability), contact us at{" "}
+              <a href="mailto:hello@continuary.app" className="underline underline-offset-2 hover:text-foreground">hello@continuary.app</a>.
+              We will respond within 30 days.
             </p>
           </div>
 

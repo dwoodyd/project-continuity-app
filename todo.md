@@ -980,3 +980,8 @@
 ## App Store Compliance (Apr 7, 2026)
 - [x] Add aiConsentGiven field to userProfiles schema + migration
 - [x] Add AI data transparency consent modal (5.1.2i) — shown once before first AI feature use
+
+## App Store Compliance Round 2 (Apr 7, 2026)
+- [x] Add revokeAiConsent procedure + Settings toggle (AI Data & Privacy section with revoke/enable)
+- [x] Write Privacy Policy page content (AI data processing section: Google Gemini, retention, GDPR)
+- [x] Add GDPR Article 6(1)(a) paragraph to AiConsentModal for EU distribution

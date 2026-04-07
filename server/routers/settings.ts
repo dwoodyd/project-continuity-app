@@ -144,4 +144,13 @@ export const settingsRouter = router({
     }
     return { success: true };
   }),
+  revokeAiConsent: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await getUserProfile(ctx.user.id);
+    if (existing) {
+      await updateUserProfile(ctx.user.id, { aiConsentGiven: false });
+    } else {
+      await upsertUserProfile({ userId: ctx.user.id, aiConsentGiven: false });
+    }
+    return { success: true };
+  }),
 });
