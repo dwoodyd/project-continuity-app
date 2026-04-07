@@ -34,6 +34,7 @@ export const settingsRouter = router({
       onboardingCompleted: false,
       planningMode: false,
       seenAbout: false,
+      aiConsentGiven: false,
       workStyle: null,
       preferredFocusHours: "morning" as const,
       workTypes: null,
@@ -130,6 +131,16 @@ export const settingsRouter = router({
       await updateUserProfile(ctx.user.id, { seenAbout: true });
     } else {
       await upsertUserProfile({ userId: ctx.user.id, seenAbout: true });
+    }
+    return { success: true };
+  }),
+  // ── App Store 5.1.2(i): AI data transparency consent ─────────────────────────
+  giveAiConsent: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await getUserProfile(ctx.user.id);
+    if (existing) {
+      await updateUserProfile(ctx.user.id, { aiConsentGiven: true });
+    } else {
+      await upsertUserProfile({ userId: ctx.user.id, aiConsentGiven: true });
     }
     return { success: true };
   }),

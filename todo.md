@@ -976,3 +976,7 @@
 - [x] Content-Type enforcement middleware on /api/trpc (reject non-JSON POST requests)
 - [x] Invite code admin UI enhanced with bulk generate (1-20 at once), copy-all button, 3-stat grid
 - [x] Custom domain CNAME setup instructions provided to user
+
+## App Store Compliance (Apr 7, 2026)
+- [x] Add aiConsentGiven field to userProfiles schema + migration
+- [x] Add AI data transparency consent modal (5.1.2i) — shown once before first AI feature use

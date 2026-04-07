@@ -127,6 +127,13 @@
       "when": 1775362555705,
       "tag": "0017_glorious_stepford_cuckoos",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1775601540788,
+      "tag": "0018_aspiring_echo",
+      "breakpoints": true
     }
   ]
 }

@@ -36,6 +36,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
 import AmnestyScreen from "./AmnestyScreen";
+import AiConsentModal from "./AiConsentModal";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -156,6 +157,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const streak = streakData?.streak ?? 0;
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
+  // AI consent: show once after onboarding + about-app, before any AI feature is used
+  const [aiConsentDismissed, setAiConsentDismissed] = useState(false);
+  const showAiConsent =
+    isAuthenticated &&
+    !aiConsentDismissed &&
+    profile?.onboardingCompleted === true &&
+    profile?.seenAbout === true &&
+    profile?.aiConsentGiven === false;
 
   // Close more sheet on navigation
   useEffect(() => {
@@ -237,6 +246,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
           <p className="text-center text-xs text-muted-foreground/50 mt-6 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
         </div>
       </div>
+    );
+  }
+
+  if (showAiConsent) {
+    return (
+      <AiConsentModal
+        onAccept={() => setAiConsentDismissed(true)}
+        onDecline={() => setAiConsentDismissed(true)}
+      />
     );
   }
 
