@@ -233,6 +233,19 @@ export async function updateSourceItem(id: number, userId: number, updates: Part
     .where(and(eq(sourceItems.id, id), eq(sourceItems.userId, userId)));
 }
 
+export async function batchUpdateSourceItemsState(
+  ids: number[],
+  userId: number,
+  state: SourceItem["state"]
+): Promise<void> {
+  if (ids.length === 0) return;
+  const db = await getDb();
+  if (!db) return;
+  await db.update(sourceItems)
+    .set({ state })
+    .where(and(eq(sourceItems.userId, userId), sql`${sourceItems.id} IN (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`));
+}
+
 // ─── Daily Plans ──────────────────────────────────────────────────────────────
 export async function getDailyPlan(userId: number, date: string): Promise<DailyPlan | undefined> {
   const db = await getDb();
@@ -488,6 +501,13 @@ export async function createProjectMemoryEvent(event: InsertProjectMemoryEvent):
   if (!db) return 0;
   const result = await db.insert(projectMemoryEvents).values(event);
   return (result as any).insertId ?? 0;
+}
+
+export async function batchCreateProjectMemoryEvents(events: InsertProjectMemoryEvent[]): Promise<void> {
+  if (events.length === 0) return;
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(projectMemoryEvents).values(events);
 }
 
 export async function getProjectMemoryEvents(userId: number, projectId: number): Promise<ProjectMemoryEvent[]> {

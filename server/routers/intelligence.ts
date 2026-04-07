@@ -15,6 +15,7 @@ import {
   createDistractionEvent,
   getDistractionWeeklyAggregates,
   createProjectMemoryEvent,
+  batchCreateProjectMemoryEvents,
   getProjectMemoryEvents,
   getLastDecisionForProject,
   getWeeklyCompass,
@@ -260,24 +261,24 @@ Return JSON: { decisions: string[] }`,
         synced++;
       }
 
-      // Log focus sessions not yet in timeline
+      // Log focus sessions not yet in timeline — batch insert to avoid N+1
       const existingSessionIds = new Set(
         existing.filter((e) => e.eventType === "focus_session").map((e) => {
           try { return JSON.parse(e.metadata ?? "{}").sessionId; } catch { return null; }
         })
       );
-      for (const session of sessions) {
-        if (existingSessionIds.has(session.id)) continue;
-        await createProjectMemoryEvent({
+      const newSessionEvents = sessions
+        .filter((session) => !existingSessionIds.has(session.id))
+        .map((session) => ({
           userId: ctx.user.id,
           projectId: input.projectId,
-          eventType: "focus_session",
+          eventType: "focus_session" as const,
           content: `Focus session: "${session.intention}" — ${Math.round(session.durationSeconds / 60)} min${session.wasCompleted ? " (completed)" : " (stepped away)"}`,
           metadata: JSON.stringify({ sessionId: session.id, durationSeconds: session.durationSeconds, wasCompleted: session.wasCompleted }),
           occurredAt: session.startedAt,
-        });
-        synced++;
-      }
+        }));
+      await batchCreateProjectMemoryEvents(newSessionEvents);
+      synced += newSessionEvents.length;
 
       return { synced };
     }),

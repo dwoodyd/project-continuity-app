@@ -966,3 +966,8 @@
 
 ## Security Hardening Round 2 (Apr 7, 2026)
 - [x] Add z.string().regex(/^\d{4}-\d{2}-\d{2}$/) to all date inputs in dailyPlan and study routers
+
+## Performance Engineering (Apr 7, 2026)
+- [ ] Fix confirmed N+1 queries
+- [ ] LLM streaming for aiProcess procedure
+- [ ] React memo/callback optimizations on hotspot components

@@ -7,6 +7,7 @@ import {
   getSourceItems,
   getSourceItemsByState,
   updateSourceItem,
+  batchUpdateSourceItemsState,
   createProjectMemoryEvent,
   getProjectById,
   getProjects,
@@ -404,13 +405,8 @@ ${content.substring(0, 3000)}`,
       const inboxItems = await getSourceItemsByState(ctx.user.id, "inbox");
 
       const toArchive = inboxItems.filter(item => item.createdAt < cutoff);
-
-      let archivedCount = 0;
-      for (const item of toArchive) {
-        await updateSourceItem(item.id, ctx.user.id, { state: "archived" });
-        archivedCount++;
-      }
-
+      const archivedCount = toArchive.length;
+      await batchUpdateSourceItemsState(toArchive.map(i => i.id), ctx.user.id, "archived");
       return { archivedCount };
     }),
 

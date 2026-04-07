@@ -27,7 +27,7 @@ import {
   Bell,
   X,
 } from "lucide-react";
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,7 +71,7 @@ const capacityConfig = {
 };
 
 // ─── Task Item ────────────────────────────────────────────────────────────────
-function TaskItem({
+const TaskItem = React.memo(function TaskItem({
   task,
   onComplete,
   onUnstick,
@@ -137,7 +137,7 @@ function TaskItem({
       )}
     </div>
   );
-}
+});
 
 // ─── Check-In Card ────────────────────────────────────────────────────────────
 function CheckInCard({

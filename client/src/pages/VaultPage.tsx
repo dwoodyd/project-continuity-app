@@ -13,7 +13,7 @@ import {
   Sparkles,
   Upload,
 } from "lucide-react";
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -258,8 +258,8 @@ function AddItemModal({
   );
 }
 
-// ─── Source Item Card ─────────────────────────────────────────────────────────
-function SourceItemCard({
+// ─── Source Item Card ────────────────────────────────────────────────────────────────
+const SourceItemCard = React.memo(function SourceItemCard({
   item,
   onUpdate,
   onProcess,
@@ -423,10 +423,9 @@ function SourceItemCard({
           </div>
         </div>
       )}
-    </div>
+     </div>
   );
-}
-
+});
 // ─── Main Vault Page ──────────────────────────────────────────────────────────
 export default function VaultPage() {
   const [addOpen, setAddOpen] = useState(false);
