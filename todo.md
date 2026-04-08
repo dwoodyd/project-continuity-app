@@ -1021,3 +1021,9 @@
 
 ## Domain Redirect (Apr 8, 2026)
 - [x] Add Express middleware: 301 redirect from continuary.manus.space → continuary.soulengineer.online
+
+## UX Fixes (Apr 8, 2026)
+- [x] Add undo for accidental task completion — show toast with "Undo" button for 5s after a task is checked off
+- [x] Allow reordering / changing next best step during project check-in ("Different step" button in Start Here card opens project picker + custom step input)
+- [x] Fix tab/click overflow in Planning Mode and other sections — added min-w-0 + overflow-hidden + truncate to check-in cards
+- [x] Add Planning Mode vs Focus Mode explainer in the UI — HelpCircle tooltip on Planning/Doing Mode toggle explains both modes and difference from Focus Mode

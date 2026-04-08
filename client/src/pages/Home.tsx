@@ -26,6 +26,8 @@ import {
   BarChart2,
   Bell,
   X,
+  HelpCircle,
+  Shuffle,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -38,6 +40,7 @@ import UnstickModal from "@/components/UnstickModal";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -76,17 +79,21 @@ const TaskItem = React.memo(function TaskItem({
   onComplete,
   onUnstick,
   isCarryover = false,
+  pendingUndo = false,
 }: {
   task: any;
   onComplete: (id: string) => void;
   onUnstick: (t: { id: string; title: string; projectId?: number | null }) => void;
   isCarryover?: boolean;
+  pendingUndo?: boolean;
 }) {
   return (
     <div className={cn(
       "flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group card-interactive",
       task.done
-        ? "bg-foreground/[0.02] border-border opacity-50"
+        ? pendingUndo
+          ? "bg-amber-50/30 dark:bg-amber-900/10 border-amber-300/40 dark:border-amber-700/40 opacity-70"
+          : "bg-foreground/[0.02] border-border opacity-50"
         : isCarryover
           ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
           : "bg-card border-border hover:border-foreground/20 card-shadow"
@@ -96,12 +103,15 @@ const TaskItem = React.memo(function TaskItem({
         className={cn(
           "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-150 flex items-center justify-center",
           task.done
-            ? "bg-emerald-500/20 border-emerald-500/40"
+            ? pendingUndo
+              ? "bg-amber-400/20 border-amber-400/60"
+              : "bg-emerald-500/20 border-emerald-500/40"
             : "border-foreground/25 hover:border-foreground/50 hover:bg-foreground/5"
         )}
         aria-label={task.done ? "Mark incomplete" : "Mark complete"}
       >
-        {task.done && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
+        {task.done && !pendingUndo && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
+        {task.done && pendingUndo && <RotateCcw className="w-2.5 h-2.5 text-amber-500" />}
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn(
@@ -162,7 +172,7 @@ function CheckInCard({
       onClick={!completed ? onOpen : undefined}
       disabled={completed}
       className={cn(
-        "flex-1 flex flex-col items-start gap-1.5 p-3.5 rounded-xl border text-left transition-all duration-150",
+        "flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden",
         completed
           ? "bg-muted/40 border-border opacity-60 cursor-default"
           : active
@@ -176,7 +186,7 @@ function CheckInCard({
           completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
         )} />
         <span className={cn(
-          "text-xs font-medium tracking-[-0.01em]",
+          "text-xs font-medium tracking-[-0.01em] truncate",
           completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
         )}>
           {label}
@@ -187,7 +197,7 @@ function CheckInCard({
         )}
       </div>
       <p className={cn(
-        "text-[10px] leading-tight pl-0.5",
+        "text-[10px] leading-tight pl-0.5 truncate w-full",
         active ? "text-white/70" : "text-muted-foreground/55"
       )}>{timeHint}</p>
     </button>
@@ -666,6 +676,9 @@ export default function Home() {
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [thresholdTask, setThresholdTask] = useState("");
   const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
+  // "Pick different step" state for the Start Here card
+  const [pickingStep, setPickingStep] = useState(false);
+  const [customStep, setCustomStep] = useState("");
   // Ref to scroll the check-in form into view when opened from the bottom CTA
   const checkInRef = useRef<HTMLDivElement>(null);
   const openCheckIn = useCallback((type: CheckInStep) => {
@@ -739,9 +752,43 @@ export default function Home() {
     return map;
   }, [healthScores]);
 
-  const completeTask = trpc.checkIns.completeTask.useMutation({
+  // Undo state: tracks task IDs that were just completed but can still be undone
+  const [pendingUndoTaskIds, setPendingUndoTaskIds] = useState<Set<string>>(new Set());
+  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+
+  const completeTaskMutation = trpc.checkIns.completeTask.useMutation({
     onSuccess: () => refetchPlan(),
   });
+  const uncompleteTask = trpc.checkIns.uncompleteTask.useMutation({
+    onSuccess: () => refetchPlan(),
+  });
+
+  // Wrap completeTask with a 5-second undo window
+  const completeTask = useCallback((taskId: string) => {
+    // Optimistically mark done in the UI immediately
+    completeTaskMutation.mutate({ taskId });
+    // Mark as pending-undo
+    setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
+    // Show undo toast
+    toast("Task marked complete", {
+      description: "Tap Undo if that was a mistake.",
+      duration: 5000,
+      action: {
+        label: "Undo",
+        onClick: () => {
+          clearTimeout(undoTimers.current[taskId]);
+          delete undoTimers.current[taskId];
+          setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
+          uncompleteTask.mutate({ taskId });
+        },
+      },
+    });
+    // Auto-clear pending-undo state after 5.5s (slightly after toast expires)
+    undoTimers.current[taskId] = setTimeout(() => {
+      setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
+      delete undoTimers.current[taskId];
+    }, 5500);
+  }, [completeTaskMutation, uncompleteTask]);
 
   const tasks: any[] = useMemo(() => {
     if (!todayPlan?.criticalTasks) return [];
@@ -1112,8 +1159,9 @@ export default function Home() {
                 <div key={task.id} className="relative">
                   <TaskItem
                     task={task}
-                    onComplete={(id) => completeTask.mutate({ taskId: id })}
+                    onComplete={(id) => completeTask(id)}
                     onUnstick={(t) => setUnstickTask(t)}
+                    pendingUndo={pendingUndoTaskIds.has(task.id)}
                   />
                   {getCarryoverCount(task) >= 2 && (
                     <div className="absolute -top-1 -right-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700">
@@ -1184,66 +1232,128 @@ export default function Home() {
                 <ArrowRight className="w-3 h-3 text-white" />
               </div>
               <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Start here</p>
+              <button
+                onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
+                className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                title="Pick a different next step"
+              >
+                <Shuffle className="w-3 h-3" />
+                <span>{pickingStep ? "Cancel" : "Different step"}</span>
+              </button>
             </div>
-            <div>
-              <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{topProject.title}</p>
-            </div>
-            {topProject.contextBreadcrumb && (
-              <div className="border-l-2 border-border pl-3">
-                <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
-                  Last stopping point: {topProject.contextBreadcrumb}
-                </p>
+
+            {/* Pick different step panel */}
+            {pickingStep && (
+              <div className="space-y-2 pt-1 border-t border-border/50">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Choose a different starting point</p>
+                {activeProjects.filter((p) => p.nextStep).map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      navigate(`/projects/${p.id}`);
+                      setPickingStep(false);
+                    }}
+                    className={cn(
+                      "w-full text-left p-2.5 rounded-lg border text-xs transition-all",
+                      p.id === topProject.id
+                        ? "border-primary/40 bg-primary/[0.06] text-foreground"
+                        : "border-border hover:border-primary/20 text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    <span className="font-medium block truncate">{p.nextStep}</span>
+                    <span className="text-[10px] opacity-60">{p.title}</span>
+                  </button>
+                ))}
+                <div className="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    value={customStep}
+                    onChange={(e) => setCustomStep(e.target.value)}
+                    placeholder="Or type a custom step..."
+                    className="flex-1 text-xs px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && customStep.trim()) {
+                        navigate(`/projects/${topProject.id}`);
+                        setPickingStep(false);
+                      }
+                    }}
+                  />
+                  {customStep.trim() && (
+                    <button
+                      onClick={() => { navigate(`/projects/${topProject.id}`); setPickingStep(false); }}
+                      className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-medium"
+                    >
+                      Go
+                    </button>
+                  )}
+                </div>
+                <p className="text-[10px] text-muted-foreground/50">Selecting a step opens the project to update it.</p>
               </div>
             )}
-            {/* Inject most recent decision for this project into Start Here */}
-            {recentDecisions && (() => {
-              const projectDecision = recentDecisions.find((d: any) => d.projectId === topProject.id);
-              if (!projectDecision) return null;
-              return (
-                <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-3">
-                  <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Last decision</p>
-                  <p className="text-xs text-foreground/80 leading-snug">{projectDecision.content}</p>
+
+            {!pickingStep && (
+              <>
+                <div>
+                  <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{topProject.title}</p>
                 </div>
-              );
-            })()}
-            <div className="flex items-center gap-2 justify-end flex-wrap">
-              <button
-                onClick={() => setReEntryProjectId(reEntryProjectId === topProject.id ? null : topProject.id)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {reEntryProjectId === topProject.id ? "Hide re-entry card" : "Show re-entry card"}
-              </button>
-              <span className="text-muted-foreground/30">·</span>
-              <button
-                onClick={() => {
-                  setFmsTask(topProject.nextStep ?? "");
-                  setFmsProjectId(topProject.id);
-                  setFmsOpen(true);
-                }}
-                className="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 transition-colors font-medium"
-              >
-                🪶 First movable step
-              </button>
-              <span className="text-muted-foreground/30">·</span>
-              <button
-                onClick={() => {
-                  setThresholdTask(topProject.nextStep ?? "");
-                  setThresholdProjectId(topProject.id);
-                  setThresholdOpen(true);
-                }}
-                className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors font-medium"
-              >
-                🚪 What's blocking me?
-              </button>
-              <span className="text-muted-foreground/30">·</span>
-              <button
-                onClick={() => navigate("/focus")}
-                className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
-              >
-                Open in Focus Mode
-              </button>
-            </div>
+                {topProject.contextBreadcrumb && (
+                  <div className="border-l-2 border-border pl-3">
+                    <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
+                      Last stopping point: {topProject.contextBreadcrumb}
+                    </p>
+                  </div>
+                )}
+                {/* Inject most recent decision for this project into Start Here */}
+                {recentDecisions && (() => {
+                  const projectDecision = recentDecisions.find((d: any) => d.projectId === topProject.id);
+                  if (!projectDecision) return null;
+                  return (
+                    <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-3">
+                      <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Last decision</p>
+                      <p className="text-xs text-foreground/80 leading-snug">{projectDecision.content}</p>
+                    </div>
+                  );
+                })()}
+                <div className="flex items-center gap-2 justify-end flex-wrap">
+                  <button
+                    onClick={() => setReEntryProjectId(reEntryProjectId === topProject.id ? null : topProject.id)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {reEntryProjectId === topProject.id ? "Hide re-entry card" : "Show re-entry card"}
+                  </button>
+                  <span className="text-muted-foreground/30">·</span>
+                  <button
+                    onClick={() => {
+                      setFmsTask(topProject.nextStep ?? "");
+                      setFmsProjectId(topProject.id);
+                      setFmsOpen(true);
+                    }}
+                    className="text-xs text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 transition-colors font-medium"
+                  >
+                    🪶 First movable step
+                  </button>
+                  <span className="text-muted-foreground/30">·</span>
+                  <button
+                    onClick={() => {
+                      setThresholdTask(topProject.nextStep ?? "");
+                      setThresholdProjectId(topProject.id);
+                      setThresholdOpen(true);
+                    }}
+                    className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors font-medium"
+                  >
+                    🚪 What's blocking me?
+                  </button>
+                  <span className="text-muted-foreground/30">·</span>
+                  <button
+                    onClick={() => navigate("/focus")}
+                    className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                  >
+                    Open in Focus Mode
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         );
       })()}
@@ -1387,13 +1497,29 @@ export default function Home() {
         </div>
       )}
 
-       {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────── */}
+       {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────────── */}
       <div className="p-4 rounded-xl border border-border bg-card">
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-foreground">
-              {isPlanningMode ? "⚡ Planning Mode" : "🎯 Doing Mode"}
-            </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-semibold text-foreground">
+                {isPlanningMode ? "⚡ Planning Mode" : "🎯 Doing Mode"}
+              </p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="text-muted-foreground/40 hover:text-muted-foreground transition-colors" aria-label="What is this?">
+                      <HelpCircle className="w-3 h-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed space-y-2 p-3">
+                    <p><strong>⚡ Planning Mode</strong> — for thinking, mapping, and deciding. Use this when you’re figuring out what to do next, breaking down a project, or making decisions. The app surfaces your projects and next steps for review.</p>
+                    <p><strong>🎯 Doing Mode</strong> — for executing and building. Use this when you know exactly what to do and just need to get it done. The app focuses on your current task and minimises distractions.</p>
+                    <p className="text-muted-foreground/60">Toggle this to match your mental state right now. Focus Mode (the ⚡ button in the sidebar) is a separate distraction-free timer session.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">
               {isPlanningMode ? "Thinking, mapping, deciding" : "Executing, building, shipping"}
             </p>
@@ -1402,7 +1528,7 @@ export default function Home() {
             onClick={togglePlanningMode}
             disabled={updateSettings.isPending}
             className={cn(
-              "relative w-10 h-5.5 rounded-full transition-colors border",
+              "relative w-10 h-5.5 rounded-full transition-colors border shrink-0 ml-3",
               isPlanningMode
                 ? "bg-primary border-primary/60"
                 : "bg-foreground/10 border-border"
@@ -1415,8 +1541,7 @@ export default function Home() {
             )} />
           </button>
         </div>
-      </div>
-        </div>
+      </div>     </div>
       </div>
       {/* ── Empty state — no plan yet (full width below grid) ───────────────────────────────────────── */}
       {!todayPlan && !activeCheckIn && (
