@@ -1012,4 +1012,4 @@
 - [x] Fix 5: Add Redis store migration guidance as TODO comments in both rate limiters
 
 ## Logo Fix (Apr 8, 2026)
-- [ ] Remove white background from sidebar logo and favicon — generate transparent PNG and update all app references
+- [x] Remove white background from sidebar logo and favicon — replaced BRAND_LOGO_SIGNIN (white-bg PNG) with composed JSX icon+wordmark; uploaded all 11 clean cropped icons to CDN; updated index.html, manifest.json, sw.js with new URLs; bumped SW cache to v5

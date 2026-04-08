@@ -230,8 +230,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up">
-              <img src={BRAND_LOGO_SIGNIN} alt="Continuary" className="w-48 object-contain" />
-              <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
+              <img src={BRAND_ICON} alt="Continuary" className="w-16 h-16 object-contain rounded-2xl" />
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Lora', serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
+                <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
+              </div>
             </div>
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
