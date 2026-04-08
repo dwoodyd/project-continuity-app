@@ -1027,3 +1027,8 @@
 - [x] Allow reordering / changing next best step during project check-in ("Different step" button in Start Here card opens project picker + custom step input)
 - [x] Fix tab/click overflow in Planning Mode and other sections — added min-w-0 + overflow-hidden + truncate to check-in cards
 - [x] Add Planning Mode vs Focus Mode explainer in the UI — HelpCircle tooltip on Planning/Doing Mode toggle explains both modes and difference from Focus Mode
+
+## UX Improvements Round 2 (Apr 8, 2026)
+- [x] Inline next-step editing in "Different step" picker — type and save new step without leaving Command Center
+- [x] Long-press to complete tasks (500ms hold) — prevents accidental completions, replaces single-tap
+- [x] Swipe-right gesture on task items to complete — natural mobile interaction, harder to trigger accidentally

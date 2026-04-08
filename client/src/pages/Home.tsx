@@ -87,28 +87,103 @@ const TaskItem = React.memo(function TaskItem({
   isCarryover?: boolean;
   pendingUndo?: boolean;
 }) {
+  // Long-press state
+  const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pressing, setPressing] = React.useState(false);
+  const [pressProgress, setPressProgress] = React.useState(0);
+  const pressInterval = React.useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startPress = () => {
+    if (task.done) return;
+    setPressing(true);
+    setPressProgress(0);
+    let elapsed = 0;
+    pressInterval.current = setInterval(() => {
+      elapsed += 50;
+      setPressProgress(Math.min(elapsed / 500, 1));
+    }, 50);
+    longPressTimer.current = setTimeout(() => {
+      clearInterval(pressInterval.current!);
+      setPressing(false);
+      setPressProgress(0);
+      onComplete(task.id);
+    }, 500);
+  };
+
+  const cancelPress = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    if (pressInterval.current) clearInterval(pressInterval.current);
+    setPressing(false);
+    setPressProgress(0);
+  };
+
+  // Swipe-right state
+  const swipeStart = React.useRef<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = React.useState(0);
+  const SWIPE_THRESHOLD = 72;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (task.done) return;
+    swipeStart.current = e.touches[0].clientX;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (swipeStart.current === null || task.done) return;
+    const dx = e.touches[0].clientX - swipeStart.current;
+    if (dx > 0) setSwipeOffset(Math.min(dx, SWIPE_THRESHOLD + 20));
+  };
+  const onTouchEnd = () => {
+    if (swipeOffset >= SWIPE_THRESHOLD) onComplete(task.id);
+    setSwipeOffset(0);
+    swipeStart.current = null;
+  };
+
   return (
-    <div className={cn(
-      "flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group card-interactive",
-      task.done
-        ? pendingUndo
-          ? "bg-amber-50/30 dark:bg-amber-900/10 border-amber-300/40 dark:border-amber-700/40 opacity-70"
-          : "bg-foreground/[0.02] border-border opacity-50"
-        : isCarryover
-          ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
-          : "bg-card border-border hover:border-foreground/20 card-shadow"
-    )}>
+    <div
+      className={cn(
+        "relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group card-interactive overflow-hidden",
+        task.done
+          ? pendingUndo
+            ? "bg-amber-50/30 dark:bg-amber-900/10 border-amber-300/40 dark:border-amber-700/40 opacity-70"
+            : "bg-foreground/[0.02] border-border opacity-50"
+          : isCarryover
+            ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
+            : "bg-card border-border hover:border-foreground/20 card-shadow"
+      )}
+      style={swipeOffset > 0 ? { transform: `translateX(${swipeOffset}px)` } : undefined}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Swipe-right reveal indicator */}
+      {swipeOffset > 0 && (
+        <div
+          className="absolute left-0 top-0 bottom-0 flex items-center justify-center bg-emerald-500/20 rounded-l-xl"
+          style={{ width: swipeOffset }}
+        >
+          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+        </div>
+      )}
+      {/* Long-press progress ring on the circle button */}
       <button
-        onClick={() => !task.done && onComplete(task.id)}
+        onPointerDown={startPress}
+        onPointerUp={cancelPress}
+        onPointerLeave={cancelPress}
         className={cn(
-          "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-150 flex items-center justify-center",
+          "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-150 flex items-center justify-center relative",
           task.done
             ? pendingUndo
               ? "bg-amber-400/20 border-amber-400/60"
               : "bg-emerald-500/20 border-emerald-500/40"
-            : "border-foreground/25 hover:border-foreground/50 hover:bg-foreground/5"
+            : pressing
+              ? "border-primary bg-primary/10"
+              : "border-foreground/25 hover:border-foreground/50 hover:bg-foreground/5"
         )}
-        aria-label={task.done ? "Mark incomplete" : "Mark complete"}
+        style={pressing && pressProgress > 0 ? {
+          background: `conic-gradient(oklch(0.51 0.24 264) ${pressProgress * 360}deg, transparent 0deg)`,
+          borderColor: "oklch(0.51 0.24 264)"
+        } : undefined}
+        aria-label={task.done ? "Completed" : "Hold to complete"}
+        title={task.done ? "Completed" : "Hold to complete"}
       >
         {task.done && !pendingUndo && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
         {task.done && pendingUndo && <RotateCcw className="w-2.5 h-2.5 text-amber-500" />}
@@ -752,9 +827,15 @@ export default function Home() {
     return map;
   }, [healthScores]);
 
+  // Inline next-step update mutation
+  const updateProjectNextStep = trpc.projects.update.useMutation({
+    onSuccess: () => utils.projects.listActive.invalidate(),
+  });
+  const [savingStep, setSavingStep] = useState(false);
+
   // Undo state: tracks task IDs that were just completed but can still be undone
   const [pendingUndoTaskIds, setPendingUndoTaskIds] = useState<Set<string>>(new Set());
-  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({}); 
 
   const completeTaskMutation = trpc.checkIns.completeTask.useMutation({
     onSuccess: () => refetchPlan(),
@@ -1245,13 +1326,17 @@ export default function Home() {
             {/* Pick different step panel */}
             {pickingStep && (
               <div className="space-y-2 pt-1 border-t border-border/50">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Choose a different starting point</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Choose a starting point</p>
                 {activeProjects.filter((p) => p.nextStep).map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => {
-                      navigate(`/projects/${p.id}`);
+                    onClick={async () => {
+                      if (p.id === topProject.id) { setPickingStep(false); return; }
+                      setSavingStep(true);
+                      await updateProjectNextStep.mutateAsync({ id: topProject.id, nextStep: p.nextStep ?? "" });
+                      setSavingStep(false);
                       setPickingStep(false);
+                      toast("Next step updated");
                     }}
                     className={cn(
                       "w-full text-left p-2.5 rounded-lg border text-xs transition-all",
@@ -1269,25 +1354,36 @@ export default function Home() {
                     type="text"
                     value={customStep}
                     onChange={(e) => setCustomStep(e.target.value)}
-                    placeholder="Or type a custom step..."
+                    placeholder="Type a custom next step..."
                     className="flex-1 text-xs px-3 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-primary/40"
-                    onKeyDown={(e) => {
+                    onKeyDown={async (e) => {
                       if (e.key === "Enter" && customStep.trim()) {
-                        navigate(`/projects/${topProject.id}`);
+                        setSavingStep(true);
+                        await updateProjectNextStep.mutateAsync({ id: topProject.id, nextStep: customStep.trim() });
+                        setSavingStep(false);
+                        setCustomStep("");
                         setPickingStep(false);
+                        toast("Next step updated");
                       }
                     }}
                   />
                   {customStep.trim() && (
                     <button
-                      onClick={() => { navigate(`/projects/${topProject.id}`); setPickingStep(false); }}
-                      className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-medium"
+                      disabled={savingStep}
+                      onClick={async () => {
+                        setSavingStep(true);
+                        await updateProjectNextStep.mutateAsync({ id: topProject.id, nextStep: customStep.trim() });
+                        setSavingStep(false);
+                        setCustomStep("");
+                        setPickingStep(false);
+                        toast("Next step updated");
+                      }}
+                      className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-medium disabled:opacity-50"
                     >
-                      Go
+                      {savingStep ? "Saving..." : "Save"}
                     </button>
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground/50">Selecting a step opens the project to update it.</p>
               </div>
             )}
 
