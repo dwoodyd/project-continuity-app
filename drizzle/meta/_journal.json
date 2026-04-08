@@ -134,6 +134,13 @@
       "when": 1775601540788,
       "tag": "0018_aspiring_echo",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1775612991568,
+      "tag": "0019_fine_timeslip",
+      "breakpoints": true
     }
   ]
 }

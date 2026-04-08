@@ -25,12 +25,18 @@ import {
 export const invitesRouter = router({
   // ── Admin: generate a single new code ────────────────────────────────────
   generate: protectedProcedure
-    .input(z.object({ label: z.string().max(255).optional() }))
+    .input(z.object({
+      label: z.string().max(255).optional(),
+      expiresInDays: z.number().int().min(1).max(365).optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can generate invite codes." });
       }
-      const invite = await createInviteCode(ctx.user.id, input.label);
+      const expiresAt = input.expiresInDays
+        ? new Date(Date.now() + input.expiresInDays * 24 * 60 * 60 * 1000)
+        : undefined;
+      const invite = await createInviteCode(ctx.user.id, input.label, expiresAt);
       return invite;
     }),
 
@@ -39,15 +45,19 @@ export const invitesRouter = router({
     .input(z.object({
       count: z.number().int().min(1).max(50),
       labelPrefix: z.string().max(100).optional(),
+      expiresInDays: z.number().int().min(1).max(365).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       if (ctx.user.role !== "admin") {
         throw new TRPCError({ code: "FORBIDDEN", message: "Only admins can generate invite codes." });
       }
+      const expiresAt = input.expiresInDays
+        ? new Date(Date.now() + input.expiresInDays * 24 * 60 * 60 * 1000)
+        : undefined;
       const codes = [];
       for (let i = 0; i < input.count; i++) {
         const label = input.labelPrefix ? `${input.labelPrefix} ${i + 1}` : undefined;
-        const invite = await createInviteCode(ctx.user.id, label);
+        const invite = await createInviteCode(ctx.user.id, label, expiresAt);
         codes.push(invite);
       }
       return { codes, count: codes.length };

@@ -142,6 +142,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
   };
 
+  const { data: memberCountData } = trpc.auth.memberCount.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+  });
   const { data: amnestyData } = trpc.ai.checkAmnesty.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 60,
@@ -248,7 +251,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">47 builders</span> in early access
+                  <span className="font-semibold text-foreground">{memberCountData?.count ?? 47} builders</span> in early access
                 </p>
               </div>
               <a

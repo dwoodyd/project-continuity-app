@@ -18,7 +18,7 @@ import { invitesRouter } from "./routers/invites";
 import { thresholdRouter } from "./routers/threshold";
 import { evidenceRouter } from "./routers/evidence";
 import { studyRouter } from "./routers/study";
-import { revokeSession } from "./db";
+import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
 export const appRouter = router({
@@ -38,6 +38,9 @@ export const appRouter = router({
         updatedAt: u.updatedAt,
         lastSignedIn: u.lastSignedIn,
       };
+    }),
+    memberCount: publicProcedure.query(async () => {
+      return { count: await getMemberCount() };
     }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);

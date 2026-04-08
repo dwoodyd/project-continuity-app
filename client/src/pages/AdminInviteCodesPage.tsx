@@ -23,8 +23,10 @@ export default function AdminInviteCodesPage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [label, setLabel] = useState("");
+  const [expiresInDays, setExpiresInDays] = useState<number | "">("");
   const [bulkCount, setBulkCount] = useState(5);
   const [bulkPrefix, setBulkPrefix] = useState("");
+  const [bulkExpiresInDays, setBulkExpiresInDays] = useState<number | "">("");
   const [copied, setCopied] = useState<string | null>(null);
 
   // Redirect non-admins
@@ -129,10 +131,19 @@ export default function AdminInviteCodesPage() {
               onChange={(e) => setLabel(e.target.value)}
               placeholder="Label (optional — e.g. Jane Smith)"
               className="flex-1"
-              onKeyDown={(e) => e.key === "Enter" && generate.mutate({ label: label.trim() || undefined })}
+              onKeyDown={(e) => e.key === "Enter" && generate.mutate({ label: label.trim() || undefined, expiresInDays: expiresInDays || undefined })}
+            />
+            <Input
+              type="number"
+              min={1}
+              max={365}
+              value={expiresInDays}
+              onChange={(e) => setExpiresInDays(e.target.value ? Math.min(365, Math.max(1, parseInt(e.target.value))) : "")}
+              placeholder="Expires in days"
+              className="w-36"
             />
             <Button
-              onClick={() => generate.mutate({ label: label.trim() || undefined })}
+              onClick={() => generate.mutate({ label: label.trim() || undefined, expiresInDays: expiresInDays || undefined })}
               disabled={generate.isPending}
               className="gap-1.5 shrink-0"
             >
@@ -175,8 +186,20 @@ export default function AdminInviteCodesPage() {
               className="flex-1"
             />
           </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-muted-foreground shrink-0 w-14">Expires</label>
+            <Input
+              type="number"
+              min={1}
+              max={365}
+              value={bulkExpiresInDays}
+              onChange={(e) => setBulkExpiresInDays(e.target.value ? Math.min(365, Math.max(1, parseInt(e.target.value))) : "")}
+              placeholder="Days until expiry (optional)"
+              className="flex-1"
+            />
+          </div>
           <Button
-            onClick={() => bulkGenerate.mutate({ count: bulkCount, labelPrefix: bulkPrefix.trim() || undefined })}
+            onClick={() => bulkGenerate.mutate({ count: bulkCount, labelPrefix: bulkPrefix.trim() || undefined, expiresInDays: bulkExpiresInDays || undefined })}
             disabled={bulkGenerate.isPending}
             variant="outline"
             className="w-full gap-1.5"
@@ -236,6 +259,18 @@ export default function AdminInviteCodesPage() {
                     <p className="font-mono text-sm font-semibold tracking-widest text-foreground">{c.code}</p>
                     {c.label && (
                       <p className="text-xs text-muted-foreground truncate">{c.label}</p>
+                    )}
+                    {c.expiresAt && !isUsed && (
+                      <p className={`text-xs mt-0.5 ${
+                        new Date(c.expiresAt) < new Date()
+                          ? "text-red-500"
+                          : "text-amber-500"
+                      }`}>
+                        {new Date(c.expiresAt) < new Date()
+                          ? "Expired"
+                          : `Expires ${new Date(c.expiresAt).toLocaleDateString()}`
+                        }
+                      </p>
                     )}
                   </div>
 

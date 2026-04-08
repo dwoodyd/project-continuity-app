@@ -447,6 +447,8 @@ export const betaInvites = mysqlTable("beta_invites", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   // Optional: label so admins know who they sent the code to
   label: varchar("label", { length: 255 }),
+  // Optional: if set, code cannot be redeemed after this timestamp
+  expiresAt: timestamp("expiresAt"),
 });
 export type BetaInvite = typeof betaInvites.$inferSelect;
 export type InsertBetaInvite = typeof betaInvites.$inferInsert;

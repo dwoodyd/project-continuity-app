@@ -999,3 +999,7 @@
 
 ## AI Provider Transparency (Apr 7, 2026)
 - [x] Name AI provider (Google Gemini 2.5 Flash via Manus AI platform) explicitly in onboarding step 2, AiConsentModal, and PrivacyPage
+
+## Beta Launch Features (Apr 8, 2026)
+- [x] Dynamic member count: publicProcedure returning live user count, wired to sign-in screen
+- [x] expiresAt on invite codes: schema migration, expiry enforcement in invites.redeem, expiry picker + expiry display in admin UI

@@ -771,14 +771,15 @@ export async function deleteAllUserData(userId: number): Promise<void> {
 
 export async function createInviteCode(
   createdByUserId: number,
-  label?: string
+  label?: string,
+  expiresAt?: Date
 ): Promise<BetaInvite> {
   const db = await getDb();
   if (!db) throw new Error("Database unavailable");
   const { randomBytes } = await import("crypto");
   // 12 random bytes → 24 hex chars, easy to read/share
   const code = randomBytes(12).toString("hex").toUpperCase();
-  await db.insert(betaInvites).values({ code, createdByUserId, label });
+  await db.insert(betaInvites).values({ code, createdByUserId, label, expiresAt });
   const [row] = await db
     .select()
     .from(betaInvites)
@@ -814,6 +815,8 @@ export async function validateInviteCode(
     .where(eq(betaInvites.code, code.toUpperCase().trim()))
     .limit(1);
   if (!row || row.usedAt !== null) return null;
+  // Reject expired codes
+  if (row.expiresAt !== null && row.expiresAt < new Date()) return null;
   return row;
 }
 
@@ -1088,3 +1091,13 @@ export async function getStreak(userId: number): Promise<{ streak: number; longe
 }
 
 
+
+// ─── Member Count ─────────────────────────────────────────────────────────────
+export async function getMemberCount(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(users);
+  return Number(result[0]?.count ?? 0);
+}
