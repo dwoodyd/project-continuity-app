@@ -1037,3 +1037,9 @@
 - [x] Haptic feedback (navigator.vibrate) on task completion via long-press and swipe
 - [x] First-use "Hold to complete" hint label on task circle (localStorage, dismisses after first completion)
 - [x] Drag-to-reorder tasks in daily plan — saves new order to criticalTasks JSON field
+
+## In-App Feedback Panel (Apr 8, 2026)
+- [x] Add feedbackSubmissions table to drizzle schema and apply migration
+- [x] Add submitFeedback tRPC mutation (saves to DB + notifies owner)
+- [x] Build FeedbackPanel sheet component (category selector, message, send button)
+- [x] Add "Feedback" entry to sidebar nav (desktop sidebar + mobile More sheet)

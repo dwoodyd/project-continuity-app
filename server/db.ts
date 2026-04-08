@@ -64,6 +64,9 @@ import {
   evidenceLogSummaries,
   EvidenceLogSummary,
   InsertEvidenceLogSummary,
+  feedbackSubmissions,
+  FeedbackSubmission,
+  InsertFeedbackSubmission,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1100,4 +1103,17 @@ export async function getMemberCount(): Promise<number> {
     .select({ count: sql<number>`COUNT(*)` })
     .from(users);
   return Number(result[0]?.count ?? 0);
+}
+
+// ─── Feedback ─────────────────────────────────────────────────────────────────
+export async function insertFeedback(data: InsertFeedbackSubmission): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(feedbackSubmissions).values(data);
+}
+
+export async function getFeedbackList(limit = 100): Promise<FeedbackSubmission[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(feedbackSubmissions).orderBy(desc(feedbackSubmissions.createdAt)).limit(limit);
 }

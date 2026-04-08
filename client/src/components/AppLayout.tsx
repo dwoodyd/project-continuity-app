@@ -31,11 +31,13 @@ import {
   X,
   Zap,
   GraduationCap,
+  MessageSquare,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
 import AmnestyScreen from "./AmnestyScreen";
+import { FeedbackPanel } from "./FeedbackPanel";
 import AiConsentModal from "./AiConsentModal";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
@@ -93,6 +95,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
   // browser session doesn't force the user through the re-entry screen again.
   const [amnestyDismissed, setAmnestyDismissed] = useState<boolean>(() => {
@@ -354,6 +357,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
               );
             })}
 
+            {/* Feedback */}
+            <button
+              onClick={() => setFeedbackOpen(true)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full text-left"
+              style={{ color: "oklch(1 0 0 / 0.48)" }}
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "oklch(1 0 0 / 0.32)" }} />
+              <span>Send Feedback</span>
+            </button>
+
             {/* Admin-only section */}
             {user?.role === "admin" && (
               <>
@@ -433,6 +446,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </button>
 
         <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
+        <FeedbackPanel open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         {showAmnesty && amnestyData && (
           <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
         )}
@@ -564,6 +578,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </Link>
                 );
               })}
+              {/* Feedback */}
+              <button
+                onClick={() => { setMoreOpen(false); setFeedbackOpen(true); }}
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors w-full text-left text-foreground hover:bg-accent"
+              >
+                <MessageSquare className="w-4.5 h-4.5 shrink-0 text-muted-foreground" />
+                <span>Send Feedback</span>
+              </button>
               {/* Admin-only entry */}
               {user?.role === "admin" && (
                 <>
@@ -603,6 +625,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </button>
 
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
+      <FeedbackPanel open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       {showAmnesty && amnestyData && (
         <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
       )}

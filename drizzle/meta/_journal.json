@@ -141,6 +141,13 @@
       "when": 1775612991568,
       "tag": "0019_fine_timeslip",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1775691991817,
+      "tag": "0020_curvy_rage",
+      "breakpoints": true
     }
   ]
 }

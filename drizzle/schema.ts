@@ -594,3 +594,15 @@ export const studyWeeklyReviews = mysqlTable("study_weekly_reviews", {
 });
 export type StudyWeeklyReview = typeof studyWeeklyReviews.$inferSelect;
 export type InsertStudyWeeklyReview = typeof studyWeeklyReviews.$inferInsert;
+
+// ─── Feedback Submissions ─────────────────────────────────────────────────────
+export const feedbackSubmissions = mysqlTable("feedbackSubmissions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  category: mysqlEnum("category", ["bug", "suggestion", "question", "other"]).notNull().default("other"),
+  message: text("message").notNull(),
+  deviceInfo: text("deviceInfo"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type FeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
+export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
