@@ -1010,3 +1010,6 @@
 - [x] Fix 3: Reject legacy-JTI tokens issued before 2026-04-08 cutoff in sdk.ts verifySession
 - [x] Fix 4: Document unsafe-inline CSP limitation with nonce-based migration path in index.ts
 - [x] Fix 5: Add Redis store migration guidance as TODO comments in both rate limiters
+
+## Logo Fix (Apr 8, 2026)
+- [ ] Remove white background from sidebar logo and favicon — generate transparent PNG and update all app references
