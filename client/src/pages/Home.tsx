@@ -833,9 +833,26 @@ export default function Home() {
   });
   const [savingStep, setSavingStep] = useState(false);
 
+  // Haptic feedback helper
+  const haptic = (ms = 50) => { try { navigator.vibrate?.(ms); } catch { /* ignore */ } };
+
+  // First-use "Hold to complete" hint — shown once, dismissed after first completion
+  const [showHoldHint, setShowHoldHint] = useState<boolean>(() => {
+    try { return !localStorage.getItem('continuary_hold_hint_seen'); } catch { return true; }
+  });
+  const dismissHoldHint = () => {
+    setShowHoldHint(false);
+    try { localStorage.setItem('continuary_hold_hint_seen', '1'); } catch { /* ignore */ }
+  };
+
+  // Drag-to-reorder state
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const updateTasks = trpc.dailyPlan.updateTasks.useMutation({ onSuccess: () => refetchPlan() });
+
   // Undo state: tracks task IDs that were just completed but can still be undone
   const [pendingUndoTaskIds, setPendingUndoTaskIds] = useState<Set<string>>(new Set());
-  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({}); 
+  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});  
 
   const completeTaskMutation = trpc.checkIns.completeTask.useMutation({
     onSuccess: () => refetchPlan(),
@@ -846,6 +863,8 @@ export default function Home() {
 
   // Wrap completeTask with a 5-second undo window
   const completeTask = useCallback((taskId: string) => {
+    haptic(60); // tactile confirmation
+    dismissHoldHint(); // hide first-use hint after first completion
     // Optimistically mark done in the UI immediately
     completeTaskMutation.mutate({ taskId });
     // Mark as pending-undo
@@ -1226,6 +1245,13 @@ export default function Home() {
             </p>
             <span className="text-xs text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
           </div>
+          {/* First-use hold hint */}
+          {showHoldHint && visibleTasks.some((t: any) => !t.done) && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15 mb-1">
+              <p className="text-[11px] text-muted-foreground">Hold the circle to complete · Swipe right to complete</p>
+              <button onClick={dismissHoldHint} className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground shrink-0">Got it</button>
+            </div>
+          )}
           {allTasksDone ? (
             <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
               <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
@@ -1236,8 +1262,24 @@ export default function Home() {
             </div>
           ) : (
             <div className="space-y-2">
-              {visibleTasks.map((task: any) => (
-                <div key={task.id} className="relative">
+              {visibleTasks.map((task: any, idx: number) => (
+                <div
+                  key={task.id}
+                  className={cn("relative transition-opacity", dragIndex === idx ? "opacity-40" : dragOverIndex === idx ? "ring-1 ring-primary/40 rounded-xl" : "")}
+                  draggable={!task.done}
+                  onDragStart={() => setDragIndex(idx)}
+                  onDragOver={(e) => { e.preventDefault(); setDragOverIndex(idx); }}
+                  onDragEnd={() => {
+                    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+                      const reordered = [...tasks];
+                      const [moved] = reordered.splice(dragIndex, 1);
+                      reordered.splice(dragOverIndex, 0, moved);
+                      updateTasks.mutate({ criticalTasks: reordered });
+                    }
+                    setDragIndex(null);
+                    setDragOverIndex(null);
+                  }}
+                >
                   <TaskItem
                     task={task}
                     onComplete={(id) => completeTask(id)}

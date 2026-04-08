@@ -1032,3 +1032,8 @@
 - [x] Inline next-step editing in "Different step" picker — type and save new step without leaving Command Center
 - [x] Long-press to complete tasks (500ms hold) — prevents accidental completions, replaces single-tap
 - [x] Swipe-right gesture on task items to complete — natural mobile interaction, harder to trigger accidentally
+
+## UX Improvements Round 3 (Apr 8, 2026)
+- [x] Haptic feedback (navigator.vibrate) on task completion via long-press and swipe
+- [x] First-use "Hold to complete" hint label on task circle (localStorage, dismisses after first completion)
+- [x] Drag-to-reorder tasks in daily plan — saves new order to criticalTasks JSON field
