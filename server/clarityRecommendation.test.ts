@@ -81,13 +81,18 @@ describe("computeRecommendation", () => {
 
   it("prefers day_pattern over overall_pattern", () => {
     const dow = 3; // Wednesday
+    // Use a fixed past Wednesday (2024-01-03) so these sessions always land on dow=3
+    // regardless of what day the test runs. The 4 'decision' sessions use a fixed
+    // Monday (2024-01-01) so they never match todayDow=3 in the algorithm.
+    const fixedWed = new Date("2024-01-03T10:00:00Z"); // Wednesday
+    const fixedMon = new Date("2024-01-01T10:00:00Z"); // Monday
     const sessions: SessionStub[] = [
-      sessionOnDow("creative_block", dow),
-      sessionOnDow("creative_block", dow),
-      { mode: "decision", createdAt: new Date() },
-      { mode: "decision", createdAt: new Date() },
-      { mode: "decision", createdAt: new Date() },
-      { mode: "decision", createdAt: new Date() },
+      { mode: "creative_block", createdAt: fixedWed },
+      { mode: "creative_block", createdAt: fixedWed },
+      { mode: "decision", createdAt: fixedMon },
+      { mode: "decision", createdAt: fixedMon },
+      { mode: "decision", createdAt: fixedMon },
+      { mode: "decision", createdAt: fixedMon },
     ];
     const result = computeRecommendation(sessions, dow);
     expect(result!.mode).toBe("creative_block");

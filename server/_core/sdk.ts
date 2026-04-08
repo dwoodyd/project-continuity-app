@@ -1,4 +1,4 @@
-import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS, THIRTY_DAYS_MS } from "@shared/const";
 import { ForbiddenError } from "@shared/_core/errors";
 import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
@@ -193,7 +193,11 @@ class SDKServer {
     options: { expiresInMs?: number } = {}
   ): Promise<string> {
     const issuedAt = Date.now();
-    const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
+    // SECURITY: Default session lifetime is capped at 30 days.
+    // ONE_YEAR_MS is intentionally NOT used here — a stolen cookie valid for a year
+    // is a critical risk. 30 days balances UX (users stay logged in) with blast-radius
+    // containment (a compromised token expires within a month at worst).
+    const expiresInMs = options.expiresInMs ?? THIRTY_DAYS_MS;
     const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1000);
     const secretKey = this.getSessionSecret();
     // Include a jti (JWT ID) so individual sessions can be revoked server-side
@@ -238,14 +242,31 @@ class SDKServer {
         return null;
       }
 
+      // SECURITY FIX 3: Hard cutoff for legacy-JTI tokens.
+      // Tokens issued before the JTI feature was added carry no jti claim and
+      // cannot be individually revoked — only a full session wipe works on them.
+      // Any token with a legacy- prefix that was issued before LEGACY_JTI_CUTOFF_MS
+      // is treated as invalid to force re-authentication.
+      // Cutoff: 2026-04-08 (the date JTI was introduced in this codebase).
+      const LEGACY_JTI_CUTOFF_UNIX = 1744070400; // 2026-04-08T00:00:00Z in seconds
+      const resolvedJti = isNonEmptyString(jti) ? jti : `legacy-${openId}`;
+      const resolvedExp = typeof exp === "number" ? exp : 0;
+
+      if (resolvedJti.startsWith("legacy-")) {
+        // Legacy tokens issued before the cutoff cannot be revoked individually.
+        // Reject them to force the user to re-authenticate and receive a proper JTI token.
+        if (resolvedExp < LEGACY_JTI_CUTOFF_UNIX) {
+          console.warn("[Auth] Rejecting legacy-JTI token issued before cutoff date");
+          return null;
+        }
+      }
+
       return {
         openId,
         appId,
         name,
-        // jti may be absent on tokens issued before this change; fall back to a
-        // deterministic placeholder so the revocation check is always safe.
-        jti: isNonEmptyString(jti) ? jti : `legacy-${openId}`,
-        exp: typeof exp === "number" ? exp : 0,
+        jti: resolvedJti,
+        exp: resolvedExp,
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));

@@ -60,9 +60,25 @@ async function startServer() {
           scriptSrc: process.env.NODE_ENV === "production"
             ? ["'self'", CDN_ORIGIN]
             : ["'self'", "'unsafe-inline'", "'unsafe-eval'", CDN_ORIGIN],
+          // SECURITY NOTE (Fix 4): 'unsafe-inline' is present in styleSrc for BOTH
+          // development and production because Tailwind CSS-in-JS and shadcn/ui inject
+          // styles at runtime via <style> tags that cannot be attributed to a nonce.
+          //
+          // Migration path to eliminate this:
+          // 1. Switch from Tailwind JIT/CSS-in-JS to a build-time CSS extraction step
+          //    (e.g. Tailwind CLI with --output, or Vite's postcss plugin) so all styles
+          //    are in static .css files served from 'self'.
+          // 2. For any remaining inline styles injected by shadcn/ui primitives (Radix),
+          //    generate a per-request nonce in Express middleware, attach it to res.locals,
+          //    and pass it to Helmet's contentSecurityPolicy.directives.styleSrc via a
+          //    function: (req, res) => ["'self'", `'nonce-${res.locals.cspNonce}'`].
+          // 3. Until step 1 is complete, 'unsafe-inline' in styleSrc is the accepted
+          //    trade-off — it allows style injection but NOT script execution, so the
+          //    XSS risk surface is limited to CSS-based attacks (e.g. data exfiltration
+          //    via attribute selectors), not arbitrary JS execution.
           styleSrc: [
             "'self'",
-            "'unsafe-inline'", // Required for Tailwind CSS-in-JS and shadcn/ui
+            "'unsafe-inline'", // Required for Tailwind CSS-in-JS and shadcn/ui (see note above)
             "https://fonts.googleapis.com",
           ],
           fontSrc: [
@@ -121,6 +137,24 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
   // ── Rate limiting ────────────────────────────────────────────────────────────
+  //
+  // SECURITY WARNING (Fix 2 & 5 — SINGLE-INSTANCE ONLY):
+  // Both limiters below use express-rate-limit's default in-memory store.
+  // This works correctly ONLY on a single-process, single-instance deployment.
+  //
+  // ⚠️  HORIZONTAL SCALING RISK: If this app is ever deployed behind a load balancer
+  // with multiple Node.js processes or containers, each instance maintains its own
+  // independent counter. The effective rate limit becomes (max * number_of_instances),
+  // completely defeating the protection.
+  //
+  // BEFORE scaling horizontally, replace the default store with a shared Redis store:
+  //   1. Install: pnpm add rate-limit-redis ioredis
+  //   2. Import:  import RedisStore from "rate-limit-redis";
+  //              import Redis from "ioredis";
+  //   3. Replace: store: new RedisStore({ sendCommand: (...args) => redis.call(...args) })
+  //      in BOTH oauthLimiter and apiLimiter configs below.
+  //   4. Set REDIS_URL in environment secrets via webdev_request_secrets.
+  //
   // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.
   // This prevents brute-force code enumeration and replay attacks.
   const oauthLimiter = rateLimit({
@@ -131,6 +165,7 @@ async function startServer() {
     // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
     validate: { xForwardedForHeader: false },
     message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
+    // TODO (horizontal scaling): add store: new RedisStore(...) here
   });
 
   // Broader limit on the tRPC API: 300 requests per minute per IP.
@@ -143,6 +178,7 @@ async function startServer() {
     // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
     validate: { xForwardedForHeader: false },
     message: { error: "Too many requests. Please slow down." },
+    // TODO (horizontal scaling): add store: new RedisStore(...) here
   });
 
   // OAuth callback under /api/oauth/callback

@@ -1003,3 +1003,10 @@
 ## Beta Launch Features (Apr 8, 2026)
 - [x] Dynamic member count: publicProcedure returning live user count, wired to sign-in screen
 - [x] expiresAt on invite codes: schema migration, expiry enforcement in invites.redeem, expiry picker + expiry display in admin UI
+
+## Security Hardening Round 3 (Apr 8, 2026)
+- [x] Fix 1: Reduce JWT session lifetime from ONE_YEAR_MS to THIRTY_DAYS_MS in sdk.ts signSession
+- [x] Fix 2: Add Redis scaling warning comment to oauthLimiter and apiLimiter in index.ts
+- [x] Fix 3: Reject legacy-JTI tokens issued before 2026-04-08 cutoff in sdk.ts verifySession
+- [x] Fix 4: Document unsafe-inline CSP limitation with nonce-based migration path in index.ts
+- [x] Fix 5: Add Redis store migration guidance as TODO comments in both rate limiters
