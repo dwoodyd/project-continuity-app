@@ -39,8 +39,9 @@ export default function AiConsentModal({ onAccept, onDecline }: AiConsentModalPr
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             To do this, relevant portions of your notes, project titles, and check-in answers
-            are sent to a <strong className="text-foreground">third-party AI service</strong> (Google Gemini, via the Manus platform).
-            This data is used solely to generate your response and is not stored or used for training.
+            are sent to <strong className="text-foreground">Google Gemini 2.5 Flash</strong>, accessed via the{" "}
+            <strong className="text-foreground">Manus AI platform</strong>.
+            This data is used solely to generate your response and is not stored or used for model training.
           </p>
 
           {/* What is shared */}

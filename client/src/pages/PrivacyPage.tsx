@@ -67,7 +67,7 @@ export default function PrivacyPage() {
               for processing:
             </p>
             <ul className="list-disc list-inside space-y-1 text-foreground/80 mb-2">
-              <li><strong>Service:</strong> Google Gemini, accessed via the Manus AI platform proxy</li>
+              <li><strong>Service:</strong> Google Gemini 2.5 Flash, accessed via the Manus AI platform proxy</li>
               <li><strong>Data sent:</strong> Project titles, descriptions, next steps; check-in answers; vault item summaries (not raw file content)</li>
               <li><strong>Retention:</strong> Data is processed in real time for your response only. Google does not store or use your content to train models under the Manus API agreement.</li>
               <li><strong>Purpose:</strong> Generating personalised plans, insights, and guidance</li>
@@ -109,8 +109,9 @@ export default function PrivacyPage() {
                 servers. This action cannot be undone.
               </li>
               <li>
-                <strong>Export your data</strong> — data export is on the roadmap and will be
-                available before the public launch.
+                <strong>Export your data</strong> — go to Settings → AI Data &amp; Privacy →
+                "Export my data" to download a full JSON archive of your projects, check-ins,
+                vault items, and focus sessions.
               </li>
               <li>
                 <strong>Opt out of notifications</strong> — toggle off in Settings → Notifications

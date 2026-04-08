@@ -996,3 +996,6 @@
 
 ## Homepage UX (Apr 7, 2026)
 - [x] Add social proof avatar badges + member count before CTA on sign-in screen
+
+## AI Provider Transparency (Apr 7, 2026)
+- [x] Name AI provider (Google Gemini 2.5 Flash via Manus AI platform) explicitly in onboarding step 2, AiConsentModal, and PrivacyPage

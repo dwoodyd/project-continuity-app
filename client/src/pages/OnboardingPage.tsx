@@ -364,6 +364,13 @@ export default function OnboardingPage() {
                     ))}
                   </div>
                 </div>
+                {/* AI provider transparency — App Store 5.1.2(i) + GDPR Art. 13 */}
+                <p className="text-[11px] text-muted-foreground/60 leading-relaxed border border-border/40 rounded-xl px-4 py-3">
+                  Continuary uses <strong className="text-muted-foreground/80">Google Gemini 2.5 Flash</strong> (via the{" "}
+                  <strong className="text-muted-foreground/80">Manus AI platform</strong>) to generate personalised
+                  insights and focus suggestions. Your notes and check-in data are sent for processing and are not used
+                  to train AI models. You can revoke this in Settings at any time.
+                </p>
                 <div className="flex gap-3">
                   <Button variant="outline" onClick={() => setStep(0)} className="flex-1">Back</Button>
                   <Button onClick={() => setStep(2)} className="flex-[2] gap-2">
