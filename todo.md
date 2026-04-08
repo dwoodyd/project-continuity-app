@@ -1013,3 +1013,8 @@
 
 ## Logo Fix (Apr 8, 2026)
 - [x] Remove white background from sidebar logo and favicon — replaced BRAND_LOGO_SIGNIN (white-bg PNG) with composed JSX icon+wordmark; uploaded all 11 clean cropped icons to CDN; updated index.html, manifest.json, sw.js with new URLs; bumped SW cache to v5
+
+## Android Domain Fix (Apr 8, 2026)
+- [x] Update manifest.json start_url and scope to use personal domain (continuary.soulengineer.online)
+- [x] Update og:url and canonical references in index.html to personal domain
+- [x] Bump SW cache version to force manifest refresh on Android (v6)
