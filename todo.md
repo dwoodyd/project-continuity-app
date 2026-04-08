@@ -1018,3 +1018,6 @@
 - [x] Update manifest.json start_url and scope to use personal domain (continuary.soulengineer.online)
 - [x] Update og:url and canonical references in index.html to personal domain
 - [x] Bump SW cache version to force manifest refresh on Android (v6)
+
+## Domain Redirect (Apr 8, 2026)
+- [x] Add Express middleware: 301 redirect from continuary.manus.space → continuary.soulengineer.online

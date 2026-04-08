@@ -41,6 +41,21 @@ async function startServer() {
   // This allows express-rate-limit to use the real client IP rather than the proxy IP.
   app.set("trust proxy", 1);
 
+  // ── Domain redirect ──────────────────────────────────────────────────────────
+  // Permanently redirect all traffic arriving via the manus.space domain to the
+  // canonical personal domain. This ensures the Manus share card URL and any
+  // old bookmarks automatically land on the correct address.
+  const CANONICAL_DOMAIN = "continuary.soulengineer.online";
+  const MANUS_DOMAINS = ["continuary.manus.space", "projcontinuity-vnvnaojz.manus.space"];
+  app.use((req, res, next) => {
+    const host = (req.headers["x-forwarded-host"] as string) || req.hostname;
+    if (MANUS_DOMAINS.some((d) => host === d || host.endsWith("." + d))) {
+      const redirectUrl = `https://${CANONICAL_DOMAIN}${req.originalUrl}`;
+      return res.redirect(301, redirectUrl);
+    }
+    next();
+  });
+
   // CDN domain used for all uploaded static assets (icons, OG images, vault files)
   const CDN_ORIGIN = "https://d2xsxph8kpxj0f.cloudfront.net";
   // Manus built-in API used for LLM, storage, and push services
