@@ -74,7 +74,6 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         borderRadius: 24,
         background: "oklch(0.17 0.04 270)",
         boxShadow: "0 0 0 1px oklch(0.75 0.15 270 / 0.12), 0 12px 40px oklch(0 0 0 / 0.55)",
-        overflow: "hidden",
         clipPath: revealed ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)",
         transform: revealed ? "scale(1)" : "scale(0.88)",
         transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
@@ -89,26 +88,24 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
           height={96}
           style={{ display: "block", width: 96, height: 96, objectFit: "contain" }}
         />
+        {/* Golden dot — inside icon container, overlays bird's eye at 62% x, 38% y */}
+        <div style={{
+          position: "absolute",
+          width: dotPulse ? 10 : 0,
+          height: dotPulse ? 10 : 0,
+          borderRadius: "50%",
+          background: "oklch(0.82 0.18 80)",
+          boxShadow: "0 0 14px 6px oklch(0.82 0.18 80 / 0.7)",
+          top: 31,
+          left: 57,
+          opacity: dotPulse ? 1 : 0,
+          transform: dotPulse ? "scale(1)" : "scale(0)",
+          transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
+          animation: dotPulse ? "dotPulse 1.2s ease-out 1.7s 1 forwards" : "none",
+          pointerEvents: "none",
+          zIndex: 2,
+        }} />
       </div>
-
-      {/* Golden dot pulse — appears after reveal, pulses once */}
-      <div style={{
-        position: "absolute",
-        width: dotPulse ? 10 : 0,
-        height: dotPulse ? 10 : 0,
-        borderRadius: "50%",
-        background: "oklch(0.82 0.18 80)",
-        boxShadow: "0 0 12px 4px oklch(0.82 0.18 80 / 0.5)",
-        // Orange dot is at bird's eye: ~62% across, ~38% down the 96px icon
-        // Icon centered: top=50%-48px, left=50%-48px
-        top: "calc(50% - 48px + 36.5px)",
-        left: "calc(50% - 48px + 59.5px)",
-        opacity: dotPulse ? 1 : 0,
-        transform: dotPulse ? "scale(1)" : "scale(0)",
-        transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
-        animation: dotPulse ? "dotPulse 1.2s ease-out 1.7s 1 forwards" : "none",
-        pointerEvents: "none",
-      }} />
 
       {/* Wordmark */}
       <div style={{
