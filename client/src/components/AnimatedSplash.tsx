@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 
-const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-512_badc923d.png";
+const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_512_286881db.png";
 
 /**
  * AnimatedSplash — actual Continuary bird logo.
  * Phases: "in" (clip+scale reveal) → "hold" (glow + golden dot pulse) → "out" (fade).
  * Tap anywhere to skip. 528Hz chime on reveal. Once per session.
  */
-export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
+export function AnimatedSplash({ onComplete, isFirstSession = false }: { onComplete: () => void; isFirstSession?: boolean }) {
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
   const [dotPulse, setDotPulse] = useState(false);
   const [skipped, setSkipped] = useState(false);
@@ -133,7 +133,7 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         color: "oklch(0.55 0.01 270)",
         fontFamily: "Inter, sans-serif",
       }}>
-        Your thread continues
+        {isFirstSession ? "Your thread starts here" : "Your thread continues"}
       </div>
 
       <style>{`

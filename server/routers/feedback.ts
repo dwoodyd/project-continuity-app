@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { insertFeedback, getFeedbackList } from "../db";
+import { insertFeedback, getFeedbackList, resolveFeedback } from "../db";
 import { notifyOwner } from "../_core/notification";
 
 export const feedbackRouter = router({
@@ -38,4 +38,13 @@ export const feedbackRouter = router({
     if (ctx.user.role !== "admin") return [];
     return getFeedbackList(100);
   }),
+
+  // Admin only: mark feedback as resolved/unresolved
+  resolve: protectedProcedure
+    .input(z.object({ id: z.number(), resolved: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") throw new Error("Forbidden");
+      await resolveFeedback(input.id, input.resolved);
+      return { success: true };
+    }),
 });

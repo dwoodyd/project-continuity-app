@@ -870,6 +870,52 @@ export default function Home() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const updateTasks = trpc.dailyPlan.updateTasks.useMutation({ onSuccess: () => refetchPlan() });
 
+  // Touch reorder state
+  const touchDragIndex = useRef<number | null>(null);
+  const touchDragOverIndex = useRef<number | null>(null);
+  const [touchDragActive, setTouchDragActive] = useState<number | null>(null);
+  const [touchDragOver, setTouchDragOver] = useState<number | null>(null);
+
+  function handleTouchStart(idx: number) {
+    touchDragIndex.current = idx;
+    touchDragOverIndex.current = idx;
+    setTouchDragActive(idx);
+  }
+
+  function handleTouchMove(e: React.TouchEvent, containerRef: React.RefObject<HTMLDivElement | null>) {
+    if (touchDragIndex.current === null) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const container = containerRef.current;
+    if (!container) return;
+    const items = Array.from(container.children) as HTMLElement[];
+    for (let i = 0; i < items.length; i++) {
+      const rect = items[i].getBoundingClientRect();
+      if (touch.clientY >= rect.top && touch.clientY <= rect.bottom) {
+        touchDragOverIndex.current = i;
+        setTouchDragOver(i);
+        break;
+      }
+    }
+  }
+
+  function handleTouchEnd(tasks: any[]) {
+    const from = touchDragIndex.current;
+    const to = touchDragOverIndex.current;
+    if (from !== null && to !== null && from !== to) {
+      const reordered = [...tasks];
+      const [moved] = reordered.splice(from, 1);
+      reordered.splice(to, 0, moved);
+      updateTasks.mutate({ criticalTasks: reordered });
+    }
+    touchDragIndex.current = null;
+    touchDragOverIndex.current = null;
+    setTouchDragActive(null);
+    setTouchDragOver(null);
+  }
+
+  const taskListRef = useRef<HTMLDivElement | null>(null);
+
   // Undo state: tracks task IDs that were just completed but can still be undone
   const [pendingUndoTaskIds, setPendingUndoTaskIds] = useState<Set<string>>(new Set());
   const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});  
@@ -1381,11 +1427,16 @@ export default function Home() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2" ref={taskListRef}
+              onTouchMove={(e) => handleTouchMove(e, taskListRef)}
+              onTouchEnd={() => handleTouchEnd(tasks)}
+            >
               {visibleTasks.map((task: any, idx: number) => (
                 <div
                   key={task.id}
-                  className={cn("relative transition-opacity", dragIndex === idx ? "opacity-40" : dragOverIndex === idx ? "ring-1 ring-primary/40 rounded-xl" : "")}
+                  className={cn("relative transition-opacity",
+                    (dragIndex === idx || touchDragActive === idx) ? "opacity-40" :
+                    (dragOverIndex === idx || touchDragOver === idx) ? "ring-1 ring-primary/40 rounded-xl" : "")}
                   draggable={!task.done}
                   onDragStart={() => setDragIndex(idx)}
                   onDragOver={(e) => { e.preventDefault(); setDragOverIndex(idx); }}
@@ -1400,12 +1451,28 @@ export default function Home() {
                     setDragOverIndex(null);
                   }}
                 >
+                  {/* Grip handle — visible on mobile for touch reorder */}
+                  {!task.done && (
+                    <div
+                      className="absolute left-0 top-0 bottom-0 w-7 flex items-center justify-center z-10 touch-none cursor-grab active:cursor-grabbing md:hidden"
+                      onTouchStart={(e) => { e.stopPropagation(); handleTouchStart(idx); }}
+                      style={{ color: "oklch(0.55 0.01 270)" }}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                        <rect x="2" y="2" width="10" height="2" rx="1"/>
+                        <rect x="2" y="6" width="10" height="2" rx="1"/>
+                        <rect x="2" y="10" width="10" height="2" rx="1"/>
+                      </svg>
+                    </div>
+                  )}
+                  <div className={cn(!task.done ? "pl-7 md:pl-0" : "")}>
                   <TaskItem
                     task={task}
                     onComplete={(id) => completeTask(id)}
                     onUnstick={(t) => setUnstickTask(t)}
                     pendingUndo={pendingUndoTaskIds.has(task.id)}
                   />
+                  </div>
                   {getCarryoverCount(task) >= 2 && (
                     <div className="absolute -top-1 -right-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700">
                       <RotateCcw className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />

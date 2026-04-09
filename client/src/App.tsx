@@ -67,12 +67,14 @@ function Router() {
 function App() {
   // Show splash once per browser session
   const [splashDone, setSplashDone] = useState(
-    // Show once per browser session (any browser, any mode)
     () => sessionStorage.getItem("splashShown") === "1"
   );
+  // First-ever session: localStorage flag not yet set
+  const isFirstSession = !localStorage.getItem("continuary_visited");
 
   function handleSplashComplete() {
     sessionStorage.setItem("splashShown", "1");
+    localStorage.setItem("continuary_visited", "1");
     setSplashDone(true);
   }
 
@@ -81,7 +83,7 @@ function App() {
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster position="top-right" richColors />
-          {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} />}
+          {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           <Router />
           <PWAInstallBanner />
         </TooltipProvider>

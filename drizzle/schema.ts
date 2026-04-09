@@ -602,6 +602,8 @@ export const feedbackSubmissions = mysqlTable("feedbackSubmissions", {
   category: mysqlEnum("category", ["bug", "suggestion", "question", "other"]).notNull().default("other"),
   message: text("message").notNull(),
   deviceInfo: text("deviceInfo"),
+  resolved: boolean("resolved").default(false).notNull(),
+  resolvedAt: timestamp("resolvedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type FeedbackSubmission = typeof feedbackSubmissions.$inferSelect;

@@ -1117,3 +1117,11 @@ export async function getFeedbackList(limit = 100): Promise<FeedbackSubmission[]
   if (!db) return [];
   return db.select().from(feedbackSubmissions).orderBy(desc(feedbackSubmissions.createdAt)).limit(limit);
 }
+
+export async function resolveFeedback(id: number, resolved: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(feedbackSubmissions)
+    .set({ resolved, resolvedAt: resolved ? new Date() : null })
+    .where(eq(feedbackSubmissions.id, id));
+}
