@@ -16,6 +16,8 @@ import FocusModePage from "./pages/FocusModePage";
 import OnboardingPage from "./pages/OnboardingPage";
 import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
+import { AnimatedSplash } from "./components/AnimatedSplash";
+import { useState } from "react";
 import IntelligencePage from "./pages/IntelligencePage";
 import ClarityEnginePage from "./pages/ClarityEnginePage";
 import PrivacyPage from "./pages/PrivacyPage";
@@ -61,11 +63,22 @@ function Router() {
 }
 
 function App() {
+  // Show splash once per browser session
+  const [splashDone, setSplashDone] = useState(
+    () => sessionStorage.getItem("splashShown") === "1"
+  );
+
+  function handleSplashComplete() {
+    sessionStorage.setItem("splashShown", "1");
+    setSplashDone(true);
+  }
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster position="top-right" richColors />
+          {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} />}
           <Router />
           <PWAInstallBanner />
         </TooltipProvider>
