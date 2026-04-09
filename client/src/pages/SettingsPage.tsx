@@ -10,6 +10,7 @@ import {
   Moon,
   Settings,
   Sparkles,
+  Play,
   Sun,
   User,
   FolderOpen,
@@ -427,6 +428,22 @@ export default function SettingsPage() {
                 </div>
                 <Button variant="outline" size="sm" onClick={toggleTheme}>
                   Switch to {theme === "dark" ? "light" : "dark"}
+                </Button>
+              </div>
+              {/* Splash Replay row */}
+              <div className="flex items-center justify-between py-3 border-t border-border">
+                <div className="flex items-center gap-3">
+                  <Play className="w-4 h-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Replay Intro</p>
+                    <p className="text-xs text-muted-foreground">Watch the opening animation again</p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  sessionStorage.removeItem("splashShown");
+                  window.location.reload();
+                }}>
+                  Replay
                 </Button>
               </div>
               {/* Install App row — always show unless already running as installed PWA */}

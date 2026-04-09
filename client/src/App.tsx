@@ -24,6 +24,7 @@ import PrivacyPage from "./pages/PrivacyPage";
 import TermsPage from "./pages/TermsPage";
 import EvidenceLogPage from "./pages/EvidenceLogPage";
 import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
+import AdminFeedbackPage from "./pages/AdminFeedbackPage";
 import StudyTrackerPage from "./pages/StudyTrackerPage";
 import InviteGatePage from "./pages/InviteGatePage";
 import AboutAppPage from "./pages/AboutAppPage";
@@ -51,6 +52,7 @@ function Router() {
             <Route path="/clarity" component={ClarityEnginePage} />
             <Route path="/evidence" component={EvidenceLogPage} />
             <Route path="/admin/invites" component={AdminInviteCodesPage} />
+            <Route path="/admin/feedback" component={AdminFeedbackPage} />
             <Route path="/admin/study" component={StudyTrackerPage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/404" component={NotFound} />

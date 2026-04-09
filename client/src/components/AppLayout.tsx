@@ -383,6 +383,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   {isActive("/admin/invites") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
                 </Link>
                 <Link
+                  href="/admin/feedback"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
+                    isActive("/admin/feedback") ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
+                  )}
+                >
+                  <MessageSquare className={cn("w-4 h-4 shrink-0", isActive("/admin/feedback") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <span>Feedback Inbox</span>
+                  {isActive("/admin/feedback") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                </Link>
+                <Link
                   href="/admin/study"
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
