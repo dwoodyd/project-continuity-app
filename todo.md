@@ -1069,3 +1069,8 @@
 ## Animated Splash Screen (Apr 9, 2026)
 - [x] Build AnimatedSplash CSS/SVG component (icon draw-on + wordmark fade, 2.5s, transitions to app)
 - [x] Wire into App.tsx as first render gate (shows once per session)
+
+## Splash + Admin Round 2 (Apr 9, 2026)
+- [ ] Splash chime: Web Audio API soft tone on arch completion
+- [ ] Splash replay button in Settings → General
+- [ ] Admin feedback inbox at /admin/feedback with category filters

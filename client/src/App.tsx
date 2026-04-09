@@ -64,13 +64,10 @@ function Router() {
 
 function App() {
   // Show splash once per browser session
-  const [splashDone, setSplashDone] = useState(() => {
-    // Only show splash when running as installed PWA
-    const isPWA = window.matchMedia("(display-mode: standalone)").matches
-      || (window.navigator as any).standalone === true;
-    if (!isPWA) return true;
-    return sessionStorage.getItem("splashShown") === "1";
-  });
+  const [splashDone, setSplashDone] = useState(
+    // Show once per browser session (any browser, any mode)
+    () => sessionStorage.getItem("splashShown") === "1"
+  );
 
   function handleSplashComplete() {
     sessionStorage.setItem("splashShown", "1");

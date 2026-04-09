@@ -12,9 +12,25 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase("hold"), 300);
+    // Soft chime when outer arch finishes drawing (~1.1s after mount)
+    const tChime = setTimeout(() => {
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(528, ctx.currentTime); // 528 Hz — calm, resonant
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 1.2);
+      } catch { /* audio blocked — silent fallback */ }
+    }, 1100);
     const t2 = setTimeout(() => setPhase("out"), 2400);
     const t3 = setTimeout(() => onComplete(), 2900);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => { clearTimeout(t1); clearTimeout(tChime); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
   function skip() {
