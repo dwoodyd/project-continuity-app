@@ -99,10 +99,10 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         borderRadius: "50%",
         background: "oklch(0.82 0.18 80)",
         boxShadow: "0 0 12px 4px oklch(0.82 0.18 80 / 0.5)",
-        // Position matches the orange dot on the bird: x=64.5%, y=41.4% of the 96px icon
-        // Icon is centered at 50%, icon top = 50%-48px, icon left = 50%-48px
-        top: "calc(50% - 48px + 39.7px)",
-        left: "calc(50% - 48px + 61.9px)",
+        // Orange dot is at bird's eye: ~62% across, ~38% down the 96px icon
+        // Icon centered: top=50%-48px, left=50%-48px
+        top: "calc(50% - 48px + 36.5px)",
+        left: "calc(50% - 48px + 59.5px)",
         opacity: dotPulse ? 1 : 0,
         transform: dotPulse ? "scale(1)" : "scale(0)",
         transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
