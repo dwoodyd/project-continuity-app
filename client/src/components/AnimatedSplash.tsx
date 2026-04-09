@@ -29,8 +29,8 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
       } catch { /* silent */ }
     }, 900);
     const t1 = setTimeout(() => { setPhase("hold"); setDotPulse(true); }, 200);
-    const t2 = setTimeout(() => setPhase("out"), 2500);
-    const t3 = setTimeout(() => onComplete(), 2920);
+    const t2 = setTimeout(() => setPhase("out"), 4000);
+    const t3 = setTimeout(() => onComplete(), 4420);
     return () => { clearTimeout(tChime); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
