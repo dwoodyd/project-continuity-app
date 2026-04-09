@@ -1082,3 +1082,6 @@
 - [x] Golden dot pulse after splash reveal completes
 - [x] Slow scale-up (0.88→1) on icon alongside clip-path reveal
 - [x] Onboarding checklist card on Command Center for new users (first check-in, first project, first vault entry)
+
+## Splash Dot Position Fix (Apr 9, 2026)
+- [x] Move golden glow dot to match exact orange dot position on bird icon (x=64.5%, y=41.4% of icon bounds)
