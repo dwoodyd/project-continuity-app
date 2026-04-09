@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 
-// CDN URL of the actual Continuary icon (512px clean cropped version)
 const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-512_badc923d.png";
 
 /**
- * AnimatedSplash — uses the actual Continuary bird logo.
- * Animation: clip-path reveal from bottom (ink rising), then wordmark fades in.
- * Tap anywhere to skip. Soft 528Hz chime on reveal. Shows once per session.
+ * AnimatedSplash — actual Continuary bird logo.
+ * Phases: "in" (clip+scale reveal) → "hold" (glow + golden dot pulse) → "out" (fade).
+ * Tap anywhere to skip. 528Hz chime on reveal. Once per session.
  */
 export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
+  const [dotPulse, setDotPulse] = useState(false);
   const [skipped, setSkipped] = useState(false);
 
   useEffect(() => {
-    // Soft chime at ~1s (when reveal completes)
+    // Chime at ~1s
     const tChime = setTimeout(() => {
       try {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -25,13 +25,12 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         gain.gain.setValueAtTime(0, ctx.currentTime);
         gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.06);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 1.4);
-      } catch { /* silent fallback */ }
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1.4);
+      } catch { /* silent */ }
     }, 900);
-    const t1 = setTimeout(() => setPhase("hold"), 200);
-    const t2 = setTimeout(() => setPhase("out"), 2400);
-    const t3 = setTimeout(() => onComplete(), 2850);
+    const t1 = setTimeout(() => { setPhase("hold"); setDotPulse(true); }, 200);
+    const t2 = setTimeout(() => setPhase("out"), 2500);
+    const t3 = setTimeout(() => onComplete(), 2920);
     return () => { clearTimeout(tChime); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
@@ -42,10 +41,7 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
     setTimeout(() => onComplete(), 380);
   }
 
-  // clipPath reveal: starts at inset(100% 0 0 0) → inset(0% 0 0 0) = bottom-up wipe
-  const clipReveal = phase === "in"
-    ? "inset(100% 0 0 0)"
-    : "inset(0% 0 0 0)";
+  const revealed = phase !== "in";
 
   return (
     <div
@@ -57,29 +53,31 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         transition: phase === "out" ? "opacity 0.42s ease-in" : "opacity 0.3s ease-out",
       }}
     >
-      {/* Ambient glow — blooms in during hold */}
+      {/* Ambient glow */}
       <div style={{
         position: "absolute",
-        width: 280,
-        height: 280,
+        width: 300,
+        height: 300,
         borderRadius: "50%",
-        background: "radial-gradient(circle, oklch(0.45 0.16 270 / 0.16) 0%, transparent 70%)",
+        background: "radial-gradient(circle, oklch(0.45 0.16 270 / 0.15) 0%, transparent 70%)",
         opacity: phase === "hold" ? 1 : 0,
         transform: phase === "hold" ? "scale(1)" : "scale(0.5)",
-        transition: "opacity 1.4s ease-out 0.1s, transform 1.6s ease-out 0.1s",
+        transition: "opacity 1.5s ease-out 0.1s, transform 1.7s ease-out 0.1s",
         pointerEvents: "none",
       }} />
 
-      {/* Icon container with clip-path reveal */}
+      {/* Icon — clip-path reveal + scale-up */}
       <div style={{
+        position: "relative",
         width: 96,
         height: 96,
         borderRadius: 24,
         background: "oklch(0.17 0.04 270)",
         boxShadow: "0 0 0 1px oklch(0.75 0.15 270 / 0.12), 0 12px 40px oklch(0 0 0 / 0.55)",
         overflow: "hidden",
-        clipPath: clipReveal,
-        transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+        clipPath: revealed ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)",
+        transform: revealed ? "scale(1)" : "scale(0.88)",
+        transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -90,18 +88,32 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
           width={96}
           height={96}
           style={{ display: "block", width: 96, height: 96, objectFit: "contain" }}
-          onError={(e) => {
-            // Fallback: show a simple arch if CDN fails
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
         />
       </div>
+
+      {/* Golden dot pulse — appears after reveal, pulses once */}
+      <div style={{
+        position: "absolute",
+        width: dotPulse ? 10 : 0,
+        height: dotPulse ? 10 : 0,
+        borderRadius: "50%",
+        background: "oklch(0.82 0.18 80)",
+        boxShadow: "0 0 12px 4px oklch(0.82 0.18 80 / 0.5)",
+        // Position it at the top-right of the icon (where the sun dot is)
+        top: "calc(50% - 48px + 14px)",
+        left: "calc(50% + 22px)",
+        opacity: dotPulse ? 1 : 0,
+        transform: dotPulse ? "scale(1)" : "scale(0)",
+        transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
+        animation: dotPulse ? "dotPulse 1.2s ease-out 1.7s 1 forwards" : "none",
+        pointerEvents: "none",
+      }} />
 
       {/* Wordmark */}
       <div style={{
         marginTop: 22,
-        opacity: phase === "in" ? 0 : 1,
-        transform: phase === "in" ? "translateY(8px)" : "translateY(0)",
+        opacity: revealed ? 1 : 0,
+        transform: revealed ? "translateY(0)" : "translateY(8px)",
         transition: "opacity 0.65s ease-out 1.1s, transform 0.65s ease-out 1.1s",
         fontFamily: "'Lora', Georgia, serif",
         fontSize: 27,
@@ -115,7 +127,7 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
       {/* Tagline */}
       <div style={{
         marginTop: 7,
-        opacity: phase === "in" ? 0 : 1,
+        opacity: revealed ? 1 : 0,
         transition: "opacity 0.6s ease-out 1.65s",
         fontSize: 11,
         letterSpacing: "0.17em",
@@ -125,6 +137,14 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
       }}>
         Your thread continues
       </div>
+
+      <style>{`
+        @keyframes dotPulse {
+          0% { transform: scale(1); opacity: 1; }
+          60% { transform: scale(2.2); opacity: 0.3; }
+          100% { transform: scale(0.8); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

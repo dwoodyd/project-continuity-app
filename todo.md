@@ -1077,3 +1077,8 @@
 
 ## Accurate Bird Logo Animation (Apr 9, 2026)
 - [x] Extract real SVG paths from Continuary bird icon and animate accurately in splash screen — using actual PNG with clip-path bottom-up reveal (filled logo, not fake strokes)
+
+## Splash Polish + Onboarding (Apr 9, 2026)
+- [x] Golden dot pulse after splash reveal completes
+- [x] Slow scale-up (0.88→1) on icon alongside clip-path reveal
+- [x] Onboarding checklist card on Command Center for new users (first check-in, first project, first vault entry)

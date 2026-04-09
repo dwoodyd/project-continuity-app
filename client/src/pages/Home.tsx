@@ -1171,6 +1171,56 @@ export default function Home() {
         ))
       }
 
+      {/* ── Onboarding Checklist (new users only) ──────────────────────────── */}
+      {(() => {
+        const hasCheckin = morningDone || middayDone || eveningDone;
+        const hasProject = activeProjects && activeProjects.length > 0;
+        const hasIdea = pendingIdeas && pendingIdeas.length > 0;
+        const allDone = hasCheckin && hasProject && hasIdea;
+        // Only show if at least one step is incomplete and user hasn't dismissed
+        const dismissed = (() => { try { return !!localStorage.getItem('continuary_onboarding_done'); } catch { return false; } })();
+        if (dismissed || allDone) return null;
+        return (
+          <div className="p-4 rounded-xl border" style={{ background: "oklch(0.13 0.025 270 / 0.6)", borderColor: "oklch(0.75 0.15 270 / 0.12)" }}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest">Getting started</p>
+              <button
+                onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} }}
+                className="text-muted-foreground hover:text-foreground text-[10px] underline underline-offset-2"
+              >Dismiss</button>
+            </div>
+            <div className="space-y-2">
+              {[{
+                done: hasCheckin,
+                label: "Complete your first check-in",
+                hint: "Tap Morning, Midday, or Evening above",
+              }, {
+                done: !!hasProject,
+                label: "Add your first project",
+                hint: "Go to Projects in the sidebar",
+              }, {
+                done: !!hasIdea,
+                label: "Capture an idea in the Vault",
+                hint: "Go to Vault in the sidebar",
+              }].map((step, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <div className={cn(
+                    "mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center",
+                    step.done ? "bg-emerald-500/20 border-emerald-500/50" : "border-foreground/20"
+                  )}>
+                    {step.done && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />}
+                  </div>
+                  <div>
+                    <p className={cn("text-xs font-medium", step.done && "line-through text-muted-foreground")}>{step.label}</p>
+                    {!step.done && <p className="text-[10px] text-muted-foreground mt-0.5">{step.hint}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -1584,7 +1634,7 @@ export default function Home() {
         {/* ════ RIGHT COLUMN ════ */}
         <div className="space-y-4">
 
-      {/* ── Thread Strength + Re-Entry Shortcut ──────────────────────────────── */}
+      {/* Thread Strength + Re-Entry Shortcut */}
       {gamStatus?.threadStrength && (
         <div
           className="p-4 rounded-xl border"
