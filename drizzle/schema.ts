@@ -606,3 +606,37 @@ export const feedbackSubmissions = mysqlTable("feedbackSubmissions", {
 });
 export type FeedbackSubmission = typeof feedbackSubmissions.$inferSelect;
 export type InsertFeedbackSubmission = typeof feedbackSubmissions.$inferInsert;
+
+// ─── Gamification: Continuity Events ─────────────────────────────────────────
+export const continuityEvents = mysqlTable("continuity_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  eventType: varchar("eventType", { length: 50 }).notNull(),
+  label: varchar("label", { length: 255 }),
+  metadata: text("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ContinuityEvent = typeof continuityEvents.$inferSelect;
+export type InsertContinuityEvent = typeof continuityEvents.$inferInsert;
+
+// ─── Gamification: Thread Strength ───────────────────────────────────────────
+export const threadStrength = mysqlTable("thread_strength", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  score: int("score").notNull().default(0),
+  state: varchar("state", { length: 30 }).notNull().default("Gathering"),
+  lastUpdatedAt: timestamp("lastUpdatedAt").defaultNow().notNull(),
+});
+export type ThreadStrength = typeof threadStrength.$inferSelect;
+export type InsertThreadStrength = typeof threadStrength.$inferInsert;
+
+// ─── Gamification: User Milestones ───────────────────────────────────────────
+export const userMilestones = mysqlTable("user_milestones", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  milestoneKey: varchar("milestoneKey", { length: 80 }).notNull(),
+  achievedAt: timestamp("achievedAt").defaultNow().notNull(),
+  dismissed: boolean("dismissed").notNull().default(false),
+});
+export type UserMilestone = typeof userMilestones.$inferSelect;
+export type InsertUserMilestone = typeof userMilestones.$inferInsert;

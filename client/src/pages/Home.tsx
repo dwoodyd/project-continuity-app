@@ -41,6 +41,16 @@ import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  ReturnMarker,
+  RhythmSegments,
+  ContinuityRing,
+  MovementFeed,
+  MilestoneCard,
+  useGamificationStatus,
+  useRecordEvent,
+} from "@/components/GamificationLayer";
+import { ReEntryFlow } from "@/components/ReEntryFlow";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -751,6 +761,16 @@ export default function Home() {
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [thresholdTask, setThresholdTask] = useState("");
   const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
+  // Gamification state
+  const { data: gamStatus, refetch: refetchGam } = useGamificationStatus();
+  const recordEvent = useRecordEvent();
+  const [returnMarkerDismissed, setReturnMarkerDismissed] = useState(false);
+  const [reEntryOpen, setReEntryOpen] = useState(false);
+  const [dismissedMilestones, setDismissedMilestones] = useState<Set<number>>(new Set());
+  const dismissMilestone = trpc.gamification.dismissMilestone.useMutation({
+    onSuccess: () => refetchGam(),
+  });
+
   // "Pick different step" state for the Start Here card
   const [pickingStep, setPickingStep] = useState(false);
   const [customStep, setCustomStep] = useState("");
@@ -867,6 +887,8 @@ export default function Home() {
     dismissHoldHint(); // hide first-use hint after first completion
     // Optimistically mark done in the UI immediately
     completeTaskMutation.mutate({ taskId });
+    // Record gamification event
+    recordEvent.mutate({ eventType: "task_completed", label: "Task completed" });
     // Mark as pending-undo
     setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
     // Show undo toast
@@ -931,6 +953,13 @@ export default function Home() {
     setActiveCheckIn(null);
     refetchCheckIns();
     refetchPlan();
+    // Record gamification event for rhythm completion
+    const rhythmLabels: Record<CheckInStep, string> = {
+      morning: "Morning plan set",
+      midday: "Midday check-in done",
+      evening: "Evening closure complete",
+    };
+    recordEvent.mutate({ eventType: `rhythm_${type}`, label: rhythmLabels[type] });
     // After morning or evening check-in, gently surface unprocessed ideas when count > 3
     if ((type === "morning" || type === "evening") && pendingIdeaCount > 3) {
       setTimeout(() => {
@@ -1110,9 +1139,50 @@ export default function Home() {
         </div>
       )}
 
+      {/* ── Return Marker ────────────────────────────────────────────────────── */}
+      {gamStatus?.returnMarker && !returnMarkerDismissed && (
+        <ReturnMarker
+          message={gamStatus.returnMarker.message}
+          onDismiss={() => {
+            setReturnMarkerDismissed(true);
+            recordEvent.mutate({
+              eventType: `return_${gamStatus.returnMarker!.window}`,
+              label: "Returned to Continuary",
+            });
+          }}
+        />
+      )}
+
+      {/* ── Pending Milestone Cards ──────────────────────────────────────────── */}
+      {gamStatus?.pendingMilestones
+        .filter(m => !dismissedMilestones.has(m.id))
+        .slice(0, 2)
+        .map(m => (
+          <MilestoneCard
+            key={m.id}
+            id={m.id}
+            title={m.title}
+            body={m.body}
+            onDismiss={(id) => {
+              setDismissedMilestones(prev => new Set(Array.from(prev).concat(id)));
+              dismissMilestone.mutate({ milestoneId: id });
+            }}
+          />
+        ))
+      }
+
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">Daily Rhythm</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Daily Rhythm</p>
+          {gamStatus?.rhythmToday && (
+            <RhythmSegments
+              morning={gamStatus.rhythmToday.morning}
+              midday={gamStatus.rhythmToday.midday}
+              evening={gamStatus.rhythmToday.evening}
+            />
+          )}
+        </div>
         <div className="flex gap-2">
           <CheckInCard
             type="morning"
@@ -1514,7 +1584,42 @@ export default function Home() {
         {/* ════ RIGHT COLUMN ════ */}
         <div className="space-y-4">
 
-      {/* ── Weekly Presence Dots ────────────────────────────────────────────────────────── */}
+      {/* ── Thread Strength + Re-Entry Shortcut ──────────────────────────────── */}
+      {gamStatus?.threadStrength && (
+        <div
+          className="p-4 rounded-xl border"
+          style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
+        >
+          <ContinuityRing
+            score={gamStatus.threadStrength.score}
+            state={gamStatus.threadStrength.state}
+          />
+          <button
+            onClick={() => setReEntryOpen(true)}
+            className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
+            style={{
+              background: "oklch(0.80 0.18 270 / 0.08)",
+              color: "oklch(0.80 0.18 270 / 0.65)",
+            }}
+          >
+            ↺ Pick up the thread
+          </button>
+        </div>
+      )}
+
+      {/* ── Evidence of Movement Feed ────────────────────────────────────────── */}
+      {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
+        <div
+          className="p-4 rounded-xl border"
+          style={{ background: "oklch(0.13 0.015 270 / 0.4)", borderColor: "oklch(1 0 0 / 0.06)" }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-widest mb-2"
+            style={{ color: "oklch(1 0 0 / 0.25)" }}>Evidence of movement</p>
+          <MovementFeed events={gamStatus.recentEvents as any} />
+        </div>
+      )}
+
+      {/* ── Weekly Presence Dots ────────────────────────────────────────────────────── */}
       {weeklyPresence && weeklyPresence.length > 0 && (
         <div className="p-4 rounded-xl border border-border bg-card">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">This week</p>

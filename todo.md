@@ -1043,3 +1043,25 @@
 - [x] Add submitFeedback tRPC mutation (saves to DB + notifies owner)
 - [x] Build FeedbackPanel sheet component (category selector, message, send button)
 - [x] Add "Feedback" entry to sidebar nav (desktop sidebar + mobile More sheet)
+
+## Gentle Gamification Plan (Apr 8, 2026)
+### Phase 1 — Highest Impact
+- [x] Return Markers: calm re-entry messages after 24h/3d/7d absence (once per window, no guilt)
+- [x] Daily Rhythm Completion: subtle progress rings/segments for Morning/Midday/Evening on Today view
+- [x] Idea Sanctuary Processing Reward: satisfying transition animation + haptic when ideas are processed
+- [x] Re-Entry Path Shortcut: "Pick Up the Thread" one-tap guided comeback flow on Today screen
+
+### Phase 2 — Core System Layer
+- [x] Continuity Signals: quiet visual indicator (ring/pulse) of return frequency on Today view
+- [x] Evidence of Movement Feed: minimal strip of recent meaningful actions (calm, reflective language)
+- [x] Thread Strength: private soft metric with 5 descriptive states (Gathering → Deepening), never harsh drop
+
+### Phase 3 — Depth and Retention
+- [x] Milestone Acknowledgments: elegant milestone cards for first rhythm, 10 ideas, first weekly review, 30 days
+- [x] Weekly Reflection Reward: summary card after Weekly Compass/Review with "week gathered" closure state
+- [x] Continuity Archive: clean timeline of returns, rhythms, milestones, and processed ideas
+
+### Schema/DB
+- [x] Add continuityEvents table (userId, eventType, metadata, createdAt)
+- [x] Add threadStrength table (userId, score, state, lastUpdatedAt)
+- [x] Add userMilestones table (userId, milestoneKey, achievedAt, dismissed)

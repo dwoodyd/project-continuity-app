@@ -19,6 +19,7 @@ import { thresholdRouter } from "./routers/threshold";
 import { evidenceRouter } from "./routers/evidence";
 import { studyRouter } from "./routers/study";
 import { feedbackRouter } from "./routers/feedback";
+import { gamificationRouter } from "./routers/gamification";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -77,6 +78,7 @@ export const appRouter = router({
   evidence: evidenceRouter,
   study: studyRouter,
   feedback: feedbackRouter,
+  gamification: gamificationRouter,
 });
 
 export type AppRouter = typeof appRouter;

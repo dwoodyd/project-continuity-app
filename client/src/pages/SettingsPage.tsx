@@ -261,10 +261,19 @@ export default function SettingsPage() {
   const { data: settings } = trpc.settings.getProfile.useQuery();
   const { data: projects } = trpc.projects.listActive.useQuery();
 
+  const recordEvent = trpc.gamification.recordEvent.useMutation();
+
   const resolveIdea = trpc.ai.resolveIdea.useMutation({
     onSuccess: (_, vars) => {
       const actionLabels: Record<string, string> = { park: "Added to Vault.", promote: "Added to project.", future: "Saved as future idea.", discard: "Dismissed." };
       toast.success(actionLabels[vars.action]);
+      // Haptic + gamification event for idea processing
+      if (navigator.vibrate) navigator.vibrate(40);
+      const label = vars.action === "park" ? "Idea moved to Vault"
+        : vars.action === "promote" ? "Idea added to project"
+        : vars.action === "future" ? "Idea saved for later"
+        : "Idea released";
+      recordEvent.mutate({ eventType: "idea_processed", label });
       refetchIdeas();
     },
     onError: () => toast.error("Failed to process idea."),
