@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 
+// CDN URL of the actual Continuary icon (512px clean cropped version)
+const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-512_badc923d.png";
+
 /**
- * AnimatedSplash — plays only when running as installed PWA.
- * - Tap/click anywhere to skip immediately.
- * - Ambient glow pulses once during the hold phase.
- * - Total runtime: 2.9s (or instant on tap).
+ * AnimatedSplash — uses the actual Continuary bird logo.
+ * Animation: clip-path reveal from bottom (ink rising), then wordmark fades in.
+ * Tap anywhere to skip. Soft 528Hz chime on reveal. Shows once per session.
  */
 export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
   const [phase, setPhase] = useState<"in" | "hold" | "out">("in");
   const [skipped, setSkipped] = useState(false);
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase("hold"), 300);
-    // Soft chime when outer arch finishes drawing (~1.1s after mount)
+    // Soft chime at ~1s (when reveal completes)
     const tChime = setTimeout(() => {
       try {
         const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -20,25 +21,31 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
         const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
         osc.type = "sine";
-        osc.frequency.setValueAtTime(528, ctx.currentTime); // 528 Hz — calm, resonant
+        osc.frequency.setValueAtTime(528, ctx.currentTime);
         gain.gain.setValueAtTime(0, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+        gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.4);
         osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 1.2);
-      } catch { /* audio blocked — silent fallback */ }
-    }, 1100);
+        osc.stop(ctx.currentTime + 1.4);
+      } catch { /* silent fallback */ }
+    }, 900);
+    const t1 = setTimeout(() => setPhase("hold"), 200);
     const t2 = setTimeout(() => setPhase("out"), 2400);
-    const t3 = setTimeout(() => onComplete(), 2900);
-    return () => { clearTimeout(t1); clearTimeout(tChime); clearTimeout(t2); clearTimeout(t3); };
+    const t3 = setTimeout(() => onComplete(), 2850);
+    return () => { clearTimeout(tChime); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onComplete]);
 
   function skip() {
     if (skipped) return;
     setSkipped(true);
     setPhase("out");
-    setTimeout(() => onComplete(), 400);
+    setTimeout(() => onComplete(), 380);
   }
+
+  // clipPath reveal: starts at inset(100% 0 0 0) → inset(0% 0 0 0) = bottom-up wipe
+  const clipReveal = phase === "in"
+    ? "inset(100% 0 0 0)"
+    : "inset(0% 0 0 0)";
 
   return (
     <div
@@ -47,108 +54,75 @@ export function AnimatedSplash({ onComplete }: { onComplete: () => void }) {
       style={{
         background: "oklch(0.09 0.01 270)",
         opacity: phase === "out" ? 0 : 1,
-        transition: phase === "out" ? "opacity 0.4s ease-in" : "opacity 0.4s ease-out",
-        pointerEvents: "all",
+        transition: phase === "out" ? "opacity 0.42s ease-in" : "opacity 0.3s ease-out",
       }}
     >
-      {/* Ambient glow — pulses once during hold phase */}
-      <div
-        style={{
-          position: "absolute",
-          width: 260,
-          height: 260,
-          borderRadius: "50%",
-          background: "radial-gradient(circle, oklch(0.50 0.18 270 / 0.18) 0%, transparent 70%)",
-          opacity: phase === "hold" ? 1 : 0,
-          transform: phase === "hold" ? "scale(1)" : "scale(0.6)",
-          transition: "opacity 1.2s ease-out 0.2s, transform 1.4s ease-out 0.2s",
-          pointerEvents: "none",
-        }}
-      />
+      {/* Ambient glow — blooms in during hold */}
+      <div style={{
+        position: "absolute",
+        width: 280,
+        height: 280,
+        borderRadius: "50%",
+        background: "radial-gradient(circle, oklch(0.45 0.16 270 / 0.16) 0%, transparent 70%)",
+        opacity: phase === "hold" ? 1 : 0,
+        transform: phase === "hold" ? "scale(1)" : "scale(0.5)",
+        transition: "opacity 1.4s ease-out 0.1s, transform 1.6s ease-out 0.1s",
+        pointerEvents: "none",
+      }} />
 
-      {/* Icon container */}
-      <div
-        style={{
-          position: "relative",
-          opacity: phase === "in" ? 0 : 1,
-          transform: phase === "in" ? "scale(0.82)" : "scale(1)",
-          transition: "opacity 0.5s ease-out, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)",
-        }}
-      >
-        <div
-          style={{
-            width: 88,
-            height: 88,
-            borderRadius: 22,
-            background: "oklch(0.18 0.04 270)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 0 0 1px oklch(0.80 0.18 270 / 0.15), 0 8px 32px oklch(0 0 0 / 0.5)",
+      {/* Icon container with clip-path reveal */}
+      <div style={{
+        width: 96,
+        height: 96,
+        borderRadius: 24,
+        background: "oklch(0.17 0.04 270)",
+        boxShadow: "0 0 0 1px oklch(0.75 0.15 270 / 0.12), 0 12px 40px oklch(0 0 0 / 0.55)",
+        overflow: "hidden",
+        clipPath: clipReveal,
+        transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <img
+          src={ICON_URL}
+          alt="Continuary"
+          width={96}
+          height={96}
+          style={{ display: "block", width: 96, height: 96, objectFit: "contain" }}
+          onError={(e) => {
+            // Fallback: show a simple arch if CDN fails
+            (e.target as HTMLImageElement).style.display = "none";
           }}
-        >
-          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-            <path
-              d="M10 42 C10 22 18 10 26 10 C34 10 42 22 42 42"
-              stroke="white" strokeWidth="2.8" strokeLinecap="round" fill="none"
-              style={{
-                strokeDasharray: 70,
-                strokeDashoffset: phase === "in" ? 70 : 0,
-                transition: "stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1) 0.2s",
-              }}
-            />
-            <path
-              d="M17 42 C17 28 21 18 26 18 C31 18 35 28 35 42"
-              stroke="white" strokeWidth="2.2" strokeLinecap="round" fill="none"
-              style={{
-                strokeDasharray: 46,
-                strokeDashoffset: phase === "in" ? 46 : 0,
-                transition: "stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1) 0.45s",
-              }}
-            />
-            <path
-              d="M8 42 L44 42"
-              stroke="white" strokeWidth="2" strokeLinecap="round"
-              style={{
-                strokeDasharray: 36,
-                strokeDashoffset: phase === "in" ? 36 : 0,
-                transition: "stroke-dashoffset 0.5s cubic-bezier(0.4,0,0.2,1) 0.9s",
-              }}
-            />
-          </svg>
-        </div>
+        />
       </div>
 
       {/* Wordmark */}
-      <div
-        style={{
-          marginTop: 20,
-          opacity: phase === "in" ? 0 : 1,
-          transform: phase === "in" ? "translateY(10px)" : "translateY(0)",
-          transition: "opacity 0.6s ease-out 1.2s, transform 0.6s ease-out 1.2s",
-          fontFamily: "'Lora', Georgia, serif",
-          fontSize: 26,
-          fontWeight: 600,
-          letterSpacing: "0.01em",
-          color: "oklch(0.96 0.005 270)",
-        }}
-      >
+      <div style={{
+        marginTop: 22,
+        opacity: phase === "in" ? 0 : 1,
+        transform: phase === "in" ? "translateY(8px)" : "translateY(0)",
+        transition: "opacity 0.65s ease-out 1.1s, transform 0.65s ease-out 1.1s",
+        fontFamily: "'Lora', Georgia, serif",
+        fontSize: 27,
+        fontWeight: 600,
+        letterSpacing: "0.01em",
+        color: "oklch(0.96 0.005 270)",
+      }}>
         Continuary
       </div>
 
       {/* Tagline */}
-      <div
-        style={{
-          marginTop: 6,
-          opacity: phase === "in" ? 0 : 1,
-          transition: "opacity 0.6s ease-out 1.7s",
-          fontSize: 11,
-          letterSpacing: "0.18em",
-          textTransform: "uppercase",
-          color: "oklch(0.60 0.01 270)",
-          fontFamily: "Inter, sans-serif",
-        }}
-      >
+      <div style={{
+        marginTop: 7,
+        opacity: phase === "in" ? 0 : 1,
+        transition: "opacity 0.6s ease-out 1.65s",
+        fontSize: 11,
+        letterSpacing: "0.17em",
+        textTransform: "uppercase",
+        color: "oklch(0.55 0.01 270)",
+        fontFamily: "Inter, sans-serif",
+      }}>
         Your thread continues
       </div>
     </div>

@@ -1074,3 +1074,6 @@
 - [x] Splash chime: Web Audio API soft tone on arch completion
 - [x] Splash replay button in Settings → General
 - [x] Admin feedback inbox at /admin/feedback with category filters
+
+## Accurate Bird Logo Animation (Apr 9, 2026)
+- [x] Extract real SVG paths from Continuary bird icon and animate accurately in splash screen — using actual PNG with clip-path bottom-up reveal (filled logo, not fake strokes)
