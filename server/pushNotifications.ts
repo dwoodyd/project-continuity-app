@@ -19,6 +19,7 @@ import {
   getRecentNotificationLog,
   getUserProfile,
   getCheckIns,
+  getColdProjects,
 } from "./db";
 
 // ── VAPID configuration ───────────────────────────────────────────────────────
@@ -247,6 +248,40 @@ async function processUserNotifications(userId: number): Promise<void> {
     if (recent.length > 0) continue;
 
     await sendPushToUser(userId, entry.type, entry.rot);
+  }
+
+  // ── Cold project nudge — fires once per day at morning check-in time ────────
+  const morningTime = parseTime(profile.morningCheckInTime ?? "08:00");
+  if (hour === morningTime.hour && minute === morningTime.minute) {
+    try {
+      const coldProjects = await getColdProjects(userId, 5);
+      if (coldProjects.length > 0) {
+        const recentCold = await getRecentNotificationLog(userId, "cold_project", 23 * 60 * 60 * 1000);
+        if (recentCold.length === 0) {
+          const project = coldProjects[0];
+          const subs = await getPushSubscriptionsForUser(userId);
+          if (subs.length > 0) {
+            const payload = JSON.stringify({
+              title: "A project is going cold.",
+              body: `"${project.title}" hasn't moved in 5+ days. Worth a look?`,
+              tag: "cold-project",
+              url: "/projects",
+            });
+            await Promise.allSettled(
+              subs.map((sub) =>
+                webpush.sendNotification(
+                  { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+                  payload
+                )
+              )
+            );
+            await logNotificationSent({ userId, type: "cold_project" });
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[Push] Cold project check failed for user ${userId}:`, (err as Error).message);
+    }
   }
 }
 

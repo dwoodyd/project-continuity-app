@@ -23,6 +23,7 @@ import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
 export default function WeeklyCompassPage() {
   const [, navigate] = useLocation();
   const [confirming, setConfirming] = useState(false);
+  const [showReward, setShowReward] = useState(false);
 
   const { data: compass, refetch, isLoading } = trpc.intelligence.getWeeklyCompass.useQuery();
   const { data: allProjects } = trpc.projects.list.useQuery();
@@ -38,8 +39,8 @@ export default function WeeklyCompassPage() {
 
   const confirm = trpc.intelligence.confirmWeeklyCompass.useMutation({
     onSuccess: () => {
-      toast.success("Weekly Compass confirmed. You know where you're headed.");
       setConfirming(false);
+      setShowReward(true);
       refetch();
     },
     onError: () => toast.error("Failed to confirm compass."),
@@ -67,6 +68,46 @@ export default function WeeklyCompassPage() {
   const shouldPark: string[] = (() => {
     try { return JSON.parse((compass as any)?.shouldPark ?? "[]"); } catch { return []; }
   })();
+
+  if (showReward && compass) {
+    const primaryProject = allProjects?.find((p) => p.id === (compass.primaryProjectId ?? undefined));
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="max-w-sm w-full text-center space-y-6">
+          <div className="text-5xl">🧭</div>
+          <div>
+            <h2 className="text-xl font-semibold text-foreground mb-1">Week gathered.</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your compass is set. The thread is clear.
+            </p>
+          </div>
+          {primaryProject && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">Primary focus this week</p>
+              <p className="font-semibold text-foreground">{primaryProject.title}</p>
+            </div>
+          )}
+          {compass.mustMove && (
+            <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3 text-sm">
+              <p className="text-xs uppercase tracking-widest text-amber-500/70 mb-1">Must move</p>
+              <p className="text-foreground">{compass.mustMove}</p>
+            </div>
+          )}
+          <div className="space-y-2 pt-2">
+            <Button className="w-full" onClick={() => { setShowReward(false); navigate("/"); }}>
+              Back to home
+            </Button>
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => setShowReward(false)}
+            >
+              View full compass
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
