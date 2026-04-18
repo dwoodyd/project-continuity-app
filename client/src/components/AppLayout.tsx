@@ -86,9 +86,10 @@ const MORE_ITEMS = [
 
 interface AppLayoutProps {
   children: React.ReactNode;
+  onPreviewIntro?: () => void;
 }
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) {
   const [location] = useLocation();
   const [, navigate] = useLocation();
   const { isAuthenticated, logout, user } = useAuth();
@@ -269,7 +270,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </a>
             </div>
           </div>
-          <p className="text-center text-xs text-muted-foreground/50 mt-6 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
+          {onPreviewIntro && (
+            <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
+              <button
+                onClick={onPreviewIntro}
+                className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
+              >
+                ✦ Preview intro
+              </button>
+            </div>
+          )}
+          <p className="text-center text-xs text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
           <p className="text-center text-xs text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
             <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy Policy</a>
             {" · "}

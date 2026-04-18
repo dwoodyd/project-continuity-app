@@ -30,7 +30,7 @@ import StudyTrackerPage from "./pages/StudyTrackerPage";
 import InviteGatePage from "./pages/InviteGatePage";
 import AboutAppPage from "./pages/AboutAppPage";
 
-function Router() {
+function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
   return (
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
@@ -40,7 +40,7 @@ function Router() {
       <Route path="/invite-gate" component={InviteGatePage} />
       <Route path="/about-app" component={AboutAppPage} />
       <Route>
-        <AppLayout>
+        <AppLayout onPreviewIntro={onPreviewIntro}>
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/vault" component={VaultPage} />
@@ -97,7 +97,7 @@ function App() {
           <Toaster position="top-right" richColors />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           {showOnboarding && <OnboardingFlow onSkip={handleOnboardingDone} />}
-          <Router />
+          <Router onPreviewIntro={() => setOnboardingDone(false)} />
           <PWAInstallBanner />
         </TooltipProvider>
       </ThemeProvider>
