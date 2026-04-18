@@ -628,7 +628,12 @@ export function OnboardingFlow({ onSkip }: { onSkip: () => void }) {
     const dx = touchStartX.current - e.changedTouches[0].clientX;
     touchStartX.current = null;
     if (dx > 50 && screen < 4) goNext();
-  }, [screen]);
+    else if (dx < -50 && screen > 0 && !transitioning) {
+      if (navigator.vibrate) navigator.vibrate(20);
+      setTransitioning(true);
+      setTimeout(() => { setScreen((s) => s - 1); setTransitioning(false); }, 200);
+    }
+  }, [screen, transitioning]);
 
   const goNext = useCallback(() => {
     if (transitioning) return;
