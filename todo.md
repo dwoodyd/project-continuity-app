@@ -1086,3 +1086,4 @@
 ## Splash Dot Position Fix (Apr 9, 2026)
 - [x] Move golden glow dot to match exact orange dot position on bird icon (x=64.5%, y=41.4% of icon bounds)
 - [x] Add "Preview intro" button to unauthenticated login screen so returning users can replay the onboarding flow
+- [x] Fix broken dot layout on onboarding screen 3 and rewrite all copy with neurodivergent emotional resonance
