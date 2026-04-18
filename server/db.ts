@@ -405,11 +405,11 @@ export async function getWeeklyCheckInPresence(userId: number): Promise<{ date: 
   return days.map((date) => ({ date, hasCheckIn: datesWithCheckIn.has(date) }));
 }
 
-export async function getWeeklyThreadData(userId: number): Promise<{ date: string; morning: boolean; midday: boolean; evening: boolean; strength: number }[]> {
+export async function getWeeklyThreadData(userId: number, daysBack = 7): Promise<{ date: string; morning: boolean; midday: boolean; evening: boolean; strength: number }[]> {
   const db = await getDb();
   if (!db) return [];
   const days: string[] = [];
-  for (let i = 6; i >= 0; i--) {
+  for (let i = daysBack - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     days.push(d.toISOString().slice(0, 10));

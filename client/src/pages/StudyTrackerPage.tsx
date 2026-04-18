@@ -689,9 +689,27 @@ export default function StudyTrackerPage() {
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5 text-primary" />
-          <h1 className="text-2xl font-semibold">Study Tracker</h1>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-primary" />
+            <h1 className="text-2xl font-semibold">Study Tracker</h1>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              if (!user?.isPro) {
+                toast.error("Export is a Pro feature", { description: "Upgrade to download your full session history.", action: { label: "Upgrade", onClick: () => window.location.href = "/pro" } });
+                return;
+              }
+              const rows = [["Date","Type","Lesson","Tiny Project","Intention","Actual Work","What Moved","Next Step"], ...dayLogs.map((l: any) => [l.date ?? "", l.type ?? "", l.lesson ?? "", l.tinyProject ?? "", l.intention ?? "", l.actualWork ?? "", l.whatMoved ?? "", l.nextStep ?? ""])];
+              const csv = rows.map(r => r.map((v: string) => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+              const a = document.createElement("a"); a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv); a.download = "study-tracker-export.csv"; a.click();
+            }}
+          >
+            {user?.isPro ? "↓ Export CSV" : "↓ Export (Pro)"}
+          </Button>
         </div>
         <p className="text-sm text-muted-foreground">30-Day Beginner Learning Path · Python · Electronics · Edge AI</p>
       </div>

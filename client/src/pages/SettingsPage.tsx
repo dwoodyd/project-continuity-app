@@ -416,7 +416,12 @@ export default function SettingsPage() {
                 {user?.name?.charAt(0) ?? "?"}
               </div>
               <div>
-                <p className="font-semibold text-foreground">{user?.name ?? "User"}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-semibold text-foreground">{user?.name ?? "User"}</p>
+                  {user?.isPro && (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">PRO</span>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">{user?.email ?? ""}</p>
               </div>
             </div>
