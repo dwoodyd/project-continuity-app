@@ -4,6 +4,7 @@
  * Displays morning/midday/evening dots + strength bars for each day.
  */
 
+import React from "react";
 import { trpc } from "@/lib/trpc";
 import { format, parseISO } from "date-fns";
 
@@ -20,6 +21,24 @@ function getDayLabel(dateStr: string): string {
 
 export function ThreadView() {
   const { data: threadData, isLoading } = trpc.checkIns.weeklyThreadData.useQuery();
+  const [toastShown, setToastShown] = React.useState(() =>
+    typeof localStorage !== "undefined" && localStorage.getItem("thread_unlock_toast_shown") === "1"
+  );
+
+  React.useEffect(() => {
+    if (!threadData || toastShown) return;
+    const activeDays = threadData.filter((d) => d.morning || d.midday || d.evening).length;
+    if (activeDays >= 3) {
+      import("sonner").then(({ toast }) => {
+        toast("Your thread is taking shape", {
+          description: "3 active days — your continuity is building.",
+          duration: 5000,
+        });
+      });
+      localStorage.setItem("thread_unlock_toast_shown", "1");
+      setToastShown(true);
+    }
+  }, [threadData, toastShown]);
 
   if (isLoading) {
     return (

@@ -659,7 +659,7 @@ export async function getAllUsersWithPushSubscriptions() {
 // ── Notification Log ──────────────────────────────────────────────────────────
 export async function logNotificationSent(data: {
   userId: number;
-  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary";
+  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary" | "thread_thinning";
   projectId?: number;
   suppressedBy?: string;
 }): Promise<void> {
@@ -670,7 +670,7 @@ export async function logNotificationSent(data: {
 
 export async function getRecentNotificationLog(
   userId: number,
-  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary",
+  type: "morning" | "midday" | "evening" | "cold_project" | "sanctuary" | "thread_thinning",
   sinceMs: number
 ): Promise<{ sentAt: Date }[]> {
   const db = await getDb();

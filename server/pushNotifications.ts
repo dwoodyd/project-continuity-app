@@ -20,6 +20,7 @@ import {
   getUserProfile,
   getCheckIns,
   getColdProjects,
+  getWeeklyThreadData,
 } from "./db";
 
 // ── VAPID configuration ───────────────────────────────────────────────────────
@@ -248,6 +249,40 @@ async function processUserNotifications(userId: number): Promise<void> {
     if (recent.length > 0) continue;
 
     await sendPushToUser(userId, entry.type, entry.rot);
+  }
+
+  // ── Thread thinning nudge — fires at morning if avg strength < 33% ──────────
+  try {
+    const threadData = await getWeeklyThreadData(userId);
+    const activeDays = threadData.filter((d) => d.morning || d.midday || d.evening);
+    if (activeDays.length >= 3) {
+      const avg = activeDays.reduce((s, d) => s + d.strength, 0) / activeDays.length;
+      if (avg < 33) {
+        const recentThin = await getRecentNotificationLog(userId, "thread_thinning", 23 * 60 * 60 * 1000);
+        if (recentThin.length === 0) {
+          const subs = await getPushSubscriptionsForUser(userId);
+          if (subs.length > 0) {
+            const payload = JSON.stringify({
+              title: "Your thread is thinning.",
+              body: "A midday or evening check-in takes 30 seconds. Keep the thread warm.",
+              tag: "thread-thinning",
+              url: "/",
+            });
+            await Promise.allSettled(
+              subs.map((sub) =>
+                webpush.sendNotification(
+                  { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+                  payload
+                )
+              )
+            );
+            await logNotificationSent({ userId, type: "thread_thinning" });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn(`[Push] Thread thinning check failed for user ${userId}:`, (err as Error).message);
   }
 
   // ── Cold project nudge — fires once per day at morning check-in time ────────

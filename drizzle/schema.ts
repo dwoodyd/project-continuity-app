@@ -339,7 +339,7 @@ export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
 export const notificationLog = mysqlTable("notification_log", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  type: mysqlEnum("type", ["morning", "midday", "evening", "cold_project", "sanctuary"]).notNull(),
+  type: mysqlEnum("type", ["morning", "midday", "evening", "cold_project", "sanctuary", "thread_thinning"]).notNull(),
   sentAt: timestamp("sentAt").defaultNow().notNull(),
   projectId: int("projectId"), // for cold_project type
   suppressedBy: varchar("suppressedBy", { length: 64 }), // e.g. "in_app_checkin"

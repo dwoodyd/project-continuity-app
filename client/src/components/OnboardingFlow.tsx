@@ -606,17 +606,7 @@ function ScreenThreadView({ visible, onNext }: { visible: boolean; onNext: () =>
         position: "relative",
         overflow: "hidden",
       }}>
-        {/* Blur overlay for "locked" feel */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to bottom, transparent 30%, oklch(0.09 0.01 270 / 0.85) 80%)",
-          zIndex: 2,
-          borderRadius: 16,
-          opacity: lockIn ? 1 : 0,
-          transition: "opacity 0.6s ease-out",
-          pointerEvents: "none",
-        }} />
+
 
         {/* Column headers */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4, marginBottom: 10 }}>
@@ -682,10 +672,10 @@ function ScreenThreadView({ visible, onNext }: { visible: boolean; onNext: () =>
           ))}
         </div>
 
-        {/* Locked label */}
+        {/* Unlock label */}
         <div style={{
           position: "absolute",
-          bottom: 16,
+          bottom: 10,
           left: 0,
           right: 0,
           zIndex: 3,
@@ -703,14 +693,14 @@ function ScreenThreadView({ visible, onNext }: { visible: boolean; onNext: () =>
             padding: "6px 14px",
             backdropFilter: "blur(8px)",
           }}>
-            <span style={{ fontSize: 12 }}>🔒</span>
+            <span style={{ fontSize: 12 }}>✦</span>
             <span style={{
               fontSize: 11,
-              color: "oklch(0.65 0.01 270)",
+              color: "oklch(0.75 0.14 270)",
               fontFamily: "Inter, sans-serif",
               letterSpacing: "0.08em",
             }}>
-              Yours starts today
+              Yours builds from day one
             </span>
           </div>
         </div>
