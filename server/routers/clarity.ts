@@ -10,7 +10,7 @@ import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
 import { claritySessions } from "../../drizzle/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, gte, sql } from "drizzle-orm";
 
 const MODES = [
   "overwhelm",
@@ -50,6 +50,17 @@ export const clarityRouter = router({
       checkLLMRateLimit(ctx.user.id);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
+      // Pro gate: free users limited to 2 Clarity Engine sessions per day
+      if (!ctx.user.isPro && ctx.user.role !== 'admin') {
+        const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+        const [{ count }] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(claritySessions)
+          .where(and(eq(claritySessions.userId, ctx.user.id), gte(claritySessions.createdAt, todayStart)));
+        if (Number(count) >= 2) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "FREE_LIMIT_REACHED" });
+        }
+      }
       const modeContext = MODE_CONTEXT[input.mode];
 
       const systemPrompt = `You are the Clarity Engine inside Continuary — a calm, perceptive guide that helps people move from inner noise to clear action.

@@ -1121,11 +1121,18 @@ export default function ClarityEnginePage() {
       try { localStorage.removeItem(BRAIN_DUMP_STORAGE_KEY); } catch { /* ignore */ }
     },
     onError: (err) => {
-      toast.error("Something went wrong. Please try again.");
-      console.error(err);
+      if (err.message === 'FREE_LIMIT_REACHED') {
+        toast("Daily limit reached", {
+          description: "Free users get 2 Clarity Engine sessions/day. Upgrade to Pro for unlimited access.",
+          action: { label: "Upgrade →", onClick: () => window.location.href = '/pro' },
+          duration: 8000,
+        });
+      } else {
+        toast.error("Something went wrong. Please try again.");
+        console.error(err);
+      }
     },
   });
-
   const setProgressMarker = trpc.clarity.setProgressMarker.useMutation({
     onSuccess: () => utils.clarity.getSession.invalidate({ id: activeSessionId! }),
   });

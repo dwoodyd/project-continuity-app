@@ -17,10 +17,7 @@ const HOW_IT_WORKS = [
   { step: "04", title: "Weekly Compass", desc: "One ritual to close the week and open the next with intention." },
 ];
 
-const TESTIMONIAL_PLACEHOLDER = [
-  { quote: "I've tried every productivity app. Continuary is the first one that doesn't make me feel broken for not using it perfectly.", name: "Early tester, ADHD" },
-  { quote: "The re-entry notes alone are worth it. I stopped losing 20 minutes every time I came back to a project.", name: "Freelance writer" },
-];
+
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
@@ -101,16 +98,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Early tester CTA */}
       <section className="px-6 max-w-2xl mx-auto mb-24">
-        <h2 className="text-2xl font-bold mb-8 text-center">Early voices</h2>
-        <div className="space-y-4">
-          {TESTIMONIAL_PLACEHOLDER.map((t) => (
-            <div key={t.name} className="bg-white/5 rounded-2xl p-6 border border-white/10">
-              <p className="text-white/80 leading-relaxed mb-4 italic">"{t.quote}"</p>
-              <p className="text-white/30 text-xs">— {t.name}</p>
-            </div>
-          ))}
+        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 text-center">
+          <div className="text-3xl mb-4">🧵</div>
+          <h2 className="text-xl font-bold mb-2">Be an early voice</h2>
+          <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+            Continuary is new. If you try it and it helps — or doesn't — I want to hear from you directly.
+            Early feedback shapes everything.
+          </p>
+          <a
+            href="mailto:hello@soulengineer.online?subject=Continuary Early Feedback"
+            className="inline-block bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
+          >
+            Send early feedback →
+          </a>
         </div>
       </section>
 
