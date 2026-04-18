@@ -154,6 +154,17 @@ function ParticleField({ active }: { active: boolean }) {
 }
 
 // ─── Screen 0: The Premise ────────────────────────────────────────────────────
+// A/B test: odd-minute visitors see variant B headline
+const AB_VARIANT = typeof Date !== "undefined" && new Date().getMinutes() % 2 === 1 ? "B" : "A";
+const PREMISE_HEADLINE = AB_VARIANT === "B"
+  ? "You haven't found the right system yet."
+  : "Your brain isn't broken.";
+const PREMISE_SUB = AB_VARIANT === "B"
+  ? "Most productivity tools weren't designed for how you actually think."
+  : "It just needs a system that works with how you actually think.";
+// Store variant so we can read it later for analytics
+if (typeof localStorage !== "undefined") localStorage.setItem("onboarding_ab_variant", AB_VARIANT);
+
 function ScreenPremise({ visible, onNext }: { visible: boolean; onNext: () => void }) {
   const [textIn, setTextIn] = useState(false);
   const [subIn, setSubIn] = useState(false);
@@ -178,13 +189,13 @@ function ScreenPremise({ visible, onNext }: { visible: boolean; onNext: () => vo
 
       <div style={{ opacity: textIn ? 1 : 0, transform: textIn ? "translateY(0)" : "translateY(16px)", transition: "opacity 0.9s ease-out, transform 0.9s ease-out" }}>
         <h1 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: "clamp(28px, 7vw, 38px)", fontWeight: 600, color: "oklch(0.96 0.005 270)", lineHeight: 1.2, letterSpacing: "-0.01em" }}>
-          Your brain isn't broken.
+          {PREMISE_HEADLINE}
         </h1>
       </div>
 
       <div style={{ marginTop: 16, opacity: subIn ? 1 : 0, transform: subIn ? "translateY(0)" : "translateY(12px)", transition: "opacity 0.8s ease-out, transform 0.8s ease-out", maxWidth: 300 }}>
         <p style={{ fontSize: 17, color: "oklch(0.65 0.01 270)", lineHeight: 1.65, fontFamily: "Inter, sans-serif", fontWeight: 400 }}>
-          It just needs a system that works <em>with</em> how you actually think.
+          {PREMISE_SUB}
         </p>
       </div>
 
@@ -207,6 +218,7 @@ function ScreenPremise({ visible, onNext }: { visible: boolean; onNext: () => vo
 }
 
 // ─── Screen 1: The Problem ────────────────────────────────────────────────────
+// Tap-anywhere to advance is handled by wrapping the screen in a clickable div
 const PROBLEMS = [
   {
     icon: "◌",
@@ -239,7 +251,7 @@ function ScreenProblem({ visible, onNext }: { visible: boolean; onNext: () => vo
   }, [visible]);
 
   return (
-    <div className="absolute inset-0 flex flex-col justify-center px-8" style={{ paddingTop: 64 }}>
+    <div className="absolute inset-0 flex flex-col justify-center px-8" style={{ paddingTop: 64 }} onClick={onNext}>
       <div style={{ marginBottom: 32, opacity: visible ? 1 : 0, transition: "opacity 0.6s ease-out", fontFamily: "Inter, sans-serif", fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "oklch(0.50 0.12 30)" }}>
         If any of this sounds familiar →
       </div>
