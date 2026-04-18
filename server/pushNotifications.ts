@@ -292,7 +292,8 @@ async function processUserNotifications(userId: number): Promise<void> {
   const morningTime = parseTime(profile.morningCheckInTime ?? "08:00");
   if (hour === morningTime.hour && minute === morningTime.minute) {
     try {
-      const coldProjects = await getColdProjects(userId, 5);
+      const coldThreshold = profile.coldProjectThresholdDays ?? 5;
+      const coldProjects = await getColdProjects(userId, coldThreshold);
       if (coldProjects.length > 0) {
         const recentCold = await getRecentNotificationLog(userId, "cold_project", 23 * 60 * 60 * 1000);
         if (recentCold.length === 0) {
@@ -301,7 +302,7 @@ async function processUserNotifications(userId: number): Promise<void> {
           if (subs.length > 0) {
             const payload = JSON.stringify({
               title: "A project is going cold.",
-              body: `"${project.title}" hasn't moved in 5+ days. Worth a look?`,
+              body: `"${project.title}" hasn't moved in ${coldThreshold}+ days. Worth a look?`,
               tag: "cold-project",
               url: "/projects",
             });

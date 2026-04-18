@@ -1087,11 +1087,11 @@
 - [x] Move golden glow dot to match exact orange dot position on bird icon (x=64.5%, y=41.4% of icon bounds)
 - [x] Add "Preview intro" button to unauthenticated login screen so returning users can replay the onboarding flow
 - [x] Fix broken dot layout on onboarding screen 3 and rewrite all copy with neurodivergent emotional resonance
-- [ ] Add betaCodes table to schema with code, usedBy, usedAt columns
-- [ ] Add isBeta, betaExpiresAt columns to users table
-- [ ] Seed 100 THREAD-BETA-### codes
-- [ ] tRPC redeemBetaCode procedure (validates, marks used, sets 45-day Pro access)
-- [ ] Beta code redemption screen in OnboardingPage (post-login)
-- [ ] Admin panel page for beta code management (list, generate, export)
-- [ ] Beta expiry push notification in cron (fires on expiry day)
-- [ ] Bypass Pro gate for isBeta users within betaExpiresAt window
+- [x] Add betaCodes table to schema with code, usedBy, usedAt columns
+- [x] Add isBeta, betaExpiresAt columns to users table
+- [x] Seed 100 THREAD-BETA-### codes
+- [x] tRPC redeemBetaCode procedure (validates, marks used, sets 45-day Pro access)
+- [x] Beta code redemption screen in OnboardingPage (post-login)
+- [x] Admin panel page for beta code management (list, generate, export)
+- [x] Beta expiry push notification in cron (fires on expiry day)
+- [x] Bypass Pro gate for isBeta users within betaExpiresAt window

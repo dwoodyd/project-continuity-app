@@ -73,7 +73,18 @@ export default function WeeklyCompassPage() {
     const primaryProject = allProjects?.find((p) => p.id === (compass.primaryProjectId ?? undefined));
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="max-w-sm w-full text-center space-y-6">
+        <div
+          className="max-w-sm w-full text-center space-y-6"
+          style={{
+            animation: "rewardCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both",
+          }}
+        >
+          <style>{`
+            @keyframes rewardCardIn {
+              from { opacity: 0; transform: translateY(24px); }
+              to   { opacity: 1; transform: translateY(0); }
+            }
+          `}</style>
           <div className="text-5xl">🧭</div>
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-1">Week gathered.</h2>

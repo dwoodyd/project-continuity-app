@@ -920,6 +920,33 @@ export default function SettingsPage() {
             )}
           </div>
 
+          {/* Cold Project Threshold */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Cold project alert</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Notify me when a project hasn't moved in:</p>
+              </div>
+              <span className="text-sm font-semibold tabular-nums" style={{ color: "oklch(0.74 0.16 58)" }}>
+                {settings?.coldProjectThresholdDays ?? 5} days
+              </span>
+            </div>
+            <input
+              type="range"
+              min={2}
+              max={14}
+              step={1}
+              value={settings?.coldProjectThresholdDays ?? 5}
+              onChange={(e) => updateSettings.mutate({ coldProjectThresholdDays: parseInt(e.target.value) })}
+              className="w-full accent-amber-500 cursor-pointer"
+            />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>2 days</span>
+              <span>7 days</span>
+              <span>14 days</span>
+            </div>
+          </div>
+
           {/* Weekly Digest */}
           <WeeklyDigestCard />
 

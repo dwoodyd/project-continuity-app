@@ -818,6 +818,9 @@ export default function Home() {
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
     staleTime: 30 * 60 * 1000,
   });
+  const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
+    staleTime: 5 * 60 * 1000,
+  });
   const utils = trpc.useUtils();
   const { data: profile } = trpc.settings.getProfile.useQuery();
   const updateSettings = trpc.settings.updateSettings.useMutation({
@@ -1064,9 +1067,20 @@ export default function Home() {
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
             {greeting}, <span style={{ background: "linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{firstName}</span>.
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {format(now, "EEEE, MMMM d")}
-          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-muted-foreground">
+              {format(now, "EEEE, MMMM d")}
+            </p>
+            {streakData && streakData.streak >= 2 && (
+              <span
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.16 58)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
+                title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
+              >
+                🔥 {streakData.streak}d
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {pendingIdeaCount > 0 && (

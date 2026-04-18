@@ -30,6 +30,11 @@ let cachedPlanId: string | null = null;
 
 export async function getOrCreatePlan(): Promise<string> {
   if (cachedPlanId) return cachedPlanId;
+  // Use pre-created plan ID from env if available (preferred)
+  if (process.env.PAYPAL_PLAN_ID) {
+    cachedPlanId = process.env.PAYPAL_PLAN_ID;
+    return cachedPlanId;
+  }
   const token = await getAccessToken();
 
   // Create product
