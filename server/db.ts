@@ -405,6 +405,28 @@ export async function getWeeklyCheckInPresence(userId: number): Promise<{ date: 
   return days.map((date) => ({ date, hasCheckIn: datesWithCheckIn.has(date) }));
 }
 
+export async function getWeeklyThreadData(userId: number): Promise<{ date: string; morning: boolean; midday: boolean; evening: boolean; strength: number }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const days: string[] = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  const results = await db.select({ date: checkIns.date, type: checkIns.type })
+    .from(checkIns)
+    .where(and(eq(checkIns.userId, userId), gte(checkIns.date, days[0]!)));
+  return days.map((date) => {
+    const dayRows = results.filter((r) => r.date === date);
+    const morning = dayRows.some((r) => r.type === "morning");
+    const midday = dayRows.some((r) => r.type === "midday");
+    const evening = dayRows.some((r) => r.type === "evening");
+    const strength = Math.round(((morning ? 1 : 0) + (midday ? 1 : 0) + (evening ? 1 : 0)) / 3 * 100);
+    return { date, morning, midday, evening, strength };
+  });
+}
+
 // ── Focus Sessions ────────────────────────────────────────────────────────────
 export async function getFocusSessionsByProject(userId: number, projectId: number, limit = 10): Promise<FocusSession[]> {
   const db = await getDb();

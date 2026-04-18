@@ -916,6 +916,7 @@ export function OnboardingFlow({ onSkip }: { onSkip: () => void }) {
 
   const goNext = useCallback(() => {
     if (transitioning) return;
+    if (navigator.vibrate) navigator.vibrate(30);
     setTransitioning(true);
     setTimeout(() => {
       setScreen((s) => s + 1);

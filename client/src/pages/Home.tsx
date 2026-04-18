@@ -51,6 +51,7 @@ import {
   useRecordEvent,
 } from "@/components/GamificationLayer";
 import { ReEntryFlow } from "@/components/ReEntryFlow";
+import { ThreadView } from "@/components/ThreadView";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -1737,27 +1738,7 @@ export default function Home() {
       )}
 
       {/* ── Weekly Presence Dots ────────────────────────────────────────────────────── */}
-      {weeklyPresence && weeklyPresence.length > 0 && (
-        <div className="p-4 rounded-xl border border-border bg-card">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-3">This week</p>
-          <div className="flex items-center gap-2">
-            {weeklyPresence.map((day) => {
-              const label = new Date(day.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short" });
-              return (
-                <div key={day.date} className="flex flex-col items-center gap-1.5 flex-1">
-                  <div
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      day.hasCheckIn ? "bg-primary" : "bg-foreground/10 border border-foreground/20"
-                    }`}
-                    title={`${label}: ${day.hasCheckIn ? "checked in" : "no check-in"}`}
-                  />
-                  <span className="text-[9px] text-muted-foreground/50 font-medium">{label.slice(0, 1)}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <ThreadView />
       {/* ── Evidence Log monthly sentence ─────────────────────────────────────────────────────────────────── */}
       {evidenceMonth?.summaryLine && (
         <div className="px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5">

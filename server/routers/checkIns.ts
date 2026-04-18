@@ -5,6 +5,7 @@ import {
   getCheckIns,
   getRecentCheckIns,
   getWeeklyCheckInPresence,
+  getWeeklyThreadData,
   updateCheckIn,
   updateDailyPlan,
   upsertDailyPlan,
@@ -545,6 +546,9 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
 
   weeklyPresence: protectedProcedure.query(async ({ ctx }) => {
     return getWeeklyCheckInPresence(ctx.user.id);
+  }),
+  weeklyThreadData: protectedProcedure.query(async ({ ctx }) => {
+    return getWeeklyThreadData(ctx.user.id);
   }),
 
   /**
