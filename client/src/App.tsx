@@ -17,6 +17,7 @@ import OnboardingPage from "./pages/OnboardingPage";
 import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import { AnimatedSplash } from "./components/AnimatedSplash";
+import { OnboardingFlow } from "./components/OnboardingFlow";
 import { useState } from "react";
 import IntelligencePage from "./pages/IntelligencePage";
 import ClarityEnginePage from "./pages/ClarityEnginePage";
@@ -71,6 +72,10 @@ function App() {
   );
   // First-ever session: localStorage flag not yet set
   const isFirstSession = !localStorage.getItem("continuary_visited");
+  // Onboarding flow: shown once to first-session users after splash
+  const [onboardingDone, setOnboardingDone] = useState(
+    () => localStorage.getItem("continuary_onboarded") === "1"
+  );
 
   function handleSplashComplete() {
     sessionStorage.setItem("splashShown", "1");
@@ -78,12 +83,20 @@ function App() {
     setSplashDone(true);
   }
 
+  function handleOnboardingDone() {
+    localStorage.setItem("continuary_onboarded", "1");
+    setOnboardingDone(true);
+  }
+
+  const showOnboarding = splashDone && isFirstSession && !onboardingDone;
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
           <Toaster position="top-right" richColors />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
+          {showOnboarding && <OnboardingFlow onSkip={handleOnboardingDone} />}
           <Router />
           <PWAInstallBanner />
         </TooltipProvider>

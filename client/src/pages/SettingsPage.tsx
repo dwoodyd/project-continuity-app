@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
+import { PushPermissionInterstitial } from "@/components/PushPermissionInterstitial";
 
 // ─── Idea Processing Card ─────────────────────────────────────────────────────
 function IdeaProcessingCard({
@@ -215,6 +216,7 @@ export default function SettingsPage() {
   const utils = trpc.useUtils();
   const { theme, toggleTheme } = useTheme();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
+  const [showPushInterstitial, setShowPushInterstitial] = useState(false);
   const updateSchedule = trpc.notifications.updateSchedule.useMutation();
   const { data: pushStatus, refetch: refetchPushStatus } = trpc.notifications.getPushStatus.useQuery();
   const registerPush = trpc.notifications.registerPush.useMutation();
@@ -373,6 +375,7 @@ export default function SettingsPage() {
   const processedIdeas = ideas?.filter((i) => i.resolvedStatus) ?? [];
 
   return (
+    <>
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
@@ -944,5 +947,13 @@ export default function SettingsPage() {
         </div>
       )}
     </div>
+
+    {showPushInterstitial && (
+      <PushPermissionInterstitial
+        onAllow={() => { setShowPushInterstitial(false); requestPermission(); }}
+        onDismiss={() => setShowPushInterstitial(false)}
+      />
+    )}
+    </>
   );
 }
