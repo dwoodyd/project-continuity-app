@@ -72,10 +72,12 @@ function App() {
   );
   // First-ever session: localStorage flag not yet set
   const isFirstSession = !localStorage.getItem("continuary_visited");
-  // Onboarding flow: shown once to first-session users after splash
+  // Onboarding flow: shown once to first-session users after splash, or when previewed
   const [onboardingDone, setOnboardingDone] = useState(
     () => localStorage.getItem("continuary_onboarded") === "1"
   );
+  // Preview mode: user explicitly triggered the intro replay
+  const [previewMode, setPreviewMode] = useState(false);
 
   function handleSplashComplete() {
     sessionStorage.setItem("splashShown", "1");
@@ -86,9 +88,14 @@ function App() {
   function handleOnboardingDone() {
     localStorage.setItem("continuary_onboarded", "1");
     setOnboardingDone(true);
+    setPreviewMode(false);
   }
 
-  const showOnboarding = splashDone && isFirstSession && !onboardingDone;
+  function handlePreviewIntro() {
+    setPreviewMode(true);
+  }
+
+  const showOnboarding = splashDone && (!onboardingDone && isFirstSession || previewMode);
 
   return (
     <ErrorBoundary>
@@ -97,7 +104,7 @@ function App() {
           <Toaster position="top-right" richColors />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           {showOnboarding && <OnboardingFlow onSkip={handleOnboardingDone} />}
-          <Router onPreviewIntro={() => setOnboardingDone(false)} />
+          <Router onPreviewIntro={handlePreviewIntro} />
           <PWAInstallBanner />
         </TooltipProvider>
       </ThemeProvider>
