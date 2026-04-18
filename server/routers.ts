@@ -20,6 +20,7 @@ import { evidenceRouter } from "./routers/evidence";
 import { studyRouter } from "./routers/study";
 import { feedbackRouter } from "./routers/feedback";
 import { gamificationRouter } from "./routers/gamification";
+import { paypalRouter } from "./routers/paypal";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -79,6 +80,7 @@ export const appRouter = router({
   study: studyRouter,
   feedback: feedbackRouter,
   gamification: gamificationRouter,
+  paypal: paypalRouter,
 });
 
 export type AppRouter = typeof appRouter;

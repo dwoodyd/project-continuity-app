@@ -29,6 +29,9 @@ import AdminFeedbackPage from "./pages/AdminFeedbackPage";
 import StudyTrackerPage from "./pages/StudyTrackerPage";
 import InviteGatePage from "./pages/InviteGatePage";
 import AboutAppPage from "./pages/AboutAppPage";
+import ProPage from "./pages/ProPage";
+import ProSuccessPage from "./pages/ProSuccessPage";
+import LandingPage from "./pages/LandingPage";
 
 function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
   return (
@@ -39,6 +42,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
       <Route path="/terms" component={TermsPage} />
       <Route path="/invite-gate" component={InviteGatePage} />
       <Route path="/about-app" component={AboutAppPage} />
+      <Route path="/landing" component={LandingPage} />
       <Route>
         <AppLayout onPreviewIntro={onPreviewIntro}>
           <Switch>
@@ -56,6 +60,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
             <Route path="/admin/feedback" component={AdminFeedbackPage} />
             <Route path="/admin/study" component={StudyTrackerPage} />
             <Route path="/settings" component={SettingsPage} />
+            <Route path="/pro" component={ProPage} />
+            <Route path="/pro/success" component={ProSuccessPage} />
+            <Route path="/pro/cancel" component={ProPage} />
             <Route path="/404" component={NotFound} />
             <Route component={NotFound} />
           </Switch>

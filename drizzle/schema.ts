@@ -22,6 +22,9 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   welcomeNotified: boolean("welcomeNotified").default(false).notNull(),
   inviteCode: varchar("inviteCode", { length: 32 }),
+  paypalSubscriptionId: varchar("paypalSubscriptionId", { length: 64 }),
+  isPro: boolean("isPro").default(false).notNull(),
+  proSince: timestamp("proSince"),
 });
 
 export type User = typeof users.$inferSelect;

@@ -162,6 +162,13 @@
       "when": 1776538183596,
       "tag": "0022_blushing_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1776547942984,
+      "tag": "0023_left_spitfire",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startNotificationCron } from "../pushNotifications";
+import { paypalRouter } from "../paypal";
 import { startWeeklyDigestCron } from "../weeklyDigest";
 import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
@@ -118,6 +119,9 @@ async function startServer() {
             FORGE_API_ORIGIN,
             "https://fonts.googleapis.com",
             "https://fonts.gstatic.com",
+            "https://www.paypal.com",
+            "https://api-m.sandbox.paypal.com",
+            "https://api-m.paypal.com",
             // Vite HMR websocket in development
             ...(process.env.NODE_ENV !== "production" ? ["ws://localhost:*", "wss://localhost:*"] : []),
           ],
@@ -196,6 +200,8 @@ async function startServer() {
     // TODO (horizontal scaling): add store: new RedisStore(...) here
   });
 
+  // PayPal webhook
+  app.use("/api/paypal", paypalRouter);
   // OAuth callback under /api/oauth/callback
   app.use("/api/oauth", oauthLimiter);
   registerOAuthRoutes(app);
