@@ -744,20 +744,38 @@ function ScreenThreadView({ visible, onNext }: { visible: boolean; onNext: () =>
   );
 }
 
+const WORK_STYLES = [
+  { key: "writing_creative", label: "Writing & Creative", emoji: "✍️" },
+  { key: "business_product", label: "Business & Product", emoji: "📊" },
+  { key: "ministry_coaching", label: "Ministry & Coaching", emoji: "🌿" },
+  { key: "consulting_client", label: "Consulting & Client Work", emoji: "🤝" },
+  { key: "multiple", label: "Multiple types", emoji: "⚡" },
+];
+
 // ─── Screen 4: The Ask ────────────────────────────────────────────────────────
 function ScreenAsk({ visible }: { visible: boolean }) {
   const [headIn, setHeadIn] = useState(false);
   const [subIn, setSubIn] = useState(false);
+  const [pickerIn, setPickerIn] = useState(false);
   const [btnIn, setBtnIn] = useState(false);
   const [freeIn, setFreeIn] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState<string | null>(() =>
+    typeof localStorage !== "undefined" ? localStorage.getItem("onboarding_work_style") : null
+  );
+
+  const handleStyleSelect = (key: string) => {
+    setSelectedStyle(key);
+    localStorage.setItem("onboarding_work_style", key);
+  };
 
   useEffect(() => {
-    if (!visible) { setHeadIn(false); setSubIn(false); setBtnIn(false); setFreeIn(false); return; }
+    if (!visible) { setHeadIn(false); setSubIn(false); setPickerIn(false); setBtnIn(false); setFreeIn(false); return; }
     const t1 = setTimeout(() => setHeadIn(true), 300);
     const t2 = setTimeout(() => setSubIn(true), 900);
-    const t3 = setTimeout(() => setBtnIn(true), 1500);
-    const t4 = setTimeout(() => setFreeIn(true), 2000);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); };
+    const t3 = setTimeout(() => setPickerIn(true), 1300);
+    const t4 = setTimeout(() => setBtnIn(true), 1800);
+    const t5 = setTimeout(() => setFreeIn(true), 2200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); clearTimeout(t4); clearTimeout(t5); };
   }, [visible]);
 
   return (
@@ -822,8 +840,65 @@ function ScreenAsk({ visible }: { visible: boolean }) {
         </p>
       </div>
 
+      {/* Work style picker */}
       <div style={{
-        marginTop: 44,
+        marginTop: 28,
+        width: "100%",
+        maxWidth: 320,
+        opacity: pickerIn ? 1 : 0,
+        transform: pickerIn ? "translateY(0)" : "translateY(10px)",
+        transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
+        position: "relative",
+      }}>
+        <p style={{
+          fontSize: 11,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "oklch(0.42 0.01 270)",
+          fontFamily: "Inter, sans-serif",
+          marginBottom: 10,
+        }}>What kind of work do you do?</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {WORK_STYLES.map((ws) => (
+            <button
+              key={ws.key}
+              onClick={() => handleStyleSelect(ws.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 14px",
+                borderRadius: 12,
+                border: selectedStyle === ws.key
+                  ? "1px solid oklch(0.65 0.14 270)"
+                  : "1px solid oklch(0.22 0.04 270)",
+                background: selectedStyle === ws.key
+                  ? "oklch(0.18 0.06 270)"
+                  : "oklch(0.12 0.02 270)",
+                cursor: "pointer",
+                transition: "border-color 0.2s, background 0.2s",
+                textAlign: "left",
+                width: "100%",
+              }}
+            >
+              <span style={{ fontSize: 16 }}>{ws.emoji}</span>
+              <span style={{
+                fontSize: 13,
+                color: selectedStyle === ws.key ? "oklch(0.88 0.06 270)" : "oklch(0.60 0.01 270)",
+                fontFamily: "Inter, sans-serif",
+                fontWeight: selectedStyle === ws.key ? 600 : 400,
+                transition: "color 0.2s",
+              }}>{ws.label}</span>
+              {selectedStyle === ws.key && (
+                <span style={{ marginLeft: "auto", fontSize: 14, color: "oklch(0.65 0.14 270)" }}>✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{
+        marginTop: 20,
         width: "100%",
         maxWidth: 320,
         opacity: btnIn ? 1 : 0,

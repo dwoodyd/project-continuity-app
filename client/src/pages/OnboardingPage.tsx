@@ -75,7 +75,9 @@ export default function OnboardingPage() {
   const [inviteChecking, setInviteChecking] = useState(false);
 
   const [name, setName] = useState(user?.name?.split(" ")[0] ?? "");
-  const [workStyle, setWorkStyle] = useState<string>("");
+  const [workStyle, setWorkStyle] = useState<string>(
+    () => (typeof localStorage !== "undefined" ? localStorage.getItem("onboarding_work_style") ?? "" : "")
+  );
   const [tonePreference, setTonePreference] = useState<"gentle" | "direct" | "firm">("direct");
   const [preferredFocusHours, setPreferredFocusHours] = useState<string>("morning");
   const [projectTitle, setProjectTitle] = useState("");
