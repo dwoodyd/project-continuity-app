@@ -582,6 +582,14 @@ function ScreenAsk({ visible }: { visible: boolean }) {
         >
           Begin your thread
         </a>
+        {typeof navigator !== "undefined" && "share" in navigator && (
+          <button
+            onClick={() => navigator.share({ title: "Continuary", text: "Built for minds that work in bursts. Your brain isn't broken — it just needs the right system.", url: window.location.origin })}
+            style={{ marginTop: 12, width: "100%", padding: "12px 0", borderRadius: 100, background: "transparent", border: "1px solid oklch(0.28 0.04 270)", color: "oklch(0.55 0.01 270)", fontSize: 14, fontFamily: "Inter, sans-serif", cursor: "pointer", letterSpacing: "0.02em" }}
+          >
+            ↗ Share with someone who needs this
+          </button>
+        )}
       </div>
 
       <div style={{ marginTop: 12, opacity: freeIn ? 1 : 0, transition: "opacity 0.6s ease-out", position: "relative" }}>
@@ -609,6 +617,18 @@ export function OnboardingFlow({ onSkip }: { onSkip: () => void }) {
   const [screen, setScreen] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
   const TOTAL = 5;
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = touchStartX.current - e.changedTouches[0].clientX;
+    touchStartX.current = null;
+    if (dx > 50 && screen < 4) goNext();
+  }, [screen]);
 
   const goNext = useCallback(() => {
     if (transitioning) return;
@@ -629,7 +649,7 @@ export function OnboardingFlow({ onSkip }: { onSkip: () => void }) {
   ];
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "oklch(0.09 0.01 270)", overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 9998, background: "oklch(0.09 0.01 270)", overflow: "hidden" }} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {screen < 4 && (
         <button
           onClick={onSkip}
