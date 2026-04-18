@@ -25,10 +25,24 @@ export const users = mysqlTable("users", {
   paypalSubscriptionId: varchar("paypalSubscriptionId", { length: 64 }),
   isPro: boolean("isPro").default(false).notNull(),
   proSince: timestamp("proSince"),
+  isBeta: boolean("isBeta").default(false).notNull(),
+  betaExpiresAt: timestamp("betaExpiresAt"),
 });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+
+// ─── Beta Codes ───────────────────────────────────────────────────────────────
+export const betaCodes = mysqlTable("betaCodes", {
+  id: int("id").autoincrement().primaryKey(),
+  code: varchar("code", { length: 32 }).notNull().unique(),
+  usedBy: int("usedBy"),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BetaCode = typeof betaCodes.$inferSelect;
+export type InsertBetaCode = typeof betaCodes.$inferInsert;
 
 // ─── User Profiles ────────────────────────────────────────────────────────────
 export const userProfiles = mysqlTable("user_profiles", {
@@ -342,7 +356,7 @@ export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
 export const notificationLog = mysqlTable("notification_log", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  type: mysqlEnum("type", ["morning", "midday", "evening", "cold_project", "sanctuary", "thread_thinning"]).notNull(),
+  type: mysqlEnum("type", ["morning", "midday", "evening", "cold_project", "sanctuary", "thread_thinning", "beta_expiry"]).notNull(),
   sentAt: timestamp("sentAt").defaultNow().notNull(),
   projectId: int("projectId"), // for cold_project type
   suppressedBy: varchar("suppressedBy", { length: 64 }), // e.g. "in_app_checkin"

@@ -169,6 +169,13 @@
       "when": 1776547942984,
       "tag": "0023_left_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1776549358084,
+      "tag": "0024_dashing_rafael_vega",
+      "breakpoints": true
     }
   ]
 }

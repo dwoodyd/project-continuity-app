@@ -21,7 +21,10 @@ import {
   getCheckIns,
   getColdProjects,
   getWeeklyThreadData,
+  getDb,
 } from "./db";
+import { eq } from "drizzle-orm";
+import { users } from "../drizzle/schema";
 
 // ── VAPID configuration ───────────────────────────────────────────────────────
 function initVapid() {
@@ -318,8 +321,47 @@ async function processUserNotifications(userId: number): Promise<void> {
       console.warn(`[Push] Cold project check failed for user ${userId}:`, (err as Error).message);
     }
   }
-}
 
+  // ── Beta expiry nudge — fires on the expiry day ────────────────────────────
+  if (hour === morningTime.hour && minute === morningTime.minute) {
+    try {
+      const db = await getDb();
+      if (db) {
+        const [userRow] = await db.select({ isBeta: users.isBeta, betaExpiresAt: users.betaExpiresAt }).from(users).where(eq(users.id, userId)).limit(1);
+        if (userRow?.isBeta && userRow.betaExpiresAt) {
+          const daysLeft = Math.ceil((userRow.betaExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          if (daysLeft === 0 || daysLeft === 3) {
+            const recentBeta = await getRecentNotificationLog(userId, "beta_expiry", 23 * 60 * 60 * 1000);
+            if (recentBeta.length === 0) {
+              const subs = await getPushSubscriptionsForUser(userId);
+              if (subs.length > 0) {
+                const payload = JSON.stringify({
+                  title: daysLeft === 0 ? "Your beta access has ended." : "Beta access ending in 3 days.",
+                  body: daysLeft === 0
+                    ? "Thank you for shaping Continuary. Upgrade to keep your thread going."
+                    : "Your 45-day beta window closes soon. Upgrade to Pro to keep full access.",
+                  tag: "beta-expiry",
+                  url: "/pro",
+                });
+                await Promise.allSettled(
+                  subs.map((sub) =>
+                    webpush.sendNotification(
+                      { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+                      payload
+                    )
+                  )
+                );
+                await logNotificationSent({ userId, type: "beta_expiry" });
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn(`[Push] Beta expiry check failed for user ${userId}:`, (err as Error).message);
+    }
+  }
+}
 // ── Scheduler ────────────────────────────────────────────────────────────────
 let cronHandle: ReturnType<typeof setInterval> | null = null;
 

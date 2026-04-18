@@ -89,6 +89,27 @@ export default function OnboardingPage() {
     onError: () => toast.error("Something went wrong. Please try again."),
   });
   const redeemInvite = trpc.invites.redeem.useMutation();
+  const redeemBetaCode = trpc.beta.redeemCode.useMutation();
+  const [betaCode, setBetaCode] = useState("");
+  const [betaCodeError, setBetaCodeError] = useState<string | null>(null);
+  const [betaCodeChecking, setBetaCodeChecking] = useState(false);
+  const [showBetaInput, setShowBetaInput] = useState(false);
+
+  const checkBetaCode = async () => {
+    const code = betaCode.trim().toUpperCase();
+    if (!code) return;
+    setBetaCodeChecking(true);
+    setBetaCodeError(null);
+    try {
+      await redeemBetaCode.mutateAsync({ code });
+      toast.success("Beta access activated! 45 days of full Pro access.");
+      setStep(0);
+    } catch (e: any) {
+      setBetaCodeError(e.message?.includes("already") ? "This code has already been used." : "Invalid beta code.");
+    } finally {
+      setBetaCodeChecking(false);
+    }
+  };
   const createProject = trpc.projects.create.useMutation();
   const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();
 
@@ -265,6 +286,32 @@ export default function OnboardingPage() {
                 <p className="text-center text-xs text-muted-foreground/50">
                   Don&rsquo;t have a code? Reach out to the Continuary team.
                 </p>
+                <div className="pt-2 border-t border-border">
+                  {!showBetaInput ? (
+                    <button
+                      onClick={() => setShowBetaInput(true)}
+                      className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors w-full text-center"
+                    >
+                      ✦ Have a beta tester code?
+                    </button>
+                  ) : (
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-amber-400/80 tracking-widest uppercase">Beta code</label>
+                      <Input
+                        value={betaCode}
+                        onChange={(e) => { setBetaCode(e.target.value.toUpperCase()); setBetaCodeError(null); }}
+                        onKeyDown={(e) => e.key === "Enter" && checkBetaCode()}
+                        placeholder="e.g. THREAD-BETA-001"
+                        className={cn("text-base font-mono tracking-widest border-amber-500/30", betaCodeError && "border-destructive")}
+                        autoFocus
+                      />
+                      {betaCodeError && <p className="text-xs text-destructive">{betaCodeError}</p>}
+                      <Button onClick={checkBetaCode} disabled={!betaCode.trim() || betaCodeChecking} variant="outline" size="sm" className="w-full border-amber-500/30 text-amber-400">
+                        {betaCodeChecking ? <><Loader2 className="w-3 h-3 animate-spin" /> Checking&hellip;</> : "Activate beta access"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

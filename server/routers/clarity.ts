@@ -51,7 +51,9 @@ export const clarityRouter = router({
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
       // Pro gate: free users limited to 2 Clarity Engine sessions per day
-      if (!ctx.user.isPro && ctx.user.role !== 'admin') {
+      const now = new Date();
+      const isActiveBeta = !!(ctx.user.isBeta && ctx.user.betaExpiresAt && ctx.user.betaExpiresAt > now);
+      if (!ctx.user.isPro && !isActiveBeta && ctx.user.role !== 'admin') {
         const todayStart = new Date(); todayStart.setHours(0,0,0,0);
         const [{ count }] = await db
           .select({ count: sql<number>`count(*)` })

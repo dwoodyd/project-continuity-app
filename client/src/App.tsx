@@ -26,6 +26,7 @@ import TermsPage from "./pages/TermsPage";
 import EvidenceLogPage from "./pages/EvidenceLogPage";
 import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
 import AdminFeedbackPage from "./pages/AdminFeedbackPage";
+import AdminBetaCodesPage from "./pages/AdminBetaCodesPage";
 import StudyTrackerPage from "./pages/StudyTrackerPage";
 import InviteGatePage from "./pages/InviteGatePage";
 import AboutAppPage from "./pages/AboutAppPage";
@@ -58,6 +59,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
             <Route path="/evidence" component={EvidenceLogPage} />
             <Route path="/admin/invites" component={AdminInviteCodesPage} />
             <Route path="/admin/feedback" component={AdminFeedbackPage} />
+            <Route path="/admin/beta" component={AdminBetaCodesPage} />
             <Route path="/admin/study" component={StudyTrackerPage} />
             <Route path="/settings" component={SettingsPage} />
             <Route path="/pro" component={ProPage} />
