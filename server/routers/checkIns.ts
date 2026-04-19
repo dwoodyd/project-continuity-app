@@ -97,6 +97,7 @@ IMPORTANT: The weekly primary project MUST appear in today's tasks unless capaci
 
       // ── Carryover context from previous days ──────────────────────────────
       let carryoverContext = "";
+      let tomorrowTasksFromYesterday: Array<{ id: string; title: string; projectId?: number | null; energyLevel?: string; estimatedMinutes?: number; notes?: string }> = [];
       if (recentPlans.length > 0) {
         const yesterday = recentPlans[0];
         if (yesterday) {
@@ -111,6 +112,16 @@ IMPORTANT: The weekly primary project MUST appear in today's tasks unless capaci
             if (repeatedCarryovers.length > 0) {
               carryoverContext += ` Note: "${repeatedCarryovers.map((t) => t.title).join('", "')}" have been carried 2+ times — consider splitting, rewriting, or parking them.`;
             }
+          }
+          // ── Tomorrow's planned tasks (from last night's evening check-in) ────
+          if (yesterday.tomorrowTasks) {
+            try {
+              const parsed = JSON.parse(yesterday.tomorrowTasks);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                tomorrowTasksFromYesterday = parsed;
+                carryoverContext += `\nUser pre-planned these activities for today last night: ${parsed.map((t: any) => `"${t.title}"${t.energyLevel && t.energyLevel !== 'any' ? ` (${t.energyLevel} energy)` : ''}${t.estimatedMinutes ? ` ~${t.estimatedMinutes}min` : ''}`).join(", ")}. Incorporate these into today's tasks where capacity allows — they represent the user's own intentions for the day.`;
+              }
+            } catch { /* ignore malformed JSON */ }
           }
         }
       }
@@ -199,13 +210,22 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const parsed = JSON.parse(raw);
 
       // Assign project IDs from input if provided; preserve carryoverCount
-      const tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => ({
-        ...t,
-        id: `task-${Date.now()}-${i}`,
-        done: false,
-        projectId: t.projectId ?? input.primaryProjectId ?? null,
-        carryoverCount: t.carryoverCount ?? 0,
-      }));
+      // Also merge in energy/time metadata from pre-planned tomorrow tasks
+      const tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => {
+        // Try to find a matching pre-planned task to inherit its metadata
+        const prePlanned = tomorrowTasksFromYesterday.find(
+          (pt) => pt.title.toLowerCase().trim() === (t.title ?? "").toLowerCase().trim()
+        );
+        return {
+          ...t,
+          id: prePlanned?.id ?? `task-${Date.now()}-${i}`,
+          done: false,
+          projectId: t.projectId ?? prePlanned?.projectId ?? input.primaryProjectId ?? null,
+          carryoverCount: t.carryoverCount ?? 0,
+          energyLevel: prePlanned?.energyLevel ?? t.energyLevel ?? undefined,
+          estimatedMinutes: prePlanned?.estimatedMinutes ?? t.estimatedMinutes ?? undefined,
+        };
+      });
 
       // Combine guidance with divergence note if present
       const fullGuidance = parsed.divergenceNote
