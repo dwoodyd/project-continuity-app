@@ -58,6 +58,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/invite-gate" component={InviteGatePage} />
         <Route path="/about-app" component={AboutAppPage} />
         <Route path="/landing" component={LandingPage} />
+        <Route path="/intro">{() => null}</Route>
         <Route>
           <AppLayout onPreviewIntro={onPreviewIntro}>
             <Switch>
@@ -119,7 +120,9 @@ function App() {
     setPreviewMode(true);
   }
 
-  const showOnboarding = splashDone && (!onboardingDone && isFirstSession || previewMode);
+  // /intro forces the flow for cold-traffic sharing links (e.g. bio, Product Hunt)
+  const isIntroRoute = typeof window !== "undefined" && window.location.pathname === "/intro";
+  const showOnboarding = splashDone && (!onboardingDone && isFirstSession || previewMode || isIntroRoute);
 
   return (
     <ErrorBoundary>

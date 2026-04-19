@@ -53,6 +53,12 @@ function Glow() {
   );
 }
 
+// ─── A/B headline test ──────────────────────────────────────────────────────
+const AB_VARIANT: "A" | "B" =
+  typeof Date !== "undefined" && new Date().getMinutes() % 2 === 1 ? "B" : "A";
+if (typeof localStorage !== "undefined")
+  localStorage.setItem("onboarding_ab_variant", AB_VARIANT);
+
 // ─── Slide 1: EKG gold line ───────────────────────────────────────────────────
 function EkgLine({ active }: { active: boolean }) {
   return (
@@ -170,7 +176,7 @@ function ReEntryCard({ active }: { active: boolean }) {
             marginBottom: "0.75rem",
           }}
         >
-          Re-entry card · 7 days away
+          Re-entry card · 6 days away
         </div>
         <div
           style={{
@@ -179,7 +185,7 @@ function ReEntryCard({ active }: { active: boolean }) {
             fontStyle: "italic", lineHeight: 1.45,
           }}
         >
-          "I want this in the marketplace by April so I can present it at the events I'm doing."
+          "I want this shipped before the end of the quarter so I can show it at the conference."
         </div>
         <div
           style={{
@@ -188,9 +194,9 @@ function ReEntryCard({ active }: { active: boolean }) {
           }}
         >
           You left off inside{" "}
-          <strong style={{ color: "white" }}>your last project</strong> — recent edits
-          ready for one more pass. Three open loops are still here, exactly where you put
-          them down.
+          <strong style={{ color: "white" }}>Chapter 3 — Market Positioning</strong> — a
+          draft paragraph mid-sentence, two research tabs saved, and a note to yourself
+          about the pricing section.
         </div>
         <div
           style={{
@@ -212,7 +218,7 @@ function ReEntryCard({ active }: { active: boolean }) {
           >
             One gentle next step
           </span>
-          Open the recent edits. Read for ten minutes. That's the whole ask.
+          Re-read the last paragraph you wrote. Just read — don't edit. That's the whole ask.
         </div>
       </div>
     </div>
@@ -592,8 +598,12 @@ export function OnboardingFlow({ onSkip }: Props) {
     alignItems: "center", justifyContent: "center",
     padding: "4rem 2rem",
     opacity: isActive(n) ? 1 : 0,
-    transform: isActive(n) ? "translateY(0)" : "translateY(14px)",
-    transition: "opacity 800ms ease, transform 800ms ease",
+    transform: isActive(n)
+      ? "translateX(0)"
+      : n < slide
+        ? "translateX(-36px)"
+        : "translateX(36px)",
+    transition: "opacity 700ms ease, transform 700ms ease",
     pointerEvents: isActive(n) ? "auto" : "none",
   });
 
@@ -660,8 +670,11 @@ export function OnboardingFlow({ onSkip }: Props) {
               <EkgLine active={isActive(1)} />
               <div style={eyebrowStyle(true)}>For minds that work in bursts</div>
               <h1 style={headlineStyle}>
-                You don't need more productivity.<br />
-                <span style={accentStyle}>You need proof you're already moving.</span>
+                {AB_VARIANT === "B" ? (
+                  <>You haven't found the right system yet.<br /><span style={accentStyle}>Because it wasn't built for how you think.</span></>
+                ) : (
+                  <>You don't need more productivity.<br /><span style={accentStyle}>You need proof you're already moving.</span></>
+                )}
               </h1>
               <p style={ledeStyle}>
                 Continuary is the workspace that holds your thread when you can't — and
