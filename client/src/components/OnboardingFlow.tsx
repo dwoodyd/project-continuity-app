@@ -598,9 +598,11 @@ export function OnboardingFlow({ onSkip }: Props) {
   }
 
   // Auto-advance slide 1 after EKG animation completes (~3.4s draw + 1.5s pause)
+  // Mobile gets extra time (7s) since reading is slower on small screens
   useEffect(() => {
     if (slide !== 1) return;
-    const t = setTimeout(() => goTo(2), 5000);
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    const t = setTimeout(() => goTo(2), isMobile ? 7000 : 5000);
     return () => clearTimeout(t);
   }, [slide, goTo]);
 

@@ -32,6 +32,7 @@ const EvidenceLogPage     = lazy(() => import("./pages/EvidenceLogPage"));
 const AdminInviteCodesPage = lazy(() => import("./pages/AdminInviteCodesPage"));
 const AdminFeedbackPage   = lazy(() => import("./pages/AdminFeedbackPage"));
 const AdminBetaCodesPage  = lazy(() => import("./pages/AdminBetaCodesPage"));
+const AdminOnboardingFunnelPage = lazy(() => import("./pages/AdminOnboardingFunnelPage"));
 const StudyTrackerPage    = lazy(() => import("./pages/StudyTrackerPage"));
 const InviteGatePage      = lazy(() => import("./pages/InviteGatePage"));
 const AboutAppPage        = lazy(() => import("./pages/AboutAppPage"));
@@ -76,6 +77,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/admin/feedback" component={AdminFeedbackPage} />
               <Route path="/admin/beta" component={AdminBetaCodesPage} />
               <Route path="/admin/study" component={StudyTrackerPage} />
+              <Route path="/admin/onboarding" component={AdminOnboardingFunnelPage} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/pro" component={ProPage} />
               <Route path="/pro/success" component={ProSuccessPage} />

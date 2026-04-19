@@ -976,6 +976,21 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+
+          {/* About / Replay Intro */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <p className="text-sm font-semibold text-foreground">About Continuary</p>
+            <p className="text-xs text-muted-foreground">Replay the intro to revisit what Continuary is built for, or copy the link to share with someone new.</p>
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={() => navigate("/intro")} className="text-xs gap-1.5">
+                <Play className="w-3 h-3" />
+                Replay intro
+              </Button>
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { navigator.clipboard.writeText(window.location.origin + "/intro"); toast.success("Link copied"); }}>
+                Copy share link
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { desc, eq, gte, and } from "drizzle-orm";
-import { protectedProcedure, router } from "../_core/trpc";
+import { desc, eq, gte, and, sql } from "drizzle-orm";
+import { protectedProcedure, adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import {
   continuityEvents,
@@ -253,6 +253,22 @@ export const gamificationRouter = router({
       .where(and(eq(continuityEvents.userId, ctx.user.id), gte(continuityEvents.createdAt, ninetyDaysAgo)))
       .orderBy(desc(continuityEvents.createdAt))
       .limit(500);
+  }),
+
+  // Admin: onboarding funnel — slide views grouped by label + A/B variant
+  getOnboardingFunnel: adminProcedure.query(async () => {
+    const db = await getDb();
+    if (!db) return [];
+    const rows = await db
+      .select({
+        label: continuityEvents.label,
+        metadata: continuityEvents.metadata,
+        count: sql<number>`count(*)`,
+      })
+      .from(continuityEvents)
+      .where(eq(continuityEvents.eventType, "onboarding_slide"))
+      .groupBy(continuityEvents.label, continuityEvents.metadata);
+    return rows;
   }),
 });
 
