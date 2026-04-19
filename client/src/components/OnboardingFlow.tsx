@@ -372,6 +372,13 @@ function IdentityCard({ active }: { active: boolean }) {
 
 // ─── Thin progress line ───────────────────────────────────────────────────────
 function ProgressLine({ current, total }: { current: number; total: number }) {
+  // Spring-fill: start at 0 on mount, then animate to real position on next frame
+  const [displayPct, setDisplayPct] = useState(0);
+  const targetPct = (current / total) * 100;
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setDisplayPct(targetPct));
+    return () => cancelAnimationFrame(raf);
+  }, [targetPct]);
   return (
     <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 10, padding: "0 0 1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
@@ -382,9 +389,9 @@ function ProgressLine({ current, total }: { current: number; total: number }) {
       <div style={{ width: "100%", height: 1, background: "rgba(255,255,255,0.06)" }}>
         <div style={{
           height: "100%",
-          width: `${(current / total) * 100}%`,
+          width: `${displayPct}%`,
           background: "linear-gradient(90deg, rgba(246,200,120,0.4), rgba(246,200,120,0.8))",
-          transition: "width 600ms cubic-bezier(0.16,1,0.3,1)",
+          transition: "width 700ms cubic-bezier(0.16,1,0.3,1)",
           boxShadow: "0 0 8px rgba(246,200,120,0.4)",
         }} />
       </div>
@@ -458,6 +465,19 @@ export function OnboardingFlow({ onSkip }: Props) {
     setSlide(n);
     window.scrollTo({ top: 0, behavior: "instant" });
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
+    // Subtle Web Audio click tone (20ms, 1200Hz sine, no file needed)
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1200, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.02);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.02);
+      osc.onended = () => ctx.close();
+    } catch {/* silently ignore if AudioContext unavailable */}
   }, []);
 
   function handleFinish() {
