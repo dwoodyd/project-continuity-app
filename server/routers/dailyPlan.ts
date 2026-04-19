@@ -11,6 +11,16 @@ function getTodayDate(): string {
   return new Date().toISOString().split("T")[0]!;
 }
 
+// Tomorrow task schema (lighter — no done flag, no carryover tracking)
+const tomorrowTaskSchema = z.object({
+  id: z.string().max(100),
+  title: z.string().max(500),
+  projectId: z.number().nullable().optional(),
+  energyLevel: z.enum(["high", "low", "any"]).optional(),
+  estimatedMinutes: z.number().int().min(1).max(480).optional(),
+  notes: z.string().max(500).optional(),
+});
+
 // Task schema extended with energyLevel for Voltage Mode
 const taskSchema = z.object({
   id: z.string().max(100),
@@ -63,6 +73,45 @@ export const dailyPlanRouter = router({
       });
       return { success: true };
     }),
+
+  // ── Tomorrow's Plan ────────────────────────────────────────────────────────
+  // Saves the list of planned tasks for tomorrow (stored on today's daily plan)
+  saveTomorrowPlan: protectedProcedure
+    .input(z.object({
+      tasks: z.array(tomorrowTaskSchema).max(20),
+      // Optional: which date's plan to store on (defaults to today)
+      date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.date ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) return { success: false };
+      await updateDailyPlan(plan.id, ctx.user.id, {
+        tomorrowTasks: JSON.stringify(input.tasks),
+      });
+      return { success: true };
+    }),
+
+  // Returns tomorrow's planned tasks from yesterday's daily plan
+  getTomorrowPlan: protectedProcedure.query(async ({ ctx }) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split("T")[0]!;
+    const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
+    if (!plan?.tomorrowTasks) return [];
+    try {
+      return JSON.parse(plan.tomorrowTasks) as Array<{
+        id: string;
+        title: string;
+        projectId?: number | null;
+        energyLevel?: string;
+        estimatedMinutes?: number;
+        notes?: string;
+      }>;
+    } catch {
+      return [];
+    }
+  }),
 
   // ── Next Best Step engine ──────────────────────────────────────────────────
   // Returns the single best task to do right now based on:

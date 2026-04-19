@@ -52,6 +52,7 @@ import {
 } from "@/components/GamificationLayer";
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
+import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -546,8 +547,10 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   const [whatRemains, setWhatRemains] = useState("");
   const [whatLearned, setWhatLearned] = useState("");
   const [tomorrowFirst, setTomorrowFirst] = useState("");
+  const [tomorrowTasks, setTomorrowTasks] = useState<TomorrowTask[]>([]);
   const [decision, setDecision] = useState("");
   const [showDecision, setShowDecision] = useState(false);
+  const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
       toast.success("Day closed. Tomorrow's brief is ready.");
@@ -578,6 +581,10 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
     if (whatRemains.trim() && whatRemains.length > 10) {
       classifyDistraction.mutate({ rawInput: whatRemains, checkInType: "evening" });
     }
+    // Persist tomorrow's task list alongside the evening closure
+    if (tomorrowTasks.length > 0) {
+      saveTomorrowPlan.mutate({ tasks: tomorrowTasks });
+    }
     submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst });
   };
   return (
@@ -603,6 +610,13 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       <div>
         <p className="text-xs font-medium text-muted-foreground mb-2">What goes first tomorrow?</p>
         <Textarea value={tomorrowFirst} onChange={(e) => setTomorrowFirst(e.target.value)} placeholder="The first concrete action tomorrow..." className="text-sm resize-none" rows={1} />
+      </div>
+      {/* Tomorrow's plan */}
+      <div className="border-t border-border/30 pt-3">
+        <TomorrowPlanSection
+          onChange={setTomorrowTasks}
+          initialTasks={tomorrowTasks}
+        />
       </div>
       {/* Decision capture */}
       <div>
@@ -813,6 +827,7 @@ export default function Home() {
   const { data: todayPlan, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery();
   const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery();
   const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery();
+  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery();
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery();
   const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery();
@@ -1728,10 +1743,46 @@ export default function Home() {
 
         {/* ════ RIGHT COLUMN ════ */}
         <div className="space-y-4">
+      {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
+      {tomorrowPlanTasks && tomorrowPlanTasks.length > 0 && (
+        <div className="p-4 rounded-xl border border-border bg-card space-y-3">
+          <div className="flex items-center gap-2">
+            <Moon className="w-3.5 h-3.5 text-muted-foreground" />
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Planned for today</p>
+            <span className="ml-auto text-[10px] text-muted-foreground/50">from last night</span>
+          </div>
+          <ul className="space-y-1.5">
+            {tomorrowPlanTasks.map((task: any, i: number) => (
+              <li key={task.id ?? i} className="flex items-start gap-2.5">
+                <Circle className="w-3 h-3 text-muted-foreground/40 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-foreground leading-snug">{task.title}</p>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    {task.energyLevel && task.energyLevel !== 'any' && (
+                      <span className={`text-[10px] font-medium ${
+                        task.energyLevel === 'high' ? 'text-amber-500' : 'text-indigo-400'
+                      }`}>
+                        {task.energyLevel === 'high' ? '⚡ high energy' : '🌙 low energy'}
+                      </span>
+                    )}
+                    {task.estimatedMinutes && (
+                      <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/50">
+                        <Clock className="w-2.5 h-2.5" />{task.estimatedMinutes}m
+                      </span>
+                    )}
+                    {task.notes && (
+                      <span className="text-[10px] text-muted-foreground/50 italic truncate max-w-[160px]">{task.notes}</span>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-      {/* Thread Strength + Re-Entry Shortcut */}
-      {gamStatus?.threadStrength && (
-        <div
+      {/* ── Thread Strength + Re-Entry Shortcut */}
+      {gamStatus?.threadStrength && (       <div
           className="p-4 rounded-xl border"
           style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
         >

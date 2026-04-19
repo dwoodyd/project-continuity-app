@@ -1095,3 +1095,11 @@
 - [x] Admin panel page for beta code management (list, generate, export)
 - [x] Beta expiry push notification in cron (fires on expiry day)
 - [x] Bypass Pro gate for isBeta users within betaExpiresAt window
+
+## Tomorrow's Plan Feature (Apr 19, 2026)
+- [ ] Add tomorrowTasks column (JSON) to daily_plans schema + migration
+- [ ] Add saveTomorrowPlan and getTomorrowPlan tRPC procedures in dailyPlan router
+- [ ] Build TomorrowPlanSection component (task list with add/remove/reorder)
+- [ ] Embed TomorrowPlanSection inside EveningCheckIn in Home.tsx
+- [ ] Show tomorrow's plan as a card on the morning Command Center (below tomorrowBrief)
+- [ ] Auto-populate tomorrow's criticalTasks from tomorrowTasks when user opens morning plan

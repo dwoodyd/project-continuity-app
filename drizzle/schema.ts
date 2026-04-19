@@ -160,6 +160,7 @@ export const dailyPlans = mysqlTable("daily_plans", {
   generatedGuidance: text("generatedGuidance"),
   tomorrowBrief: text("tomorrowBrief"),
   tomorrowBriefGeneratedAt: timestamp("tomorrowBriefGeneratedAt"),
+  tomorrowTasks: text("tomorrowTasks"), // JSON array: [{id,title,projectId?,energyLevel?,estimatedMinutes?}]
   emotionalState: mysqlEnum("emotionalState", ["focused", "anxious", "foggy", "energized", "drained"]),
   mentalLoad: mysqlEnum("mentalLoad", ["light", "moderate", "heavy"]),
   clarityModeSuggestion: varchar("clarityModeSuggestion", { length: 50 }),

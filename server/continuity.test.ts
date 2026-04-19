@@ -187,6 +187,21 @@ describe("dailyPlan", () => {
     const result = await caller.dailyPlan.getToday();
     expect(result === null || typeof result === "object").toBe(true);
   });
+
+  it("getTomorrowPlan returns an array", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.dailyPlan.getTomorrowPlan();
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("saveTomorrowPlan returns success:false when no plan exists", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.dailyPlan.saveTomorrowPlan({
+      tasks: [{ id: "t1", title: "Write tests", energyLevel: "high", estimatedMinutes: 30 }],
+    });
+    // getDailyPlan is mocked to return null, so success should be false
+    expect(result).toEqual({ success: false });
+  });
 });
 
 // ─── Settings tests ───────────────────────────────────────────────────────────
