@@ -461,24 +461,29 @@ export function OnboardingFlow({ onSkip }: Props) {
   const recordEvent = trpc.gamification.recordEvent.useMutation();
   const touchStartX = useRef<number | null>(null);
 
-  const goTo = useCallback((n: number) => {
+  const [muted, setMuted] = useState(false);
+
+  const goTo = useCallback((n: number, fromSlide?: number) => {
     setSlide(n);
     window.scrollTo({ top: 0, behavior: "instant" });
     if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
-    // Subtle Web Audio click tone (20ms, 1200Hz sine, no file needed)
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(1200, ctx.currentTime);
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.02);
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.start(); osc.stop(ctx.currentTime + 0.02);
-      osc.onended = () => ctx.close();
-    } catch {/* silently ignore if AudioContext unavailable */}
-  }, []);
+    // Pitch-shifted click tone: slides 1-6 map to 800-1400Hz ascending arc
+    if (!muted) {
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const hz = 800 + ((n - 1) / 5) * 600; // 800Hz at slide 1, 1400Hz at slide 6
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(hz, ctx.currentTime);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.02);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.02);
+        osc.onended = () => ctx.close();
+      } catch {/* silently ignore if AudioContext unavailable */}
+    }
+  }, [muted]);
 
   function handleFinish() {
     setFinished(true);
@@ -571,6 +576,21 @@ export function OnboardingFlow({ onSkip }: Props) {
         <AmbientGlow slide={slide} />
 
         {/* Skip */}
+        {/* Mute toggle */}
+        <button
+          onClick={() => setMuted(m => !m)}
+          title={muted ? "Unmute" : "Mute"}
+          style={{
+            position: "fixed", top: "1.25rem", left: "1.25rem", zIndex: 20,
+            background: "transparent", border: "none",
+            color: muted ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.3)",
+            fontSize: "1rem", cursor: "pointer", lineHeight: 1,
+            padding: "0.38rem",
+          }}
+        >
+          {muted ? "🔇" : "🔈"}
+        </button>
+
         <button
           onClick={onSkip}
           style={{
