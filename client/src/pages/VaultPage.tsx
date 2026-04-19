@@ -431,6 +431,7 @@ export default function VaultPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
   const [filterState, setFilterState] = useState<SourceState | "all" | "review" | "graph">("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedGraphItem, setSelectedGraphItem] = useState<any | null>(null);
   const { data: graphData } = trpc.vault.getGraphData.useQuery(undefined, { enabled: filterState === "graph" });
   const graphItemUpdateState = trpc.vault.updateState.useMutation({
@@ -493,11 +494,23 @@ export default function VaultPage() {
   const duplicateGroups = duplicateData?.groups ?? [];
   const disconnectedIds = duplicateData?.disconnected ?? [];
 
-  const filtered = filterState === "review"
+  const baseFiltered = filterState === "review"
     ? (reviewQueue ?? [])
     : (items?.filter((item) =>
         filterState === "all" ? item.state !== "archived" : item.state === filterState
       ) ?? []);
+  const filtered = searchQuery.trim()
+    ? baseFiltered.filter((item) => {
+        const q = searchQuery.toLowerCase();
+        const tags: string[] = (() => { try { return JSON.parse(item.tags ?? "[]"); } catch { return []; } })();
+        return (
+          (item.title ?? "").toLowerCase().includes(q) ||
+          (item.summary ?? "").toLowerCase().includes(q) ||
+          (item.contentClass ?? "").toLowerCase().includes(q) ||
+          tags.some((t) => t.toLowerCase().includes(q))
+        );
+      })
+    : baseFiltered;
 
   const inboxCount = items?.filter((i) => i.state === "inbox").length ?? 0;
   const reviewCount = reviewQueue?.length ?? 0;
@@ -574,6 +587,22 @@ export default function VaultPage() {
         </div>
       )}
 
+      {/* Search bar */}
+      <div className="relative">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="6.5" cy="6.5" r="4" /><line x1="10" y1="10" x2="14" y2="14" /></svg>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search titles, tags, summaries…"
+          className="w-full pl-8 pr-8 py-2 text-sm rounded-xl bg-muted/60 border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/40"
+        />
+        {searchQuery && (
+          <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="2" y1="2" x2="14" y2="14" /><line x1="14" y1="2" x2="2" y2="14" /></svg>
+          </button>
+        )}
+      </div>
       {/* Filter tabs */}
       <div className="flex gap-1.5 flex-wrap">
         {(["all", "inbox", "review", "mapped", "active", "today", "parked", "done"] as const).map((state) => (
