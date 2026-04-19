@@ -242,10 +242,18 @@ async function processUserNotifications(userId: number): Promise<void> {
     },
   ];
 
+  // Convert current local time to total minutes-since-midnight for window comparison
+  const nowTotalMinutes = hour * 60 + minute;
+
   for (const entry of types) {
     if (!entry.enabled) continue;
     if (entry.alreadyDone) continue;
-    if (entry.time.hour !== hour || entry.time.minute !== minute) continue;
+    // Fire if the cron tick lands within a ±2-minute window of the scheduled time.
+    // This tolerates event-loop jitter, GC pauses, and backoff ticks without
+    // requiring exact-minute equality.
+    const scheduledTotal = entry.time.hour * 60 + entry.time.minute;
+    const drift = Math.abs(nowTotalMinutes - scheduledTotal);
+    if (drift > 2) continue;
 
     // Check suppression: don't send if already sent in last 23h
     const recent = await getRecentNotificationLog(userId, entry.type, SUPPRESSION_WINDOW_MS);

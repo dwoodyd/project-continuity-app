@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ScheduledNotification {
@@ -77,6 +77,12 @@ export function useNotifications() {
 
   const isSupported = typeof window !== "undefined" && "Notification" in window;
 
+  // Track permission in state so React re-renders when it changes after
+  // requestPermission() resolves (the browser doesn't fire a re-render on its own).
+  const [permission, setPermission] = useState<NotificationPermission>(
+    isSupported ? Notification.permission : "denied"
+  );
+
   const getPermission = useCallback(async (): Promise<NotificationPermission> => {
     if (!isSupported) return "denied";
     if (Notification.permission === "granted") return "granted";
@@ -86,6 +92,7 @@ export function useNotifications() {
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     const perm = await getPermission();
+    setPermission(perm);
     return perm === "granted";
   }, [getPermission]);
 
@@ -247,7 +254,7 @@ export function useNotifications() {
 
   return {
     isSupported,
-    permission: isSupported ? Notification.permission : ("denied" as NotificationPermission),
+    permission,
     requestPermission,
     registerSW,
     scheduleCheckInNotifications,

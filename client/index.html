@@ -75,10 +75,21 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script
-      defer
-      src="%VITE_ANALYTICS_ENDPOINT%/umami"
-      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
+    <!-- Analytics: only injected when both env vars are set at build time -->
+    <script>
+      (function(){
+        var ep = "%VITE_ANALYTICS_ENDPOINT%";
+        var id = "%VITE_ANALYTICS_WEBSITE_ID%";
+        // Vite leaves the literal placeholder string when the var is undefined.
+        // Guard: skip injection if either value is still a raw placeholder.
+        if (!ep || ep.indexOf('%') === 0 || !id || id.indexOf('%') === 0) return;
+        var s = document.createElement('script');
+        s.defer = true;
+        s.src = ep + '/umami';
+        s.setAttribute('data-website-id', id);
+        document.body.appendChild(s);
+      })();
+    </script>
   </body>
 
 </html>

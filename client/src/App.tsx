@@ -1,76 +1,91 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AppLayout from "./components/AppLayout";
-import Home from "./pages/Home";
-import VaultPage from "./pages/VaultPage";
-import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDetailPage from "./pages/ProjectDetailPage";
-import WeeklyReviewPage from "./pages/WeeklyReviewPage";
-import WeeklyCompassPage from "./pages/WeeklyCompassPage";
-import SettingsPage from "./pages/SettingsPage";
-import FocusModePage from "./pages/FocusModePage";
-import OnboardingPage from "./pages/OnboardingPage";
-import WelcomePage from "./pages/WelcomePage";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import { AnimatedSplash } from "./components/AnimatedSplash";
 import { OnboardingFlow } from "./components/OnboardingFlow";
-import { useState } from "react";
-import IntelligencePage from "./pages/IntelligencePage";
-import ClarityEnginePage from "./pages/ClarityEnginePage";
-import PrivacyPage from "./pages/PrivacyPage";
-import TermsPage from "./pages/TermsPage";
-import EvidenceLogPage from "./pages/EvidenceLogPage";
-import AdminInviteCodesPage from "./pages/AdminInviteCodesPage";
-import AdminFeedbackPage from "./pages/AdminFeedbackPage";
-import AdminBetaCodesPage from "./pages/AdminBetaCodesPage";
-import StudyTrackerPage from "./pages/StudyTrackerPage";
-import InviteGatePage from "./pages/InviteGatePage";
-import AboutAppPage from "./pages/AboutAppPage";
-import ProPage from "./pages/ProPage";
-import ProSuccessPage from "./pages/ProSuccessPage";
+import { useState, lazy, Suspense } from "react";
+
+// ── Eagerly loaded: shown on first paint or critical auth path ─────────────
+import Home from "./pages/Home";
+import OnboardingPage from "./pages/OnboardingPage";
 import LandingPage from "./pages/LandingPage";
+import NotFound from "@/pages/NotFound";
+
+// ── Lazy loaded: deferred until the route is first visited ─────────────────
+const VaultPage           = lazy(() => import("./pages/VaultPage"));
+const ProjectsPage        = lazy(() => import("./pages/ProjectsPage"));
+const ProjectDetailPage   = lazy(() => import("./pages/ProjectDetailPage"));
+const WeeklyReviewPage    = lazy(() => import("./pages/WeeklyReviewPage"));
+const WeeklyCompassPage   = lazy(() => import("./pages/WeeklyCompassPage"));
+const SettingsPage        = lazy(() => import("./pages/SettingsPage"));
+const FocusModePage       = lazy(() => import("./pages/FocusModePage"));
+const WelcomePage         = lazy(() => import("./pages/WelcomePage"));
+const IntelligencePage    = lazy(() => import("./pages/IntelligencePage"));
+const ClarityEnginePage   = lazy(() => import("./pages/ClarityEnginePage"));
+const PrivacyPage         = lazy(() => import("./pages/PrivacyPage"));
+const TermsPage           = lazy(() => import("./pages/TermsPage"));
+const EvidenceLogPage     = lazy(() => import("./pages/EvidenceLogPage"));
+const AdminInviteCodesPage = lazy(() => import("./pages/AdminInviteCodesPage"));
+const AdminFeedbackPage   = lazy(() => import("./pages/AdminFeedbackPage"));
+const AdminBetaCodesPage  = lazy(() => import("./pages/AdminBetaCodesPage"));
+const StudyTrackerPage    = lazy(() => import("./pages/StudyTrackerPage"));
+const InviteGatePage      = lazy(() => import("./pages/InviteGatePage"));
+const AboutAppPage        = lazy(() => import("./pages/AboutAppPage"));
+const ProPage             = lazy(() => import("./pages/ProPage"));
+const ProSuccessPage      = lazy(() => import("./pages/ProSuccessPage"));
+
+// Minimal fallback shown while a lazy chunk loads (avoids blank flash)
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  );
+}
 
 function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
   return (
-    <Switch>
-      <Route path="/onboarding" component={OnboardingPage} />
-      <Route path="/focus" component={FocusModePage} />
-      <Route path="/privacy" component={PrivacyPage} />
-      <Route path="/terms" component={TermsPage} />
-      <Route path="/invite-gate" component={InviteGatePage} />
-      <Route path="/about-app" component={AboutAppPage} />
-      <Route path="/landing" component={LandingPage} />
-      <Route>
-        <AppLayout onPreviewIntro={onPreviewIntro}>
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/vault" component={VaultPage} />
-            <Route path="/projects" component={ProjectsPage} />
-            <Route path="/projects/:id" component={ProjectDetailPage} />
-            <Route path="/weekly" component={WeeklyReviewPage} />
-            <Route path="/compass" component={WeeklyCompassPage} />
-            <Route path="/welcome" component={WelcomePage} />
-            <Route path="/intelligence" component={IntelligencePage} />
-            <Route path="/clarity" component={ClarityEnginePage} />
-            <Route path="/evidence" component={EvidenceLogPage} />
-            <Route path="/admin/invites" component={AdminInviteCodesPage} />
-            <Route path="/admin/feedback" component={AdminFeedbackPage} />
-            <Route path="/admin/beta" component={AdminBetaCodesPage} />
-            <Route path="/admin/study" component={StudyTrackerPage} />
-            <Route path="/settings" component={SettingsPage} />
-            <Route path="/pro" component={ProPage} />
-            <Route path="/pro/success" component={ProSuccessPage} />
-            <Route path="/pro/cancel" component={ProPage} />
-            <Route path="/404" component={NotFound} />
-            <Route component={NotFound} />
-          </Switch>
-        </AppLayout>
-      </Route>
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/onboarding" component={OnboardingPage} />
+        <Route path="/focus" component={FocusModePage} />
+        <Route path="/privacy" component={PrivacyPage} />
+        <Route path="/terms" component={TermsPage} />
+        <Route path="/invite-gate" component={InviteGatePage} />
+        <Route path="/about-app" component={AboutAppPage} />
+        <Route path="/landing" component={LandingPage} />
+        <Route>
+          <AppLayout onPreviewIntro={onPreviewIntro}>
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/vault" component={VaultPage} />
+              <Route path="/projects" component={ProjectsPage} />
+              <Route path="/projects/:id" component={ProjectDetailPage} />
+              <Route path="/weekly" component={WeeklyReviewPage} />
+              <Route path="/compass" component={WeeklyCompassPage} />
+              <Route path="/welcome" component={WelcomePage} />
+              <Route path="/intelligence" component={IntelligencePage} />
+              <Route path="/clarity" component={ClarityEnginePage} />
+              <Route path="/evidence" component={EvidenceLogPage} />
+              <Route path="/admin/invites" component={AdminInviteCodesPage} />
+              <Route path="/admin/feedback" component={AdminFeedbackPage} />
+              <Route path="/admin/beta" component={AdminBetaCodesPage} />
+              <Route path="/admin/study" component={StudyTrackerPage} />
+              <Route path="/settings" component={SettingsPage} />
+              <Route path="/pro" component={ProPage} />
+              <Route path="/pro/success" component={ProSuccessPage} />
+              <Route path="/pro/cancel" component={ProPage} />
+              <Route path="/404" component={NotFound} />
+              <Route component={NotFound} />
+            </Switch>
+          </AppLayout>
+        </Route>
+      </Switch>
+    </Suspense>
   );
 }
 
