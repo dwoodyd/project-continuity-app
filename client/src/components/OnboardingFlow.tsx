@@ -459,6 +459,7 @@ export function OnboardingFlow({ onSkip }: Props) {
   const TOTAL = 6;
   const { user } = useAuth();
   const recordEvent = trpc.gamification.recordEvent.useMutation();
+  const saveAbVariant = trpc.settings.setOnboardingAbVariant.useMutation();
   const touchStartX = useRef<number | null>(null);
 
   // Persist mute preference across sessions
@@ -491,6 +492,7 @@ export function OnboardingFlow({ onSkip }: Props) {
 
   function handleFinish() {
     setFinished(true);
+    if (user) saveAbVariant.mutate({ variant: AB_VARIANT });
     // Two-note resolution chord on completion
     playTone(1400, 0.03);
     setTimeout(() => playTone(1600, 0.04), 60);

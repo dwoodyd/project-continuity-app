@@ -1,0 +1,2 @@
+ALTER TABLE `notification_log` MODIFY COLUMN `type` enum('morning','midday','evening','cold_project','sanctuary','thread_thinning','beta_expiry') NOT NULL;--> statement-breakpoint
+ALTER TABLE `user_profiles` ADD `onboardingAbVariant` varchar(1);

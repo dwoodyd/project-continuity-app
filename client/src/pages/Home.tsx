@@ -753,6 +753,10 @@ export default function Home() {
   const [activeCheckIn, setActiveCheckIn] = useState<CheckInStep | null>(null);
   const [unstickTask, setUnstickTask] = useState<{ id: string; title: string; projectId?: number | null } | null>(null);
   const [ideaOpen, setIdeaOpen] = useState(false);
+  // Product Hunt launch banner — shown only on VITE_PH_LAUNCH_DATE env var date
+  const phLaunchDate = import.meta.env.VITE_PH_LAUNCH_DATE as string | undefined;
+  const [phBannerDismissed, setPhBannerDismissed] = useState(() => localStorage.getItem("ph_banner_dismissed") === "1");
+  const showPhBanner = !phBannerDismissed && !!phLaunchDate && new Date().toISOString().slice(0, 10) === phLaunchDate;
   const [completedCheckIns, setCompletedCheckIns] = useState<Set<CheckInStep>>(new Set());
   const [reEntryProjectId, setReEntryProjectId] = useState<number | null>(null);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
@@ -1061,6 +1065,15 @@ export default function Home() {
 
   return (
     <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
+      {/* ── Product Hunt launch banner ────────────────────────────────────── */}
+      {showPhBanner && (
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(246,200,120,0.08)", border: "1px solid rgba(246,200,120,0.2)" }}>
+          <span className="text-amber-300/90">🚀 We're live on <a href="https://www.producthunt.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Product Hunt</a> today — support us with an upvote!</span>
+          <button onClick={() => { setPhBannerDismissed(true); localStorage.setItem("ph_banner_dismissed", "1"); }} className="text-amber-300/50 hover:text-amber-300 transition-colors shrink-0">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div>

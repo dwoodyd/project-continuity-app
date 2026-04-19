@@ -44,6 +44,7 @@ export const settingsRouter = router({
       workTypes: null,
       distractionPatterns: null,
       primaryDistraction: null,
+      onboardingAbVariant: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -129,6 +130,17 @@ export const settingsRouter = router({
       return { success: true };
     }),
 
+  setOnboardingAbVariant: protectedProcedure
+    .input(z.object({ variant: z.enum(["A", "B"]) }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getUserProfile(ctx.user.id);
+      if (existing) {
+        await updateUserProfile(ctx.user.id, { onboardingAbVariant: input.variant } as any);
+      } else {
+        await upsertUserProfile({ userId: ctx.user.id, onboardingAbVariant: input.variant } as any);
+      }
+      return { success: true };
+    }),
   markAboutSeen: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) {

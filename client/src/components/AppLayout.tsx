@@ -32,6 +32,7 @@ import {
   Zap,
   GraduationCap,
   MessageSquare,
+  BarChart2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -403,6 +404,17 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   <MessageSquare className={cn("w-4 h-4 shrink-0", isActive("/admin/feedback") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
                   <span>Feedback Inbox</span>
                   {isActive("/admin/feedback") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
+                </Link>
+                <Link
+                  href="/admin/onboarding"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group",
+                    isActive("/admin/onboarding") ? "bg-amber-400/15 text-amber-400 font-medium" : "text-white/55 hover:text-white/90 hover:bg-white/[0.07]"
+                  )}
+                >
+                  <BarChart2 className={cn("w-4 h-4 shrink-0", isActive("/admin/onboarding") ? "text-amber-400" : "text-white/40 group-hover:text-white/70")} />
+                  <span>Onboarding Funnel</span>
+                  {isActive("/admin/onboarding") && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-400" />}
                 </Link>
                 <Link
                   href="/admin/study"

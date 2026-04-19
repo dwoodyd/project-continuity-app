@@ -977,6 +977,24 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* What's New changelog */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <p className="text-sm font-semibold text-foreground">What's New</p>
+            <div className="space-y-2">
+              {[
+                { v: "v1.3", note: "Onboarding v3 — cinematic word reveals, ambient glow, swipe navigation" },
+                { v: "v1.2", note: "Evidence Log, streak badge, cold project threshold setting" },
+                { v: "v1.1", note: "Weekly Compass, Knowledge Vault, Pro upgrade via PayPal" },
+                { v: "v1.0", note: "Daily check-ins, Clarity Engine, project health scores" },
+              ].map(({ v, note }) => (
+                <div key={v} className="flex gap-2 items-start">
+                  <span className="text-xs font-mono shrink-0 mt-0.5" style={{ color: "#f6c878" }}>{v}</span>
+                  <span className="text-xs text-muted-foreground">{note}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* About / Replay Intro */}
           <div className="p-5 rounded-xl bg-card border border-border space-y-3">
             <p className="text-sm font-semibold text-foreground">About Continuary</p>

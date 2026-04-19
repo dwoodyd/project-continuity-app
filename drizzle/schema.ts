@@ -76,6 +76,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   workTypes: text("workTypes"), // JSON string of work type strings
   distractionPatterns: text("distractionPatterns"), // JSON string
   primaryDistraction: varchar("primaryDistraction", { length: 255 }),
+  onboardingAbVariant: varchar("onboardingAbVariant", { length: 1 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
