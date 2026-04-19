@@ -461,32 +461,39 @@ export function OnboardingFlow({ onSkip }: Props) {
   const recordEvent = trpc.gamification.recordEvent.useMutation();
   const touchStartX = useRef<number | null>(null);
 
-  const [muted, setMuted] = useState(false);
+  // Persist mute preference across sessions
+  const [muted, setMuted] = useState(() => localStorage.getItem("continuary_onboarding_mute") === "1");
+  const reducedMotion = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const goTo = useCallback((n: number, fromSlide?: number) => {
+  function playTone(hz: number, duration = 0.02) {
+    if (muted || reducedMotion) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(hz, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + duration);
+      osc.onended = () => ctx.close();
+    } catch {/* ignore */}
+  }
+
+  const goTo = useCallback((n: number) => {
     setSlide(n);
-    window.scrollTo({ top: 0, behavior: "instant" });
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
-    // Pitch-shifted click tone: slides 1-6 map to 800-1400Hz ascending arc
-    if (!muted) {
-      try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        const hz = 800 + ((n - 1) / 5) * 600; // 800Hz at slide 1, 1400Hz at slide 6
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(hz, ctx.currentTime);
-        gain.gain.setValueAtTime(0.06, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.02);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(); osc.stop(ctx.currentTime + 0.02);
-        osc.onended = () => ctx.close();
-      } catch {/* silently ignore if AudioContext unavailable */}
-    }
-  }, [muted]);
+    window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "instant" });
+    if (!reducedMotion && typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
+    playTone(800 + ((n - 1) / 5) * 600);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [muted, reducedMotion]);
 
   function handleFinish() {
     setFinished(true);
+    // Two-note resolution chord on completion
+    playTone(1400, 0.03);
+    setTimeout(() => playTone(1600, 0.04), 60);
     setTimeout(onSkip, 2200);
   }
 
@@ -578,7 +585,7 @@ export function OnboardingFlow({ onSkip }: Props) {
         {/* Skip */}
         {/* Mute toggle */}
         <button
-          onClick={() => setMuted(m => !m)}
+          onClick={() => setMuted(m => { const next = !m; localStorage.setItem("continuary_onboarding_mute", next ? "1" : "0"); return next; })}
           title={muted ? "Unmute" : "Mute"}
           style={{
             position: "fixed", top: "1.25rem", left: "1.25rem", zIndex: 20,
