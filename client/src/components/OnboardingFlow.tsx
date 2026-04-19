@@ -11,6 +11,8 @@
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 // ─── Ambient starfield ────────────────────────────────────────────────────────
 function Stars() {
@@ -580,16 +582,38 @@ export function OnboardingFlow({ onSkip }: Props) {
   const [slide, setSlide] = useState(1);
   const [finished, setFinished] = useState(false);
   const TOTAL = 6;
+  const { user } = useAuth();
+  const recordEvent = trpc.gamification.recordEvent.useMutation();
 
   const goTo = useCallback((n: number) => {
     setSlide(n);
     window.scrollTo({ top: 0, behavior: "instant" });
+    // Haptic pulse on mobile
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
   }, []);
 
   function handleFinish() {
     setFinished(true);
     setTimeout(onSkip, 2200);
   }
+
+  // Auto-advance slide 1 after EKG animation completes (~3.4s draw + 1.5s pause)
+  useEffect(() => {
+    if (slide !== 1) return;
+    const t = setTimeout(() => goTo(2), 5000);
+    return () => clearTimeout(t);
+  }, [slide, goTo]);
+
+  // Track slide views for drop-off analytics (only for authenticated users)
+  useEffect(() => {
+    if (!user) return;
+    recordEvent.mutate({
+      eventType: "onboarding_slide",
+      label: `slide_${slide}`,
+      metadata: JSON.stringify({ ab: AB_VARIANT }),
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slide, user?.id]);
 
   // Keyboard navigation
   useEffect(() => {
