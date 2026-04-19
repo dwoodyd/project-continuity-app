@@ -491,10 +491,20 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
       style={{
         position: "fixed", bottom: "2rem", left: "50%",
         transform: "translateX(-50%)",
-        display: "flex", gap: "0.4rem", zIndex: 10,
+        display: "flex", flexDirection: "column", alignItems: "center",
+        gap: "0.5rem", zIndex: 10,
       }}
     >
-      {Array.from({ length: total }).map((_, i) => (
+      <span
+        style={{
+          fontSize: "0.65rem", letterSpacing: "0.14em",
+          textTransform: "uppercase", color: "rgba(255,255,255,0.28)",
+        }}
+      >
+        {current} of {total}
+      </span>
+      <div style={{ display: "flex", gap: "0.4rem" }}>
+        {Array.from({ length: total }).map((_, i) => (
         <div
           key={i}
           style={{
@@ -506,7 +516,8 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
             transition: "width 400ms ease, background 400ms ease",
           }}
         />
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
