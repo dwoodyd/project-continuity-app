@@ -1130,3 +1130,8 @@
 - [x] "Add to Tomorrow's Plan" card action
 - [x] "Share to Vault" card action (copies note, keeps original)
 - [x] Update tests
+
+## Scratch Pad — Round 4 (Apr 20, 2026)
+- [x] Colour filter row above note list
+- [x] Sidebar note-count badge next to Scratch Pad nav item
+- [x] Bulk-select mode with delete / colour / send-to-vault actions

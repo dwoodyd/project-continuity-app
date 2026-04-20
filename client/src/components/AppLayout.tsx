@@ -166,6 +166,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     staleTime: 1000 * 60 * 10,
   });
   const streak = streakData?.streak ?? 0;
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const scratchCount = scratchNotes?.length ?? 0;
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
   // AI consent: show once after onboarding + about-app, before any AI feature is used
@@ -345,13 +350,15 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     : { color: "oklch(1 0 0 / 0.48)" }
                   }
                 >
-                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
+                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
                   <span>{label}</span>
+                  {href === "/scratch" && scratchCount > 0 && !active && (
+                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.68 0.20 270 / 0.18)", color: "oklch(0.80 0.18 270)" }}>{scratchCount}</span>
+                  )}
                   {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.80 0.18 270)" }} />}
                 </Link>
               );
             })}
-
             <p className="px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "secondary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
