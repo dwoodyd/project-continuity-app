@@ -22,6 +22,7 @@ import { feedbackRouter } from "./routers/feedback";
 import { gamificationRouter } from "./routers/gamification";
 import { paypalRouter } from "./routers/paypal";
 import { betaRouter } from "./routers/beta";
+import { scratchPadRouter } from "./routers/scratchPad";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -85,6 +86,7 @@ export const appRouter = router({
   gamification: gamificationRouter,
   paypal: paypalRouter,
   beta: betaRouter,
+  scratchPad: scratchPadRouter,
 });
 
 export type AppRouter = typeof appRouter;

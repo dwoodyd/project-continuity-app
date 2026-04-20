@@ -190,6 +190,13 @@
       "when": 1776629104649,
       "tag": "0026_strange_plazm",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1776704499578,
+      "tag": "0027_vengeful_gwen_stacy",
+      "breakpoints": true
     }
   ]
 }

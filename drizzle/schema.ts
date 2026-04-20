@@ -661,3 +661,14 @@ export const userMilestones = mysqlTable("user_milestones", {
 });
 export type UserMilestone = typeof userMilestones.$inferSelect;
 export type InsertUserMilestone = typeof userMilestones.$inferInsert;
+
+// ─── Scratch Pad Notes ────────────────────────────────────────────────────────
+export const scratchNotes = mysqlTable("scratch_notes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  content: text("content").notNull().default(""),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ScratchNote = typeof scratchNotes.$inferSelect;
+export type InsertScratchNote = typeof scratchNotes.$inferInsert;

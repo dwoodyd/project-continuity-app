@@ -33,6 +33,7 @@ import {
   GraduationCap,
   MessageSquare,
   BarChart2,
+  PenLine,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -58,6 +59,7 @@ const ALL_NAV_ITEMS = [
   { href: "/projects",     label: "Projects",        icon: Archive,       section: "primary" },
   { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
+  { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
   { href: "/weekly",       label: "Weekly Review",   icon: Archive,       section: "secondary" },
@@ -72,6 +74,7 @@ const PRIMARY_TABS = [
   { href: "/projects", label: "Projects", icon: Archive },
   { href: "/clarity",  label: "Clarity",  icon: Zap },
   { href: "/vault",    label: "Vault",    icon: BookOpen },
+  { href: "/scratch",  label: "Pad",      icon: PenLine },
   { href: "/more",     label: "More",     icon: MoreHorizontal },
 ] as const;
 

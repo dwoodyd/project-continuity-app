@@ -67,6 +67,9 @@ import {
   feedbackSubmissions,
   FeedbackSubmission,
   InsertFeedbackSubmission,
+  scratchNotes,
+  ScratchNote,
+  InsertScratchNote,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1146,4 +1149,30 @@ export async function resolveFeedback(id: number, resolved: boolean): Promise<vo
   await db.update(feedbackSubmissions)
     .set({ resolved, resolvedAt: resolved ? new Date() : null })
     .where(eq(feedbackSubmissions.id, id));
+}
+
+// ─── Scratch Pad ──────────────────────────────────────────────────────────────
+export async function getScratchNotes(userId: number): Promise<ScratchNote[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(scratchNotes).where(eq(scratchNotes.userId, userId)).orderBy(desc(scratchNotes.updatedAt));
+}
+
+export async function createScratchNote(data: Omit<InsertScratchNote, "id" | "createdAt" | "updatedAt">): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.insert(scratchNotes).values(data);
+  return (result[0] as any).insertId ?? 0;
+}
+
+export async function updateScratchNote(id: number, userId: number, content: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(scratchNotes).set({ content }).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
+}
+
+export async function deleteScratchNote(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(scratchNotes).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
 }

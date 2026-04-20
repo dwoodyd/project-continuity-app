@@ -37,6 +37,10 @@ vi.mock("./db", () => ({
   getLatestReEntryCard: vi.fn().mockResolvedValue(null),
   createReEntryCard: vi.fn().mockResolvedValue(1),
   acknowledgeReEntryCard: vi.fn().mockResolvedValue(undefined),
+  getScratchNotes: vi.fn().mockResolvedValue([]),
+  createScratchNote: vi.fn().mockResolvedValue(99),
+  updateScratchNote: vi.fn().mockResolvedValue(undefined),
+  deleteScratchNote: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock("./storage", () => ({
@@ -177,6 +181,33 @@ describe("ai.ideas", () => {
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.ai.listIdeas();
     expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+// ─── Scratch Pad tests ───────────────────────────────────────────────────────
+describe("scratchPad", () => {
+  it("list returns an array", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.list();
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("create returns an id", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.create({ content: "Buy oat milk" });
+    expect(typeof result.id).toBe("number");
+  });
+
+  it("update returns success:true", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.update({ id: 1, content: "Updated text" });
+    expect(result.success).toBe(true);
+  });
+
+  it("delete returns success:true", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.delete({ id: 1 });
+    expect(result.success).toBe(true);
   });
 });
 

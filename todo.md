@@ -1103,3 +1103,13 @@
 - [x] Embed TomorrowPlanSection inside EveningCheckIn in Home.tsx
 - [x] Show tomorrow's plan as a card on the morning Command Center (below tomorrowBrief)
 - [x] Auto-populate tomorrow's criticalTasks from tomorrowTasks when user opens morning plan
+
+## Scratch Pad Feature (Apr 20, 2026)
+- [x] Add scratchNotes table to schema (id, userId, content, createdAt, updatedAt)
+- [x] Generate and apply migration
+- [x] Add DB helpers: getScratchNotes, createScratchNote, updateScratchNote, deleteScratchNote
+- [x] Add tRPC router: scratchPad.list, scratchPad.create, scratchPad.update, scratchPad.delete
+- [x] Build ScratchPadPage with note list, inline editing, add/delete
+- [x] Add /scratch route in App.tsx
+- [x] Add Scratch Pad to sidebar nav (primary section) and mobile bottom nav
+- [x] Write vitest tests for scratchPad router
