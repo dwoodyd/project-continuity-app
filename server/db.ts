@@ -1155,7 +1155,7 @@ export async function resolveFeedback(id: number, resolved: boolean): Promise<vo
 export async function getScratchNotes(userId: number): Promise<ScratchNote[]> {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(scratchNotes).where(eq(scratchNotes.userId, userId)).orderBy(desc(scratchNotes.updatedAt));
+  return db.select().from(scratchNotes).where(eq(scratchNotes.userId, userId)).orderBy(desc(scratchNotes.pinned), desc(scratchNotes.updatedAt));
 }
 
 export async function createScratchNote(data: Omit<InsertScratchNote, "id" | "createdAt" | "updatedAt">): Promise<number> {
@@ -1175,4 +1175,10 @@ export async function deleteScratchNote(id: number, userId: number): Promise<voi
   const db = await getDb();
   if (!db) return;
   await db.delete(scratchNotes).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
+}
+
+export async function togglePinScratchNote(id: number, userId: number, pinned: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(scratchNotes).set({ pinned }).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
 }

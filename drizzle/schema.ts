@@ -668,6 +668,7 @@ export const scratchNotes = mysqlTable("scratch_notes", {
   userId: int("userId").notNull(),
   content: text("content").notNull().default(""),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  pinned: boolean("pinned").notNull().default(false),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type ScratchNote = typeof scratchNotes.$inferSelect;

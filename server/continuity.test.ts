@@ -40,7 +40,9 @@ vi.mock("./db", () => ({
   getScratchNotes: vi.fn().mockResolvedValue([]),
   createScratchNote: vi.fn().mockResolvedValue(99),
   updateScratchNote: vi.fn().mockResolvedValue(undefined),
+  togglePinScratchNote: vi.fn().mockResolvedValue(undefined),
   deleteScratchNote: vi.fn().mockResolvedValue(undefined),
+  createSourceItem: vi.fn().mockResolvedValue(55),
 }));
 
 vi.mock("./storage", () => ({
@@ -208,6 +210,18 @@ describe("scratchPad", () => {
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.scratchPad.delete({ id: 1 });
     expect(result.success).toBe(true);
+  });
+
+  it("togglePin returns success:true", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.togglePin({ id: 1, pinned: true });
+    expect(result.success).toBe(true);
+  });
+
+  it("sendToVault returns a vaultId", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.sendToVault({ id: 1, content: "Test note content" });
+    expect(typeof result.vaultId).toBe("number");
   });
 });
 

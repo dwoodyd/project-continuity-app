@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Lightbulb, Mic, MicOff, Send, Loader2, WifiOff } from "lucide-react";
+import { Lightbulb, Mic, MicOff, Send, Loader2, WifiOff, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -33,6 +33,15 @@ export default function IdeaSanctuaryModal({
 
   const { queueOfflineIdea, getOfflineQueue, removeFromOfflineQueue } = useNotifications();
   const utils = trpc.useUtils();
+
+  const addToScratchPad = trpc.scratchPad.create.useMutation({
+    onSuccess: () => {
+      toast.success("Added to Scratch Pad");
+      setContent("");
+      onClose();
+    },
+    onError: () => toast.error("Could not save to Scratch Pad."),
+  });
 
   const captureIdea = trpc.ai.captureIdea.useMutation({
     onSuccess: () => {
@@ -248,6 +257,17 @@ export default function IdeaSanctuaryModal({
           </button>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { if (content.trim()) addToScratchPad.mutate({ content: content.trim() }); }}
+              disabled={!content.trim() || addToScratchPad.isPending}
+              className="text-muted-foreground gap-1.5"
+              title="Save to Scratch Pad instead"
+            >
+              <PenLine className="w-3.5 h-3.5" />
+              Pad
+            </Button>
             <Button variant="ghost" size="sm" onClick={onClose} className="text-muted-foreground">
               Cancel
             </Button>

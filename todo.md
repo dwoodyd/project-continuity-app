@@ -1113,3 +1113,11 @@
 - [x] Add /scratch route in App.tsx
 - [x] Add Scratch Pad to sidebar nav (primary section) and mobile bottom nav
 - [x] Write vitest tests for scratchPad router
+
+## Scratch Pad Enhancements (Apr 20, 2026)
+- [x] Add pinned boolean column to scratch_notes, apply migration
+- [x] Add togglePinScratchNote DB helper + tRPC procedure
+- [x] Add pin/unpin button to NoteCard, pinned notes sort to top
+- [x] Wire FAB quick-capture to drop note into Scratch Pad
+- [x] Add send-to-Vault action on each note card
+- [x] Update tests for new procedures

@@ -3,58 +3,68 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Trash2, PenLine, Check, X } from "lucide-react";
+import { Plus, Trash2, PenLine, Check, X, Pin, PinOff, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
+type Note = {
+  id: number;
+  userId: number;
+  content: string;
+  pinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 // ── Single editable note card ─────────────────────────────────────────────────
 function NoteCard({
-  id,
-  content,
-  updatedAt,
+  note,
   onSave,
   onDelete,
+  onTogglePin,
+  onSendToVault,
 }: {
-  id: number;
-  content: string;
-  updatedAt: Date;
+  note: Note;
   onSave: (id: number, content: string) => void;
   onDelete: (id: number) => void;
+  onTogglePin: (id: number, pinned: boolean) => void;
+  onSendToVault: (id: number, content: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(content);
+  const [draft, setDraft] = useState(note.content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (editing && textareaRef.current) {
       textareaRef.current.focus();
-      // Move cursor to end
       const len = textareaRef.current.value.length;
       textareaRef.current.setSelectionRange(len, len);
     }
   }, [editing]);
 
   function handleSave() {
-    if (draft.trim() === "") {
-      onDelete(id);
-      return;
-    }
-    onSave(id, draft);
+    if (draft.trim() === "") { onDelete(note.id); return; }
+    onSave(note.id, draft);
     setEditing(false);
   }
 
   function handleCancel() {
-    setDraft(content);
+    setDraft(note.content);
     setEditing(false);
   }
 
   return (
-    <div
-      className={cn(
-        "group relative rounded-xl border bg-card transition-all",
-        editing ? "border-primary/30 shadow-sm shadow-primary/10" : "border-border hover:border-border/80"
+    <div className={cn(
+      "group relative rounded-xl border bg-card transition-all",
+      note.pinned ? "border-primary/40" : "border-border hover:border-border/80",
+      editing && "border-primary/30 shadow-sm shadow-primary/10"
+    )}>
+      {note.pinned && !editing && (
+        <div className="absolute top-2 left-2 text-primary/60">
+          <Pin className="w-3 h-3 fill-current" />
+        </div>
       )}
-    >
+
       {editing ? (
         <div className="p-3 space-y-2">
           <Textarea
@@ -63,7 +73,6 @@ function NoteCard({
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Escape") handleCancel();
-              // Cmd/Ctrl+Enter to save
               if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSave();
             }}
             className="text-sm resize-none min-h-[80px] border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none"
@@ -80,27 +89,49 @@ function NoteCard({
           </div>
         </div>
       ) : (
-        <button
-          className="w-full text-left p-3 pr-10"
-          onClick={() => setEditing(true)}
-          aria-label="Edit note"
-        >
-          <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">{content || <span className="text-muted-foreground italic">Empty note</span>}</p>
+        <button className="w-full text-left p-3 pl-6 pr-24" onClick={() => setEditing(true)} aria-label="Edit note">
+          <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">
+            {note.content || <span className="text-muted-foreground italic">Empty note</span>}
+          </p>
           <p className="text-[10px] text-muted-foreground/50 mt-2">
-            {formatDistanceToNow(new Date(updatedAt), { addSuffix: true })}
+            {formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}
           </p>
         </button>
       )}
 
-      {/* Delete button — only visible on hover when not editing */}
+      {/* Action buttons — visible on hover when not editing */}
       {!editing && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(id); }}
-          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all"
-          aria-label="Delete note"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+        <div className="absolute top-2 right-2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+          <button
+            onClick={(e) => { e.stopPropagation(); onTogglePin(note.id, !note.pinned); }}
+            className={cn(
+              "p-1.5 rounded-lg transition-all",
+              note.pinned
+                ? "text-primary hover:bg-primary/10"
+                : "text-muted-foreground/40 hover:text-primary hover:bg-primary/10"
+            )}
+            aria-label={note.pinned ? "Unpin note" : "Pin note"}
+            title={note.pinned ? "Unpin" : "Pin to top"}
+          >
+            {note.pinned ? <PinOff className="w-3.5 h-3.5" /> : <Pin className="w-3.5 h-3.5" />}
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onSendToVault(note.id, note.content); }}
+            className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-amber-500 hover:bg-amber-500/10 transition-all"
+            aria-label="Send to Vault"
+            title="Send to Knowledge Vault"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onDelete(note.id); }}
+            className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all"
+            aria-label="Delete note"
+            title="Delete"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       )}
     </div>
   );
@@ -170,17 +201,13 @@ export default function ScratchPadPage() {
     onMutate: async (input) => {
       await utils.scratchPad.list.cancel();
       const prev = utils.scratchPad.list.getData();
-      // Optimistic: prepend a temporary note
       utils.scratchPad.list.setData(undefined, (old = []) => [
-        { id: -Date.now(), userId: 0, content: input.content ?? "", createdAt: new Date(), updatedAt: new Date() },
+        { id: -Date.now(), userId: 0, content: input.content ?? "", pinned: false, createdAt: new Date(), updatedAt: new Date() },
         ...old,
       ]);
       return { prev };
     },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev);
-      toast.error("Could not add note.");
-    },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not add note."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
@@ -193,10 +220,7 @@ export default function ScratchPadPage() {
       );
       return { prev };
     },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev);
-      toast.error("Could not save note.");
-    },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not save note."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
@@ -207,16 +231,38 @@ export default function ScratchPadPage() {
       utils.scratchPad.list.setData(undefined, (old = []) => old.filter((n) => n.id !== input.id));
       return { prev };
     },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev);
-      toast.error("Could not delete note.");
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not delete note."); },
+    onSettled: () => utils.scratchPad.list.invalidate(),
+  });
+
+  const togglePin = trpc.scratchPad.togglePin.useMutation({
+    onMutate: async (input) => {
+      await utils.scratchPad.list.cancel();
+      const prev = utils.scratchPad.list.getData();
+      utils.scratchPad.list.setData(undefined, (old = []) =>
+        old.map((n) => n.id === input.id ? { ...n, pinned: input.pinned } : n)
+          .sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0))
+      );
+      return { prev };
     },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); },
+    onSettled: () => utils.scratchPad.list.invalidate(),
+  });
+
+  const sendToVault = trpc.scratchPad.sendToVault.useMutation({
+    onMutate: async (input) => {
+      await utils.scratchPad.list.cancel();
+      const prev = utils.scratchPad.list.getData();
+      utils.scratchPad.list.setData(undefined, (old = []) => old.filter((n) => n.id !== input.id));
+      return { prev };
+    },
+    onSuccess: () => toast.success("Sent to Knowledge Vault", { description: "Find it in Vault → Inbox." }),
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not send to Vault."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-4">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <div className="p-2 rounded-xl bg-primary/10">
           <PenLine className="w-4 h-4 text-primary" />
@@ -230,15 +276,11 @@ export default function ScratchPadPage() {
         )}
       </div>
 
-      {/* New note */}
       <NewNoteInput onCreate={(content) => create.mutate({ content })} />
 
-      {/* Notes list */}
       {isLoading ? (
         <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 rounded-xl bg-muted/40 animate-pulse" />
-          ))}
+          {[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl bg-muted/40 animate-pulse" />)}
         </div>
       ) : notes.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground/50">
@@ -251,11 +293,11 @@ export default function ScratchPadPage() {
           {notes.map((note) => (
             <NoteCard
               key={note.id}
-              id={note.id}
-              content={note.content}
-              updatedAt={note.updatedAt}
+              note={note}
               onSave={(id, content) => update.mutate({ id, content })}
               onDelete={(id) => remove.mutate({ id })}
+              onTogglePin={(id, pinned) => togglePin.mutate({ id, pinned })}
+              onSendToVault={(id, content) => sendToVault.mutate({ id, content })}
             />
           ))}
         </div>
