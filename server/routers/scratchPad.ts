@@ -6,7 +6,10 @@ import {
   updateScratchNote,
   deleteScratchNote,
   togglePinScratchNote,
+  setColourScratchNote,
   createSourceItem,
+  getDailyPlan,
+  updateDailyPlan,
 } from "../db";
 
 export const scratchPadRouter = router({
@@ -57,5 +60,46 @@ export const scratchPadRouter = router({
       });
       await deleteScratchNote(input.id, ctx.user.id);
       return { vaultId };
+    }),
+
+  shareToVault: protectedProcedure
+    .input(z.object({ id: z.number(), content: z.string(), title: z.string().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const title = input.title?.trim() || input.content.slice(0, 60).split("\n")[0] || "Scratch note";
+      const vaultId = await createSourceItem({
+        userId: ctx.user.id,
+        title,
+        rawContent: input.content,
+        cleanContent: input.content,
+        sourceType: "text",
+        state: "inbox",
+        tags: JSON.stringify(["scratch"]),
+      });
+      // Note is NOT deleted — it stays in the pad
+      return { vaultId };
+    }),
+
+  setColour: protectedProcedure
+    .input(z.object({ id: z.number(), colour: z.string().nullable() }))
+    .mutation(async ({ ctx, input }) => {
+      await setColourScratchNote(input.id, ctx.user.id, input.colour);
+      return { success: true };
+    }),
+
+  addToTomorrowPlan: protectedProcedure
+    .input(z.object({ content: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dateStr = today.toISOString().slice(0, 10);
+      const plan = await getDailyPlan(ctx.user.id, dateStr);
+      const existing: Array<{ id: string; text: string; energy?: string; estimatedMinutes?: number }> =
+        plan?.tomorrowTasks ? JSON.parse(plan.tomorrowTasks) : [];
+      const newTask = { id: `scratch-${Date.now()}`, text: input.content.slice(0, 200) };
+      const updated = [...existing, newTask];
+      if (plan) {
+        await updateDailyPlan(plan.id, ctx.user.id, { tomorrowTasks: JSON.stringify(updated) });
+      }
+      return { success: true, taskCount: updated.length };
     }),
 });

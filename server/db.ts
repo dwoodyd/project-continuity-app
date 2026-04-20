@@ -1182,3 +1182,9 @@ export async function togglePinScratchNote(id: number, userId: number, pinned: b
   if (!db) return;
   await db.update(scratchNotes).set({ pinned }).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
 }
+
+export async function setColourScratchNote(id: number, userId: number, colour: string | null): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(scratchNotes).set({ colour }).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
+}

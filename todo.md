@@ -1121,3 +1121,12 @@
 - [x] Wire FAB quick-capture to drop note into Scratch Pad
 - [x] Add send-to-Vault action on each note card
 - [x] Update tests for new procedures
+
+## Scratch Pad — Round 3 (Apr 20, 2026)
+- [x] Add colour varchar column to scratch_notes, apply migration
+- [x] Add setColourScratchNote DB helper + tRPC procedure; add shareToVault (copy, not delete) procedure
+- [x] Search/filter bar at top of ScratchPadPage
+- [x] Colour tag dot picker on each NoteCard (5 colours + clear)
+- [x] "Add to Tomorrow's Plan" card action
+- [x] "Share to Vault" card action (copies note, keeps original)
+- [x] Update tests

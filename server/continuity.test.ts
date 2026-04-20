@@ -43,6 +43,8 @@ vi.mock("./db", () => ({
   togglePinScratchNote: vi.fn().mockResolvedValue(undefined),
   deleteScratchNote: vi.fn().mockResolvedValue(undefined),
   createSourceItem: vi.fn().mockResolvedValue(55),
+  setColourScratchNote: vi.fn().mockResolvedValue(undefined),
+  getDailyPlan: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock("./storage", () => ({
@@ -222,6 +224,24 @@ describe("scratchPad", () => {
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.scratchPad.sendToVault({ id: 1, content: "Test note content" });
     expect(typeof result.vaultId).toBe("number");
+  });
+
+  it("shareToVault returns a vaultId without deleting note", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.shareToVault({ id: 1, content: "Shared note" });
+    expect(typeof result.vaultId).toBe("number");
+  });
+
+  it("setColour returns success:true", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.setColour({ id: 1, colour: "red" });
+    expect(result.success).toBe(true);
+  });
+
+  it("addToTomorrowPlan returns success:true", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.scratchPad.addToTomorrowPlan({ content: "Do the thing" });
+    expect(result.success).toBe(true);
   });
 });
 
