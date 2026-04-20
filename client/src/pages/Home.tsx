@@ -28,6 +28,7 @@ import {
   X,
   HelpCircle,
   Shuffle,
+  PenLine,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -833,6 +834,7 @@ export default function Home() {
   const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery();
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { staleTime: 60_000 });
   const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
     staleTime: 30 * 60 * 1000,
@@ -1780,6 +1782,26 @@ export default function Home() {
           </ul>
         </div>
       )}
+
+      {/* ── Scratch Pad Widget ────────────────────────────────────────────────────────────────── */}
+      {scratchNotes && scratchNotes.length > 0 && (() => {
+        const pinned = (scratchNotes as any[]).filter(n => n.pinned);
+        const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
+        return (
+          <a href="/scratch" className="block p-4 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
+            <div className="flex items-center gap-2 mb-2">
+              <PenLine className="w-3.5 h-3.5 text-muted-foreground" />
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Scratch Pad</p>
+              <span className="ml-auto text-[10px] text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
+            </div>
+            <div className="space-y-1.5">
+              {preview.map((note: any) => (
+                <p key={note.id} className="text-xs text-foreground/70 leading-snug line-clamp-2 whitespace-pre-wrap">{note.content}</p>
+              ))}
+            </div>
+          </a>
+        );
+      })()}
 
       {/* ── Thread Strength + Re-Entry Shortcut */}
       {gamStatus?.threadStrength && (       <div

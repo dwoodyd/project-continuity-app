@@ -1135,3 +1135,8 @@
 - [x] Colour filter row above note list
 - [x] Sidebar note-count badge next to Scratch Pad nav item
 - [x] Bulk-select mode with delete / colour / send-to-vault actions
+
+## Scratch Pad — Round 5 (Apr 20, 2026)
+- [x] Note templates (Quick list, Brain dump, Meeting notes) in NewNoteInput
+- [x] Sort order toggle (newest/oldest first) in ScratchPadPage header
+- [x] Scratch Pad widget on Today dashboard (pinned/recent note preview)

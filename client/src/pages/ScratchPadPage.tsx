@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   Plus, Trash2, PenLine, Check, X, Pin, PinOff,
   BookOpen, Share2, CalendarPlus, Search, CheckSquare, Square,
+  ArrowUpDown, LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -180,6 +181,13 @@ function NoteCard({
   );
 }
 
+// ── Note templates ────────────────────────────────────────────────────────────
+const TEMPLATES = [
+  { label: "Quick list",    content: "□ \n□ \n□ " },
+  { label: "Brain dump",   content: "What's on my mind:\n\nActions I can take:\n\nLet go of:" },
+  { label: "Meeting notes",content: "Meeting: \nDate: \nAttendees: \n\nKey points:\n- \n\nActions:\n- " },
+];
+
 // ── New note input ─────────────────────────────────────────────────────────────
 function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -191,10 +199,23 @@ function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
     onCreate(content.trim()); setContent(""); setOpen(false);
   }
   if (!open) return (
-    <button onClick={() => setOpen(true)}
-      className="w-full flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-sm">
-      <Plus className="w-4 h-4 shrink-0" /><span>New note</span>
-    </button>
+    <div className="flex items-center gap-2">
+      <button onClick={() => setOpen(true)}
+        className="flex-1 flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-sm">
+        <Plus className="w-4 h-4 shrink-0" /><span>New note</span>
+      </button>
+      <div className="relative group">
+        <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-xs">
+          <LayoutTemplate className="w-3.5 h-3.5" /><span>Template</span>
+        </button>
+        <div className="absolute right-0 top-full mt-1 z-50 hidden group-hover:flex group-focus-within:flex flex-col bg-popover border border-border rounded-xl shadow-lg overflow-hidden min-w-[140px]">
+          {TEMPLATES.map(t => (
+            <button key={t.label} onClick={() => { onCreate(t.content); }}
+              className="px-3 py-2 text-xs text-left hover:bg-muted/60 text-foreground transition-all">{t.label}</button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
   return (
     <div className="rounded-xl border border-primary/30 bg-card shadow-sm shadow-primary/10 p-3 space-y-2">
@@ -216,16 +237,24 @@ export default function ScratchPadPage() {
   const [colourFilter, setColourFilter] = useState<string | null>(null);
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   const { data: notes = [], isLoading } = trpc.scratchPad.list.useQuery();
 
-  // ── Filtering ──────────────────────────────────────────────────────────────
+  // ── Filtering + sorting ────────────────────────────────────────────────────
   const filtered = useMemo(() => {
-    let result = notes as Note[];
+    let result = (notes as Note[]).slice();
     if (colourFilter) result = result.filter(n => n.colour === colourFilter);
     if (search.trim()) { const q = search.toLowerCase(); result = result.filter(n => n.content.toLowerCase().includes(q)); }
+    // pinned always first, then sort by date
+    result.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      const ta = new Date(a.createdAt).getTime();
+      const tb = new Date(b.createdAt).getTime();
+      return sortOrder === "newest" ? tb - ta : ta - tb;
+    });
     return result;
-  }, [notes, search, colourFilter]);
+  }, [notes, search, colourFilter, sortOrder]);
 
   // Colours actually used (for filter row)
   const usedColours = useMemo(() => {
@@ -359,6 +388,12 @@ export default function ScratchPadPage() {
         </div>
         <div className="ml-auto flex items-center gap-2">
           {notes.length > 0 && <span className="text-xs text-muted-foreground/60">{notes.length} note{notes.length !== 1 ? "s" : ""}</span>}
+          {notes.length > 1 && (
+            <button onClick={() => setSortOrder(v => v === "newest" ? "oldest" : "newest")}
+              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-all" title={sortOrder === "newest" ? "Showing newest first" : "Showing oldest first"}>
+              <ArrowUpDown className="w-3 h-3" />{sortOrder === "newest" ? "Newest" : "Oldest"}
+            </button>
+          )}
           {notes.length > 1 && (
             <button onClick={() => { setSelectMode(v => !v); if (selectMode) exitSelectMode(); }}
               className={cn("text-xs px-2 py-1 rounded-lg border transition-all", selectMode ? "border-primary/40 text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground")}>
