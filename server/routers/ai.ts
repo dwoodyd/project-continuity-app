@@ -209,7 +209,7 @@ Return JSON: { stoppingPoint, unresolvedDecision, whatWasRuledOut, nextPhysicalA
   getLatestReEntryCard: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async ({ ctx, input }) => {
-      return getLatestReEntryCard(ctx.user.id, input.projectId);
+      return (await getLatestReEntryCard(ctx.user.id, input.projectId)) ?? null;
     }),
 
   acknowledgeReEntryCard: protectedProcedure

@@ -288,7 +288,7 @@ Return JSON: { decisions: string[] }`,
 
   // ── Weekly Compass ────────────────────────────────────────────────────────────
   getWeeklyCompass: protectedProcedure.query(async ({ ctx }) => {
-    return getLatestWeeklyCompass(ctx.user.id);
+    return (await getLatestWeeklyCompass(ctx.user.id)) ?? null;
   }),
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
