@@ -695,3 +695,20 @@ export const paypalEvents = mysqlTable("paypal_events", {
   processedAt: bigint("processed_at", { mode: "number" }).notNull(),
 });
 export type PaypalEvent = typeof paypalEvents.$inferSelect;
+
+// ─── Google Calendar Integration ─────────────────────────────────────────────
+// Stores per-user OAuth tokens for Google Calendar access.
+// One row per user; updated on each token refresh.
+export const googleCalendarTokens = mysqlTable("google_calendar_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: bigint("expires_at", { mode: "number" }).notNull(),
+  scope: varchar("scope", { length: 512 }).notNull().default(""),
+  calendarId: varchar("calendar_id", { length: 255 }).notNull().default("primary"),
+  connectedAt: bigint("connected_at", { mode: "number" }).notNull(),
+  updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
+});
+export type GoogleCalendarToken = typeof googleCalendarTokens.$inferSelect;
+export type InsertGoogleCalendarToken = typeof googleCalendarTokens.$inferInsert;

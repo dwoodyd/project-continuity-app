@@ -18,6 +18,7 @@ import { paypalRouter } from "../paypal";
 import { startWeeklyDigestCron } from "../weeklyDigest";
 import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
+import { registerCalendarRoutes } from "../calendarRoutes";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -256,6 +257,7 @@ async function startServer() {
   app.use("/api/oauth", oauthLimiter);
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  registerCalendarRoutes(app);
 
   // ── Origin / Referer allowlist (M3) ────────────────────────────────────────
   // Reject mutations from unknown cross-site origins to harden CSRF posture.

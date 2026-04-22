@@ -204,6 +204,13 @@
       "when": 1776880282216,
       "tag": "0028_red_firebrand",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1776896695990,
+      "tag": "0029_brown_black_tarantula",
+      "breakpoints": true
     }
   ]
 }

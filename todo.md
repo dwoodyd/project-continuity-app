@@ -1233,5 +1233,14 @@
   - [x] Wire into ClarityEnginePage Brain Dump textarea (already wired)
 - [x] Luxury heatmap: GitHub-style contribution grid in gold/charcoal for Intelligence + Evidence Log
 
+## Google Calendar Integration
+- [x] DB: googleCalendarTokens table (userId, accessToken, refreshToken, expiresAt, calendarId)
+- [x] Backend: Google Calendar OAuth flow (connect, callback, disconnect, token refresh)
+- [x] Backend: fetchWeekEvents helper — fetches this week's events from Google Calendar API
+- [x] Backend: Wire calendar events into Weekly Compass AI recommendation prompt
+- [x] Frontend: "Connect Google Calendar" button in Settings → Integrations tab
+- [x] Frontend: Calendar event preview strip in Weekly Compass (shows busy blocks)
+- [x] Frontend: Disconnect calendar option in Settings
+
 ## Bug Fixes
 - [x] Fix Replay Intro button in Settings — desktop layout was missing IntroContext.Provider; secondary About button was navigating to /intro instead of calling replayIntro()

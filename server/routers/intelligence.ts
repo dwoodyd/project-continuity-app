@@ -37,6 +37,7 @@ import {
   getUserProfile,
   updateProject,
 } from "../db";
+import { getWeekEvents, formatEventsForPrompt } from "../googleCalendar";
 
 // ── Distraction Classification ─────────────────────────────────────────────────
 export const intelligenceRouter = router({
@@ -293,11 +294,12 @@ Return JSON: { decisions: string[] }`,
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
     checkLLMRateLimit(ctx.user.id);
-    const [activeProjects, recentSessions, recentPlans, profile] = await Promise.all([
+    const [activeProjects, recentSessions, recentPlans, profile, calendarEvents] = await Promise.all([
       getActiveProjects(ctx.user.id),
       getRecentFocusSessions(ctx.user.id, 20),
       getRecentDailyPlans(ctx.user.id, 7),
       getUserProfile(ctx.user.id),
+      getWeekEvents(ctx.user.id).catch(() => null),
     ]);
 
     const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
@@ -309,6 +311,10 @@ Return JSON: { decisions: string[] }`,
       return `"${p.title}" (status: ${p.status}, next: ${p.nextStep ?? "not set"}, sessions this week: ${sessionCount})`;
     }).join("\n");
 
+    const calendarSection = calendarEvents
+      ? `\n\nCalendar events this week:\n${formatEventsForPrompt(calendarEvents)}`
+      : "";
+
     const response = await invokeLLM({
       messages: [
         {
@@ -316,11 +322,12 @@ Return JSON: { decisions: string[] }`,
           content: `You are a grounded weekly planning assistant. Tone: ${tone}. 
 Never use motivational language. Be sober and clear.
 Help the user set weekly priorities across their active projects.
+When calendar events are provided, factor in busy blocks and scheduled commitments when recommending what to prioritize and what to defer.
 Return JSON only.`,
         },
         {
           role: "user",
-          content: `Active projects this week:\n${projectSummaries || "No active projects yet."}
+          content: `Active projects this week:\n${projectSummaries || "No active projects yet."}${calendarSection}
 
 Generate a weekly compass:
 1. Recommend primary project (most important to move this week)

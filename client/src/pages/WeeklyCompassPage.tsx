@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   ArrowRight,
+  Calendar,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -20,6 +21,64 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
 import { GlossaryTerm } from "@/components/TermTooltip";
+
+// ─── Calendar Event Strip ──────────────────────────────────────────────
+function CalendarEventStrip() {
+  const { data, isLoading } = trpc.calendar.getWeekEvents.useQuery();
+
+  if (isLoading) return null;
+  if (!data?.connected) {
+    return (
+      <div className="flex items-center gap-2 px-1 py-2">
+        <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+        <span className="text-xs text-muted-foreground/50">
+          Connect Google Calendar in{" "}
+          <a href="/settings" className="underline underline-offset-2 hover:text-muted-foreground transition-colors">Settings</a>{" "}
+          to include your schedule in AI recommendations.
+        </span>
+      </div>
+    );
+  }
+
+  if (!data.events.length) {
+    return (
+      <div className="flex items-center gap-2 px-1 py-2">
+        <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+        <span className="text-xs text-muted-foreground">No calendar events this week — open schedule.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1.5">
+        <Calendar className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+        <span className="text-xs font-medium text-foreground">This week's calendar</span>
+        <span className="text-xs text-muted-foreground">({data.events.length} event{data.events.length !== 1 ? 's' : ''})</span>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {data.events.slice(0, 8).map((event) => {
+          const startLabel = event.allDay
+            ? event.start
+            : new Date(event.start).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" });
+          return (
+            <div
+              key={event.id}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-border bg-muted/30 text-xs text-muted-foreground max-w-[200px]"
+              title={`${event.summary} — ${startLabel}`}
+            >
+              <span className="truncate">{event.summary}</span>
+              <span className="shrink-0 opacity-60">{event.allDay ? "all day" : new Date(event.start).toLocaleString("en-US", { weekday: "short" })}</span>
+            </div>
+          );
+        })}
+        {data.events.length > 8 && (
+          <span className="text-xs text-muted-foreground self-center">+{data.events.length - 8} more</span>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function WeeklyCompassPage() {
   const [, navigate] = useLocation();
@@ -148,7 +207,8 @@ export default function WeeklyCompassPage() {
             : <><Sparkles className="w-3.5 h-3.5" />{compass ? "Regenerate" : "Generate"}</>}
         </Button>
       </div>
-
+      {/* Calendar event strip */}
+      <CalendarEventStrip />
       {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-16">

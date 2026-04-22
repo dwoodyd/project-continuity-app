@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import {
   Bell,
+  Calendar,
   CheckCircle2,
   Lightbulb,
   Loader2,
@@ -20,6 +21,7 @@ import {
   Smartphone,
   Share,
   Mail,
+  Unlink,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -166,6 +168,67 @@ function IdeaProcessingCard({
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Google Calendar Section ──────────────────────────────────────────────
+function GoogleCalendarSection() {
+  const utils = trpc.useUtils();
+  const { data: status, isLoading } = trpc.calendar.getStatus.useQuery();
+  const disconnect = trpc.calendar.disconnect.useMutation({
+    onSuccess: () => {
+      toast.success("Google Calendar disconnected.");
+      utils.calendar.getStatus.invalidate();
+    },
+    onError: () => toast.error("Failed to disconnect."),
+  });
+
+  const handleConnect = () => {
+    window.location.href = "/api/calendar/connect";
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center gap-2 text-xs text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking connection...</div>;
+  }
+
+  if (status?.connected) {
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-emerald-500" />
+          <span className="text-xs text-foreground">Connected</span>
+          {status.connectedAt && (
+            <span className="text-xs text-muted-foreground">since {new Date(status.connectedAt).toLocaleDateString()}</span>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground">Your calendar events are included in Weekly Compass AI recommendations.</p>
+        <Button
+          size="sm"
+          variant="outline"
+          className="text-xs gap-1.5 text-muted-foreground"
+          disabled={disconnect.isPending}
+          onClick={() => disconnect.mutate()}
+        >
+          {disconnect.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Unlink className="w-3 h-3" />}
+          Disconnect
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">Connect your Google Calendar so the Weekly Compass can factor in your scheduled events when making AI recommendations.</p>
+      <Button
+        size="sm"
+        variant="outline"
+        className="text-xs gap-1.5"
+        onClick={handleConnect}
+      >
+        <Calendar className="w-3.5 h-3.5" />
+        Connect Google Calendar
+      </Button>
     </div>
   );
 }
@@ -974,6 +1037,15 @@ export default function SettingsPage() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Google Calendar Integration */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-amber-500" />
+              <p className="text-sm font-semibold text-foreground">Google Calendar</p>
+            </div>
+            <GoogleCalendarSection />
           </div>
 
           {/* What's New changelog */}
