@@ -18,6 +18,7 @@ import {
   Heart,
   ShieldAlert,
 } from "lucide-react";
+import { ActivityHeatmap } from "@/components/ActivityHeatmap";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type Momentum = "rising" | "steady" | "fading" | "stalled";
@@ -226,6 +227,17 @@ export default function IntelligencePage() {
             Cross-project patterns and health scores. Run on demand — each analysis uses one AI call.
           </p>
         </div>
+      </div>
+
+      {/* ── Activity Heatmap ────────────────────────────────────────────── */}
+      <div
+        className="p-4 rounded-xl border"
+        style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
+      >
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "oklch(0.72 0.17 65 / 0.70)" }}>
+          Activity — past year
+        </p>
+        <ActivityHeatmap />
       </div>
 
       {/* ── Emotional Trend ───────────────────────────────────────────────────── */}

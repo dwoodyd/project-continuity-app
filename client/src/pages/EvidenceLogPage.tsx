@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2 } from "lucide-react";
 import { Link } from "wouter";
 import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
+import { ActivityHeatmap } from "@/components/ActivityHeatmap";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -300,21 +301,15 @@ export default function EvidenceLogPage() {
           </div>
         )}
 
-        {/* 30-day heatmap */}
-        <div className="space-y-2">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            Last 30 days
-          </h2>
-          {streakLoading ? (
-            <Skeleton className="h-12 w-full rounded-xl" />
-          ) : (
-            <div className="p-4 rounded-xl border border-border/60 bg-card/50">
-              <StreakHeatmap data={streakData ?? []} />
-              <p className="text-xs text-muted-foreground mt-2">
-                Each square is one day. Gold = sessions started.
-              </p>
-            </div>
-          )}
+        {/* Activity heatmap */}
+        <div
+          className="p-4 rounded-xl border space-y-1"
+          style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "oklch(0.72 0.17 65 / 0.70)" }}>
+            Activity — past year
+          </p>
+          <ActivityHeatmap />
         </div>
 
         {/* Monthly summaries */}

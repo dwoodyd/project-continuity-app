@@ -432,6 +432,59 @@ export async function getWeeklyThreadData(userId: number, daysBack = 7): Promise
   });
 }
 
+// ── Heatmap ──────────────────────────────────────────────────────────────────
+/**
+ * Returns 365 days of daily activity data for the luxury heatmap.
+ * Each day: date, checkInCount (0-3), focusSessionCount.
+ * Activity level 0-4 for rendering intensity.
+ */
+export async function getHeatmapData(
+  userId: number
+): Promise<{ date: string; checkInCount: number; focusCount: number; level: 0 | 1 | 2 | 3 | 4 }[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+  const [checkInRows, sessionRows] = await Promise.all([
+    db.select({ date: checkIns.date, type: checkIns.type })
+      .from(checkIns)
+      .where(and(eq(checkIns.userId, userId), gte(checkIns.date, cutoffStr))),
+    db.select({ startedAt: focusSessions.startedAt })
+      .from(focusSessions)
+      .where(and(eq(focusSessions.userId, userId), gte(focusSessions.startedAt, cutoff))),
+  ]);
+
+  // Build date map
+  const byDate: Record<string, { checkInCount: number; focusCount: number }> = {};
+  for (const row of checkInRows) {
+    byDate[row.date] = byDate[row.date] ?? { checkInCount: 0, focusCount: 0 };
+    byDate[row.date]!.checkInCount++;
+  }
+  for (const row of sessionRows) {
+    const d = row.startedAt.toISOString().slice(0, 10);
+    byDate[d] = byDate[d] ?? { checkInCount: 0, focusCount: 0 };
+    byDate[d]!.focusCount++;
+  }
+
+  // Build 365-day array
+  const result: { date: string; checkInCount: number; focusCount: number; level: 0 | 1 | 2 | 3 | 4 }[] = [];
+  for (let i = 364; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const entry = byDate[dateStr] ?? { checkInCount: 0, focusCount: 0 };
+    const total = entry.checkInCount + entry.focusCount;
+    const level: 0 | 1 | 2 | 3 | 4 =
+      total === 0 ? 0 :
+      total === 1 ? 1 :
+      total <= 3 ? 2 :
+      total <= 5 ? 3 : 4;
+    result.push({ date: dateStr, ...entry, level });
+  }
+  return result;
+}
+
 // ── Focus Sessions ────────────────────────────────────────────────────────────
 export async function getFocusSessionsByProject(userId: number, projectId: number, limit = 10): Promise<FocusSession[]> {
   const db = await getDb();

@@ -25,6 +25,7 @@ import {
   getDistractionWeeklyAggregates,
   getDistractionEventsByUser,
   getStreak,
+  getHeatmapData,
 } from "../db";
 import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -657,5 +658,8 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
 
   getStreak: protectedProcedure.query(async ({ ctx }) => {
     return getStreak(ctx.user.id);
+  }),
+  getHeatmapData: protectedProcedure.query(async ({ ctx }) => {
+    return getHeatmapData(ctx.user.id);
   }),
 });
