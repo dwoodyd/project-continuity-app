@@ -1192,3 +1192,9 @@
 - [N/A] Sanitize webhook errors Stripe — N/A (PayPal)
 - [N/A] Add Stripe schema columns — N/A (PayPal)
 - [N/A] Create reconcile-subscription-status.mts — N/A (PayPal)
+
+## Go-Live Sprint
+- [x] PayPal: env-driven PAYPAL_BASE URL (sandbox vs live via PAYPAL_ENV secret)
+- [x] PayPal: BILLING.SUBSCRIPTION.PAYMENT.FAILED webhook handler with notifyOwner
+- [x] In-app beta feedback button — already fully implemented (FeedbackPanel + feedbackRouter)
+- [x] Mitigate transitive CVEs: axios 1.15.2, qs >=6.14.1, follow-redirects >=1.15.12, mdast-util-to-hast >=13.2.1, drizzle-orm 0.45.2. Lodash 3 CVEs accepted risk (no patched 4.x exists; recharts-only, client-side)

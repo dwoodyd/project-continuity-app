@@ -2,8 +2,12 @@ import express from "express";
 import { getDb } from "./db";
 import { users } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { notifyOwner } from "./_core/notification";
 
-const PAYPAL_BASE = "https://api-m.sandbox.paypal.com"; // switch to api-m.paypal.com for live
+// Set PAYPAL_ENV=live in production secrets to switch to live mode
+const PAYPAL_BASE = process.env.PAYPAL_ENV === "live"
+  ? "https://api-m.paypal.com"
+  : "https://api-m.sandbox.paypal.com";
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET!;
 
@@ -123,19 +127,37 @@ export async function cancelSubscription(subscriptionId: string, userId: number)
 export const paypalRouter = express.Router();
 
 paypalRouter.post("/webhook", express.json(), async (req, res) => {
-  const event = req.body as { event_type: string; resource: { id: string; custom_id: string; status: string } };
+  const event = req.body as {
+    event_type: string;
+    resource: { id: string; custom_id: string; status: string };
+  };
   try {
+    const userId = parseInt(event.resource?.custom_id ?? "");
+
     if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
-      const userId = parseInt(event.resource.custom_id);
       if (!isNaN(userId)) await activateSubscription(event.resource.id, userId);
-    } else if (event.event_type === "BILLING.SUBSCRIPTION.CANCELLED" || event.event_type === "BILLING.SUBSCRIPTION.EXPIRED") {
-      const userId = parseInt(event.resource.custom_id);
+
+    } else if (
+      event.event_type === "BILLING.SUBSCRIPTION.CANCELLED" ||
+      event.event_type === "BILLING.SUBSCRIPTION.EXPIRED"
+    ) {
       const dbInst = await getDb();
-      if (!isNaN(userId) && dbInst) await dbInst.update(users).set({ isPro: false }).where(eq(users.id, userId));
+      if (!isNaN(userId) && dbInst)
+        await dbInst.update(users).set({ isPro: false }).where(eq(users.id, userId));
+
+    } else if (event.event_type === "BILLING.SUBSCRIPTION.PAYMENT.FAILED") {
+      // Notify the owner so they can follow up; user retains Pro access until subscription expires
+      const subscriptionId = event.resource?.id ?? "unknown";
+      console.warn(`[PayPal] Payment failed for subscription ${subscriptionId}, userId ${userId}`);
+      await notifyOwner({
+        title: "⚠️ PayPal Payment Failed",
+        content: `Subscription **${subscriptionId}** payment failed.\nUser ID: ${isNaN(userId) ? "unknown" : userId}\n\nPlease follow up — the user may need to update their payment method.`,
+      }).catch(() => {/* non-blocking */});
     }
+
     res.json({ ok: true });
   } catch (e) {
-    console.error("[PayPal webhook]", e);
+    console.error("[PayPal webhook]", e instanceof Error ? e.message : String(e));
     res.status(500).json({ error: "webhook error" });
   }
 });
