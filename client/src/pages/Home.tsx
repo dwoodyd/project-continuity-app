@@ -54,6 +54,7 @@ import {
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
+import { WrenCompanion } from "@/components/WrenCompanion";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -1813,6 +1814,10 @@ export default function Home() {
         <span className="text-[10px] text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
       </a>
 
+      {/* ── Wren Companion ─────────────────────────────────────────────── */}
+      <div className="flex items-center justify-center py-2">
+        <WrenCompanion state="neutral" size={52} glow={false} />
+      </div>
       {/* ── Thread Strength + Re-Entry Shortcut */}
       {gamStatus?.threadStrength && (       <div
           className="p-4 rounded-xl border"

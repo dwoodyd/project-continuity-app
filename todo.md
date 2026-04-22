@@ -1202,3 +1202,12 @@
 ## Post-Launch Sprint
 - [x] PayPal webhook idempotency: paypal_events ledger table + duplicate-check
 - [x] Beta invite-code gate: already fully implemented (betaCodes table + beta router + /admin/beta UI)
+
+## Wren Companion + Visual Polish Sprint
+- [x] Fix landing page flex layout bug (unlayered .flex rule in index.css — highest cascade priority)
+- [x] Upload Wren SVG/webp assets to CDN (/manus-storage/wren_neutral_88afb376.svg etc.)
+- [x] Build WrenCompanion component with CSS keyframe animations (bob, breathe, bounce, wiggle, lean)
+- [x] Place Wren on Command Center (neutral state, 52px, below Knowledge Graph shortcut)
+- [x] Place Wren in onboarding flow slide 1 (guiding state, 72px, with glow ring)
+- [x] Update TourPage.tsx Wren assets to new SVG/webp URLs
+- [ ] Full visual audit: spacing, copy, layout fixes across all screens

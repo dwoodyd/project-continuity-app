@@ -225,6 +225,13 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
 }
 
+/* Unlayered: highest cascade priority — ensures .flex always means display:flex */
+.flex {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+}
+
 @layer components {
   .container {
     width: 100%;
@@ -232,11 +239,6 @@
     margin-right: auto;
     padding-left: 1rem;
     padding-right: 1rem;
-  }
-
-  .flex {
-    min-height: 0;
-    min-width: 0;
   }
 
   @media (min-width: 640px) {

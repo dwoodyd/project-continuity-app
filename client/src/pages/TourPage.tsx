@@ -3,9 +3,9 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
-const WREN_NEUTRAL = "/manus-storage/wren_neutral_94a3d434.png";
-const WREN_STATES  = "/manus-storage/wren_states_924967a2.png";
-const WREN_STATES2 = "/manus-storage/wren_states_2_7e1484a1.png";
+const WREN_NEUTRAL = "/manus-storage/wren_neutral_88afb376.svg";
+const WREN_STATES  = "/manus-storage/wren_states_49729c5a.webp";
+const WREN_STATES2 = "/manus-storage/wren_states_2_80de5f08.webp";
 
 type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "invite";
 
