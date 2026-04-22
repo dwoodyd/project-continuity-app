@@ -457,11 +457,12 @@ function VaultGraphPreview({ active }: { active: boolean }) {
 
   // Tutorial caption steps (demo-only): step 0 = nodes, 1 = edges, 2 = big-picture
   const TUTORIAL_STEPS = [
-    { icon: "●", text: "Each dot is a note, session, or decision in your Vault." },
-    { icon: "—", text: "Lines appear when two entries share a tag or project." },
-    { icon: "◎", text: "Over time the map reveals clusters you didn't plan." },
+    { icon: "●", text: "Each dot is a note, session, or decision in your Vault.", highlight: "node" as const },
+    { icon: "—", text: "Lines appear when two entries share a tag or project.", highlight: "edge" as const },
+    { icon: "◎", text: "Over time the map reveals clusters you didn't plan.", highlight: "none" as const },
   ];
   const [tutStep, setTutStep] = useState(-1);
+  const [tutDismissed, setTutDismissed] = useState(false);
 
   useEffect(() => {
     if (!active) {
@@ -480,18 +481,23 @@ function VaultGraphPreview({ active }: { active: boolean }) {
       const key = `${e.source}-${e.target}`;
       return setTimeout(() => setShownEdges(prev => new Set(Array.from(prev).concat(key))), edgeDelay + i * 90);
     });
-    // Tutorial captions fire after graph is fully drawn (demo only)
+    // Tutorial captions: loop every 2.2 s after graph draws (demo only)
+    let loopHandle: ReturnType<typeof setInterval> | null = null;
     const tutTimers: ReturnType<typeof setTimeout>[] = [];
     if (!isLive) {
       const base = edgeDelay + miniEdges.length * 90 + 300;
-      TUTORIAL_STEPS.forEach((_, i) =>
-        tutTimers.push(setTimeout(() => setTutStep(i), base + i * 2200))
-      );
+      tutTimers.push(setTimeout(() => {
+        setTutStep(0);
+        loopHandle = setInterval(() =>
+          setTutStep(s => (s + 1) % TUTORIAL_STEPS.length), 2200
+        );
+      }, base));
     }
     return () => {
       nodeTimers.forEach(clearTimeout);
       edgeTimers.forEach(clearTimeout);
       tutTimers.forEach(clearTimeout);
+      if (loopHandle) clearInterval(loopHandle);
     };
   }, [active, miniNodes.length, miniEdges.length, isLive]);
 
@@ -533,17 +539,20 @@ function VaultGraphPreview({ active }: { active: boolean }) {
           const x1 = px(src.cx, W), y1 = px(src.cy, H);
           const x2 = px(tgt.cx, W), y2 = px(tgt.cy, H);
           const len = Math.hypot(x2 - x1, y2 - y1);
+          const edgePulse = !isLive && !tutDismissed && tutStep >= 0 && TUTORIAL_STEPS[tutStep].highlight === "edge";
           return (
             <line
               key={key}
               x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="rgba(100,200,160,0.35)"
-              strokeWidth={1}
+              stroke={edgePulse ? "rgba(100,200,160,0.75)" : "rgba(100,200,160,0.35)"}
+              strokeWidth={edgePulse ? 1.8 : 1}
               strokeLinecap="round"
               style={{
                 strokeDasharray: len,
                 strokeDashoffset: shown ? 0 : len,
-                transition: shown ? "stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1)" : "none",
+                transition: shown
+                  ? "stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1), stroke 0.4s ease, stroke-width 0.4s ease"
+                  : "none",
               }}
             />
           );
@@ -553,6 +562,7 @@ function VaultGraphPreview({ active }: { active: boolean }) {
         {miniNodes.map(n => {
           const shown = shownNodes.has(n.id);
           const x = px(n.cx, W), y = px(n.cy, H);
+          const nodePulse = !isLive && !tutDismissed && tutStep >= 0 && TUTORIAL_STEPS[tutStep].highlight === "node";
           return (
             <g key={n.id} style={{
               opacity: shown ? 1 : 0,
@@ -561,9 +571,14 @@ function VaultGraphPreview({ active }: { active: boolean }) {
               transition: shown ? "opacity 0.45s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1)" : "none",
             }}>
               <circle
-                cx={x} cy={y} r={7}
+                cx={x} cy={y} r={nodePulse ? 9 : 7}
                 fill={n.color}
-                style={{ filter: `drop-shadow(0 0 6px ${n.color}66)` }}
+                style={{
+                  filter: nodePulse
+                    ? `drop-shadow(0 0 10px ${n.color}cc)`
+                    : `drop-shadow(0 0 6px ${n.color}66)`,
+                  transition: "r 0.4s ease, filter 0.4s ease",
+                }}
               />
               <text
                 x={x} y={y + 18}
@@ -579,24 +594,39 @@ function VaultGraphPreview({ active }: { active: boolean }) {
         })}
       </svg>
 
-      {!isLive && (
-        <div style={{ minHeight: "2.6rem", marginTop: "0.75rem", position: "relative" }}>
-          {TUTORIAL_STEPS.map((s, i) => (
-            <div
-              key={i}
+      {!isLive && !tutDismissed && (
+        <div style={{ minHeight: "2.6rem", marginTop: "0.75rem", position: "relative", display: "flex", alignItems: "center" }}>
+          <div style={{ flex: 1, position: "relative", minHeight: "2.6rem" }}>
+            {TUTORIAL_STEPS.map((s, i) => (
+              <div
+                key={i}
+                style={{
+                  position: "absolute", inset: 0,
+                  display: "flex", alignItems: "center", gap: "0.55rem",
+                  opacity: tutStep === i ? 1 : 0,
+                  transform: tutStep === i ? "translateY(0)" : tutStep > i ? "translateY(-8px)" : "translateY(8px)",
+                  transition: "opacity 0.55s ease, transform 0.55s cubic-bezier(0.16,1,0.3,1)",
+                  pointerEvents: "none",
+                }}
+              >
+                <span style={{ fontSize: "0.75rem", color: "#6ec6a0", flexShrink: 0, width: "1rem", textAlign: "center" }}>{s.icon}</span>
+                <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.42)", lineHeight: 1.45 }}>{s.text}</span>
+              </div>
+            ))}
+          </div>
+          {tutStep >= 0 && (
+            <button
+              onClick={() => setTutDismissed(true)}
               style={{
-                position: "absolute", inset: 0,
-                display: "flex", alignItems: "center", gap: "0.55rem",
-                opacity: tutStep === i ? 1 : 0,
-                transform: tutStep === i ? "translateY(0)" : tutStep > i ? "translateY(-8px)" : "translateY(8px)",
-                transition: "opacity 0.55s ease, transform 0.55s cubic-bezier(0.16,1,0.3,1)",
-                pointerEvents: "none",
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: "0.65rem", color: "rgba(255,255,255,0.22)",
+                fontFamily: "inherit", letterSpacing: "0.06em",
+                flexShrink: 0, padding: "0.2rem 0.4rem",
               }}
             >
-              <span style={{ fontSize: "0.75rem", color: "#6ec6a0", flexShrink: 0, width: "1rem", textAlign: "center" }}>{s.icon}</span>
-              <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.42)", lineHeight: 1.45 }}>{s.text}</span>
-            </div>
-          ))}
+              got it →
+            </button>
+          )}
         </div>
       )}
     </div>
