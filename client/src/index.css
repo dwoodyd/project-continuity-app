@@ -225,8 +225,8 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
 }
 
-/* Unlayered: highest cascade priority — ensures .flex always means display:flex */
-.flex {
+/* Higher specificity (0,2,0) beats Tailwind's .flex (0,1,0) — works in all layers */
+.flex.flex {
   display: flex;
   min-height: 0;
   min-width: 0;

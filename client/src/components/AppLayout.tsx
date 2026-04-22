@@ -239,12 +239,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem'}}>
         <div className="w-full max-w-sm">
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center gap-3 animate-fade-slide-up">
+          <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
+            <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
               <img src={BRAND_ICON} alt="Continuary" className="w-16 h-16 object-contain rounded-2xl" />
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
                 <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Lora', serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
                 <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
               </div>
@@ -254,8 +254,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 A structured command center for execution. Turn scattered notes into daily focus.
               </p>
               {/* Social proof — avatar stack + member count */}
-              <div className="flex items-center justify-center gap-3 mb-5">
-                <div className="flex -space-x-2">
+              <div className="flex items-center justify-center gap-3 mb-5" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.75rem',marginBottom:'1.25rem'}}>
+                <div className="flex -space-x-2" style={{display:'flex'}}>
                   {["JK","AM","TR","SL","OB"].map((initials, i) => (
                     <div
                       key={initials}
