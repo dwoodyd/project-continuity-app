@@ -7,9 +7,9 @@ const WREN_NEUTRAL = "/manus-storage/wren_neutral_94a3d434.png";
 const WREN_STATES  = "/manus-storage/wren_states_924967a2.png";
 const WREN_STATES2 = "/manus-storage/wren_states_2_7e1484a1.png";
 
-type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "strength" | "invite";
+type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "invite";
 
-const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","strength","invite"];
+const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","graph","strength","invite"];
 
 const STEP_META: Record<Step, { label: string; wren: string }> = {
   intro:    { label: "Welcome",         wren: WREN_NEUTRAL },
@@ -18,6 +18,7 @@ const STEP_META: Record<Step, { label: string; wren: string }> = {
   morning:  { label: "Morning",         wren: WREN_STATES  },
   evening:  { label: "Evening",         wren: WREN_STATES2 },
   vault:    { label: "The Vault",       wren: WREN_NEUTRAL },
+  graph:    { label: "Knowledge Graph",  wren: WREN_STATES  },
   strength: { label: "Thread Strength", wren: WREN_STATES  },
   invite:   { label: "Request Access",  wren: WREN_NEUTRAL },
 };
@@ -27,6 +28,121 @@ const MORNING_DEMO =
 
 const EVENING_DEMO =
   `You showed up. That matters more than the list.\n\nTwo of three tasks completed is not a failure — it's data. The third one tells you something about your energy pattern on days like this.\n\nTomorrow, Wren will carry that thread forward. Rest now.`;
+
+// ─── Knowledge Graph Demo ────────────────────────────────────────────────────
+const GRAPH_NODES = [
+  { id: "n1", x: 50,  y: 30,  label: "Investor update draft",       tag: "Writing",   primary: true },
+  { id: "n2", x: 20,  y: 60,  label: "McKinsey context-switching",   tag: "Research",  primary: false },
+  { id: "n3", x: 80,  y: 60,  label: "Cut third service offering",   tag: "Decision",  primary: false },
+  { id: "n4", x: 35,  y: 80,  label: "Focus block — Tue morning",    tag: "Session",   primary: false },
+  { id: "n5", x: 65,  y: 80,  label: "Positioning note — Feb 2024",  tag: "Idea",      primary: false },
+  { id: "n6", x: 50,  y: 55,  label: "Chapter 2 opening scene",      tag: "Writing",   primary: false },
+];
+const GRAPH_EDGES = [
+  { from: "n1", to: "n2", suggested: false },
+  { from: "n1", to: "n3", suggested: false },
+  { from: "n1", to: "n6", suggested: true  },
+  { from: "n2", to: "n4", suggested: false },
+  { from: "n3", to: "n5", suggested: true  },
+  { from: "n4", to: "n6", suggested: false },
+];
+const TAG_COLOURS: Record<string, string> = {
+  Writing:  "#f59e0b",
+  Research: "#60a5fa",
+  Decision: "#a78bfa",
+  Session:  "#34d399",
+  Idea:     "#f87171",
+};
+
+function KnowledgeGraphDemo() {
+  const [active, setActive] = useState<string | null>(null);
+  const W = 100, H = 100;
+  const activeEdges = active
+    ? GRAPH_EDGES.filter(e => e.from === active || e.to === active)
+    : GRAPH_EDGES;
+  const connectedIds = active
+    ? new Set(activeEdges.flatMap(e => [e.from, e.to]))
+    : null;
+
+  return (
+    <div className="relative bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden" style={{ paddingBottom: "56%" }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="absolute inset-0 w-full h-full"
+        style={{ cursor: "default" }}
+      >
+        {/* Edges */}
+        {GRAPH_EDGES.map((e, i) => {
+          const from = GRAPH_NODES.find(n => n.id === e.from)!;
+          const to   = GRAPH_NODES.find(n => n.id === e.to)!;
+          const highlighted = active ? (e.from === active || e.to === active) : true;
+          return (
+            <line
+              key={i}
+              x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+              stroke={e.suggested ? "#f59e0b" : "#ffffff"}
+              strokeOpacity={highlighted ? (e.suggested ? 0.5 : 0.15) : 0.04}
+              strokeWidth={e.suggested ? 0.4 : 0.25}
+              strokeDasharray={e.suggested ? "1 0.8" : undefined}
+            />
+          );
+        })}
+        {/* Nodes */}
+        {GRAPH_NODES.map(n => {
+          const colour = TAG_COLOURS[n.tag] ?? "#ffffff";
+          const isActive = active === n.id;
+          const faded = connectedIds ? !connectedIds.has(n.id) : false;
+          return (
+            <g key={n.id} style={{ cursor: "pointer" }} onClick={() => setActive(isActive ? null : n.id)}>
+              <circle
+                cx={n.x} cy={n.y}
+                r={n.primary ? 3.5 : 2.5}
+                fill={colour}
+                fillOpacity={faded ? 0.1 : isActive ? 1 : 0.7}
+                stroke={isActive ? "#ffffff" : colour}
+                strokeWidth={isActive ? 0.6 : 0}
+              />
+              {(isActive || n.primary) && (
+                <text
+                  x={n.x} y={n.y - 4}
+                  textAnchor="middle"
+                  fontSize="3"
+                  fill="#ffffff"
+                  fillOpacity={faded ? 0.2 : 0.8}
+                  style={{ pointerEvents: "none", userSelect: "none" }}
+                >
+                  {n.label.length > 22 ? n.label.slice(0, 22) + "…" : n.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      {/* Legend */}
+      <div className="absolute bottom-3 left-4 flex flex-wrap gap-3">
+        {Object.entries(TAG_COLOURS).map(([tag, col]) => (
+          <span key={tag} className="flex items-center gap-1 text-[10px] text-white/40">
+            <span className="w-2 h-2 rounded-full inline-block" style={{ background: col, opacity: 0.7 }} />
+            {tag}
+          </span>
+        ))}
+      </div>
+      <div className="absolute bottom-3 right-4 flex items-center gap-1 text-[10px] text-amber-400/50">
+        <span className="inline-block w-4 border-t border-dashed border-amber-400/50" />
+        Suggested link
+      </div>
+      {active && (
+        <div className="absolute top-3 left-4 right-4 bg-black/60 backdrop-blur rounded-lg px-3 py-2 text-xs text-white/70">
+          <span className="font-medium text-white/90">{GRAPH_NODES.find(n => n.id === active)?.label}</span>
+          {" "}— connected to {activeEdges.length} {activeEdges.length === 1 ? "entry" : "entries"}
+          {activeEdges.some(e => e.suggested) && (
+            <span className="ml-2 text-amber-400/70">· {activeEdges.filter(e => e.suggested).length} suggested</span>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function TourPage() {
   const [step, setStep] = useState<Step>("intro");
@@ -245,11 +361,26 @@ export default function TourPage() {
                 ))}
               </div>
               <p className="text-white/35 text-sm">Items are automatically tagged, linked to projects, and surfaced when they're relevant.</p>
-              <Nav onPrev={prev} onNext={next} nextLabel="See Thread Strength" />
+              <Nav onPrev={prev} onNext={next} nextLabel="See the Knowledge Graph" />
             </div>
           </Fade>
         )}
 
+        {step === "graph" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." wren={WREN_STATES} />
+              <p className="text-white/60 leading-relaxed text-lg">
+                As your Vault grows, Continuary maps the connections between your entries — surfacing hidden links between ideas, decisions, and research you captured months apart.
+              </p>
+              <KnowledgeGraphDemo />
+              <p className="text-white/35 text-sm">
+                Tap any node to see its connections. Suggested links appear automatically — you confirm, reject, or explore them.
+              </p>
+              <Nav onPrev={prev} onNext={next} nextLabel="See Thread Strength" />
+            </div>
+          </Fade>
+        )}
         {step === "strength" && (
           <Fade>
             <div className="space-y-8">
