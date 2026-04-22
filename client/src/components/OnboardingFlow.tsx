@@ -22,7 +22,6 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { WrenCompanion } from "@/components/WrenCompanion";
 
 // ─── A/B headline test ──────────────────────────────────────────────────────
 const AB_VARIANT: "A" | "B" =
@@ -883,10 +882,7 @@ export function OnboardingFlow({ onSkip }: Props) {
           <section style={slideStyle(1)}>
             <div style={innerStyle}>
               <EkgLine active={isActive(1)} />
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
-                <WrenCompanion state="guiding" size={72} glow={true} />
-              </div>
-              <div style={eyebrowStyle(true)}>For minds that work in bursts</div>
+<div style={eyebrowStyle(true)}>For minds that work in bursts</div>
               <h1 style={headlineStyle}>
                 {AB_VARIANT === "B" ? (
                   <>
