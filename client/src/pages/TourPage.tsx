@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -56,89 +56,154 @@ const TAG_COLOURS: Record<string, string> = {
 
 function KnowledgeGraphDemo() {
   const [active, setActive] = useState<string | null>(null);
-  const W = 100, H = 100;
+  const [confirmedEdges, setConfirmedEdges] = useState<Set<string>>(new Set());
+  const [visibleNodes, setVisibleNodes] = useState<Set<string>>(new Set());
+  const [visibleEdges, setVisibleEdges] = useState<Set<number>>(new Set());
+  const [confirmingEdge, setConfirmingEdge] = useState<number | null>(null);
+
+  // Entry animation: stagger nodes then edges
+  useEffect(() => {
+    const nodeTimers = GRAPH_NODES.map((n, i) =>
+      setTimeout(() => setVisibleNodes(prev => new Set([...Array.from(prev), n.id])), i * 120)
+    );
+    const edgeTimers = GRAPH_EDGES.map((_, i) =>
+      setTimeout(() => setVisibleEdges(prev => new Set([...Array.from(prev), i])), GRAPH_NODES.length * 120 + i * 100)
+    );
+    return () => { [...nodeTimers, ...edgeTimers].forEach(clearTimeout); };
+  }, []);
+
+  const edgeKey = (i: number) => `e${i}`;
   const activeEdges = active
-    ? GRAPH_EDGES.filter(e => e.from === active || e.to === active)
-    : GRAPH_EDGES;
-  const connectedIds = active
-    ? new Set(activeEdges.flatMap(e => [e.from, e.to]))
-    : null;
+    ? GRAPH_EDGES.map((e, i) => ({ ...e, i })).filter(e => e.from === active || e.to === active)
+    : GRAPH_EDGES.map((e, i) => ({ ...e, i }));
+  const connectedIds = active ? new Set(activeEdges.flatMap(e => [e.from, e.to])) : null;
+
+  const handleConfirm = (i: number) => {
+    setConfirmedEdges(prev => new Set([...Array.from(prev), edgeKey(i)]));
+    setConfirmingEdge(null);
+  };
+
+  const suggestedEdgesWithActive = active
+    ? GRAPH_EDGES.map((e, idx) => ({ ...e, i: idx })).filter(e => e.suggested && !confirmedEdges.has(edgeKey(e.i)) && (e.from === active || e.to === active))
+    : [];
 
   return (
-    <div className="relative bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden" style={{ paddingBottom: "56%" }}>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="absolute inset-0 w-full h-full"
-        style={{ cursor: "default" }}
-      >
-        {/* Edges */}
-        {GRAPH_EDGES.map((e, i) => {
-          const from = GRAPH_NODES.find(n => n.id === e.from)!;
-          const to   = GRAPH_NODES.find(n => n.id === e.to)!;
-          const highlighted = active ? (e.from === active || e.to === active) : true;
-          return (
-            <line
-              key={i}
-              x1={from.x} y1={from.y} x2={to.x} y2={to.y}
-              stroke={e.suggested ? "#f59e0b" : "#ffffff"}
-              strokeOpacity={highlighted ? (e.suggested ? 0.5 : 0.15) : 0.04}
-              strokeWidth={e.suggested ? 0.4 : 0.25}
-              strokeDasharray={e.suggested ? "1 0.8" : undefined}
-            />
-          );
-        })}
-        {/* Nodes */}
-        {GRAPH_NODES.map(n => {
-          const colour = TAG_COLOURS[n.tag] ?? "#ffffff";
-          const isActive = active === n.id;
-          const faded = connectedIds ? !connectedIds.has(n.id) : false;
-          return (
-            <g key={n.id} style={{ cursor: "pointer" }} onClick={() => setActive(isActive ? null : n.id)}>
-              <circle
-                cx={n.x} cy={n.y}
-                r={n.primary ? 3.5 : 2.5}
-                fill={colour}
-                fillOpacity={faded ? 0.1 : isActive ? 1 : 0.7}
-                stroke={isActive ? "#ffffff" : colour}
-                strokeWidth={isActive ? 0.6 : 0}
+    <div className="space-y-3">
+      <div className="relative bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden" style={{ paddingBottom: "56%" }}>
+        <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
+          {/* Edges */}
+          {GRAPH_EDGES.map((e, i) => {
+            const from = GRAPH_NODES.find(n => n.id === e.from)!;
+            const to   = GRAPH_NODES.find(n => n.id === e.to)!;
+            const isVisible = visibleEdges.has(i);
+            const isConfirmed = confirmedEdges.has(edgeKey(i));
+            const highlighted = active ? (e.from === active || e.to === active) : true;
+            const isSuggested = e.suggested && !isConfirmed;
+            return (
+              <line key={i}
+                x1={from.x} y1={from.y} x2={to.x} y2={to.y}
+                stroke={isConfirmed ? "#34d399" : isSuggested ? "#f59e0b" : "#ffffff"}
+                strokeOpacity={isVisible ? (highlighted ? (isSuggested ? 0.55 : isConfirmed ? 0.7 : 0.18) : 0.04) : 0}
+                strokeWidth={isSuggested ? 0.4 : isConfirmed ? 0.5 : 0.25}
+                strokeDasharray={isSuggested ? "1 0.8" : undefined}
+                style={{ transition: "stroke-opacity 0.4s ease, stroke 0.3s ease" }}
               />
-              {(isActive || n.primary) && (
-                <text
-                  x={n.x} y={n.y - 4}
-                  textAnchor="middle"
-                  fontSize="3"
-                  fill="#ffffff"
-                  fillOpacity={faded ? 0.2 : 0.8}
-                  style={{ pointerEvents: "none", userSelect: "none" }}
-                >
-                  {n.label.length > 22 ? n.label.slice(0, 22) + "…" : n.label}
-                </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-      {/* Legend */}
-      <div className="absolute bottom-3 left-4 flex flex-wrap gap-3">
-        {Object.entries(TAG_COLOURS).map(([tag, col]) => (
-          <span key={tag} className="flex items-center gap-1 text-[10px] text-white/40">
-            <span className="w-2 h-2 rounded-full inline-block" style={{ background: col, opacity: 0.7 }} />
-            {tag}
-          </span>
-        ))}
-      </div>
-      <div className="absolute bottom-3 right-4 flex items-center gap-1 text-[10px] text-amber-400/50">
-        <span className="inline-block w-4 border-t border-dashed border-amber-400/50" />
-        Suggested link
-      </div>
-      {active && (
-        <div className="absolute top-3 left-4 right-4 bg-black/60 backdrop-blur rounded-lg px-3 py-2 text-xs text-white/70">
-          <span className="font-medium text-white/90">{GRAPH_NODES.find(n => n.id === active)?.label}</span>
-          {" "}— connected to {activeEdges.length} {activeEdges.length === 1 ? "entry" : "entries"}
-          {activeEdges.some(e => e.suggested) && (
-            <span className="ml-2 text-amber-400/70">· {activeEdges.filter(e => e.suggested).length} suggested</span>
-          )}
+            );
+          })}
+          {/* Nodes */}
+          {GRAPH_NODES.map((n, ni) => {
+            const colour = TAG_COLOURS[n.tag] ?? "#ffffff";
+            const isActive = active === n.id;
+            const faded = connectedIds ? !connectedIds.has(n.id) : false;
+            const isVisible = visibleNodes.has(n.id);
+            return (
+              <g key={n.id} style={{ cursor: "pointer" }} onClick={() => setActive(isActive ? null : n.id)}>
+                <circle
+                  cx={n.x} cy={n.y}
+                  r={n.primary ? 3.5 : 2.5}
+                  fill={colour}
+                  fillOpacity={isVisible ? (faded ? 0.1 : isActive ? 1 : 0.7) : 0}
+                  stroke={isActive ? "#ffffff" : colour}
+                  strokeWidth={isActive ? 0.6 : 0}
+                  style={{ transition: `fill-opacity 0.35s ease ${ni * 0.12}s` }}
+                />
+                {(isActive || n.primary) && isVisible && (
+                  <text x={n.x} y={n.y - 4} textAnchor="middle" fontSize="3"
+                    fill="#ffffff" fillOpacity={faded ? 0.2 : 0.85}
+                    style={{ pointerEvents: "none", userSelect: "none" }}>
+                    {n.label.length > 22 ? n.label.slice(0, 22) + "…" : n.label}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+        {/* Legend */}
+        <div className="absolute bottom-3 left-4 flex flex-wrap gap-3">
+          {Object.entries(TAG_COLOURS).map(([tag, col]) => (
+            <span key={tag} className="flex items-center gap-1 text-[10px] text-white/40">
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: col, opacity: 0.7 }} />
+              {tag}
+            </span>
+          ))}
         </div>
+        <div className="absolute bottom-3 right-4 flex items-center gap-2 text-[10px]">
+          {confirmedEdges.size > 0 && (
+            <span className="text-emerald-400/60 flex items-center gap-1">
+              <span className="inline-block w-3 border-t border-emerald-400/60" /> Confirmed
+            </span>
+          )}
+          <span className="text-amber-400/50 flex items-center gap-1">
+            <span className="inline-block w-3 border-t border-dashed border-amber-400/50" /> Suggested
+          </span>
+        </div>
+        {/* Active node info */}
+        {active && (
+          <div className="absolute top-3 left-4 right-4 bg-black/70 backdrop-blur rounded-lg px-3 py-2 text-xs text-white/70">
+            <span className="font-medium text-white/90">{GRAPH_NODES.find(n => n.id === active)?.label}</span>
+            {" "}— {activeEdges.length} {activeEdges.length === 1 ? "connection" : "connections"}
+            {activeEdges.some(e => e.suggested && !confirmedEdges.has(edgeKey(e.i))) && (
+              <span className="ml-2 text-amber-400/70">· {activeEdges.filter(e => e.suggested && !confirmedEdges.has(edgeKey(e.i))).length} suggested</span>
+            )}
+          </div>
+        )}
+      </div>
+      {/* Confirm suggested links */}
+      {suggestedEdgesWithActive.length > 0 && (
+        <div className="space-y-2">
+          {suggestedEdgesWithActive.map(e => {
+            const fromNode = GRAPH_NODES.find(n => n.id === e.from)!;
+            const toNode   = GRAPH_NODES.find(n => n.id === e.to)!;
+            return (
+              <div key={e.i} className="flex items-center justify-between gap-3 bg-amber-400/[0.06] border border-amber-400/20 rounded-xl px-4 py-3">
+                <div className="text-xs text-white/70 leading-snug flex-1">
+                  <span className="text-amber-300/80 font-medium">Suggested link</span>
+                  {" — "}
+                  <span className="text-white/50">{fromNode.label}</span>
+                  {" ↔ "}
+                  <span className="text-white/50">{toNode.label}</span>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button
+                    onClick={() => handleConfirm(e.i)}
+                    className="text-[11px] bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-lg px-3 py-1 transition-colors"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setConfirmedEdges(prev => { const s = new Set(Array.from(prev)); s.add(`reject-${e.i}`); return s; })}
+                    className="text-[11px] bg-white/5 hover:bg-white/10 text-white/40 border border-white/10 rounded-lg px-3 py-1 transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {!active && (
+        <p className="text-center text-white/25 text-xs">Tap a node to explore its connections</p>
       )}
     </div>
   );
