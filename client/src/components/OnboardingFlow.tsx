@@ -1,24 +1,22 @@
-/**
- * OnboardingFlow v3 — Rork Max quality
+/*
+ * OnboardingFlow v4 — Knowledge Graph slide added
  *
- * Upgrades over v2:
- *   • Word-by-word clip-mask reveal on every headline (staggered 60ms per word)
- *   • Per-slide ambient radial glow that shifts color with the slide
- *   • Touch / swipe gesture navigation (left/right, threshold 48px)
- *   • Thin progress line at bottom instead of dots (cleaner, more cinematic)
- *   • CTA fades in 800ms after slide settles (delayed reveal)
- *   • Slide transition: directional translateX + opacity (same as before, tightened)
- *   • True black (#000) background for maximum contrast
+ * Upgrades over v3:
+ *   • Slide 6: Knowledge Graph — live mini-graph from vault.getGraphData,
+ *     with graceful demo fallback when user has <2 vault entries.
+ *   • TOTAL bumped from 6 → 7; GLOW_COLORS extended with entry 6 (green) and
+ *     the old entry 6 (gold close) moved to 7.
  *
- * Emotional arc: recognized → forgiven → guided → unburdened → kept
+ * Emotional arc: recognized → forgiven → guided → unburdened → kept → connected
  *
- * 6 slides:
+ * 7 slides:
  *   1. The thesis line      — EKG gold line + word-reveal headline
  *   2. Amnesty Protocol     — Re-Entry Card with porch-light glow
  *   3. Threshold Diagnosis  — Arched door opens with amber light
  *   4. Clarity Engine       — 6 emotional tiles cascade in
  *   5. Evidence Log         — Identity sentence types itself
- *   6. The close            — "You're not behind. You just lost the thread."
+ *   6. Knowledge Graph      — Live mini-graph of vault connections (new)
+ *   7. The close            — "You're not behind. You just lost the thread."
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { getLoginUrl } from "@/const";
@@ -65,7 +63,8 @@ const GLOW_COLORS: Record<number, string> = {
   3: "rgba(246,180,80,0.08), rgba(246,180,80,0.02) 40%, transparent 70%",
   4: "rgba(120,180,255,0.06), rgba(180,140,255,0.03) 40%, transparent 70%",
   5: "rgba(160,220,180,0.05), rgba(246,200,120,0.03) 40%, transparent 70%",
-  6: "rgba(246,200,120,0.09), rgba(246,200,120,0.03) 40%, transparent 70%",
+  6: "rgba(100,200,160,0.07), rgba(80,180,220,0.04) 40%, transparent 70%",
+  7: "rgba(246,200,120,0.09), rgba(246,200,120,0.03) 40%, transparent 70%",
 };
 
 function AmbientGlow({ slide }: { slide: number }) {
@@ -85,10 +84,6 @@ function AmbientGlow({ slide }: { slide: number }) {
 }
 
 // ─── Word-by-word clip-mask reveal ────────────────────────────────────────────
-/**
- * Splits text into words and reveals each with a clip-mask slide-up animation,
- * staggered by `delayPerWord` ms. Re-triggers when `active` flips to true.
- */
 function WordReveal({
   children,
   active,
@@ -370,6 +365,208 @@ function IdentityCard({ active }: { active: boolean }) {
   );
 }
 
+// ─── Slide 6: Knowledge Graph Mini-Preview ────────────────────────────────────
+// Demo data used when user has <2 vault entries
+const DEMO_NODES = [
+  { id: "n1", label: "Book notes", color: "#6ec6a0" },
+  { id: "n2", label: "Q2 strategy", color: "#7eb8f5" },
+  { id: "n3", label: "Research draft", color: "#b89af5" },
+  { id: "n4", label: "Meeting recap", color: "#f5c07a" },
+  { id: "n5", label: "Side project", color: "#f57a7a" },
+];
+const DEMO_EDGES = [
+  { source: "n1", target: "n3" },
+  { source: "n2", target: "n4" },
+  { source: "n3", target: "n5" },
+  { source: "n1", target: "n2" },
+];
+
+// Deterministic layout positions for up to 9 nodes in a loose circle
+const CIRCLE_POSITIONS = [
+  { cx: 50, cy: 30 },
+  { cx: 78, cy: 50 },
+  { cx: 65, cy: 76 },
+  { cx: 35, cy: 76 },
+  { cx: 22, cy: 50 },
+  { cx: 50, cy: 55 },
+  { cx: 68, cy: 35 },
+  { cx: 32, cy: 35 },
+  { cx: 50, cy: 70 },
+];
+
+// Content-class → colour mapping matching the vault palette
+const CLASS_COLORS: Record<string, string> = {
+  writing: "#7eb8f5",
+  research: "#b89af5",
+  decision: "#f5c07a",
+  session: "#6ec6a0",
+  idea: "#f57a7a",
+  note: "#8a8a96",
+};
+
+interface MiniNode { id: string; label: string; color: string; cx: number; cy: number; }
+interface MiniEdge { source: string; target: string; }
+
+function VaultGraphPreview({ active }: { active: boolean }) {
+  const graphQuery = trpc.vault.getGraphData.useQuery(undefined, {
+    enabled: active,
+    staleTime: 60_000,
+  });
+
+  // Build mini-graph data from real vault data or fall back to demo
+  const { miniNodes, miniEdges, isLive } = (() => {
+    const raw = graphQuery.data;
+    const hasEnoughData = raw && raw.nodes.length >= 2;
+
+    if (hasEnoughData) {
+      // Take up to 8 nodes, preferring items over projects for visual variety
+      const items = raw.nodes.filter(n => n.type === "item").slice(0, 6);
+      const projects = raw.nodes.filter(n => n.type === "project").slice(0, 2);
+      const selected = [...items, ...projects].slice(0, 8);
+      const selectedIds = new Set(selected.map(n => n.id));
+
+      const mn: MiniNode[] = selected.map((n, i) => ({
+        id: n.id,
+        label: n.label.length > 18 ? n.label.slice(0, 16) + "…" : n.label,
+        color: n.type === "project"
+          ? "#f6c878"
+          : CLASS_COLORS[n.contentClass ?? ""] ?? "#6ec6a0",
+        cx: CIRCLE_POSITIONS[i % CIRCLE_POSITIONS.length].cx,
+        cy: CIRCLE_POSITIONS[i % CIRCLE_POSITIONS.length].cy,
+      }));
+
+      const me: MiniEdge[] = raw.edges
+        .filter(e => selectedIds.has(e.source) && selectedIds.has(e.target))
+        .slice(0, 10)
+        .map(e => ({ source: e.source, target: e.target }));
+
+      return { miniNodes: mn, miniEdges: me, isLive: true };
+    }
+
+    // Demo fallback
+    const mn: MiniNode[] = DEMO_NODES.map((n, i) => ({
+      ...n,
+      cx: CIRCLE_POSITIONS[i].cx,
+      cy: CIRCLE_POSITIONS[i].cy,
+    }));
+    return { miniNodes: mn, miniEdges: DEMO_EDGES, isLive: false };
+  })();
+
+  const [shownNodes, setShownNodes] = useState<Set<string>>(new Set());
+  const [shownEdges, setShownEdges] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!active) {
+      setShownNodes(new Set());
+      setShownEdges(new Set());
+      return;
+    }
+    // Stagger node entry
+    const nodeTimers = miniNodes.map((n, i) =>
+      setTimeout(() => setShownNodes(prev => new Set(Array.from(prev).concat(n.id))), 200 + i * 120)
+    );
+    // Edges appear after all nodes
+    const edgeDelay = 200 + miniNodes.length * 120 + 200;
+    const edgeTimers = miniEdges.map((e, i) => {
+      const key = `${e.source}-${e.target}`;
+      return setTimeout(() => setShownEdges(prev => new Set(Array.from(prev).concat(key))), edgeDelay + i * 90);
+    });
+    return () => { nodeTimers.forEach(clearTimeout); edgeTimers.forEach(clearTimeout); };
+  }, [active, miniNodes.length, miniEdges.length]);
+
+  // Compute pixel positions from percentage cx/cy (viewBox 0–100)
+  const W = 320, H = 220;
+  const px = (pct: number, dim: number) => (pct / 100) * dim;
+
+  const nodeById = new Map(miniNodes.map(n => [n.id, n]));
+
+  return (
+    <div style={{
+      margin: "1.5rem auto 0",
+      maxWidth: 380,
+      background: "rgba(100,200,160,0.04)",
+      border: "1px solid rgba(100,200,160,0.15)",
+      borderRadius: 20,
+      padding: "1.25rem 1.5rem",
+      opacity: active ? 1 : 0,
+      transform: active ? "translateY(0) scale(1)" : "translateY(18px) scale(0.97)",
+      transition: active ? "opacity 0.8s ease 0.3s, transform 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s" : "none",
+    }}>
+      <div style={{ fontSize: "0.6rem", letterSpacing: "0.18em", textTransform: "uppercase", color: "#6ec6a0", marginBottom: "0.75rem", opacity: 0.7 }}>
+        {isLive ? "Your vault connections" : "Example connections"}
+      </div>
+
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width={W}
+        height={H}
+        style={{ display: "block", width: "100%", height: "auto", overflow: "visible" }}
+      >
+        {/* Edges */}
+        {miniEdges.map(e => {
+          const src = nodeById.get(e.source);
+          const tgt = nodeById.get(e.target);
+          if (!src || !tgt) return null;
+          const key = `${e.source}-${e.target}`;
+          const shown = shownEdges.has(key);
+          const x1 = px(src.cx, W), y1 = px(src.cy, H);
+          const x2 = px(tgt.cx, W), y2 = px(tgt.cy, H);
+          const len = Math.hypot(x2 - x1, y2 - y1);
+          return (
+            <line
+              key={key}
+              x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke="rgba(100,200,160,0.35)"
+              strokeWidth={1}
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: len,
+                strokeDashoffset: shown ? 0 : len,
+                transition: shown ? "stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1)" : "none",
+              }}
+            />
+          );
+        })}
+
+        {/* Nodes */}
+        {miniNodes.map(n => {
+          const shown = shownNodes.has(n.id);
+          const x = px(n.cx, W), y = px(n.cy, H);
+          return (
+            <g key={n.id} style={{
+              opacity: shown ? 1 : 0,
+              transform: shown ? "scale(1)" : "scale(0.5)",
+              transformOrigin: `${x}px ${y}px`,
+              transition: shown ? "opacity 0.45s ease, transform 0.45s cubic-bezier(0.16,1,0.3,1)" : "none",
+            }}>
+              <circle
+                cx={x} cy={y} r={7}
+                fill={n.color}
+                style={{ filter: `drop-shadow(0 0 6px ${n.color}66)` }}
+              />
+              <text
+                x={x} y={y + 18}
+                textAnchor="middle"
+                fontSize={8}
+                fill="rgba(255,255,255,0.55)"
+                style={{ fontFamily: "inherit", pointerEvents: "none" }}
+              >
+                {n.label}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+
+      {!isLive && (
+        <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.28)", margin: "0.6rem 0 0", textAlign: "center", fontStyle: "italic" }}>
+          Add notes to your Vault and watch the map grow.
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ─── Thin progress line ───────────────────────────────────────────────────────
 function ProgressLine({ current, total }: { current: number; total: number }) {
   // Spring-fill: start at 0 on mount, then animate to real position on next frame
@@ -456,7 +653,7 @@ interface Props {
 export function OnboardingFlow({ onSkip }: Props) {
   const [slide, setSlide] = useState(1);
   const [finished, setFinished] = useState(false);
-  const TOTAL = 6;
+  const TOTAL = 7;
   const { user } = useAuth();
   const recordEvent = trpc.gamification.recordEvent.useMutation();
   const saveAbVariant = trpc.settings.setOnboardingAbVariant.useMutation();
@@ -486,7 +683,7 @@ export function OnboardingFlow({ onSkip }: Props) {
     setSlide(n);
     window.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "instant" });
     if (!reducedMotion && typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
-    playTone(800 + ((n - 1) / 5) * 600);
+    playTone(800 + ((n - 1) / 6) * 600);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [muted, reducedMotion]);
 
@@ -576,7 +773,6 @@ export function OnboardingFlow({ onSkip }: Props) {
         <Stars />
         <AmbientGlow slide={slide} />
 
-        {/* Skip */}
         {/* Mute toggle */}
         <button
           onClick={() => setMuted(m => { const next = !m; localStorage.setItem("continuary_onboarding_mute", next ? "1" : "0"); return next; })}
@@ -751,8 +947,32 @@ export function OnboardingFlow({ onSkip }: Props) {
             </div>
           </section>
 
-          {/* ── Slide 6: The close ── */}
+          {/* ── Slide 6: Knowledge Graph ── */}
           <section style={slideStyle(6)}>
+            <div style={innerStyle}>
+              <div style={eyebrowStyle()}>Knowledge Graph</div>
+              <h1 style={headlineStyle}>
+                <WordReveal active={isActive(6)} delayOffset={100}>Your ideas are already</WordReveal>
+                <br />
+                <span style={accentStyle}>
+                  <WordReveal active={isActive(6)} delayOffset={700}>connecting.</WordReveal>
+                </span>
+              </h1>
+              <p style={quietStyle}>
+                Every note, session, and decision you add to your Vault becomes a node in
+                a living map. Continuary surfaces the links you didn't know were there.
+              </p>
+              <VaultGraphPreview active={isActive(6)} />
+              <DelayedCTA active={isActive(6)} delay={2400}>
+                <div style={{ ...rowStyle, marginTop: "1.75rem" }}>
+                  <button style={ctaWarmStyle} onClick={() => goTo(7)}>One last thing →</button>
+                </div>
+              </DelayedCTA>
+            </div>
+          </section>
+
+          {/* ── Slide 7: The close ── */}
+          <section style={slideStyle(7)}>
             <div style={innerStyle}>
               {finished ? (
                 <>
@@ -766,10 +986,10 @@ export function OnboardingFlow({ onSkip }: Props) {
                 <>
                   <div style={eyebrowStyle()}>One last thing</div>
                   <h1 style={headlineStyle}>
-                    <WordReveal active={isActive(6)} delayOffset={100}>You're not behind.</WordReveal>
+                    <WordReveal active={isActive(7)} delayOffset={100}>You're not behind.</WordReveal>
                     <br />
                     <span style={accentStyle}>
-                      <WordReveal active={isActive(6)} delayOffset={600}>You just lost the thread.</WordReveal>
+                      <WordReveal active={isActive(7)} delayOffset={600}>You just lost the thread.</WordReveal>
                     </span>
                   </h1>
                   <p style={ledeStyle}>
@@ -777,7 +997,7 @@ export function OnboardingFlow({ onSkip }: Props) {
                     you return. You don't have to remember. You just have to come back.
                   </p>
                   <p style={whisperStyle}>You came back. That's the whole thing.</p>
-                  <DelayedCTA active={isActive(6)} delay={1200}>
+                  <DelayedCTA active={isActive(7)} delay={1200}>
                     <div style={rowStyle}>
                       <a
                         href={getLoginUrl()}

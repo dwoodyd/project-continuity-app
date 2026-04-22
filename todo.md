@@ -1147,3 +1147,10 @@
 - [x] Build TourPage (/tour) with full interactive onboarding narrative and Wren mascot
 - [x] Register /tour public route in App.tsx (no auth required)
 - [x] Write vitest tests for waitlist procedure
+
+## Knowledge Graph — In-App Onboarding Integration (Apr 2026)
+- [x] Audit OnboardingFlow slide structure and VaultGraph component
+- [x] Add Knowledge Graph slide to OnboardingFlow with live user data + empty-state fallback (reuses vault.getGraphData)
+- [x] Slide inserted as slide 6 (before "The Close", now slide 7); TOTAL bumped 6→7; GLOW_COLORS extended
+- [x] VaultGraphPreview: live mini-graph when ≥2 vault nodes, demo fallback with "Add notes to your Vault" prompt otherwise
+- [x] 351 tests passing, 0 TypeScript errors
