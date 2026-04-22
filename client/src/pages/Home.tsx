@@ -1803,6 +1803,16 @@ export default function Home() {
         );
       })()}
 
+      {/* ── Knowledge Graph Shortcut ─────────────────────────────────────── */}
+      <a href="/vault" className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
+        <span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Knowledge Graph</p>
+          <p className="text-xs text-foreground/60 mt-0.5">View your vault connections</p>
+        </div>
+        <span className="text-[10px] text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
+      </a>
+
       {/* ── Thread Strength + Re-Entry Shortcut */}
       {gamStatus?.threadStrength && (       <div
           className="p-4 rounded-xl border"

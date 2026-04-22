@@ -462,7 +462,9 @@ function VaultGraphPreview({ active }: { active: boolean }) {
     { icon: "◎", text: "Over time the map reveals clusters you didn't plan.", highlight: "none" as const },
   ];
   const [tutStep, setTutStep] = useState(-1);
-  const [tutDismissed, setTutDismissed] = useState(false);
+  const [tutDismissed, setTutDismissed] = useState(
+    () => typeof localStorage !== "undefined" && localStorage.getItem("continuary_graph_tut") === "1"
+  );
 
   useEffect(() => {
     if (!active) {
@@ -595,8 +597,14 @@ function VaultGraphPreview({ active }: { active: boolean }) {
       </svg>
 
       {!isLive && !tutDismissed && (
-        <div style={{ minHeight: "2.6rem", marginTop: "0.75rem", position: "relative", display: "flex", alignItems: "center" }}>
-          <div style={{ flex: 1, position: "relative", minHeight: "2.6rem" }}>
+        <div style={{ marginTop: "0.75rem" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: "0.35rem", marginBottom: "0.45rem" }}>
+            {TUTORIAL_STEPS.map((_, i) => (
+              <div key={i} style={{ width: 4, height: 4, borderRadius: "50%", background: tutStep === i ? "#6ec6a0" : "rgba(255,255,255,0.15)", transition: "background 0.4s ease" }} />
+            ))}
+          </div>
+          <div style={{ minHeight: "2.6rem", position: "relative", display: "flex", alignItems: "center" }}>
+            <div style={{ flex: 1, position: "relative", minHeight: "2.6rem" }}>
             {TUTORIAL_STEPS.map((s, i) => (
               <div
                 key={i}
@@ -613,10 +621,10 @@ function VaultGraphPreview({ active }: { active: boolean }) {
                 <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.42)", lineHeight: 1.45 }}>{s.text}</span>
               </div>
             ))}
-          </div>
+            </div>
           {tutStep >= 0 && (
             <button
-              onClick={() => setTutDismissed(true)}
+              onClick={() => { setTutDismissed(true); localStorage.setItem("continuary_graph_tut", "1"); }}
               style={{
                 background: "none", border: "none", cursor: "pointer",
                 fontSize: "0.65rem", color: "rgba(255,255,255,0.22)",
@@ -627,6 +635,7 @@ function VaultGraphPreview({ active }: { active: boolean }) {
               got it →
             </button>
           )}
+          </div>
         </div>
       )}
     </div>
