@@ -6,6 +6,8 @@ import { randomBytes } from "crypto";
 import type { IncomingMessage, ServerResponse } from "http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
+import Redis from "ioredis";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
@@ -37,20 +39,19 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-async function startServer() {
-  // M6: Refuse to boot in production unless the operator has acknowledged that
-  // the in-memory rate-limiter store is not safe under horizontal scaling.
-  // Set SINGLE_INSTANCE_OK=1 when deploying to a single-instance environment.
-  // Remove this check (and migrate to Redis-backed limiters) before scaling out.
-  if (ENV.isProduction && process.env.SINGLE_INSTANCE_OK !== "1") {
-    console.error(
-      "[Startup] SINGLE_INSTANCE_OK is not set. " +
-      "The in-memory rate-limiter is unsafe under horizontal scaling. " +
-      "Set SINGLE_INSTANCE_OK=1 to acknowledge this and proceed with a single-instance deployment."
-    );
-    process.exit(1);
-  }
+// Shared Redis client for rate-limit stores — safe for horizontal scaling.
+// Falls back gracefully to in-memory if REDIS_URL is not set (dev/test environments).
+const redisClient = process.env.REDIS_URL
+  ? new Redis(process.env.REDIS_URL, { tls: {}, lazyConnect: true })
+  : null;
 
+if (redisClient) {
+  redisClient.on("error", (err) =>
+    console.error("[Redis] Rate-limit store error:", err.message)
+  );
+}
+
+async function startServer() {
   const app = express();
   const server = createServer(app);
 
@@ -205,29 +206,38 @@ async function startServer() {
   //   4. Set REDIS_URL in environment secrets via webdev_request_secrets.
   //
   // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.
-  // This prevents brute-force code enumeration and replay attacks.
+  // Uses Redis store when REDIS_URL is set (horizontal-scaling safe); falls back to in-memory.
   const oauthLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
     validate: { xForwardedForHeader: false },
     message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
-    // TODO (horizontal scaling): add store: new RedisStore(...) here
+    ...(redisClient ? {
+      store: new RedisStore({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sendCommand: (...args: string[]) => (redisClient as any).call(args[0], ...args.slice(1)) as Promise<boolean | number | string | (boolean | number | string)[]>,
+        prefix: "rl:oauth:",
+      }),
+    } : {}),
   });
 
   // Broader limit on the tRPC API: 300 requests per minute per IP.
-  // Prevents automated scraping and runaway clients without affecting normal usage.
   const apiLimiter = rateLimit({
-    windowMs: 60 * 1000, // 1 minute
+    windowMs: 60 * 1000,
     max: 300,
     standardHeaders: true,
     legacyHeaders: false,
-    // trust proxy is set above — suppress the false-positive X-Forwarded-For warning
     validate: { xForwardedForHeader: false },
     message: { error: "Too many requests. Please slow down." },
-    // TODO (horizontal scaling): add store: new RedisStore(...) here
+    ...(redisClient ? {
+      store: new RedisStore({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        sendCommand: (...args: string[]) => (redisClient as any).call(args[0], ...args.slice(1)) as Promise<boolean | number | string | (boolean | number | string)[]>,
+        prefix: "rl:api:",
+      }),
+    } : {}),
   });
 
   // PayPal webhook

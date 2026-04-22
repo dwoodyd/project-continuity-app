@@ -1179,6 +1179,16 @@
 - [x] Set SINGLE_INSTANCE_OK=1 env secret in production
 
 ## Security Follow-on Sprint
-- [~] Redis-backed rate limiter (ioredis INCR/EXPIRE) — deferred; migration diff documented in SECURITY_AUDIT.md
+- [x] Redis-backed rate limiter — implemented via rate-limit-redis + ioredis; SINGLE_INSTANCE_OK gate removed
 - [x] Push subscription endpoint allowlist in notifications.subscribe (was already implemented)
 - [x] CSP nonce migration: per-request nonce replacing unsafe-inline in styleSrc
+
+## Revision Notes — Horizontal Scaling & Stripe Hardening
+- [x] Redis-backed rate limiters: install rate-limit-redis + ioredis, update oauthLimiter and apiLimiter in server/_core/index.ts
+- [N/A] Stripe subscription status mapping — app uses PayPal, not Stripe
+- [N/A] Webhook idempotency stripe_events — N/A (PayPal)
+- [N/A] Payment failure handler invoice.payment_failed — N/A (PayPal)
+- [N/A] Remove evt_test_ dead code — N/A (no Stripe webhook)
+- [N/A] Sanitize webhook errors Stripe — N/A (PayPal)
+- [N/A] Add Stripe schema columns — N/A (PayPal)
+- [N/A] Create reconcile-subscription-status.mts — N/A (PayPal)
