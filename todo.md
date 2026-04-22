@@ -1171,3 +1171,9 @@
 - [x] L7: Add .max(64) to notifications.updateSchedule timezone input
 - [x] L8: Truncate OAuth callback error log to 2000 chars
 - [x] Update SECURITY_AUDIT.md to reflect all fixes
+
+## SHIP_CHANGELOG.md Delta Items
+- [x] M6: Add SINGLE_INSTANCE_OK=1 startup assertion in server/_core/index.ts
+- [x] H4 addendum: Add invokeLLMForUser wrapper in rateLimiter.ts; update evidence.generateIdentitySentence + checkIns.submitEvening call sites
+- [x] M5 addendum: Add legacy localStorage cleanup useEffect in useAuth.ts
+- [x] Set SINGLE_INSTANCE_OK=1 env secret in production

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
-import { checkLLMRateLimit } from "../_core/rateLimiter";
+import { checkLLMRateLimit, invokeLLMForUser } from "../_core/rateLimiter";
 import {
   upsertEvidenceSummary,
   getEvidenceSummaries,
@@ -111,7 +111,8 @@ export async function computeStats(userId: number, month: string) {
  */
 export async function generateIdentitySentence(
   month: string,
-  stats: { sessionsStarted: number; returnsAfterGap: number; hardDaySessions: number; genuinePermissions: number }
+  stats: { sessionsStarted: number; returnsAfterGap: number; hardDaySessions: number; genuinePermissions: number },
+  userId?: string | number
 ): Promise<string> {
   const [y, m] = month.split("-").map(Number);
   const monthName = new Date(Date.UTC(y, m - 1, 1)).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -133,12 +134,19 @@ Genuine permissions (stopped at the timer): ${stats.genuinePermissions}
 
 Write only the single sentence. No preamble, no explanation.`;
 
-  const response = await invokeLLM({
-    messages: [
-      { role: "system", content: "You write precise, honest, identity-affirming sentences. You never over-promise or use inspirational language." },
-      { role: "user", content: prompt },
-    ],
-  });
+  const response = userId
+    ? await invokeLLMForUser(userId, {
+        messages: [
+          { role: "system", content: "You write precise, honest, identity-affirming sentences. You never over-promise or use inspirational language." },
+          { role: "user", content: prompt },
+        ],
+      })
+    : await invokeLLM({
+        messages: [
+          { role: "system", content: "You write precise, honest, identity-affirming sentences. You never over-promise or use inspirational language." },
+          { role: "user", content: prompt },
+        ],
+      });
 
   const content = response?.choices?.[0]?.message?.content;
   if (!content || typeof content !== "string") {
@@ -180,7 +188,7 @@ export const evidenceRouter = router({
         });
       }
 
-      const summaryLine = await generateIdentitySentence(month, stats);
+      const summaryLine = await generateIdentitySentence(month, stats, ctx.user.id);
       return upsertEvidenceSummary({
         userId: ctx.user.id,
         month,

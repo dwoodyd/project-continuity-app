@@ -58,6 +58,11 @@ export function useAuth(options?: UseAuthOptions) {
     logoutMutation.isPending,
   ]);
 
+  // M5 addendum: one-time cleanup for browsers that stored PII under the legacy key.
+  useEffect(() => {
+    try { localStorage.removeItem("manus-runtime-user-info"); } catch { /* ignore */ }
+  }, []);
+
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
     if (meQuery.isLoading || logoutMutation.isPending) return;

@@ -36,6 +36,19 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  // M6: Refuse to boot in production unless the operator has acknowledged that
+  // the in-memory rate-limiter store is not safe under horizontal scaling.
+  // Set SINGLE_INSTANCE_OK=1 when deploying to a single-instance environment.
+  // Remove this check (and migrate to Redis-backed limiters) before scaling out.
+  if (ENV.isProduction && process.env.SINGLE_INSTANCE_OK !== "1") {
+    console.error(
+      "[Startup] SINGLE_INSTANCE_OK is not set. " +
+      "The in-memory rate-limiter is unsafe under horizontal scaling. " +
+      "Set SINGLE_INSTANCE_OK=1 to acknowledge this and proceed with a single-instance deployment."
+    );
+    process.exit(1);
+  }
+
   const app = express();
   const server = createServer(app);
 

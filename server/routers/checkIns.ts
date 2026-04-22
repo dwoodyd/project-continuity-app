@@ -505,7 +505,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
           const month = new Date().toISOString().slice(0, 7);
           const stats = await computeStats(evidenceUserId, month);
           const summaryLine = stats.sessionsStarted > 0
-            ? await generateIdentitySentence(month, stats)
+            ? await generateIdentitySentence(month, stats, evidenceUserId)
             : null;
           await upsertEvidenceSummary({
             userId: evidenceUserId,

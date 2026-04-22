@@ -44,6 +44,20 @@ export function checkLLMRateLimit(userId: string | number): void {
 }
 
 /**
+ * Rate-limited wrapper around invokeLLM.
+ * Use this for all user-triggered LLM calls so the rate limit is structurally enforced.
+ * Background/cron paths that legitimately bypass the limit should import invokeLLM directly.
+ */
+export async function invokeLLMForUser(
+  userId: string | number,
+  params: Parameters<typeof import("./llm").invokeLLM>[0]
+): Promise<ReturnType<typeof import("./llm").invokeLLM>> {
+  checkLLMRateLimit(userId);
+  const { invokeLLM } = await import("./llm");
+  return invokeLLM(params);
+}
+
+/**
  * Periodically clean up the store to prevent unbounded memory growth.
  * Runs every 5 minutes and removes entries with no recent calls.
  */
