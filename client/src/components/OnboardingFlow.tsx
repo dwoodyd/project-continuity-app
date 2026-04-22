@@ -455,10 +455,19 @@ function VaultGraphPreview({ active }: { active: boolean }) {
   const [shownNodes, setShownNodes] = useState<Set<string>>(new Set());
   const [shownEdges, setShownEdges] = useState<Set<string>>(new Set());
 
+  // Tutorial caption steps (demo-only): step 0 = nodes, 1 = edges, 2 = big-picture
+  const TUTORIAL_STEPS = [
+    { icon: "●", text: "Each dot is a note, session, or decision in your Vault." },
+    { icon: "—", text: "Lines appear when two entries share a tag or project." },
+    { icon: "◎", text: "Over time the map reveals clusters you didn't plan." },
+  ];
+  const [tutStep, setTutStep] = useState(-1);
+
   useEffect(() => {
     if (!active) {
       setShownNodes(new Set());
       setShownEdges(new Set());
+      setTutStep(-1);
       return;
     }
     // Stagger node entry
@@ -471,8 +480,20 @@ function VaultGraphPreview({ active }: { active: boolean }) {
       const key = `${e.source}-${e.target}`;
       return setTimeout(() => setShownEdges(prev => new Set(Array.from(prev).concat(key))), edgeDelay + i * 90);
     });
-    return () => { nodeTimers.forEach(clearTimeout); edgeTimers.forEach(clearTimeout); };
-  }, [active, miniNodes.length, miniEdges.length]);
+    // Tutorial captions fire after graph is fully drawn (demo only)
+    const tutTimers: ReturnType<typeof setTimeout>[] = [];
+    if (!isLive) {
+      const base = edgeDelay + miniEdges.length * 90 + 300;
+      TUTORIAL_STEPS.forEach((_, i) =>
+        tutTimers.push(setTimeout(() => setTutStep(i), base + i * 2200))
+      );
+    }
+    return () => {
+      nodeTimers.forEach(clearTimeout);
+      edgeTimers.forEach(clearTimeout);
+      tutTimers.forEach(clearTimeout);
+    };
+  }, [active, miniNodes.length, miniEdges.length, isLive]);
 
   // Compute pixel positions from percentage cx/cy (viewBox 0–100)
   const W = 320, H = 220;
@@ -559,9 +580,24 @@ function VaultGraphPreview({ active }: { active: boolean }) {
       </svg>
 
       {!isLive && (
-        <p style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.28)", margin: "0.6rem 0 0", textAlign: "center", fontStyle: "italic" }}>
-          Add notes to your Vault and watch the map grow.
-        </p>
+        <div style={{ minHeight: "2.6rem", marginTop: "0.75rem", position: "relative" }}>
+          {TUTORIAL_STEPS.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                position: "absolute", inset: 0,
+                display: "flex", alignItems: "center", gap: "0.55rem",
+                opacity: tutStep === i ? 1 : 0,
+                transform: tutStep === i ? "translateY(0)" : tutStep > i ? "translateY(-8px)" : "translateY(8px)",
+                transition: "opacity 0.55s ease, transform 0.55s cubic-bezier(0.16,1,0.3,1)",
+                pointerEvents: "none",
+              }}
+            >
+              <span style={{ fontSize: "0.75rem", color: "#6ec6a0", flexShrink: 0, width: "1rem", textAlign: "center" }}>{s.icon}</span>
+              <span style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.42)", lineHeight: 1.45 }}>{s.text}</span>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
