@@ -499,14 +499,6 @@ export function OnboardingFlow({ onSkip }: Props) {
     setTimeout(onSkip, 2200);
   }
 
-  // Auto-advance slide 1 after EKG animation
-  useEffect(() => {
-    if (slide !== 1) return;
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const t = setTimeout(() => goTo(2), isMobile ? 7000 : 5000);
-    return () => clearTimeout(t);
-  }, [slide, goTo]);
-
   // Slide drop-off analytics
   useEffect(() => {
     if (!user) return;
