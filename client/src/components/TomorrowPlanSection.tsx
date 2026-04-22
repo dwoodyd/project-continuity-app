@@ -98,12 +98,12 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-muted-foreground">
+        <p className="text-sm font-medium text-muted-foreground">
           Tomorrow's activities{" "}
           <span className="font-normal opacity-60">(optional)</span>
         </p>
         {saving && (
-          <span className="text-[10px] text-muted-foreground/50 animate-pulse">saving…</span>
+          <span className="text-sm text-muted-foreground/50 animate-pulse">saving…</span>
         )}
       </div>
 
@@ -142,7 +142,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
                 {/* Energy badge */}
                 {task.energyLevel && task.energyLevel !== "any" && (
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full shrink-0 ${
+                    className={`text-xs px-1.5 py-0.5 rounded-full shrink-0 ${
                       task.energyLevel === "high"
                         ? "bg-amber-500/15 text-amber-500"
                         : "bg-indigo-400/15 text-indigo-400"
@@ -154,7 +154,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
 
                 {/* Time badge */}
                 {task.estimatedMinutes && (
-                  <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/60 shrink-0">
+                  <span className="flex items-center gap-0.5 text-sm text-muted-foreground/60 shrink-0">
                     <Clock className="w-2.5 h-2.5" />
                     {task.estimatedMinutes}m
                   </span>
@@ -186,7 +186,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
                 <div className="px-3 pb-2 pt-0 grid grid-cols-2 gap-2 border-t border-border/30">
                   {/* Energy level */}
                   <div>
-                    <label className="text-[10px] text-muted-foreground/60 block mb-1">Energy</label>
+                    <label className="text-sm text-muted-foreground/60 block mb-1">Energy</label>
                     <select
                       value={task.energyLevel ?? "any"}
                       onChange={e => updateTask(task.id, { energyLevel: e.target.value as EnergyLevel })}
@@ -200,7 +200,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
 
                   {/* Estimated time */}
                   <div>
-                    <label className="text-[10px] text-muted-foreground/60 block mb-1">Est. time (min)</label>
+                    <label className="text-sm text-muted-foreground/60 block mb-1">Est. time (min)</label>
                     <Input
                       type="number"
                       min={1}
@@ -218,7 +218,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
 
                   {/* Notes */}
                   <div className="col-span-2">
-                    <label className="text-[10px] text-muted-foreground/60 block mb-1">Note <span className="opacity-50">(optional)</span></label>
+                    <label className="text-sm text-muted-foreground/60 block mb-1">Note <span className="opacity-50">(optional)</span></label>
                     <Input
                       value={task.notes ?? ""}
                       onChange={e => updateTask(task.id, { notes: e.target.value })}
@@ -236,7 +236,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
 
       {/* Empty state hint */}
       {tasks.length === 0 && (
-        <p className="text-[11px] text-muted-foreground/40 italic">
+        <p className="text-sm text-muted-foreground/40 italic">
           No activities planned yet. Add one below.
         </p>
       )}
@@ -265,7 +265,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
       </div>
 
       {tasks.length > 0 && (
-        <p className="text-[10px] text-muted-foreground/40">
+        <p className="text-sm text-muted-foreground/40">
           Tap the grid icon on any item to set energy level, time estimate, or a note.
         </p>
       )}

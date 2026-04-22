@@ -1215,3 +1215,11 @@
 - [x] Fix WrenCompanion sprite sheet crop (background-image approach for guiding/celebrating/resting/nudging)
 - [x] Wire real Wren SVG/webp artwork into WrenCompanion (neutral SVG + 3-panel states webp + 2-panel states2 webp)
 - [x] Fix sign-in page avatar circles (inline style display:flex on avatar container)
+
+## Font & Legibility Scale Bump
+- [x] Increase base font size to 17px in index.css html (font-size: 17px)
+- [x] Increase line-height to 1.7 globally
+- [x] Scale up text-xs/text-sm in Home.tsx, AppLayout, DashboardLayout, GamificationLayer, TomorrowPlanSection, ReEntryFlow
+- [x] Bump sidebar nav labels, section labels, and body copy sizes
+- [x] Increase sidebar footer button text sizes
+- [x] Verified: 351 tests passing, 0 TS errors

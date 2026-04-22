@@ -188,6 +188,7 @@
     box-sizing: border-box;
   }
   html {
+    font-size: 17px;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -198,7 +199,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    line-height: 1.6;
+    line-height: 1.7;
   }
   /* Brand serif — used for wordmark, page headings, and brand moments */
   .font-brand {
@@ -309,7 +310,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -352,7 +353,7 @@
   /* ── Divider with label ── */
   .divider-label {
     display: flex; align-items: center; gap: 0.75rem;
-    font-size: 0.75rem; font-weight: 500;
+    font-size: 0.8125rem; font-weight: 500;
     color: var(--muted-foreground); letter-spacing: 0.04em;
   }
   .divider-label::before, .divider-label::after {

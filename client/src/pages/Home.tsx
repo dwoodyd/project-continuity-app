@@ -203,18 +203,18 @@ const TaskItem = React.memo(function TaskItem({
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn(
-          "text-sm leading-snug tracking-[-0.005em]",
+          "text-base leading-snug tracking-[-0.005em]",
           task.done && "line-through text-muted-foreground"
         )}>
           {task.title}
         </p>
         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
           {isCarryover && !task.done && (
-            <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">carried over</span>
+            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">carried over</span>
           )}
           {task.energyTag && !task.done && (
             <span className={cn(
-              "text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border",
+              "text-xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border",
               task.energyTag === "high" ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800" :
               task.energyTag === "low" ? "text-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
               "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
@@ -285,7 +285,7 @@ function CheckInCard({
         )}
       </div>
       <p className={cn(
-        "text-[10px] leading-tight pl-0.5 truncate w-full",
+        "text-xs leading-tight pl-0.5 truncate w-full",
         active ? "text-white/70" : "text-muted-foreground/55"
       )}>{timeHint}</p>
     </button>
@@ -336,7 +336,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
     <div className="space-y-5">
       {/* Emotional State */}
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">How are you feeling right now? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">How are you feeling right now? <span className="font-normal opacity-60">(optional)</span></p>
         <div className="flex flex-wrap gap-2">
           {(Object.entries(emotionalStateConfig) as [EmotionalState, typeof emotionalStateConfig[EmotionalState]][]).map(([state, cfg]) => (
             <button
@@ -355,14 +355,14 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
           ))}
         </div>
         {emotionalState && emotionalStateConfig[emotionalState]?.clarityHint && (
-          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
             <span>💡</span> {emotionalStateConfig[emotionalState].clarityHint}
           </p>
         )}
       </div>
       {/* Mental Load */}
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">Mental load today? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">Mental load today? <span className="font-normal opacity-60">(optional)</span></p>
         <div className="flex gap-2">
           {(["light", "moderate", "heavy"] as MentalLoad[]).map((load) => (
             <button
@@ -380,7 +380,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       </div>
       {/* Capacity */}
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-3">How's your capacity today?</p>
+        <p className="text-sm font-medium text-muted-foreground mb-3">How's your capacity today?</p>
         <div className="grid grid-cols-3 gap-2">
           {(["full", "partial", "low"] as CapacityLevel[]).map((level) => {
             const cfg = capacityConfig[level];
@@ -398,18 +398,18 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
               >
                 <Icon className={cn("w-5 h-5", capacity === level ? cfg.color : "text-muted-foreground")} />
                 <span className="text-xs font-medium">{cfg.label}</span>
-                <span className="text-[9px] text-muted-foreground leading-tight">{cfg.taskCount}</span>
+                <span className="text-sm text-muted-foreground leading-tight">{cfg.taskCount}</span>
               </button>
             );
           })}
         </div>
-        <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed">
+        <p className="text-sm text-muted-foreground/70 mt-2 leading-relaxed">
           {capacityConfig[capacity].description}
         </p>
       </div>
       {projects && projects.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-muted-foreground mb-2">Primary focus today</p>
+          <p className="text-sm font-medium text-muted-foreground mb-2">Primary focus today</p>
           <div className="space-y-1.5">
             {projects.slice(0, 4).map((p) => (
               <button
@@ -431,7 +431,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       )}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-medium text-muted-foreground">Anything to note? <span className="font-normal opacity-60">(optional)</span></p>
+          <p className="text-sm font-medium text-muted-foreground">Anything to note? <span className="font-normal opacity-60">(optional)</span></p>
           <VoiceDictationButton
             onTranscript={(text) => setNotes((prev) => (prev ? `${prev} ${text}` : text))}
             disabled={submit.isPending}
@@ -475,7 +475,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What did you work on this morning?</p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What did you work on this morning?</p>
         <Textarea
           value={workedOn}
           onChange={(e) => setWorkedOn(e.target.value)}
@@ -485,7 +485,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
         />
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">Was it on plan?</p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">Was it on plan?</p>
         <div className="flex gap-2">
           {[{ v: true, l: "Yes" }, { v: false, l: "Not really" }].map(({ v, l }) => (
             <button
@@ -500,7 +500,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
         </div>
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">Any interruptions? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">Any interruptions? <span className="font-normal opacity-60">(optional)</span></p>
         <Textarea
           value={interruptions}
           onChange={(e) => setInterruptions(e.target.value)}
@@ -510,7 +510,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
         />
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What's the next move? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What's the next move? <span className="font-normal opacity-60">(optional)</span></p>
         <Textarea
           value={nextMove}
           onChange={(e) => setNextMove(e.target.value)}
@@ -592,7 +592,7 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
     <div className="space-y-4">
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-medium text-muted-foreground">What moved today?</p>
+          <p className="text-sm font-medium text-muted-foreground">What moved today?</p>
           <VoiceDictationButton
             onTranscript={(text) => setWhatMoved((prev) => (prev ? `${prev} ${text}` : text))}
             disabled={submit.isPending}
@@ -601,15 +601,15 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
         <Textarea value={whatMoved} onChange={(e) => setWhatMoved(e.target.value)} placeholder="What actually got done..." className="text-sm resize-none" rows={2} />
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What remains? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What remains? <span className="font-normal opacity-60">(optional)</span></p>
         <Textarea value={whatRemains} onChange={(e) => setWhatRemains(e.target.value)} placeholder="What's carrying over..." className="text-sm resize-none" rows={1} />
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What did you learn or decide? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What did you learn or decide? <span className="font-normal opacity-60">(optional)</span></p>
         <Textarea value={whatLearned} onChange={(e) => setWhatLearned(e.target.value)} placeholder="Insights, decisions, realizations..." className="text-sm resize-none" rows={1} />
       </div>
       <div>
-        <p className="text-xs font-medium text-muted-foreground mb-2">What goes first tomorrow?</p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What goes first tomorrow?</p>
         <Textarea value={tomorrowFirst} onChange={(e) => setTomorrowFirst(e.target.value)} placeholder="The first concrete action tomorrow..." className="text-sm resize-none" rows={1} />
       </div>
       {/* Tomorrow's plan */}
@@ -623,7 +623,7 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       <div>
         <button
           onClick={() => setShowDecision(!showDecision)}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <BookOpen className="w-3.5 h-3.5" />
           {showDecision ? "Hide" : "Log a decision made today"} <span className="opacity-50">(optional)</span>
@@ -637,7 +637,7 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
               className="text-sm resize-none"
               rows={2}
             />
-            <p className="text-[10px] text-muted-foreground/60 mt-1">Decisions are saved to your project log for future reference.</p>
+            <p className="text-sm text-muted-foreground/60 mt-1">Decisions are saved to your project log for future reference.</p>
           </div>
         )}
       </div>
@@ -682,10 +682,10 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
       <div className="p-4 rounded-xl bg-card border border-border space-y-3">
         <div className="flex items-center gap-2">
           <RotateCcw className="w-4 h-4 text-muted-foreground" />
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Re-entry card</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Re-entry card</p>
         </div>
         <p className="text-sm text-foreground">Returning to <span className="font-medium">{projectTitle}</span>?</p>
-        <p className="text-xs text-muted-foreground">Get a quick summary of where you left off before entering Focus Mode.</p>
+        <p className="text-sm text-muted-foreground">Get a quick summary of where you left off before entering Focus Mode.</p>
         <Button size="sm" variant="outline" onClick={handleGenerate} disabled={loading} className="w-full">
           {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-2" /> : null}
           Show re-entry card
@@ -698,12 +698,12 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
     <div className="p-4 rounded-xl bg-card border border-foreground/10 space-y-3">
       <div className="flex items-center gap-2">
         <RotateCcw className="w-4 h-4 text-muted-foreground" />
-        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Re-entry — {projectTitle}</p>
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Re-entry — {projectTitle}</p>
       </div>
       {card.isFirstSession ? (
         <div className="space-y-2">
           <p className="text-sm text-foreground">This is your first session on this project.</p>
-          <p className="text-xs text-muted-foreground">No history yet — the next step below is your starting point.</p>
+          <p className="text-sm text-muted-foreground">No history yet — the next step below is your starting point.</p>
         </div>
       ) : !card.isReturning ? (
         // Recent session (< 24h) — show brief context only
@@ -717,19 +717,19 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
         <>
           {card.stoppingPoint && (
             <div className="border-l-2 border-border pl-3">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-0.5">Last stopping point</p>
+              <p className="text-sm text-muted-foreground uppercase tracking-wide mb-0.5">Last stopping point</p>
               <p className="text-sm text-foreground">{card.stoppingPoint}</p>
             </div>
           )}
           {card.unresolvedDecision && (
             <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-3">
-              <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Open thread</p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Open thread</p>
               <p className="text-sm text-foreground">{card.unresolvedDecision}</p>
             </div>
           )}
           {card.whatWasRuledOut && (
             <div className="border-l-2 border-emerald-300 dark:border-emerald-700 pl-3">
-              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-0.5">Already handled</p>
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-wide mb-0.5">Already handled</p>
               <p className="text-sm text-muted-foreground line-through">{card.whatWasRuledOut}</p>
             </div>
           )}
@@ -737,16 +737,16 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
       )}
       {card.nextPhysicalAction && (
         <div className="p-3 rounded-lg bg-foreground/[0.04] border border-foreground/10">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Next physical action</p>
+          <p className="text-sm text-muted-foreground uppercase tracking-wide mb-1">Next physical action</p>
           <p className="text-sm font-medium text-foreground">{card.nextPhysicalAction}</p>
           {card.needsClarification && (
-            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">⚠ This step may need clarification before starting</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ This step may need clarification before starting</p>
           )}
         </div>
       )}
       {card.whyItMatters && (
         <div className="pt-1 border-t border-border">
-          <p className="text-xs text-muted-foreground/70 italic leading-relaxed">Why this matters: {card.whyItMatters}</p>
+          <p className="text-sm text-muted-foreground/70 italic leading-relaxed">Why this matters: {card.whyItMatters}</p>
         </div>
       )}
       <div className="flex gap-2">
@@ -1103,7 +1103,7 @@ export default function Home() {
             </p>
             {streakData && streakData.streak >= 2 && (
               <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
                 style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.16 58)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
                 title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
               >
@@ -1145,7 +1145,7 @@ export default function Home() {
         <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.68 0.20 270 / 0.28)", background: "linear-gradient(135deg, oklch(0.68 0.20 270 / 0.08) 0%, oklch(0.68 0.20 270 / 0.03) 100%)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Sun className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Morning plan ready</p>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Morning plan ready</p>
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </div>
@@ -1176,7 +1176,7 @@ export default function Home() {
           <div className="p-4 rounded-xl bg-red-50/60 dark:bg-red-900/10 border border-red-200/60 dark:border-red-800/40">
             <div className="flex items-center gap-2 mb-1">
               <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-              <p className="text-[10px] font-semibold text-red-700 dark:text-red-300 uppercase tracking-widest">Blocker detected</p>
+              <p className="text-xs font-semibold text-red-700 dark:text-red-300 uppercase tracking-widest">Blocker detected</p>
             </div>
             <p className="text-sm text-red-700 dark:text-red-300">{blockedProject.title} — {blockedProject.nextStep}</p>
           </div>
@@ -1191,7 +1191,7 @@ export default function Home() {
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-[10px] text-purple-600 dark:text-purple-400 hover:underline font-medium"
+              className="text-xs text-purple-600 dark:text-purple-400 hover:underline font-medium"
             >Open</button>
           </div>
         </div>
@@ -1200,7 +1200,7 @@ export default function Home() {
         <div className="p-4 rounded-xl bg-card border border-border card-shadow">
           <div className="flex items-center gap-2 mb-2">
             <Moon className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Yesterday's brief for today</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{tomorrowBrief}</p>
         </div>
@@ -1214,7 +1214,7 @@ export default function Home() {
             </div>
             <button
               onClick={() => navigate("/settings?tab=ideas")}
-              className="text-[10px] text-amber-600 dark:text-amber-400 hover:underline font-medium"
+              className="text-xs text-amber-600 dark:text-amber-400 hover:underline font-medium"
             >Process now</button>
           </div>
         </div>
@@ -1224,7 +1224,7 @@ export default function Home() {
         <div className="relative p-4 rounded-xl overflow-hidden border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.12) 0%, oklch(0.72 0.17 65 / 0.08) 100%)'}}>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
+            <p className="text-xs font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -1277,7 +1277,7 @@ export default function Home() {
               <p className="text-xs font-semibold text-primary uppercase tracking-widest">Getting started</p>
               <button
                 onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} }}
-                className="text-muted-foreground hover:text-foreground text-[10px] underline underline-offset-2"
+                className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
               >Dismiss</button>
             </div>
             <div className="space-y-2">
@@ -1303,7 +1303,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p className={cn("text-xs font-medium", step.done && "line-through text-muted-foreground")}>{step.label}</p>
-                    {!step.done && <p className="text-[10px] text-muted-foreground mt-0.5">{step.hint}</p>}
+                    {!step.done && <p className="text-sm text-muted-foreground mt-0.5">{step.hint}</p>}
                   </div>
                 </div>
               ))}
@@ -1315,7 +1315,7 @@ export default function Home() {
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Daily Rhythm</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Daily Rhythm</p>
           {gamStatus?.rhythmToday && (
             <RhythmSegments
               morning={gamStatus.rhythmToday.morning}
@@ -1385,7 +1385,7 @@ export default function Home() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <RotateCcw className="w-3.5 h-3.5 text-amber-500" />
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Carried over from yesterday
             </p>
           </div>
@@ -1394,7 +1394,7 @@ export default function Home() {
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-900/10">
                 <Circle className="w-4 h-4 text-amber-400 shrink-0" />
                 <p className="text-sm text-foreground">{taskTitle}</p>
-                <Badge variant="outline" className="ml-auto text-[10px] text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 shrink-0">
+                <Badge variant="outline" className="ml-auto text-xs text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700 shrink-0">
                   carryover
                 </Badge>
               </div>
@@ -1417,7 +1417,7 @@ export default function Home() {
               <p className="text-sm font-medium text-foreground leading-snug">
                 Something is at the door.
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 &ldquo;{mostStuck.title}&rdquo; has been carried {getCarryoverCount(mostStuck)} time{getCarryoverCount(mostStuck) !== 1 ? 's' : ''}. That's not a discipline problem — it's a threshold pattern. Let's find out what's actually in the way.
               </p>
               <div className="mt-2.5 flex items-center gap-3 flex-wrap">
@@ -1437,7 +1437,7 @@ export default function Home() {
                     setFmsProjectId(mostStuck.projectId ?? undefined);
                     setFmsOpen(true);
                   }}
-                  className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Just give me a first move
                 </button>
@@ -1451,16 +1451,16 @@ export default function Home() {
       {tasks.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               Today's tasks
             </p>
-            <span className="text-xs text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
+            <span className="text-sm text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
           </div>
           {/* First-use hold hint */}
           {showHoldHint && visibleTasks.some((t: any) => !t.done) && (
             <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15 mb-1">
-              <p className="text-[11px] text-muted-foreground">Hold the circle to complete · Swipe right to complete</p>
-              <button onClick={dismissHoldHint} className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground shrink-0">Got it</button>
+              <p className="text-sm text-muted-foreground">Hold the circle to complete · Swipe right to complete</p>
+              <button onClick={dismissHoldHint} className="text-sm text-muted-foreground/50 hover:text-muted-foreground shrink-0">Got it</button>
             </div>
           )}
           {allTasksDone ? (
@@ -1521,13 +1521,13 @@ export default function Home() {
                   {getCarryoverCount(task) >= 2 && (
                     <div className="absolute -top-1 -right-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700">
                       <RotateCcw className="w-2.5 h-2.5 text-amber-600 dark:text-amber-400" />
-                      <span className="text-[9px] font-medium text-amber-700 dark:text-amber-300">{getCarryoverCount(task)}×</span>
+                      <span className="text-xs font-medium text-amber-700 dark:text-amber-300">{getCarryoverCount(task)}×</span>
                     </div>
                   )}
                 </div>
               ))}
               {hiddenTaskCount > 0 && (
-                <p className="text-xs text-muted-foreground/50 text-center py-1.5">
+                <p className="text-sm text-muted-foreground/50 text-center py-1.5">
                   {hiddenTaskCount} more task{hiddenTaskCount > 1 ? "s" : ""} held back — {capacityLevel === "low" ? "one thing today" : "focus on these first"}
                 </p>
               )}
@@ -1541,15 +1541,15 @@ export default function Home() {
         <div className="p-4 rounded-xl border space-y-2" style={{ borderColor: "oklch(0.68 0.17 155 / 0.25)", background: "oklch(0.68 0.17 155 / 0.05)" }}>
           <div className="flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-emerald-500" />
-            <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.68 0.17 155 / 0.80)" }}>Next best step</p>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.68 0.17 155 / 0.80)" }}>Next best step</p>
             {nextBestStep.isStale && (
-              <span className="ml-auto text-[9px] text-amber-500/70 font-medium">waiting a while</span>
+              <span className="ml-auto text-xs text-amber-500/70 font-medium">waiting a while</span>
             )}
           </div>
           <p className="text-sm font-medium text-foreground leading-snug">{nextBestStep.title}</p>
-          <p className="text-xs text-muted-foreground leading-relaxed">{nextBestStep.reason}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{nextBestStep.reason}</p>
           {nextBestStep.estimatedMinutes && (
-            <p className="text-[10px] text-muted-foreground/60 flex items-center gap-1">
+            <p className="text-sm text-muted-foreground/60 flex items-center gap-1">
               <Clock className="w-2.5 h-2.5" />{nextBestStep.estimatedMinutes} min
             </p>
           )}
@@ -1586,10 +1586,10 @@ export default function Home() {
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-white" />
               </div>
-              <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
-                className="ml-auto flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 title="Pick a different next step"
               >
                 <Shuffle className="w-3 h-3" />
@@ -1600,7 +1600,7 @@ export default function Home() {
             {/* Pick different step panel */}
             {pickingStep && (
               <div className="space-y-2 pt-1 border-t border-border/50">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Choose a starting point</p>
+                <p className="text-sm text-muted-foreground uppercase tracking-wide">Choose a starting point</p>
                 {activeProjects.filter((p) => p.nextStep).map((p) => (
                   <button
                     key={p.id}
@@ -1620,7 +1620,7 @@ export default function Home() {
                     )}
                   >
                     <span className="font-medium block truncate">{p.nextStep}</span>
-                    <span className="text-[10px] opacity-60">{p.title}</span>
+                    <span className="text-xs opacity-60">{p.title}</span>
                   </button>
                 ))}
                 <div className="flex gap-2 pt-1">
@@ -1665,11 +1665,11 @@ export default function Home() {
               <>
                 <div>
                   <p className="text-sm font-medium text-foreground leading-snug">{topProject.nextStep}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{topProject.title}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{topProject.title}</p>
                 </div>
                 {topProject.contextBreadcrumb && (
                   <div className="border-l-2 border-border pl-3">
-                    <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
+                    <p className="text-sm text-muted-foreground/70 italic leading-relaxed">
                       Last stopping point: {topProject.contextBreadcrumb}
                     </p>
                   </div>
@@ -1680,15 +1680,15 @@ export default function Home() {
                   if (!projectDecision) return null;
                   return (
                     <div className="border-l-2 border-amber-300 dark:border-amber-700 pl-3">
-                      <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Last decision</p>
-                      <p className="text-xs text-foreground/80 leading-snug">{projectDecision.content}</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-0.5">Last decision</p>
+                      <p className="text-sm text-foreground/80 leading-snug">{projectDecision.content}</p>
                     </div>
                   );
                 })()}
                 <div className="flex items-center gap-2 justify-end flex-wrap">
                   <button
                     onClick={() => setReEntryProjectId(reEntryProjectId === topProject.id ? null : topProject.id)}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {reEntryProjectId === topProject.id ? "Hide re-entry card" : "Show re-entry card"}
                   </button>
@@ -1750,8 +1750,8 @@ export default function Home() {
         <div className="p-4 rounded-xl border border-border bg-card space-y-3">
           <div className="flex items-center gap-2">
             <Moon className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Planned for today</p>
-            <span className="ml-auto text-[10px] text-muted-foreground/50">from last night</span>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Planned for today</p>
+            <span className="ml-auto text-sm text-muted-foreground/50">from last night</span>
           </div>
           <ul className="space-y-1.5">
             {tomorrowPlanTasks.map((task: any, i: number) => (
@@ -1761,19 +1761,19 @@ export default function Home() {
                   <p className="text-sm text-foreground leading-snug">{task.title}</p>
                   <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                     {task.energyLevel && task.energyLevel !== 'any' && (
-                      <span className={`text-[10px] font-medium ${
+                      <span className={`text-xs font-medium ${
                         task.energyLevel === 'high' ? 'text-amber-500' : 'text-indigo-400'
                       }`}>
                         {task.energyLevel === 'high' ? '⚡ high energy' : '🌙 low energy'}
                       </span>
                     )}
                     {task.estimatedMinutes && (
-                      <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground/50">
+                      <span className="flex items-center gap-0.5 text-sm text-muted-foreground/50">
                         <Clock className="w-2.5 h-2.5" />{task.estimatedMinutes}m
                       </span>
                     )}
                     {task.notes && (
-                      <span className="text-[10px] text-muted-foreground/50 italic truncate max-w-[160px]">{task.notes}</span>
+                      <span className="text-sm text-muted-foreground/50 italic truncate max-w-[160px]">{task.notes}</span>
                     )}
                   </div>
                 </div>
@@ -1791,12 +1791,12 @@ export default function Home() {
           <a href="/scratch" className="block p-4 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
             <div className="flex items-center gap-2 mb-2">
               <PenLine className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Scratch Pad</p>
-              <span className="ml-auto text-[10px] text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Scratch Pad</p>
+              <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
               {preview.map((note: any) => (
-                <p key={note.id} className="text-xs text-foreground/70 leading-snug line-clamp-2 whitespace-pre-wrap">{note.content}</p>
+                <p key={note.id} className="text-sm text-foreground/70 leading-snug line-clamp-2 whitespace-pre-wrap">{note.content}</p>
               ))}
             </div>
           </a>
@@ -1807,10 +1807,10 @@ export default function Home() {
       <a href="/vault" className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
         <span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Knowledge Graph</p>
-          <p className="text-xs text-foreground/60 mt-0.5">View your vault connections</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Knowledge Graph</p>
+          <p className="text-sm text-foreground/60 mt-0.5">View your vault connections</p>
         </div>
-        <span className="text-[10px] text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
+        <span className="text-sm text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
       </a>
 
       {/* ── Thread Strength + Re-Entry Shortcut */}
@@ -1841,7 +1841,7 @@ export default function Home() {
           className="p-4 rounded-xl border"
           style={{ background: "oklch(0.13 0.015 270 / 0.4)", borderColor: "oklch(1 0 0 / 0.06)" }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-widest mb-2"
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2"
             style={{ color: "oklch(1 0 0 / 0.25)" }}>Evidence of movement</p>
           <MovementFeed events={gamStatus.recentEvents as any} />
         </div>
@@ -1852,14 +1852,14 @@ export default function Home() {
       {/* ── Evidence Log monthly sentence ─────────────────────────────────────────────────────────────────── */}
       {evidenceMonth?.summaryLine && (
         <div className="px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5">
-          <p className="text-[10px] font-semibold text-amber-400/70 uppercase tracking-widest mb-1">Your evidence</p>
-          <p className="text-xs text-foreground/70 italic leading-relaxed">{evidenceMonth.summaryLine}</p>
+          <p className="text-xs font-semibold text-amber-400/70 uppercase tracking-widest mb-1">Your evidence</p>
+          <p className="text-sm text-foreground/70 italic leading-relaxed">{evidenceMonth.summaryLine}</p>
         </div>
       )}
       {/* ── Active Projects Quick Access (right col) ────────────────────────────────────────────────────────── */}
       {activeProjects && activeProjects.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Active projects</p>
+          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Active projects</p>
           <div className="space-y-2">
             {activeProjects.slice(0, capacityLevel === "low" ? 1 : capacityLevel === "partial" ? 2 : 3).map((project) => (
               <button
@@ -1871,7 +1871,7 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-foreground truncate">{project.title}</p>
                     {momentumByProject[project.id] && (
-                      <span className={`text-[9px] font-semibold uppercase tracking-wide shrink-0 ${
+                      <span className={`text-xs font-semibold uppercase tracking-wide shrink-0 ${
                         momentumByProject[project.id] === 'rising' ? 'text-emerald-500' :
                         momentumByProject[project.id] === 'fading' ? 'text-amber-500' :
                         momentumByProject[project.id] === 'stalled' ? 'text-red-400' :
@@ -1885,14 +1885,14 @@ export default function Home() {
                     )}
                   </div>
                   {project.nextStep && (
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">Next: {project.nextStep}</p>
+                    <p className="text-sm text-muted-foreground truncate mt-0.5">Next: {project.nextStep}</p>
                   )}
                 </div>
                 <ChevronDown className="w-4 h-4 text-muted-foreground rotate-[-90deg] shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </button>
             ))}
             {capacityLevel === "low" && activeProjects.length > 1 && (
-              <p className="text-xs text-muted-foreground/60 text-center py-1">
+              <p className="text-sm text-muted-foreground/60 text-center py-1">
                 {activeProjects.length - 1} other project{activeProjects.length - 1 > 1 ? "s" : ""} paused for today
               </p>
             )}
@@ -1915,10 +1915,10 @@ export default function Home() {
               <Sparkles className="w-4 h-4 text-primary" />
             </div>
             <div className="flex-1 min-w-0 pr-4">
-              <p className="text-[10px] font-semibold text-primary/70 uppercase tracking-widest mb-1">Pattern detected</p>
+              <p className="text-xs font-semibold text-primary/70 uppercase tracking-widest mb-1">Pattern detected</p>
               <p className="text-sm font-medium text-foreground mb-1">{clarityRec.modeLabel}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>
-              <p className="text-[10px] text-muted-foreground/50 italic mb-3">{clarityRec.context}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>
+              <p className="text-sm text-muted-foreground/50 italic mb-3">{clarityRec.context}</p>
               <button
                 onClick={() => navigate(`/clarity?mode=${clarityRec.mode}`)}
                 className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
@@ -1933,14 +1933,14 @@ export default function Home() {
       {/* ── Recent Decisions (right col) ────────────────────────────────────────────────────────── */}
       {recentDecisions && recentDecisions.length > 0 && (
         <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent decisions</p>
+          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent decisions</p>
           <div className="space-y-2">
             {recentDecisions.slice(0, 2).map((d: any) => (
               <div key={d.id} className="flex items-start gap-3 p-3 rounded-xl border border-border bg-card">
                 <BookOpen className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-sm text-foreground leading-snug">{d.content}</p>
-                  {d.context && <p className="text-xs text-muted-foreground/60 mt-0.5">{d.context}</p>}
+                  {d.context && <p className="text-sm text-muted-foreground/60 mt-0.5">{d.context}</p>}
                 </div>
               </div>
             ))}
@@ -1971,7 +1971,7 @@ export default function Home() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <p className="text-[10px] text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {isPlanningMode ? "Thinking, mapping, deciding" : "Executing, building, shipping"}
             </p>
           </div>
@@ -2028,7 +2028,7 @@ export default function Home() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground mb-1">Stay in rhythm with reminders</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Continuary can nudge you at morning, midday, and evening — so you never lose the thread of your day.
               </p>
               <div className="flex items-center gap-3 mt-4">
@@ -2041,7 +2041,7 @@ export default function Home() {
                 </Button>
                 <button
                   onClick={handleNotifPromptDefer}
-                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Not now
                 </button>

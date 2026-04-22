@@ -74,7 +74,7 @@ export function RhythmSegments({
             }}
           />
           <span
-            className="text-[10px] font-medium transition-colors duration-500"
+            className="text-sm font-medium transition-colors duration-500"
             style={{ color: done ? "oklch(0.80 0.18 270 / 0.7)" : "oklch(1 0 0 / 0.22)" }}
           >
             {label}
@@ -82,7 +82,7 @@ export function RhythmSegments({
         </div>
       ))}
       {count === 3 && (
-        <span className="text-[10px] ml-1" style={{ color: "oklch(0.80 0.18 270 / 0.55)" }}>
+        <span className="text-xs ml-1" style={{ color: "oklch(0.80 0.18 270 / 0.55)" }}>
           · Full day held
         </span>
       )}
@@ -110,8 +110,8 @@ export function ContinuityRing({ score, state }: { score: number; state: string 
         />
       </svg>
       <div>
-        <p className="text-xs font-semibold" style={{ color: "oklch(0.88 0.06 270)" }}>{state}</p>
-        <p className="text-[10px]" style={{ color: "oklch(1 0 0 / 0.30)" }}>Thread Strength</p>
+        <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.06 270)" }}>{state}</p>
+        <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.30)" }}>Thread Strength</p>
       </div>
     </div>
   );
@@ -156,7 +156,7 @@ export function MovementFeed({ events }: { events: Array<{ id: number; label: st
             <span className="text-xs flex-1 truncate" style={{ color: "oklch(1 0 0 / 0.50)" }}>
               {ev.label ?? ev.eventType.replace(/_/g, " ")}
             </span>
-            <span className="text-[10px] shrink-0" style={{ color: "oklch(1 0 0 / 0.22)" }}>
+            <span className="text-xs shrink-0" style={{ color: "oklch(1 0 0 / 0.22)" }}>
               {timeAgo(ev.createdAt)}
             </span>
           </div>

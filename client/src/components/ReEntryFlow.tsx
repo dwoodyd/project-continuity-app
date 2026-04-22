@@ -123,7 +123,7 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
         ) : (
           // Question steps
           <div className="px-5 pb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-3"
+            <p className="text-sm font-semibold uppercase tracking-widest mb-3"
               style={{ color: "oklch(0.80 0.18 270 / 0.45)" }}>
               Re-entry · {step + 1} of {STEPS.length}
             </p>

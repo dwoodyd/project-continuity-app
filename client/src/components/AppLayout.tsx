@@ -246,7 +246,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               <img src={BRAND_ICON} alt="Continuary" className="w-16 h-16 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
                 <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Lora', serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
-                <p className="text-xs text-muted-foreground tracking-widest uppercase">Command Center</p>
+                <p className="text-sm text-muted-foreground tracking-widest uppercase">Command Center</p>
               </div>
             </div>
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
@@ -280,7 +280,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">{memberCountData?.count ?? 47} builders</span> in early access
                 </p>
               </div>
@@ -297,14 +297,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
               <button
                 onClick={onPreviewIntro}
-                className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
+                className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
               >
                 ✦ Preview intro
               </button>
             </div>
           )}
-          <p className="text-center text-xs text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
-          <p className="text-center text-xs text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
+          <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
+          <p className="text-center text-sm text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
             <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy Policy</a>
             {" · "}
             <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms of Service</a>
