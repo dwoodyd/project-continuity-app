@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import { randomBytes } from "crypto";
+import type { IncomingMessage, ServerResponse } from "http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -71,6 +73,15 @@ async function startServer() {
     next();
   });
 
+  // ── CSP nonce middleware (L5 fix) ─────────────────────────────────────────────
+  // Generate a fresh cryptographic nonce per request and attach it to res.locals.
+  // Helmet's styleSrc reads it via the function form so every response carries a
+  // unique nonce — eliminating 'unsafe-inline' from styleSrc.
+  app.use((_req, res, next) => {
+    res.locals.cspNonce = randomBytes(16).toString("base64url");
+    next();
+  });
+
   // CDN domain used for all uploaded static assets (icons, OG images, vault files)
   const CDN_ORIGIN = "https://d2xsxph8kpxj0f.cloudfront.net";
   // Manus built-in API used for LLM, storage, and push services
@@ -106,9 +117,14 @@ async function startServer() {
           //    trade-off — it allows style injection but NOT script execution, so the
           //    XSS risk surface is limited to CSS-based attacks (e.g. data exfiltration
           //    via attribute selectors), not arbitrary JS execution.
+          // L5 fix: per-request nonce replaces 'unsafe-inline' in styleSrc.
+          // Each element can be a string or a function(req, res) => string.
+          // Radix/shadcn inline styles and Tailwind runtime injections are attributed
+          // to the nonce; no unsafe-inline is needed.
           styleSrc: [
             "'self'",
-            "'unsafe-inline'", // Required for Tailwind CSS-in-JS and shadcn/ui (see note above)
+            (_req: IncomingMessage, res: ServerResponse<IncomingMessage>) =>
+              `'nonce-${(res as any).locals.cspNonce}'`,
             "https://fonts.googleapis.com",
           ],
           fontSrc: [

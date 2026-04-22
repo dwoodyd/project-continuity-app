@@ -126,3 +126,69 @@ No action required for production security. The `recharts`/`lodash` finding is w
 - **L6** OAuth `state` CSRF — accepted risk; upstream Manus OAuth server enforces binding.
 - **L7** `notifications.updateSchedule` `timezone` — `.max(64)` added.
 - **L8** OAuth callback error log — truncated to 2,000 chars.
+
+---
+
+## 2026-04-22 — Security Follow-on Sprint
+
+### L5 — CSP nonce migration (CLOSED)
+
+`server/_core/index.ts` now generates a fresh 16-byte cryptographic nonce per request via `crypto.randomBytes` and attaches it to `res.locals.cspNonce`. Helmet's `styleSrc` directive uses the Helmet v8 per-item function API to embed `'nonce-<value>'` in every `Content-Security-Policy` response header. `'unsafe-inline'` has been removed from `styleSrc` in all environments. Verified live: `style-src 'self' 'nonce-<random>' https://fonts.googleapis.com` is present in response headers.
+
+### Push subscription endpoint allowlist (CLOSED — previously implemented)
+
+`notifications.registerPush` rejects endpoints whose hostname is not in the `ALLOWED_PUSH_ENDPOINT_HOSTS` Set (FCM, Mozilla, Apple, Windows). Confirmed in code review; no additional changes needed.
+
+### Redis-backed rate limiter (DEFERRED — no Redis instance provisioned)
+
+The in-memory `Map`-based store in `server/_core/rateLimiter.ts` is safe for the current single-instance deployment (`SINGLE_INSTANCE_OK=1`). When scaling out, apply the following migration:
+
+**Step 1 — Install ioredis:**
+```bash
+pnpm add ioredis
+```
+
+**Step 2 — Replace `server/_core/rateLimiter.ts` with:**
+```ts
+import { TRPCError } from "@trpc/server";
+import Redis from "ioredis";
+
+const redis = new Redis(process.env.REDIS_URL!);
+
+const WINDOW_MS = 60_000;
+const MAX_CALLS = 10;
+
+export async function checkLLMRateLimit(userId: string | number): Promise<void> {
+  const key = `llm-rl:${userId}`;
+  const now = Date.now();
+  const windowStart = now - WINDOW_MS;
+
+  const pipe = redis.pipeline();
+  pipe.zremrangebyscore(key, "-inf", windowStart); // evict old entries
+  pipe.zadd(key, now, `${now}-${Math.random()}`);  // record this call
+  pipe.zcard(key);                                  // count in window
+  pipe.pexpire(key, WINDOW_MS);                     // auto-expire key
+  const results = await pipe.exec();
+
+  const count = (results?.[2]?.[1] as number) ?? 0;
+  if (count > MAX_CALLS) {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `You've made ${MAX_CALLS} AI requests in the last minute. Please wait a moment before trying again.`,
+    });
+  }
+}
+
+export async function invokeLLMForUser(
+  userId: string | number,
+  params: Parameters<typeof import("./llm").invokeLLM>[0]
+): ReturnType<typeof import("./llm").invokeLLM> {
+  await checkLLMRateLimit(userId);
+  const { invokeLLM } = await import("./llm");
+  return invokeLLM(params);
+}
+```
+
+**Step 3 — Add `REDIS_URL` secret via `webdev_request_secrets`.**
+
+**Step 4 — Remove the `SINGLE_INSTANCE_OK` startup assertion from `server/_core/index.ts`.**

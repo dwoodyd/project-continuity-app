@@ -1177,3 +1177,8 @@
 - [x] H4 addendum: Add invokeLLMForUser wrapper in rateLimiter.ts; update evidence.generateIdentitySentence + checkIns.submitEvening call sites
 - [x] M5 addendum: Add legacy localStorage cleanup useEffect in useAuth.ts
 - [x] Set SINGLE_INSTANCE_OK=1 env secret in production
+
+## Security Follow-on Sprint
+- [~] Redis-backed rate limiter (ioredis INCR/EXPIRE) — deferred; migration diff documented in SECURITY_AUDIT.md
+- [x] Push subscription endpoint allowlist in notifications.subscribe (was already implemented)
+- [x] CSP nonce migration: per-request nonce replacing unsafe-inline in styleSrc
