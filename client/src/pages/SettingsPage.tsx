@@ -1053,6 +1053,10 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-foreground">What's New</p>
             <div className="space-y-2">
               {[
+                { v: "v1.7", note: "Google Calendar integration — Weekly Compass reads your real schedule" },
+                { v: "v1.6", note: "Whisper voice-to-text in Clarity Engine, 52-week activity heatmap" },
+                { v: "v1.5", note: "⌘K Command Palette, Pricing page, GlossaryTerm tooltips, Amnesty auto-dissolve" },
+                { v: "v1.4", note: "Replay Intro fix, sidebar micro-interactions, PH banner redesign" },
                 { v: "v1.3", note: "Onboarding v3 — cinematic word reveals, ambient glow, swipe navigation" },
                 { v: "v1.2", note: "Evidence Log, streak badge, cold project threshold setting" },
                 { v: "v1.1", note: "Weekly Compass, Knowledge Vault, Pro upgrade via PayPal" },
