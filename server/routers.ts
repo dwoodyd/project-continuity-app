@@ -23,6 +23,7 @@ import { gamificationRouter } from "./routers/gamification";
 import { paypalRouter } from "./routers/paypal";
 import { betaRouter } from "./routers/beta";
 import { scratchPadRouter } from "./routers/scratchPad";
+import { waitlistRouter } from "./routers/waitlist";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -87,6 +88,7 @@ export const appRouter = router({
   paypal: paypalRouter,
   beta: betaRouter,
   scratchPad: scratchPadRouter,
+  waitlist: waitlistRouter,
 });
 
 export type AppRouter = typeof appRouter;

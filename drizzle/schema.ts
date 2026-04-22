@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   int,
   json,
@@ -674,3 +675,14 @@ export const scratchNotes = mysqlTable("scratch_notes", {
 });
 export type ScratchNote = typeof scratchNotes.$inferSelect;
 export type InsertScratchNote = typeof scratchNotes.$inferInsert;
+
+// ─── Waitlist Requests ────────────────────────────────────────────────────────
+export const waitlistRequests = mysqlTable("waitlist_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  name: varchar("name", { length: 255 }),
+  reason: text("reason"),
+  createdAt: bigint("created_at", { mode: "number" }).notNull(),
+});
+export type WaitlistRequest = typeof waitlistRequests.$inferSelect;
+export type InsertWaitlistRequest = typeof waitlistRequests.$inferInsert;

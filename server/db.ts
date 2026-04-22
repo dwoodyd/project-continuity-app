@@ -70,6 +70,7 @@ import {
   scratchNotes,
   ScratchNote,
   InsertScratchNote,
+  waitlistRequests,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1187,4 +1188,22 @@ export async function setColourScratchNote(id: number, userId: number, colour: s
   const db = await getDb();
   if (!db) return;
   await db.update(scratchNotes).set({ colour }).where(and(eq(scratchNotes.id, id), eq(scratchNotes.userId, userId)));
+}
+
+// ─── Waitlist ─────────────────────────────────────────────────────────────────
+export async function createWaitlistRequest(data: { email: string; name?: string; reason?: string }) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(waitlistRequests).values({
+    email: data.email,
+    name: data.name ?? null,
+    reason: data.reason ?? null,
+    createdAt: Date.now(),
+  });
+}
+
+export async function getWaitlistRequests() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(waitlistRequests).orderBy(desc(waitlistRequests.createdAt));
 }
