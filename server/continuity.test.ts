@@ -45,6 +45,8 @@ vi.mock("./db", () => ({
   createSourceItem: vi.fn().mockResolvedValue(55),
   setColourScratchNote: vi.fn().mockResolvedValue(undefined),
   getDailyPlan: vi.fn().mockResolvedValue(null),
+  createWaitlistRequest: vi.fn().mockResolvedValue(1),
+  getWaitlistRequests: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("./storage", () => ({
@@ -266,6 +268,25 @@ describe("dailyPlan", () => {
     });
     // getDailyPlan is mocked to return null, so success should be false
     expect(result).toEqual({ success: false });
+  });
+});
+
+// ─── Waitlist tests ───────────────────────────────────────────────────────────
+describe("waitlist", () => {
+  it("join returns success:true with valid email", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    const result = await caller.waitlist.join({ email: "test@example.com", name: "Test User" });
+    expect(result).toEqual({ success: true });
+  });
+
+  it("join throws on invalid email", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    await expect(caller.waitlist.join({ email: "not-an-email" })).rejects.toThrow();
+  });
+
+  it("list throws FORBIDDEN for non-admin user", async () => {
+    const caller = appRouter.createCaller(makeCtx());
+    await expect(caller.waitlist.list()).rejects.toThrow();
   });
 });
 

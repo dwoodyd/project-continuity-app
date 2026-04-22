@@ -1142,8 +1142,8 @@
 - [x] Scratch Pad widget on Today dashboard (pinned/recent note preview)
 
 ## Public Welcome / Onboarding Experience (Apr 2026)
-- [ ] Add waitlist_requests table to schema + migration
-- [ ] Add submitWaitlistRequest tRPC public procedure + notifyOwner on submission
-- [ ] Build WelcomePage with full interactive onboarding narrative and Wren mascot
-- [ ] Register /welcome public route in App.tsx (no auth required)
-- [ ] Write vitest tests for waitlist procedure
+- [x] Add waitlist_requests table to schema + migration
+- [x] Add submitWaitlistRequest tRPC public procedure + notifyOwner on submission
+- [x] Build TourPage (/tour) with full interactive onboarding narrative and Wren mascot
+- [x] Register /tour public route in App.tsx (no auth required)
+- [x] Write vitest tests for waitlist procedure
