@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useIntro } from "@/contexts/IntroContext";
 import { useNotifications } from "@/hooks/useNotifications";
 import { format } from "date-fns";
 import { PushPermissionInterstitial } from "@/components/PushPermissionInterstitial";
@@ -215,6 +216,7 @@ export default function SettingsPage() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { theme, toggleTheme } = useTheme();
+  const { replayIntro } = useIntro();
   const { permission, isSupported, requestPermission, scheduleCheckInNotifications } = useNotifications();
   const [showPushInterstitial, setShowPushInterstitial] = useState(false);
   const updateSchedule = trpc.notifications.updateSchedule.useMutation();
@@ -438,19 +440,16 @@ export default function SettingsPage() {
                   Switch to {theme === "dark" ? "light" : "dark"}
                 </Button>
               </div>
-              {/* Splash Replay row */}
+              {/* Onboarding Replay row */}
               <div className="flex items-center justify-between py-3 border-t border-border">
                 <div className="flex items-center gap-3">
                   <Play className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Replay Intro</p>
-                    <p className="text-xs text-muted-foreground">Watch the opening animation again</p>
+                    <p className="text-sm text-muted-foreground">Watch the full onboarding intro again</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => {
-                  sessionStorage.removeItem("splashShown");
-                  window.location.reload();
-                }}>
+                <Button variant="outline" size="sm" onClick={() => replayIntro()}>
                   Replay
                 </Button>
               </div>

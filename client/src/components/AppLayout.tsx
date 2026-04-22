@@ -38,6 +38,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
+import { IntroContext } from "../contexts/IntroContext";
 import AmnestyScreen from "./AmnestyScreen";
 import { FeedbackPanel } from "./FeedbackPanel";
 import AiConsentModal from "./AiConsentModal";
@@ -514,6 +515,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   // ── COMPACT / MOBILE LAYOUT ─────────────────────────────────────────────────
   return (
+    <IntroContext.Provider value={{ replayIntro: onPreviewIntro ?? (() => {}) }}>
     <div
       className="h-screen w-full flex flex-col items-center overflow-hidden"
       style={{ background: "var(--sidebar)" }}
@@ -688,5 +690,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
       )}
     </div>
+    </IntroContext.Provider>
   );
 }
