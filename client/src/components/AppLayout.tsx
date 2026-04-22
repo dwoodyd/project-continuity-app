@@ -45,6 +45,7 @@ import AiConsentModal from "./AiConsentModal";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { CommandPaletteTrigger } from "./CommandPalette";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
 
@@ -67,6 +68,7 @@ const ALL_NAV_ITEMS = [
   { href: "/intelligence", label: "Intelligence",    icon: Lightbulb,     section: "secondary" },
   { href: "/settings",     label: "Settings",        icon: Settings,      section: "secondary" },
   { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
+  { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
 ] as const;
 
 // ── Mobile bottom-tab items (5 visible) ──────────────────────────────────────
@@ -350,6 +352,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             )}
           </div>
 
+          {/* ⌘K Command palette trigger */}
+          <div className="px-2 pt-2 pb-1">
+            <CommandPaletteTrigger />
+          </div>
           {/* Nav */}
           <nav className="flex-1 px-2 py-3 space-y-0.5">
             <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Command</p>

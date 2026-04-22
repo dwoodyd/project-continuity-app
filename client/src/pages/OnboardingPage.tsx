@@ -112,6 +112,7 @@ export default function OnboardingPage() {
   };
   const createProject = trpc.projects.create.useMutation();
   const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();
+  const submitMorning = trpc.checkIns.submitMorning.useMutation();
 
   const checkInviteCode = async () => {
     const code = inviteCode.trim().toUpperCase();
@@ -179,6 +180,22 @@ export default function OnboardingPage() {
           setGeneratedNextStep(result.nextStep);
         } catch {
           // non-fatal — proceed without generated step
+        }
+      }
+      // Seed today's daily plan so the Command Center shows the user's own project
+      // on first landing — not a stale pre-populated task (biggest first-run trust issue).
+      if (createdProjectId) {
+        try {
+          const seedNotes = projectNext?.trim() || generatedNextStep?.trim()
+            || (projectTitle.trim() ? `Starting project: ${projectTitle}` : undefined);
+          await submitMorning.mutateAsync({
+            capacityLevel: "partial",
+            primaryProjectId: createdProjectId,
+            userNotes: seedNotes ?? undefined,
+          });
+          await utils.dailyPlan.getToday.invalidate();
+        } catch {
+          // non-fatal — user can run a morning check-in from the Command Center
         }
       }
       setStep(4); // done screen (was 3, shifted by invite gate step)

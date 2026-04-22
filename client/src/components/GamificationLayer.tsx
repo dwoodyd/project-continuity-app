@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import { X, Flame, Zap, BookOpen, CheckCircle2, RotateCcw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { GlossaryTerm } from "@/components/TermTooltip";
 
 // ─── Return Marker ────────────────────────────────────────────────────────────
 export function ReturnMarker({ message, onDismiss }: { message: string; onDismiss: () => void }) {
@@ -111,7 +112,7 @@ export function ContinuityRing({ score, state }: { score: number; state: string 
       </svg>
       <div>
         <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.06 270)" }}>{state}</p>
-        <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.30)" }}>Thread Strength</p>
+        <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.30)" }}><GlossaryTerm name="threadStrength" /></p>
       </div>
     </div>
   );

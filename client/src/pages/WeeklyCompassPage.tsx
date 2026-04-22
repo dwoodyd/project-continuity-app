@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
+import { GlossaryTerm } from "@/components/TermTooltip";
 
 export default function WeeklyCompassPage() {
   const [, navigate] = useLocation();
@@ -131,7 +132,7 @@ export default function WeeklyCompassPage() {
               Week of {format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}
             </span>
           </div>
-          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Compass</h1>
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight"><GlossaryTerm name="weeklyCompass" /></h1>
           <p className="text-sm text-muted-foreground mt-1">
             One clear direction for the week. Not a schedule — a compass.
           </p>

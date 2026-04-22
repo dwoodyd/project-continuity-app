@@ -30,7 +30,7 @@ import {
   Save,
   Search,
 } from "lucide-react";
-
+import { GlossaryTerm } from "@/components/TermTooltip";
 
 type Mode =
   | "overwhelm"
@@ -454,7 +454,7 @@ function ResultView({
       {session.signalLine && (
         <div className="bg-gradient-to-r from-indigo-900/40 to-indigo-800/20 border border-indigo-500/30 rounded-xl p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">
-            Signal Line
+            <GlossaryTerm name="signalLine" />
           </p>
           <p className="text-lg font-brand font-medium text-foreground italic leading-relaxed">
             "{session.signalLine}"

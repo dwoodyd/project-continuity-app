@@ -54,6 +54,7 @@ import {
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
+import { GlossaryTerm } from "@/components/TermTooltip";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -1084,9 +1085,39 @@ export default function Home() {
     <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
       {/* ── Product Hunt launch banner ────────────────────────────────────── */}
       {showPhBanner && (
-        <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl text-xs" style={{ background: "rgba(246,200,120,0.08)", border: "1px solid rgba(246,200,120,0.2)" }}>
-          <span className="text-amber-300/90">🚀 We're live on <a href="https://www.producthunt.com" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Product Hunt</a> today — support us with an upvote!</span>
-          <button onClick={() => { setPhBannerDismissed(true); localStorage.setItem("ph_banner_dismissed", "1"); }} className="text-amber-300/50 hover:text-amber-300 transition-colors shrink-0">
+        <div
+          className="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl"
+          style={{
+            background: "linear-gradient(135deg, rgba(160,120,50,0.07) 0%, rgba(100,75,25,0.04) 100%)",
+            border: "1px solid rgba(160,120,50,0.16)",
+          }}
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <span
+              className="shrink-0 w-0.5 h-7 rounded-full"
+              style={{ background: "linear-gradient(180deg, rgba(160,120,50,0.65) 0%, rgba(160,120,50,0.1) 100%)" }}
+            />
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(190,155,80,0.80)", letterSpacing: "0.015em", fontWeight: 400 }}>
+              Continuary is live on{" "}
+              <a
+                href="https://www.producthunt.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "rgba(200,165,90,0.95)", textDecoration: "underline", textUnderlineOffset: "3px", textDecorationColor: "rgba(160,120,50,0.35)", fontWeight: 500 }}
+              >
+                Product Hunt
+              </a>
+              {" "}— an upvote means a great deal.
+            </p>
+          </div>
+          <button
+            onClick={() => { setPhBannerDismissed(true); localStorage.setItem("ph_banner_dismissed", "1"); }}
+            className="shrink-0 transition-opacity"
+            style={{ color: "rgba(160,120,50,0.35)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "rgba(160,120,50,0.65)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(160,120,50,0.35)")}
+            aria-label="Dismiss"
+          >
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -1270,7 +1301,10 @@ export default function Home() {
         const allDone = hasCheckin && hasProject && hasIdea;
         // Only show if at least one step is incomplete and user hasn't dismissed
         const dismissed = (() => { try { return !!localStorage.getItem('continuary_onboarding_done'); } catch { return false; } })();
-        if (dismissed || allDone) return null;
+        // Hide for returning users who already have projects (prevents "Add your first project"
+        // showing with 3 projects already in the system — biggest trust-breaker for new users).
+        const isReturningUser = profile?.onboardingCompleted === true && hasProject;
+        if (dismissed || allDone || isReturningUser) return null;
         return (
           <div className="p-4 rounded-xl border" style={{ background: "oklch(0.13 0.025 270 / 0.6)", borderColor: "oklch(0.75 0.15 270 / 0.12)" }}>
             <div className="flex items-center justify-between mb-3">
@@ -1954,7 +1988,11 @@ export default function Home() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <p className="text-xs font-semibold text-foreground">
-                {isPlanningMode ? "⚡ Planning Mode" : "🎯 Doing Mode"}
+                {isPlanningMode ? (
+                  <span>⚡ <GlossaryTerm name="gatheringMode" /></span>
+                ) : (
+                  <span>🎯 <GlossaryTerm name="doingMode" /></span>
+                )}
               </p>
               <TooltipProvider>
                 <Tooltip>

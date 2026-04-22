@@ -1223,3 +1223,9 @@
 - [x] Bump sidebar nav labels, section labels, and body copy sizes
 - [x] Increase sidebar footer button text sizes
 - [x] Verified: 351 tests passing, 0 TS errors
+## A+ Polish Sprint
+- [ ] Redesign Product Hunt banner: muted gold, no rocket emoji, sophisticated typography
+- [ ] Sidebar hover micro-interactions: amber accent line slides to active tab, soft glow on hover
+- [ ] Auto-dissolve amnesty screen: 3-4s linger then slow fade into Today dashboard (keep "take me in" link)
+- [ ] Whisper API voice-to-text in Clarity Engine Brain Dump textarea (not browser dictation)
+- [ ] Luxury heatmap: GitHub-style contribution grid in gold/charcoal for Intelligence + Evidence Log

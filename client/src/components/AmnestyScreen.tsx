@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -21,6 +21,30 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
   const [isGenerating, setIsGenerating] = useState(false);
   const [parkedIds, setParkedIds] = useState<Set<number>>(new Set());
 
+  // Auto-dissolve: linger 3.5 s on the entry screen, then slowly fade out into the dashboard
+  const [autoFading, setAutoFading] = useState(false);
+  const autoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (step !== "entry") return;
+    autoTimer.current = setTimeout(() => {
+      setAutoFading(true);
+      fadeTimer.current = setTimeout(() => onComplete(), 1400);
+    }, 3500);
+    return () => {
+      if (autoTimer.current) clearTimeout(autoTimer.current);
+      if (fadeTimer.current) clearTimeout(fadeTimer.current);
+    };
+  }, [step, onComplete]);
+
+  // Cancel auto-dissolve if the user interacts
+  const cancelAuto = () => {
+    if (autoTimer.current) clearTimeout(autoTimer.current);
+    if (fadeTimer.current) clearTimeout(fadeTimer.current);
+    setAutoFading(false);
+  };
+
   const gapDays = Math.floor(gapHours / 24);
   const gapLabel = gapDays === 1 ? "a day" : gapDays < 7 ? `${gapDays} days` : "a while";
 
@@ -30,7 +54,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
   const addToVault = trpc.vault.addPaste.useMutation();
   const utils = trpc.useUtils();
 
-  const handleProceed = () => setStep("question");
+  const handleProceed = () => { cancelAuto(); setStep("question"); };
 
   const handleParkProject = async (project: {
     id: number;
@@ -90,7 +114,13 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6">
+    <div
+      className="fixed inset-0 z-50 bg-background flex items-center justify-center p-6"
+      style={{
+        transition: "opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1)",
+        opacity: autoFading ? 0 : 1,
+      }}
+    >
       <div className="w-full max-w-md">
 
         {/* ── Step 1: Entry ──────────────────────────────────────────────── */}
@@ -118,7 +148,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
               <button
-                onClick={onComplete}
+                onClick={() => { cancelAuto(); onComplete(); }}
                 className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
               >
                 I know where I am — take me in

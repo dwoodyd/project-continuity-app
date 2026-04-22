@@ -350,6 +350,40 @@
   .btn-press { transition: transform 100ms ease, opacity 100ms ease; }
   .btn-press:active { transform: scale(0.97); opacity: 0.9; }
 
+  /* ── Sidebar nav micro-interactions ── */
+  /* Amber accent line that slides to the active item */
+  [data-slot="sidebar-menu-button"] {
+    position: relative;
+    transition: background 280ms ease, color 200ms ease, box-shadow 280ms ease;
+  }
+  [data-slot="sidebar-menu-button"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scaleY(0);
+    width: 2px;
+    height: 60%;
+    border-radius: 0 2px 2px 0;
+    background: linear-gradient(180deg, rgba(180,140,60,0.9) 0%, rgba(180,140,60,0.3) 100%);
+    transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 250ms ease;
+    opacity: 0;
+  }
+  [data-slot="sidebar-menu-button"]:hover::before {
+    transform: translateY(-50%) scaleY(0.55);
+    opacity: 0.45;
+  }
+  [data-slot="sidebar-menu-button"][data-active="true"]::before {
+    transform: translateY(-50%) scaleY(1);
+    opacity: 1;
+  }
+  [data-slot="sidebar-menu-button"]:hover:not([data-active="true"]) {
+    box-shadow: inset 0 0 0 1px rgba(180,140,60,0.07);
+  }
+  [data-slot="sidebar-menu-button"][data-active="true"] {
+    box-shadow: inset 0 0 0 1px rgba(180,140,60,0.13), 0 0 14px rgba(180,140,60,0.05);
+  }
+
   /* ── Divider with label ── */
   .divider-label {
     display: flex; align-items: center; gap: 0.75rem;
