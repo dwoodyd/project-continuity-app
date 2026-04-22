@@ -102,6 +102,8 @@ async function startServer() {
 
   // CDN domain used for all uploaded static assets (icons, OG images, vault files)
   const CDN_ORIGIN = "https://d2xsxph8kpxj0f.cloudfront.net";
+  // Secondary CDN domain for webdev-static-assets (Wren art, uploaded media via manus-upload-file --webdev)
+  const CDN_STATIC_ORIGIN = "https://d36hbw14aib5lz.cloudfront.net";
   // Manus built-in API used for LLM, storage, and push services
   const FORGE_API_ORIGIN = process.env.BUILT_IN_FORGE_API_URL
     ? new URL(process.env.BUILT_IN_FORGE_API_URL).origin
@@ -155,11 +157,13 @@ async function startServer() {
             "data:",           // Inline base64 images (canvas exports, avatars)
             "blob:",           // Canvas-generated share card blobs
             CDN_ORIGIN,
+            CDN_STATIC_ORIGIN, // webdev-static-assets (Wren art, uploaded media)
           ],
           mediaSrc: [
             "'self'",
             "blob:",           // Audio blobs from voice recording
             CDN_ORIGIN,
+            CDN_STATIC_ORIGIN, // webdev-static-assets
           ],
           connectSrc: [
             "'self'",

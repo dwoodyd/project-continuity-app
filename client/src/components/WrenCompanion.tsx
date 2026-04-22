@@ -1,26 +1,29 @@
 /**
  * WrenCompanion — Continuary's animated bird mascot.
  *
- * States:
- *   neutral    → gentle vertical bob + breathing scale
- *   guiding    → bob + subtle lean forward (translateX)
- *   celebrating→ excited bounce + faster bob
- *   resting    → very slow breathing, minimal bob
- *   nudging    → small side-to-side wiggle + bob
+ * States mapped to real artwork:
+ *   neutral    → wren_neutral.svg  (bird in arch, holding thread, calm)
+ *   guiding    → wren_states.webp  left panel  — Onboarding / Guiding pose
+ *   celebrating→ wren_states.webp  right panel — Celebration / Milestone pose
+ *   resting    → wren_states_2.webp left panel  — Evening / Wind-down pose
+ *   nudging    → wren_states_2.webp right panel — Nudge / Prompt pose
  *
  * Assets (CDN):
- *   neutral SVG  → /manus-storage/wren_neutral_88afb376.svg
- *   states webp  → /manus-storage/wren_states_49729c5a.webp
- *   states2 webp → /manus-storage/wren_states_2_80de5f08.webp
+ *   neutral SVG  → /manus-storage/wren_neutral_f320ed04.svg
+ *   states webp  → /manus-storage/wren_states_58a50e1a.webp   (3 panels: L=guiding, M=returning, R=celebrating)
+ *   states2 webp → /manus-storage/wren_states_2_849b6ba6.webp (2 panels: L=resting, R=nudging)
+ *
+ * Sprite sheet approach: for multi-panel webp files we use background-image with
+ * background-size/position to crop to the correct panel, avoiding showing the full sheet.
  */
 
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 // ── CDN asset paths ──────────────────────────────────────────────────────────
-const WREN_NEUTRAL_SVG = "/manus-storage/wren_neutral_88afb376.svg";
-const WREN_STATES_WEBP = "/manus-storage/wren_states_49729c5a.webp";
-const WREN_STATES2_WEBP = "/manus-storage/wren_states_2_80de5f08.webp";
+const WREN_NEUTRAL_SVG = "/manus-storage/wren_neutral_f320ed04.svg";
+const WREN_STATES_WEBP = "/manus-storage/wren_states_58a50e1a.webp";
+const WREN_STATES2_WEBP = "/manus-storage/wren_states_2_849b6ba6.webp";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type WrenState = "neutral" | "guiding" | "celebrating" | "resting" | "nudging";
@@ -51,7 +54,14 @@ const STATE_CONFIG: Record<
     wiggle: boolean;
     bounce: boolean;
     leanForward: boolean;
+    /** CDN URL of the image asset */
     asset: string;
+    /**
+     * If set, render as background-image crop instead of <img>.
+     * backgroundSize: CSS background-size (e.g. "300% 100%" for 3-panel sheet)
+     * backgroundPosition: CSS background-position (e.g. "0% center" for left panel)
+     */
+    bgCrop?: { backgroundSize: string; backgroundPosition: string };
   }
 > = {
   neutral: {
@@ -63,8 +73,10 @@ const STATE_CONFIG: Record<
     bounce: false,
     leanForward: false,
     asset: WREN_NEUTRAL_SVG,
+    // SVG — no crop needed, use <img> directly
   },
   guiding: {
+    // wren_states.webp — left panel (Onboarding / Guiding)
     bobDuration: "1.8s",
     bobAmount: "6px",
     breathDuration: "2.6s",
@@ -73,8 +85,10 @@ const STATE_CONFIG: Record<
     bounce: false,
     leanForward: true,
     asset: WREN_STATES_WEBP,
+    bgCrop: { backgroundSize: "300% 100%", backgroundPosition: "0% center" },
   },
   celebrating: {
+    // wren_states.webp — right panel (Celebration / Milestone)
     bobDuration: "0.7s",
     bobAmount: "10px",
     breathDuration: "1.2s",
@@ -83,8 +97,10 @@ const STATE_CONFIG: Record<
     bounce: true,
     leanForward: false,
     asset: WREN_STATES_WEBP,
+    bgCrop: { backgroundSize: "300% 100%", backgroundPosition: "100% center" },
   },
   resting: {
+    // wren_states_2.webp — left panel (Evening / Wind-down)
     bobDuration: "4.0s",
     bobAmount: "3px",
     breathDuration: "5.0s",
@@ -93,8 +109,10 @@ const STATE_CONFIG: Record<
     bounce: false,
     leanForward: false,
     asset: WREN_STATES2_WEBP,
+    bgCrop: { backgroundSize: "200% 100%", backgroundPosition: "0% center" },
   },
   nudging: {
+    // wren_states_2.webp — right panel (Nudge / Prompt)
     bobDuration: "2.0s",
     bobAmount: "5px",
     breathDuration: "3.0s",
@@ -103,6 +121,7 @@ const STATE_CONFIG: Record<
     bounce: false,
     leanForward: false,
     asset: WREN_STATES2_WEBP,
+    bgCrop: { backgroundSize: "200% 100%", backgroundPosition: "100% center" },
   },
 };
 
@@ -183,7 +202,7 @@ export function WrenCompanion({
     return () => { if (bubbleTimer.current) clearTimeout(bubbleTimer.current); };
   }, [message]);
 
-  // ── Determine animation style ──────────────────────────────────────────────
+  // ── Determine animation ──────────────────────────────────────────────────
   const bobAnim = cfg.bounce
     ? `wren-bounce ${cfg.bobDuration} ease-in-out infinite`
     : `wren-bob ${cfg.bobDuration} ease-in-out infinite`;
@@ -192,42 +211,60 @@ export function WrenCompanion({
     ? "none"
     : `wren-breathe ${cfg.breathDuration} ease-in-out infinite`;
 
-  const overlayAnim = cfg.wiggle
+  const extraAnim = cfg.wiggle
     ? `wren-wiggle 2.2s ease-in-out infinite`
     : cfg.leanForward
     ? `wren-lean 2.0s ease-in-out infinite`
     : "none";
 
-  const imgStyle: React.CSSProperties = {
+  // Combined animation string
+  const animationValue = extraAnim !== "none"
+    ? `${bobAnim}, ${breathAnim}, ${extraAnim}`
+    : `${bobAnim}, ${breathAnim}`;
+
+  // ── Base element style ───────────────────────────────────────────────────
+  const baseStyle: React.CSSProperties = {
     width: size,
     height: size,
-    objectFit: "contain",
     display: "block",
-    // CSS custom props for keyframe amounts
     ["--wren-bob" as string]: `-${cfg.bobAmount}`,
     ["--wren-breath" as string]: cfg.breathAmount,
-    animation: `${bobAnim}, ${breathAnim}`,
+    animation: animationValue,
     cursor: onClick ? "pointer" : "default",
     userSelect: "none",
     WebkitUserSelect: "none",
+    flexShrink: 0,
   };
 
-  const overlayStyle: React.CSSProperties =
-    overlayAnim !== "none"
-      ? {
-          position: "absolute",
-          inset: 0,
-          animation: overlayAnim,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }
-      : {};
+  // ── Render: background-image crop for sprite sheets, <img> for SVG ───────
+  const birdElement = cfg.bgCrop ? (
+    <div
+      style={{
+        ...baseStyle,
+        backgroundImage: `url(${cfg.asset})`,
+        backgroundSize: cfg.bgCrop.backgroundSize,
+        backgroundPosition: cfg.bgCrop.backgroundPosition,
+        backgroundRepeat: "no-repeat",
+        borderRadius: 4,
+      }}
+      role="img"
+      aria-label="Wren"
+      onClick={onClick}
+    />
+  ) : (
+    <img
+      src={cfg.asset}
+      alt="Wren"
+      draggable={false}
+      style={{ ...baseStyle, objectFit: "contain" }}
+      onClick={onClick}
+    />
+  );
 
   return (
     <div
       className={cn("relative inline-flex items-end justify-center", className)}
-      style={{ width: size, height: size + (message ? 0 : 0) }}
+      style={{ width: size, height: size }}
     >
       {/* Glow ring */}
       {glow && (
@@ -244,27 +281,8 @@ export function WrenCompanion({
         />
       )}
 
-      {/* Main bird image */}
-      {overlayAnim !== "none" ? (
-        <div style={{ position: "relative", width: size, height: size }}>
-          <img
-            src={cfg.asset}
-            alt="Wren"
-            draggable={false}
-            style={imgStyle}
-            onClick={onClick}
-          />
-          <div style={overlayStyle} />
-        </div>
-      ) : (
-        <img
-          src={cfg.asset}
-          alt="Wren"
-          draggable={false}
-          style={imgStyle}
-          onClick={onClick}
-        />
-      )}
+      {/* Main bird */}
+      {birdElement}
 
       {/* Speech bubble */}
       {showBubble && message && (

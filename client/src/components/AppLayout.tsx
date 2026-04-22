@@ -255,12 +255,26 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               </p>
               {/* Social proof — avatar stack + member count */}
               <div className="flex items-center justify-center gap-3 mb-5" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.75rem',marginBottom:'1.25rem'}}>
-                <div className="flex -space-x-2" style={{display:'flex'}}>
+                <div style={{display:'flex',marginLeft:'0'}}>
                   {["JK","AM","TR","SL","OB"].map((initials, i) => (
                     <div
                       key={initials}
-                      className="w-7 h-7 rounded-full border-2 border-card flex items-center justify-center text-[9px] font-bold text-white"
-                      style={{ background: ["#4F6BED","#7C5CBF","#2D9CDB","#27AE60","#E2704A"][i], zIndex: 5 - i }}
+                      style={{
+                        display:'flex',
+                        alignItems:'center',
+                        justifyContent:'center',
+                        width:28,
+                        height:28,
+                        borderRadius:'50%',
+                        border:'2px solid var(--card)',
+                        background:["#4F6BED","#7C5CBF","#2D9CDB","#27AE60","#E2704A"][i],
+                        fontSize:9,
+                        fontWeight:700,
+                        color:'#fff',
+                        marginLeft: i === 0 ? 0 : -8,
+                        zIndex: 5 - i,
+                        flexShrink: 0,
+                      }}
                     >
                       {initials}
                     </div>

@@ -1210,4 +1210,8 @@
 - [x] Place Wren on Command Center (neutral state, 52px, below Knowledge Graph shortcut)
 - [x] Place Wren in onboarding flow slide 1 (guiding state, 72px, with glow ring)
 - [x] Update TourPage.tsx Wren assets to new SVG/webp URLs
-- [ ] Full visual audit: spacing, copy, layout fixes across all screens
+- [x] Full visual audit: spacing, copy, layout fixes across all screens
+- [x] Fix CSP img-src to allow CDN_STATIC_ORIGIN (d36hbw14aib5lz.cloudfront.net) for Wren assets
+- [x] Fix WrenCompanion sprite sheet crop (background-image approach for guiding/celebrating/resting/nudging)
+- [x] Wire real Wren SVG/webp artwork into WrenCompanion (neutral SVG + 3-panel states webp + 2-panel states2 webp)
+- [x] Fix sign-in page avatar circles (inline style display:flex on avatar container)
