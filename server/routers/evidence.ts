@@ -201,4 +201,31 @@ export const evidenceRouter = router({
   getStreakData: protectedProcedure.query(async ({ ctx }) => {
     return getEvidenceStreakData(ctx.user.id);
   }),
+
+  /** Export all Evidence Log summaries as Obsidian-compatible Markdown */
+  exportMarkdown: protectedProcedure.query(async ({ ctx }) => {
+    const summaries = await getEvidenceSummaries(ctx.user.id, 100);
+    if (!summaries.length) return { markdown: "# Evidence Log\n\nNo entries yet.\n" };
+    const lines: string[] = [
+      "# Evidence Log — Continuary",
+      "",
+      "> Your personal record of continuity. Every month, one sentence drawn from your own evidence.",
+      "",
+    ];
+    for (const s of summaries) {
+      const [y, mo] = s.month.split("-").map(Number);
+      const label = new Date(Date.UTC(y, mo - 1, 1)).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+      lines.push(`## ${label}`);
+      if (s.summaryLine) lines.push(`\n> ${s.summaryLine}\n`);
+      lines.push("");
+      lines.push(`| Metric | Value |`);
+      lines.push(`|---|---|`);
+      lines.push(`| Sessions started | ${s.sessionsStarted} |`);
+      lines.push(`| Returns after gaps | ${s.returnsAfterGap} |`);
+      lines.push(`| Hard-day sessions | ${s.hardDaySessions} |`);
+      lines.push(`| Genuine permissions | ${s.genuinePermissions ?? 0} |`);
+      lines.push("");
+    }
+    return { markdown: lines.join("\n") };
+  }),
 });

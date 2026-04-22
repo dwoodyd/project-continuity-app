@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Clipboard,
+  Download,
   FileText,
   Loader2,
   Plus,
@@ -428,6 +429,7 @@ const SourceItemCard = React.memo(function SourceItemCard({
 });
 // ─── Main Vault Page ──────────────────────────────────────────────────────────
 export default function VaultPage() {
+  const utils = trpc.useUtils();
   const [addOpen, setAddOpen] = useState(false);
   const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
   const [filterState, setFilterState] = useState<SourceState | "all" | "review" | "graph">("all");
@@ -531,6 +533,27 @@ export default function VaultPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-muted-foreground border-border/40 hover:text-foreground shrink-0"
+            title="Export as Markdown"
+            onClick={async () => {
+              try {
+                const result = await utils.vault.exportMarkdown.fetch();
+                const blob = new Blob([result.markdown], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `continuary-vault-${new Date().toISOString().slice(0,10)}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.success("Vault exported");
+              } catch { toast.error("Export failed"); }
+            }}
+          >
+            <Download className="w-3.5 h-3.5" />
+          </Button>
           <Button
             variant="outline"
             size="sm"

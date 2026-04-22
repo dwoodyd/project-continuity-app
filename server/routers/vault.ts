@@ -499,4 +499,38 @@ ${content.substring(0, 3000)}`,
         cutoffDate: cutoff.toISOString().split("T")[0],
       };
     }),
+
+  /** Export all Vault items as Obsidian-compatible Markdown */
+  exportMarkdown: protectedProcedure.query(async ({ ctx }) => {
+    const items = await getSourceItems(ctx.user.id);
+    if (!items.length) return { markdown: "# Knowledge Vault\n\nNo items yet.\n" };
+    const grouped: Record<string, typeof items> = {};
+    for (const item of items) {
+      const key = item.state ?? "inbox";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(item);
+    }
+    const stateOrder = ["active", "today", "mapped", "inbox", "parked", "done", "archived"];
+    const lines: string[] = [
+      "# Knowledge Vault — Continuary",
+      "",
+      "> Exported from Continuary. Import into Obsidian or Notion.",
+      "",
+    ];
+    for (const state of stateOrder) {
+      const group = grouped[state];
+      if (!group?.length) continue;
+      lines.push(`## ${state.charAt(0).toUpperCase() + state.slice(1)} (${group.length})`);
+      lines.push("");
+      for (const item of group) {
+        lines.push(`### ${item.title || "Untitled"}`);
+        if (item.sourceType) lines.push(`*Type: ${item.sourceType}*`);
+        if (item.summary) lines.push(`\n**Summary:** ${item.summary}`);
+        const body = item.rawContent ?? item.cleanContent ?? "";
+        if (body) lines.push(`\n${body.slice(0, 2000)}${body.length > 2000 ? "\n\n*(truncated — full content in Continuary)*" : ""}`);
+        lines.push("");
+      }
+    }
+    return { markdown: lines.join("\n") };
+  }),
 });

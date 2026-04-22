@@ -1303,7 +1303,8 @@ export default function Home() {
         const dismissed = (() => { try { return !!localStorage.getItem('continuary_onboarding_done'); } catch { return false; } })();
         // Hide for returning users who already have projects (prevents "Add your first project"
         // showing with 3 projects already in the system — biggest trust-breaker for new users).
-        const isReturningUser = profile?.onboardingCompleted === true && hasProject;
+        // Use project count alone as source of truth — do NOT require onboardingCompleted flag.
+        const isReturningUser = hasProject;
         if (dismissed || allDone || isReturningUser) return null;
         return (
           <div className="p-4 rounded-xl border" style={{ background: "oklch(0.13 0.025 270 / 0.6)", borderColor: "oklch(0.75 0.15 270 / 0.12)" }}>

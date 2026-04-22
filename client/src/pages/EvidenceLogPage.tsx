@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2 } from "lucide-react";
+import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2, Download } from "lucide-react";
 import { Link } from "wouter";
 import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
 import { ActivityHeatmap } from "@/components/ActivityHeatmap";
@@ -217,6 +217,8 @@ function MonthlyEvidenceCard({
 export default function EvidenceLogPage() {
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const utils = trpc.useUtils();
+
   const { data: summaries, isLoading: summariesLoading, refetch: refetchSummaries } =
     trpc.evidence.getMonthly.useQuery();
 
@@ -279,6 +281,27 @@ export default function EvidenceLogPage() {
                 <Flame className="w-3.5 h-3.5 mr-1.5" />
               )}
               Update this month
+            </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  const result = await utils.evidence.exportMarkdown.fetch();
+                  const blob = new Blob([result.markdown], { type: "text/markdown" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `continuary-evidence-log-${new Date().toISOString().slice(0,10)}.md`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Evidence Log exported");
+                } catch { toast.error("Export failed"); }
+              }}
+              size="sm"
+              variant="outline"
+              className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
+              title="Export as Markdown"
+            >
+              <Download className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>

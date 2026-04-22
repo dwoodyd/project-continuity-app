@@ -1244,3 +1244,8 @@
 
 ## Bug Fixes
 - [x] Fix Replay Intro button in Settings — desktop layout was missing IntroContext.Provider; secondary About button was navigating to /intro instead of calling replayIntro()
+
+## Sprint: 3 Feature Additions
+- [x] Getting Started checklist auto-complete: isReturningUser now uses project count alone (not onboardingCompleted flag)
+- [x] Markdown/Obsidian export: Download ↓ button on Evidence Log + Vault header downloads .md file
+- [x] Shareable Monthly Identity Card: "Post to X" button added to ShareEvidenceModal (pre-fills tweet with identity sentence)
