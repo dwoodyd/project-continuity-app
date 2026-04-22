@@ -6,8 +6,7 @@ import { randomBytes } from "crypto";
 import type { IncomingMessage, ServerResponse } from "http";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import RedisStore from "rate-limit-redis";
-import Redis from "ioredis";
+import { Redis as UpstashRedis } from "@upstash/redis";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
@@ -39,16 +38,34 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
-// Shared Redis client for rate-limit stores — safe for horizontal scaling.
-// Falls back gracefully to in-memory if REDIS_URL is not set (dev/test environments).
-const redisClient = process.env.REDIS_URL
-  ? new Redis(process.env.REDIS_URL, { tls: {}, lazyConnect: true })
+// Shared Upstash Redis client for rate-limit stores — REST API, no raw TCP/TLS.
+// Falls back gracefully to in-memory if Upstash env vars are not set.
+const upstashRedis = (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+  ? new UpstashRedis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
   : null;
 
-if (redisClient) {
-  redisClient.on("error", (err) =>
-    console.error("[Redis] Rate-limit store error:", err.message)
-  );
+// Custom express-rate-limit store backed by Upstash INCR/EXPIRE.
+// Compatible with express-rate-limit v7 Store interface.
+function makeUpstashStore(prefix: string, windowMs: number) {
+  if (!upstashRedis) return undefined;
+  return {
+    async increment(key: string) {
+      const k = `${prefix}${key}`;
+      const count = await upstashRedis.incr(k);
+      if (count === 1) await upstashRedis.expire(k, Math.ceil(windowMs / 1000));
+      const resetTime = new Date(Date.now() + windowMs);
+      return { totalHits: count, resetTime };
+    },
+    async decrement(key: string) {
+      await upstashRedis.decr(`${prefix}${key}`);
+    },
+    async resetKey(key: string) {
+      await upstashRedis.del(`${prefix}${key}`);
+    },
+  };
 }
 
 async function startServer() {
@@ -206,39 +223,28 @@ async function startServer() {
   //   4. Set REDIS_URL in environment secrets via webdev_request_secrets.
   //
   // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.
-  // Uses Redis store when REDIS_URL is set (horizontal-scaling safe); falls back to in-memory.
+  // Uses Upstash Redis store when env vars are set (horizontal-scaling safe); falls back to in-memory.
+  const oauthWindowMs = 15 * 60 * 1000;
   const oauthLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: oauthWindowMs,
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false },
     message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
-    ...(redisClient ? {
-      store: new RedisStore({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendCommand: (...args: string[]) => (redisClient as any).call(args[0], ...args.slice(1)) as Promise<boolean | number | string | (boolean | number | string)[]>,
-        prefix: "rl:oauth:",
-      }),
-    } : {}),
+    store: makeUpstashStore("rl:oauth:", oauthWindowMs),
   });
-
   // Broader limit on the tRPC API: 300 requests per minute per IP.
+  const apiWindowMs = 60 * 1000;
   const apiLimiter = rateLimit({
-    windowMs: 60 * 1000,
+    windowMs: apiWindowMs,
     max: 300,
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false },
     message: { error: "Too many requests. Please slow down." },
-    ...(redisClient ? {
-      store: new RedisStore({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        sendCommand: (...args: string[]) => (redisClient as any).call(args[0], ...args.slice(1)) as Promise<boolean | number | string | (boolean | number | string)[]>,
-        prefix: "rl:api:",
-      }),
-    } : {}),
-  });
+    store: makeUpstashStore("rl:api:", apiWindowMs),
+  });;
 
   // PayPal webhook
   app.use("/api/paypal", paypalRouter);

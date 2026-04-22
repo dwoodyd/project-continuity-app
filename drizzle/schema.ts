@@ -686,3 +686,12 @@ export const waitlistRequests = mysqlTable("waitlist_requests", {
 });
 export type WaitlistRequest = typeof waitlistRequests.$inferSelect;
 export type InsertWaitlistRequest = typeof waitlistRequests.$inferInsert;
+
+// ─── PayPal Webhook Idempotency Ledger ────────────────────────────────────────────
+export const paypalEvents = mysqlTable("paypal_events", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: varchar("event_id", { length: 128 }).notNull().unique(),
+  eventType: varchar("event_type", { length: 128 }).notNull(),
+  processedAt: bigint("processed_at", { mode: "number" }).notNull(),
+});
+export type PaypalEvent = typeof paypalEvents.$inferSelect;

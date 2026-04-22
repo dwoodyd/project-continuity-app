@@ -1198,3 +1198,7 @@
 - [x] PayPal: BILLING.SUBSCRIPTION.PAYMENT.FAILED webhook handler with notifyOwner
 - [x] In-app beta feedback button — already fully implemented (FeedbackPanel + feedbackRouter)
 - [x] Mitigate transitive CVEs: axios 1.15.2, qs >=6.14.1, follow-redirects >=1.15.12, mdast-util-to-hast >=13.2.1, drizzle-orm 0.45.2. Lodash 3 CVEs accepted risk (no patched 4.x exists; recharts-only, client-side)
+
+## Post-Launch Sprint
+- [x] PayPal webhook idempotency: paypal_events ledger table + duplicate-check
+- [x] Beta invite-code gate: already fully implemented (betaCodes table + beta router + /admin/beta UI)

@@ -1,6 +1,6 @@
 import express from "express";
 import { getDb } from "./db";
-import { users } from "../drizzle/schema";
+import { users, paypalEvents } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification";
 
@@ -132,6 +132,23 @@ paypalRouter.post("/webhook", express.json(), async (req, res) => {
     resource: { id: string; custom_id: string; status: string };
   };
   try {
+    // Idempotency: skip duplicate webhook deliveries
+    const eventId = (req.body as { id?: string }).id;
+    if (eventId) {
+      const db = await getDb();
+      if (db) {
+        try {
+          await db.insert(paypalEvents).values({
+            eventId,
+            eventType: event.event_type,
+            processedAt: Date.now(),
+          });
+        } catch {
+          // Unique constraint violation — already processed, safe to ignore
+          return res.json({ ok: true, duplicate: true });
+        }
+      }
+    }
     const userId = parseInt(event.resource?.custom_id ?? "");
 
     if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
