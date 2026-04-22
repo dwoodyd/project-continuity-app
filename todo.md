@@ -1232,3 +1232,6 @@
   - [x] Frontend: VoiceDictationButton component (tap to record/stop, appends to textarea)
   - [x] Wire into ClarityEnginePage Brain Dump textarea (already wired)
 - [x] Luxury heatmap: GitHub-style contribution grid in gold/charcoal for Intelligence + Evidence Log
+
+## Bug Fixes
+- [x] Fix Replay Intro button in Settings — desktop layout was missing IntroContext.Provider; secondary About button was navigating to /intro instead of calling replayIntro()

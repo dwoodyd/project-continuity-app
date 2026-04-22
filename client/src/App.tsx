@@ -128,7 +128,7 @@ function App() {
 
   // /intro forces the flow for cold-traffic sharing links (e.g. bio, Product Hunt)
   const isIntroRoute = typeof window !== "undefined" && window.location.pathname === "/intro";
-  const showOnboarding = splashDone && (!onboardingDone && isFirstSession || previewMode || isIntroRoute);
+  const showOnboarding = splashDone && ((!onboardingDone && isFirstSession) || previewMode || isIntroRoute);
 
   return (
     <ErrorBoundary>

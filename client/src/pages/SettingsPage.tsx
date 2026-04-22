@@ -999,7 +999,7 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-foreground">About Continuary</p>
             <p className="text-xs text-muted-foreground">Replay the intro to revisit what Continuary is built for, or copy the link to share with someone new.</p>
             <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm" onClick={() => navigate("/intro")} className="text-xs gap-1.5">
+              <Button variant="outline" size="sm" onClick={() => replayIntro()} className="text-xs gap-1.5">
                 <Play className="w-3 h-3" />
                 Replay intro
               </Button>

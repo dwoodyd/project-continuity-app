@@ -333,6 +333,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // ── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
   if (isDesktopMode) {
     return (
+      <IntroContext.Provider value={{ replayIntro: onPreviewIntro ?? (() => {}) }}>
       <div className="h-screen w-full flex overflow-hidden bg-background">
         {/* Left Sidebar */}
         <aside
@@ -516,6 +517,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
         )}
       </div>
+      </IntroContext.Provider>
     );
   }
 
