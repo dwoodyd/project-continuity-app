@@ -31,6 +31,7 @@ export const aiRouter = router({
       capturedDuringTask: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       // Derive a short title from the first line or first 60 chars
       const firstLine = input.content.split("\n")[0]?.trim() ?? "";
       const title = firstLine.length > 0
@@ -134,6 +135,7 @@ Return JSON: { parsedIntent: string (1 sentence), suggestedProject: string|null 
   generateReEntryCard: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const project = await getProjectById(input.projectId, ctx.user.id);
       if (!project) return null;
 
@@ -225,6 +227,7 @@ Return JSON: { stoppingPoint, unresolvedDecision, whatWasRuledOut, nextPhysicalA
       context: z.string().max(2000).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const project = input.projectId ? await getProjectById(input.projectId, ctx.user.id) : null;
 
       const response = await invokeLLM({
@@ -289,6 +292,7 @@ Return JSON: {
   checkGoodEnough: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const project = await getProjectById(input.projectId, ctx.user.id);
       if (!project?.goodEnoughThreshold) return null;
 
@@ -423,9 +427,10 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
 
       if (!response.ok) {
         const errorText = await response.text().catch(() => "");
+        console.error(`[transcribeVoiceDirect] Upstream error ${response.status}: ${errorText.slice(0, 500)}`);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Transcription failed: ${response.status}${errorText ? ` — ${errorText.slice(0, 200)}` : ""}`,
+          message: "Transcription failed. Please try again.",
         });
       }
 

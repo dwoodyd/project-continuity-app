@@ -1154,3 +1154,20 @@
 - [x] Slide inserted as slide 6 (before "The Close", now slide 7); TOTAL bumped 6→7; GLOW_COLORS extended
 - [x] VaultGraphPreview: live mini-graph when ≥2 vault nodes, demo fallback with "Add notes to your Vault" prompt otherwise
 - [x] 351 tests passing, 0 TypeScript errors
+
+## Adversarial Security Audit Remediation (Apr 2026)
+- [x] H1: Add assertProjectOwnedBy helper to db.ts; gate intelligence.logMemoryEvent
+- [x] H2: Gate intelligence.saveDecision with assertProjectOwnedBy
+- [x] H3: Gate focusSessions.save with assertProjectOwnedBy
+- [x] H4: Add checkLLMRateLimit to ai.captureIdea, generateReEntryCard, unstickTask, checkGoodEnough, evidence.generateIdentitySentence, clarity.analyzePatterns
+- [x] M1: Change system.sendWeeklyDigest from protectedProcedure to adminProcedure
+- [x] M2: Sanitise transcribeVoiceDirect error — log upstream body, return static message
+- [x] M3: Change SameSite cookie from "none" to "lax"; add Origin/Referer allowlist middleware
+- [x] M4: Replace req.path.includes() with exact-path check for upload bypass
+- [x] M5: Remove localStorage.setItem of user PII from useAuth hook
+- [x] L1: Convert gamification.recordEvent eventType to z.enum
+- [x] L2: Reject tokens without real jti claim unconditionally
+- [x] L3: Add assertProjectOwnedBy to threshold.generateFirstMovableStep, threshold.diagnose, clarity.runSession
+- [x] L7: Add .max(64) to notifications.updateSchedule timezone input
+- [x] L8: Truncate OAuth callback error log to 2000 chars
+- [x] Update SECURITY_AUDIT.md to reflect all fixes

@@ -28,6 +28,7 @@ import {
   getRecentFocusSessions,
   getActiveProjects,
   getProjectById,
+  assertProjectOwnedBy,
   getRecentCheckIns,
   getRecentDailyPlans,
   createReEntryCard,
@@ -116,6 +117,7 @@ Return JSON only: { category: string, confidence: "high"|"medium"|"low" }`,
       source: z.enum(["manual", "extracted"]).default("manual"),
     }))
     .mutation(async ({ ctx, input }) => {
+      if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const id = await createDecision({
         userId: ctx.user.id,
         projectId: input.projectId ?? null,
@@ -198,6 +200,7 @@ Return JSON: { decisions: string[] }`,
       occurredAt: z.number().optional(), // unix ms
     }))
     .mutation(async ({ ctx, input }) => {
+      await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const id = await createProjectMemoryEvent({
         userId: ctx.user.id,
         projectId: input.projectId,

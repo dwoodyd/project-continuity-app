@@ -69,7 +69,8 @@ export function registerOAuthRoutes(app: Express) {
       res.redirect(302, "/");
     } catch (error: any) {
       const detail = error?.response?.data ?? error?.message ?? String(error);
-      console.error("[OAuth] Callback failed", JSON.stringify(detail));
+      const detailStr = JSON.stringify(detail);
+      console.error("[OAuth] Callback failed", detailStr.slice(0, 2000));
       // Redirect to a user-friendly error page instead of showing raw JSON
       res.redirect(302, `/?auth_error=${encodeURIComponent("Sign-in failed. Please try again.")}`);
     }

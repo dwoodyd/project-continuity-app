@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import {
   upsertEvidenceSummary,
   getEvidenceSummaries,
@@ -165,6 +166,7 @@ export const evidenceRouter = router({
   generateSummary: protectedProcedure
     .input(z.object({ month: z.string().regex(/^\d{4}-\d{2}$/).optional() }))
     .mutation(async ({ ctx, input }) => {
+      checkLLMRateLimit(ctx.user.id);
       const month = input.month ?? currentMonth();
       const stats = await computeStats(ctx.user.id, month);
 

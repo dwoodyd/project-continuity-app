@@ -208,16 +208,44 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
 
-  // ── Content-Type enforcement ────────────────────────────────────────────────
+  // ── Origin / Referer allowlist (M3) ────────────────────────────────────────
+  // Reject mutations from unknown cross-site origins to harden CSRF posture.
+  // SameSite=Lax already blocks most cross-site cookie sends; this is defence-in-depth.
+  app.use("/api/trpc", (req, res, next) => {
+    const method = req.method;
+    if (method === "POST" || method === "PUT" || method === "PATCH") {
+      const origin = req.headers["origin"] as string | undefined;
+      const referer = req.headers["referer"] as string | undefined;
+      const source = origin ?? (referer ? new URL(referer).origin : undefined);
+      if (source) {
+        const isLocal = source.startsWith("http://localhost") || source.startsWith("http://127.0.0.1");
+        const isKnown = [
+          "continuary.manus.space",
+          "continuary.soulengineer.online",
+          "projcontinuity-vnvnaojz.manus.space",
+        ].some((d) => source === `https://${d}` || source.endsWith(`.${d}`));
+        if (!isLocal && !isKnown && ENV.isProduction) {
+          res.status(403).json({ error: "Forbidden" });
+          return;
+        }
+      }
+    }
+    next();
+  });
+
+  // ── Content-Type enforcement (M4 — exact-match upload bypass) ───────────────
   // Reject POST/PUT/PATCH requests to the tRPC API that don't declare application/json.
   // This prevents content-type confusion attacks (e.g. multipart smuggling) and ensures
   // all mutation payloads are parsed by the JSON body parser above.
   // GET requests (tRPC queries) and the audio upload path are exempt.
+  // IMPORTANT: use exact path equality, NOT .includes(), to prevent batch-URL bypass.
   app.use("/api/trpc", (req, res, next) => {
     const method = req.method;
     if (method === "POST" || method === "PUT" || method === "PATCH") {
-      // Audio upload path sends base64 JSON — already handled by the 50mb parser above, allow through
-      if (req.path.includes("vault.uploadAudio") || req.path.includes("vault.addFile")) {
+      // Audio upload paths send base64 JSON — already handled by the 50mb parser above.
+      // Use exact match to prevent batched URL bypass (M4).
+      const isUploadEndpoint = req.path === "/vault.uploadAudio" || req.path === "/vault.addFile";
+      if (isUploadEndpoint) {
         return next();
       }
       const ct = req.headers["content-type"] ?? "";

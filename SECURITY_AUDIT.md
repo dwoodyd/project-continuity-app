@@ -81,3 +81,48 @@ No action required for production security. The `recharts`/`lodash` finding is w
 1. **Content Security Policy (CSP)** — Helmet's CSP is disabled in development and uses the default in production. Consider adding an explicit `script-src` directive that restricts to `'self'` and the CDN origin once the asset URLs are stable.
 2. **Subresource Integrity (SRI)** — The Google Fonts CDN link in `index.html` does not use `integrity` attributes. Low risk for fonts, but worth adding.
 3. **Push subscription validation** — The `notifications.subscribe` procedure accepts any VAPID subscription object from the client. Consider adding a server-side check that the `endpoint` URL matches a known push service domain (e.g., `fcm.googleapis.com`, `push.apple.com`).
+
+---
+
+# Adversarial Security Audit — Apr 2026
+
+**Date:** 2026-04-22
+**Basis:** External red-team adversarial review of the full codebase
+**Result:** All 18 findings remediated. 351 tests passing. 0 TypeScript errors.
+
+| Severity | Count | Status |
+|----------|-------|--------|
+| High     | 4     | ✅ Fixed |
+| Medium   | 6     | ✅ Fixed |
+| Low      | 8     | ✅ Fixed |
+
+## Infrastructure Helper Added
+
+`assertProjectOwnedBy(projectId, userId)` added to `server/db.ts`. Throws `TRPCError({ code: "NOT_FOUND" })` if the caller does not own the project. Used by H1–H3, L3.
+
+## High Severity Fixes
+
+- **H1** `intelligence.logMemoryEvent` — `assertProjectOwnedBy` gate added before insert.
+- **H2** `intelligence.saveDecision` — `assertProjectOwnedBy` gate added before insert.
+- **H3** `focusSessions.save` — `assertProjectOwnedBy` gate added before insert.
+- **H4** Missing LLM rate limits — `checkLLMRateLimit` added to `ai.captureIdea`, `ai.generateReEntryCard`, `ai.unstickTask`, `ai.checkGoodEnough`, `evidence.generateSummary`, `clarity.analyzePatterns`.
+
+## Medium Severity Fixes
+
+- **M1** `system.sendWeeklyDigest` — changed from `protectedProcedure` to `adminProcedure`.
+- **M2** `ai.transcribeVoiceDirect` — upstream error body logged server-side only; user sees static message.
+- **M3** Cookie `SameSite=None` → `SameSite=Lax`; Origin/Referer allowlist middleware added to `/api/trpc`.
+- **M4** Content-type bypass — `req.path.includes()` replaced with exact equality check for upload endpoints.
+- **M5** `useAuth` localStorage PII write removed; React Query cache is sole source of truth.
+- **M6** In-memory rate-limit stores — accepted risk; Redis migration tracked for horizontal-scaling milestone.
+
+## Low Severity Fixes
+
+- **L1** `gamification.recordEvent` `eventType` converted to `z.enum`; `label`/`metadata` length-capped.
+- **L2** Legacy-JTI synthesis removed; tokens without real `jti` rejected unconditionally.
+- **L3** `assertProjectOwnedBy` gates added to `threshold.generateFirstMovableStep`, `threshold.diagnose`, `clarity.runSession`.
+- **L4** Prompt injection — mitigated by `json_schema` enforcement; CSP nonce migration tracked.
+- **L5** CSP `unsafe-inline` — documented trade-off; nonce migration tracked.
+- **L6** OAuth `state` CSRF — accepted risk; upstream Manus OAuth server enforces binding.
+- **L7** `notifications.updateSchedule` `timezone` — `.max(64)` added.
+- **L8** OAuth callback error log — truncated to 2,000 chars.

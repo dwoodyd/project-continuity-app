@@ -42,10 +42,8 @@ export function useAuth(options?: UseAuthOptions) {
   }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
-    localStorage.setItem(
-      "manus-runtime-user-info",
-      JSON.stringify(meQuery.data)
-    );
+    // M5 fix: do NOT persist user PII (id, name, email, role) to localStorage.
+    // React Query cache is the single source of truth; httpOnly cookie holds the session.
     return {
       user: meQuery.data ?? null,
       loading: meQuery.isLoading || logoutMutation.isPending,

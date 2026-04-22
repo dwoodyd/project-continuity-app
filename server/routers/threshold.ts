@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
+  assertProjectOwnedBy,
   createFirstMovableStep,
   createThresholdDiagnosis,
   getRecentFirstMovableSteps,
@@ -42,6 +43,7 @@ export const thresholdRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
+      if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
 
       let projectContext = input.projectContext ?? "";
       if (input.projectId && !projectContext) {
@@ -161,6 +163,7 @@ Generate a First Movable Step and a Minimum Viable Contact version.`;
     )
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
+      if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
 
       const systemPrompt = `You are a compassionate threshold analyst trained in the "Permission to Start" framework. You identify which of six threshold patterns is blocking someone from starting, and you generate a Threshold Card to help them cross it.
 

@@ -28,7 +28,7 @@ export const systemRouter = router({
       } as const;
     }),
 
-  sendWeeklyDigest: protectedProcedure.mutation(async ({ ctx }) => {
+  sendWeeklyDigest: adminProcedure.mutation(async ({ ctx }) => {
     const delivered = await sendWeeklyDigestForOwner(ctx.user.id);
     return { success: delivered };
   }),

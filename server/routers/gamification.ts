@@ -131,9 +131,9 @@ export const gamificationRouter = router({
   // Record a continuity event and update thread strength + milestones
   recordEvent: protectedProcedure
     .input(z.object({
-      eventType: z.string(),
-      label: z.string().optional(),
-      metadata: z.string().optional(),
+      eventType: z.enum(["return_24h", "return_3d", "return_7d", "rhythm_morning", "rhythm_midday", "rhythm_evening", "idea_processed", "task_completed", "project_step", "weekly_review", "weekly_compass", "reentry_flow"]),
+      label: z.string().max(200).optional(),
+      metadata: z.string().max(500).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();

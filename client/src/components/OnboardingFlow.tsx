@@ -771,16 +771,7 @@ export function OnboardingFlow({ onSkip }: Props) {
     setTimeout(onSkip, 2200);
   }
 
-  // Slide drop-off analytics
-  useEffect(() => {
-    if (!user) return;
-    recordEvent.mutate({
-      eventType: "onboarding_slide",
-      label: `slide_${slide}`,
-      metadata: JSON.stringify({ ab: AB_VARIANT }),
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slide, user?.id]);
+  // Slide drop-off analytics (removed: onboarding_slide is not a valid gamification event type)
 
   // Keyboard navigation
   useEffect(() => {

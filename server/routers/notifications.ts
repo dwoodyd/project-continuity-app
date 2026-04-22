@@ -109,7 +109,7 @@ export const notificationsRouter = router({
       middayTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
       eveningEnabled: z.boolean().optional(),
       eveningTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-      timezone: z.string().optional(),
+      timezone: z.string().max(64).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const updates: Record<string, unknown> = {};

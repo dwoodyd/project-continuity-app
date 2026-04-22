@@ -8,7 +8,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
-import { getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
+import { assertProjectOwnedBy, getDb, updateProject, createProjectMemoryEvent, getProjectById } from "../db";
 import { claritySessions } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 
@@ -48,6 +48,7 @@ export const clarityRouter = router({
     )
      .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
+      if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
       // Pro gate: free users limited to 2 Clarity Engine sessions per day
@@ -331,6 +332,7 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
   // ── Analyze patterns across clarity sessions ──────────────────────────────
   analyzePatterns: protectedProcedure
     .query(async ({ ctx }) => {
+      checkLLMRateLimit(ctx.user.id);
       const db = await getDb();
       if (!db) return null;
       const sessions = await db

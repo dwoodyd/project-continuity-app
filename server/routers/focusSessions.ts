@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { createProjectMemoryEvent, getDb } from "../db";
+import { assertProjectOwnedBy, createProjectMemoryEvent, getDb } from "../db";
 import { focusSessions } from "../../drizzle/schema";
 import { eq, desc, and, gte } from "drizzle-orm";
 
@@ -17,6 +17,7 @@ export const focusSessionsRouter = router({
       notes: z.string().max(2000, "Notes must be under 2,000 characters").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
 

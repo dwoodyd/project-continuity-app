@@ -245,21 +245,14 @@ class SDKServer {
       // SECURITY FIX 3: Hard cutoff for legacy-JTI tokens.
       // Tokens issued before the JTI feature was added carry no jti claim and
       // cannot be individually revoked — only a full session wipe works on them.
-      // Any token with a legacy- prefix that was issued before LEGACY_JTI_CUTOFF_MS
-      // is treated as invalid to force re-authentication.
-      // Cutoff: 2026-04-08 (the date JTI was introduced in this codebase).
-      const LEGACY_JTI_CUTOFF_UNIX = 1744070400; // 2026-04-08T00:00:00Z in seconds
-      const resolvedJti = isNonEmptyString(jti) ? jti : `legacy-${openId}`;
-      const resolvedExp = typeof exp === "number" ? exp : 0;
-
-      if (resolvedJti.startsWith("legacy-")) {
-        // Legacy tokens issued before the cutoff cannot be revoked individually.
-        // Reject them to force the user to re-authenticate and receive a proper JTI token.
-        if (resolvedExp < LEGACY_JTI_CUTOFF_UNIX) {
-          console.warn("[Auth] Rejecting legacy-JTI token issued before cutoff date");
-          return null;
-        }
+      // L2 fix: reject any token that lacks a real jti claim unconditionally.
+      // Synthesising legacy-${openId} allowed non-revocable tokens; this closes that gap.
+      if (!isNonEmptyString(jti)) {
+        console.warn("[Auth] Rejecting token without jti claim");
+        return null;
       }
+      const resolvedJti = jti;
+      const resolvedExp = typeof exp === "number" ? exp : 0;
 
       return {
         openId,

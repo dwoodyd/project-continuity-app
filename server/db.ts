@@ -1,4 +1,5 @@
 import { and, desc, eq, gte, isNull, lte, ne, or, sql } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   CheckIn,
@@ -1206,4 +1207,13 @@ export async function getWaitlistRequests() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(waitlistRequests).orderBy(desc(waitlistRequests.createdAt));
+}
+
+// ─── Security helper ─────────────────────────────────────────────────────────
+// Throws TRPCError NOT_FOUND (not FORBIDDEN — avoids leaking id existence)
+// if the caller does not own the project. Call before any write that accepts
+// a projectId from client input.
+export async function assertProjectOwnedBy(projectId: number, userId: number): Promise<void> {
+  const project = await getProjectById(projectId, userId);
+  if (!project) throw new TRPCError({ code: "NOT_FOUND" });
 }
