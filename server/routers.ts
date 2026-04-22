@@ -24,6 +24,7 @@ import { paypalRouter } from "./routers/paypal";
 import { betaRouter } from "./routers/beta";
 import { scratchPadRouter } from "./routers/scratchPad";
 import { waitlistRouter } from "./routers/waitlist";
+import { voiceRouter } from "./routers/voice";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -89,6 +90,7 @@ export const appRouter = router({
   beta: betaRouter,
   scratchPad: scratchPadRouter,
   waitlist: waitlistRouter,
+  voice: voiceRouter,
 });
 
 export type AppRouter = typeof appRouter;

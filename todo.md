@@ -1227,5 +1227,8 @@
 - [x] Redesign Product Hunt banner: muted gold, no rocket emoji, sophisticated typography
 - [x] Sidebar hover micro-interactions: amber accent line slides to active tab, soft glow on hover
 - [x] Auto-dissolve amnesty screen: 3-4s linger then slow fade into Today dashboard (keep "take me in" link)
-- [ ] Whisper API voice-to-text in Clarity Engine Brain Dump textarea (not browser dictation)
+- [x] Whisper API voice-to-text in Clarity Engine Brain Dump textarea (not browser dictation)
+  - [x] Backend: ai.transcribeVoiceDirect tRPC procedure (base64 webm → Whisper → transcript text)
+  - [x] Frontend: VoiceDictationButton component (tap to record/stop, appends to textarea)
+  - [x] Wire into ClarityEnginePage Brain Dump textarea (already wired)
 - [x] Luxury heatmap: GitHub-style contribution grid in gold/charcoal for Intelligence + Evidence Log
