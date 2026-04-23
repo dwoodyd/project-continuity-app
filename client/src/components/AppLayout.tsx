@@ -343,7 +343,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           {/* Brand header */}
           <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
-              <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" style={{ boxShadow: "0 0 0 1px oklch(1 0 0 / 0.10)" }} />
+              <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
               <span className="text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
             </Link>
             {streak > 0 && (
@@ -540,7 +540,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           }}
         >
           <Link href="/" className="flex items-center gap-2">
-            <img src={BRAND_ICON} alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
+            <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
             {streak > 0 && (
               <span className="flex items-center gap-0.5 bg-amber-400/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full" title={`${streak}-day streak`}>
                 🔥 {streak}d
