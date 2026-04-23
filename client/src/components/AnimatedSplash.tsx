@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const ICON_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270045694/FCGHQFOViIPQUWjy.svg";
+const ICON_URL = "/logo-clean.svg";
 
 /**
  * AnimatedSplash — actual Continuary bird logo.
