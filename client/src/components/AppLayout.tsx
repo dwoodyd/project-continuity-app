@@ -246,7 +246,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
-              <img src={BRAND_ICON} alt="Continuary" className="w-16 h-16 object-contain rounded-2xl" />
+              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663270045694/FCGHQFOViIPQUWjy.svg" alt="Continuary" className="w-20 h-20 object-contain" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
                 <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Lora', serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
                 <p className="text-sm text-muted-foreground tracking-widest uppercase">Command Center</p>

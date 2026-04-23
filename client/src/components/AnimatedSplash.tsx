@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_512_286881db.png";
+const ICON_URL = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270045694/FCGHQFOViIPQUWjy.svg";
 
 /**
  * AnimatedSplash — actual Continuary bird logo.
@@ -69,11 +69,8 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
       {/* Icon — clip-path reveal + scale-up */}
       <div style={{
         position: "relative",
-        width: 96,
-        height: 96,
-        borderRadius: 24,
-        background: "oklch(0.17 0.04 270)",
-        boxShadow: "0 0 0 1px oklch(0.75 0.15 270 / 0.12), 0 12px 40px oklch(0 0 0 / 0.55)",
+        width: 120,
+        height: 120,
         clipPath: revealed ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)",
         transform: revealed ? "scale(1)" : "scale(0.88)",
         transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
@@ -84,9 +81,9 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         <img
           src={ICON_URL}
           alt="Continuary"
-          width={96}
-          height={96}
-          style={{ display: "block", width: 96, height: 96, objectFit: "contain" }}
+          width={120}
+          height={120}
+          style={{ display: "block", width: 120, height: 120, objectFit: "contain" }}
         />
         {/* Golden dot — inside icon container, overlays bird's eye at 62% x, 38% y */}
         <div style={{
@@ -96,8 +93,8 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
           borderRadius: "50%",
           background: "oklch(0.82 0.18 80)",
           boxShadow: "0 0 14px 6px oklch(0.82 0.18 80 / 0.7)",
-          top: 31,
-          left: 57,
+          top: 38,
+          left: 72,
           opacity: dotPulse ? 1 : 0,
           transform: dotPulse ? "scale(1)" : "scale(0)",
           transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
