@@ -174,9 +174,9 @@ function PhoneMockup() {
       <div
         className="absolute inset-0 rounded-[36px] border-[6px] shadow-2xl overflow-hidden"
         style={{
-          borderColor: "oklch(0.18 0.04 252)",
-          background: "oklch(0.14 0.04 252)",
-          boxShadow: "0 40px 80px oklch(0.1 0.08 252 / 0.6), 0 0 0 1px oklch(0.3 0.06 252 / 0.4)",
+          borderColor: "var(--border)",
+          background: "var(--card)",
+          boxShadow: "0 40px 80px oklch(0 0 0 / 0.3), 0 0 0 1px var(--border)",
         }}
       >
         <div className="h-8 flex items-center justify-between px-5 pt-1">
@@ -193,13 +193,13 @@ function PhoneMockup() {
             <div className="h-3 w-20 rounded-full bg-white/20" />
             <div className="w-5 h-5 rounded-full bg-amber-400/80" />
           </div>
-          <div className="rounded-xl p-3" style={{ background: "oklch(0.22 0.06 252)" }}>
+          <div className="rounded-xl p-3" style={{ background: "var(--muted)" }}>
             <div className="h-2 w-16 rounded-full mb-2" style={{ background: "oklch(0.72 0.14 65 / 0.6)" }} />
             <div className="h-3 w-full rounded-full bg-white/20 mb-1.5" />
             <div className="h-3 w-3/4 rounded-full bg-white/15" />
           </div>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: "oklch(0.19 0.04 252)" }}>
+            <div key={i} className="rounded-lg p-2.5 flex items-center gap-2" style={{ background: "var(--secondary)" }}>
               <div className="w-6 h-6 rounded-lg shrink-0" style={{ background: `oklch(${0.45 + i * 0.1} 0.15 ${220 + i * 30})` }} />
               <div className="flex-1 space-y-1">
                 <div className="h-2 rounded-full bg-white/25" style={{ width: `${60 + i * 10}%` }} />
@@ -208,7 +208,7 @@ function PhoneMockup() {
               <div className="w-4 h-4 rounded-full shrink-0" style={{ background: `oklch(${0.6 + i * 0.05} 0.12 ${140 + i * 20} / 0.4)` }} />
             </div>
           ))}
-          <div className="rounded-lg p-2.5 flex items-center justify-around" style={{ background: "oklch(0.19 0.04 252)" }}>
+          <div className="rounded-lg p-2.5 flex items-center justify-around" style={{ background: "var(--secondary)" }}>
             {["☀️", "🕐", "🌙"].map((emoji, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
                 <span className="text-sm">{emoji}</span>
@@ -229,16 +229,16 @@ function EvidenceCard() {
     <div
       className="rounded-2xl p-6 shadow-2xl max-w-sm mx-auto"
       style={{
-        background: "oklch(0.16 0.05 252)",
-        border: "1px solid oklch(0.28 0.06 252)",
-        boxShadow: "0 32px 64px oklch(0.08 0.06 252 / 0.8)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
+        boxShadow: "0 32px 64px oklch(0 0 0 / 0.3)",
       }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 65)" }}>Evidence Log</p>
-          <p className="text-xs text-white/40 mt-0.5">March 2025</p>
+          <p className="text-xs text-muted-foreground mt-0.5">March 2025</p>
         </div>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 65 / 0.15)" }}>
           <ScrollText className="w-4 h-4" style={{ color: "oklch(0.72 0.14 65)" }} />
@@ -246,8 +246,8 @@ function EvidenceCard() {
       </div>
 
       {/* Identity sentence */}
-      <div className="mb-5 p-4 rounded-xl" style={{ background: "oklch(0.20 0.06 252)" }}>
-        <p className="text-xs text-white/40 mb-2 font-medium">This month's identity sentence</p>
+      <div className="mb-5 p-4 rounded-xl" style={{ background: "var(--muted)" }}>
+        <p className="text-xs text-muted-foreground mb-2 font-medium">This month's identity sentence</p>
         <p className="text-sm font-medium leading-relaxed italic" style={{ color: "oklch(0.88 0.06 65)", fontFamily: "Lora, serif" }}>
           "Someone who shows up for their work even when the conditions aren't perfect."
         </p>
@@ -261,9 +261,9 @@ function EvidenceCard() {
           { label: "Hard-day sessions", value: "4" },
           { label: "Genuine permissions", value: "11" },
         ].map(({ label, value }) => (
-          <div key={label} className="rounded-lg p-2.5 text-center" style={{ background: "oklch(0.22 0.05 252)" }}>
-            <p className="text-lg font-bold text-white">{value}</p>
-            <p className="text-[9px] text-white/40 leading-tight mt-0.5">{label}</p>
+          <div key={label} className="rounded-lg p-2.5 text-center" style={{ background: "var(--secondary)" }}>
+            <p className="text-lg font-bold text-foreground">{value}</p>
+            <p className="text-[9px] text-muted-foreground leading-tight mt-0.5">{label}</p>
           </div>
         ))}
       </div>
@@ -277,9 +277,9 @@ function ThresholdCard() {
     <div
       className="rounded-2xl p-6 shadow-2xl max-w-sm mx-auto"
       style={{
-        background: "oklch(0.16 0.05 252)",
-        border: "1px solid oklch(0.28 0.06 252)",
-        boxShadow: "0 32px 64px oklch(0.08 0.06 252 / 0.8)",
+        background: "var(--card)",
+        border: "1px solid var(--border)",
+        boxShadow: "0 32px 64px oklch(0 0 0 / 0.3)",
       }}
     >
       <div className="flex items-center gap-3 mb-5">
@@ -287,8 +287,8 @@ function ThresholdCard() {
           <DoorOpen className="w-4 h-4" style={{ color: "oklch(0.72 0.14 65)" }} />
         </div>
         <div>
-          <p className="text-xs font-bold text-white">Threshold Diagnosis</p>
-          <p className="text-[10px] text-white/40">What's at the door?</p>
+          <p className="text-xs font-bold text-foreground">Threshold Diagnosis</p>
+          <p className="text-[10px] text-muted-foreground">What's at the door?</p>
         </div>
       </div>
 
@@ -298,9 +298,9 @@ function ThresholdCard() {
           { q: "What's actually in the way?", a: "Fear it won't be good enough" },
           { q: "What's the smallest true step?", a: "Write one honest sentence" },
         ].map(({ q, a }, i) => (
-          <div key={i} className="rounded-xl p-3" style={{ background: "oklch(0.20 0.06 252)" }}>
-            <p className="text-[9px] text-white/40 mb-1">{q}</p>
-            <p className="text-xs font-medium text-white/85">{a}</p>
+          <div key={i} className="rounded-xl p-3" style={{ background: "var(--muted)" }}>
+            <p className="text-[9px] text-muted-foreground mb-1">{q}</p>
+            <p className="text-xs font-medium text-foreground/85">{a}</p>
           </div>
         ))}
       </div>
@@ -350,14 +350,14 @@ export default function WelcomePage() {
 
   const ctaButton = isAuthenticated ? (
     <Link href="/">
-      <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+      <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
         Open Command Center <ArrowRight className="w-4 h-4" />
       </Button>
     </Link>
   ) : (
     <div className="flex flex-col sm:flex-row items-center gap-3">
       <a href={getLoginUrl()}>
-        <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+        <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
           Get Started Free <ArrowRight className="w-4 h-4" />
         </Button>
       </a>
@@ -389,8 +389,7 @@ export default function WelcomePage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, oklch(0.18 0.06 252) 0%, oklch(0.22 0.08 265) 50%, oklch(0.20 0.05 252) 100%)" }}
+        className="relative overflow-hidden bg-background"
       >
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.6 0.2 265)", transform: "translate(30%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(-30%, 30%)" }} />
@@ -443,8 +442,7 @@ export default function WelcomePage() {
 
       {/* ── Signature Feature 1: Evidence Log ───────────────────────────────── */}
       <section
-        className="py-24 px-6 relative overflow-hidden"
-        style={{ background: "linear-gradient(160deg, oklch(0.13 0.05 252) 0%, oklch(0.17 0.07 265) 100%)" }}
+        className="py-24 px-6 relative overflow-hidden bg-muted/50"
       >
         <div className="absolute top-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.65 0.18 155)", transform: "translate(-30%, -30%)" }} />
         <div className="max-w-5xl mx-auto">
@@ -538,7 +536,7 @@ export default function WelcomePage() {
             <div
               className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-start gap-6"
               style={{
-                background: "linear-gradient(135deg, oklch(0.20 0.06 252) 0%, oklch(0.24 0.08 270) 100%)",
+                background: "var(--card)",
                 border: "1px solid oklch(0.30 0.07 252)",
               }}
             >
@@ -670,7 +668,7 @@ export default function WelcomePage() {
       {/* ── Final CTA ────────────────────────────────────────────────────────── */}
       <section
         className="py-24 px-6 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, oklch(0.20 0.06 252) 0%, oklch(0.25 0.08 270) 100%)" }}
+        style={{ background: "var(--card)" }}
       >
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(20%, -20%)" }} />
 
@@ -688,14 +686,14 @@ export default function WelcomePage() {
 
           {isAuthenticated ? (
             <Link href="/">
-              <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+              <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
                 Open Command Center <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a href={getLoginUrl()}>
-                <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.18 0.05 252)" }}>
+                <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
                   Get Started Free <ArrowRight className="w-5 h-5" />
                 </Button>
               </a>

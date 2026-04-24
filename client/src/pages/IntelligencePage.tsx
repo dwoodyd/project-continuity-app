@@ -232,9 +232,9 @@ export default function IntelligencePage() {
       {/* ── Activity Heatmap ────────────────────────────────────────────── */}
       <div
         className="p-4 rounded-xl border"
-        style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
+        style={{ background: "var(--card)", borderColor: "var(--border)" }}
       >
-        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "oklch(0.72 0.17 65 / 0.70)" }}>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-muted-foreground">
           Activity — past year
         </p>
         <ActivityHeatmap />

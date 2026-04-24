@@ -1307,7 +1307,7 @@ export default function Home() {
         const isReturningUser = hasProject;
         if (dismissed || allDone || isReturningUser) return null;
         return (
-          <div className="p-4 rounded-xl border" style={{ background: "oklch(0.13 0.025 270 / 0.6)", borderColor: "oklch(0.75 0.15 270 / 0.12)" }}>
+          <div className="p-4 rounded-xl border bg-card" style={{ borderColor: "var(--border)" }}>
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-primary uppercase tracking-widest">Getting started</p>
               <button
@@ -1851,7 +1851,7 @@ export default function Home() {
       {/* ── Thread Strength + Re-Entry Shortcut */}
       {gamStatus?.threadStrength && (       <div
           className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.14 0.02 270 / 0.5)", borderColor: "oklch(0.80 0.18 270 / 0.12)" }}
+          style={{ background: "var(--card)", borderColor: "var(--border)" }}
         >
           <ContinuityRing
             score={gamStatus.threadStrength.score}
@@ -1874,10 +1874,9 @@ export default function Home() {
       {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
         <div
           className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.13 0.015 270 / 0.4)", borderColor: "oklch(1 0 0 / 0.06)" }}
+          style={{ background: "var(--muted)", borderColor: "var(--border)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2"
-            style={{ color: "oklch(1 0 0 / 0.25)" }}>Evidence of movement</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-muted-foreground">Evidence of movement</p>
           <MovementFeed events={gamStatus.recentEvents as any} />
         </div>
       )}

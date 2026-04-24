@@ -113,18 +113,17 @@ export default function AboutAppPage() {
 
   return (
     <div
-      className="min-h-screen text-white overflow-y-auto"
-      style={{ background: "oklch(0.12 0.03 264)" }}
+      className="min-h-screen text-foreground overflow-y-auto bg-background"
     >
       {/* ── Header ── */}
       <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/5"
-        style={{ background: "oklch(0.12 0.03 264 / 0.95)", backdropFilter: "blur(12px)" }}
+        style={{ background: "var(--background)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}
       >
         <img src={BRAND_LOGO} alt="Continuary" className="h-8 w-auto object-contain" />
         <button
           onClick={handleEnter}
           disabled={markSeen.isPending}
-          className="text-xs text-white/40 hover:text-white/70 transition-colors"
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           Skip intro →
         </button>
@@ -158,17 +157,16 @@ export default function AboutAppPage() {
 
         {/* ── Core principles ── */}
         <div
-          className="rounded-2xl border border-white/8 p-6 mb-10"
-          style={{ background: "oklch(0.16 0.04 264)" }}
+          className="rounded-2xl border p-6 mb-10 bg-card"
         >
-          <p className="text-xs font-semibold tracking-widest uppercase text-white/40 mb-4">
+          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
             Three things to know
           </p>
           <div className="space-y-3">
             {PRINCIPLES.map((p) => (
               <div key={p} className="flex items-start gap-3">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-white/80 leading-relaxed">{p}</p>
+                <p className="text-sm text-foreground/80 leading-relaxed">{p}</p>
               </div>
             ))}
           </div>
@@ -176,7 +174,7 @@ export default function AboutAppPage() {
 
         {/* ── Spaces grid ── */}
         <div className="mb-12">
-          <p className="text-xs font-semibold tracking-widest uppercase text-white/40 mb-5">
+          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5">
             Eight spaces, one continuous thread
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -184,14 +182,14 @@ export default function AboutAppPage() {
               <div
                 key={name}
                 className={`rounded-xl border ${border} p-4 flex gap-3`}
-                style={{ background: "oklch(0.15 0.035 264)" }}
+                style={{ background: "var(--muted)" }}
               >
                 <div className={`w-9 h-9 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-4 h-4 ${color}`} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white leading-snug mb-0.5">{name}</p>
-                  <p className="text-xs text-white/50 leading-relaxed">{desc}</p>
+                  <p className="text-sm font-semibold text-foreground leading-snug mb-0.5">{name}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -200,10 +198,9 @@ export default function AboutAppPage() {
 
         {/* ── How to start ── */}
         <div
-          className="rounded-2xl border border-white/8 p-6 mb-10"
-          style={{ background: "oklch(0.16 0.04 264)" }}
+          className="rounded-2xl border p-6 mb-10 bg-card"
         >
-          <p className="text-xs font-semibold tracking-widest uppercase text-white/40 mb-4">
+          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
             Where to start
           </p>
           <ol className="space-y-3">
@@ -220,7 +217,7 @@ export default function AboutAppPage() {
                 >
                   {i + 1}
                 </span>
-                <p className="text-sm text-white/70 leading-relaxed">{step}</p>
+                <p className="text-sm text-foreground/70 leading-relaxed">{step}</p>
               </li>
             ))}
           </ol>
@@ -241,7 +238,7 @@ export default function AboutAppPage() {
             {markSeen.isPending ? "Opening your app…" : "Enter Continuary"}
             <ArrowRight className="w-5 h-5" />
           </Button>
-          <p className="text-xs text-white/30 mt-3">
+          <p className="text-xs text-muted-foreground mt-3">
             You won't see this screen again.
           </p>
         </div>
