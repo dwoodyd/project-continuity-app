@@ -4,6 +4,22 @@ import { users, paypalEvents } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification";
 
+// ─── Timeout-aware fetch for all PayPal API calls ────────────────────────────
+async function paypalFetch(url: string, options: RequestInit, timeoutMs = 10_000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`PayPal request timed out after ${timeoutMs}ms: ${url}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 // Set PAYPAL_ENV=live in production secrets to switch to live mode
 const PAYPAL_BASE = process.env.PAYPAL_ENV === "live"
   ? "https://api-m.paypal.com"
@@ -17,7 +33,7 @@ export const PRO_PLAN_NAME = "Continuary Pro";
 
 // ─── Get OAuth token ──────────────────────────────────────────────────────────
 async function getAccessToken(): Promise<string> {
-  const res = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
+  const res = await paypalFetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
     method: "POST",
     headers: {
       Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString("base64")}`,
@@ -42,7 +58,7 @@ export async function getOrCreatePlan(): Promise<string> {
   const token = await getAccessToken();
 
   // Create product
-  const productRes = await fetch(`${PAYPAL_BASE}/v1/catalogs/products`, {
+  const productRes = await paypalFetch(`${PAYPAL_BASE}/v1/catalogs/products`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ name: PRO_PLAN_NAME, type: "SERVICE", category: "SOFTWARE" }),
@@ -50,7 +66,7 @@ export async function getOrCreatePlan(): Promise<string> {
   const product = await productRes.json() as { id: string };
 
   // Create plan
-  const planRes = await fetch(`${PAYPAL_BASE}/v1/billing/plans`, {
+  const planRes = await paypalFetch(`${PAYPAL_BASE}/v1/billing/plans`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -77,7 +93,7 @@ export async function createSubscriptionLink(userId: number, returnUrl: string, 
   const token = await getAccessToken();
   const planId = await getOrCreatePlan();
 
-  const res = await fetch(`${PAYPAL_BASE}/v1/billing/subscriptions`, {
+  const res = await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -113,7 +129,7 @@ export async function activateSubscription(subscriptionId: string, userId: numbe
 // ─── Cancel subscription ──────────────────────────────────────────────────────
 export async function cancelSubscription(subscriptionId: string, userId: number) {
   const token = await getAccessToken();
-  await fetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
+  await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${subscriptionId}/cancel`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ reason: "User requested cancellation" }),

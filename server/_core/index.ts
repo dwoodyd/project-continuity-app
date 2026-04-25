@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import compression from "compression";
 import { createServer } from "http";
 import net from "net";
 import { randomBytes } from "crypto";
@@ -200,6 +201,10 @@ async function startServer() {
       referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     })
   );
+
+  // ── Response compression ──────────────────────────────────────────────────────
+  // Gzip/Brotli compress all responses >1KB — reduces bandwidth by ~70% for JSON.
+  app.use(compression());
 
   // Default body limit: 10 MB covers all JSON payloads.
   // Voice transcription uploads (audio blobs) are scoped to a higher 50 MB limit on their specific path.

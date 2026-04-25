@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  index,
   int,
   json,
   mysqlEnum,

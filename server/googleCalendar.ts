@@ -17,6 +17,22 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const GOOGLE_CALENDAR_API = "https://www.googleapis.com/calendar/v3";
 const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
+// Timeout-aware fetch for all Google API calls
+async function googleFetch(url: string, options: RequestInit, timeoutMs = 10_000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      throw new Error(`Google API request timed out after ${timeoutMs}ms`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function getClientId() {
   return process.env.GOOGLE_CLIENT_ID ?? "";
 }
@@ -63,7 +79,7 @@ export async function exchangeCodeForTokens(
   code: string,
   redirectUri: string
 ): Promise<TokenResponse> {
-  const res = await fetch(GOOGLE_TOKEN_URL, {
+  const res = await googleFetch(GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -83,7 +99,7 @@ export async function exchangeCodeForTokens(
 
 // ── Token refresh ─────────────────────────────────────────────────────────────
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number }> {
-  const res = await fetch(GOOGLE_TOKEN_URL, {
+  const res = await googleFetch(GOOGLE_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -217,7 +233,7 @@ export async function getWeekEvents(userId: number): Promise<CalendarEvent[] | n
     maxResults: "50",
   });
 
-  const res = await fetch(
+  const res = await googleFetch(
     `${GOOGLE_CALENDAR_API}/calendars/${calendarId}/events?${params.toString()}`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );

@@ -18,8 +18,10 @@ export const betaRouter = {
 
       const betaExpiresAt = new Date(Date.now() + 45 * 24 * 60 * 60 * 1000);
 
-      await db!.update(betaCodes).set({ usedBy: ctx.user.id, usedAt: new Date() }).where(eq(betaCodes.id, codeRow.id));
-      await db!.update(users).set({ isBeta: true, betaExpiresAt, isPro: true, proSince: new Date() }).where(eq(users.id, ctx.user.id));
+      await db!.transaction(async (tx) => {
+        await tx.update(betaCodes).set({ usedBy: ctx.user.id, usedAt: new Date() }).where(eq(betaCodes.id, codeRow.id));
+        await tx.update(users).set({ isBeta: true, betaExpiresAt, isPro: true, proSince: new Date() }).where(eq(users.id, ctx.user.id));
+      });
 
       return { success: true, expiresAt: betaExpiresAt };
     }),
