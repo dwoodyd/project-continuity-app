@@ -2,7 +2,7 @@
  * InviteGatePage — shown to authenticated users who have not yet redeemed an invite code.
  * Allows them to enter a code and gain access, or sign out.
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { KeyRound, LogOut } from "lucide-react";
 
 export default function InviteGatePage() {
-  const [code, setCode] = useState("");
+  const pending = sessionStorage.getItem("pendingInviteCode") ?? "";
+  const [code, setCode] = useState(pending);
   const { logout, refresh } = useAuth();
   const utils = trpc.useUtils();
 
   const redeem = trpc.invites.redeem.useMutation({
     onSuccess: async () => {
+      sessionStorage.removeItem("pendingInviteCode");
       toast.success("Access granted. Welcome to Continuary.");
       // Refresh the user object so inviteCode is now set and the gate lifts
       await utils.auth.me.invalidate();
@@ -28,6 +30,14 @@ export default function InviteGatePage() {
       toast.error(err.message || "Invalid or already-used invite code.");
     },
   });
+
+  // Auto-submit if a pending invite code was stored from the landing page
+  useEffect(() => {
+    if (pending) {
+      redeem.mutate({ code: pending });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

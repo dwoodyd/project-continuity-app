@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 
@@ -17,17 +18,24 @@ const HOW_IT_WORKS = [
   { step: "04", title: "Weekly Compass", desc: "One ritual to close the week and open the next with intention." },
 ];
 
-
-
 export default function LandingPage() {
   const [, navigate] = useLocation();
+  const [inviteCode, setInviteCode] = useState("");
+
+  // Store invite code in sessionStorage so InviteGatePage can pre-fill it after sign-in
+  const handleInviteSignIn = () => {
+    if (inviteCode.trim()) {
+      sessionStorage.setItem("pendingInviteCode", inviteCode.trim().toUpperCase());
+    }
+    window.location.href = getLoginUrl();
+  };
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white font-sans">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-2">
-          <span className="text-amber-400 text-lg">✦</span>
+          <img src="/logo-navy.svg" alt="Continuary" className="w-8 h-8 rounded-xl" />
           <span className="font-bold tracking-tight text-sm">Continuary</span>
         </div>
         <div className="flex items-center gap-3">
@@ -116,6 +124,34 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Invite code section */}
+      <section className="px-6 max-w-xl mx-auto mb-24">
+        <div className="bg-white/5 rounded-3xl p-8 border border-amber-400/20 text-center">
+          <div className="text-amber-400 text-2xl mb-3">🔑</div>
+          <h2 className="text-xl font-bold mb-2">Have a beta invite code?</h2>
+          <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
+            Enter your code below and sign in — it'll be applied automatically so you can get straight to the app.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
+            <input
+              type="text"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && handleInviteSignIn()}
+              placeholder="ENTER CODE"
+              maxLength={32}
+              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm font-mono tracking-widest focus:outline-none focus:border-amber-400/60 transition-colors"
+            />
+            <button
+              onClick={handleInviteSignIn}
+              className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
+            >
+              Sign in →
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Pro CTA */}
       <section className="px-6 max-w-xl mx-auto mb-24 text-center">
         <div className="bg-gradient-to-b from-amber-400/10 to-transparent border border-amber-400/20 rounded-3xl p-10">
@@ -134,7 +170,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-white/5 px-6 py-8 text-center text-white/20 text-xs">
         <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-amber-400">✦</span>
+          <img src="/logo-navy.svg" alt="Continuary" className="w-6 h-6 rounded-lg" />
           <span className="font-bold text-white/40">Continuary</span>
         </div>
         <div className="flex items-center justify-center gap-6">
