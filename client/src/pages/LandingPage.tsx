@@ -31,7 +31,7 @@ export default function LandingPage() {
           <span className="font-bold tracking-tight text-sm">Continuary</span>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate("/")} className="text-white/40 hover:text-white text-sm transition-colors">Sign in</button>
+          <a href={getLoginUrl()} className="text-white/40 hover:text-white text-sm transition-colors">Sign in</a>
           <a href={getLoginUrl()} className="bg-amber-400 hover:bg-amber-300 text-black text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
             Get started free
           </a>
@@ -54,9 +54,9 @@ export default function LandingPage() {
           <a href={getLoginUrl()} className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-2xl text-base transition-colors w-full sm:w-auto text-center">
             Start your thread — free
           </a>
-          <button onClick={() => navigate("/")} className="text-white/40 hover:text-white text-sm transition-colors">
+          <a href={getLoginUrl()} className="text-white/40 hover:text-white text-sm transition-colors">
             Already have an account →
-          </button>
+          </a>
         </div>
       </section>
 
@@ -140,7 +140,7 @@ export default function LandingPage() {
         <div className="flex items-center justify-center gap-6">
           <button onClick={() => navigate("/privacy")} className="hover:text-white/50 transition-colors">Privacy</button>
           <button onClick={() => navigate("/terms")} className="hover:text-white/50 transition-colors">Terms</button>
-          <button onClick={() => navigate("/")} className="hover:text-white/50 transition-colors">App</button>
+          <a href={getLoginUrl()} className="hover:text-white/50 transition-colors">App</a>
         </div>
       </footer>
     </div>

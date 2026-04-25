@@ -20,6 +20,7 @@ import { startWeeklyDigestCron } from "../weeklyDigest";
 import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
 import { registerCalendarRoutes } from "../calendarRoutes";
+import { sdk } from "./sdk";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -263,6 +264,26 @@ async function startServer() {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   registerCalendarRoutes(app);
+
+  // ── Scheduled task endpoints ─────────────────────────────────────────────────
+  // These routes accept POST from the Manus scheduled task agent using the
+  // auto-injected SCHEDULED_TASK_COOKIE. Auth is validated via the normal session
+  // cookie mechanism; the platform issues a "user"-role session for scheduled tasks.
+  app.post("/api/scheduled/weekly-digest", async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req).catch(() => null);
+      if (!user) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      // Trigger the weekly digest send for the authenticated user's data
+      const { sendWeeklyDigestForOwner } = await import("../weeklyDigest");
+      await sendWeeklyDigestForOwner(user.id);
+      return res.json({ ok: true, message: "Weekly digest triggered", userId: user.id });
+    } catch (err: any) {
+      console.error("[Scheduled] weekly-digest error:", err?.message);
+      return res.status(500).json({ error: "Internal error" });
+    }
+  });
 
   // ── Origin / Referer allowlist (M3) ────────────────────────────────────────
   // Reject mutations from unknown cross-site origins to harden CSRF posture.

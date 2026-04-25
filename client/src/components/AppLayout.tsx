@@ -240,7 +240,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   }, []);
 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
+  // Redirect cold visitors to the marketing/landing page instead of the raw sign-in card
   if (!isAuthenticated) {
+    if (location !== "/landing") {
+      navigate("/landing");
+      return null;
+    }
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem'}}>
         <div className="w-full max-w-sm">
