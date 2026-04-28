@@ -99,7 +99,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) {
   const [location] = useLocation();
   const [, navigate] = useLocation();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -241,7 +241,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
   // Redirect cold visitors to the marketing/landing page instead of the raw sign-in card
-  if (!isAuthenticated) {
+  // Wait for auth to resolve before redirecting — prevents redirect loop after OAuth callback
+  if (!authLoading && !isAuthenticated) {
     if (location !== "/landing") {
       navigate("/landing");
       return null;
