@@ -239,14 +239,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     }
   }, []);
 
-  // ── Unauthenticated landing ─────────────────────────────────────────────────
-  // Redirect cold visitors to the marketing/landing page instead of the raw sign-in card
-  // Wait for auth to resolve before redirecting — prevents redirect loop after OAuth callback
-  if (!authLoading && !isAuthenticated) {
-    if (location !== "/landing") {
-      navigate("/landing");
-      return null;
+  // Return-path redirect: after OAuth completes, navigate to the stored path (e.g. /onboarding)
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      const returnPath = localStorage.getItem("continuary_return_path");
+      if (returnPath && returnPath !== "/" && returnPath !== "/landing") {
+        localStorage.removeItem("continuary_return_path");
+        navigate(returnPath);
+      }
     }
+  }, [isAuthenticated, authLoading, navigate]);
+
+  // ── Unauthenticated landing ─────────────────────────────────────────────────
+  // Show sign-in card for any unauthenticated route — wait for auth to resolve first
+  if (!authLoading && !isAuthenticated) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem'}}>
         <div className="w-full max-w-sm">
@@ -295,11 +301,17 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               </div>
               <a
                 href={getLoginUrl()}
+                onClick={() => {
+                  if (location && location !== "/" && location !== "/landing") {
+                    localStorage.setItem("continuary_return_path", location);
+                  }
+                }}
                 className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
+              <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← Back to landing page</a>
             </div>
           </div>
           {onPreviewIntro && (
