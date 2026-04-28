@@ -1,6 +1,5 @@
 /**
  * InviteGatePage — shown to authenticated users who have not yet redeemed an invite code.
- * Allows them to enter a code and gain access, or sign out.
  */
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
@@ -8,7 +7,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { KeyRound, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 export default function InviteGatePage() {
   const pending = sessionStorage.getItem("pendingInviteCode") ?? "";
@@ -20,10 +19,8 @@ export default function InviteGatePage() {
     onSuccess: async () => {
       sessionStorage.removeItem("pendingInviteCode");
       toast.success("Access granted. Welcome to Continuary.");
-      // Refresh the user object so inviteCode is now set and the gate lifts
       await utils.auth.me.invalidate();
       if (refresh) refresh();
-      // Small delay to let the query refresh before navigating
       setTimeout(() => { window.location.href = "/"; }, 600);
     },
     onError: (err) => {
@@ -31,7 +28,6 @@ export default function InviteGatePage() {
     },
   });
 
-  // Auto-submit if a pending invite code was stored from the landing page
   useEffect(() => {
     if (pending) {
       redeem.mutate({ code: pending });
@@ -51,12 +47,17 @@ export default function InviteGatePage() {
       <div className="w-full max-w-sm flex flex-col gap-8 animate-fade-slide-up">
         {/* Header */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <KeyRound className="w-6 h-6 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Invite required</h1>
+          <img src="/logo-navy.svg" alt="Continuary" className="w-14 h-14 rounded-2xl" />
+          <h1 className="text-2xl font-bold tracking-tight">Private Beta</h1>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-            Continuary is currently invite-only. Enter your invite code below to unlock access.
+            Continuary is currently invite-only. Enter your invite code below, or{" "}
+            <a
+              href="mailto:hello@soulengineer.online"
+              className="underline underline-offset-2 hover:text-foreground transition-colors"
+            >
+              email hello@soulengineer.online
+            </a>{" "}
+            to request access.
           </p>
         </div>
 
@@ -82,8 +83,10 @@ export default function InviteGatePage() {
         </form>
 
         {/* Sign out */}
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-xs text-muted-foreground">Don't have a code?</p>
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-xs text-muted-foreground text-center">
+            Already have an account on a different email?
+          </p>
           <Button
             variant="ghost"
             size="sm"
@@ -91,7 +94,7 @@ export default function InviteGatePage() {
             onClick={() => logout()}
           >
             <LogOut className="w-4 h-4" />
-            Sign out
+            Sign out and switch account
           </Button>
         </div>
       </div>
