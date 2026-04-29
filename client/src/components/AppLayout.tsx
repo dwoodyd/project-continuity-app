@@ -190,15 +190,21 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     setMoreOpen(false);
   }, [location]);
 
-  // Onboarding gate
+  // Onboarding gate — admin users bypass entirely (they may not have a profile yet)
   useEffect(() => {
+    if (
+      isAuthenticated &&
+      user &&
+      user.role === "admin"
+    ) return; // admins skip onboarding
     if (isAuthenticated && profile && profile.onboardingCompleted === false && location !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [isAuthenticated, profile, navigate, location]);
+  }, [isAuthenticated, user, profile, navigate, location]);
 
-  // About Continuary gate: show once to every new user after onboarding
+  // About Continuary gate: show once to every new user after onboarding (admins bypass)
   useEffect(() => {
+    if (isAuthenticated && user && user.role === "admin") return; // admins skip
     if (
       isAuthenticated &&
       profile &&
@@ -210,7 +216,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     ) {
       navigate("/about-app");
     }
-  }, [isAuthenticated, profile, navigate, location]);
+  }, [isAuthenticated, user, profile, navigate, location]);
 
   // Invite-only gate: block non-admin users who have not redeemed an invite code
   useEffect(() => {

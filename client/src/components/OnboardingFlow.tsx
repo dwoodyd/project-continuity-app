@@ -881,6 +881,12 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 1: The thesis line ── */}
           <section style={slideStyle(1)}>
             <div style={innerStyle}>
+              {/* Continuary logo */}
+              <img
+                src="/continuary-logo-navy.svg"
+                alt="Continuary"
+                style={{ width: 64, height: 64, borderRadius: 14, marginBottom: "1.5rem", display: "block" }}
+              />
               <EkgLine active={isActive(1)} />
 <div style={eyebrowStyle(true)}>For minds that work in bursts</div>
               <h1 style={headlineStyle}>
