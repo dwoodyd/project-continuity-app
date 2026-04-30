@@ -49,11 +49,8 @@ import { CommandPaletteTrigger } from "./CommandPalette";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
 
-// ── Brand CDN URLs ───────────────────────────────────────────────────────────
-// Official monochrome icon: white bird on navy rounded square (for header + favicon)
-const BRAND_ICON = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-512_c825f57d.png";
-// Sign-in screen: dark-background stacked lockup (navy arch + white bird + wordmark)
-const BRAND_LOGO_SIGNIN = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-dark-bg-stacked_3630c4d9.png";
+// ── Brand logo ───────────────────────────────────────────────────────────────
+const BRAND_LOGO_SIGNIN = "/logo-navy.svg";
 
 // ── All nav items ────────────────────────────────────────────────────────────
 const ALL_NAV_ITEMS = [

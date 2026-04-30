@@ -17,8 +17,20 @@ import {
   AlertTriangle,
   Target,
   Activity,
+  Paperclip,
+  StickyNote,
+  MessageSquare,
+  Upload,
+  Trash2,
+  Send,
+  Plus,
+  FileText,
+  Image,
+  File,
+  Pin,
+  Bot,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,7 +202,7 @@ export default function ProjectDetailPage() {
   const [unstickTask, setUnstickTask] = useState<{ id: string; title: string; projectId?: number | null } | null>(null);
   const [editingNext, setEditingNext] = useState(false);
   const [nextStepDraft, setNextStepDraft] = useState("");
-  const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "clarity">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "timeline" | "clarity" | "files" | "notes" | "chat">("overview");
   const [timelineFilter, setTimelineFilter] = useState<"all" | "focus_session" | "decision" | "milestone" | "blocker">("all");
   const [fmsOpen, setFmsOpen] = useState(false);
   const [thresholdOpen, setThresholdOpen] = useState(false);
@@ -287,9 +299,12 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 bg-muted rounded-xl p-1">
+      <div className="flex gap-1 bg-muted rounded-xl p-1 overflow-x-auto">
         {[
           { id: "overview" as const, label: "Overview" },
+          { id: "files" as const, label: "Files" },
+          { id: "notes" as const, label: "Notes" },
+          { id: "chat" as const, label: "AI Chat" },
           { id: "timeline" as const, label: "Timeline" },
           { id: "clarity" as const, label: "Clarity" },
         ].map(({ id, label }) => (
@@ -297,7 +312,7 @@ export default function ProjectDetailPage() {
             key={id}
             onClick={() => setActiveTab(id)}
             className={cn(
-              "flex-1 py-2 rounded-lg text-sm font-medium transition-colors",
+              "flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
               activeTab === id
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -672,6 +687,21 @@ export default function ProjectDetailPage() {
         </div>
       )}
 
+      {/* ── Files Tab ──────────────────────────────────────────────────────── */}
+      {activeTab === "files" && (
+        <WorkspaceFilesTab projectId={projectId} />
+      )}
+
+      {/* ── Notes Tab ──────────────────────────────────────────────────────── */}
+      {activeTab === "notes" && (
+        <WorkspaceNotesTab projectId={projectId} />
+      )}
+
+      {/* ── AI Chat Tab ────────────────────────────────────────────────────── */}
+      {activeTab === "chat" && (
+        <WorkspaceChatTab projectId={projectId} projectTitle={project.title} />
+      )}
+
       {/* Modals */}
       {reEntryOpen && <ReEntryModal projectId={projectId} onClose={() => setReEntryOpen(false)} />}
       {unstickTask && <UnstickModal task={unstickTask} onClose={() => setUnstickTask(null)} />}
@@ -691,6 +721,314 @@ export default function ProjectDetailPage() {
           onStartSession={() => navigate("/focus")}
         />
       )}
+    </div>
+  );
+}
+
+// ─── Workspace: Files Tab ─────────────────────────────────────────────────────
+function WorkspaceFilesTab({ projectId }: { projectId: number }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { data: files, refetch } = trpc.workspace.listFiles.useQuery({ projectId });
+
+  const uploadFile = trpc.workspace.uploadFile.useMutation({
+    onSuccess: () => { toast.success("File uploaded."); refetch(); },
+    onError: (e) => toast.error(e.message ?? "Upload failed."),
+  });
+
+  const deleteFile = trpc.workspace.deleteFile.useMutation({
+    onSuccess: () => { toast.success("File deleted."); refetch(); },
+    onError: () => toast.error("Delete failed."),
+  });
+
+  const [uploading, setUploading] = useState(false);
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 16 * 1024 * 1024) { toast.error("File must be under 16 MB."); return; }
+    setUploading(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const base64 = btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""));
+      await uploadFile.mutateAsync({
+        projectId,
+        fileName: file.name,
+        fileDataBase64: base64,
+        mimeType: file.type || "application/octet-stream",
+      });
+    } catch { /* handled by onError */ }
+    finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
+  }
+
+  function fileIcon(mime: string) {
+    if (mime.startsWith("image/")) return <Image className="w-4 h-4 text-blue-500" />;
+    if (mime === "application/pdf") return <FileText className="w-4 h-4 text-red-500" />;
+    return <File className="w-4 h-4 text-muted-foreground" />;
+  }
+
+  function formatBytes(bytes: number) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{files?.length ?? 0} file{files?.length !== 1 ? "s" : ""}</p>
+        <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+          {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Upload className="w-3.5 h-3.5 mr-1.5" />}
+          Upload file
+        </Button>
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange}
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.md,.csv,.jpg,.jpeg,.png,.gif,.webp" />
+      </div>
+
+      {!files || files.length === 0 ? (
+        <div className="py-16 flex flex-col items-center gap-3 text-center">
+          <Paperclip className="w-8 h-8 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">No files yet. Upload documents, images, or references for this project.</p>
+          <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+            <Upload className="w-3.5 h-3.5 mr-1.5" /> Upload your first file
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {files.map((file) => (
+            <div key={file.id} className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group">
+              <div className="shrink-0">{fileIcon(file.mimeType)}</div>
+              <div className="flex-1 min-w-0">
+                <a href={file.fileUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-sm font-medium text-foreground hover:underline truncate block">{file.name}</a>
+                <p className="text-xs text-muted-foreground">{formatBytes(file.sizeBytes ?? 0)} · {format(new Date(file.createdAt), "MMM d, yyyy")}</p>
+              </div>
+              <button
+                onClick={() => deleteFile.mutate({ fileId: file.id })}
+                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Workspace: Notes Tab ─────────────────────────────────────────────────────
+function WorkspaceNotesTab({ projectId }: { projectId: number }) {
+  const { data: notes, refetch } = trpc.workspace.listNotes.useQuery({ projectId });
+  const [editingId, setEditingId] = useState<number | "new" | null>(null);
+  const [draftTitle, setDraftTitle] = useState("");
+  const [draftContent, setDraftContent] = useState("");
+
+  const createNote = trpc.workspace.createNote.useMutation({
+    onSuccess: () => { toast.success("Note saved."); refetch(); setEditingId(null); },
+    onError: () => toast.error("Failed to save note."),
+  });
+
+  const updateNote = trpc.workspace.updateNote.useMutation({
+    onSuccess: () => { toast.success("Note updated."); refetch(); setEditingId(null); },
+    onError: () => toast.error("Failed to update note."),
+  });
+
+  const deleteNote = trpc.workspace.deleteNote.useMutation({
+    onSuccess: () => { toast.success("Note deleted."); refetch(); },
+    onError: () => toast.error("Delete failed."),
+  });
+
+  const pinNote = trpc.workspace.updateNote.useMutation({
+    onSuccess: () => refetch(),
+  });
+
+  function startNew() {
+    setDraftTitle("");
+    setDraftContent("");
+    setEditingId("new");
+  }
+
+  function startEdit(note: { id: number; title: string | null; content: string }) {
+    setDraftTitle(note.title ?? "");
+    setDraftContent(note.content);
+    setEditingId(note.id);
+  }
+
+  function saveNote() {
+    if (!draftContent.trim()) { toast.error("Note content is required."); return; }
+    if (editingId === "new") {
+      createNote.mutate({ projectId, title: draftTitle || "Untitled note", content: draftContent });
+    } else if (typeof editingId === "number") {
+      updateNote.mutate({ noteId: editingId, title: draftTitle || "Untitled note", content: draftContent });
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{notes?.length ?? 0} note{notes?.length !== 1 ? "s" : ""}</p>
+        <Button size="sm" variant="outline" onClick={startNew}>
+          <Plus className="w-3.5 h-3.5 mr-1.5" /> New note
+        </Button>
+      </div>
+
+      {/* Editor */}
+      {editingId !== null && (
+        <div className="p-4 rounded-xl border border-border bg-card space-y-3">
+          <Input
+            placeholder="Note title (optional)"
+            value={draftTitle}
+            onChange={(e) => setDraftTitle(e.target.value)}
+            className="text-sm font-medium border-0 border-b rounded-none px-0 focus-visible:ring-0 bg-transparent"
+          />
+          <Textarea
+            placeholder="Write your note here..."
+            value={draftContent}
+            onChange={(e) => setDraftContent(e.target.value)}
+            className="min-h-[140px] text-sm resize-none border-0 px-0 focus-visible:ring-0 bg-transparent"
+            autoFocus
+          />
+          <div className="flex gap-2 pt-1">
+            <Button size="sm" onClick={saveNote} disabled={createNote.isPending || updateNote.isPending}>
+              {createNote.isPending || updateNote.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+              Save
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>Cancel</Button>
+          </div>
+        </div>
+      )}
+
+      {!notes || notes.length === 0 ? (
+        <div className="py-16 flex flex-col items-center gap-3 text-center">
+          <StickyNote className="w-8 h-8 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">No notes yet. Capture ideas, decisions, or context for this project.</p>
+          <Button size="sm" variant="outline" onClick={startNew}><Plus className="w-3.5 h-3.5 mr-1.5" /> Add first note</Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {notes.map((note) => (
+            <div key={note.id} className="p-4 rounded-xl border border-border bg-card group">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <p className="text-sm font-medium text-foreground">{note.title ?? "Untitled note"}</p>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                  <button onClick={() => pinNote.mutate({ noteId: note.id, isPinned: !note.isPinned })}
+                    className={cn("p-1 transition-colors", note.isPinned ? "text-amber-500" : "text-muted-foreground hover:text-foreground")}>
+                    <Pin className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => startEdit(note)} className="p-1 text-muted-foreground hover:text-foreground transition-colors">
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+                  <button onClick={() => deleteNote.mutate({ noteId: note.id })} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{note.content}</p>
+              <p className="text-[10px] text-muted-foreground/50 mt-2">{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Workspace: AI Chat Tab ───────────────────────────────────────────────────
+function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; projectTitle: string }) {
+  const { data: messages, refetch } = trpc.workspace.listMessages.useQuery({ projectId });
+  const [input, setInput] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const sendMessage = trpc.workspace.sendMessage.useMutation({
+    onSuccess: () => { refetch(); setInput(""); },
+    onError: (e) => toast.error(e.message ?? "Failed to send."),
+  });
+
+  const clearChat = trpc.workspace.clearChat.useMutation({
+    onSuccess: () => { toast.success("Chat cleared."); refetch(); },
+  });
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  function handleSend() {
+    const text = input.trim();
+    if (!text || sendMessage.isPending) return;
+    sendMessage.mutate({ projectId, message: text });
+  }
+
+  return (
+    <div className="flex flex-col" style={{ minHeight: "420px" }}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Bot className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium">AI Project Assistant</span>
+        </div>
+        {messages && messages.length > 0 && (
+          <button onClick={() => clearChat.mutate({ projectId })}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Clear chat
+          </button>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 space-y-3 overflow-y-auto pb-4" style={{ maxHeight: "380px" }}>
+        {!messages || messages.length === 0 ? (
+          <div className="py-12 flex flex-col items-center gap-3 text-center">
+            <MessageSquare className="w-8 h-8 text-muted-foreground/30" />
+            <p className="text-sm text-muted-foreground">Ask anything about <strong>{projectTitle}</strong>.</p>
+            <p className="text-xs text-muted-foreground/70">The assistant knows your project context, notes, and next steps.</p>
+          </div>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")}>
+              {msg.role === "assistant" && (
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-3.5 h-3.5 text-primary" />
+                </div>
+              )}
+              <div className={cn(
+                "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-br-sm"
+                  : "bg-muted text-foreground rounded-bl-sm"
+              )}>
+                <p className="whitespace-pre-wrap">{msg.content}</p>
+              </div>
+            </div>
+          ))
+        )}
+        {sendMessage.isPending && (
+          <div className="flex gap-2.5 justify-start">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Bot className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <div className="bg-muted rounded-2xl rounded-bl-sm px-3.5 py-2.5">
+              <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="flex gap-2 pt-3 border-t border-border">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder={`Ask about ${projectTitle}...`}
+          className="flex-1 text-sm"
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+          disabled={sendMessage.isPending}
+        />
+        <Button size="sm" onClick={handleSend} disabled={!input.trim() || sendMessage.isPending} className="shrink-0">
+          <Send className="w-3.5 h-3.5" />
+        </Button>
+      </div>
     </div>
   );
 }

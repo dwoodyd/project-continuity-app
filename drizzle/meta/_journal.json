@@ -211,6 +211,13 @@
       "when": 1776896695990,
       "tag": "0029_brown_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1777522302589,
+      "tag": "0030_aberrant_black_panther",
+      "breakpoints": true
     }
   ]
 }

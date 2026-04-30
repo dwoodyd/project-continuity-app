@@ -21,8 +21,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const BRAND_LOGO =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-dark-bg-stacked_3630c4d9.png";
+const BRAND_LOGO = "/logo-navy.svg";
 
 const SPACES = [
   {
@@ -119,7 +118,7 @@ export default function AboutAppPage() {
       <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/5"
         style={{ background: "var(--background)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}
       >
-        <img src={BRAND_LOGO} alt="Continuary" className="h-8 w-auto object-contain" />
+        <img src={BRAND_LOGO} alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
         <button
           onClick={handleEnter}
           disabled={markSeen.isPending}

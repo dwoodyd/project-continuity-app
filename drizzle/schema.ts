@@ -713,3 +713,44 @@ export const googleCalendarTokens = mysqlTable("google_calendar_tokens", {
 });
 export type GoogleCalendarToken = typeof googleCalendarTokens.$inferSelect;
 export type InsertGoogleCalendarToken = typeof googleCalendarTokens.$inferInsert;
+
+// ─── Project Workspace: Files ─────────────────────────────────────────────────
+export const projectFiles = mysqlTable("project_files", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 500 }).notNull(),
+  fileKey: varchar("fileKey", { length: 500 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull().default("application/octet-stream"),
+  sizeBytes: bigint("sizeBytes", { mode: "number" }).default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectFile = typeof projectFiles.$inferSelect;
+export type InsertProjectFile = typeof projectFiles.$inferInsert;
+
+// ─── Project Workspace: Notes ─────────────────────────────────────────────────
+export const projectNotes = mysqlTable("project_notes", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  userId: int("userId").notNull(),
+  title: varchar("title", { length: 500 }).default("Untitled note"),
+  content: text("content").notNull(),
+  isPinned: boolean("isPinned").default(false),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type ProjectNote = typeof projectNotes.$inferSelect;
+export type InsertProjectNote = typeof projectNotes.$inferInsert;
+
+// ─── Project Workspace: AI Chat Messages ──────────────────────────────────────
+export const projectMessages = mysqlTable("project_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  projectId: int("projectId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ProjectMessage = typeof projectMessages.$inferSelect;
+export type InsertProjectMessage = typeof projectMessages.$inferInsert;

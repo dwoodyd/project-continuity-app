@@ -10,14 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-function ContinuaryMark({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 40 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="9" strokeWidth="4" stroke="currentColor" fill="none" />
-      <path d="M21 12 A9 9 0 1 1 28.36 5.64" strokeWidth="4" stroke="currentColor" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
+// ContinuaryMark removed — use <img src="/logo-navy.svg" /> instead
 
 const WORK_STYLES = [
   { value: "writing_creative", label: "Writing or creative work" },
@@ -161,12 +154,15 @@ export default function OnboardingPage() {
         createdProjectId = result?.id ?? null;
       }
       await completeOnboarding.mutateAsync({
+        name: name.trim() || undefined,
         workTypes: workStyle ? [workStyle] : [],
         distractionPatterns: [],
         focusHoursStart: focusStartMap[preferredFocusHours] ?? "09:00",
         focusHoursEnd: focusEndMap[preferredFocusHours] ?? "17:00",
         tonePreference,
       });
+      // Invalidate auth.me so the updated name propagates everywhere immediately
+      await utils.auth.me.invalidate();
       // Redeem the invite code now that onboarding is complete
       if (inviteValidated && inviteCode.trim()) {
         await redeemInvite.mutateAsync({ code: inviteCode.trim().toUpperCase() }).catch(() => {
@@ -218,9 +214,7 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm text-center">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-lg mx-auto mb-5">
-            <ContinuaryMark className="w-8 h-5 text-white" />
-          </div>
+          <img src="/logo-navy.svg" alt="Continuary" className="w-14 h-14 rounded-2xl object-contain mx-auto mb-5" />
           <h1 className="text-xl font-semibold tracking-[-0.02em] text-foreground mb-2">Continuary</h1>
           <p className="text-sm text-muted-foreground mb-6">Sign in to get started.</p>
           <a
@@ -241,9 +235,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md">
-              <ContinuaryMark className="w-6 h-4 text-white" />
-            </div>
+            <img src="/logo-navy.svg" alt="Continuary" className="w-10 h-10 rounded-xl object-contain" />
             <span className="text-lg font-semibold tracking-[-0.02em] text-foreground">Continuary</span>
           </div>
         </div>
@@ -528,9 +520,7 @@ export default function OnboardingPage() {
             {/* Done */}
             {step === 4 && (
               <div className="text-center space-y-8 py-4">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
-                  <ContinuaryMark className="w-8 h-5 text-primary" />
-                </div>
+                <img src="/logo-navy.svg" alt="Continuary" className="w-14 h-14 rounded-2xl object-contain mx-auto" />
                 <div className="space-y-2">
                   <p className="text-lg text-foreground font-medium tracking-[-0.01em]">
                     Continuary is ready.

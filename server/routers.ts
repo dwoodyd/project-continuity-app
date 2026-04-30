@@ -26,6 +26,7 @@ import { scratchPadRouter } from "./routers/scratchPad";
 import { waitlistRouter } from "./routers/waitlist";
 import { voiceRouter } from "./routers/voice";
 import { calendarRouter } from "./routers/calendar";
+import { workspaceRouter } from "./routers/workspace";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -93,6 +94,7 @@ export const appRouter = router({
   waitlist: waitlistRouter,
   voice: voiceRouter,
   calendar: calendarRouter,
+  workspace: workspaceRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -883,7 +883,7 @@ export function OnboardingFlow({ onSkip }: Props) {
             <div style={innerStyle}>
               {/* Continuary logo */}
               <img
-                src="/continuary-logo-navy.svg"
+                src="/logo-navy.svg"
                 alt="Continuary"
                 style={{ width: 64, height: 64, borderRadius: 14, marginBottom: "1.5rem", display: "block" }}
               />

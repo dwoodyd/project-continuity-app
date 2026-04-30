@@ -119,6 +119,12 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function updateUserName(userId: number, name: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ name }).where(eq(users.id, userId));
+}
+
 export async function markWelcomeNotified(userId: number): Promise<void> {
   const db = await getDb();
   if (!db) return;

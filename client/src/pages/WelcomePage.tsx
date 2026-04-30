@@ -31,9 +31,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useEffect, useRef, useState, useCallback } from "react";
 
-// ── Brand CDN URLs ────────────────────────────────────────────────────────────
-const BRAND_LOGO_DARK =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/logo-dark-bg-stacked_3630c4d9.png";
+// ── Brand logo ────────────────────────────────────────────────────────────────
+const BRAND_LOGO_DARK = "/logo-navy.svg";
 
 // ── Intersection-observer fade-in hook ────────────────────────────────────────
 function useFadeIn() {
@@ -396,7 +395,7 @@ export default function WelcomePage() {
 
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
           <div className="flex justify-center mb-12 animate-fade-slide-up">
-            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-20 w-auto object-contain" />
+            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-20 w-20 object-contain rounded-2xl" />
           </div>
 
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
@@ -746,7 +745,7 @@ export default function WelcomePage() {
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
       <footer className="py-10 px-6 border-t border-border bg-background">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-12 w-auto object-contain opacity-70" />
+          <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-12 w-12 object-contain rounded-xl opacity-70" />
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
             {isAuthenticated ? (
               <>

@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData,
   getProjects, getSourceItems, getRecentCheckIns, getRecentDailyPlans,
-  getIdeaCaptures, getRecentFocusSessions,
+  getIdeaCaptures, getRecentFocusSessions, updateUserName,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -52,6 +52,7 @@ export const settingsRouter = router({
 
   completeOnboarding: protectedProcedure
     .input(z.object({
+      name: z.string().min(1).max(100).optional(),
       workTypes: z.array(z.string().max(100)),
       distractionPatterns: z.array(z.string().max(200)),
       focusHoursStart: z.string().max(10),
@@ -62,6 +63,10 @@ export const settingsRouter = router({
       preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      // Save the user's preferred name to the users table so it's used everywhere
+      if (input.name?.trim()) {
+        await updateUserName(ctx.user.id, input.name.trim());
+      }
       const profileData: Record<string, unknown> = {
         workTypes: JSON.stringify(input.workTypes),
         distractionPatterns: JSON.stringify(input.distractionPatterns),
