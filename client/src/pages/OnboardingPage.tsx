@@ -2,7 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { ArrowRight, ChevronRight, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,6 +67,16 @@ export default function OnboardingPage() {
   const utils = trpc.useUtils();
   // step -1 = invite gate (shown first), 0-2 = profile setup, 3 = done
   const [step, setStep] = useState(-1);
+
+  // Skip the invite gate step if the user already has access (redeemed a code, is admin, or has isPro).
+  // This runs after auth loads — if user already has access, jump straight to step 0.
+  useEffect(() => {
+    if (!user) return;
+    const hasAccess = !!(user.hasRedeemedInvite || user.role === "admin" || user.isPro);
+    if (hasAccess && step === -1) {
+      setStep(0);
+    }
+  }, [user]);
 
   // Invite gate state
   const [inviteCode, setInviteCode] = useState("");
