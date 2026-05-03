@@ -1134,7 +1134,9 @@ export default function Home() {
       )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
-        <div>
+        <div className="flex items-center gap-3">
+          <WrenPlayer clip="greeting" size="sm" wrapperClassName="shrink-0 -mt-1" />
+          <div>
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
             {greeting}, <span style={{ background: "linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{firstName}</span>.
           </h1>
@@ -1151,6 +1153,7 @@ export default function Home() {
                 🔥 {streakData.streak}d
               </span>
             )}
+          </div>
           </div>
         </div>
         <div className="flex items-center gap-2">

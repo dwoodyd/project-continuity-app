@@ -58,6 +58,9 @@ interface WrenPlayerProps {
   className?: string;
   /** Extra wrapper className */
   wrapperClassName?: string;
+  /** Override blend mode. Defaults to 'screen' to remove black backgrounds.
+   *  Pass 'normal' to keep the original video background. */
+  blendMode?: "screen" | "lighten" | "normal";
 }
 
 export default function WrenPlayer({
@@ -68,9 +71,13 @@ export default function WrenPlayer({
   muted = true,
   className,
   wrapperClassName,
+  blendMode = "screen",
 }: WrenPlayerProps) {
   return (
-    <div className={cn("flex items-center justify-center", SIZE_CLASSES[size], wrapperClassName)}>
+    <div
+      className={cn("flex items-center justify-center", SIZE_CLASSES[size], wrapperClassName)}
+      style={{ isolation: "isolate" }}
+    >
       <video
         key={clip}
         src={WREN_CLIPS[clip]}
@@ -79,6 +86,7 @@ export default function WrenPlayer({
         muted={muted}
         playsInline
         className={cn("w-full h-full object-contain", className)}
+        style={{ mixBlendMode: blendMode }}
       />
     </div>
   );
