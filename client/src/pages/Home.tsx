@@ -53,6 +53,7 @@ import {
 } from "@/components/GamificationLayer";
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
+import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 
@@ -774,6 +775,7 @@ export default function Home() {
   const [phBannerDismissed, setPhBannerDismissed] = useState(() => localStorage.getItem("ph_banner_dismissed") === "1");
   const showPhBanner = !phBannerDismissed && !!phLaunchDate && new Date().toISOString().slice(0, 10) === phLaunchDate;
   const [completedCheckIns, setCompletedCheckIns] = useState<Set<CheckInStep>>(new Set());
+  const [wrenCelebration, setWrenCelebration] = useState<{ type: CheckInStep; message: string } | null>(null);
   const [reEntryProjectId, setReEntryProjectId] = useState<number | null>(null);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const [fmsOpen, setFmsOpen] = useState(false);
@@ -1025,6 +1027,14 @@ export default function Home() {
     setActiveCheckIn(null);
     refetchCheckIns();
     refetchPlan();
+    // Show Wren celebration overlay
+    const celebrationMessages: Record<CheckInStep, string> = {
+      morning: "Thread secured. Today has direction.",
+      midday: "You checked in. The thread holds.",
+      evening: "Day closed. Wren will keep this warm until tomorrow.",
+    };
+    setWrenCelebration({ type, message: celebrationMessages[type] });
+    setTimeout(() => setWrenCelebration(null), 3500);
     // Record gamification event for rhythm completion
     const rhythmLabels: Record<CheckInStep, string> = {
       morning: "Morning plan set",
@@ -1398,8 +1408,24 @@ export default function Home() {
         {/* ════ LEFT COLUMN ════ */}
         <div className="space-y-6">
 
-      {/* ── Active Check-In Form─────────────────────────────────────── */}
-      {activeCheckIn && (
+          {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
+          {wrenCelebration && (
+            <div
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+              style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
+            >
+              <WrenPlayer clip="celebrate" size="2xl" />
+              <p
+                className="mt-4 text-lg font-semibold text-center px-8"
+                style={{ color: "oklch(0.85 0.12 65)" }}
+              >
+                {wrenCelebration.message}
+              </p>
+            </div>
+          )}
+
+          {/* ── Active Check-In Form ─────────────────────────────────────────── */}
+          {activeCheckIn && (
         <div ref={checkInRef} className="p-5 rounded-xl bg-card border border-foreground/10 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-foreground capitalize">

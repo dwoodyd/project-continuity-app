@@ -8,6 +8,7 @@
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
+import WrenPlayer from "@/components/WrenPlayer";
 import {
   Brain,
   Zap,
@@ -193,6 +194,29 @@ export default function AboutAppPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* ── Meet Wren ── */}
+        <div
+          className="rounded-2xl border p-6 mb-10 text-center"
+          style={{ background: "oklch(0.18 0.04 264 / 0.6)", borderColor: "oklch(0.72 0.14 65 / 0.25)" }}
+        >
+          <div className="flex justify-center mb-4">
+            <WrenPlayer clip="greeting" size="lg" />
+          </div>
+          <p
+            className="text-xs font-semibold tracking-widest uppercase mb-2"
+            style={{ color: "oklch(0.82 0.14 65)" }}
+          >
+            Meet Wren
+          </p>
+          <h2 className="text-xl font-bold text-foreground mb-3">
+            Your continuity companion
+          </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Wren is the bird who carries your thread. She shows up in your check-ins, celebrates your returns,
+            and keeps your work warm between sessions. She doesn't judge gaps — she just helps you find your way back.
+          </p>
         </div>
 
         {/* ── How to start ── */}

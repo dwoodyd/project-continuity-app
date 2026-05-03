@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, subDays, startOfWeek } from "date-fns";
 import DistractionInsightsCard from "@/components/DistractionInsightsCard";
+import WrenPlayer from "@/components/WrenPlayer";
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds < 1) return "0m";
@@ -53,12 +54,15 @@ export default function WeeklyReviewPage() {
 
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
-      {/* Header */}
-      <div>
-        <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {format(subDays(new Date(), 7), "MMM d")} – {format(new Date(), "MMM d, yyyy")}
-        </p>
+      {/* Header with Wren */}
+      <div className="flex items-center gap-4">
+        <WrenPlayer clip="digest" size="md" />
+        <div>
+          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {format(subDays(new Date(), 7), "MMM d")} – {format(new Date(), "MMM d, yyyy")}
+          </p>
+        </div>
       </div>
 
       {/* Stats */}
@@ -93,8 +97,8 @@ export default function WeeklyReviewPage() {
         <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
           <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="flex justify-center mb-4">
+              <WrenPlayer clip="digest" size="lg" />
             </div>
             <p className="text-base font-semibold text-white mb-1">Generate your weekly review</p>
             <p className="text-sm text-white/70 mb-5">
