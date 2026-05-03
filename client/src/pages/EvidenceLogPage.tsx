@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import WrenPlayer from "@/components/WrenPlayer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -216,6 +217,7 @@ function MonthlyEvidenceCard({
 
 export default function EvidenceLogPage() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showWrenCelebration, setShowWrenCelebration] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -249,8 +251,33 @@ export default function EvidenceLogPage() {
   const totalReturns = summaries?.reduce((acc, s) => acc + s.returnsAfterGap, 0) ?? 0;
   const totalHardDays = summaries?.reduce((acc, s) => acc + s.hardDaySessions, 0) ?? 0;
 
+  // Show Wren once per browser session when the user has evidence
+  useEffect(() => {
+    if (!summaries || summaries.length === 0) return;
+    const key = "wren_evidence_celebrated";
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    setShowWrenCelebration(true);
+    setTimeout(() => setShowWrenCelebration(false), 3500);
+  }, [summaries]);
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Wren celebration — shown once per session when evidence exists */}
+      {showWrenCelebration && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+          style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
+        >
+          <WrenPlayer clip="celebrate" size="2xl" />
+          <p
+            className="mt-4 text-lg font-semibold text-center px-8"
+            style={{ color: "oklch(0.85 0.12 65)" }}
+          >
+            This is your record. Every entry is proof.
+          </p>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
         {/* Header */}
         <div className="space-y-1">

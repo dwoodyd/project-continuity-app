@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   ArrowLeft,
   BookOpen,
@@ -45,6 +46,7 @@ import {
 import { toast } from "sonner";
 import { format, formatDistanceToNow } from "date-fns";
 import UnstickModal from "@/components/UnstickModal";
+import WrenPlayer from "@/components/WrenPlayer";
 import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 
@@ -939,6 +941,15 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
   const { data: messages, refetch } = trpc.workspace.listMessages.useQuery({ projectId });
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const firstName = user?.name?.split(" ")[0] ?? "there";
+  // Show Wren intro once ever per project (localStorage flag)
+  const wrenKey = `wren_chat_intro_${projectId}`;
+  const [showWrenIntro, setShowWrenIntro] = useState(() => !localStorage.getItem(wrenKey));
+  const dismissWrenIntro = () => {
+    localStorage.setItem(wrenKey, "1");
+    setShowWrenIntro(false);
+  };
 
   const sendMessage = trpc.workspace.sendMessage.useMutation({
     onSuccess: () => { refetch(); setInput(""); },
@@ -977,8 +988,25 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
 
       {/* Messages */}
       <div className="flex-1 space-y-3 overflow-y-auto pb-4" style={{ maxHeight: "380px" }}>
+        {/* Wren intro — shown once ever per project */}
+        {showWrenIntro && (
+          <div className="flex gap-2.5 justify-start">
+            <div className="shrink-0 mt-0.5">
+              <WrenPlayer clip="greeting" size="sm" />
+            </div>
+            <div
+              className="max-w-[80%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm leading-relaxed bg-muted text-foreground cursor-pointer"
+              onClick={dismissWrenIntro}
+            >
+              <p className="whitespace-pre-wrap">
+                Hi {firstName} — I'm Wren. I'm holding the thread for <strong>{projectTitle}</strong>. Ask me anything about it — context, next steps, blockers, or what you were thinking last time.
+              </p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Tap to dismiss</p>
+            </div>
+          </div>
+        )}
         {!messages || messages.length === 0 ? (
-          <div className="py-12 flex flex-col items-center gap-3 text-center">
+          <div className="py-8 flex flex-col items-center gap-3 text-center">
             <MessageSquare className="w-8 h-8 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">Ask anything about <strong>{projectTitle}</strong>.</p>
             <p className="text-xs text-muted-foreground/70">The assistant knows your project context, notes, and next steps.</p>
