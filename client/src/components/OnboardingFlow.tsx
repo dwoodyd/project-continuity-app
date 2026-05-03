@@ -22,6 +22,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import WrenPlayer from "@/components/WrenPlayer";
 
 // ─── A/B headline test ──────────────────────────────────────────────────────
 const AB_VARIANT: "A" | "B" =
@@ -881,12 +882,10 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 1: The thesis line ── */}
           <section style={slideStyle(1)}>
             <div style={innerStyle}>
-              {/* Continuary logo */}
-              <img
-                src="/logo-navy.svg"
-                alt="Continuary"
-                style={{ width: 64, height: 64, borderRadius: 14, marginBottom: "1.5rem", display: "block" }}
-              />
+              {/* Wren mascot — welcome animation */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
+                <WrenPlayer clip="welcome" size="xl" />
+              </div>
               <EkgLine active={isActive(1)} />
 <div style={eyebrowStyle(true)}>For minds that work in bursts</div>
               <h1 style={headlineStyle}>
@@ -924,6 +923,10 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 2: Amnesty Protocol ── */}
           <section style={slideStyle(2)}>
             <div style={innerStyle}>
+              {/* Wren mascot — resting/waiting, she holds the thread while you're away */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
+                <WrenPlayer clip="resting" size="lg" />
+              </div>
               <div style={eyebrowStyle()}>Amnesty Protocol</div>
               <h1 style={headlineStyle}>
                 <WordReveal active={isActive(2)} delayOffset={100}>Come back after a gap.</WordReveal>
@@ -997,6 +1000,10 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 5: Evidence Log ── */}
           <section style={slideStyle(5)}>
             <div style={innerStyle}>
+              {/* Wren mascot — celebrate, she sings your progress into checkmarks */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
+                <WrenPlayer clip="celebrate" size="lg" />
+              </div>
               <div style={eyebrowStyle()}>Evidence Log</div>
               <h1 style={headlineStyle}>
                 <WordReveal active={isActive(5)} delayOffset={100}>Every month, one sentence —</WordReveal>
@@ -1022,6 +1029,10 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 6: Knowledge Graph ── */}
           <section style={slideStyle(6)}>
             <div style={innerStyle}>
+              {/* Wren mascot — connected, she holds the thread connecting all your ideas */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
+                <WrenPlayer clip="connected" size="lg" />
+              </div>
               <div style={eyebrowStyle()}>Knowledge Graph</div>
               <h1 style={headlineStyle}>
                 <WordReveal active={isActive(6)} delayOffset={100}>Your ideas are already</WordReveal>
@@ -1046,6 +1057,10 @@ export function OnboardingFlow({ onSkip }: Props) {
           {/* ── Slide 7: The close ── */}
           <section style={slideStyle(7)}>
             <div style={innerStyle}>
+              {/* Wren mascot — greeting/flying based on finished state */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
+                <WrenPlayer clip={finished ? "flying" : "greeting"} size="xl" />
+              </div>
               {finished ? (
                 <>
                   <div style={eyebrowStyle(true)}>Kept</div>

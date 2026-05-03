@@ -2,25 +2,22 @@ import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
-
-const WREN_NEUTRAL = "/manus-storage/wren_neutral_88afb376.svg";
-const WREN_STATES  = "/manus-storage/wren_states_49729c5a.webp";
-const WREN_STATES2 = "/manus-storage/wren_states_2_80de5f08.webp";
+import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 
 type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "invite";
 
 const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","graph","strength","invite"];
 
-const STEP_META: Record<Step, { label: string; wren: string }> = {
-  intro:    { label: "Welcome",         wren: WREN_NEUTRAL },
-  problem:  { label: "The Problem",     wren: WREN_STATES2 },
-  thread:   { label: "Your Thread",     wren: WREN_STATES  },
-  morning:  { label: "Morning",         wren: WREN_STATES  },
-  evening:  { label: "Evening",         wren: WREN_STATES2 },
-  vault:    { label: "The Vault",       wren: WREN_NEUTRAL },
-  graph:    { label: "Knowledge Graph",  wren: WREN_STATES  },
-  strength: { label: "Thread Strength", wren: WREN_STATES  },
-  invite:   { label: "Request Access",  wren: WREN_NEUTRAL },
+const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
+  intro:    { label: "Welcome",         wren: "welcome"     },
+  problem:  { label: "The Problem",     wren: "resting"     },
+  thread:   { label: "Your Thread",     wren: "connected"   },
+  morning:  { label: "Morning",         wren: "flying"      },
+  evening:  { label: "Evening",         wren: "resting"     },
+  vault:    { label: "The Vault",       wren: "knowledge"   },
+  graph:    { label: "Knowledge Graph", wren: "connected"   },
+  strength: { label: "Thread Strength", wren: "celebrate"   },
+  invite:   { label: "Request Access",  wren: "greeting"    },
 };
 
 const MORNING_DEMO =
@@ -233,7 +230,7 @@ export default function TourPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0c10]/90 backdrop-blur border-b border-white/5">
         <div className="flex items-center gap-2">
-          <img src={WREN_NEUTRAL} alt="Continuary" className="w-8 h-8 rounded-lg object-cover" />
+          <WrenPlayer clip="greeting" size="xs" />
           <span className="font-semibold tracking-wide text-white/90">Continuary</span>
         </div>
         <a href={getLoginUrl()} className="text-sm text-white/40 hover:text-white/70 transition-colors">Sign in</a>
@@ -261,7 +258,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <img src={WREN_NEUTRAL} alt="Wren" className="w-40 h-40 rounded-2xl object-cover shadow-2xl shadow-amber-900/30" />
+              <WrenPlayer clip="welcome" size="xl" />
               <div className="space-y-4">
                 <p className="text-amber-400/80 text-sm tracking-widest uppercase">Welcome</p>
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight">Your thread<br />continues here.</h1>
@@ -280,7 +277,7 @@ export default function TourPage() {
         {step === "problem" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Problem" title="The gap between sessions is where work goes to die." wren={WREN_STATES2} />
+              <Header eyebrow="The Problem" title="The gap between sessions is where work goes to die." wren="resting" />
               <div className="grid md:grid-cols-2 gap-4">
                 {[
                   { icon: "⏸", title: "You step away", body: "Life happens. A meeting runs long. A family emergency. A bad week. You leave your work mid-thought." },
@@ -303,7 +300,7 @@ export default function TourPage() {
         {step === "thread" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Thread" title="Continuity isn't a habit. It's a practice of returning." wren={WREN_STATES} />
+              <Header eyebrow="The Thread" title="Continuity isn't a habit. It's a practice of returning." wren="connected" />
               <p className="text-white/60 leading-relaxed text-lg">
                 Continuary doesn't ask you to be consistent. It asks you to <em className="text-amber-300/80 not-italic">return</em>. Every time you come back — even after days away — the thread picks up exactly where you left it.
               </p>
@@ -332,7 +329,7 @@ export default function TourPage() {
         {step === "morning" && (
           <Fade>
             <div className="space-y-6">
-              <Header eyebrow="Morning Check-In" title="What does today need to protect?" wren={WREN_STATES} />
+              <Header eyebrow="Morning Check-In" title="What does today need to protect?" wren="flying" />
               {!morningDone ? (
                 <>
                   <p className="text-white/45 text-sm">This is a simulation — fill in anything to experience the flow.</p>
@@ -360,7 +357,7 @@ export default function TourPage() {
                 <div className="space-y-4">
                   <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-6 space-y-3">
                     <div className="flex items-center gap-2 text-amber-400/70 text-sm">
-                      <img src={WREN_NEUTRAL} alt="" className="w-5 h-5 rounded object-cover" />
+                      <WrenPlayer clip="thinking" size="xs" />
                       <span>Wren responds</span>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">{MORNING_DEMO}</p>
@@ -376,7 +373,7 @@ export default function TourPage() {
         {step === "evening" && (
           <Fade>
             <div className="space-y-6">
-              <Header eyebrow="Evening Check-In" title="Close the loop before you rest." wren={WREN_STATES2} />
+              <Header eyebrow="Evening Check-In" title="Close the loop before you rest." wren="resting" />
               {!eveningDone ? (
                 <>
                   <p className="text-white/45 text-sm">Simulate closing your day.</p>
@@ -393,7 +390,7 @@ export default function TourPage() {
               ) : (
                 <div className="bg-indigo-400/5 border border-indigo-400/20 rounded-xl p-6 space-y-3">
                   <div className="flex items-center gap-2 text-indigo-300/70 text-sm">
-                    <img src={WREN_NEUTRAL} alt="" className="w-5 h-5 rounded object-cover" />
+                    <WrenPlayer clip="thinking" size="xs" />
                     <span>Wren responds</span>
                   </div>
                   <p className="text-white/80 leading-relaxed whitespace-pre-line">{EVENING_DEMO}</p>
@@ -407,7 +404,7 @@ export default function TourPage() {
         {step === "vault" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Vault" title="Every thought you've ever had about your work, in one place." wren={WREN_NEUTRAL} />
+              <Header eyebrow="The Vault" title="Every thought you've ever had about your work, in one place." wren="knowledge" />
               <p className="text-white/60 leading-relaxed text-lg">
                 The Vault is your knowledge base — not a note-taking app, but a living intelligence layer that connects your ideas, drafts, research, and decisions to your active projects.
               </p>
@@ -434,7 +431,7 @@ export default function TourPage() {
         {step === "graph" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." wren={WREN_STATES} />
+              <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." wren="connected" />
               <p className="text-white/60 leading-relaxed text-lg">
                 As your Vault grows, Continuary maps the connections between your entries — surfacing hidden links between ideas, decisions, and research you captured months apart.
               </p>
@@ -449,7 +446,7 @@ export default function TourPage() {
         {step === "strength" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Thread Strength" title="A living measure of your continuity." wren={WREN_STATES} />
+              <Header eyebrow="Thread Strength" title="A living measure of your continuity." wren="celebrate" />
               <p className="text-white/60 leading-relaxed text-lg">
                 Thread Strength doesn't measure how much you did. It measures how consistently you've stayed connected to your work — and how well you've returned after gaps.
               </p>
@@ -486,7 +483,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <img src={WREN_NEUTRAL} alt="Wren" className="w-32 h-32 rounded-2xl object-cover shadow-2xl shadow-amber-900/30" />
+              <WrenPlayer clip="greeting" size="xl" />
               {!submitted ? (
                 <>
                   <div className="space-y-3">
@@ -539,10 +536,10 @@ function Fade({ children }: { children: React.ReactNode }) {
   return <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</div>;
 }
 
-function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: string }) {
+function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
   return (
     <div className="flex items-start gap-5">
-      <img src={wren} alt="" className="w-16 h-16 rounded-xl object-cover shadow-lg shrink-0 mt-1" />
+      <WrenPlayer clip={wren} size="sm" />
       <div className="space-y-1">
         <p className="text-amber-400/70 text-xs tracking-widest uppercase">{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-bold leading-snug">{title}</h2>

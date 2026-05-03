@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-
-const ICON_URL = "/logo-navy.svg";
+import WrenPlayer from "@/components/WrenPlayer";
 
 /**
  * AnimatedSplash — actual Continuary bird logo.
@@ -66,42 +65,14 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         pointerEvents: "none",
       }} />
 
-      {/* Icon — clip-path reveal + scale-up */}
+      {/* Wren mascot — welcome animation, clip-path reveal */}
       <div style={{
         position: "relative",
-        width: 120,
-        height: 120,
         clipPath: revealed ? "inset(0% 0 0 0)" : "inset(100% 0 0 0)",
         transform: revealed ? "scale(1)" : "scale(0.88)",
         transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
       }}>
-        <img
-          src={ICON_URL}
-          alt="Continuary"
-          width={120}
-          height={120}
-          style={{ display: "block", width: 120, height: 120, objectFit: "contain" }}
-        />
-        {/* Golden dot — inside icon container, overlays bird's eye at 62% x, 38% y */}
-        <div style={{
-          position: "absolute",
-          width: dotPulse ? 10 : 0,
-          height: dotPulse ? 10 : 0,
-          borderRadius: "50%",
-          background: "oklch(0.82 0.18 80)",
-          boxShadow: "0 0 14px 6px oklch(0.82 0.18 80 / 0.7)",
-          top: 38,
-          left: 72,
-          opacity: dotPulse ? 1 : 0,
-          transform: dotPulse ? "scale(1)" : "scale(0)",
-          transition: "opacity 0.5s ease-out 1.2s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s, width 0s 1.2s, height 0s 1.2s",
-          animation: dotPulse ? "dotPulse 1.2s ease-out 1.7s 1 forwards" : "none",
-          pointerEvents: "none",
-          zIndex: 2,
-        }} />
+        <WrenPlayer clip="welcome" size="xl" />
       </div>
 
       {/* Wordmark */}
