@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import IdeaSanctuaryModal from "@/components/IdeaSanctuaryModal";
+import WrenPlayer from "@/components/WrenPlayer";
 
 type FocusPhase = "setup" | "active" | "break" | "complete";
 
@@ -475,9 +476,11 @@ export default function FocusModePage() {
         {/* Complete Phase */}
         {phase === "complete" && (
           <div className="text-center space-y-6 max-w-sm w-full">
-            <CheckCircle2 className="w-16 h-16 text-emerald-500 mx-auto" />
+            <div className="flex justify-center">
+              <WrenPlayer clip="celebrate" size="xl" />
+            </div>
             <div>
-              <h2 className="text-2xl font-semibold text-foreground">Session complete.</h2>
+              <h2 className="text-2xl font-semibold text-foreground">You showed up. That's the whole thing.</h2>
               <p className="text-muted-foreground mt-2">
                 You focused on: <span className="text-foreground font-medium">"{intention}"</span>
               </p>

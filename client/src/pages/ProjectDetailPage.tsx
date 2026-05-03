@@ -1001,6 +1001,7 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
               <p className="whitespace-pre-wrap">
                 Hi {firstName} — I'm Wren. I'm holding the thread for <strong>{projectTitle}</strong>. Ask me anything about it — context, next steps, blockers, or what you were thinking last time.
               </p>
+              <p className="text-xs text-muted-foreground/50 mt-0.5 italic">Wren — your Continuary companion</p>
               <p className="text-xs text-muted-foreground/60 mt-1">Tap to dismiss</p>
             </div>
           </div>

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import WrenPlayer from "@/components/WrenPlayer";
 
 type ProjectStatus = "idea" | "mapped" | "active" | "paused" | "completed" | "archived";
 
@@ -176,6 +177,10 @@ function HealthDot({ score }: { score?: number }) {
 
 // ─── Project Card ─────────────────────────────────────────────────────────────
 function ProjectCard({ project, onClick, healthScore }: { project: any; onClick: () => void; healthScore?: number }) {
+  // Stale nudge: project not touched in 7+ days
+  const isStale = project.lastTouchedAt
+    ? (Date.now() - new Date(project.lastTouchedAt).getTime()) > 7 * 24 * 60 * 60 * 1000
+    : false;
   const cfg = statusConfig[project.status as ProjectStatus] ?? statusConfig.idea;
   const priorityCfg = priorityConfig[project.priorityLevel as keyof typeof priorityConfig] ?? priorityConfig.medium;
 
@@ -214,8 +219,19 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
             </p>
           )}
         </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {isStale ? (
+            <WrenPlayer clip="resting" size="xs" />
+          ) : (
+            <ChevronRight className="w-4 h-4 text-muted-foreground mt-0.5 group-hover:translate-x-0.5 transition-transform" />
+          )}
+        </div>
       </div>
+      {isStale && (
+        <p className="text-xs text-muted-foreground/50 mt-2 italic">
+          Still holding your thread for <span className="text-foreground/60 font-medium">{project.title}</span>…
+        </p>
+      )}
     </button>
   );
 }

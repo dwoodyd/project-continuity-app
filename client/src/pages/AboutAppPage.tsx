@@ -201,8 +201,14 @@ export default function AboutAppPage() {
           className="rounded-2xl border p-6 mb-10 text-center"
           style={{ background: "oklch(0.18 0.04 264 / 0.6)", borderColor: "oklch(0.72 0.14 65 / 0.25)" }}
         >
-          <div className="flex justify-center mb-4">
+          <div className="flex flex-col items-center mb-4">
             <WrenPlayer clip="greeting" size="lg" />
+            <p
+              className="text-xs font-medium mt-1"
+              style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}
+            >
+              Wren — your Continuary companion
+            </p>
           </div>
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-2"
