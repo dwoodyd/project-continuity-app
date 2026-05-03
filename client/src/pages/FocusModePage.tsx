@@ -477,7 +477,7 @@ export default function FocusModePage() {
         {phase === "complete" && (
           <div className="text-center space-y-6 max-w-sm w-full">
             <div className="flex justify-center">
-              <WrenPlayer clip="celebrate" size="xl" />
+              <WrenPlayer clip="celebrate" blendMode="screen" size="xl" />
             </div>
             <div>
               <h2 className="text-2xl font-semibold text-foreground">You showed up. That's the whole thing.</h2>

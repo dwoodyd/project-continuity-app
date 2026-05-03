@@ -65,6 +65,7 @@ const ALL_NAV_ITEMS = [
   { href: "/intelligence", label: "Intelligence",    icon: Lightbulb,     section: "secondary" },
   { href: "/settings",     label: "Settings",        icon: Settings,      section: "secondary" },
   { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
+  { href: "/tour",         label: "Take the Tour",   icon: GraduationCap, section: "secondary" },
   { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
 ] as const;
 
@@ -85,6 +86,7 @@ const MORE_ITEMS = [
   { href: "/weekly",       label: "Weekly Review",    icon: Archive },
   { href: "/intelligence", label: "Intelligence",     icon: Lightbulb },
   { href: "/welcome",      label: "About Continuary", icon: Home },
+  { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
   { href: "/settings",     label: "Settings",         icon: Settings },
 ];
 

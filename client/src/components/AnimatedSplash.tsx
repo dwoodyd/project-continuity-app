@@ -72,7 +72,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         transform: revealed ? "scale(1)" : "scale(0.88)",
         transition: "clip-path 1.0s cubic-bezier(0.22, 1, 0.36, 1) 0.15s, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
       }}>
-        <WrenPlayer clip="welcome" size="xl" />
+        <WrenPlayer clip="welcome" blendMode="screen" size="xl" />
       </div>
 
       {/* Wordmark */}

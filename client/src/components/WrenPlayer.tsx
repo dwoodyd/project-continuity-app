@@ -8,6 +8,7 @@
  * All clips are looped by default. Pass loop={false} to play once.
  */
 
+import React from "react";
 import { cn } from "@/lib/utils";
 
 // ─── CDN URLs for every Wren animation ───────────────────────────────────────
@@ -58,9 +59,9 @@ interface WrenPlayerProps {
   className?: string;
   /** Extra wrapper className */
   wrapperClassName?: string;
-  /** Override blend mode. Defaults to 'screen' to remove black backgrounds.
-   *  Pass 'normal' to keep the original video background. */
-  blendMode?: "screen" | "lighten" | "normal";
+  /** Override blend mode. Defaults to 'multiply' to remove white/light backgrounds.
+   *  Pass 'screen' for dark/black backgrounds, 'normal' to keep the original video background. */
+  blendMode?: "screen" | "lighten" | "multiply" | "normal";
 }
 
 export default function WrenPlayer({
@@ -71,7 +72,7 @@ export default function WrenPlayer({
   muted = true,
   className,
   wrapperClassName,
-  blendMode = "screen",
+  blendMode = "multiply",
 }: WrenPlayerProps) {
   return (
     <div
@@ -86,7 +87,7 @@ export default function WrenPlayer({
         muted={muted}
         playsInline
         className={cn("w-full h-full object-contain", className)}
-        style={{ mixBlendMode: blendMode }}
+        style={{ mixBlendMode: blendMode as React.CSSProperties["mixBlendMode"] }}
       />
     </div>
   );

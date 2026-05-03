@@ -132,6 +132,13 @@ export default function AboutAppPage() {
       <div className="max-w-2xl mx-auto px-6 pb-24 pt-12">
         {/* ── Hero ── */}
         <div className="text-center mb-14">
+          {/* Wren greeting — front and center */}
+          <div className="flex flex-col items-center mb-4">
+            <WrenPlayer clip="greeting" size="xl" />
+            <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
+              Wren — your Continuary companion
+            </p>
+          </div>
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
             style={{
