@@ -326,8 +326,8 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
-            objectPosition: "center 20%",
+            objectFit: "contain",
+            objectPosition: "center center",
             display: "block",
           }}
         />
@@ -912,7 +912,33 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-8 text-center max-w-md mx-auto">
       <Entrance visible={visible[0]} className="mb-6">
-        <WrenPlayer clip="celebrate" size="lg" autoPlay loop />
+        {/* Same rounded card treatment as the intro screen */}
+        <div
+          style={{
+            width: "min(320px, 80vw)",
+            aspectRatio: "1 / 1",
+            borderRadius: "1.5rem",
+            overflow: "hidden",
+            flexShrink: 0,
+            boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+          }}
+        >
+          <video
+            key="celebrate"
+            src={WREN_CLIPS["celebrate"]}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+              objectPosition: "center center",
+              display: "block",
+            }}
+          />
+        </div>
       </Entrance>
       <Entrance visible={visible[1]} className="mb-3">
         <Headline size="xl">
