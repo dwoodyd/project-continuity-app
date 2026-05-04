@@ -46,6 +46,7 @@ import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { CommandPaletteTrigger } from "./CommandPalette";
+import WrenPlayer from "./WrenPlayer";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
 
@@ -488,6 +489,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
           {/* Sidebar footer */}
           <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
+            {/* Wren resting — persistent looping mascot */}
+            <div className="flex items-center gap-2 px-3 py-1.5">
+              <WrenPlayer clip="resting" size="xs" loop autoPlay />
+              <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
+            </div>
             {user && (
               <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.68 0.20 270 / 0.18)" }}>
