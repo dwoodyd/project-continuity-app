@@ -6,8 +6,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import AppLayout from "./components/AppLayout";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import { AnimatedSplash } from "./components/AnimatedSplash";
-import { OnboardingFlow } from "./components/OnboardingFlow";
 import { useState, lazy, Suspense } from "react";
+import { OnboardingPageWithCallback } from "./pages/OnboardingPage";
 
 // ── Eagerly loaded: shown on first paint or critical auth path ─────────────
 import Home from "./pages/Home";
@@ -136,7 +136,7 @@ function App() {
         <TooltipProvider>
           <Toaster position="top-right" richColors />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
-          {showOnboarding && <OnboardingFlow onSkip={handleOnboardingDone} />}
+          {showOnboarding && <OnboardingPageWithCallback onDone={handleOnboardingDone} />}
           <Router onPreviewIntro={handlePreviewIntro} />
           <PWAInstallBanner />
         </TooltipProvider>

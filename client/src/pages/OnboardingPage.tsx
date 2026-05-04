@@ -869,11 +869,12 @@ function StepProject({
 }
 
 // ─── Done screen ──────────────────────────────────────────────────────────────
-function DoneScreen({ name }: { name: string }) {
+function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   const [active, setActive] = useState(false);
   const visible = useEntrance(active, 4, 0, 180);
   const [, navigate] = useLocation();
   useEffect(() => { const t = setTimeout(() => setActive(true), 100); return () => clearTimeout(t); }, []);
+  const handleContinue = () => onDone ? onDone() : navigate("/");
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-8 text-center max-w-md mx-auto">
@@ -892,7 +893,7 @@ function DoneScreen({ name }: { name: string }) {
       </Entrance>
       <Entrance visible={visible[3]} className="w-full">
         <button
-          onClick={() => navigate("/")}
+          onClick={handleContinue}
           className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
           style={{
             background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
@@ -938,7 +939,15 @@ function SlideTransition({
 }
 
 // ─── Main OnboardingPage ──────────────────────────────────────────────────────
+export function OnboardingPageWithCallback({ onDone }: { onDone?: () => void }) {
+  return <OnboardingPageInner onDone={onDone} />;
+}
+
 export default function OnboardingPage() {
+  return <OnboardingPageInner />;
+}
+
+function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
@@ -1127,7 +1136,7 @@ export default function OnboardingPage() {
             loading={isPending}
           />
         )}
-        {step === 6 && <DoneScreen name={name} />}
+        {step === 6 && <DoneScreen name={name} onDone={onDone} />}
       </SlideTransition>
     </div>
   );
