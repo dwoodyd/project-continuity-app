@@ -1249,3 +1249,8 @@
 - [x] Getting Started checklist auto-complete: isReturningUser now uses project count alone (not onboardingCompleted flag)
 - [x] Markdown/Obsidian export: Download ↓ button on Evidence Log + Vault header downloads .md file
 - [x] Shareable Monthly Identity Card: "Post to X" button added to ShareEvidenceModal (pre-fills tweet with identity sentence)
+
+## Onboarding Enhancement v5 Follow-up
+- [x] Replay onboarding intro button in Settings — upgrade visual to match v5 dark full-screen style
+- [x] Streak milestone celebration overlay — full-screen Wren celebrate clip at 3/7/30 day streaks, shown once per milestone via localStorage
+- [x] Premium invite code entry — auto-formatted groups of 4 with dashes, large centered display

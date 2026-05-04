@@ -47,6 +47,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { CommandPaletteTrigger } from "./CommandPalette";
 import WrenPlayer from "./WrenPlayer";
+import StreakMilestoneCelebration from "./StreakMilestoneCelebration";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
 
@@ -726,6 +727,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       {showAmnesty && amnestyData && (
         <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
       )}
+      <StreakMilestoneCelebration streak={streak} />
     </div>
     </IntroContext.Provider>
   );
