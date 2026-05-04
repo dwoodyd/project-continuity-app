@@ -30,7 +30,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import WrenPlayer from "@/components/WrenPlayer";
+import WrenPlayer, { WREN_CLIPS } from "@/components/WrenPlayer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type WorkStyle =
@@ -289,66 +289,119 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
   const isLast = lineIndex === WREN_INTRO_LINES.length - 1;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-8 text-center">
-      {/* Wren */}
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: 1,
+        minHeight: "100dvh",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Wren — fills top 58% of screen, video object-cover so it bleeds edge to edge */}
       <div
         style={{
+          flex: "0 0 58%",
+          position: "relative",
           opacity: wrenVisible ? 1 : 0,
-          transform: wrenVisible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.9)",
-          transition: "opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1)",
-          marginBottom: "2rem",
+          transform: wrenVisible ? "scale(1)" : "scale(1.04)",
+          transition: "opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1)",
+          overflow: "hidden",
         }}
       >
-        <WrenPlayer clip="greeting" size="lg" autoPlay loop />
-      </div>
-
-      {/* Line */}
-      <div style={{ minHeight: "3.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p
+        <video
+          key="greeting"
+          src={WREN_CLIPS["welcome"]}
+          autoPlay
+          loop
+          muted
+          playsInline
           style={{
-            fontSize: lineIndex === 0 ? "2rem" : "1.5rem",
-            fontWeight: lineIndex === 0 ? 600 : 400,
-            color: "rgba(255,255,255,0.92)",
-            lineHeight: 1.3,
-            opacity: lineVisible ? 1 : 0,
-            transform: lineVisible ? "translateY(0)" : "translateY(12px)",
-            transition: "opacity 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.45s cubic-bezier(0.16,1,0.3,1)",
-            maxWidth: "28rem",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center center",
+            display: "block",
           }}
-        >
-          {WREN_INTRO_LINES[lineIndex]}
-        </p>
+        />
+        {/* Gradient fade into bottom section */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "40%",
+            background: "linear-gradient(to bottom, transparent, #080a0f)",
+            pointerEvents: "none",
+          }}
+        />
       </div>
 
-      {/* Skip / Continue */}
+      {/* Bottom section — text + CTA anchored to lower 42% */}
       <div
         style={{
-          marginTop: "3rem",
-          opacity: lineVisible ? 1 : 0,
-          transition: "opacity 0.4s ease 0.3s",
+          flex: "0 0 42%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "0 2rem 3rem",
+          textAlign: "center",
+          gap: "1.5rem",
         }}
       >
-        {isLast ? (
-          <button
-            onClick={onDone}
-            className="flex items-center gap-2 px-8 py-3.5 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
+        {/* Animated line */}
+        <div style={{ minHeight: "5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <p
             style={{
-              background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-              color: "white",
-              boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
+              fontSize: lineIndex === 0 ? "2.2rem" : "1.6rem",
+              fontWeight: lineIndex === 0 ? 700 : 400,
+              color: "rgba(255,255,255,0.95)",
+              lineHeight: 1.25,
+              letterSpacing: lineIndex === 0 ? "-0.02em" : "-0.01em",
+              opacity: lineVisible ? 1 : 0,
+              transform: lineVisible ? "translateY(0)" : "translateY(16px)",
+              transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
+              maxWidth: "30rem",
             }}
           >
-            Let's go <ArrowRight className="w-4 h-4" />
-          </button>
-        ) : (
-          <button
-            onClick={onDone}
-            className="text-xs transition-colors"
-            style={{ color: "rgba(255,255,255,0.25)" }}
-          >
-            Skip intro →
-          </button>
-        )}
+            {WREN_INTRO_LINES[lineIndex]}
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div
+          style={{
+            opacity: lineVisible ? 1 : 0,
+            transition: "opacity 0.4s ease 0.35s",
+            width: "100%",
+            maxWidth: "22rem",
+          }}
+        >
+          {isLast ? (
+            <button
+              onClick={onDone}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
+              style={{
+                background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
+                color: "white",
+                boxShadow: "0 4px 24px oklch(0.52 0.22 270 / 0.45)",
+              }}
+            >
+              Let's go <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={onDone}
+              className="text-xs transition-colors"
+              style={{ color: "rgba(255,255,255,0.22)" }}
+            >
+              Skip intro →
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
