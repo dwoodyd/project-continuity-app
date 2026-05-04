@@ -224,7 +224,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <p
       className="text-xs font-bold tracking-[0.18em] uppercase"
-      style={{ color: "oklch(0.80 0.18 270 / 0.7)" }}
+      style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}
     >
       {children}
     </p>
@@ -235,7 +235,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function Headline({ children, size = "lg" }: { children: React.ReactNode; size?: "lg" | "xl" }) {
   return (
     <h2
-      className={cn("leading-tight tracking-tight", size === "xl" ? "text-4xl" : "text-3xl")}
+      className={cn("leading-tight tracking-tight", size === "xl" ? "text-5xl" : "text-4xl")}
       style={{ color: "rgba(255,255,255,0.95)", fontWeight: 400 }}
     >
       {children}
@@ -550,7 +550,7 @@ function StepName({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div className="flex flex-col justify-center min-h-screen px-8 max-w-md mx-auto pb-8 pt-20">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 1 of 3 — About you</Eyebrow>
       </Entrance>
@@ -582,7 +582,7 @@ function StepName({
         />
 
         <div>
-          <p className="text-xs font-semibold tracking-[0.14em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
+          <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
             What best describes your work right now?
           </p>
           <div className="space-y-2">
@@ -616,9 +616,11 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-8 text-center max-w-md mx-auto">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
-        <WrenPlayer clip="thinking" size="md" autoPlay loop />
+        <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}>
+          <video key="thinking" src={WREN_CLIPS["thinking"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+        </div>
       </Entrance>
       <Entrance visible={visible[1]} className="mb-3">
         <Headline>
@@ -656,7 +658,7 @@ function StepTone({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div className="flex flex-col justify-center min-h-screen px-8 max-w-md mx-auto pb-8 pt-20">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 2 of 3 — Your style</Eyebrow>
       </Entrance>
@@ -676,30 +678,6 @@ function StepTone({
             <span className="mr-2">{t.emoji}</span>{t.label}
           </PillOption>
         ))}
-
-        <div className="pt-4">
-          <p className="text-xs font-semibold tracking-[0.14em] uppercase mb-3" style={{ color: "rgba(255,255,255,0.3)" }}>
-            When do you do your best focused work?
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {FOCUS_HOURS.map(fh => (
-              <button
-                key={fh.value}
-                onClick={() => {}}
-                className="px-4 py-3 rounded-2xl text-left transition-all"
-                style={{
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1.5px solid rgba(255,255,255,0.08)",
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "0.8rem",
-                }}
-              >
-                <div style={{ fontWeight: 500, color: "rgba(255,255,255,0.8)" }}>{fh.label}</div>
-                <div style={{ fontSize: "0.7rem", color: "rgba(255,255,255,0.35)" }}>{fh.time}</div>
-              </button>
-            ))}
-          </div>
-        </div>
       </Entrance>
 
       <Entrance visible={visible[3]} className="space-y-3">
@@ -731,7 +709,7 @@ function StepFocus({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div className="flex flex-col justify-center min-h-screen px-8 max-w-md mx-auto pb-8 pt-20">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 2 of 3 — Your rhythm</Eyebrow>
       </Entrance>
@@ -819,7 +797,7 @@ function StepProject({
   };
 
   return (
-    <div className="flex flex-col justify-center min-h-screen px-8 max-w-md mx-auto pb-8 pt-20">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 3 of 3 — Your work</Eyebrow>
       </Entrance>
@@ -836,8 +814,8 @@ function StepProject({
 
       <Entrance visible={visible[3]} className="mb-8 space-y-4">
         <div>
-          <label className="text-xs font-semibold tracking-[0.14em] uppercase mb-2 block" style={{ color: "rgba(255,255,255,0.3)" }}>
-            Project name
+          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
+            What's this project called?
           </label>
           <input
             value={projectTitle}
@@ -850,8 +828,8 @@ function StepProject({
           />
         </div>
         <div>
-          <label className="text-xs font-semibold tracking-[0.14em] uppercase mb-2 block" style={{ color: "rgba(255,255,255,0.3)" }}>
-            Why does it matter?
+          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
+            Why does it matter to you?
           </label>
           <textarea
             value={projectWhy}
@@ -864,8 +842,8 @@ function StepProject({
           />
         </div>
         <div>
-          <label className="text-xs font-semibold tracking-[0.14em] uppercase mb-2 block" style={{ color: "rgba(255,255,255,0.3)" }}>
-            What's the next step? <span className="normal-case font-normal opacity-60">(optional)</span>
+          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
+            What's the very next step? <span style={{ opacity: 0.5 }}>(optional)</span>
           </label>
           <input
             value={projectNext}
@@ -910,7 +888,7 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   const handleContinue = () => onDone ? onDone() : navigate("/");
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-8 text-center max-w-md mx-auto">
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
         {/* Same rounded card treatment as the intro screen */}
         <div
