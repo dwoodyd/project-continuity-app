@@ -1417,7 +1417,7 @@ export default function Home() {
               className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
               style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
             >
-              <WrenPlayer clip="celebrate" blendMode="screen" size="2xl" />
+              <WrenPlayer clip="celebrate" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
                 style={{ color: "oklch(0.85 0.12 65)" }}

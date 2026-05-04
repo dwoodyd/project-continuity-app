@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -233,7 +234,10 @@ export default function TourPage() {
           <WrenPlayer clip="greeting" size="xs" />
           <span className="font-semibold tracking-wide text-white/90">Continuary</span>
         </div>
-        <a href={getLoginUrl()} className="text-sm text-white/40 hover:text-white/70 transition-colors">Sign in</a>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-sm text-white/40 hover:text-white/70 transition-colors">← Back to app</Link>
+          <a href={getLoginUrl()} className="text-sm text-white/40 hover:text-white/70 transition-colors">Sign in</a>
+        </div>
       </nav>
 
       {/* Progress */}
@@ -258,7 +262,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="welcome" blendMode="screen" size="xl" />
+              <WrenPlayer clip="welcome" size="xl" />
               <div className="space-y-4">
                 <p className="text-amber-400/80 text-sm tracking-widest uppercase">Welcome</p>
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight">Your thread<br />continues here.</h1>

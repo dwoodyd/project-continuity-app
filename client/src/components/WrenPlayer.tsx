@@ -3,9 +3,11 @@
  *
  * Usage:
  *   <WrenPlayer clip="welcome" size="lg" />
- *   <WrenPlayer clip="thinking" size="sm" loop />
+ *   <WrenPlayer clip="greeting" size="md" />
  *
- * All clips are looped by default. Pass loop={false} to play once.
+ * All clips loop by default. Pass loop={false} to play once.
+ * The video plays as-is with no blend mode tricks — backgrounds are handled
+ * by the parent container or the optional `bg` prop.
  */
 
 import React from "react";
@@ -59,9 +61,6 @@ interface WrenPlayerProps {
   className?: string;
   /** Extra wrapper className */
   wrapperClassName?: string;
-  /** Override blend mode. Defaults to 'multiply' to remove white/light backgrounds.
-   *  Pass 'screen' for dark/black backgrounds, 'normal' to keep the original video background. */
-  blendMode?: "screen" | "lighten" | "multiply" | "normal";
 }
 
 export default function WrenPlayer({
@@ -72,12 +71,10 @@ export default function WrenPlayer({
   muted = true,
   className,
   wrapperClassName,
-  blendMode = "multiply",
 }: WrenPlayerProps) {
   return (
     <div
       className={cn("flex items-center justify-center", SIZE_CLASSES[size], wrapperClassName)}
-      style={{ isolation: "isolate" }}
     >
       <video
         key={clip}
@@ -87,7 +84,6 @@ export default function WrenPlayer({
         muted={muted}
         playsInline
         className={cn("w-full h-full object-contain", className)}
-        style={{ mixBlendMode: blendMode as React.CSSProperties["mixBlendMode"] }}
       />
     </div>
   );

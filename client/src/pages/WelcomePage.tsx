@@ -4,6 +4,7 @@
  * as the signature differentiators from the book "Permission to Start".
  */
 import { Link } from "wouter";
+import WrenPlayer from "@/components/WrenPlayer";
 import {
   ArrowRight,
   Brain,
@@ -394,8 +395,11 @@ export default function WelcomePage() {
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(-30%, 30%)" }} />
 
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
-          <div className="flex justify-center mb-12 animate-fade-slide-up">
-            <img src={BRAND_LOGO_DARK} alt="Continuary" className="h-20 w-20 object-contain rounded-2xl" />
+          <div className="flex flex-col items-center mb-8 animate-fade-slide-up">
+            <WrenPlayer clip="greeting" size="xl" />
+            <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
+              Wren — your Continuary companion
+            </p>
           </div>
 
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
