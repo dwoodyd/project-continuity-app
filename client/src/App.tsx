@@ -136,7 +136,11 @@ function App() {
         <TooltipProvider>
           <Toaster position="top-right" richColors />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
-          {showOnboarding && <OnboardingPageWithCallback onDone={handleOnboardingDone} />}
+          {showOnboarding && (
+            <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#080a0f" }}>
+              <OnboardingPageWithCallback onDone={handleOnboardingDone} />
+            </div>
+          )}
           <Router onPreviewIntro={handlePreviewIntro} />
           <PWAInstallBanner />
         </TooltipProvider>
