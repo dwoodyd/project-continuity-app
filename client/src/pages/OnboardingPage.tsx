@@ -928,6 +928,9 @@ function SlideTransition({
     <div
       key={stepKey}
       style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
         opacity: mounted ? 1 : 0,
         transform: mounted ? "translateX(0)" : direction === "forward" ? "translateX(40px)" : "translateX(-40px)",
         transition: "opacity 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.45s cubic-bezier(0.16,1,0.3,1)",
@@ -1067,8 +1070,8 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
 
   return (
     <div
-      className="min-h-screen relative overflow-hidden"
-      style={{ background: "#080a0f" }}
+      className="relative overflow-hidden"
+      style={{ background: "#080a0f", height: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column" }}
     >
       {/* Ambient glow */}
       <div
