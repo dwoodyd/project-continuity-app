@@ -275,7 +275,7 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
     if (!lineVisible || !active) return;
     if (lineIndex >= WREN_INTRO_LINES.length - 1) return;
     // Auto-advance each line
-    const duration = lineIndex === 0 ? 1800 : 2000;
+    const duration = lineIndex === 0 ? 2800 : 3200;
     const t = setTimeout(() => {
       setLineVisible(false);
       setTimeout(() => {
@@ -363,9 +363,9 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "contain",
+            objectFit: "cover",
             objectPosition: "center center",
-            display: "block",
+              display: "block",
           }}
         />
       </div>
