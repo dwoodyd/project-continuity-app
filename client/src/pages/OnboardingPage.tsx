@@ -129,8 +129,8 @@ function ProgressBar({ value }: { value: number }) {
         className="h-full transition-all duration-700 ease-out"
         style={{
           width: `${value}%`,
-          background: "linear-gradient(90deg, oklch(0.68 0.20 270), oklch(0.80 0.18 270))",
-          boxShadow: "0 0 8px oklch(0.68 0.20 270 / 0.6)",
+          background: "linear-gradient(90deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+          boxShadow: "0 0 8px oklch(0.65 0.18 65 / 0.7)",
         }}
       />
     </div>
@@ -302,7 +302,43 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
         textAlign: "center",
       }}
     >
-      {/* Wren — contained rounded video card, ~40vh tall, centered */}
+      {/* Skip intro — persistent top-right */}
+      <button
+        onClick={onDone}
+        style={{
+          position: "fixed",
+          top: "1.25rem",
+          right: "1.25rem",
+          zIndex: 60,
+          fontSize: "0.75rem",
+          color: "rgba(255,255,255,0.28)",
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          letterSpacing: "0.04em",
+          transition: "color 0.2s",
+          padding: "0.25rem 0.5rem",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.28)")}
+      >
+        Skip intro →
+      </button>
+
+      {/* Wren — contained rounded video card with amber glow */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        {/* Amber glow */}
+        <div
+          style={{
+            position: "absolute",
+            inset: "-40px",
+            background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.18) 0%, transparent 70%)",
+            filter: "blur(20px)",
+            pointerEvents: "none",
+            opacity: wrenVisible ? 1 : 0,
+            transition: "opacity 1.2s ease",
+          }}
+        />
       <div
         style={{
           opacity: wrenVisible ? 1 : 0,
@@ -314,6 +350,7 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
           overflow: "hidden",
           flexShrink: 0,
           boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+          position: "relative",
         }}
       >
         <video
@@ -331,6 +368,7 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
             display: "block",
           }}
         />
+      </div>
       </div>
 
       {/* Text */}
@@ -361,7 +399,7 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
           maxWidth: "22rem",
         }}
       >
-        {isLast ? (
+        {isLast && (
           <button
             onClick={onDone}
             className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
@@ -372,14 +410,6 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
             }}
           >
             Let's go <ArrowRight className="w-4 h-4" />
-          </button>
-        ) : (
-          <button
-            onClick={onDone}
-            className="text-xs transition-colors"
-            style={{ color: "rgba(255,255,255,0.22)" }}
-          >
-            Skip intro →
           </button>
         )}
       </div>
@@ -618,8 +648,12 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
-        <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)" }}>
-          <video key="thinking" src={WREN_CLIPS["thinking"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+        <div style={{ position: "relative" }}>
+          {/* Amber glow */}
+          <div style={{ position: "absolute", inset: "-32px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.15) 0%, transparent 70%)", filter: "blur(16px)", pointerEvents: "none" }} />
+          <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)", position: "relative" }}>
+            <video key="thinking" src={WREN_CLIPS["thinking"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+          </div>
         </div>
       </Entrance>
       <Entrance visible={visible[1]} className="mb-3">
@@ -890,17 +924,20 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
-        {/* Same rounded card treatment as the intro screen */}
-        <div
-          style={{
-            width: "min(320px, 80vw)",
-            aspectRatio: "1 / 1",
-            borderRadius: "1.5rem",
-            overflow: "hidden",
-            flexShrink: 0,
-            boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
-          }}
-        >
+        {/* Same rounded card treatment as the intro screen, with amber glow */}
+        <div style={{ position: "relative" }}>
+          <div style={{ position: "absolute", inset: "-40px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.18) 0%, transparent 70%)", filter: "blur(20px)", pointerEvents: "none" }} />
+          <div
+            style={{
+              width: "min(320px, 80vw)",
+              aspectRatio: "1 / 1",
+              borderRadius: "1.5rem",
+              overflow: "hidden",
+              flexShrink: 0,
+              boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+              position: "relative",
+            }}
+          >
           <video
             key="celebrate"
             src={WREN_CLIPS["celebrate"]}
@@ -916,6 +953,7 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
               display: "block",
             }}
           />
+          </div>
         </div>
       </Entrance>
       <Entrance visible={visible[1]} className="mb-3">
