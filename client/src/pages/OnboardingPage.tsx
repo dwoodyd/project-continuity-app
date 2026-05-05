@@ -154,14 +154,14 @@ function PillOption({
       onClick={onClick}
       className="w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 active:scale-[0.98]"
       style={{
-        background: selected ? "oklch(0.68 0.20 270 / 0.14)" : "rgba(255,255,255,0.04)",
-        border: selected ? "1.5px solid oklch(0.68 0.20 270 / 0.7)" : "1.5px solid rgba(255,255,255,0.08)",
-        boxShadow: selected ? "0 0 0 1px oklch(0.68 0.20 270 / 0.2) inset" : "none",
+        background: selected ? "oklch(0.80 0.17 65 / 0.12)" : "rgba(255,255,255,0.04)",
+        border: selected ? "1.5px solid oklch(0.80 0.17 65 / 0.65)" : "1.5px solid rgba(255,255,255,0.08)",
+        boxShadow: selected ? "0 0 0 1px oklch(0.80 0.17 65 / 0.18) inset" : "none",
       }}
     >
       <div
         className="text-sm font-medium"
-        style={{ color: selected ? "oklch(0.88 0.12 270)" : "rgba(255,255,255,0.82)" }}
+        style={{ color: selected ? "oklch(0.92 0.10 65)" : "rgba(255,255,255,0.82)" }}
       >
         {children}
       </div>

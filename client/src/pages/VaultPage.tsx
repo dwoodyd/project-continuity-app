@@ -1,6 +1,7 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { VaultGraph } from "@/components/VaultGraph";
+import WrenPlayer from "@/components/WrenPlayer";
 import {
   AlertTriangle,
   BookOpen,
@@ -739,14 +740,15 @@ export default function VaultPage() {
       {/* Items list */}
       {filtered.length === 0 ? (
         filterState === "all" ? (
-          <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
-            <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                <BookOpen className="w-6 h-6 text-white" />
+          <div className="relative overflow-hidden rounded-2xl text-center" style={{background: 'oklch(0.08 0.02 264)', border: '1px solid rgba(255,255,255,0.06)'}}>
+            {/* Amber ambient glow */}
+            <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse at 50% 55%, oklch(0.80 0.17 65 / 0.07) 0%, transparent 65%)'}} />
+            <div className="relative flex flex-col items-center pt-8 pb-8 px-8">
+              <div className="mb-5" style={{width: 'min(180px, 55vw)', aspectRatio: '9/16', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'}}>
+                <WrenPlayer clip="journal" size="full" loop autoPlay />
               </div>
               <p className="text-base font-semibold text-white mb-1">Your Vault is empty.</p>
-              <p className="text-sm text-white/70 mb-5">Import notes, transcripts, or files to start building your knowledge base.</p>
+              <p className="text-sm mb-5" style={{color: 'rgba(255,255,255,0.5)'}}>Drop your first insight — notes, transcripts, or files.</p>
               <Button size="sm" onClick={() => setAddOpen(true)} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0 gap-1.5">
                 <Plus className="w-3.5 h-3.5" />
                 Add first source

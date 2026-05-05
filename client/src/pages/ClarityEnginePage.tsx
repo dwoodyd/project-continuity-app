@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import WrenPlayer from "@/components/WrenPlayer";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Button } from "@/components/ui/button";
@@ -731,13 +732,16 @@ function HistoryView({
           <Button variant="ghost" onClick={() => setSearchQuery("")} className="mt-2">Clear search</Button>
         </div>
       ) : (
-        <div className="text-center py-16 text-muted-foreground">
-          <Brain className="w-10 h-10 mx-auto mb-3 opacity-30" />
-          <p>No clarity sessions yet.</p>
+        <div className="flex flex-col items-center py-10 text-muted-foreground">
+          <div className="mb-4" style={{width: 'min(160px, 50vw)', aspectRatio: '1/1', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'}}>
+            <WrenPlayer clip="tablet" size="full" loop autoPlay />
+          </div>
+          <p className="text-sm font-medium text-foreground mb-1">No clarity sessions yet.</p>
+          <p className="text-xs mb-4" style={{color: 'rgba(255,255,255,0.4)'}}>Start a session to clear the noise and find the signal.</p>
           <Button
             variant="ghost"
             onClick={() => setView("new")}
-            className="mt-2"
+            className="mt-1"
           >
             Start your first session
           </Button>

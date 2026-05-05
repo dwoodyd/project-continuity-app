@@ -50,6 +50,8 @@ export const WREN_CLIPS = {
   journal: "/manus-storage/WrenJournal_4343c2d0.mp4",
   /** Streak milestone celebration — Wren flying with golden halo, white bg, square */
   celebration2: "/manus-storage/WrenCelebration2_68dd7c1a.mp4",
+  /** Clarity Engine empty state — Wren at tablet/screen, focused energy */
+  tablet: "/manus-storage/WrenTablet2_e29d161c.mp4",
 } as const;
 
 export type WrenClip = keyof typeof WREN_CLIPS;
