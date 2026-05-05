@@ -92,6 +92,54 @@ const MORE_ITEMS = [
   { href: "/settings",     label: "Settings",         icon: Settings },
 ];
 
+// ── Wren sidebar presence with meet-Wren tooltip ────────────────────────────
+const WREN_TOOLTIP_KEY = "continuary-wren-tooltip-seen";
+function WrenSidebarPresence() {
+  const [showTooltip, setShowTooltip] = useState(() => {
+    try { return !localStorage.getItem(WREN_TOOLTIP_KEY); } catch { return false; }
+  });
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    const t1 = setTimeout(() => setVisible(true), 1200);
+    const t2 = setTimeout(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setShowTooltip(false);
+        try { localStorage.setItem(WREN_TOOLTIP_KEY, "1"); } catch { /* ignore */ }
+      }, 400);
+    }, 5000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showTooltip]);
+
+  return (
+    <div className="relative flex items-center gap-2 px-3 py-1.5">
+      <div style={{ WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)" }}>
+        <WrenPlayer clip="homeVideo" size="xs" loop autoPlay />
+      </div>
+      <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
+      {showTooltip && (
+        <div
+          className="absolute bottom-full left-2 mb-2 z-50"
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(6px)",
+            transition: "opacity 0.35s ease, transform 0.35s ease",
+            pointerEvents: "none",
+          }}
+        >
+          <div className="rounded-xl px-3 py-2 text-xs shadow-xl max-w-[180px]" style={{ background: "oklch(0.22 0.04 65)", border: "1px solid oklch(0.80 0.17 65 / 0.35)", color: "oklch(0.95 0.05 65)" }}>
+            <p className="font-semibold mb-0.5">Hi, I'm Wren ✨</p>
+            <p className="leading-snug" style={{ color: "oklch(0.85 0.04 65)" }}>I'll be here with you every step of the way.</p>
+            <div className="absolute -bottom-1.5 left-4 w-3 h-3 rotate-45" style={{ background: "oklch(0.22 0.04 65)", borderRight: "1px solid oklch(0.80 0.17 65 / 0.35)", borderBottom: "1px solid oklch(0.80 0.17 65 / 0.35)" }} />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface AppLayoutProps {
   children: React.ReactNode;
   onPreviewIntro?: () => void;
@@ -490,11 +538,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
           {/* Sidebar footer */}
           <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
-            {/* Wren resting — persistent looping mascot */}
-            <div className="flex items-center gap-2 px-3 py-1.5">
-              <WrenPlayer clip="homeVideo" size="xs" loop autoPlay />
-              <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
-            </div>
+            {/* Wren resting — persistent looping mascot with meet-Wren tooltip */}
+            <WrenSidebarPresence />
             {user && (
               <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.68 0.20 270 / 0.18)" }}>

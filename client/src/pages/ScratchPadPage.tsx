@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
+import WrenPlayer from "@/components/WrenPlayer";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -460,10 +461,12 @@ export default function ScratchPadPage() {
           <button onClick={() => { setSearch(""); setColourFilter(null); }} className="text-xs text-primary mt-2 hover:underline">Clear filters</button>
         </div>
       ) : notes.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground/50">
-          <PenLine className="w-8 h-8 mx-auto mb-3 opacity-30" />
-          <p className="text-sm">Nothing here yet.</p>
-          <p className="text-xs mt-1">Add a note above — no labels, no projects, just words.</p>
+        <div className="text-center py-8 flex flex-col items-center">
+          <div style={{ width: 140, height: 140, WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)" }}>
+            <WrenPlayer clip="playful" size="full" loop autoPlay />
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">Nothing here yet.</p>
+          <p className="text-xs text-muted-foreground/50 mt-1">Add a note above — no labels, no projects, just words.</p>
         </div>
       ) : (
         <div className="space-y-2">

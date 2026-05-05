@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import WrenPlayer from "@/components/WrenPlayer";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -221,8 +222,8 @@ export default function WeeklyCompassPage() {
         <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
           <div className="relative">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <Compass className="w-7 h-7 text-white" />
+            <div className="flex justify-center mb-2" style={{ WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)" }}>
+              <WrenPlayer clip="floatingMemories" size="xl" loop autoPlay />
             </div>
             <p className="text-base font-semibold text-white mb-2">No compass set for this week.</p>
             <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto">

@@ -20,6 +20,14 @@ import {
   Shield,
   ArrowRight,
   CheckCircle2,
+  Sparkles,
+  Heart,
+  Star,
+  Flame,
+  Eye,
+  MessageCircle,
+  Trophy,
+  Moon,
 } from "lucide-react";
 
 const BRAND_LOGO = "/logo-navy.svg";
@@ -97,6 +105,74 @@ const PRINCIPLES = [
   "The work is never lost. It is waiting for you to come back.",
 ];
 
+// Wren personality trait cards
+const WREN_TRAITS = [
+  {
+    icon: Heart,
+    title: "She never judges a gap",
+    desc: "Whether you've been away for a day or a month, Wren greets you the same way — with warmth, not guilt. She holds your thread while you're gone.",
+    clip: "greeting" as const,
+    accent: "text-rose-400",
+    accentBg: "bg-rose-400/10",
+    accentBorder: "border-rose-400/20",
+  },
+  {
+    icon: Flame,
+    title: "She celebrates your returns",
+    desc: "Every check-in is a win. When you hit a streak milestone — 3, 7, or 30 days — Wren shows up with a full celebration. You earned it.",
+    clip: "celebration2" as const,
+    accent: "text-amber-400",
+    accentBg: "bg-amber-400/10",
+    accentBorder: "border-amber-400/20",
+  },
+  {
+    icon: Eye,
+    title: "She watches over your work",
+    desc: "Wren lives in your sidebar, quietly present on every page. She's not a chatbot — she's a companion. A reminder that someone is keeping watch.",
+    clip: "homeVideo" as const,
+    accent: "text-violet-400",
+    accentBg: "bg-violet-400/10",
+    accentBorder: "border-violet-400/20",
+  },
+  {
+    icon: MessageCircle,
+    title: "She speaks to you directly",
+    desc: "During onboarding and key moments, Wren delivers lines to you personally — not instructions, but presence. She knows your name.",
+    clip: "withLetters" as const,
+    accent: "text-blue-400",
+    accentBg: "bg-blue-400/10",
+    accentBorder: "border-blue-400/20",
+  },
+  {
+    icon: Moon,
+    title: "She rests when you do",
+    desc: "When you're not active, Wren settles into a quiet loop — eyes soft, golden particles drifting. She's not waiting impatiently. She's just there.",
+    clip: "sleeping" as const,
+    accent: "text-indigo-400",
+    accentBg: "bg-indigo-400/10",
+    accentBorder: "border-indigo-400/20",
+  },
+  {
+    icon: Star,
+    title: "She marks your milestones",
+    desc: "Wren tracks what matters. First check-in, first project, first streak — she acknowledges every threshold with intention, not just a badge.",
+    clip: "pathOfProgress" as const,
+    accent: "text-emerald-400",
+    accentBg: "bg-emerald-400/10",
+    accentBorder: "border-emerald-400/20",
+  },
+];
+
+// Where Wren shows up across the app
+const WREN_APPEARANCES = [
+  { location: "Onboarding", desc: "She opens the experience and closes it — bookending your first day.", clip: "darkOpener" as const },
+  { location: "Sidebar", desc: "A quiet ambient loop in the footer. Always present, never intrusive.", clip: "homeVideo" as const },
+  { location: "Check-in complete", desc: "A small celebration every time you close out your day.", clip: "celebrate" as const },
+  { location: "Streak milestones", desc: "Full-screen celebration at 3, 7, and 30 consecutive days.", clip: "celebration2" as const },
+  { location: "Knowledge Vault", desc: "She greets you at the empty state — an invitation, not a void.", clip: "journal" as const },
+  { location: "Clarity Engine", desc: "She's focused and ready when you need to clear the noise.", clip: "tablet" as const },
+];
+
 export default function AboutAppPage() {
   const [, navigate] = useLocation();
   const utils = trpc.useUtils();
@@ -112,11 +188,10 @@ export default function AboutAppPage() {
   };
 
   return (
-    <div
-      className="min-h-screen text-foreground overflow-y-auto bg-background"
-    >
+    <div className="min-h-screen text-foreground overflow-y-auto bg-background">
       {/* ── Header ── */}
-      <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/5"
+      <div
+        className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/5"
         style={{ background: "var(--background)", backdropFilter: "blur(12px)", borderColor: "var(--border)" }}
       >
         <img src={BRAND_LOGO} alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
@@ -132,7 +207,6 @@ export default function AboutAppPage() {
       <div className="max-w-2xl mx-auto px-6 pb-24 pt-12">
         {/* ── Hero ── */}
         <div className="text-center mb-14">
-          {/* Wren greeting — front and center */}
           <div className="flex flex-col items-center mb-4">
             <WrenPlayer clip="greeting" size="xl" />
             <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
@@ -163,9 +237,7 @@ export default function AboutAppPage() {
         </div>
 
         {/* ── Core principles ── */}
-        <div
-          className="rounded-2xl border p-6 mb-10 bg-card"
-        >
+        <div className="rounded-2xl border p-6 mb-10 bg-card">
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
             Three things to know
           </p>
@@ -203,39 +275,156 @@ export default function AboutAppPage() {
           </div>
         </div>
 
-        {/* ── Meet Wren ── */}
-        <div
-          className="rounded-2xl border p-6 mb-10 text-center"
-          style={{ background: "oklch(0.18 0.04 264 / 0.6)", borderColor: "oklch(0.72 0.14 65 / 0.25)" }}
-        >
-          <div className="flex flex-col items-center mb-4">
-            <WrenPlayer clip="greeting" size="lg" />
+        {/* ══════════════════════════════════════════════════════════════════════
+            MEET WREN — Full Profile
+        ══════════════════════════════════════════════════════════════════════ */}
+        <div className="mb-12">
+          {/* Section header */}
+          <div className="text-center mb-8">
             <p
-              className="text-xs font-medium mt-1"
-              style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}
+              className="text-xs font-semibold tracking-widest uppercase mb-2"
+              style={{ color: "oklch(0.82 0.14 65)" }}
             >
-              Wren — your Continuary companion
+              Meet Wren
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
+              Your continuity companion
+            </h2>
+            <p className="text-sm text-white/60 leading-relaxed max-w-md mx-auto">
+              Wren is the bird who carries your thread. She's not an AI assistant, not a productivity bot —
+              she's a presence. A witness to your work. She shows up when it matters and stays quiet when you need space.
             </p>
           </div>
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-2"
-            style={{ color: "oklch(0.82 0.14 65)" }}
+
+          {/* Hero Wren card — full-width cinematic intro */}
+          <div
+            className="rounded-2xl overflow-hidden mb-6 relative"
+            style={{
+              background: "oklch(0.12 0.04 264)",
+              border: "1px solid oklch(0.72 0.14 65 / 0.2)",
+              boxShadow: "0 0 60px oklch(0.72 0.14 65 / 0.08)",
+            }}
           >
-            Meet Wren
-          </p>
-          <h2 className="text-xl font-bold text-foreground mb-3">
-            Your continuity companion
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-            Wren is the bird who carries your thread. She shows up in your check-ins, celebrates your returns,
-            and keeps your work warm between sessions. She doesn't judge gaps — she just helps you find your way back.
-          </p>
+            {/* Ambient glow */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.72 0.14 65 / 0.12) 0%, transparent 70%)",
+              }}
+            />
+            <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-6 p-6 sm:p-8 relative z-10">
+              {/* Video */}
+              <div
+                className="shrink-0 mb-4 sm:mb-0"
+                style={{
+                  width: 200,
+                  height: 200,
+                  borderRadius: "1.25rem",
+                  overflow: "hidden",
+                  boxShadow: "0 8px 40px oklch(0.72 0.14 65 / 0.25)",
+                  border: "1px solid oklch(0.72 0.14 65 / 0.2)",
+                }}
+              >
+                <WrenPlayer clip="withLetters" size="full" loop autoPlay feather featherDirection="radial" />
+              </div>
+              {/* Bio */}
+              <div className="flex-1 text-center sm:text-left">
+                <div
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-3"
+                  style={{ background: "oklch(0.72 0.14 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Continuary's mascot
+                </div>
+                <h3 className="text-xl font-bold text-foreground mb-2">Wren</h3>
+                <p className="text-sm text-white/70 leading-relaxed mb-3">
+                  A small bird with a golden thread. She appeared the moment the first user opened Continuary
+                  and has been carrying threads ever since. She doesn't speak in notifications or push you toward
+                  productivity — she simply holds the space between your sessions.
+                </p>
+                <p className="text-xs text-white/40 italic">
+                  "She doesn't judge gaps. She just helps you find your way back."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Personality trait cards — 2 column grid */}
+          <div className="mb-6">
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
+              Who she is
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {WREN_TRAITS.map(({ icon: Icon, title, desc, clip, accent, accentBg, accentBorder }) => (
+                <div
+                  key={title}
+                  className={`rounded-xl border ${accentBorder} p-4 flex gap-3`}
+                  style={{ background: "oklch(0.14 0.03 264 / 0.8)" }}
+                >
+                  {/* Small video thumbnail */}
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: "0.75rem",
+                      overflow: "hidden",
+                      border: "1px solid oklch(0.72 0.14 65 / 0.15)",
+                    }}
+                  >
+                    <WrenPlayer clip={clip} size="full" loop autoPlay />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Icon className={`w-3.5 h-3.5 ${accent} shrink-0`} />
+                      <p className="text-sm font-semibold text-foreground leading-snug">{title}</p>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Where Wren shows up */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{
+              background: "oklch(0.14 0.03 264 / 0.6)",
+              borderColor: "oklch(0.72 0.14 65 / 0.15)",
+            }}
+          >
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5">
+              Where you'll find her
+            </p>
+            <div className="space-y-4">
+              {WREN_APPEARANCES.map(({ location, desc, clip }) => (
+                <div key={location} className="flex items-center gap-4">
+                  {/* Tiny video */}
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: "0.625rem",
+                      overflow: "hidden",
+                      border: "1px solid oklch(0.72 0.14 65 / 0.15)",
+                    }}
+                  >
+                    <WrenPlayer clip={clip} size="full" loop autoPlay />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground mb-0.5">{location}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ── How to start ── */}
-        <div
-          className="rounded-2xl border p-6 mb-10 bg-card"
-        >
+        <div className="rounded-2xl border p-6 mb-10 bg-card">
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
             Where to start
           </p>
@@ -275,7 +464,7 @@ export default function AboutAppPage() {
             <ArrowRight className="w-5 h-5" />
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
-            You won't see this screen again.
+            You won't see this screen again — but you can replay it from Settings.
           </p>
         </div>
       </div>

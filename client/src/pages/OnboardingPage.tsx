@@ -349,8 +349,10 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
           borderRadius: "1.5rem",
           overflow: "hidden",
           flexShrink: 0,
-          boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+          boxShadow: "0 8px 64px rgba(0,0,0,0.7)",
           position: "relative",
+          WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
+          maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
         }}
       >
         <video
@@ -651,7 +653,7 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
         <div style={{ position: "relative" }}>
           {/* Amber glow */}
           <div style={{ position: "absolute", inset: "-32px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.15) 0%, transparent 70%)", filter: "blur(16px)", pointerEvents: "none" }} />
-          <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)", position: "relative" }}>
+          <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 64px rgba(0,0,0,0.7)", position: "relative", WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)" }}>
             <video key="floatingMemories" src={WREN_CLIPS["floatingMemories"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         </div>
@@ -934,8 +936,10 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
               borderRadius: "1.5rem",
               overflow: "hidden",
               flexShrink: 0,
-              boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)",
+              boxShadow: "0 8px 64px rgba(0,0,0,0.7)",
               position: "relative",
+              WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
             }}
           >
           <video
