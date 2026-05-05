@@ -155,6 +155,7 @@ export default function WrenPlayer({
         muted={muted}
         playsInline
         className={cn("w-full h-full object-contain", className)}
+        style={{ mixBlendMode: "screen" }}
       />
     </div>
   );

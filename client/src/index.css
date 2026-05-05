@@ -395,3 +395,10 @@
   }
 }
 
+
+/* ── Wren video blend mode ───────────────────────────────────────────────────
+   Blend out black backgrounds from all Wren mascot videos so only the
+   foreground character is visible over any background colour or image.      */
+video {
+  mix-blend-mode: screen;
+}

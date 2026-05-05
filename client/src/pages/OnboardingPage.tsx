@@ -344,6 +344,7 @@ function SmoothLoopVideo({
     objectFit: "cover",
     objectPosition: "center center",
     display: "block",
+    mixBlendMode: "screen",
     transition: `opacity ${crossfadeDuration}s ease`,
     ...style,
   };
