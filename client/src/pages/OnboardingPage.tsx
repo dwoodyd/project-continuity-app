@@ -243,7 +243,39 @@ function Headline({ children, size = "lg" }: { children: React.ReactNode; size?:
   );
 }
 
-// ─── Wren speech bubble (auto-advancing) ─────────────────────────────────────
+// ─── Word-by-word reveal helper ───────────────────────────────────────────────
+function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean; delay?: number }) {
+  const words = text.split(" ");
+  const [visible, setVisible] = useState<boolean[]>(Array(words.length).fill(false));
+  useEffect(() => {
+    if (!active) { setVisible(Array(words.length).fill(false)); return; }
+    const timers = words.map((_, i) =>
+      setTimeout(() => setVisible(prev => { const n = [...prev]; n[i] = true; return n; }), delay + i * 85)
+    );
+    return () => timers.forEach(clearTimeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, text, delay]);
+  return (
+    <span>
+      {words.map((word, i) => (
+        <span
+          key={i}
+          style={{
+            display: "inline-block",
+            opacity: visible[i] ? 1 : 0,
+            transform: visible[i] ? "translateY(0)" : "translateY(10px)",
+            transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
+            marginRight: "0.28em",
+          }}
+        >
+          {word}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// ─── Wren cinematic intro ─────────────────────────────────────────────────────
 const WREN_INTRO_LINES = [
   "hey there.",
   "you just did something most people skip.",
@@ -254,165 +286,152 @@ const WREN_INTRO_LINES = [
 
 function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => void }) {
   const [lineIndex, setLineIndex] = useState(0);
-  const [lineVisible, setLineVisible] = useState(false);
-  const [wrenVisible, setWrenVisible] = useState(false);
+  const [lineActive, setLineActive] = useState(false);
+  const [videoVisible, setVideoVisible] = useState(false);
+  const [fadingOut, setFadingOut] = useState(false);
 
+  // Fade in video on mount
   useEffect(() => {
-    if (!active) {
-      setLineIndex(0);
-      setLineVisible(false);
-      setWrenVisible(false);
-      return;
-    }
-    // Wren appears first
-    const t0 = setTimeout(() => setWrenVisible(true), 200);
-    // First line
-    const t1 = setTimeout(() => setLineVisible(true), 600);
-    return () => { clearTimeout(t0); clearTimeout(t1); };
+    if (!active) { setVideoVisible(false); setFadingOut(false); return; }
+    const t = setTimeout(() => setVideoVisible(true), 150);
+    return () => clearTimeout(t);
   }, [active]);
 
+  // Reset + start first line
   useEffect(() => {
-    if (!lineVisible || !active) return;
-    if (lineIndex >= WREN_INTRO_LINES.length - 1) return;
-    // Auto-advance each line
-    const duration = lineIndex === 0 ? 2800 : 3200;
-    const t = setTimeout(() => {
-      setLineVisible(false);
-      setTimeout(() => {
-        setLineIndex(i => i + 1);
-        setLineVisible(true);
-      }, 350);
-    }, duration);
+    if (!active) { setLineIndex(0); setLineActive(false); return; }
+    const t = setTimeout(() => setLineActive(true), 900);
     return () => clearTimeout(t);
-  }, [lineIndex, lineVisible, active]);
+  }, [active]);
+
+  // Auto-advance lines
+  useEffect(() => {
+    if (!lineActive || !active) return;
+    if (lineIndex >= WREN_INTRO_LINES.length - 1) return;
+    const lineDuration = lineIndex === 0 ? 3000 : 3400;
+    const t = setTimeout(() => {
+      setLineActive(false);
+      setTimeout(() => { setLineIndex(i => i + 1); setLineActive(true); }, 420);
+    }, lineDuration);
+    return () => clearTimeout(t);
+  }, [lineIndex, lineActive, active]);
 
   const isLast = lineIndex === WREN_INTRO_LINES.length - 1;
+  const line = WREN_INTRO_LINES[lineIndex];
+  const isHero = lineIndex === 0;
+
+  const handleDone = () => {
+    setFadingOut(true);
+    setTimeout(onDone, 650);
+  };
 
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        flex: 1,
-        minHeight: "100dvh",
-        padding: "2rem 2rem 3rem",
-        gap: "2rem",
-        textAlign: "center",
+        position: "fixed",
+        inset: 0,
+        zIndex: 10,
+        overflow: "hidden",
+        background: "#000",
+        opacity: fadingOut ? 0 : 1,
+        transition: fadingOut ? "opacity 0.65s ease" : "none",
       }}
     >
-      {/* Skip intro — persistent top-right */}
-      <button
-        onClick={onDone}
+      {/* ── Full-bleed video background ── */}
+      <video
+        key="wren-intro-bg"
+        src={WREN_CLIPS["withLetters"]}
+        autoPlay
+        loop
+        muted
+        playsInline
         style={{
-          position: "fixed",
-          top: "1.25rem",
-          right: "1.25rem",
-          zIndex: 60,
-          fontSize: "0.75rem",
-          color: "rgba(255,255,255,0.28)",
-          background: "transparent",
-          border: "none",
-          cursor: "pointer",
-          letterSpacing: "0.04em",
-          transition: "color 0.2s",
-          padding: "0.25rem 0.5rem",
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center center",
+          opacity: videoVisible ? 1 : 0,
+          transition: "opacity 1.6s ease",
+          display: "block",
         }}
-        onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.55)")}
-        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.28)")}
+      />
+
+      {/* ── Gradient overlays — top dark, bottom dark, edges dark ── */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 28%, transparent 48%, rgba(0,0,0,0.88) 100%)",
+      }} />
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.25) 100%)",
+      }} />
+
+      {/* ── Skip — barely visible bottom-right ── */}
+      <button
+        onClick={handleDone}
+        style={{
+          position: "absolute", bottom: "1.5rem", right: "1.5rem", zIndex: 20,
+          fontSize: "0.68rem", color: "rgba(255,255,255,0.2)",
+          background: "transparent", border: "none", cursor: "pointer",
+          letterSpacing: "0.1em", textTransform: "uppercase",
+          transition: "color 0.2s", padding: "0.5rem",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
+        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.2)")}
       >
-        Skip intro →
+        Skip
       </button>
 
-      {/* Wren — contained rounded video card with amber glow */}
-      <div style={{ position: "relative", flexShrink: 0 }}>
-        {/* Amber glow */}
-        <div
-          style={{
-            position: "absolute",
-            inset: "-40px",
-            background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.18) 0%, transparent 70%)",
-            filter: "blur(20px)",
-            pointerEvents: "none",
-            opacity: wrenVisible ? 1 : 0,
-            transition: "opacity 1.2s ease",
-          }}
-        />
+      {/* ── Floating text — lower third ── */}
       <div
         style={{
-          opacity: wrenVisible ? 1 : 0,
-          transform: wrenVisible ? "translateY(0) scale(1)" : "translateY(16px) scale(0.96)",
-          transition: "opacity 0.9s cubic-bezier(0.16,1,0.3,1), transform 0.9s cubic-bezier(0.16,1,0.3,1)",
-          width: "min(320px, 80vw)",
-          aspectRatio: "1 / 1",
-          borderRadius: "1.5rem",
-          overflow: "hidden",
-          flexShrink: 0,
-          boxShadow: "0 8px 64px rgba(0,0,0,0.7)",
-          position: "relative",
-          WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
-          maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          padding: "0 clamp(1.5rem, 6vw, 4rem) clamp(4rem, 10vh, 7rem)",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          gap: "2rem", textAlign: "center",
         }}
       >
-        <video
-          key="withLetters"
-          src={WREN_CLIPS["withLetters"]}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center center",
-              display: "block",
-          }}
-        />
-      </div>
-      </div>
-
-      {/* Text */}
-      <div style={{ minHeight: "4.5rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <p
           style={{
-            fontSize: lineIndex === 0 ? "2rem" : "1.5rem",
-            fontWeight: lineIndex === 0 ? 700 : 400,
-            color: "rgba(255,255,255,0.95)",
-            lineHeight: 1.25,
-            letterSpacing: lineIndex === 0 ? "-0.02em" : "-0.01em",
-            opacity: lineVisible ? 1 : 0,
-            transform: lineVisible ? "translateY(0)" : "translateY(14px)",
-            transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
-            maxWidth: "28rem",
+            fontSize: isHero ? "clamp(1.8rem, 5.5vw, 3rem)" : "clamp(1.3rem, 3.8vw, 2rem)",
+            fontWeight: isHero ? 700 : 400,
+            color: "rgba(255,255,255,0.97)",
+            lineHeight: 1.18,
+            letterSpacing: isHero ? "-0.03em" : "-0.015em",
+            maxWidth: "34rem",
+            textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)",
+            margin: 0,
           }}
         >
-          {WREN_INTRO_LINES[lineIndex]}
+          <WordReveal text={line} active={lineActive} delay={0} />
         </p>
-      </div>
 
-      {/* CTA */}
-      <div
-        style={{
-          opacity: lineVisible ? 1 : 0,
-          transition: "opacity 0.4s ease 0.35s",
-          width: "100%",
-          maxWidth: "22rem",
-        }}
-      >
+        {/* CTA on last line */}
         {isLast && (
-          <button
-            onClick={onDone}
-            className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
+          <div
             style={{
-              background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-              color: "white",
-              boxShadow: "0 4px 24px oklch(0.52 0.22 270 / 0.45)",
+              opacity: lineActive ? 1 : 0,
+              transform: lineActive ? "translateY(0)" : "translateY(12px)",
+              transition: "opacity 0.6s ease 1s, transform 0.6s ease 1s",
+              width: "100%", maxWidth: "22rem",
             }}
           >
-            Let's go <ArrowRight className="w-4 h-4" />
-          </button>
+            <button
+              onClick={handleDone}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem",
+                fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600,
+                background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
+                color: "white", border: "none", cursor: "pointer",
+                boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset",
+              }}
+            >
+              Let's go <ArrowRight style={{ width: "1rem", height: "1rem" }} />
+            </button>
+          </div>
         )}
       </div>
     </div>
