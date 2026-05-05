@@ -1080,7 +1080,96 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   );
 }
 
-// ─── Slide transition wrapper ─────────────────────────────────────────────────
+// ─── Ambient audio controller ─────────────────────────────────────────────────
+const AMBIENT_SRC = "/manus-storage/ambient-onboarding_6b426ce0.mp3";
+
+function useAmbientAudio(isCinematic: boolean) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!audioRef.current) {
+      const audio = new Audio(AMBIENT_SRC);
+      audio.loop = true;
+      audio.volume = 0;
+      audioRef.current = audio;
+    }
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    cancelAnimationFrame(fadeRef.current);
+
+    const targetVol = isCinematic ? 0.08 : 0;
+    const step = isCinematic ? 0.002 : 0.004; // fade in slower, fade out faster
+
+    if (isCinematic) {
+      audio.play().catch(() => {});
+    }
+
+    const fade = () => {
+      if (!audioRef.current) return;
+      const current = audioRef.current.volume;
+      const diff = targetVol - current;
+      if (Math.abs(diff) < 0.001) {
+        audioRef.current.volume = targetVol;
+        if (targetVol === 0) audioRef.current.pause();
+        return;
+      }
+      audioRef.current.volume = Math.max(0, Math.min(1, current + (diff > 0 ? step : -step)));
+      fadeRef.current = requestAnimationFrame(fade);
+    };
+    fadeRef.current = requestAnimationFrame(fade);
+
+    return () => cancelAnimationFrame(fadeRef.current);
+  }, [isCinematic]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(fadeRef.current);
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+    };
+  }, []);
+}
+
+// ─── Fade-to-black crossfade transition ───────────────────────────────────────
+// Renders a black overlay that flashes briefly on step change, giving a
+// cinematic dissolve feel between screens.
+function FadeToBlackTransition({ stepKey, children }: { stepKey: number; children: React.ReactNode }) {
+  const [overlay, setOverlay] = useState(0); // 0=transparent, 1=black
+  const prevKey = useRef(stepKey);
+
+  useEffect(() => {
+    if (prevKey.current === stepKey) return;
+    prevKey.current = stepKey;
+    // Flash black briefly
+    setOverlay(1);
+    const t = setTimeout(() => setOverlay(0), 50);
+    return () => clearTimeout(t);
+  }, [stepKey]);
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative" }}>
+      {children}
+      {/* Black overlay — fades in then out on each step change */}
+      <div
+        style={{
+          position: "fixed", inset: 0, zIndex: 100,
+          background: "#000",
+          opacity: overlay,
+          transition: overlay === 1
+            ? "opacity 0.25s ease"
+            : "opacity 0.5s ease",
+          pointerEvents: overlay > 0.5 ? "all" : "none",
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Slide transition wrapper (kept for legacy compat) ────────────────────────
 function SlideTransition({
   stepKey,
   direction,
@@ -1122,6 +1211,9 @@ export default function OnboardingPage() {
   return <OnboardingPageInner />;
 }
 
+// Cinematic steps are those with full-bleed Wren video backgrounds
+const CINEMATIC_STEPS = new Set([0, 2, 6]);
+
 function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const { user, isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
@@ -1131,6 +1223,9 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   // 3 = tone select, 4 = focus, 5 = project, 6 = done
   const [step, setStep] = useState(-1);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+
+  // Ambient audio: plays softly on cinematic screens, fades out on input screens
+  useAmbientAudio(CINEMATIC_STEPS.has(step));
 
   // Skip invite gate if user already has access
   useEffect(() => {
@@ -1261,8 +1356,8 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
       {/* Progress bar */}
       <ProgressBar value={progress} />
 
-      {/* Screens */}
-      <SlideTransition stepKey={step} direction={direction}>
+      {/* Screens — wrapped in fade-to-black crossfade */}
+      <FadeToBlackTransition stepKey={step}>
         {step === -1 && (
           <InviteGateScreen onSuccess={() => goForward(0)} />
         )}
@@ -1312,7 +1407,7 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
           />
         )}
         {step === 6 && <DoneScreen name={name} onDone={onDone} />}
-      </SlideTransition>
+      </FadeToBlackTransition>
     </div>
   );
 }
