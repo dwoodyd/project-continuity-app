@@ -281,6 +281,95 @@ function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean
   );
 }
 
+// ─── Smooth crossfade loop video ────────────────────────────────────────────
+// Two <video> elements stacked. When A is ~0.5s from ending, B (already
+// playing from the start) fades in while A fades out → seamless dissolve loop.
+function SmoothLoopVideo({
+  src,
+  style,
+  crossfadeDuration = 0.8,
+}: {
+  src: string;
+  style?: React.CSSProperties;
+  crossfadeDuration?: number;
+}) {
+  const videoARef = useRef<HTMLVideoElement>(null);
+  const videoBRef = useRef<HTMLVideoElement>(null);
+  const [activeSlot, setActiveSlot] = useState<"a" | "b">("a");
+  const rafRef = useRef<number>(0);
+
+  // Kick off the crossfade logic once both videos are ready
+  const startLoop = useCallback(() => {
+    const check = () => {
+      const active = activeSlot === "a" ? videoARef.current : videoBRef.current;
+      const standby = activeSlot === "a" ? videoBRef.current : videoARef.current;
+      if (!active || !standby) { rafRef.current = requestAnimationFrame(check); return; }
+
+      const remaining = active.duration - active.currentTime;
+      if (active.duration > 0 && remaining <= crossfadeDuration + 0.05) {
+        // Restart standby from beginning and swap
+        standby.currentTime = 0;
+        standby.play().catch(() => {});
+        setActiveSlot(prev => (prev === "a" ? "b" : "a"));
+        // Give a small gap before checking again to avoid double-trigger
+        setTimeout(() => { rafRef.current = requestAnimationFrame(check); }, (crossfadeDuration + 0.2) * 1000);
+        return;
+      }
+      rafRef.current = requestAnimationFrame(check);
+    };
+    rafRef.current = requestAnimationFrame(check);
+  }, [activeSlot, crossfadeDuration]);
+
+  useEffect(() => {
+    const a = videoARef.current;
+    if (!a) return;
+    a.play().catch(() => {});
+    startLoop();
+    return () => cancelAnimationFrame(rafRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-register the RAF loop when activeSlot changes
+  useEffect(() => {
+    cancelAnimationFrame(rafRef.current);
+    startLoop();
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [activeSlot, startLoop]);
+
+  const baseStyle: React.CSSProperties = {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    objectPosition: "center center",
+    display: "block",
+    transition: `opacity ${crossfadeDuration}s ease`,
+    ...style,
+  };
+
+  return (
+    <>
+      <video
+        ref={videoARef}
+        src={src}
+        muted
+        playsInline
+        preload="auto"
+        style={{ ...baseStyle, opacity: activeSlot === "a" ? 1 : 0 }}
+      />
+      <video
+        ref={videoBRef}
+        src={src}
+        muted
+        playsInline
+        preload="auto"
+        style={{ ...baseStyle, opacity: activeSlot === "b" ? 1 : 0 }}
+      />
+    </>
+  );
+}
+
 // ─── Wren cinematic intro ─────────────────────────────────────────────────────
 const WREN_INTRO_LINES = [
   "hey there.",
@@ -343,26 +432,10 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
         transition: fadingOut ? "opacity 0.65s ease" : "none",
       }}
     >
-      {/* ── Full-bleed video background ── */}
-      <video
-        key="wren-intro-bg"
-        src={WREN_CLIPS["withLetters"]}
-        autoPlay
-        loop
-        muted
-        playsInline
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center center",
-          opacity: videoVisible ? 1 : 0,
-          transition: "opacity 1.6s ease",
-          display: "block",
-        }}
-      />
+      {/* ── Full-bleed video background (smooth crossfade loop) ── */}
+      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.6s ease" }}>
+        <SmoothLoopVideo src={WREN_CLIPS["withLetters"]} crossfadeDuration={1.0} />
+      </div>
 
       {/* ── Gradient overlays — top dark, bottom dark, edges dark ── */}
       <div style={{
@@ -674,37 +747,44 @@ function StepName({
 // ─── Step 2: Tone interstitial (Wren reacts to name) ─────────────────
 function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => void }) {
   const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 150);
-  useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
+  const [videoVisible, setVideoVisible] = useState(false);
+  const visible = useEntrance(active, 3, 0, 180);
+  useEffect(() => {
+    const t1 = setTimeout(() => setVideoVisible(true), 150);
+    const t2 = setTimeout(() => setActive(true), 900);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-6">
-        <div style={{ position: "relative" }}>
-          {/* Amber glow */}
-          <div style={{ position: "absolute", inset: "-32px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.15) 0%, transparent 70%)", filter: "blur(16px)", pointerEvents: "none" }} />
-          <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 64px rgba(0,0,0,0.7)", position: "relative", WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)" }}>
-            <video key="floatingMemories" src={WREN_CLIPS["floatingMemories"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-          </div>
-        </div>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-3">
-        <Headline>
-          Good to meet you, <strong style={{ fontWeight: 700 }}>{name || "you"}</strong>.
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-10">
-        <p className="text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-          One quick thing — how direct should I be with you? This shapes how Continuary talks to you every day.
-        </p>
-      </Entrance>
-      <Entrance visible={visible[3]} className="w-full">
-        <CTAButton onClick={onNext}>
-          Choose my style <ArrowRight className="w-4 h-4" />
-        </CTAButton>
-      </Entrance>
-    </div>
+    <div style={{ position: "fixed", inset: 0, zIndex: 5, overflow: "hidden", background: "#000" }}>
+      {/* Full-bleed video background */}
+      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.6s ease" }}>
+        <SmoothLoopVideo src={WREN_CLIPS["floatingMemories2"]} crossfadeDuration={1.0} />
+      </div>
+      {/* Gradient overlays */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 45%, rgba(0,0,0,0.9) 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.2) 100%)" }} />
+      {/* Lower-third text + CTA */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingLeft: "clamp(1.5rem, 6vw, 4rem)", paddingRight: "clamp(1.5rem, 6vw, 4rem)", paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem", textAlign: "center" }}>
+        <Entrance visible={visible[0]}>
+          <p style={{ fontSize: "clamp(1.6rem, 5vw, 2.6rem)", fontWeight: 700, color: "rgba(255,255,255,0.97)", lineHeight: 1.18, letterSpacing: "-0.03em", maxWidth: "30rem", textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)", margin: 0 }}>
+            Good to meet you, <strong style={{ fontWeight: 800, color: "oklch(0.88 0.14 65)" }}>{name || "you"}</strong>.
+          </p>
+        </Entrance>
+        <Entrance visible={visible[1]}>
+          <p style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, maxWidth: "28rem", textShadow: "0 1px 12px rgba(0,0,0,0.9)", margin: 0 }}>
+            One quick thing — how direct should I be with you? This shapes how Continuary talks to you every day.
+          </p>
+        </Entrance>
+        <Entrance visible={visible[2]} style={{ width: "100%", maxWidth: "22rem" }}>
+          <button
+            onClick={onNext}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem", fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600, background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))", color: "white", border: "none", cursor: "pointer", boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
+          >
+            Choose my style <ArrowRight style={{ width: "1rem", height: "1rem" }} />
+          </button>
+        </Entrance>
+      </div>
     </div>
   );
 }
@@ -956,73 +1036,46 @@ function StepProject({
 // ─── Done screen ──────────────────────────────────────────────────────────────
 function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 180);
+  const [videoVisible, setVideoVisible] = useState(false);
+  const visible = useEntrance(active, 3, 0, 200);
   const [, navigate] = useLocation();
-  useEffect(() => { const t = setTimeout(() => setActive(true), 100); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const t1 = setTimeout(() => setVideoVisible(true), 150);
+    const t2 = setTimeout(() => setActive(true), 1000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
   const handleContinue = () => onDone ? onDone() : navigate("/");
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-6">
-        {/* Same rounded card treatment as the intro screen, with amber glow */}
-        <div style={{ position: "relative" }}>
-          <div style={{ position: "absolute", inset: "-40px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.18) 0%, transparent 70%)", filter: "blur(20px)", pointerEvents: "none" }} />
-          <div
-            style={{
-              width: "min(320px, 80vw)",
-              aspectRatio: "1 / 1",
-              borderRadius: "1.5rem",
-              overflow: "hidden",
-              flexShrink: 0,
-              boxShadow: "0 8px 64px rgba(0,0,0,0.7)",
-              position: "relative",
-              WebkitMaskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
-              maskImage: "radial-gradient(ellipse 88% 88% at 50% 50%, black 40%, transparent 100%)",
-            }}
+    <div style={{ position: "fixed", inset: 0, zIndex: 5, overflow: "hidden", background: "#000" }}>
+      {/* Full-bleed video background */}
+      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.8s ease" }}>
+        <SmoothLoopVideo src={WREN_CLIPS["celebrationFlying"]} crossfadeDuration={1.2} />
+      </div>
+      {/* Gradient overlays */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 35%, transparent 40%, rgba(0,0,0,0.92) 100%)" }} />
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.2) 100%)" }} />
+      {/* Lower-third text + CTA */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingLeft: "clamp(1.5rem, 6vw, 4rem)", paddingRight: "clamp(1.5rem, 6vw, 4rem)", paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem", textAlign: "center" }}>
+        <Entrance visible={visible[0]}>
+          <p style={{ fontSize: "clamp(1.8rem, 5.5vw, 3rem)", fontWeight: 700, color: "rgba(255,255,255,0.97)", lineHeight: 1.18, letterSpacing: "-0.03em", maxWidth: "32rem", textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)", margin: 0 }}>
+            {name ? <>{"You're all set, "}<strong style={{ fontWeight: 800, color: "oklch(0.88 0.14 65)" }}>{name}</strong>{"."}</> : "You're all set."}
+          </p>
+        </Entrance>
+        <Entrance visible={visible[1]}>
+          <p style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, maxWidth: "28rem", textShadow: "0 1px 12px rgba(0,0,0,0.9)", margin: 0 }}>
+            Your command center is ready. Wren will be with you every step of the way.
+          </p>
+        </Entrance>
+        <Entrance visible={visible[2]} style={{ width: "100%", maxWidth: "22rem" }}>
+          <button
+            onClick={handleContinue}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem", fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600, background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))", color: "white", border: "none", cursor: "pointer", boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
           >
-          <video
-            key="pathOfProgress"
-            src={WREN_CLIPS["pathOfProgress"]}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              objectPosition: "center center",
-              display: "block",
-            }}
-          />
-          </div>
-        </div>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-3">
-        <Headline size="xl">
-          {name ? `You're all set, ${name}.` : "You're all set."}
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-10">
-        <p className="text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
-          Your command center is ready. Wren will be with you every step of the way.
-        </p>
-      </Entrance>
-      <Entrance visible={visible[3]} className="w-full">
-        <button
-          onClick={handleContinue}
-          className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all active:scale-[0.97]"
-          style={{
-            background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-            color: "white",
-            boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
-          }}
-        >
-          Open Continuary <ArrowRight className="w-4 h-4" />
-        </button>
-      </Entrance>
-    </div>
+            Open Continuary <ArrowRight style={{ width: "1rem", height: "1rem" }} />
+          </button>
+        </Entrance>
+      </div>
     </div>
   );
 }
