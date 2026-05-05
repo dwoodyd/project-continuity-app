@@ -492,7 +492,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
             {/* Wren resting — persistent looping mascot */}
             <div className="flex items-center gap-2 px-3 py-1.5">
-              <WrenPlayer clip="resting" size="xs" loop autoPlay />
+              <WrenPlayer clip="homeVideo" size="xs" loop autoPlay />
               <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
             </div>
             {user && (

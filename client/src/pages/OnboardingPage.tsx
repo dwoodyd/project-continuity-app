@@ -354,8 +354,8 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
         }}
       >
         <video
-          key="welcome"
-          src={WREN_CLIPS["welcome"]}
+          key="withLetters"
+          src={WREN_CLIPS["withLetters"]}
           autoPlay
           loop
           muted
@@ -652,7 +652,7 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
           {/* Amber glow */}
           <div style={{ position: "absolute", inset: "-32px", background: "radial-gradient(circle, oklch(0.80 0.17 65 / 0.15) 0%, transparent 70%)", filter: "blur(16px)", pointerEvents: "none" }} />
           <div style={{ width: "min(260px, 72vw)", aspectRatio: "1 / 1", borderRadius: "1.5rem", overflow: "hidden", flexShrink: 0, boxShadow: "0 8px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)", position: "relative" }}>
-            <video key="thinking" src={WREN_CLIPS["thinking"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }} />
+            <video key="floatingMemories" src={WREN_CLIPS["floatingMemories"]} autoPlay loop muted playsInline style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           </div>
         </div>
       </Entrance>
@@ -939,8 +939,8 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
             }}
           >
           <video
-            key="celebrate"
-            src={WREN_CLIPS["celebrate"]}
+            key="pathOfProgress"
+            src={WREN_CLIPS["pathOfProgress"]}
             autoPlay
             loop
             muted
