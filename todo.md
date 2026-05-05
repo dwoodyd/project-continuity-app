@@ -1254,3 +1254,8 @@
 - [x] Replay onboarding intro button in Settings — upgrade visual to match v5 dark full-screen style
 - [x] Streak milestone celebration overlay — full-screen Wren celebrate clip at 3/7/30 day streaks, shown once per milestone via localStorage
 - [x] Premium invite code entry — auto-formatted groups of 4 with dashes, large centered display
+
+## Mobile Layout Fixes (onboarding)
+- [x] Fix mobile onboarding layout: CTA buttons cut off at bottom on phone screens — add safe-area-inset-bottom padding and make step screens scrollable
+- [x] Fix cinematic intro lower-third: "Let's go" button hidden behind browser chrome on short phones — use env(safe-area-inset-bottom) in bottom padding
+- [x] Reduce Headline font sizes on mobile: text-4xl/5xl too large on small screens — use clamp() responsive sizing

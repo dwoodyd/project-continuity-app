@@ -235,8 +235,14 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function Headline({ children, size = "lg" }: { children: React.ReactNode; size?: "lg" | "xl" }) {
   return (
     <h2
-      className={cn("leading-tight tracking-tight", size === "xl" ? "text-5xl" : "text-4xl")}
-      style={{ color: "rgba(255,255,255,0.95)", fontWeight: 400 }}
+      style={{
+        fontSize: size === "xl" ? "clamp(1.6rem, 5.5vw, 2.75rem)" : "clamp(1.4rem, 4.5vw, 2.25rem)",
+        lineHeight: 1.18,
+        letterSpacing: "-0.02em",
+        color: "rgba(255,255,255,0.95)",
+        fontWeight: 400,
+        margin: 0,
+      }}
     >
       {children}
     </h2>
@@ -383,14 +389,15 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
       >
         Skip
       </button>
-
-      {/* ── Floating text — lower third ── */}
+      {/* ── Floating text ── lower third ── */}
       <div
         style={{
           position: "absolute", bottom: 0, left: 0, right: 0,
-          padding: "0 clamp(1.5rem, 6vw, 4rem) clamp(4rem, 10vh, 7rem)",
+          paddingLeft: "clamp(1.5rem, 6vw, 4rem)",
+          paddingRight: "clamp(1.5rem, 6vw, 4rem)",
+          paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)",
           display: "flex", flexDirection: "column", alignItems: "center",
-          gap: "2rem", textAlign: "center",
+          gap: "1.5rem", textAlign: "center",
         }}
       >
         <p
@@ -492,7 +499,8 @@ function InviteGateScreen({
   };
 
   return (
-    <div className="flex flex-col justify-center min-h-screen px-8 max-w-md mx-auto">
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Private Beta</Eyebrow>
       </Entrance>
@@ -579,10 +587,11 @@ function InviteGateScreen({
         </div>
       </Entrance>
     </div>
+    </div>
   );
 }
 
-// ─── Step 1: Name + Work Style ────────────────────────────────────────────────
+// ─── Step 1: Name + Work Style ────────────────────────────────────────────
 function StepName({
   name,
   setName,
@@ -601,7 +610,8 @@ function StepName({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 1 of 3 — About you</Eyebrow>
       </Entrance>
@@ -657,17 +667,19 @@ function StepName({
         </CTAButton>
       </Entrance>
     </div>
+    </div>
   );
 }
 
-// ─── Step 2: Tone interstitial (Wren reacts to name) ─────────────────────────
+// ─── Step 2: Tone interstitial (Wren reacts to name) ─────────────────
 function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => void }) {
   const [active, setActive] = useState(false);
   const visible = useEntrance(active, 4, 0, 150);
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
         <div style={{ position: "relative" }}>
           {/* Amber glow */}
@@ -693,6 +705,7 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
         </CTAButton>
       </Entrance>
     </div>
+    </div>
   );
 }
 
@@ -713,7 +726,8 @@ function StepTone({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 2 of 3 — Your style</Eyebrow>
       </Entrance>
@@ -744,6 +758,7 @@ function StepTone({
         </CTAButton>
       </Entrance>
     </div>
+    </div>
   );
 }
 
@@ -764,7 +779,8 @@ function StepFocus({
   useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 2 of 3 — Your rhythm</Eyebrow>
       </Entrance>
@@ -806,6 +822,7 @@ function StepFocus({
           ← Back
         </CTAButton>
       </Entrance>
+    </div>
     </div>
   );
 }
@@ -852,7 +869,8 @@ function StepProject({
   };
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: "2rem 2rem 3rem", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "flex-start", padding: "max(env(safe-area-inset-top, 0px), 2.5rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-2">
         <Eyebrow>Step 3 of 3 — Your work</Eyebrow>
       </Entrance>
@@ -931,6 +949,7 @@ function StepProject({
         </button>
       </Entrance>
     </div>
+    </div>
   );
 }
 
@@ -943,7 +962,8 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
   const handleContinue = () => onDone ? onDone() : navigate("/");
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 2rem 3rem", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
+    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
+    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", textAlign: "center", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
       <Entrance visible={visible[0]} className="mb-6">
         {/* Same rounded card treatment as the intro screen, with amber glow */}
         <div style={{ position: "relative" }}>
@@ -1002,6 +1022,7 @@ function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
           Open Continuary <ArrowRight className="w-4 h-4" />
         </button>
       </Entrance>
+    </div>
     </div>
   );
 }
