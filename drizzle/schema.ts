@@ -754,3 +754,21 @@ export const projectMessages = mysqlTable("project_messages", {
 });
 export type ProjectMessage = typeof projectMessages.$inferSelect;
 export type InsertProjectMessage = typeof projectMessages.$inferInsert;
+
+// ─── Emotional Cycle: Mood Logs ───────────────────────────────────────────────
+// One entry per user per calendar day. score 1–10 maps to Hersey's scale:
+// 1–3 = worry/low, 4–6 = neutral, 7–10 = elation/high.
+export const moodLogs = mysqlTable("mood_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** ISO date string YYYY-MM-DD — one row per user per day */
+  date: varchar("date", { length: 10 }).notNull(),
+  score: int("score").notNull(), // 1–10
+  note: text("note"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (t) => ({
+  userDateIdx: index("mood_logs_user_date").on(t.userId, t.date),
+}));
+export type MoodLog = typeof moodLogs.$inferSelect;
+export type InsertMoodLog = typeof moodLogs.$inferInsert;

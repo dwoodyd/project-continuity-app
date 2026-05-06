@@ -651,6 +651,72 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+// ─── Mood Widget ────────────────────────────────────────────────────────────
+function MoodWidget() {
+  const todayQuery = trpc.moodLogs.getToday.useQuery();
+  const cycleQuery = trpc.moodLogs.getCycleAnalysis.useQuery();
+  const logMutation = trpc.moodLogs.logToday.useMutation({
+    onSuccess: () => { todayQuery.refetch(); cycleQuery.refetch(); },
+  });
+  const [hoverScore, setHoverScore] = useState<number | null>(null);
+
+  const today = todayQuery.data;
+  const cycle = cycleQuery.data;
+
+  function phaseColor(score: number) {
+    if (score >= 7) return "oklch(0.75 0.18 145)";
+    if (score >= 4) return "oklch(0.75 0.15 65)";
+    return "oklch(0.65 0.18 30)";
+  }
+
+  return (
+    <a
+      href="/emotional-cycle"
+      className="block p-4 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group"
+      onClick={(e) => { if ((e.target as HTMLElement).closest('button')) e.preventDefault(); }}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <BarChart2 className="w-3.5 h-3.5 text-muted-foreground" />
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Emotional Cycle</p>
+        <span className="ml-auto text-xs text-muted-foreground/50 group-hover:text-primary/60 transition-colors">View chart →</span>
+      </div>
+      {cycle?.hasEnoughData && cycle.currentPhase && (
+        <div className="flex items-center gap-2 mb-3">
+          <span style={{ width: 8, height: 8, borderRadius: "50%", background: phaseColor(cycle.currentPhase === "high" ? 8 : cycle.currentPhase === "low" ? 2 : 5), display: "inline-block", flexShrink: 0 }} />
+          <span className="text-xs" style={{ color: phaseColor(cycle.currentPhase === "high" ? 8 : cycle.currentPhase === "low" ? 2 : 5) }}>
+            {cycle.currentPhase === "high" ? "High period" : cycle.currentPhase === "low" ? "Low period" : "Neutral phase"}
+          </span>
+          {cycle.cycleDays && <span className="text-xs text-muted-foreground/50">· ~{cycle.cycleDays}d cycle</span>}
+        </div>
+      )}
+      <div className="space-y-1.5">
+        <p className="text-xs text-muted-foreground">{today ? `Today: ${today.score}/10` : "Log today's mood"}</p>
+        <div className="flex gap-1">
+          {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+            <button
+              key={n}
+              onMouseEnter={() => setHoverScore(n)}
+              onMouseLeave={() => setHoverScore(null)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); logMutation.mutate({ score: n }); }}
+              style={{
+                flex: 1, height: 24, borderRadius: 4,
+                background: (hoverScore !== null ? n <= hoverScore : today && n <= today.score)
+                  ? phaseColor(hoverScore ?? today?.score ?? n)
+                  : "rgba(255,255,255,0.07)",
+                border: "none", cursor: "pointer", transition: "background 0.1s",
+              }}
+              title={`Score ${n}`}
+            />
+          ))}
+        </div>
+        <div className="flex justify-between text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
+          <span>Worry</span><span>Neutral</span><span>Elation</span>
+        </div>
+      </div>
+    </a>
+  );
+}
+
 // ─── Re-Entry Card Component ──────────────────────────────────────────────────
 function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number; projectTitle: string; onDismiss: () => void }) {
   const generate = trpc.intelligence.generateReEntryCard.useMutation();
@@ -1809,6 +1875,9 @@ export default function Home() {
 
         {/* ════ RIGHT COLUMN ════ */}
         <div className="space-y-4">
+      {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
+      <MoodWidget />
+
       {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
       {tomorrowPlanTasks && tomorrowPlanTasks.length > 0 && (
         <div className="p-4 rounded-xl border border-border bg-card space-y-3">

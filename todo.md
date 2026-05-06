@@ -1259,3 +1259,13 @@
 - [x] Fix mobile onboarding layout: CTA buttons cut off at bottom on phone screens — add safe-area-inset-bottom padding and make step screens scrollable
 - [x] Fix cinematic intro lower-third: "Let's go" button hidden behind browser chrome on short phones — use env(safe-area-inset-bottom) in bottom padding
 - [x] Reduce Headline font sizes on mobile: text-4xl/5xl too large on small screens — use clamp() responsive sizing
+
+## Emotional Cycle Tracker
+- [x] Add mood_logs table to drizzle schema (id, userId, date UTC, score 1-10, note optional, createdAt)
+- [ ] Generate and apply migration SQL
+- [ ] Add tRPC procedures: moodLogs.logToday (upsert), moodLogs.getHistory (last 90 days), moodLogs.getCycleAnalysis
+- [x] Build EmotionalCyclePage: dot-connect SVG chart, 1-10 log input, cycle length detection, high/low predictions, Wren commentary
+- [x] Add mood widget to Home dashboard (today score + cycle phase badge)
+- [ ] Integrate mood prompt into morning check-in flow
+- [ ] Add Emotional Cycle entry to sidebar navigation
+- [ ] Write vitest tests for cycle analysis logic

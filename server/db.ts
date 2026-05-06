@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, isNull, lte, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
@@ -72,6 +72,9 @@ import {
   ScratchNote,
   InsertScratchNote,
   waitlistRequests,
+  moodLogs,
+  MoodLog,
+  InsertMoodLog,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1275,4 +1278,50 @@ export async function getWaitlistRequests() {
 export async function assertProjectOwnedBy(projectId: number, userId: number): Promise<void> {
   const project = await getProjectById(projectId, userId);
   if (!project) throw new TRPCError({ code: "NOT_FOUND" });
+}
+
+// ─── Mood Logs (Emotional Cycle Tracker) ─────────────────────────────────────
+export async function upsertMoodLog(userId: number, date: string, score: number, note?: string) {
+  const db = await getDb();
+  if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+  // Try update first, then insert
+  const [existing] = await db
+    .select({ id: moodLogs.id })
+    .from(moodLogs)
+    .where(and(eq(moodLogs.userId, userId), eq(moodLogs.date, date)))
+    .limit(1);
+  if (existing) {
+    await db
+      .update(moodLogs)
+      .set({ score, note: note ?? null })
+      .where(eq(moodLogs.id, existing.id));
+    return { date, score, note };
+  }
+  await db.insert(moodLogs).values({ userId, date, score, note: note ?? null });
+  return { date, score, note };
+}
+
+export async function getMoodHistory(userId: number, days = 90) {
+  const db = await getDb();
+  if (!db) return [];
+  // Calculate date N days ago
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+  const sinceStr = since.toISOString().slice(0, 10);
+  return db
+    .select()
+    .from(moodLogs)
+    .where(and(eq(moodLogs.userId, userId), gte(moodLogs.date, sinceStr)))
+    .orderBy(asc(moodLogs.date));
+}
+
+export async function getTodayMoodLog(userId: number, todayDate: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db
+    .select()
+    .from(moodLogs)
+    .where(and(eq(moodLogs.userId, userId), eq(moodLogs.date, todayDate)))
+    .limit(1);
+  return row ?? null;
 }

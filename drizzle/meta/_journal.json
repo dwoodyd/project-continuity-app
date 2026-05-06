@@ -218,6 +218,13 @@
       "when": 1777522302589,
       "tag": "0030_aberrant_black_panther",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1778072664775,
+      "tag": "0031_freezing_roughhouse",
+      "breakpoints": true
     }
   ]
 }

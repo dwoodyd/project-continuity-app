@@ -61,6 +61,7 @@ const ALL_NAV_ITEMS = [
   { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
+  { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
   { href: "/weekly",       label: "Weekly Review",   icon: Archive,       section: "secondary" },
@@ -83,6 +84,7 @@ const PRIMARY_TABS = [
 
 // ── Mobile "More" sheet items ─────────────────────────────────────────────────
 const MORE_ITEMS = [
+  { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2 },
   { href: "/evidence",     label: "Evidence Log",    icon: ScrollText },
   { href: "/compass",      label: "Weekly Compass",   icon: Compass },
   { href: "/weekly",       label: "Weekly Review",    icon: Archive },
