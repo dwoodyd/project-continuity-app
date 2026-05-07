@@ -231,7 +231,7 @@ export default function TourPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0c10]/90 backdrop-blur border-b border-white/5">
         <div className="flex items-center gap-2">
-          <WrenPlayer clip="greeting" size="xs" />
+          <WrenPlayer clip="popsHead" size="xs" />
           <span className="font-semibold tracking-wide text-white/90">Continuary</span>
         </div>
         <div className="flex items-center gap-3">
@@ -262,7 +262,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="welcome" size="xl" />
+              <WrenPlayer clip="luminousFloats" size="xl" />
               <div className="space-y-4">
                 <p className="text-amber-400/80 text-sm tracking-widest uppercase">Welcome</p>
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight">Your thread<br />continues here.</h1>
@@ -361,7 +361,7 @@ export default function TourPage() {
                 <div className="space-y-4">
                   <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-6 space-y-3">
                     <div className="flex items-center gap-2 text-amber-400/70 text-sm">
-                      <WrenPlayer clip="thinking" size="xs" />
+                      <WrenPlayer clip="closesEyes" size="xs" />
                       <span>Wren responds</span>
                     </div>
                     <p className="text-white/80 leading-relaxed whitespace-pre-line">{MORNING_DEMO}</p>
@@ -394,7 +394,7 @@ export default function TourPage() {
               ) : (
                 <div className="bg-indigo-400/5 border border-indigo-400/20 rounded-xl p-6 space-y-3">
                   <div className="flex items-center gap-2 text-indigo-300/70 text-sm">
-                    <WrenPlayer clip="thinking" size="xs" />
+                    <WrenPlayer clip="closesEyes" size="xs" />
                     <span>Wren responds</span>
                   </div>
                   <p className="text-white/80 leading-relaxed whitespace-pre-line">{EVENING_DEMO}</p>
@@ -487,7 +487,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="greeting" size="xl" />
+              <WrenPlayer clip="popsHead" size="xl" />
               {!submitted ? (
                 <>
                   <div className="space-y-3">

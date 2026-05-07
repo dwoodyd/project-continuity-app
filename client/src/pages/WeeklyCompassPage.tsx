@@ -223,7 +223,7 @@ export default function WeeklyCompassPage() {
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
           <div className="relative">
             <div className="flex justify-center mb-2" style={{ WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)" }}>
-              <WrenPlayer clip="floatingMemories" size="xl" loop autoPlay />
+              <WrenPlayer clip="memoryOrb" size="xl" loop autoPlay />
             </div>
             <p className="text-base font-semibold text-white mb-2">No compass set for this week.</p>
             <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto">

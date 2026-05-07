@@ -118,7 +118,7 @@ function WrenSidebarPresence() {
   return (
     <div className="relative flex items-center gap-2 px-3 py-1.5">
       <div style={{ WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)" }}>
-        <WrenPlayer clip="homeVideo" size="xs" loop autoPlay />
+        <WrenPlayer clip="mainCornerWave" size="xs" loop autoPlay />
       </div>
       <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
       {showTooltip && (

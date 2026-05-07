@@ -992,7 +992,7 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
         {showWrenIntro && (
           <div className="flex gap-2.5 justify-start">
             <div className="shrink-0 mt-0.5">
-              <WrenPlayer clip="greeting" size="sm" />
+              <WrenPlayer clip="popsHead" size="sm" />
             </div>
             <div
               className="max-w-[80%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm leading-relaxed bg-muted text-foreground cursor-pointer"

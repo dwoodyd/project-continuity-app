@@ -1201,7 +1201,7 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <WrenPlayer clip="greeting" size="sm" wrapperClassName="shrink-0 -mt-1" />
+          <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" />
           <div>
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
             {greeting}, <span style={{ background: "linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{firstName}</span>.
@@ -1483,7 +1483,7 @@ export default function Home() {
               className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
               style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
             >
-              <WrenPlayer clip="celebrate" size="2xl" />
+              <WrenPlayer clip="cartwheels" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
                 style={{ color: "oklch(0.85 0.12 65)" }}

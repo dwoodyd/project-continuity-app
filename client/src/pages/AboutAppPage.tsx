@@ -208,7 +208,7 @@ export default function AboutAppPage() {
         {/* ── Hero ── */}
         <div className="text-center mb-14">
           <div className="flex flex-col items-center mb-4">
-            <WrenPlayer clip="greeting" size="xl" />
+            <WrenPlayer clip="popsHead" size="xl" />
             <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
               Wren — your Continuary companion
             </p>
@@ -325,7 +325,7 @@ export default function AboutAppPage() {
                   border: "1px solid oklch(0.72 0.14 65 / 0.2)",
                 }}
               >
-                <WrenPlayer clip="withLetters" size="full" loop autoPlay feather featherDirection="radial" />
+                <WrenPlayer clip="luminousFloats" size="full" loop autoPlay feather featherDirection="radial" />
               </div>
               {/* Bio */}
               <div className="flex-1 text-center sm:text-left">

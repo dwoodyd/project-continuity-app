@@ -745,7 +745,7 @@ export default function VaultPage() {
             <div className="absolute inset-0 pointer-events-none" style={{background: 'radial-gradient(ellipse at 50% 55%, oklch(0.80 0.17 65 / 0.07) 0%, transparent 65%)'}} />
             <div className="relative flex flex-col items-center pt-8 pb-8 px-8">
               <div className="mb-5" style={{width: 'min(180px, 55vw)', aspectRatio: '9/16', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.5)'}}>
-                <WrenPlayer clip="journal" size="full" loop autoPlay />
+                <WrenPlayer clip="hoversJournal" size="full" loop autoPlay />
               </div>
               <p className="text-base font-semibold text-white mb-1">Your Vault is empty.</p>
               <p className="text-sm mb-5" style={{color: 'rgba(255,255,255,0.5)'}}>Drop your first insight — notes, transcripts, or files.</p>

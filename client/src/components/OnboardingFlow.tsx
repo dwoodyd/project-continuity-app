@@ -884,7 +884,7 @@ export function OnboardingFlow({ onSkip }: Props) {
             <div style={innerStyle}>
               {/* Wren mascot — welcome animation */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
-                <WrenPlayer clip="welcome" size="xl" />
+                <WrenPlayer clip="luminousFloats" size="xl" />
               </div>
               <EkgLine active={isActive(1)} />
 <div style={eyebrowStyle(true)}>For minds that work in bursts</div>
@@ -925,7 +925,7 @@ export function OnboardingFlow({ onSkip }: Props) {
             <div style={innerStyle}>
               {/* Wren mascot — resting/waiting, she holds the thread while you're away */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
-                <WrenPlayer clip="resting" size="lg" />
+                <WrenPlayer clip="inflates" size="lg" />
               </div>
               <div style={eyebrowStyle()}>Amnesty Protocol</div>
               <h1 style={headlineStyle}>
@@ -1002,7 +1002,7 @@ export function OnboardingFlow({ onSkip }: Props) {
             <div style={innerStyle}>
               {/* Wren mascot — celebrate, she sings your progress into checkmarks */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
-                <WrenPlayer clip="celebrate" size="lg" />
+                <WrenPlayer clip="cartwheels" size="lg" />
               </div>
               <div style={eyebrowStyle()}>Evidence Log</div>
               <h1 style={headlineStyle}>
@@ -1031,7 +1031,7 @@ export function OnboardingFlow({ onSkip }: Props) {
             <div style={innerStyle}>
               {/* Wren mascot — connected, she holds the thread connecting all your ideas */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem" }}>
-                <WrenPlayer clip="connected" size="lg" />
+                <WrenPlayer clip="tuggingThread" size="lg" />
               </div>
               <div style={eyebrowStyle()}>Knowledge Graph</div>
               <h1 style={headlineStyle}>

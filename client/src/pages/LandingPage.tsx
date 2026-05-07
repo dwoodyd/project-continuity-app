@@ -51,7 +51,7 @@ export default function LandingPage() {
       <section className="pt-32 pb-24 px-6 text-center max-w-3xl mx-auto">
         {/* Wren mascot — the first thing visitors see */}
         <div className="flex justify-center mb-4">
-          <WrenPlayer clip="welcome" size="2xl" />
+          <WrenPlayer clip="luminousFloats" size="2xl" />
         </div>
         <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-full px-4 py-1.5 text-amber-400 text-xs font-medium mb-8">
           ✦ Built for ADHD, focus struggles, and non-linear thinkers

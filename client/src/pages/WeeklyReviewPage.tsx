@@ -56,7 +56,7 @@ export default function WeeklyReviewPage() {
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header with Wren */}
       <div className="flex items-center gap-4">
-        <WrenPlayer clip="digest" size="md" />
+        <WrenPlayer clip="letter" size="md" />
         <div>
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -98,7 +98,7 @@ export default function WeeklyReviewPage() {
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
           <div className="relative">
             <div className="flex justify-center mb-4">
-              <WrenPlayer clip="digest" size="lg" />
+              <WrenPlayer clip="letter" size="lg" />
             </div>
             <p className="text-base font-semibold text-white mb-1">Generate your weekly review</p>
             <p className="text-sm text-white/70 mb-5">

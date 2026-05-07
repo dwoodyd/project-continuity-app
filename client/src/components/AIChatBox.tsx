@@ -203,7 +203,7 @@ export function AIChatBox({
           <div className="flex h-full flex-col p-4">
             <div className="flex flex-1 flex-col items-center justify-center gap-6 text-muted-foreground">
               <div className="flex flex-col items-center gap-3">
-                <WrenPlayer clip="greeting" size="lg" />
+                <WrenPlayer clip="popsHead" size="lg" />
                 <p className="text-sm text-center max-w-xs">{emptyStateMessage}</p>
               </div>
 
@@ -249,7 +249,7 @@ export function AIChatBox({
                   >
                     {message.role === "assistant" && (
                       <div className="size-8 shrink-0 mt-1 flex items-center justify-center">
-                        <WrenPlayer clip="thinking" size="xs" />
+                        <WrenPlayer clip="closesEyes" size="xs" />
                       </div>
                     )}
 
@@ -291,7 +291,7 @@ export function AIChatBox({
                   }
                 >
                   <div className="size-8 shrink-0 mt-1 flex items-center justify-center">
-                    <WrenPlayer clip="thinking" size="xs" />
+                    <WrenPlayer clip="closesEyes" size="xs" />
                   </div>
                   <div className="rounded-lg bg-muted px-4 py-2.5">
                     <Loader2 className="size-4 animate-spin text-muted-foreground" />

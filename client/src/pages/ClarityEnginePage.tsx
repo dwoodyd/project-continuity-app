@@ -734,7 +734,7 @@ function HistoryView({
       ) : (
         <div className="flex flex-col items-center py-10 text-muted-foreground">
           <div className="mb-4" style={{width: 'min(160px, 50vw)', aspectRatio: '1/1', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'}}>
-            <WrenPlayer clip="tablet" size="full" loop autoPlay />
+            <WrenPlayer clip="perchedDoc" size="full" loop autoPlay />
           </div>
           <p className="text-sm font-medium text-foreground mb-1">No clarity sessions yet.</p>
           <p className="text-xs mb-4" style={{color: 'rgba(255,255,255,0.4)'}}>Start a session to clear the noise and find the signal.</p>

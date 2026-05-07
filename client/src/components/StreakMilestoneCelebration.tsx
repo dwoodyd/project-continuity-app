@@ -125,7 +125,7 @@ export default function StreakMilestoneCelebration({ streak }: Props) {
           zIndex: 1,
         }}
       >
-        <WrenPlayer clip="celebration2" size="2xl" autoPlay loop />
+        <WrenPlayer clip="happySplit" size="2xl" autoPlay loop />
       </div>
 
       {/* Milestone badge */}
