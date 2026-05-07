@@ -1262,10 +1262,10 @@
 
 ## Emotional Cycle Tracker
 - [x] Add mood_logs table to drizzle schema (id, userId, date UTC, score 1-10, note optional, createdAt)
-- [ ] Generate and apply migration SQL
-- [ ] Add tRPC procedures: moodLogs.logToday (upsert), moodLogs.getHistory (last 90 days), moodLogs.getCycleAnalysis
+- [x] Generate and apply migration SQL
+- [x] Add tRPC procedures: moodLogs.logToday (upsert), moodLogs.getHistory (last 90 days), moodLogs.getCycleAnalysis
 - [x] Build EmotionalCyclePage: dot-connect SVG chart, 1-10 log input, cycle length detection, high/low predictions, Wren commentary
 - [x] Add mood widget to Home dashboard (today score + cycle phase badge)
-- [ ] Integrate mood prompt into morning check-in flow
-- [ ] Add Emotional Cycle entry to sidebar navigation
-- [ ] Write vitest tests for cycle analysis logic
+- [x] Integrate mood prompt into morning check-in flow
+- [x] Add Emotional Cycle entry to sidebar navigation
+- [x] Write vitest tests for cycle analysis logic

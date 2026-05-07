@@ -1,36 +1,29 @@
 /**
- * OnboardingPage v5 — Premium full-screen redesign
+ * OnboardingPage v6 — Full-screen video-as-page redesign
  *
- * Design principles (from reference video analysis):
- * - Full-screen dark canvas — no card/border boxes
- * - Staggered text entrance: eyebrow → headline → body, each with delay
- * - Emotional interstitials with Wren speaking directly to the user
- * - Mixed-weight typography: key phrase bolded inline
- * - Full-width pill buttons, solid accent color, heavily rounded
- * - Instant selection feedback: accent border + tinted background on tap
- * - Personalization: user's name used in every subsequent screen
- * - Spring-physics slide transitions (CSS cubic-bezier bounce)
- * - Wren as active speaker, not decoration
+ * Every screen IS the video. Copy floats over it as overlays.
+ * Input screens use a semi-transparent frosted panel so text is readable.
+ * All videos use mix-blend-mode: screen (black bg removed automatically).
  *
  * Flow:
- *   -1  Invite gate (skipped if user already has access)
- *    0  Wren intro sequence (auto-advancing, 5 lines)
- *    1  Name + work style
- *    2  Tone interstitial (Wren reacts to name)
- *    3  Tone selection
- *    4  Focus hours
- *    5  First project
- *    6  Done / celebration
+ *   -1  Invite gate
+ *    0  Wren intro (cinematic monologue — dropsAndHovers)
+ *    1  Name + work style (peeking)
+ *    2  Tone interstitial (winksRipple)
+ *    3  Tone selection (closesEyes)
+ *    4  Focus hours (hoversThread)
+ *    5  First project (perchedDoc)
+ *    6  Done / celebration (fliesHug)
  */
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { ArrowRight, ChevronRight, Loader2 } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import WrenPlayer, { WREN_CLIPS } from "@/components/WrenPlayer";
+import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type WorkStyle =
@@ -46,25 +39,25 @@ type FocusHour = "morning" | "midday" | "afternoon" | "evening" | "varies";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const WORK_STYLES: { value: WorkStyle; label: string; sub: string }[] = [
-  { value: "writing_creative", label: "Writing or creative work", sub: "Books, content, music, art" },
-  { value: "business_product", label: "Building a business or product", sub: "Startups, SaaS, side projects" },
+  { value: "writing_creative",  label: "Writing or creative work",      sub: "Books, content, music, art" },
+  { value: "business_product",  label: "Building a business or product", sub: "Startups, SaaS, side projects" },
   { value: "ministry_coaching", label: "Ministry, coaching, or speaking", sub: "Leading, teaching, guiding others" },
-  { value: "consulting_client", label: "Consulting or client work", sub: "Services, freelance, agency" },
-  { value: "multiple", label: "Multiple things at once", sub: "You're juggling more than one" },
+  { value: "consulting_client", label: "Consulting or client work",      sub: "Services, freelance, agency" },
+  { value: "multiple",          label: "Multiple things at once",        sub: "You're juggling more than one" },
 ];
 
-const TONE_OPTIONS: { value: TonePref; label: string; description: string; emoji: string }[] = [
-  { value: "gentle", label: "Gentle", description: "Calm, patient, no pressure language", emoji: "🌿" },
-  { value: "direct", label: "Direct", description: "Clear and honest, no softening", emoji: "⚡" },
-  { value: "firm", label: "Firm", description: "Straight accountability, no filler", emoji: "🔩" },
+const TONE_OPTIONS: { value: TonePref; label: string; description: string }[] = [
+  { value: "gentle", label: "Gentle",  description: "Calm, patient, no pressure language" },
+  { value: "direct", label: "Direct",  description: "Clear and honest, no softening" },
+  { value: "firm",   label: "Firm",    description: "Straight accountability, no filler" },
 ];
 
 const FOCUS_HOURS: { value: FocusHour; label: string; time: string }[] = [
-  { value: "morning", label: "Morning", time: "6am – 12pm" },
-  { value: "midday", label: "Midday", time: "11am – 2pm" },
+  { value: "morning",   label: "Morning",   time: "6am – 12pm" },
+  { value: "midday",    label: "Midday",    time: "11am – 2pm" },
   { value: "afternoon", label: "Afternoon", time: "1pm – 6pm" },
-  { value: "evening", label: "Evening", time: "5pm – 10pm" },
-  { value: "varies", label: "It varies", time: "No fixed window" },
+  { value: "evening",   label: "Evening",   time: "5pm – 10pm" },
+  { value: "varies",    label: "It varies", time: "No fixed window" },
 ];
 
 const focusStartMap: Record<FocusHour, string> = {
@@ -74,276 +67,51 @@ const focusEndMap: Record<FocusHour, string> = {
   morning: "12:00", midday: "14:00", afternoon: "17:00", evening: "21:00", varies: "17:00",
 };
 
-// ─── Staggered entrance hook ─────────────────────────────────────────────────
-function useEntrance(active: boolean, count: number, baseDelay = 0, step = 120) {
-  const [visible, setVisible] = useState<boolean[]>(Array(count).fill(false));
-  useEffect(() => {
-    if (!active) {
-      setVisible(Array(count).fill(false));
-      return;
-    }
-    const timers = Array.from({ length: count }, (_, i) =>
-      setTimeout(() => setVisible(prev => { const next = [...prev]; next[i] = true; return next; }), baseDelay + i * step)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [active, count, baseDelay, step]);
-  return visible;
-}
-
-// ─── Animated entrance element ───────────────────────────────────────────────
-function Entrance({
-  visible,
-  delay = 0,
-  children,
-  className,
-  style,
-}: {
-  visible: boolean;
-  delay?: number;
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <div
-      className={className}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(18px)",
-        transition: visible
-          ? `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`
-          : "none",
-        ...style,
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ─── Progress bar ─────────────────────────────────────────────────────────────
-function ProgressBar({ value }: { value: number }) {
-  return (
-    <div className="fixed top-0 inset-x-0 z-50 h-0.5" style={{ background: "rgba(255,255,255,0.06)" }}>
-      <div
-        className="h-full transition-all duration-700 ease-out"
-        style={{
-          width: `${value}%`,
-          background: "linear-gradient(90deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
-          boxShadow: "0 0 8px oklch(0.65 0.18 65 / 0.7)",
-        }}
-      />
-    </div>
-  );
-}
-
-// ─── Pill selection button ────────────────────────────────────────────────────
-function PillOption({
-  selected,
-  onClick,
-  children,
-  sub,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-  sub?: string;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full text-left px-5 py-4 rounded-2xl transition-all duration-200 active:scale-[0.98]"
-      style={{
-        background: selected ? "oklch(0.80 0.17 65 / 0.12)" : "rgba(255,255,255,0.04)",
-        border: selected ? "1.5px solid oklch(0.80 0.17 65 / 0.65)" : "1.5px solid rgba(255,255,255,0.08)",
-        boxShadow: selected ? "0 0 0 1px oklch(0.80 0.17 65 / 0.18) inset" : "none",
-      }}
-    >
-      <div
-        className="text-sm font-medium"
-        style={{ color: selected ? "oklch(0.92 0.10 65)" : "rgba(255,255,255,0.82)" }}
-      >
-        {children}
-      </div>
-      {sub && (
-        <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.38)" }}>
-          {sub}
-        </div>
-      )}
-    </button>
-  );
-}
-
-// ─── Primary CTA button ───────────────────────────────────────────────────────
-function CTAButton({
-  onClick,
-  disabled,
-  loading,
-  children,
-  secondary,
-}: {
-  onClick: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  children: React.ReactNode;
-  secondary?: boolean;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled || loading}
-      className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
-      style={
-        secondary
-          ? {
-              background: "rgba(255,255,255,0.06)",
-              color: "rgba(255,255,255,0.5)",
-              border: "1.5px solid rgba(255,255,255,0.08)",
-            }
-          : {
-              background:
-                disabled || loading
-                  ? "rgba(255,255,255,0.08)"
-                  : "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-              color: disabled || loading ? "rgba(255,255,255,0.3)" : "white",
-              boxShadow:
-                disabled || loading
-                  ? "none"
-                  : "0 4px 20px oklch(0.52 0.22 270 / 0.4), 0 1px 0 rgba(255,255,255,0.1) inset",
-              cursor: disabled || loading ? "not-allowed" : "pointer",
-            }
-      }
-    >
-      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : children}
-    </button>
-  );
-}
-
-// ─── Eyebrow label ────────────────────────────────────────────────────────────
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      className="text-xs font-bold tracking-[0.18em] uppercase"
-      style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}
-    >
-      {children}
-    </p>
-  );
-}
-
-// ─── Headline with mixed weight ───────────────────────────────────────────────
-function Headline({ children, size = "lg" }: { children: React.ReactNode; size?: "lg" | "xl" }) {
-  return (
-    <h2
-      style={{
-        fontSize: size === "xl" ? "clamp(1.6rem, 5.5vw, 2.75rem)" : "clamp(1.4rem, 4.5vw, 2.25rem)",
-        lineHeight: 1.18,
-        letterSpacing: "-0.02em",
-        color: "rgba(255,255,255,0.95)",
-        fontWeight: 400,
-        margin: 0,
-      }}
-    >
-      {children}
-    </h2>
-  );
-}
-
-// ─── Word-by-word reveal helper ───────────────────────────────────────────────
-function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean; delay?: number }) {
-  const words = text.split(" ");
-  const [visible, setVisible] = useState<boolean[]>(Array(words.length).fill(false));
-  useEffect(() => {
-    if (!active) { setVisible(Array(words.length).fill(false)); return; }
-    const timers = words.map((_, i) =>
-      setTimeout(() => setVisible(prev => { const n = [...prev]; n[i] = true; return n; }), delay + i * 85)
-    );
-    return () => timers.forEach(clearTimeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, text, delay]);
-  return (
-    <span>
-      {words.map((word, i) => (
-        <span
-          key={i}
-          style={{
-            display: "inline-block",
-            opacity: visible[i] ? 1 : 0,
-            transform: visible[i] ? "translateY(0)" : "translateY(10px)",
-            transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
-            marginRight: "0.28em",
-          }}
-        >
-          {word}
-        </span>
-      ))}
-    </span>
-  );
-}
-
-// ─── Smooth crossfade loop video ────────────────────────────────────────────
-// Two <video> elements stacked. When A is ~0.5s from ending, B (already
-// playing from the start) fades in while A fades out → seamless dissolve loop.
-function SmoothLoopVideo({
-  src,
-  style,
-  crossfadeDuration = 0.8,
-}: {
+// ─── Smooth crossfade loop video ──────────────────────────────────────────────
+function SmoothLoopVideo({ src, style, crossfadeDuration = 1.0 }: {
   src: string;
   style?: React.CSSProperties;
   crossfadeDuration?: number;
 }) {
-  const videoARef = useRef<HTMLVideoElement>(null);
-  const videoBRef = useRef<HTMLVideoElement>(null);
-  const [activeSlot, setActiveSlot] = useState<"a" | "b">("a");
+  const aRef = useRef<HTMLVideoElement>(null);
+  const bRef = useRef<HTMLVideoElement>(null);
+  const [active, setActive] = useState<"a" | "b">("a");
   const rafRef = useRef<number>(0);
 
-  // Kick off the crossfade logic once both videos are ready
   const startLoop = useCallback(() => {
     const check = () => {
-      const active = activeSlot === "a" ? videoARef.current : videoBRef.current;
-      const standby = activeSlot === "a" ? videoBRef.current : videoARef.current;
-      if (!active || !standby) { rafRef.current = requestAnimationFrame(check); return; }
-
-      const remaining = active.duration - active.currentTime;
-      if (active.duration > 0 && remaining <= crossfadeDuration + 0.05) {
-        // Restart standby from beginning and swap
-        standby.currentTime = 0;
-        standby.play().catch(() => {});
-        setActiveSlot(prev => (prev === "a" ? "b" : "a"));
-        // Give a small gap before checking again to avoid double-trigger
+      const av = active === "a" ? aRef.current : bRef.current;
+      const sb = active === "a" ? bRef.current : aRef.current;
+      if (!av || !sb) { rafRef.current = requestAnimationFrame(check); return; }
+      const rem = av.duration - av.currentTime;
+      if (av.duration > 0 && rem <= crossfadeDuration + 0.05) {
+        sb.currentTime = 0;
+        sb.play().catch(() => {});
+        setActive(p => p === "a" ? "b" : "a");
         setTimeout(() => { rafRef.current = requestAnimationFrame(check); }, (crossfadeDuration + 0.2) * 1000);
         return;
       }
       rafRef.current = requestAnimationFrame(check);
     };
     rafRef.current = requestAnimationFrame(check);
-  }, [activeSlot, crossfadeDuration]);
+  }, [active, crossfadeDuration]);
 
   useEffect(() => {
-    const a = videoARef.current;
-    if (!a) return;
-    a.play().catch(() => {});
+    aRef.current?.play().catch(() => {});
     startLoop();
     return () => cancelAnimationFrame(rafRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-register the RAF loop when activeSlot changes
   useEffect(() => {
     cancelAnimationFrame(rafRef.current);
     startLoop();
     return () => cancelAnimationFrame(rafRef.current);
-  }, [activeSlot, startLoop]);
+  }, [active, startLoop]);
 
-  const baseStyle: React.CSSProperties = {
-    position: "absolute",
-    inset: 0,
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    objectPosition: "center center",
-    display: "block",
+  const base: React.CSSProperties = {
+    position: "absolute", inset: 0, width: "100%", height: "100%",
+    objectFit: "cover", objectPosition: "center",
     mixBlendMode: "screen",
     transition: `opacity ${crossfadeDuration}s ease`,
     ...style,
@@ -351,180 +119,274 @@ function SmoothLoopVideo({
 
   return (
     <>
-      <video
-        ref={videoARef}
-        src={src}
-        muted
-        playsInline
-        preload="auto"
-        style={{ ...baseStyle, opacity: activeSlot === "a" ? 1 : 0 }}
-      />
-      <video
-        ref={videoBRef}
-        src={src}
-        muted
-        playsInline
-        preload="auto"
-        style={{ ...baseStyle, opacity: activeSlot === "b" ? 1 : 0 }}
-      />
+      <video ref={aRef} src={src} muted playsInline preload="auto"
+        style={{ ...base, opacity: active === "a" ? 1 : 0 }} />
+      <video ref={bRef} src={src} muted playsInline preload="auto"
+        style={{ ...base, opacity: active === "b" ? 1 : 0 }} />
     </>
   );
 }
 
-// ─── Wren cinematic intro ─────────────────────────────────────────────────────
-const WREN_INTRO_LINES = [
-  "hey there.",
-  "you just did something most people skip.",
-  "you decided to actually track what matters.",
-  "from here, it's noticing, building, and repeating.",
-  "let's set this up for the way you actually work.",
-];
-
-function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => void }) {
-  const [lineIndex, setLineIndex] = useState(0);
-  const [lineActive, setLineActive] = useState(false);
-  const [videoVisible, setVideoVisible] = useState(false);
-  const [fadingOut, setFadingOut] = useState(false);
-
-  // Fade in video on mount
-  useEffect(() => {
-    if (!active) { setVideoVisible(false); setFadingOut(false); return; }
-    const t = setTimeout(() => setVideoVisible(true), 150);
-    return () => clearTimeout(t);
-  }, [active]);
-
-  // Reset + start first line
-  useEffect(() => {
-    if (!active) { setLineIndex(0); setLineActive(false); return; }
-    const t = setTimeout(() => setLineActive(true), 900);
-    return () => clearTimeout(t);
-  }, [active]);
-
-  // Auto-advance lines
-  useEffect(() => {
-    if (!lineActive || !active) return;
-    if (lineIndex >= WREN_INTRO_LINES.length - 1) return;
-    const lineDuration = lineIndex === 0 ? 3000 : 3400;
-    const t = setTimeout(() => {
-      setLineActive(false);
-      setTimeout(() => { setLineIndex(i => i + 1); setLineActive(true); }, 420);
-    }, lineDuration);
-    return () => clearTimeout(t);
-  }, [lineIndex, lineActive, active]);
-
-  const isLast = lineIndex === WREN_INTRO_LINES.length - 1;
-  const line = WREN_INTRO_LINES[lineIndex];
-  const isHero = lineIndex === 0;
-
-  const handleDone = () => {
-    setFadingOut(true);
-    setTimeout(onDone, 650);
-  };
-
+// ─── Single-play video (plays once, holds last frame) ─────────────────────────
+function OnceVideo({ src, style, onEnded }: {
+  src: string;
+  style?: React.CSSProperties;
+  onEnded?: () => void;
+}) {
   return (
-    <div
+    <video
+      src={src}
+      autoPlay
+      muted
+      playsInline
+      preload="auto"
+      onEnded={onEnded}
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 10,
-        overflow: "hidden",
-        background: "#000",
-        opacity: fadingOut ? 0 : 1,
-        transition: fadingOut ? "opacity 0.65s ease" : "none",
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", objectPosition: "center",
+        mixBlendMode: "screen",
+        ...style,
       }}
-    >
-      {/* ── Full-bleed video background (smooth crossfade loop) ── */}
-      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.6s ease" }}>
-        <SmoothLoopVideo src={WREN_CLIPS["withLetters"]} crossfadeDuration={1.0} />
-      </div>
+    />
+  );
+}
 
-      {/* ── Gradient overlays — top dark, bottom dark, edges dark ── */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 28%, transparent 48%, rgba(0,0,0,0.88) 100%)",
-      }} />
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none",
-        background: "linear-gradient(to right, rgba(0,0,0,0.25) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.25) 100%)",
-      }} />
-
-      {/* ── Skip — barely visible bottom-right ── */}
-      <button
-        onClick={handleDone}
-        style={{
-          position: "absolute", bottom: "1.5rem", right: "1.5rem", zIndex: 20,
-          fontSize: "0.68rem", color: "rgba(255,255,255,0.2)",
-          background: "transparent", border: "none", cursor: "pointer",
-          letterSpacing: "0.1em", textTransform: "uppercase",
-          transition: "color 0.2s", padding: "0.5rem",
-        }}
-        onMouseEnter={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
-        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.2)")}
-      >
-        Skip
-      </button>
-      {/* ── Floating text ── lower third ── */}
-      <div
-        style={{
-          position: "absolute", bottom: 0, left: 0, right: 0,
-          paddingLeft: "clamp(1.5rem, 6vw, 4rem)",
-          paddingRight: "clamp(1.5rem, 6vw, 4rem)",
-          paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)",
-          display: "flex", flexDirection: "column", alignItems: "center",
-          gap: "1.5rem", textAlign: "center",
-        }}
-      >
-        <p
-          style={{
-            fontSize: isHero ? "clamp(1.8rem, 5.5vw, 3rem)" : "clamp(1.3rem, 3.8vw, 2rem)",
-            fontWeight: isHero ? 700 : 400,
-            color: "rgba(255,255,255,0.97)",
-            lineHeight: 1.18,
-            letterSpacing: isHero ? "-0.03em" : "-0.015em",
-            maxWidth: "34rem",
-            textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)",
-            margin: 0,
-          }}
-        >
-          <WordReveal text={line} active={lineActive} delay={0} />
-        </p>
-
-        {/* CTA on last line */}
-        {isLast && (
-          <div
-            style={{
-              opacity: lineActive ? 1 : 0,
-              transform: lineActive ? "translateY(0)" : "translateY(12px)",
-              transition: "opacity 0.6s ease 1s, transform 0.6s ease 1s",
-              width: "100%", maxWidth: "22rem",
-            }}
-          >
-            <button
-              onClick={handleDone}
-              style={{
-                width: "100%", display: "flex", alignItems: "center", justifyContent: "center",
-                gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem",
-                fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600,
-                background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-                color: "white", border: "none", cursor: "pointer",
-                boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset",
-              }}
-            >
-              Let's go <ArrowRight style={{ width: "1rem", height: "1rem" }} />
-            </button>
-          </div>
-        )}
-      </div>
+// ─── Full-screen video stage ──────────────────────────────────────────────────
+// The video fills the screen; children float over it.
+function VideoStage({ children, bgColor = "#000" }: {
+  children: React.ReactNode;
+  bgColor?: string;
+}) {
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 10,
+      background: bgColor,
+      overflow: "hidden",
+    }}>
+      {children}
     </div>
   );
 }
 
-// ─── Invite gate screen ───────────────────────────────────────────────────────
-function InviteGateScreen({
-  onSuccess,
-}: {
-  onSuccess: () => void;
+// ─── Standard gradient overlays ───────────────────────────────────────────────
+function GradientOverlays({ top = true, bottom = true }: { top?: boolean; bottom?: boolean }) {
+  return (
+    <>
+      {top && (
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 30%)",
+        }} />
+      )}
+      {bottom && (
+        <div style={{
+          position: "absolute", inset: 0, pointerEvents: "none",
+          background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 45%)",
+        }} />
+      )}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.2) 100%)",
+      }} />
+    </>
+  );
+}
+
+// ─── Frosted input panel (for data-entry screens) ────────────────────────────
+function FrostedPanel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: "rgba(0,0,0,0.72)",
+      backdropFilter: "blur(24px)",
+      WebkitBackdropFilter: "blur(24px)",
+      borderRadius: "1.5rem 1.5rem 0 0",
+      border: "1px solid rgba(255,255,255,0.08)",
+      borderBottom: "none",
+      padding: "2rem 1.75rem max(calc(env(safe-area-inset-bottom, 0px) + 1.5rem), 2rem)",
+      width: "100%",
+      maxWidth: "28rem",
+      margin: "0 auto",
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ─── Lower-third overlay (for cinematic screens) ──────────────────────────────
+function LowerThird({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: "0 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)",
+      maxWidth: "28rem",
+      margin: "0 auto",
+      zIndex: 20,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ─── Word-by-word reveal ──────────────────────────────────────────────────────
+function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean; delay?: number }) {
+  const words = text.split(" ");
+  const [vis, setVis] = useState<boolean[]>(Array(words.length).fill(false));
+  useEffect(() => {
+    if (!active) { setVis(Array(words.length).fill(false)); return; }
+    const ts = words.map((_, i) =>
+      setTimeout(() => setVis(p => { const n = [...p]; n[i] = true; return n; }), delay + i * 80)
+    );
+    return () => ts.forEach(clearTimeout);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, text, delay]);
+  return (
+    <span>
+      {words.map((w, i) => (
+        <span key={i} style={{
+          display: "inline-block",
+          opacity: vis[i] ? 1 : 0,
+          transform: vis[i] ? "translateY(0)" : "translateY(12px)",
+          transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
+          marginRight: "0.28em",
+        }}>{w}</span>
+      ))}
+    </span>
+  );
+}
+
+// ─── Staggered entrance ───────────────────────────────────────────────────────
+function Fade({ visible, delay = 0, children, style }: {
+  visible: boolean; delay?: number; children: React.ReactNode; style?: React.CSSProperties;
 }) {
+  return (
+    <div style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(16px)",
+      transition: visible
+        ? `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`
+        : "none",
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
+
+// ─── Pill selection button ────────────────────────────────────────────────────
+function PillOption({ selected, onClick, children, sub }: {
+  selected: boolean; onClick: () => void; children: React.ReactNode; sub?: string;
+}) {
+  return (
+    <button onClick={onClick}
+      className="w-full text-left px-4 py-3 rounded-xl transition-all duration-200 active:scale-[0.98]"
+      style={{
+        background: selected ? "oklch(0.80 0.17 65 / 0.15)" : "rgba(255,255,255,0.05)",
+        border: selected ? "1.5px solid oklch(0.80 0.17 65 / 0.7)" : "1.5px solid rgba(255,255,255,0.1)",
+      }}
+    >
+      <div className="text-sm font-medium" style={{ color: selected ? "oklch(0.92 0.10 65)" : "rgba(255,255,255,0.85)" }}>
+        {children}
+      </div>
+      {sub && <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.38)" }}>{sub}</div>}
+    </button>
+  );
+}
+
+// ─── CTA button ───────────────────────────────────────────────────────────────
+function CTAButton({ onClick, disabled, loading, children, secondary }: {
+  onClick: () => void; disabled?: boolean; loading?: boolean;
+  children: React.ReactNode; secondary?: boolean;
+}) {
+  return (
+    <button onClick={onClick} disabled={disabled || loading}
+      className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-sm font-semibold transition-all duration-200 active:scale-[0.98]"
+      style={secondary ? {
+        background: "rgba(255,255,255,0.07)",
+        color: "rgba(255,255,255,0.5)",
+        border: "1.5px solid rgba(255,255,255,0.1)",
+      } : {
+        background: disabled || loading
+          ? "rgba(255,255,255,0.08)"
+          : "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
+        color: disabled || loading ? "rgba(255,255,255,0.3)" : "white",
+        boxShadow: disabled || loading ? "none" : "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
+        cursor: disabled || loading ? "not-allowed" : "pointer",
+      }}
+    >
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : children}
+    </button>
+  );
+}
+
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+function ProgressBar({ value }: { value: number }) {
+  return (
+    <div className="fixed top-0 inset-x-0 z-50 h-0.5" style={{ background: "rgba(255,255,255,0.06)" }}>
+      <div className="h-full transition-all duration-700 ease-out" style={{
+        width: `${value}%`,
+        background: "linear-gradient(90deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+        boxShadow: "0 0 8px oklch(0.65 0.18 65 / 0.7)",
+      }} />
+    </div>
+  );
+}
+
+// ─── Fade-to-black transition wrapper ────────────────────────────────────────
+function FadeToBlackTransition({ stepKey, children }: { stepKey: number; children: React.ReactNode }) {
+  const [displayed, setDisplayed] = useState(children);
+  const [overlay, setOverlay] = useState(0); // 0=transparent, 1=black, fading back to 0
+  const prevKey = useRef(stepKey);
+
+  useEffect(() => {
+    if (stepKey === prevKey.current) return;
+    prevKey.current = stepKey;
+    setOverlay(1);
+    const t1 = setTimeout(() => { setDisplayed(children); setOverlay(0); }, 280);
+    return () => clearTimeout(t1);
+  }, [stepKey, children]);
+
+  return (
+    <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
+      {displayed}
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 99, pointerEvents: "none",
+        background: "#000",
+        opacity: overlay,
+        transition: overlay === 1 ? "opacity 0.25s ease" : "opacity 0.5s ease",
+      }} />
+    </div>
+  );
+}
+
+// ─── Ambient audio hook ───────────────────────────────────────────────────────
+function useAmbientAudio(isCinematic: boolean) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  useEffect(() => {
+    if (!audioRef.current) {
+      const a = new Audio("https://static-assets.manus.space/ambient_onboarding_processed_c9a1b2d3.mp3");
+      a.loop = true;
+      a.volume = 0;
+      audioRef.current = a;
+    }
+    const audio = audioRef.current;
+    if (isCinematic) {
+      audio.play().catch(() => {});
+      let v = audio.volume;
+      const up = setInterval(() => { v = Math.min(0.08, v + 0.005); audio.volume = v; if (v >= 0.08) clearInterval(up); }, 80);
+      return () => clearInterval(up);
+    } else {
+      let v = audio.volume;
+      const dn = setInterval(() => { v = Math.max(0, v - 0.008); audio.volume = v; if (v <= 0) { audio.pause(); clearInterval(dn); } }, 80);
+      return () => clearInterval(dn);
+    }
+  }, [isCinematic]);
+}
+
+// ─── SCREEN: Invite Gate ──────────────────────────────────────────────────────
+function InviteGateScreen({ onSuccess }: { onSuccess: () => void }) {
   const [inviteCode, setInviteCode] = useState("");
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -532,714 +394,617 @@ function InviteGateScreen({
   const [betaError, setBetaError] = useState<string | null>(null);
   const [betaChecking, setBetaChecking] = useState(false);
   const [showBeta, setShowBeta] = useState(false);
-  const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 130);
+  const [visible, setVisible] = useState(false);
 
-  const utils = trpc.useUtils();
-  const redeemInvite = trpc.invites.redeem.useMutation();
-  const redeemBeta = trpc.beta.redeemCode.useMutation();
+  const validateInvite = trpc.invites.redeem.useMutation();
+  const validateBeta = trpc.beta.redeemCode.useMutation();
 
-  useEffect(() => { const t = setTimeout(() => setActive(true), 80); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 100); return () => clearTimeout(t); }, []);
 
   const checkInvite = async () => {
-    const code = inviteCode.trim().toUpperCase();
-    if (!code) return;
-    setChecking(true);
-    setInviteError(null);
+    if (!inviteCode.trim()) return;
+    setChecking(true); setInviteError(null);
     try {
-      await utils.invites.validate.fetch({ code });
+      await validateInvite.mutateAsync({ code: inviteCode.trim() });
       onSuccess();
-    } catch {
-      setInviteError("Invalid or already used. Check and try again.");
-    } finally {
-      setChecking(false);
-    }
+    } catch (e: any) { setInviteError(e?.message || "That code doesn't look right. Try again."); }
+    finally { setChecking(false); }
   };
 
   const checkBeta = async () => {
-    const code = betaCode.trim().toUpperCase();
-    if (!code) return;
-    setBetaChecking(true);
-    setBetaError(null);
+    if (!betaCode.trim()) return;
+    setBetaChecking(true); setBetaError(null);
     try {
-      await redeemBeta.mutateAsync({ code });
-      toast.success("Beta access activated!");
+      await validateBeta.mutateAsync({ code: betaCode.trim() });
       onSuccess();
-    } catch (e: any) {
-      setBetaError(e.message?.includes("already") ? "Already used." : "Invalid beta code.");
-    } finally {
-      setBetaChecking(false);
-    }
+    } catch (e: any) { setBetaError(e?.message || "Invalid beta code."); }
+    finally { setBetaChecking(false); }
   };
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-2">
-        <Eyebrow>Private Beta</Eyebrow>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-3">
-        <Headline>
-          You need an <strong style={{ fontWeight: 700 }}>invite code</strong> to continue.
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-8">
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-          Continuary is in private beta. Enter your code below to get access.
-        </p>
-      </Entrance>
+    <VideoStage>
+      {/* Wren peeking as background */}
+      <SmoothLoopVideo src={WREN_CLIPS.peeking} />
+      <GradientOverlays />
 
-      <Entrance visible={visible[3]} className="space-y-4">
-        <div>
+      <LowerThird>
+        <Fade visible={visible} delay={0}>
+          <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+            Early Access
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={80} style={{ marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "clamp(1.5rem, 5vw, 2.2rem)", fontWeight: 400, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+            You need an invite to get in.
+          </h2>
+        </Fade>
+        <Fade visible={visible} delay={160} style={{ marginBottom: "1.5rem" }}>
+          <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+            Continuary is invite-only right now. Enter your code below.
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={240} style={{ marginBottom: "1rem" }}>
           <input
             value={inviteCode}
             onChange={e => { setInviteCode(e.target.value.toUpperCase()); setInviteError(null); }}
             onKeyDown={e => e.key === "Enter" && checkInvite()}
             placeholder="INVITE CODE"
             autoFocus
-            autoComplete="off"
-            spellCheck={false}
-            className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-[0.12em] outline-none transition-all"
+            className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-widest outline-none"
             style={{
-              background: "rgba(255,255,255,0.05)",
-              border: inviteError ? "1.5px solid oklch(0.65 0.22 25)" : "1.5px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.08)",
+              border: inviteError ? "1.5px solid oklch(0.65 0.22 25)" : "1.5px solid rgba(255,255,255,0.15)",
               color: "rgba(255,255,255,0.9)",
             }}
           />
-          {inviteError && (
-            <p className="text-xs mt-2 px-1" style={{ color: "oklch(0.72 0.18 25)" }}>{inviteError}</p>
-          )}
-        </div>
-
-        <CTAButton onClick={checkInvite} disabled={!inviteCode.trim()} loading={checking}>
-          Continue <ArrowRight className="w-4 h-4" />
-        </CTAButton>
-
-        <p className="text-center text-xs" style={{ color: "rgba(255,255,255,0.2)" }}>
-          Don't have a code? Reach out to the Continuary team.
-        </p>
-
-        <div className="pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          {inviteError && <p className="text-xs mt-2 px-1" style={{ color: "oklch(0.72 0.18 25)" }}>{inviteError}</p>}
+        </Fade>
+        <Fade visible={visible} delay={320} style={{ marginBottom: "0.75rem" }}>
+          <CTAButton onClick={checkInvite} disabled={!inviteCode.trim()} loading={checking}>
+            Continue <ArrowRight className="w-4 h-4" />
+          </CTAButton>
+        </Fade>
+        <Fade visible={visible} delay={400}>
           {!showBeta ? (
-            <button
-              onClick={() => setShowBeta(true)}
-              className="text-xs w-full text-center transition-colors"
-              style={{ color: "oklch(0.80 0.17 65 / 0.5)" }}
-            >
+            <button onClick={() => setShowBeta(true)} className="text-xs w-full text-center"
+              style={{ color: "oklch(0.80 0.17 65 / 0.5)" }}>
               ✦ Have a beta tester code?
             </button>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <input
                 value={betaCode}
                 onChange={e => { setBetaCode(e.target.value.toUpperCase()); setBetaError(null); }}
                 onKeyDown={e => e.key === "Enter" && checkBeta()}
                 placeholder="BETA CODE"
                 autoFocus
-                className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-[0.12em] outline-none"
+                className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-widest outline-none"
                 style={{
-                  background: "rgba(255,255,255,0.05)",
+                  background: "rgba(255,255,255,0.06)",
                   border: betaError ? "1.5px solid oklch(0.65 0.22 25)" : "1.5px solid oklch(0.80 0.17 65 / 0.3)",
                   color: "rgba(255,255,255,0.9)",
                 }}
               />
               {betaError && <p className="text-xs px-1" style={{ color: "oklch(0.72 0.18 25)" }}>{betaError}</p>}
-              <button
-                onClick={checkBeta}
-                disabled={!betaCode.trim() || betaChecking}
-                className="w-full py-3 rounded-2xl text-sm font-semibold transition-all"
-                style={{
-                  background: "oklch(0.80 0.17 65 / 0.12)",
-                  border: "1.5px solid oklch(0.80 0.17 65 / 0.3)",
-                  color: "oklch(0.80 0.17 65)",
-                }}
-              >
+              <button onClick={checkBeta} disabled={!betaCode.trim() || betaChecking}
+                className="w-full py-3 rounded-2xl text-sm font-semibold"
+                style={{ background: "oklch(0.80 0.17 65 / 0.12)", border: "1.5px solid oklch(0.80 0.17 65 / 0.3)", color: "oklch(0.80 0.17 65)" }}>
                 {betaChecking ? "Checking…" : "Activate beta access"}
               </button>
             </div>
           )}
-        </div>
-      </Entrance>
-    </div>
-    </div>
+        </Fade>
+      </LowerThird>
+    </VideoStage>
   );
 }
 
-// ─── Step 1: Name + Work Style ────────────────────────────────────────────
-function StepName({
-  name,
-  setName,
-  workStyle,
-  setWorkStyle,
-  onNext,
-}: {
-  name: string;
-  setName: (v: string) => void;
-  workStyle: WorkStyle;
-  setWorkStyle: (v: WorkStyle) => void;
-  onNext: () => void;
-}) {
-  const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 5, 0, 110);
-  useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
+// ─── SCREEN 0: Wren cinematic intro ──────────────────────────────────────────
+const INTRO_LINES = [
+  "hey there.",
+  "you just did something most people skip.",
+  "you decided to actually track what matters.",
+  "from here — it's noticing, building, repeating.",
+  "let's set this up for the way you actually work.",
+];
 
-  return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-2">
-        <Eyebrow>Step 1 of 3 — About you</Eyebrow>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-2">
-        <Headline>
-          What should <strong style={{ fontWeight: 700 }}>Continuary</strong> call you?
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-8">
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-          We'll use your name throughout the app to keep things personal.
-        </p>
-      </Entrance>
-
-      <Entrance visible={visible[3]} className="mb-6 space-y-4">
-        <input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="Your first name"
-          autoFocus
-          className="w-full px-5 py-4 rounded-2xl text-base outline-none transition-all"
-          style={{
-            background: "rgba(255,255,255,0.05)",
-            border: "1.5px solid rgba(255,255,255,0.1)",
-            color: "rgba(255,255,255,0.9)",
-          }}
-          onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
-          onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
-        />
-
-        <div>
-          <p className="text-sm mb-3" style={{ color: "rgba(255,255,255,0.45)" }}>
-            What best describes your work right now?
-          </p>
-          <div className="space-y-2">
-            {WORK_STYLES.map(ws => (
-              <PillOption
-                key={ws.value}
-                selected={workStyle === ws.value}
-                onClick={() => setWorkStyle(ws.value)}
-                sub={ws.sub}
-              >
-                {ws.label}
-              </PillOption>
-            ))}
-          </div>
-        </div>
-      </Entrance>
-
-      <Entrance visible={visible[4]}>
-        <CTAButton onClick={onNext} disabled={!name.trim()}>
-          Continue <ArrowRight className="w-4 h-4" />
-        </CTAButton>
-      </Entrance>
-    </div>
-    </div>
-  );
-}
-
-// ─── Step 2: Tone interstitial (Wren reacts to name) ─────────────────
-function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => void }) {
-  const [active, setActive] = useState(false);
+function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => void }) {
+  const [lineIdx, setLineIdx] = useState(0);
+  const [lineActive, setLineActive] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
-  const visible = useEntrance(active, 3, 0, 180);
+  const [fadingOut, setFadingOut] = useState(false);
+
   useEffect(() => {
-    const t1 = setTimeout(() => setVideoVisible(true), 150);
-    const t2 = setTimeout(() => setActive(true), 900);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+    if (!active) { setVideoVisible(false); setFadingOut(false); return; }
+    const t = setTimeout(() => setVideoVisible(true), 150);
+    return () => clearTimeout(t);
+  }, [active]);
 
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 5, overflow: "hidden", background: "#000" }}>
-      {/* Full-bleed video background */}
-      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.6s ease" }}>
-        <SmoothLoopVideo src={WREN_CLIPS["floatingMemories2"]} crossfadeDuration={1.0} />
-      </div>
-      {/* Gradient overlays */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 45%, rgba(0,0,0,0.9) 100%)" }} />
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.2) 100%)" }} />
-      {/* Lower-third text + CTA */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingLeft: "clamp(1.5rem, 6vw, 4rem)", paddingRight: "clamp(1.5rem, 6vw, 4rem)", paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem", textAlign: "center" }}>
-        <Entrance visible={visible[0]}>
-          <p style={{ fontSize: "clamp(1.6rem, 5vw, 2.6rem)", fontWeight: 700, color: "rgba(255,255,255,0.97)", lineHeight: 1.18, letterSpacing: "-0.03em", maxWidth: "30rem", textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)", margin: 0 }}>
-            Good to meet you, <strong style={{ fontWeight: 800, color: "oklch(0.88 0.14 65)" }}>{name || "you"}</strong>.
-          </p>
-        </Entrance>
-        <Entrance visible={visible[1]}>
-          <p style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, maxWidth: "28rem", textShadow: "0 1px 12px rgba(0,0,0,0.9)", margin: 0 }}>
-            One quick thing — how direct should I be with you? This shapes how Continuary talks to you every day.
-          </p>
-        </Entrance>
-        <Entrance visible={visible[2]} style={{ width: "100%", maxWidth: "22rem" }}>
-          <button
-            onClick={onNext}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem", fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600, background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))", color: "white", border: "none", cursor: "pointer", boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
-          >
-            Choose my style <ArrowRight style={{ width: "1rem", height: "1rem" }} />
-          </button>
-        </Entrance>
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    if (!active) { setLineIdx(0); setLineActive(false); return; }
+    const t = setTimeout(() => setLineActive(true), 900);
+    return () => clearTimeout(t);
+  }, [active]);
 
-// ─── Step 3: Tone selection ───────────────────────────────────────────────────
-function StepTone({
-  tone,
-  setTone,
-  onNext,
-  onBack,
-}: {
-  tone: TonePref;
-  setTone: (v: TonePref) => void;
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 110);
-  useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    if (!lineActive || !active) return;
+    if (lineIdx >= INTRO_LINES.length - 1) return;
+    const dur = lineIdx === 0 ? 3000 : 3400;
+    const t = setTimeout(() => {
+      setLineActive(false);
+      setTimeout(() => { setLineIdx(i => i + 1); setLineActive(true); }, 380);
+    }, dur);
+    return () => clearTimeout(t);
+  }, [lineIdx, lineActive, active]);
 
-  return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-2">
-        <Eyebrow>Step 2 of 3 — Your style</Eyebrow>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-2">
-        <Headline>
-          How should Continuary <strong style={{ fontWeight: 700 }}>talk to you?</strong>
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-8 space-y-3">
-        {TONE_OPTIONS.map(t => (
-          <PillOption
-            key={t.value}
-            selected={tone === t.value}
-            onClick={() => setTone(t.value)}
-            sub={t.description}
-          >
-            <span className="mr-2">{t.emoji}</span>{t.label}
-          </PillOption>
-        ))}
-      </Entrance>
+  const isLast = lineIdx === INTRO_LINES.length - 1;
 
-      <Entrance visible={visible[3]} className="space-y-3">
-        <CTAButton onClick={onNext}>
-          Continue <ArrowRight className="w-4 h-4" />
-        </CTAButton>
-        <CTAButton onClick={onBack} secondary>
-          ← Back
-        </CTAButton>
-      </Entrance>
-    </div>
-    </div>
-  );
-}
-
-// ─── Step 4: Focus hours (dedicated) ─────────────────────────────────────────
-function StepFocus({
-  focusHour,
-  setFocusHour,
-  onNext,
-  onBack,
-}: {
-  focusHour: FocusHour;
-  setFocusHour: (v: FocusHour) => void;
-  onNext: () => void;
-  onBack: () => void;
-}) {
-  const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 110);
-  useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
-
-  return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "center", padding: "max(env(safe-area-inset-top, 0px), 2rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-2">
-        <Eyebrow>Step 2 of 3 — Your rhythm</Eyebrow>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-2">
-        <Headline>
-          When do you do your <strong style={{ fontWeight: 700 }}>best focused work?</strong>
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-8">
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-          Continuary will schedule your most important work during this window.
-        </p>
-      </Entrance>
-
-      <Entrance visible={visible[2]} className="mb-8 grid grid-cols-2 gap-3">
-        {FOCUS_HOURS.map(fh => (
-          <button
-            key={fh.value}
-            onClick={() => setFocusHour(fh.value)}
-            className="px-4 py-4 rounded-2xl text-left transition-all duration-200 active:scale-[0.97]"
-            style={{
-              background: focusHour === fh.value ? "oklch(0.68 0.20 270 / 0.14)" : "rgba(255,255,255,0.04)",
-              border: focusHour === fh.value ? "1.5px solid oklch(0.68 0.20 270 / 0.7)" : "1.5px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            <div className="text-sm font-medium" style={{ color: focusHour === fh.value ? "oklch(0.88 0.12 270)" : "rgba(255,255,255,0.82)" }}>
-              {fh.label}
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.35)" }}>{fh.time}</div>
-          </button>
-        ))}
-      </Entrance>
-
-      <Entrance visible={visible[3]} className="space-y-3">
-        <CTAButton onClick={onNext}>
-          Continue <ArrowRight className="w-4 h-4" />
-        </CTAButton>
-        <CTAButton onClick={onBack} secondary>
-          ← Back
-        </CTAButton>
-      </Entrance>
-    </div>
-    </div>
-  );
-}
-
-// ─── Step 5: First Project ────────────────────────────────────────────────────
-function StepProject({
-  name,
-  projectTitle,
-  setProjectTitle,
-  projectWhy,
-  setProjectWhy,
-  projectNext,
-  setProjectNext,
-  onFinish,
-  onSkip,
-  loading,
-}: {
-  name: string;
-  projectTitle: string;
-  setProjectTitle: (v: string) => void;
-  projectWhy: string;
-  setProjectWhy: (v: string) => void;
-  projectNext: string;
-  setProjectNext: (v: string) => void;
-  onFinish: () => void;
-  onSkip: () => void;
-  loading: boolean;
-}) {
-  const [active, setActive] = useState(false);
-  const visible = useEntrance(active, 4, 0, 120);
-  useEffect(() => { const t = setTimeout(() => setActive(true), 60); return () => clearTimeout(t); }, []);
-
-  const inputStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.05)",
-    border: "1.5px solid rgba(255,255,255,0.1)",
-    color: "rgba(255,255,255,0.9)",
-    borderRadius: "1rem",
-    padding: "1rem 1.25rem",
-    width: "100%",
-    fontSize: "0.9rem",
-    outline: "none",
-    transition: "border-color 0.2s",
-    resize: "none" as const,
+  const handleDone = () => {
+    setFadingOut(true);
+    setTimeout(onDone, 650);
   };
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain" }}>
-    <div style={{ minHeight: "100dvh", display: "flex", flexDirection: "column", justifyContent: "flex-start", padding: "max(env(safe-area-inset-top, 0px), 2.5rem) 2rem max(calc(env(safe-area-inset-bottom, 0px) + 2rem), 2.5rem)", maxWidth: "28rem", margin: "0 auto", width: "100%" }}>
-      <Entrance visible={visible[0]} className="mb-2">
-        <Eyebrow>Step 3 of 3 — Your work</Eyebrow>
-      </Entrance>
-      <Entrance visible={visible[1]} className="mb-2">
-        <Headline>
-          {name ? `${name}, what's one thing` : "What's one thing"} you're <strong style={{ fontWeight: 700 }}>actively working on?</strong>
-        </Headline>
-      </Entrance>
-      <Entrance visible={visible[2]} className="mb-8">
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.45)" }}>
-          This becomes your first project. You can add more later.
-        </p>
-      </Entrance>
-
-      <Entrance visible={visible[3]} className="mb-8 space-y-4">
-        <div>
-          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
-            What's this project called?
-          </label>
-          <input
-            value={projectTitle}
-            onChange={e => setProjectTitle(e.target.value)}
-            placeholder="What is this project called?"
-            autoFocus
-            style={inputStyle}
-            onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
-            onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
-          />
-        </div>
-        <div>
-          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
-            Why does it matter to you?
-          </label>
-          <textarea
-            value={projectWhy}
-            onChange={e => setProjectWhy(e.target.value)}
-            placeholder="What would change if this got finished?"
-            rows={3}
-            style={inputStyle}
-            onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
-            onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
-          />
-        </div>
-        <div>
-          <label className="text-sm mb-2 block" style={{ color: "rgba(255,255,255,0.5)" }}>
-            What's the very next step? <span style={{ opacity: 0.5 }}>(optional)</span>
-          </label>
-          <input
-            value={projectNext}
-            onChange={e => setProjectNext(e.target.value)}
-            placeholder="Can be added later"
-            style={inputStyle}
-            onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
-            onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
-          />
-        </div>
-
-        {/* AI transparency */}
-        <p className="text-[11px] leading-relaxed px-4 py-3 rounded-xl" style={{ color: "rgba(255,255,255,0.3)", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          Continuary uses <strong style={{ color: "rgba(255,255,255,0.5)" }}>Google Gemini 2.5 Flash</strong> via the{" "}
-          <strong style={{ color: "rgba(255,255,255,0.5)" }}>Manus AI platform</strong> to generate personalised insights. Your data is not used to train AI models.
-        </p>
-      </Entrance>
-
-      <Entrance visible={visible[3]} className="space-y-3">
-        <CTAButton onClick={onFinish} loading={loading}>
-          {loading ? "Setting up your workspace…" : <>Finish setup <ArrowRight className="w-4 h-4" /></>}
-        </CTAButton>
-        <button
-          onClick={onSkip}
-          disabled={loading}
-          className="w-full text-center text-xs py-2 transition-colors"
-          style={{ color: "rgba(255,255,255,0.2)" }}
-        >
-          Skip for now — I'll add projects later
-        </button>
-      </Entrance>
-    </div>
-    </div>
-  );
-}
-
-// ─── Done screen ──────────────────────────────────────────────────────────────
-function DoneScreen({ name, onDone }: { name: string; onDone?: () => void }) {
-  const [active, setActive] = useState(false);
-  const [videoVisible, setVideoVisible] = useState(false);
-  const visible = useEntrance(active, 3, 0, 200);
-  const [, navigate] = useLocation();
-  useEffect(() => {
-    const t1 = setTimeout(() => setVideoVisible(true), 150);
-    const t2 = setTimeout(() => setActive(true), 1000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
-  const handleContinue = () => onDone ? onDone() : navigate("/");
-
-  return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 5, overflow: "hidden", background: "#000" }}>
-      {/* Full-bleed video background */}
-      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.8s ease" }}>
-        <SmoothLoopVideo src={WREN_CLIPS["celebrationFlying"]} crossfadeDuration={1.2} />
+    <VideoStage>
+      {/* Full-bleed Wren video */}
+      <div style={{ position: "absolute", inset: 0, opacity: videoVisible ? 1 : 0, transition: "opacity 1.6s ease" }}>
+        <SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers} crossfadeDuration={1.0} />
       </div>
-      {/* Gradient overlays */}
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 35%, transparent 40%, rgba(0,0,0,0.92) 100%)" }} />
-      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(to right, rgba(0,0,0,0.2) 0%, transparent 35%, transparent 65%, rgba(0,0,0,0.2) 100%)" }} />
-      {/* Lower-third text + CTA */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, paddingLeft: "clamp(1.5rem, 6vw, 4rem)", paddingRight: "clamp(1.5rem, 6vw, 4rem)", paddingBottom: "max(calc(env(safe-area-inset-bottom, 0px) + 2.5rem), 3.5rem)", display: "flex", flexDirection: "column", alignItems: "center", gap: "1.25rem", textAlign: "center" }}>
-        <Entrance visible={visible[0]}>
-          <p style={{ fontSize: "clamp(1.8rem, 5.5vw, 3rem)", fontWeight: 700, color: "rgba(255,255,255,0.97)", lineHeight: 1.18, letterSpacing: "-0.03em", maxWidth: "32rem", textShadow: "0 2px 32px rgba(0,0,0,0.9), 0 1px 6px rgba(0,0,0,1)", margin: 0 }}>
-            {name ? <>{"You're all set, "}<strong style={{ fontWeight: 800, color: "oklch(0.88 0.14 65)" }}>{name}</strong>{"."}</> : "You're all set."}
-          </p>
-        </Entrance>
-        <Entrance visible={visible[1]}>
-          <p style={{ fontSize: "clamp(1rem, 3vw, 1.25rem)", fontWeight: 400, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, maxWidth: "28rem", textShadow: "0 1px 12px rgba(0,0,0,0.9)", margin: 0 }}>
-            Your command center is ready. Wren will be with you every step of the way.
-          </p>
-        </Entrance>
-        <Entrance visible={visible[2]} style={{ width: "100%", maxWidth: "22rem" }}>
-          <button
-            onClick={handleContinue}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", padding: "1rem 1.5rem", borderRadius: "1rem", fontSize: "clamp(0.9rem, 2.5vw, 1.05rem)", fontWeight: 600, background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))", color: "white", border: "none", cursor: "pointer", boxShadow: "0 4px 32px oklch(0.52 0.22 270 / 0.55), 0 0 0 1px rgba(255,255,255,0.1) inset" }}
-          >
-            Open Continuary <ArrowRight style={{ width: "1rem", height: "1rem" }} />
-          </button>
-        </Entrance>
-      </div>
-    </div>
-  );
-}
+      <GradientOverlays />
 
-// ─── Ambient audio controller ─────────────────────────────────────────────────
-const AMBIENT_SRC = "/manus-storage/ambient-onboarding_6b426ce0.mp3";
+      {/* Fade-out overlay */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "#000", opacity: fadingOut ? 1 : 0,
+        transition: fadingOut ? "opacity 0.65s ease" : "none",
+        zIndex: 30,
+      }} />
 
-function useAmbientAudio(isCinematic: boolean) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const fadeRef = useRef<number>(0);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      const audio = new Audio(AMBIENT_SRC);
-      audio.loop = true;
-      audio.volume = 0;
-      audioRef.current = audio;
-    }
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    cancelAnimationFrame(fadeRef.current);
-
-    const targetVol = isCinematic ? 0.08 : 0;
-    const step = isCinematic ? 0.002 : 0.004; // fade in slower, fade out faster
-
-    if (isCinematic) {
-      audio.play().catch(() => {});
-    }
-
-    const fade = () => {
-      if (!audioRef.current) return;
-      const current = audioRef.current.volume;
-      const diff = targetVol - current;
-      if (Math.abs(diff) < 0.001) {
-        audioRef.current.volume = targetVol;
-        if (targetVol === 0) audioRef.current.pause();
-        return;
-      }
-      audioRef.current.volume = Math.max(0, Math.min(1, current + (diff > 0 ? step : -step)));
-      fadeRef.current = requestAnimationFrame(fade);
-    };
-    fadeRef.current = requestAnimationFrame(fade);
-
-    return () => cancelAnimationFrame(fadeRef.current);
-  }, [isCinematic]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      cancelAnimationFrame(fadeRef.current);
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-    };
-  }, []);
-}
-
-// ─── Fade-to-black crossfade transition ───────────────────────────────────────
-// Renders a black overlay that flashes briefly on step change, giving a
-// cinematic dissolve feel between screens.
-function FadeToBlackTransition({ stepKey, children }: { stepKey: number; children: React.ReactNode }) {
-  const [overlay, setOverlay] = useState(0); // 0=transparent, 1=black
-  const prevKey = useRef(stepKey);
-
-  useEffect(() => {
-    if (prevKey.current === stepKey) return;
-    prevKey.current = stepKey;
-    // Flash black briefly
-    setOverlay(1);
-    const t = setTimeout(() => setOverlay(0), 50);
-    return () => clearTimeout(t);
-  }, [stepKey]);
-
-  return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative" }}>
-      {children}
-      {/* Black overlay — fades in then out on each step change */}
-      <div
+      {/* Skip button */}
+      <button
+        onClick={handleDone}
         style={{
-          position: "fixed", inset: 0, zIndex: 100,
-          background: "#000",
-          opacity: overlay,
-          transition: overlay === 1
-            ? "opacity 0.25s ease"
-            : "opacity 0.5s ease",
-          pointerEvents: overlay > 0.5 ? "all" : "none",
+          position: "absolute",
+          top: `max(calc(env(safe-area-inset-top, 0px) + 1rem), 1.5rem)`,
+          right: "1.5rem",
+          zIndex: 40,
+          color: "rgba(255,255,255,0.35)",
+          fontSize: "0.75rem",
+          letterSpacing: "0.1em",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: "0.5rem",
         }}
-      />
-    </div>
+      >
+        SKIP
+      </button>
+
+      {/* Lower-third text */}
+      <LowerThird>
+        <div style={{ marginBottom: "1.5rem", minHeight: "5rem" }}>
+          <p style={{
+            fontSize: lineIdx === 0 ? "clamp(1.8rem, 6vw, 2.8rem)" : "clamp(1.2rem, 4vw, 1.75rem)",
+            fontWeight: lineIdx === 0 ? 300 : 300,
+            color: "rgba(255,255,255,0.95)",
+            lineHeight: 1.25,
+            letterSpacing: "-0.02em",
+          }}>
+            <WordReveal text={INTRO_LINES[lineIdx]} active={lineActive} />
+          </p>
+        </div>
+
+        {isLast && lineActive && (
+          <Fade visible={true} delay={INTRO_LINES[lineIdx].split(" ").length * 80 + 400}>
+            <CTAButton onClick={handleDone}>
+              Let's go <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+          </Fade>
+        )}
+      </LowerThird>
+    </VideoStage>
   );
 }
 
-// ─── Slide transition wrapper (kept for legacy compat) ────────────────────────
-function SlideTransition({
-  stepKey,
-  direction,
-  children,
-}: {
-  stepKey: string | number;
-  direction: "forward" | "back";
-  children: React.ReactNode;
+// ─── SCREEN 1: Name + Work Style ─────────────────────────────────────────────
+function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
+  name: string; setName: (v: string) => void;
+  workStyle: WorkStyle; setWorkStyle: (v: WorkStyle) => void;
+  onNext: () => void;
 }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    const t = requestAnimationFrame(() => setMounted(true));
-    return () => cancelAnimationFrame(t);
-  }, []);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
   return (
-    <div
-      key={stepKey}
-      style={{
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        opacity: mounted ? 1 : 0,
-        transform: mounted ? "translateX(0)" : direction === "forward" ? "translateX(40px)" : "translateX(-40px)",
-        transition: "opacity 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.45s cubic-bezier(0.16,1,0.3,1)",
-      }}
-    >
-      {children}
-    </div>
+    <VideoStage>
+      {/* Wren peeking — she's watching you type */}
+      <SmoothLoopVideo src={WREN_CLIPS.peeking} />
+      <GradientOverlays top={false} />
+
+      {/* Frosted input panel at bottom */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        maxHeight: "88dvh", overflowY: "auto", overscrollBehavior: "contain",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      }}>
+        <FrostedPanel>
+          <Fade visible={visible} delay={0} style={{ marginBottom: "0.25rem" }}>
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+              Step 1 of 3
+            </p>
+          </Fade>
+          <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
+            <h2 style={{ fontSize: "clamp(1.4rem, 4.5vw, 2rem)", fontWeight: 400, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+              What should <strong style={{ fontWeight: 700 }}>Continuary</strong> call you?
+            </h2>
+          </Fade>
+          <Fade visible={visible} delay={160} style={{ marginBottom: "1.25rem" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              We'll use your name throughout the app.
+            </p>
+          </Fade>
+
+          <Fade visible={visible} delay={240} style={{ marginBottom: "1rem" }}>
+            <input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your first name"
+              autoFocus
+              className="w-full px-5 py-4 rounded-2xl text-base outline-none transition-all"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.9)",
+              }}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+            />
+          </Fade>
+
+          <Fade visible={visible} delay={320} style={{ marginBottom: "1.25rem" }}>
+            <p className="text-sm mb-2" style={{ color: "rgba(255,255,255,0.45)" }}>
+              What best describes your work right now?
+            </p>
+            <div className="space-y-2">
+              {WORK_STYLES.map(ws => (
+                <PillOption key={ws.value} selected={workStyle === ws.value}
+                  onClick={() => setWorkStyle(ws.value)} sub={ws.sub}>
+                  {ws.label}
+                </PillOption>
+              ))}
+            </div>
+          </Fade>
+
+          <Fade visible={visible} delay={400}>
+            <CTAButton onClick={onNext} disabled={!name.trim()}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+          </Fade>
+        </FrostedPanel>
+      </div>
+    </VideoStage>
   );
 }
 
-// ─── Main OnboardingPage ──────────────────────────────────────────────────────
-export function OnboardingPageWithCallback({ onDone }: { onDone?: () => void }) {
-  return <OnboardingPageInner onDone={onDone} />;
+// ─── SCREEN 2: Tone interstitial ──────────────────────────────────────────────
+function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => void }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 300); return () => clearTimeout(t); }, []);
+
+  return (
+    <VideoStage>
+      <SmoothLoopVideo src={WREN_CLIPS.winksRipple} />
+      <GradientOverlays />
+
+      <LowerThird>
+        <Fade visible={visible} delay={0} style={{ marginBottom: "0.75rem" }}>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+            Nice to meet you
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={120} style={{ marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "clamp(1.6rem, 5.5vw, 2.6rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+            Good to meet you, <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>{name || "friend"}</span>.
+          </h2>
+        </Fade>
+        <Fade visible={visible} delay={280} style={{ marginBottom: "2rem" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+            One more thing — how do you want me to talk to you? Some people want gentle nudges. Others want me to be direct. You pick.
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={440}>
+          <CTAButton onClick={onNext}>
+            Choose my tone <ArrowRight className="w-4 h-4" />
+          </CTAButton>
+        </Fade>
+      </LowerThird>
+    </VideoStage>
+  );
 }
 
-export default function OnboardingPage() {
-  return <OnboardingPageInner />;
+// ─── SCREEN 3: Tone selection ─────────────────────────────────────────────────
+function StepTone({ tone, setTone, onNext, onBack }: {
+  tone: TonePref | ""; setTone: (v: TonePref) => void;
+  onNext: () => void; onBack: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
+
+  return (
+    <VideoStage>
+      <SmoothLoopVideo src={WREN_CLIPS.closesEyes} />
+      <GradientOverlays top={false} />
+
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        maxHeight: "80dvh", overflowY: "auto", overscrollBehavior: "contain",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      }}>
+        <FrostedPanel>
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={onBack} style={{ color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <Fade visible={visible} delay={0}>
+              <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+                Step 2 of 3
+              </p>
+            </Fade>
+          </div>
+
+          <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
+            <h2 style={{ fontSize: "clamp(1.4rem, 4.5vw, 2rem)", fontWeight: 400, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+              How should I talk to you?
+            </h2>
+          </Fade>
+          <Fade visible={visible} delay={160} style={{ marginBottom: "1.25rem" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              This shapes how Wren speaks to you every day.
+            </p>
+          </Fade>
+
+          <Fade visible={visible} delay={240} style={{ marginBottom: "1.25rem" }}>
+            <div className="space-y-2">
+              {TONE_OPTIONS.map(t => (
+                <PillOption key={t.value} selected={tone === t.value}
+                  onClick={() => setTone(t.value)} sub={t.description}>
+                  {t.label}
+                </PillOption>
+              ))}
+            </div>
+          </Fade>
+
+          <Fade visible={visible} delay={360}>
+            <CTAButton onClick={onNext} disabled={!tone}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+          </Fade>
+        </FrostedPanel>
+      </div>
+    </VideoStage>
+  );
 }
 
-// Cinematic steps are those with full-bleed Wren video backgrounds
-const CINEMATIC_STEPS = new Set([0, 2, 6]);
+// ─── SCREEN 4: Focus hours ────────────────────────────────────────────────────
+function StepFocus({ focusHour, setFocusHour, onNext, onBack }: {
+  focusHour: FocusHour | ""; setFocusHour: (v: FocusHour) => void;
+  onNext: () => void; onBack: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
+  return (
+    <VideoStage>
+      <SmoothLoopVideo src={WREN_CLIPS.hoversThread} />
+      <GradientOverlays top={false} />
+
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        maxHeight: "80dvh", overflowY: "auto", overscrollBehavior: "contain",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      }}>
+        <FrostedPanel>
+          <div className="flex items-center gap-3 mb-3">
+            <button onClick={onBack} style={{ color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <Fade visible={visible} delay={0}>
+              <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+                Step 3 of 3
+              </p>
+            </Fade>
+          </div>
+
+          <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
+            <h2 style={{ fontSize: "clamp(1.4rem, 4.5vw, 2rem)", fontWeight: 400, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+              When do you do your best work?
+            </h2>
+          </Fade>
+          <Fade visible={visible} delay={160} style={{ marginBottom: "1.25rem" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              Continuary will schedule your focus time around this window.
+            </p>
+          </Fade>
+
+          <Fade visible={visible} delay={240} style={{ marginBottom: "1.25rem" }}>
+            <div className="space-y-2">
+              {FOCUS_HOURS.map(fh => (
+                <PillOption key={fh.value} selected={focusHour === fh.value}
+                  onClick={() => setFocusHour(fh.value)} sub={fh.time}>
+                  {fh.label}
+                </PillOption>
+              ))}
+            </div>
+          </Fade>
+
+          <Fade visible={visible} delay={360}>
+            <CTAButton onClick={onNext} disabled={!focusHour}>
+              Continue <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+          </Fade>
+        </FrostedPanel>
+      </div>
+    </VideoStage>
+  );
+}
+
+// ─── SCREEN 5: First project ──────────────────────────────────────────────────
+function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProjectWhy,
+  projectNext, setProjectNext, onFinish, onSkip, loading }: {
+  name: string;
+  projectTitle: string; setProjectTitle: (v: string) => void;
+  projectWhy: string; setProjectWhy: (v: string) => void;
+  projectNext: string; setProjectNext: (v: string) => void;
+  onFinish: () => void; onSkip: () => void;
+  loading: boolean;
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
+
+  return (
+    <VideoStage>
+      <SmoothLoopVideo src={WREN_CLIPS.perchedDoc} />
+      <GradientOverlays top={false} />
+
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0,
+        maxHeight: "90dvh", overflowY: "auto", overscrollBehavior: "contain",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      }}>
+        <FrostedPanel>
+          <Fade visible={visible} delay={0} style={{ marginBottom: "0.25rem" }}>
+            <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+              First project
+            </p>
+          </Fade>
+          <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
+            <h2 style={{ fontSize: "clamp(1.4rem, 4.5vw, 2rem)", fontWeight: 400, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+              What's the one thing you're building right now, {name}?
+            </h2>
+          </Fade>
+          <Fade visible={visible} delay={160} style={{ marginBottom: "1.25rem" }}>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.45)" }}>
+              This becomes your first active project. You can add more later.
+            </p>
+          </Fade>
+
+          <Fade visible={visible} delay={240} style={{ marginBottom: "0.75rem" }}>
+            <input
+              value={projectTitle}
+              onChange={e => setProjectTitle(e.target.value)}
+              placeholder="Project name"
+              className="w-full px-5 py-4 rounded-2xl text-base outline-none transition-all"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.9)",
+              }}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+            />
+          </Fade>
+
+          <Fade visible={visible} delay={320} style={{ marginBottom: "0.75rem" }}>
+            <textarea
+              value={projectWhy}
+              onChange={e => setProjectWhy(e.target.value)}
+              placeholder="Why does this matter to you? (optional)"
+              rows={2}
+              className="w-full px-5 py-3 rounded-2xl text-sm outline-none transition-all resize-none"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.9)",
+              }}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+            />
+          </Fade>
+
+          <Fade visible={visible} delay={400} style={{ marginBottom: "1.25rem" }}>
+            <input
+              value={projectNext}
+              onChange={e => setProjectNext(e.target.value)}
+              placeholder="What's the very next action? (optional)"
+              className="w-full px-5 py-4 rounded-2xl text-sm outline-none transition-all"
+              style={{
+                background: "rgba(255,255,255,0.07)",
+                border: "1.5px solid rgba(255,255,255,0.12)",
+                color: "rgba(255,255,255,0.9)",
+              }}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
+            />
+          </Fade>
+
+          <Fade visible={visible} delay={480} style={{ marginBottom: "0.75rem" }}>
+            <CTAButton onClick={onFinish} disabled={!projectTitle.trim()} loading={loading}>
+              Set up my space <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+          </Fade>
+          <Fade visible={visible} delay={560}>
+            <CTAButton onClick={onSkip} secondary loading={loading}>
+              Skip for now
+            </CTAButton>
+          </Fade>
+        </FrostedPanel>
+      </div>
+    </VideoStage>
+  );
+}
+
+// ─── SCREEN 6: Done / celebration ────────────────────────────────────────────
+function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
+  const [visible, setVisible] = useState(false);
+  const [videoEnded, setVideoEnded] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 400); return () => clearTimeout(t); }, []);
+
+  return (
+    <VideoStage>
+      {/* Wren flies at camera for a hug — plays once, then loops a calm clip */}
+      {!videoEnded ? (
+        <OnceVideo src={WREN_CLIPS.fliesHug} onEnded={() => setVideoEnded(true)} />
+      ) : (
+        <SmoothLoopVideo src={WREN_CLIPS.mainCornerWave} />
+      )}
+      <GradientOverlays />
+
+      <LowerThird>
+        <Fade visible={visible} delay={0} style={{ marginBottom: "0.75rem" }}>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+            You're in.
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={120} style={{ marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "clamp(1.8rem, 6vw, 2.8rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+            Welcome to Continuary, <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>{name || "friend"}</span>.
+          </h2>
+        </Fade>
+        <Fade visible={visible} delay={280} style={{ marginBottom: "2rem" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Your space is ready. Wren will be with you every step of the way — tracking what matters, noticing your patterns, and keeping you moving.
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={440}>
+          <CTAButton onClick={onDone}>
+            Let's begin <ArrowRight className="w-4 h-4" />
+          </CTAButton>
+        </Fade>
+      </LowerThird>
+    </VideoStage>
+  );
+}
+
+// ─── Main onboarding inner ───────────────────────────────────────────────────
 function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const { user, isAuthenticated } = useAuth();
-  const [, navigate] = useLocation();
   const utils = trpc.useUtils();
 
-  // step -1 = invite gate, 0 = wren intro, 1 = name/work, 2 = tone interstitial,
-  // 3 = tone select, 4 = focus, 5 = project, 6 = done
-  const [step, setStep] = useState(-1);
-  const [direction, setDirection] = useState<"forward" | "back">("forward");
-
-  // Ambient audio: plays softly on cinematic screens, fades out on input screens
-  useAmbientAudio(CINEMATIC_STEPS.has(step));
-
-  // Skip invite gate if user already has access
-  useEffect(() => {
-    if (!user) return;
-    const hasAccess = !!(user.hasRedeemedInvite || user.role === "admin" || user.isPro);
-    if (hasAccess && step === -1) setStep(0);
-  }, [user]);
-
-  // Form state
-  const [name, setName] = useState(user?.name?.split(" ")[0] ?? "");
+  const [step, setStep] = useState<number>(-1);
+  const [name, setName] = useState("");
   const [workStyle, setWorkStyle] = useState<WorkStyle>("");
-  const [tone, setTone] = useState<TonePref>("direct");
-  const [focusHour, setFocusHour] = useState<FocusHour>("morning");
+  const [tone, setTone] = useState<TonePref | "">("direct");
+  const [focusHour, setFocusHour] = useState<FocusHour | "">("morning");
   const [projectTitle, setProjectTitle] = useState("");
   const [projectWhy, setProjectWhy] = useState("");
   const [projectNext, setProjectNext] = useState("");
@@ -1251,8 +1016,22 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();
   const submitMorning = trpc.checkIns.submitMorning.useMutation();
 
-  const goForward = (n: number) => { setDirection("forward"); setStep(n); };
-  const goBack = (n: number) => { setDirection("back"); setStep(n); };
+  // Skip invite gate if user already has access
+  useEffect(() => {
+    if (!user) return;
+    const hasAccess = !!(user.hasRedeemedInvite || user.role === "admin" || user.isPro);
+    if (hasAccess && step === -1) setStep(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Pre-fill name from auth
+  useEffect(() => {
+    if (user?.name && !name) setName(user.name.split(" ")[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.name]);
+
+  const goForward = (to: number) => setStep(to);
+  const goBack = (to: number) => setStep(to);
 
   const finishOnboarding = async (skipProject = false) => {
     try {
@@ -1271,13 +1050,12 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
         name: name.trim() || undefined,
         workTypes: workStyle ? [workStyle] : [],
         distractionPatterns: [],
-        focusHoursStart: focusStartMap[focusHour],
-        focusHoursEnd: focusEndMap[focusHour],
-        tonePreference: tone,
+        focusHoursStart: focusStartMap[(focusHour || "morning") as FocusHour],
+        focusHoursEnd: focusEndMap[(focusHour || "morning") as FocusHour],
+        tonePreference: (tone || "gentle") as TonePref,
       });
       await utils.auth.me.invalidate();
       await utils.settings.getProfile.invalidate();
-
       if (createdProjectId) {
         try {
           const result = await generateStartHere.mutateAsync({
@@ -1285,7 +1063,7 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
             projectTitle,
             whyItMatters: projectWhy || undefined,
             userNextStep: projectNext || undefined,
-            tonePreference: tone,
+            tonePreference: (tone || "gentle") as TonePref,
             workStyle: workStyle || undefined,
           });
           const seedNotes = projectNext?.trim() || result.nextStep?.trim()
@@ -1304,31 +1082,30 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
 
   const isPending = completeOnboarding.isPending || createProject.isPending;
 
-  // Progress: -1=0%, 0=8%, 1=25%, 2=40%, 3=55%, 4=70%, 5=85%, 6=100%
+  // Ambient audio: play on cinematic screens (0, 2, 6)
+  const isCinematic = step === 0 || step === 2 || step === 6;
+  useAmbientAudio(isCinematic);
+
+  // Progress
   const progressMap: Record<number, number> = { [-1]: 0, 0: 8, 1: 25, 2: 40, 3: 55, 4: 70, 5: 85, 6: 100 };
   const progress = progressMap[step] ?? 0;
 
   if (!isAuthenticated) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center p-8"
-        style={{ background: "#080a0f" }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-8" style={{ background: "#000" }}>
         <div className="w-full max-w-sm text-center space-y-6">
-          <img src="/logo-navy.svg" alt="Continuary" className="w-14 h-14 rounded-2xl object-contain mx-auto" />
+          <img src={WREN_STILLS.luminousFront} alt="Wren" className="w-20 h-20 rounded-full object-contain mx-auto" style={{ mixBlendMode: "screen" }} />
           <div>
             <h1 className="text-2xl font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>Continuary</h1>
             <p className="text-sm mt-2" style={{ color: "rgba(255,255,255,0.4)" }}>Sign in to get started.</p>
           </div>
-          <a
-            href={getLoginUrl()}
+          <a href={getLoginUrl()}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl text-sm font-semibold"
             style={{
               background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
               color: "white",
               boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
-            }}
-          >
+            }}>
             Sign in <ChevronRight className="w-4 h-4" />
           </a>
         </div>
@@ -1336,79 +1113,55 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
     );
   }
 
+  if (step === -1 && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#000" }}>
+        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "rgba(255,255,255,0.3)" }} />
+      </div>
+    );
+  }
+
   return (
-    <div
-      className="relative overflow-hidden"
-      style={{ background: "#080a0f", height: "100%", minHeight: "100dvh", display: "flex", flexDirection: "column" }}
-    >
-      {/* Ambient glow */}
-      <div
-        className="fixed pointer-events-none"
-        style={{
-          left: "50%", top: "35%",
-          transform: "translate(-50%, -50%)",
-          width: 900, height: 900,
-          background: "radial-gradient(circle, oklch(0.52 0.22 270 / 0.07) 0%, transparent 65%)",
-          filter: "blur(40px)",
-          transition: "opacity 1s ease",
-        }}
-      />
-
-      {/* Progress bar */}
+    <div style={{ background: "#000", height: "100%", minHeight: "100dvh" }}>
       <ProgressBar value={progress} />
-
-      {/* Screens — wrapped in fade-to-black crossfade */}
       <FadeToBlackTransition stepKey={step}>
-        {step === -1 && (
-          <InviteGateScreen onSuccess={() => goForward(0)} />
-        )}
-        {step === 0 && (
-          <WrenIntroSequence active={step === 0} onDone={() => goForward(1)} />
-        )}
+        {step === -1 && <InviteGateScreen onSuccess={() => goForward(0)} />}
+        {step === 0 && <WrenIntroSequence active={step === 0} onDone={() => goForward(1)} />}
         {step === 1 && (
-          <StepName
-            name={name}
-            setName={setName}
-            workStyle={workStyle}
-            setWorkStyle={setWorkStyle}
-            onNext={() => goForward(2)}
-          />
+          <StepName name={name} setName={setName} workStyle={workStyle}
+            setWorkStyle={setWorkStyle} onNext={() => goForward(2)} />
         )}
-        {step === 2 && (
-          <StepToneInterstitial name={name} onNext={() => goForward(3)} />
-        )}
+        {step === 2 && <StepToneInterstitial name={name} onNext={() => goForward(3)} />}
         {step === 3 && (
-          <StepTone
-            tone={tone}
-            setTone={setTone}
-            onNext={() => goForward(4)}
-            onBack={() => goBack(1)}
-          />
+          <StepTone tone={tone} setTone={setTone}
+            onNext={() => goForward(4)} onBack={() => goBack(1)} />
         )}
         {step === 4 && (
-          <StepFocus
-            focusHour={focusHour}
-            setFocusHour={setFocusHour}
-            onNext={() => goForward(5)}
-            onBack={() => goBack(3)}
-          />
+          <StepFocus focusHour={focusHour} setFocusHour={setFocusHour}
+            onNext={() => goForward(5)} onBack={() => goBack(3)} />
         )}
         {step === 5 && (
           <StepProject
             name={name}
-            projectTitle={projectTitle}
-            setProjectTitle={setProjectTitle}
-            projectWhy={projectWhy}
-            setProjectWhy={setProjectWhy}
-            projectNext={projectNext}
-            setProjectNext={setProjectNext}
+            projectTitle={projectTitle} setProjectTitle={setProjectTitle}
+            projectWhy={projectWhy} setProjectWhy={setProjectWhy}
+            projectNext={projectNext} setProjectNext={setProjectNext}
             onFinish={() => finishOnboarding(false)}
             onSkip={() => finishOnboarding(true)}
             loading={isPending}
           />
         )}
-        {step === 6 && <DoneScreen name={name} onDone={onDone} />}
+        {step === 6 && <DoneScreen name={name} onDone={onDone ?? (() => {})} />}
       </FadeToBlackTransition>
     </div>
   );
+}
+
+// ─── Exports ──────────────────────────────────────────────────────────────────
+export function OnboardingPageWithCallback({ onDone }: { onDone?: () => void }) {
+  return <OnboardingPageInner onDone={onDone} />;
+}
+
+export default function OnboardingPage() {
+  return <OnboardingPageInner />;
 }
