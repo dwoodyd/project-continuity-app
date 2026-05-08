@@ -29,6 +29,16 @@ export const users = mysqlTable("users", {
   proSince: timestamp("proSince"),
   isBeta: boolean("isBeta").default(false).notNull(),
   betaExpiresAt: timestamp("betaExpiresAt"),
+  // ── Founding Member fields ──────────────────────────────────────────────────
+  isFoundingMember: boolean("isFoundingMember").default(false).notNull(),
+  foundingMemberCohort: int("foundingMemberCohort"),
+  foundingMemberJoinedAt: timestamp("foundingMemberJoinedAt"),
+  trialEndsAt: timestamp("trialEndsAt"),
+  foundingRateLocked: boolean("foundingRateLocked").default(false).notNull(),
+  foundingTier: mysqlEnum("foundingTier", ["pro", "keeper"]),
+  referredBy: int("referredBy"),
+  referralBonusDays: int("referralBonusDays").default(0).notNull(),
+  referralCode: varchar("referralCode", { length: 64 }),
 });
 
 export type User = typeof users.$inferSelect;

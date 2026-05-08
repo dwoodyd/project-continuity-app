@@ -1,0 +1,90 @@
+{
+  "query": "SHOW COLUMNS FROM users LIKE '%founding%'; SHOW COLUMNS FROM users LIKE '%trial%'; SHOW COLUMNS FROM users LIKE '%referral%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SHOW COLUMNS FROM users LIKE '%founding%'; SHOW COLUMNS FROM users LIKE '%trial%'; SHOW COLUMNS FROM users LIKE '%referral%';",
+  "rows": [
+    {
+      "Field": "isFoundingMember",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "foundingMemberCohort",
+      "Type": "int",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "foundingMemberJoinedAt",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "foundingRateLocked",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "foundingTier",
+      "Type": "enum('pro','keeper')",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "Field",
+      "Type": "Type",
+      "Null": "Null",
+      "Key": "Key",
+      "Default": "Default",
+      "Extra": "Extra"
+    },
+    {
+      "Field": "trialEndsAt",
+      "Type": "timestamp",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "Field",
+      "Type": "Type",
+      "Null": "Null",
+      "Key": "Key",
+      "Default": "Default",
+      "Extra": "Extra"
+    },
+    {
+      "Field": "referralBonusDays",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "",
+      "Default": "0",
+      "Extra": ""
+    },
+    {
+      "Field": "referralCode",
+      "Type": "varchar(64)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nisFoundingMember\ttinyint(1)\tNO\t\t0\t\nfoundingMemberCohort\tint\tYES\t\tNULL\t\nfoundingMemberJoinedAt\ttimestamp\tYES\t\tNULL\t\nfoundingRateLocked\ttinyint(1)\tNO\t\t0\t\nfoundingTier\tenum('pro','keeper')\tYES\t\tNULL\t\nField\tType\tNull\tKey\tDefault\tExtra\ntrialEndsAt\ttimestamp\tYES\t\tNULL\t\nField\tType\tNull\tKey\tDefault\tExtra\nreferralBonusDays\tint\tNO\t\t0\t\nreferralCode\tvarchar(64)\tYES\t\tNULL\t\n",
+  "stderr": "",
+  "execution_time_ms": 299
+}

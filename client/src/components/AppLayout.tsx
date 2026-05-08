@@ -34,6 +34,7 @@ import {
   MessageSquare,
   BarChart2,
   PenLine,
+  Star,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -70,6 +71,7 @@ const ALL_NAV_ITEMS = [
   { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
   { href: "/tour",         label: "Take the Tour",   icon: GraduationCap, section: "secondary" },
   { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
+  { href: "/founding-member", label: "Founding Member", icon: Star,          section: "secondary" },
 ] as const;
 
 // ── Mobile bottom-tab items (5 visible) ──────────────────────────────────────
@@ -92,6 +94,7 @@ const MORE_ITEMS = [
   { href: "/welcome",      label: "About Continuary", icon: Home },
   { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
   { href: "/settings",     label: "Settings",         icon: Settings },
+  { href: "/founding-member", label: "Founding Member", icon: Star },
 ];
 
 // ── Wren sidebar presence with meet-Wren tooltip ────────────────────────────

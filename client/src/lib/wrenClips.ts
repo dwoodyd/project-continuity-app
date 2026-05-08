@@ -119,6 +119,21 @@ export const WREN_CLIPS = {
   extra9:             `${BASE}/wren_untitled_9_6a2ee8e4.mp4`,
   /** Wren untitled 11 — extra clip C */
   extra11:            `${BASE}/wren_untitled_11_82cd59f1.mp4`,
+
+  // ── Legacy aliases (backward compat — map to best new equivalent) ──────────
+  floatingMemories:   `${BASE}/wren_glowing_hovers_6ea04f47.mp4`,
+  floatingMemories2:  `${BASE}/wren_glowing_hovers_6ea04f47.mp4`,
+  pathOfProgress:     `${BASE}/wren_hovers_thread_29c4964a.mp4`,
+  celebrationFlying:  `${BASE}/wren_flies_hug_af727f9c.mp4`,
+  withLetters:        `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
+  greeting:           `${BASE}/wren_pops_head_1568d1e1.mp4`,
+  welcome:            `${BASE}/wren_drops_and_hovers_fe4c3cf4.mp4`,
+  workspace:          `${BASE}/wren_perched_doc_463f72f2.mp4`,
+  focus:              `${BASE}/wren_hovers_thread_29c4964a.mp4`,
+  celebration:        `${BASE}/wren_flies_hug_af727f9c.mp4`,
+  celebration2:       `${BASE}/wren_cartwheels_feefa3ef.mp4`,
+  reflection:         `${BASE}/wren_hovers_journal_ef4ca92d.mp4`,
+  idle:               `${BASE}/wren_main_corner_wave_b211fe78.mp4`,
 } as const;
 
 export type WrenClipKey = keyof typeof WREN_CLIPS;

@@ -331,26 +331,73 @@ async function processUserNotifications(userId: number): Promise<void> {
     }
   }
 
-  // ── Beta expiry nudge — fires on the expiry day ────────────────────────────
+  // ── Founding Member push ladder — 5 touchpoints over the 90-day trial ────────
+  // Day 1 (activation), Day 30 (milestone), Day 83 (7 days left),
+  // Day 87 (3 days left), Day 90 (final CTA)
   if (hour === morningTime.hour && minute === morningTime.minute) {
     try {
       const db = await getDb();
       if (db) {
-        const [userRow] = await db.select({ isBeta: users.isBeta, betaExpiresAt: users.betaExpiresAt }).from(users).where(eq(users.id, userId)).limit(1);
-        if (userRow?.isBeta && userRow.betaExpiresAt) {
-          const daysLeft = Math.ceil((userRow.betaExpiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          if (daysLeft === 0 || daysLeft === 3) {
+        const [userRow] = await db.select({
+          isBeta: users.isBeta,
+          betaExpiresAt: users.betaExpiresAt,
+          isFoundingMember: users.isFoundingMember,
+          foundingMemberJoinedAt: users.foundingMemberJoinedAt,
+          trialEndsAt: users.trialEndsAt,
+        }).from(users).where(eq(users.id, userId)).limit(1);
+
+        const effectiveExpiry = userRow?.trialEndsAt ?? userRow?.betaExpiresAt;
+        const joinedAt = userRow?.foundingMemberJoinedAt;
+        const isActive = (userRow?.isFoundingMember || userRow?.isBeta) && effectiveExpiry;
+
+        if (isActive && effectiveExpiry && joinedAt) {
+          const daysLeft = Math.ceil((effectiveExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+          const daysSinceJoined = Math.floor((Date.now() - joinedAt.getTime()) / (1000 * 60 * 60 * 24));
+
+          type PushMsg = { title: string; body: string; tag: string };
+          // Day-since-joined triggers
+          const dayTriggers: Record<number, PushMsg> = {
+            1: {
+              title: "Wren is waiting.",
+              body: "Three minutes for your first ritual. Your thread starts today.",
+              tag: "founding-day1",
+            },
+            30: {
+              title: "One month in.",
+              body: "You’re building something real. Your founding rate is still waiting for you.",
+              tag: "founding-day30",
+            },
+          };
+          // Days-left triggers
+          const daysLeftTriggers: Record<number, PushMsg> = {
+            7: {
+              title: "7 days left. Lock in your founding rate.",
+              body: "Your 90-day founding window closes soon. Secure your rate for life.",
+              tag: "founding-7days",
+            },
+            3: {
+              title: "3 days. We’ve loved building this with you.",
+              body: "Lock in your founding rate before your trial ends.",
+              tag: "founding-3days",
+            },
+            0: {
+              title: "Today’s the day. Keep going.",
+              body: "Your founding member trial ends today. Convert now to keep your thread.",
+              tag: "founding-day90",
+            },
+          };
+
+          const msg = dayTriggers[daysSinceJoined] ?? daysLeftTriggers[daysLeft];
+          if (msg) {
             const recentBeta = await getRecentNotificationLog(userId, "beta_expiry", 23 * 60 * 60 * 1000);
             if (recentBeta.length === 0) {
               const subs = await getPushSubscriptionsForUser(userId);
               if (subs.length > 0) {
                 const payload = JSON.stringify({
-                  title: daysLeft === 0 ? "Your beta access has ended." : "Beta access ending in 3 days.",
-                  body: daysLeft === 0
-                    ? "Thank you for shaping Continuary. Upgrade to keep your thread going."
-                    : "Your 45-day beta window closes soon. Upgrade to Pro to keep full access.",
-                  tag: "beta-expiry",
-                  url: "/pro",
+                  title: msg.title,
+                  body: msg.body,
+                  tag: msg.tag,
+                  url: "/founding-member",
                 });
                 await Promise.allSettled(
                   subs.map((sub) =>
@@ -367,7 +414,7 @@ async function processUserNotifications(userId: number): Promise<void> {
         }
       }
     } catch (err) {
-      console.warn(`[Push] Beta expiry check failed for user ${userId}:`, (err as Error).message);
+      console.warn(`[Push] Founding member push check failed for user ${userId}:`, (err as Error).message);
     }
   }
 }
