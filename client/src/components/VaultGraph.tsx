@@ -347,7 +347,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
         </label>
         <label className="flex items-center gap-1.5 cursor-pointer select-none">
           <input type="checkbox" checked={clusterByTag} onChange={(e) => setClusterByTag(e.target.checked)} className="w-3 h-3 accent-violet-400" />
-          <span className="text-violet-400">Group by tag</span>
+          <span className="text-amber-400">Group by tag</span>
         </label>
       </div>
 

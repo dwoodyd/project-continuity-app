@@ -53,8 +53,8 @@ const SPACES = [
     icon: DoorOpen,
     name: "Projects",
     desc: "Every project has a Re-Entry Card that remembers exactly where you left off — open loops, context, and next step.",
-    color: "text-violet-400",
-    bg: "bg-violet-400/10",
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
     border: "border-violet-400/20",
   },
   {
@@ -69,8 +69,8 @@ const SPACES = [
     icon: Compass,
     name: "Weekly Compass",
     desc: "Set your primary and secondary focus for the week so every day starts with clear intent instead of decision fatigue.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-400/10",
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
     border: "border-indigo-400/20",
   },
   {
@@ -130,8 +130,8 @@ const WREN_TRAITS = [
     title: "She watches over your work",
     desc: "Wren lives in your sidebar, quietly present on every page. She's not a chatbot — she's a companion. A reminder that someone is keeping watch.",
     clip: "homeVideo" as const,
-    accent: "text-violet-400",
-    accentBg: "bg-violet-400/10",
+    accent: "text-amber-400",
+    accentBg: "bg-amber-400/10",
     accentBorder: "border-violet-400/20",
   },
   {
@@ -148,8 +148,8 @@ const WREN_TRAITS = [
     title: "She rests when you do",
     desc: "When you're not active, Wren settles into a quiet loop — eyes soft, golden particles drifting. She's not waiting impatiently. She's just there.",
     clip: "sleeping" as const,
-    accent: "text-indigo-400",
-    accentBg: "bg-indigo-400/10",
+    accent: "text-amber-400",
+    accentBg: "bg-amber-400/10",
     accentBorder: "border-indigo-400/20",
   },
   {

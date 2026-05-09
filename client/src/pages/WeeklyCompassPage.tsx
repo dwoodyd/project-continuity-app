@@ -148,7 +148,7 @@ export default function WeeklyCompassPage() {
           `}</style>
           <div className="text-5xl">🧭</div>
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-1">Week gathered.</h2>
+            <h2 className="text-xl font-normal text-foreground mb-1 font-brand">Week <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>gathered.</span></h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Your compass is set. The thread is clear.
             </p>
@@ -192,7 +192,7 @@ export default function WeeklyCompassPage() {
               Week of {format(weekStart, "MMM d")} – {format(weekEnd, "MMM d, yyyy")}
             </span>
           </div>
-          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight"><GlossaryTerm name="weeklyCompass" /></h1>
+          <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand"><GlossaryTerm name="weeklyCompass" /></h1>
           <p className="text-sm text-muted-foreground mt-1">
             One clear direction for the week. Not a schedule — a compass.
           </p>

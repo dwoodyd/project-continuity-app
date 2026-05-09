@@ -92,15 +92,15 @@ const FEATURES = [
     icon: Compass,
     title: "Weekly Compass",
     desc: "Set your primary and secondary focus for the week. Every day starts with clear intent instead of decision fatigue.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-400/10",
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
   },
   {
     icon: BarChart3,
     title: "Distraction Insights",
     desc: "Weekly pattern recognition across your work. See your top distraction category and the time of day it peaks — then do something about it.",
-    color: "text-violet-500",
-    bg: "bg-violet-500/10",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
   },
   {
     icon: Lightbulb,
@@ -147,15 +147,15 @@ const STEPS = [
     title: "Midday — Alignment pulse",
     desc: "A two-minute check. On plan? Any blockers? The midday pulse recalibrates without derailing your momentum.",
     color: "text-primary",
-    accentColor: "oklch(0.55 0.18 252)",
+    accentColor: "oklch(0.78 0.18 65 / 0.7)",
   },
   {
     icon: Moon,
     step: "03",
     title: "Evening — Close the loop",
     desc: "Reflect on what moved. Capture carryovers. The evening closure writes tomorrow's brief so you start the next day with context, not confusion.",
-    color: "text-indigo-400",
-    accentColor: "oklch(0.6 0.18 270)",
+    color: "text-amber-400",
+    accentColor: "oklch(0.78 0.18 65)",
   },
   {
     icon: ScrollText,
@@ -218,7 +218,7 @@ function PhoneMockup() {
           </div>
         </div>
       </div>
-      <div className="absolute -inset-8 -z-10 rounded-full blur-3xl opacity-30" style={{ background: "oklch(0.55 0.2 252)" }} />
+      <div className="absolute -inset-8 -z-10 rounded-full blur-3xl opacity-30" style={{ background: "oklch(0.78 0.18 65 / 0.5)" }} />
     </div>
   );
 }
@@ -391,7 +391,7 @@ export default function WelcomePage() {
       <section
         className="relative overflow-hidden bg-background"
       >
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.6 0.2 265)", transform: "translate(30%, -30%)" }} />
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.78 0.18 65 / 0.4)", transform: "translate(30%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.72 0.14 65)", transform: "translate(-30%, 30%)" }} />
 
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">

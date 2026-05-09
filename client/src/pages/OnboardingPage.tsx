@@ -310,9 +310,9 @@ function CTAButton({ onClick, disabled, loading, children, secondary }: {
       } : {
         background: disabled || loading
           ? "rgba(255,255,255,0.08)"
-          : "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-        color: disabled || loading ? "rgba(255,255,255,0.3)" : "white",
-        boxShadow: disabled || loading ? "none" : "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
+          : "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+        color: disabled || loading ? "rgba(255,255,255,0.3)" : "oklch(0.12 0.02 65)",
+        boxShadow: disabled || loading ? "none" : "0 4px 20px oklch(0.78 0.18 65 / 0.35)",
         cursor: disabled || loading ? "not-allowed" : "pointer",
       }}
     >
@@ -656,7 +656,7 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -899,7 +899,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -916,7 +916,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -932,7 +932,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.68 0.20 270 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -1114,9 +1114,9 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
           <a href={getLoginUrl()}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl text-sm font-semibold"
             style={{
-              background: "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))",
-              color: "white",
-              boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.4)",
+              background: "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+              color: "oklch(0.12 0.02 65)",
+              boxShadow: "0 4px 20px oklch(0.78 0.18 65 / 0.35)",
             }}>
             Sign in <ChevronRight className="w-4 h-4" />
           </a>

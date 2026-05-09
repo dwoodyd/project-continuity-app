@@ -182,7 +182,7 @@ function TimelineEventIcon({ type }: { type: string }) {
     blocker: { icon: <AlertTriangle className="w-3 h-3" />, color: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" },
     decision: { icon: <GitBranch className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
     next_step_change: { icon: <ChevronRight className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
-    vault_import: { icon: <BookOpen className="w-3 h-3" />, color: "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400" },
+    vault_import: { icon: <BookOpen className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
     check_in: { icon: <Activity className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
     status_change: { icon: <Layers className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
   };
@@ -376,7 +376,7 @@ export default function ProjectDetailPage() {
                   <div className="ml-auto flex items-center gap-0.5 shrink-0">
                     <button
                       onClick={() => setFmsOpen(true)}
-                      className="text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 p-1 transition-colors"
+                      className="text-amber-500 dark:text-amber-400 hover:text-amber-400 p-1 transition-colors"
                       title="Find my first movable step"
                     >
                       <span className="text-xs">🪶</span>
@@ -617,7 +617,7 @@ export default function ProjectDetailPage() {
       {activeTab === "clarity" && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2">
-            <Brain className="w-4 h-4 text-indigo-400" />
+            <Brain className="w-4 h-4 text-amber-400" />
             <p className="text-sm font-medium text-foreground">Clarity Sessions</p>
             <span className="text-xs text-muted-foreground ml-1">linked to this project</span>
           </div>
@@ -646,14 +646,14 @@ export default function ProjectDetailPage() {
                 };
                 const markerColors: Record<string, string> = {
                   clearer: "text-emerald-400",
-                  ready_to_act: "text-indigo-400",
+                  ready_to_act: "text-amber-400",
                   still_unsure: "text-amber-400",
                   need_to_revisit: "text-rose-400",
                 };
                 return (
                   <div key={session.id} className="p-4 rounded-xl bg-card border border-border/60 space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-medium text-indigo-400 capitalize">
+                      <span className="text-xs font-medium text-amber-400 capitalize">
                         {modeLabels[session.mode] ?? session.mode}
                       </span>
                       <span className="text-[10px] text-muted-foreground">

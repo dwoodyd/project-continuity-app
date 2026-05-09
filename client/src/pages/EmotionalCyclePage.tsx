@@ -87,8 +87,8 @@ function CycleChart({ data }: { data: { date: string; score: number }[] }) {
         {/* Gradient fill under curve */}
         <defs>
           <linearGradient id="cycleGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.62 0.22 270)" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="oklch(0.62 0.22 270)" stopOpacity={0.0} />
+            <stop offset="0%" stopColor="oklch(0.78 0.18 65)" stopOpacity={0.25} />
+            <stop offset="100%" stopColor="oklch(0.78 0.18 65)" stopOpacity={0.0} />
           </linearGradient>
         </defs>
         {pathD && (
@@ -100,7 +100,7 @@ function CycleChart({ data }: { data: { date: string; score: number }[] }) {
 
         {/* Main curve */}
         {pathD && (
-          <path d={pathD} fill="none" stroke="oklch(0.68 0.20 270)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke="oklch(0.78 0.18 65)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
         )}
 
         {/* Dots */}
@@ -328,10 +328,10 @@ export default function EmotionalCyclePage() {
             disabled={!score || logMutation.isPending}
             className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
             style={{
-              background: score ? "linear-gradient(135deg, oklch(0.52 0.22 270), oklch(0.62 0.22 270))" : "rgba(255,255,255,0.06)",
+              background: score ? "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))" : "rgba(255,255,255,0.06)",
               color: score ? "white" : "rgba(255,255,255,0.3)",
               cursor: score ? "pointer" : "not-allowed",
-              boxShadow: score ? "0 4px 20px oklch(0.52 0.22 270 / 0.35)" : "none",
+              boxShadow: score ? "0 4px 20px oklch(0.78 0.18 65 / 0.35)" : "none",
             }}
           >
             {logMutation.isPending ? "Saving…" : alreadyLogged ? "Update log" : "Save mood"}

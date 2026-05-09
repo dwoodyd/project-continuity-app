@@ -49,7 +49,7 @@ function MomentumIcon({ momentum }: { momentum: Momentum }) {
 function SeverityIcon({ severity }: { severity: Severity }) {
   if (severity === "critical") return <AlertTriangle className="w-4 h-4 text-red-400" />;
   if (severity === "warning") return <AlertTriangle className="w-4 h-4 text-amber-400" />;
-  return <Info className="w-4 h-4 text-indigo-400" />;
+  return <Info className="w-4 h-4 text-amber-400" />;
 }
 
 function severityBadgeVariant(severity: Severity): "destructive" | "secondary" | "outline" {
@@ -220,7 +220,7 @@ export default function IntelligencePage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Brain className="w-5 h-5 text-indigo-400" />
+            <Brain className="w-5 h-5 text-amber-400" />
             <h1 className="text-xl font-semibold text-foreground">Intelligence</h1>
           </div>
           <p className="text-sm text-muted-foreground">
@@ -391,8 +391,8 @@ export default function IntelligencePage() {
         ) : !hasInsights ? (
           <Card className="border-dashed border-border/50 bg-transparent">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-indigo-950/50 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-indigo-400" />
+              <div className="w-12 h-12 rounded-full bg-amber-900/20 flex items-center justify-center">
+                <Zap className="w-5 h-5 text-amber-400" />
               </div>
               <p className="text-sm font-medium text-foreground">No patterns detected yet</p>
               <p className="text-xs text-muted-foreground max-w-xs">
@@ -400,7 +400,7 @@ export default function IntelligencePage() {
               </p>
               <Button
                 size="sm"
-                className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="mt-2 bg-amber-500 hover:bg-amber-400 text-amber-950"
                 disabled={patternsLoading}
                 onClick={() => {
                   setPatternsLoading(true);
@@ -429,7 +429,7 @@ export default function IntelligencePage() {
                       {ins.affectedProjectIds?.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {ins.affectedProjectIds.map((pid: number) => (
-                            <span key={pid} className="text-xs px-1.5 py-0.5 rounded bg-indigo-950/50 text-indigo-300 border border-indigo-800/40">
+                            <span key={pid} className="text-xs px-1.5 py-0.5 rounded bg-amber-900/20 text-amber-300 border border-amber-800/40">
                               {projectMap.get(pid) ?? `Project ${pid}`}
                             </span>
                           ))}
@@ -479,8 +479,8 @@ export default function IntelligencePage() {
         ) : !hasScores ? (
           <Card className="border-dashed border-border/50 bg-transparent">
             <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-indigo-950/50 flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-indigo-400" />
+              <div className="w-12 h-12 rounded-full bg-amber-900/20 flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-amber-400" />
               </div>
               <p className="text-sm font-medium text-foreground">No health scores yet</p>
               <p className="text-xs text-muted-foreground max-w-xs">
@@ -488,7 +488,7 @@ export default function IntelligencePage() {
               </p>
               <Button
                 size="sm"
-                className="mt-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="mt-2 bg-amber-500 hover:bg-amber-400 text-amber-950"
                 disabled={scoringLoading}
                 onClick={() => {
                   setScoringLoading(true);

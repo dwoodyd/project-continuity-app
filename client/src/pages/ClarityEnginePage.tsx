@@ -454,7 +454,7 @@ function ResultView({
       {/* Signal Line */}
       {session.signalLine && (
         <div className="bg-gradient-to-r from-indigo-900/40 to-indigo-800/20 border border-indigo-500/30 rounded-xl p-5">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
             <GlossaryTerm name="signalLine" />
           </p>
           <p className="text-lg font-brand font-medium text-foreground italic leading-relaxed">
@@ -822,8 +822,8 @@ function PatternsView({
           )}
 
           {/* Honest observation */}
-          <div className="bg-indigo-900/20 border border-indigo-500/30 rounded-xl p-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-400 mb-2">Honest observation</p>
+          <div className="bg-amber-900/10 border border-amber-500/30 rounded-xl p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Honest observation</p>
             <p className="text-foreground leading-relaxed">{patterns.honestObservation}</p>
           </div>
 

@@ -287,9 +287,9 @@ export default function EvidenceLogPage() {
           </Link>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-                <BookOpen className="w-6 h-6 text-amber-400" />
-                Evidence Log
+              <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand flex items-center gap-2">
+                <BookOpen className="w-6 h-6" style={{ color: "oklch(0.78 0.18 65)" }} />
+                Evidence <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>Log</span>
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
                 The record of who you actually are — not who you think you should be.

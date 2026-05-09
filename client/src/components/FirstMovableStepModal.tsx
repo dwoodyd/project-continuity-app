@@ -95,7 +95,7 @@ export function FirstMovableStepModal({
               <Button
                 onClick={handleGenerate}
                 disabled={generate.isPending || !avoidedTask.trim()}
-                className="w-full gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
+                className="w-full gap-2 bg-amber-500 hover:bg-amber-400 text-amber-950"
               >
                 {generate.isPending ? (
                   <>

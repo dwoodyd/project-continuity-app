@@ -160,11 +160,11 @@ function SkuCard({
   onSelect: (sku: typeof SKUS[0]) => void;
   loading: boolean;
 }) {
-  const accentColor = sku.color === "amber" ? "border-amber-500/60 bg-amber-500/5" : "border-violet-500/60 bg-violet-500/5";
+  const accentColor = sku.color === "amber" ? "border-amber-500/60 bg-amber-500/5" : "border-amber-500/40 bg-amber-500/5";
   const btnColor = sku.color === "amber"
     ? "bg-amber-500 hover:bg-amber-400 text-black"
     : "bg-violet-500 hover:bg-violet-400 text-white";
-  const badgeColor = sku.color === "amber" ? "bg-amber-500/20 text-amber-300 border-amber-500/30" : "bg-violet-500/20 text-violet-300 border-violet-500/30";
+  const badgeColor = sku.color === "amber" ? "bg-amber-500/20 text-amber-300 border-amber-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30";
 
   return (
     <div
@@ -319,13 +319,13 @@ export default function FoundingMemberPage() {
           >
             {isExpired ? (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">Your trial has ended.</h2>
+                <h2 className="text-xl font-normal text-white mb-1 font-brand">Your trial has <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>ended.</span></h2>
                 <p className="text-sm text-white/60">Thank you for shaping Continuary. Keep your thread going.</p>
               </>
             ) : (
               <>
-                <h2 className="text-xl font-bold text-white mb-1">
-                  You helped build this.
+                <h2 className="text-xl font-normal text-white mb-1 font-brand">
+                  You helped <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>build this.</span>
                 </h2>
                 <p className="text-sm text-white/60">
                   Lock in your founding rate and keep everything you've built.

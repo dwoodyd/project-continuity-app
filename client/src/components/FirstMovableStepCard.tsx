@@ -34,7 +34,7 @@ export function FirstMovableStepCard({
   }
 
   return (
-    <div className="rounded-xl border border-indigo-200/40 bg-indigo-950/30 p-5 space-y-4">
+    <div className="rounded-xl border border-amber-500/20 bg-amber-900/10 p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium uppercase tracking-widest text-amber-400/80">
@@ -78,7 +78,7 @@ export function FirstMovableStepCard({
           size="sm"
           onClick={handleStart}
           disabled={markUsed.isPending}
-          className="gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white"
+          className="gap-1.5" style={{ background: 'oklch(0.78 0.18 65)', color: 'oklch(0.12 0.02 65)' }}
         >
           {markUsed.isPending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

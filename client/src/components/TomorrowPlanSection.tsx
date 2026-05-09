@@ -145,7 +145,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
                     className={`text-xs px-1.5 py-0.5 rounded-full shrink-0 ${
                       task.energyLevel === "high"
                         ? "bg-amber-500/15 text-amber-500"
-                        : "bg-indigo-400/15 text-indigo-400"
+                        : "bg-amber-400/15 text-amber-400"
                     }`}
                   >
                     {task.energyLevel}

@@ -387,13 +387,13 @@ export default function TourPage() {
                     <Field label="What goes first tomorrow?" placeholder="e.g. The client proposal — it's due by noon." value={evening.tomorrow} onChange={v => setEvening(p => ({ ...p, tomorrow: v }))} />
                   </div>
                   <button onClick={() => setEveningDone(true)} disabled={!evening.wins}
-                    className="w-full py-3 rounded-xl bg-indigo-500/80 hover:bg-indigo-400/80 disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold transition-colors">
+                    className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 disabled:cursor-not-allowed text-amber-950 font-semibold transition-colors">
                     Close the day
                   </button>
                 </>
               ) : (
-                <div className="bg-indigo-400/5 border border-indigo-400/20 rounded-xl p-6 space-y-3">
-                  <div className="flex items-center gap-2 text-indigo-300/70 text-sm">
+                <div className="bg-amber-400/5 border border-amber-400/20 rounded-xl p-6 space-y-3">
+                  <div className="flex items-center gap-2 text-amber-300/70 text-sm">
                     <WrenPlayer clip="closesEyes" size="xs" />
                     <span>Wren responds</span>
                   </div>

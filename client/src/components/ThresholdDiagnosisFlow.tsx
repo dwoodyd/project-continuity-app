@@ -112,7 +112,7 @@ export function ThresholdDiagnosisFlow({
 
   const currentQuestion = QUESTIONS[step];
   const patternColor = result
-    ? PATTERN_COLORS[result.pattern] ?? "border-indigo-400/30 bg-indigo-950/20"
+    ? PATTERN_COLORS[result.pattern] ?? "border-amber-500/30 bg-amber-900/10"
     : "";
 
   return (
@@ -174,7 +174,7 @@ export function ThresholdDiagnosisFlow({
                   diagnose.isPending ||
                   !answers[currentQuestion.id as keyof typeof answers].trim()
                 }
-                className="w-full gap-2 bg-indigo-600 hover:bg-indigo-500 text-white"
+                className="w-full gap-2 bg-amber-500 hover:bg-amber-400 text-amber-950"
               >
                 {diagnose.isPending ? (
                   <>
@@ -239,7 +239,7 @@ export function ThresholdDiagnosisFlow({
                     onStartSession?.();
                     handleClose();
                   }}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
+                  className="w-full bg-amber-500 hover:bg-amber-400 text-amber-950"
                 >
                   Start with this move
                 </Button>
