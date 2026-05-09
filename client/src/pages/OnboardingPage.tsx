@@ -990,6 +990,18 @@ function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
             Let's begin <ArrowRight className="w-4 h-4" />
           </CTAButton>
         </Fade>
+        <Fade visible={visible} delay={580}>
+          <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.30)", marginTop: "0.75rem" }}>
+            By continuing, you agree to our{" "}
+            <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.50)", textDecoration: "underline", textUnderlineOffset: "2px" }}>
+              Terms of Service
+            </a>
+            {" "}&amp;{" "}
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.50)", textDecoration: "underline", textUnderlineOffset: "2px" }}>
+              Privacy Policy
+            </a>.
+          </p>
+        </Fade>
       </LowerThird>
     </VideoStage>
   );

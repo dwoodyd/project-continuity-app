@@ -1,0 +1,510 @@
+{
+  "query": "SELECT code, usedBy, usedAt FROM betaCodes WHERE code LIKE 'THREAD-BETA-%' ORDER BY code;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT code, usedBy, usedAt FROM betaCodes WHERE code LIKE 'THREAD-BETA-%' ORDER BY code;",
+  "rows": [
+    {
+      "code": "THREAD-BETA-001",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-002",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-003",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-004",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-005",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-006",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-007",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-008",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-009",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-010",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-011",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-012",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-013",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-014",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-015",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-016",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-017",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-018",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-019",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-020",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-021",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-022",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-023",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-024",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-025",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-026",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-027",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-028",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-029",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-030",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-031",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-032",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-033",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-034",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-035",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-036",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-037",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-038",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-039",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-040",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-041",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-042",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-043",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-044",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-045",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-046",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-047",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-048",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-049",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-050",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-051",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-052",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-053",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-054",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-055",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-056",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-057",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-058",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-059",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-060",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-061",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-062",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-063",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-064",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-065",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-066",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-067",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-068",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-069",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-070",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-071",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-072",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-073",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-074",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-075",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-076",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-077",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-078",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-079",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-080",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-081",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-082",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-083",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-084",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-085",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-086",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-087",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-088",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-089",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-090",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-091",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-092",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-093",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-094",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-095",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-096",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-097",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-098",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-099",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    },
+    {
+      "code": "THREAD-BETA-100",
+      "usedBy": "NULL",
+      "usedAt": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "code\tusedBy\tusedAt\nTHREAD-BETA-001\tNULL\tNULL\nTHREAD-BETA-002\tNULL\tNULL\nTHREAD-BETA-003\tNULL\tNULL\nTHREAD-BETA-004\tNULL\tNULL\nTHREAD-BETA-005\tNULL\tNULL\nTHREAD-BETA-006\tNULL\tNULL\nTHREAD-BETA-007\tNULL\tNULL\nTHREAD-BETA-008\tNULL\tNULL\nTHREAD-BETA-009\tNULL\tNULL\nTHREAD-BETA-010\tNULL\tNULL\nTHREAD-BETA-011\tNULL\tNULL\nTHREAD-BETA-012\tNULL\tNULL\nTHREAD-BETA-013\tNULL\tNULL\nTHREAD-BETA-014\tNULL\tNULL\nTHREAD-BETA-015\tNULL\tNULL\nTHREAD-BETA-016\tNULL\tNULL\nTHREAD-BETA-017\tNULL\tNULL\nTHREAD-BETA-018\tNULL\tNULL\nTHREAD-BETA-019\tNULL\tNULL\nTHREAD-BETA-020\tNULL\tNULL\nTHREAD-BETA-021\tNULL\tNULL\nTHREAD-BETA-022\tNULL\tNULL\nTHREAD-BETA-023\tNULL\tNULL\nTHREAD-BETA-024\tNULL\tNULL\nTHREAD-BETA-025\tNULL\tNULL\nTHREAD-BETA-026\tNULL\tNULL\nTHREAD-BETA-027\tNULL\tNULL\nTHREAD-BETA-028\tNULL\tNULL\nTHREAD-BETA-029\tNULL\tNULL\nTHREAD-BETA-030\tNULL\tNULL\nTHREAD-BETA-031\tNULL\tNULL\nTHREAD-BETA-032\tNULL\tNULL\nTHREAD-BETA-033\tNULL\tNULL\nTHREAD-BETA-034\tNULL\tNULL\nTHREAD-BETA-035\tNULL\tNULL\nTHREAD-BETA-036\tNULL\tNULL\nTHREAD-BETA-037\tNULL\tNULL\nTHREAD-BETA-038\tNULL\tNULL\nTHREAD-BETA-039\tNULL\tNULL\nTHREAD-BETA-040\tNULL\tNULL\nTHREAD-BETA-041\tNULL\tNULL\nTHREAD-BETA-042\tNULL\tNULL\nTHREAD-BETA-043\tNULL\tNULL\nTHREAD-BETA-044\tNULL\tNULL\nTHREAD-BETA-045\tNULL\tNULL\nTHREAD-BETA-046\tNULL\tNULL\nTHREAD-BETA-047\tNULL\tNULL\nTHREAD-BETA-048\tNULL\tNULL\nTHREAD-BETA-049\tNULL\tNULL\nTHREAD-BETA-050\tNULL\tNULL\nTHREAD-BETA-051\tNULL\tNULL\nTHREAD-BETA-052\tNULL\tNULL\nTHREAD-BETA-053\tNULL\tNULL\nTHREAD-BETA-054\tNULL\tNULL\nTHREAD-BETA-055\tNULL\tNULL\nTHREAD-BETA-056\tNULL\tNULL\nTHREAD-BETA-057\tNULL\tNULL\nTHREAD-BETA-058\tNULL\tNULL\nTHREAD-BETA-059\tNULL\tNULL\nTHREAD-BETA-060\tNULL\tNULL\nTHREAD-BETA-061\tNULL\tNULL\nTHREAD-BETA-062\tNULL\tNULL\nTHREAD-BETA-063\tNULL\tNULL\nTHREAD-BETA-064\tNULL\tNULL\nTHREAD-BETA-065\tNULL\tNULL\nTHREAD-BETA-066\tNULL\tNULL\nTHREAD-BETA-067\tNULL\tNULL\nTHREAD-BETA-068\tNULL\tNULL\nTHREAD-BETA-069\tNULL\tNULL\nTHREAD-BETA-070\tNULL\tNULL\nTHREAD-BETA-071\tNULL\tNULL\nTHREAD-BETA-072\tNULL\tNULL\nTHREAD-BETA-073\tNULL\tNULL\nTHREAD-BETA-074\tNULL\tNULL\nTHREAD-BETA-075\tNULL\tNULL\nTHREAD-BETA-076\tNULL\tNULL\nTHREAD-BETA-077\tNULL\tNULL\nTHREAD-BETA-078\tNULL\tNULL\nTHREAD-BETA-079\tNULL\tNULL\nTHREAD-BETA-080\tNULL\tNULL\nTHREAD-BETA-081\tNULL\tNULL\nTHREAD-BETA-082\tNULL\tNULL\nTHREAD-BETA-083\tNULL\tNULL\nTHREAD-BETA-084\tNULL\tNULL\nTHREAD-BETA-085\tNULL\tNULL\nTHREAD-BETA-086\tNULL\tNULL\nTHREAD-BETA-087\tNULL\tNULL\nTHREAD-BETA-088\tNULL\tNULL\nTHREAD-BETA-089\tNULL\tNULL\nTHREAD-BETA-090\tNULL\tNULL\nTHREAD-BETA-091\tNULL\tNULL\nTHREAD-BETA-092\tNULL\tNULL\nTHREAD-BETA-093\tNULL\tNULL\nTHREAD-BETA-094\tNULL\tNULL\nTHREAD-BETA-095\tNULL\tNULL\nTHREAD-BETA-096\tNULL\tNULL\nTHREAD-BETA-097\tNULL\tNULL\nTHREAD-BETA-098\tNULL\tNULL\nTHREAD-BETA-099\tNULL\tNULL\nTHREAD-BETA-100\tNULL\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 281
+}
