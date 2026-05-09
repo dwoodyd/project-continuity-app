@@ -364,8 +364,8 @@ export default function FoundingMemberPage() {
         </div>
 
         {/* Graceful free exit */}
-        <div className="text-center pb-8">
-          <p className="text-xs text-white/30 mb-2">
+        <div className="text-center pb-8 space-y-3">
+          <p className="text-xs text-white/30">
             Not ready yet? Your data stays safe. You can upgrade anytime.
           </p>
           <Link href="/">
@@ -373,6 +373,19 @@ export default function FoundingMemberPage() {
               Continue with free access
             </button>
           </Link>
+          <div className="flex items-center justify-center gap-3 pt-1">
+            <Link href="/terms">
+              <button className="text-xs text-white/25 hover:text-white/50 transition-colors underline underline-offset-2">
+                Terms of Service
+              </button>
+            </Link>
+            <span className="text-white/15 text-xs">·</span>
+            <Link href="/privacy">
+              <button className="text-xs text-white/25 hover:text-white/50 transition-colors underline underline-offset-2">
+                Privacy Policy
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

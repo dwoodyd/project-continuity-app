@@ -632,6 +632,13 @@ export default function SettingsPage() {
               </button>
               <span className="text-muted-foreground/30 text-xs">·</span>
               <button
+                onClick={() => navigate("/terms")}
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
+              >
+                Terms of Service
+              </button>
+              <span className="text-muted-foreground/30 text-xs">·</span>
+              <button
                 onClick={async () => {
                   try {
                     const data = await utils.settings.exportData.fetch();

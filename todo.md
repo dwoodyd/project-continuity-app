@@ -1271,14 +1271,14 @@
 - [x] Write vitest tests for cycle analysis logic
 
 ## Founding Member Migration (P0)
-- [ ] Add isFoundingMember, foundingMemberCohort, foundingMemberJoinedAt, foundingRateLocked, foundingTier, referredBy, referralBonusDays fields to users table
-- [ ] Add referral_codes table
-- [ ] Update FOUNDING_TRIAL_DAYS constant to 90, update beta.ts redeemCode
-- [ ] Add cohort batching logic (25 per cohort, auto-open next when prev hits day 14)
-- [ ] Add referral mechanic: generate code per founding member, redeem adds 30 days to both
-- [ ] Add day-91 auto-revert cron job
-- [ ] Build /founding-member conversion page with 4 SKUs + personal data summary
-- [ ] Implement 8-touchpoint communication ladder (push + email)
-- [ ] Auto-migrate existing beta users to founding member cohort 1 with 45-day extension
-- [ ] Add Founding Member section to Settings page with referral code
-- [ ] Wire /founding-member route in App.tsx and redirect trial users from /pro
+- [x] Add isFoundingMember, foundingMemberCohort, foundingMemberJoinedAt, foundingRateLocked, foundingTier, referredBy, referralBonusDays fields to users table
+- [x] Add referral_codes table
+- [x] Update FOUNDING_TRIAL_DAYS constant to 90, update beta.ts redeemCode
+- [x] Add cohort batching logic (25 per cohort, auto-open next when prev hits day 14)
+- [x] Add referral mechanic: generate code per founding member, redeem adds 30 days to both
+- [x] Add day-91 auto-revert cron job
+- [x] Build /founding-member conversion page with 4 SKUs + personal data summary
+- [x] Implement 8-touchpoint communication ladder (push + email)
+- [x] Auto-migrate existing beta users to founding member cohort 1 with 45-day extension
+- [x] Add Founding Member section to Settings page with referral code
+- [x] Wire /founding-member route in App.tsx and redirect trial users from /pro

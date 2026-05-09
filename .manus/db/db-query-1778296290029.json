@@ -1,0 +1,40 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'users' AND COLUMN_NAME LIKE '%ound%' OR COLUMN_NAME LIKE '%trial%' OR COLUMN_NAME LIKE '%referr%' ORDER BY ORDINAL_POSITION;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'users' AND COLUMN_NAME LIKE '%ound%' OR COLUMN_NAME LIKE '%trial%' OR COLUMN_NAME LIKE '%referr%' ORDER BY ORDINAL_POSITION;",
+  "rows": [
+    {
+      "COLUMN_NAME": "isFoundingMember"
+    },
+    {
+      "COLUMN_NAME": "foundingMemberCohort"
+    },
+    {
+      "COLUMN_NAME": "foundingMemberJoinedAt"
+    },
+    {
+      "COLUMN_NAME": "trialEndsAt"
+    },
+    {
+      "COLUMN_NAME": "foundingRateLocked"
+    },
+    {
+      "COLUMN_NAME": "foundingTier"
+    },
+    {
+      "COLUMN_NAME": "referredBy"
+    },
+    {
+      "COLUMN_NAME": "referralBonusDays"
+    },
+    {
+      "COLUMN_NAME": "referralCode"
+    },
+    {
+      "COLUMN_NAME": "preferredFocusHours"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nisFoundingMember\nfoundingMemberCohort\nfoundingMemberJoinedAt\ntrialEndsAt\nfoundingRateLocked\nfoundingTier\nreferredBy\nreferralBonusDays\nreferralCode\npreferredFocusHours\n",
+  "stderr": "",
+  "execution_time_ms": 410
+}
