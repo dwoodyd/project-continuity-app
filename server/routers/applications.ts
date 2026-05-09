@@ -1,0 +1,116 @@
+/**
+ * Applications router — founding member application management
+ *
+ * Public procedures:
+ *   applications.submit   — submit a founding member application (from marketing site)
+ *
+ * Admin procedures:
+ *   applications.list     — list all applications (optionally filtered by status)
+ *   applications.approve  — approve an application: generates invite code + sends email
+ *   applications.reject   — reject an application
+ */
+import { z } from "zod";
+import { TRPCError } from "@trpc/server";
+import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
+import {
+  createFoundingApplication,
+  getFoundingApplications,
+  approveFoundingApplication,
+  rejectFoundingApplication,
+  createInviteCode,
+} from "../db";
+import { notifyOwner } from "../_core/notification";
+import { sendEmail, buildInviteCodeEmail, buildApplicationConfirmationEmail } from "../_core/email";
+
+export const applicationsRouter = router({
+  // ── Public: submit a founding member application ──────────────────────────
+  submit: publicProcedure
+    .input(
+      z.object({
+        name: z.string().min(1).max(255),
+        email: z.string().email().max(320),
+        relationship: z.string().max(2000).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await createFoundingApplication(input);
+
+      // Send confirmation email to the applicant
+      const { subject, html } = buildApplicationConfirmationEmail({
+        recipientName: input.name.split(" ")[0] ?? input.name,
+      });
+      await sendEmail({ to: input.email, subject, html });
+
+      // Notify the owner
+      await notifyOwner({
+        title: "New Founding Member Application",
+        content: `${input.name} (${input.email}) has applied for founding member access.\n\nRelationship to the work:\n${input.relationship ?? "Not provided"}\n\nReview and approve at /admin/applications`,
+      });
+
+      return { success: true };
+    }),
+
+  // ── Admin: list applications ──────────────────────────────────────────────
+  list: protectedProcedure
+    .input(
+      z.object({
+        status: z.enum(["pending", "approved", "rejected"]).optional(),
+      }).optional()
+    )
+    .query(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
+      return getFoundingApplications(input?.status);
+    }),
+
+  // ── Admin: approve an application ────────────────────────────────────────
+  approve: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        applicantName: z.string(),
+        applicantEmail: z.string().email(),
+        /** The base URL of the app (e.g. https://continuary.app) — passed from the frontend */
+        appUrl: z.string().url(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
+
+      // Generate a fresh invite code
+      const invite = await createInviteCode(ctx.user.id, `Founding: ${input.applicantName}`);
+      const code = invite.code;
+
+      // Mark application as approved
+      await approveFoundingApplication(input.id, code);
+
+      // Send the invite code email
+      const firstName = input.applicantName.split(" ")[0] ?? input.applicantName;
+      const { subject, html } = buildInviteCodeEmail({
+        recipientName: firstName,
+        inviteCode: code,
+        appUrl: input.appUrl,
+      });
+      const emailSent = await sendEmail({
+        to: input.applicantEmail,
+        subject,
+        html,
+      });
+
+      return { success: true, code, emailSent };
+    }),
+
+  // ── Admin: reject an application ─────────────────────────────────────────
+  reject: protectedProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
+      await rejectFoundingApplication(input.id);
+      return { success: true };
+    }),
+});

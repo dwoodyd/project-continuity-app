@@ -28,6 +28,7 @@ import { voiceRouter } from "./routers/voice";
 import { calendarRouter } from "./routers/calendar";
 import { workspaceRouter } from "./routers/workspace";
 import { moodLogsRouter } from "./routers/moodLogs";
+import { applicationsRouter } from "./routers/applications";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -97,6 +98,7 @@ export const appRouter = router({
   calendar: calendarRouter,
   workspace: workspaceRouter,
   moodLogs: moodLogsRouter,
+  applications: applicationsRouter,
 });
 
 export type AppRouter = typeof appRouter;

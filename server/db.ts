@@ -75,6 +75,8 @@ import {
   moodLogs,
   MoodLog,
   InsertMoodLog,
+  foundingApplications,
+  FoundingApplication,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1324,4 +1326,50 @@ export async function getTodayMoodLog(userId: number, todayDate: string) {
     .where(and(eq(moodLogs.userId, userId), eq(moodLogs.date, todayDate)))
     .limit(1);
   return row ?? null;
+}
+
+// ─── Founding Applications ────────────────────────────────────────────────────
+export async function createFoundingApplication(data: {
+  name: string;
+  email: string;
+  relationship?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db
+    .insert(foundingApplications)
+    .values({ ...data, createdAt: Date.now() });
+  return (result as any).insertId as number;
+}
+
+export async function getFoundingApplications(status?: "pending" | "approved" | "rejected"): Promise<FoundingApplication[]> {
+  const db = await getDb();
+  if (!db) return [];
+  if (status) {
+    return db.select().from(foundingApplications)
+      .where(eq(foundingApplications.status, status))
+      .orderBy(desc(foundingApplications.createdAt));
+  }
+  return db.select().from(foundingApplications).orderBy(desc(foundingApplications.createdAt));
+}
+
+export async function approveFoundingApplication(
+  id: number,
+  inviteCode: string
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(foundingApplications)
+    .set({ status: "approved", inviteCodeSent: inviteCode, approvedAt: Date.now() })
+    .where(eq(foundingApplications.id, id));
+}
+
+export async function rejectFoundingApplication(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(foundingApplications)
+    .set({ status: "rejected" })
+    .where(eq(foundingApplications.id, id));
 }

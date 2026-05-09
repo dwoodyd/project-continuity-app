@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
 import WrenPlayer from "@/components/WrenPlayer";
@@ -22,6 +22,23 @@ const HOW_IT_WORKS = [
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const [inviteCode, setInviteCode] = useState("");
+  const inviteSectionRef = useRef<HTMLElement>(null);
+
+  // Pre-fill invite code from URL param: /landing?code=XXXX
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const codeParam = params.get("code");
+    if (codeParam) {
+      const normalized = codeParam.trim().toUpperCase();
+      setInviteCode(normalized);
+      // Immediately store it so it survives the OAuth redirect
+      sessionStorage.setItem("pendingInviteCode", normalized);
+      // Scroll to the invite section after a short delay
+      setTimeout(() => {
+        inviteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 400);
+    }
+  }, []);
 
   // Store invite code in sessionStorage so InviteGatePage can pre-fill it after sign-in
   const handleInviteSignIn = () => {
@@ -130,7 +147,7 @@ export default function LandingPage() {
       </section>
 
       {/* Invite code section */}
-      <section className="px-6 max-w-xl mx-auto mb-24">
+      <section ref={inviteSectionRef} className="px-6 max-w-xl mx-auto mb-24">
         <div className="bg-white/5 rounded-3xl p-8 border border-amber-400/20 text-center">
           <div className="text-amber-400 text-2xl mb-3">🔑</div>
           <h2 className="text-xl font-bold mb-2">Have a beta invite code?</h2>
@@ -178,10 +195,21 @@ export default function LandingPage() {
           <img src="/logo-navy.svg" alt="Continuary" className="w-6 h-6 rounded-lg" />
           <span className="font-bold text-white/40">Continuary</span>
         </div>
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex items-center justify-center gap-6 mb-4">
           <button onClick={() => navigate("/privacy")} className="hover:text-white/50 transition-colors">Privacy</button>
           <button onClick={() => navigate("/terms")} className="hover:text-white/50 transition-colors">Terms</button>
           <a href={getLoginUrl()} className="hover:text-white/50 transition-colors">App</a>
+        </div>
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => {
+              inviteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+              setTimeout(() => inviteSectionRef.current?.querySelector("input")?.focus(), 600);
+            }}
+            className="text-amber-400/60 hover:text-amber-400 transition-colors text-xs font-medium tracking-wide"
+          >
+            Already approved? Redeem your invite code →
+          </button>
         </div>
       </footer>
     </div>

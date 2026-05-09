@@ -782,3 +782,21 @@ export const moodLogs = mysqlTable("mood_logs", {
 }));
 export type MoodLog = typeof moodLogs.$inferSelect;
 export type InsertMoodLog = typeof moodLogs.$inferInsert;
+
+// ─── Founding Member Applications ─────────────────────────────────────────────
+// Submitted via the marketing site apply form. Admin reviews and approves/rejects.
+export const foundingApplications = mysqlTable("founding_applications", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  relationship: text("relationship"),
+  /** null = pending, 'approved' = code sent, 'rejected' = declined */
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  /** The invite code sent to this applicant (set when approved) */
+  inviteCodeSent: varchar("inviteCodeSent", { length: 32 }),
+  /** Timestamp when the approval email was sent */
+  approvedAt: bigint("approvedAt", { mode: "number" }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type FoundingApplication = typeof foundingApplications.$inferSelect;
+export type InsertFoundingApplication = typeof foundingApplications.$inferInsert;

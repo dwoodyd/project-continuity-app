@@ -2,13 +2,13 @@
   "name": "Continuary",
   "short_name": "Continuary",
   "description": "Your personal continuity system — stay in motion on what matters.",
-  "start_url": "https://continuary.soulengineer.online/",
-  "scope": "https://continuary.soulengineer.online/",
-  "id": "https://continuary.soulengineer.online/",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1B2A4A",
-  "theme_color": "#1B2A4A",
+  "background_color": "#080a0f",
+  "theme_color": "#080a0f",
   "categories": ["productivity", "lifestyle"],
   "icons": [
     {
@@ -83,7 +83,7 @@
       "name": "Morning Check-In",
       "short_name": "Morning",
       "description": "Start your morning check-in",
-      "url": "https://continuary.soulengineer.online/?checkin=morning",
+      "url": "/?checkin=morning",
       "icons": [
         {
           "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
@@ -95,7 +95,7 @@
       "name": "Knowledge Vault",
       "short_name": "Vault",
       "description": "Open your Knowledge Vault",
-      "url": "https://continuary.soulengineer.online/vault",
+      "url": "/vault",
       "icons": [
         {
           "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
@@ -107,7 +107,7 @@
       "name": "Clarity Engine",
       "short_name": "Clarity",
       "description": "Open the Clarity Engine",
-      "url": "https://continuary.soulengineer.online/clarity",
+      "url": "/clarity",
       "icons": [
         {
           "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
