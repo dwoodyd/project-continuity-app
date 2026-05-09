@@ -52,133 +52,133 @@
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Continuary — Light Mode
-   Premium off-white with deep navy sidebar and violet-blue accent
-   Inspired by: Orizon, Linear, Apple
+   Warm ivory with deep navy sidebar and amber-gold primary accent
+   Aligned with marketing site: siliconwren-kbzwg7lf.manus.space
 ══════════════════════════════════════════════════════════════════════════════ */
 :root {
   --radius: 0.75rem;
 
-  /* ── Accent: violet-blue ── */
-  --primary: oklch(0.52 0.22 270);          /* #6C63FF violet */
-  --primary-foreground: oklch(0.99 0 0);
+  /* ── Primary: amber-gold (matches marketing site CTA + accent) ── */
+  --primary: oklch(0.72 0.16 62);            /* #E8A020 warm amber-gold */
+  --primary-foreground: oklch(0.12 0.03 62); /* near-black on amber */
 
-  /* ── Warm amber accent (bird eye dot) ── */
-  --brand: oklch(0.74 0.16 58);             /* #E8B84B warm gold */
-  --brand-foreground: oklch(0.15 0.03 58);
-  --brand-muted: oklch(0.97 0.03 58);
+  /* ── Brand gold (same as primary in this palette) ── */
+  --brand: oklch(0.72 0.16 62);
+  --brand-foreground: oklch(0.12 0.03 62);
+  --brand-muted: oklch(0.96 0.04 62);
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.74 0.16 58);
-  --amber-foreground: oklch(0.15 0.03 58);
+  --amber: oklch(0.72 0.16 62);
+  --amber-foreground: oklch(0.12 0.03 62);
   --emerald: oklch(0.62 0.17 155);
   --emerald-foreground: oklch(0.99 0 0);
 
-  /* ── Page surfaces ── */
-  --background: oklch(0.98 0.003 264);
-  --foreground: oklch(0.14 0.04 264);
+  /* ── Page surfaces: warm ivory ── */
+  --background: oklch(0.98 0.006 60);
+  --foreground: oklch(0.14 0.03 240);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0.04 264);
+  --card-foreground: oklch(0.14 0.03 240);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0.04 264);
+  --popover-foreground: oklch(0.14 0.03 240);
 
-  --secondary: oklch(0.95 0.012 264);
-  --secondary-foreground: oklch(0.35 0.10 264);
+  --secondary: oklch(0.95 0.012 60);
+  --secondary-foreground: oklch(0.35 0.06 240);
 
-  --muted: oklch(0.95 0.008 264);
-  --muted-foreground: oklch(0.52 0.022 264);
+  --muted: oklch(0.95 0.008 60);
+  --muted-foreground: oklch(0.52 0.022 240);
 
-  --accent: oklch(0.95 0.012 264);
-  --accent-foreground: oklch(0.52 0.22 270);
+  --accent: oklch(0.95 0.012 60);
+  --accent-foreground: oklch(0.72 0.16 62);
 
   --destructive: oklch(0.55 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.90 0.010 264);
-  --input: oklch(0.90 0.010 264);
-  --ring: oklch(0.52 0.22 270);
+  --border: oklch(0.90 0.010 60);
+  --input: oklch(0.90 0.010 60);
+  --ring: oklch(0.72 0.16 62);
 
-  /* ── Sidebar: deep near-black navy ── */
-  --sidebar: oklch(0.13 0.04 264);
-  --sidebar-foreground: oklch(0.88 0.012 264);
-  --sidebar-primary: oklch(0.52 0.22 270);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.20 0.05 264);
-  --sidebar-accent-foreground: oklch(0.88 0.012 264);
-  --sidebar-border: oklch(0.22 0.05 264);
-  --sidebar-ring: oklch(0.52 0.22 270);
+  /* ── Sidebar: deep navy (matches marketing site background) ── */
+  --sidebar: oklch(0.12 0.025 240);
+  --sidebar-foreground: oklch(0.88 0.010 240);
+  --sidebar-primary: oklch(0.72 0.16 62);
+  --sidebar-primary-foreground: oklch(0.12 0.03 62);
+  --sidebar-accent: oklch(0.18 0.030 240);
+  --sidebar-accent-foreground: oklch(0.88 0.010 240);
+  --sidebar-border: oklch(0.20 0.028 240);
+  --sidebar-ring: oklch(0.72 0.16 62);
 
   /* ── Charts ── */
-  --chart-1: oklch(0.52 0.22 270);
+  --chart-1: oklch(0.72 0.16 62);
   --chart-2: oklch(0.62 0.17 155);
-  --chart-3: oklch(0.74 0.16 58);
-  --chart-4: oklch(0.55 0.20 22);
+  --chart-3: oklch(0.55 0.22 22);
+  --chart-4: oklch(0.52 0.22 270);
   --chart-5: oklch(0.60 0.18 310);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Continuary — Dark Mode
-   Near-black with cool tint, violet accent, gold warmth
-   Inspired by: Linear, Vercel dashboard, Apple developer tools
+   Deep navy background, amber-gold primary, warm ivory text
+   Directly mirrors marketing site atmosphere
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
-  /* ── Accent: lighter violet for dark bg ── */
-  --primary: oklch(0.68 0.20 270);          /* #9180FF */
-  --primary-foreground: oklch(0.10 0.03 270);
+  /* ── Primary: amber-gold (brighter for dark bg) ── */
+  --primary: oklch(0.78 0.18 65);            /* #F5A623 marketing site amber */
+  --primary-foreground: oklch(0.10 0.03 65);
 
-  /* ── Gold accent ── */
-  --brand: oklch(0.80 0.17 65);
-  --brand-foreground: oklch(0.12 0.03 65);
-  --brand-muted: oklch(0.20 0.06 65);
+  /* ── Brand gold ── */
+  --brand: oklch(0.78 0.18 65);
+  --brand-foreground: oklch(0.10 0.03 65);
+  --brand-muted: oklch(0.18 0.06 65);
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.80 0.17 65);
-  --amber-foreground: oklch(0.12 0.03 65);
+  --amber: oklch(0.78 0.18 65);
+  --amber-foreground: oklch(0.10 0.03 65);
   --emerald: oklch(0.68 0.17 155);
   --emerald-foreground: oklch(0.10 0.02 155);
 
-  /* ── Page surfaces — deep near-black ── */
-  --background: oklch(0.095 0.018 264);
-  --foreground: oklch(0.93 0.008 264);
+  /* ── Page surfaces: deep navy (marketing site: ~#0d1117 / #0a0e1a) ── */
+  --background: oklch(0.10 0.022 240);
+  --foreground: oklch(0.93 0.008 60);        /* warm ivory text */
 
-  --card: oklch(0.13 0.025 264);
-  --card-foreground: oklch(0.93 0.008 264);
+  --card: oklch(0.14 0.028 240);
+  --card-foreground: oklch(0.93 0.008 60);
 
-  --popover: oklch(0.15 0.030 264);
-  --popover-foreground: oklch(0.93 0.008 264);
+  --popover: oklch(0.16 0.030 240);
+  --popover-foreground: oklch(0.93 0.008 60);
 
-  --secondary: oklch(0.19 0.038 264);
-  --secondary-foreground: oklch(0.78 0.015 264);
+  --secondary: oklch(0.20 0.035 240);
+  --secondary-foreground: oklch(0.78 0.012 60);
 
-  --muted: oklch(0.17 0.032 264);
-  --muted-foreground: oklch(0.55 0.020 264);
+  --muted: oklch(0.18 0.030 240);
+  --muted-foreground: oklch(0.55 0.018 240);
 
-  --accent: oklch(0.19 0.038 264);
-  --accent-foreground: oklch(0.68 0.20 270);
+  --accent: oklch(0.20 0.035 240);
+  --accent-foreground: oklch(0.78 0.18 65);
 
   --destructive: oklch(0.60 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.22 0.038 264);
-  --input: oklch(0.22 0.038 264);
-  --ring: oklch(0.68 0.20 270);
+  --border: oklch(0.22 0.030 240);
+  --input: oklch(0.22 0.030 240);
+  --ring: oklch(0.78 0.18 65);
 
-  /* ── Sidebar: darkest layer ── */
-  --sidebar: oklch(0.075 0.015 264);
-  --sidebar-foreground: oklch(0.82 0.015 264);
-  --sidebar-primary: oklch(0.68 0.20 270);
-  --sidebar-primary-foreground: oklch(0.10 0.03 270);
-  --sidebar-accent: oklch(0.15 0.030 264);
-  --sidebar-accent-foreground: oklch(0.82 0.015 264);
-  --sidebar-border: oklch(0.18 0.032 264);
-  --sidebar-ring: oklch(0.68 0.20 270);
+  /* ── Sidebar: darkest navy layer ── */
+  --sidebar: oklch(0.075 0.018 240);
+  --sidebar-foreground: oklch(0.82 0.012 240);
+  --sidebar-primary: oklch(0.78 0.18 65);
+  --sidebar-primary-foreground: oklch(0.10 0.03 65);
+  --sidebar-accent: oklch(0.14 0.025 240);
+  --sidebar-accent-foreground: oklch(0.82 0.012 240);
+  --sidebar-border: oklch(0.17 0.025 240);
+  --sidebar-ring: oklch(0.78 0.18 65);
 
   /* ── Charts ── */
-  --chart-1: oklch(0.68 0.20 270);
+  --chart-1: oklch(0.78 0.18 65);
   --chart-2: oklch(0.68 0.17 155);
-  --chart-3: oklch(0.80 0.17 65);
-  --chart-4: oklch(0.62 0.20 22);
+  --chart-3: oklch(0.62 0.20 22);
+  --chart-4: oklch(0.68 0.20 270);
   --chart-5: oklch(0.65 0.18 310);
 }
 
@@ -201,9 +201,14 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     line-height: 1.7;
   }
-  /* Brand serif — used for wordmark, page headings, and brand moments */
+  /* Brand serif — Playfair Display for display headlines and brand moments */
   .font-brand {
-    font-family: 'Lora', Georgia, 'Times New Roman', serif;
+    font-family: 'Playfair Display', 'Lora', Georgia, 'Times New Roman', serif;
+  }
+  /* Italic serif accent — used for the second-line italic headline pattern */
+  .font-brand-italic {
+    font-family: 'Playfair Display', 'Lora', Georgia, serif;
+    font-style: italic;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -217,7 +222,7 @@
     @apply cursor-pointer;
   }
   :focus-visible {
-    outline: 2px solid oklch(0.68 0.20 270 / 0.65);
+    outline: 2px solid oklch(0.78 0.18 65 / 0.65);
     outline-offset: 2px;
   }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -289,9 +294,9 @@
     box-shadow: 0 1px 3px oklch(0 0 0 / 0.40), 0 4px 16px oklch(0 0 0 / 0.30);
   }
 
-  /* ── Accent glow ── */
+  /* ── Amber glow ── */
   .glow-accent {
-    box-shadow: 0 0 0 1px oklch(0.68 0.20 270 / 0.3), 0 0 20px oklch(0.68 0.20 270 / 0.12);
+    box-shadow: 0 0 0 1px oklch(0.78 0.18 65 / 0.3), 0 0 20px oklch(0.78 0.18 65 / 0.12);
   }
 
   /* ── Interactive card lift ── */
@@ -305,30 +310,29 @@
     box-shadow: 0 2px 8px oklch(0 0 0 / 0.50), 0 8px 24px oklch(0 0 0 / 0.35);
   }
 
-  /* ── Section label (Orizon-style: small caps + left accent bar) ── */
+  /* ── Section label: amber small-caps (matches marketing site style) ── */
   .section-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted-foreground);
+    color: oklch(0.78 0.18 65 / 0.75);
   }
   .section-label::before {
-    content: '';
-    display: block;
-    width: 2px;
-    height: 12px;
-    background: var(--primary);
-    border-radius: 1px;
+    content: '·';
+    display: inline;
+    color: oklch(0.78 0.18 65);
+    font-size: 1rem;
+    line-height: 1;
     flex-shrink: 0;
   }
 
-  /* ── Gradient text ── */
+  /* ── Gradient text: amber to warm white ── */
   .text-gradient {
-    background: linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58));
+    background: linear-gradient(135deg, oklch(0.78 0.18 65), oklch(0.93 0.008 60));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -365,7 +369,7 @@
     width: 2px;
     height: 60%;
     border-radius: 0 2px 2px 0;
-    background: linear-gradient(180deg, rgba(180,140,60,0.9) 0%, rgba(180,140,60,0.3) 100%);
+    background: linear-gradient(180deg, oklch(0.78 0.18 65 / 0.9) 0%, oklch(0.78 0.18 65 / 0.3) 100%);
     transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 250ms ease;
     opacity: 0;
   }
@@ -378,10 +382,10 @@
     opacity: 1;
   }
   [data-slot="sidebar-menu-button"]:hover:not([data-active="true"]) {
-    box-shadow: inset 0 0 0 1px rgba(180,140,60,0.07);
+    box-shadow: inset 0 0 0 1px oklch(0.78 0.18 65 / 0.07);
   }
   [data-slot="sidebar-menu-button"][data-active="true"] {
-    box-shadow: inset 0 0 0 1px rgba(180,140,60,0.13), 0 0 14px rgba(180,140,60,0.05);
+    box-shadow: inset 0 0 0 1px oklch(0.78 0.18 65 / 0.13), 0 0 14px oklch(0.78 0.18 65 / 0.05);
   }
 
   /* ── Divider with label ── */

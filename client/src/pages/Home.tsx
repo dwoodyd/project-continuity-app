@@ -1203,8 +1203,8 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" />
           <div>
-          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">
-            {greeting}, <span style={{ background: "linear-gradient(135deg, oklch(0.68 0.20 270), oklch(0.74 0.16 58))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>{firstName}</span>.
+          <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand">
+            {greeting}, <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>{firstName}</span>.
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
@@ -1252,10 +1252,10 @@ export default function Home() {
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
       {topAlert === "check_in_due" && (
-        <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.68 0.20 270 / 0.28)", background: "linear-gradient(135deg, oklch(0.68 0.20 270 / 0.08) 0%, oklch(0.68 0.20 270 / 0.03) 100%)" }}>
+        <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.78 0.18 65 / 0.28)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Sun className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Morning plan ready</p>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning plan ready</p>
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </div>
@@ -1293,15 +1293,15 @@ export default function Home() {
         );
       })()}
       {topAlert === "weekly_review" && (
-        <div className="p-3 rounded-xl bg-purple-50/60 dark:bg-purple-900/10 border border-purple-200/60 dark:border-purple-800/40">
+        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.78 0.18 65 / 0.06)", borderColor: "oklch(0.78 0.18 65 / 0.20)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5 text-purple-500" />
-              <p className="text-xs text-purple-700 dark:text-purple-300">Weekly review is ready for this week.</p>
+              <BarChart2 className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65)" }} />
+              <p className="text-xs" style={{ color: "oklch(0.88 0.12 65)" }}>Weekly review is ready for this week.</p>
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-xs text-purple-600 dark:text-purple-400 hover:underline font-medium"
+              className="text-xs font-medium hover:underline" style={{ color: "oklch(0.78 0.18 65)" }}
             >Open</button>
           </div>
         </div>
@@ -1711,12 +1711,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.68 0.20 270 / 0.25)", background: "linear-gradient(135deg, oklch(0.68 0.20 270 / 0.08) 0%, oklch(0.68 0.20 270 / 0.03) 100%)" }}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.78 0.18 65 / 0.25)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
-                <ArrowRight className="w-3 h-3 text-white" />
+                <ArrowRight className="w-3 h-3 text-primary-foreground" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.80 0.18 270)" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
                 className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -1959,8 +1959,8 @@ export default function Home() {
             onClick={() => setReEntryOpen(true)}
             className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
             style={{
-              background: "oklch(0.80 0.18 270 / 0.08)",
-              color: "oklch(0.80 0.18 270 / 0.65)",
+              background: "oklch(0.78 0.18 65 / 0.08)",
+              color: "oklch(0.78 0.18 65 / 0.65)",
             }}
           >
             ↺ Pick up the thread

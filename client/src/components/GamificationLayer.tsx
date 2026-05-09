@@ -20,28 +20,34 @@ import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { GlossaryTerm } from "@/components/TermTooltip";
 
+/* Amber accent constants — matches marketing site #F5A623 */
+const AMBER = "oklch(0.78 0.18 65)";
+const AMBER_DIM = "oklch(0.78 0.18 65 / 0.65)";
+const AMBER_FAINT = "oklch(0.78 0.18 65 / 0.18)";
+const AMBER_TEXT = "oklch(0.90 0.10 65)";
+
 // ─── Return Marker ────────────────────────────────────────────────────────────
 export function ReturnMarker({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   return (
     <div
       className="relative flex items-start gap-3 px-4 py-3 rounded-2xl border"
       style={{
-        background: "oklch(0.18 0.02 270 / 0.6)",
-        borderColor: "oklch(0.80 0.18 270 / 0.18)",
+        background: "oklch(0.16 0.03 65 / 0.55)",
+        borderColor: "oklch(0.78 0.18 65 / 0.18)",
         backdropFilter: "blur(8px)",
       }}
     >
       <div
         className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-        style={{ background: "oklch(0.80 0.18 270 / 0.7)" }}
+        style={{ background: AMBER_DIM }}
       />
-      <p className="text-sm leading-relaxed flex-1" style={{ color: "oklch(0.88 0.06 270)" }}>
+      <p className="text-sm leading-relaxed flex-1" style={{ color: AMBER_TEXT }}>
         {message}
       </p>
       <button
         onClick={onDismiss}
         className="shrink-0 p-0.5 rounded-lg opacity-40 hover:opacity-80 transition-opacity"
-        style={{ color: "oklch(0.80 0.18 270)" }}
+        style={{ color: AMBER }}
         aria-label="Dismiss"
       >
         <X className="w-3.5 h-3.5" />
@@ -69,21 +75,19 @@ export function RhythmSegments({
             className="h-1 rounded-full transition-all duration-700"
             style={{
               width: 28,
-              background: done
-                ? "oklch(0.80 0.18 270 / 0.85)"
-                : "oklch(1 0 0 / 0.10)",
+              background: done ? AMBER_DIM : "oklch(1 0 0 / 0.10)",
             }}
           />
           <span
             className="text-sm font-medium transition-colors duration-500"
-            style={{ color: done ? "oklch(0.80 0.18 270 / 0.7)" : "oklch(1 0 0 / 0.22)" }}
+            style={{ color: done ? "oklch(0.78 0.18 65 / 0.7)" : "oklch(1 0 0 / 0.22)" }}
           >
             {label}
           </span>
         </div>
       ))}
       {count === 3 && (
-        <span className="text-xs ml-1" style={{ color: "oklch(0.80 0.18 270 / 0.55)" }}>
+        <span className="text-xs ml-1" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>
           · Full day held
         </span>
       )}
@@ -104,14 +108,14 @@ export function ContinuityRing({ score, state }: { score: number; state: string 
         <circle cx={22} cy={22} r={r} fill="none" strokeWidth={3}
           stroke="oklch(1 0 0 / 0.07)" />
         <circle cx={22} cy={22} r={r} fill="none" strokeWidth={3}
-          stroke="oklch(0.80 0.18 270 / 0.65)"
+          stroke={AMBER_DIM}
           strokeDasharray={`${dash} ${circ}`}
           strokeLinecap="round"
           style={{ transition: "stroke-dasharray 1.2s ease" }}
         />
       </svg>
       <div>
-        <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.06 270)" }}>{state}</p>
+        <p className="text-sm font-semibold" style={{ color: AMBER_TEXT }}>{state}</p>
         <p className="text-xs" style={{ color: "oklch(1 0 0 / 0.30)" }}><GlossaryTerm name="threadStrength" /></p>
       </div>
     </div>
@@ -153,7 +157,7 @@ export function MovementFeed({ events }: { events: Array<{ id: number; label: st
         const Icon = EVENT_ICONS[ev.eventType] ?? Zap;
         return (
           <div key={ev.id} className="flex items-center gap-2.5 py-1">
-            <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.80 0.18 270 / 0.45)" }} />
+            <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.78 0.18 65 / 0.45)" }} />
             <span className="text-xs flex-1 truncate" style={{ color: "oklch(1 0 0 / 0.50)" }}>
               {ev.label ?? ev.eventType.replace(/_/g, " ")}
             </span>
@@ -185,25 +189,25 @@ export function MilestoneCard({
         visible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
       )}
       style={{
-        background: "linear-gradient(135deg, oklch(0.20 0.04 270 / 0.8), oklch(0.16 0.02 270 / 0.9))",
-        borderColor: "oklch(0.80 0.18 270 / 0.22)",
+        background: "linear-gradient(135deg, oklch(0.16 0.04 65 / 0.8), oklch(0.13 0.02 65 / 0.9))",
+        borderColor: "oklch(0.78 0.18 65 / 0.22)",
       }}
     >
-      {/* Subtle glow */}
+      {/* Subtle amber glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 20% 50%, oklch(0.80 0.18 270 / 0.06) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at 20% 50%, oklch(0.78 0.18 65 / 0.06) 0%, transparent 70%)",
         }}
       />
       <button
         onClick={dismiss}
         className="absolute top-3 right-3 p-1 rounded-lg opacity-30 hover:opacity-70 transition-opacity"
-        style={{ color: "oklch(0.80 0.18 270)" }}
+        style={{ color: AMBER }}
       >
         <X className="w-3.5 h-3.5" />
       </button>
-      <p className="text-sm font-semibold mb-1 pr-6" style={{ color: "oklch(0.92 0.08 270)" }}>
+      <p className="text-sm font-semibold mb-1 pr-6" style={{ color: AMBER_TEXT }}>
         {title}
       </p>
       <p className="text-xs leading-relaxed" style={{ color: "oklch(1 0 0 / 0.45)" }}>

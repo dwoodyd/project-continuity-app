@@ -366,7 +366,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     localStorage.setItem("continuary_return_path", location);
                   }
                 }}
-                className="flex items-center justify-center gap-2 w-full bg-primary text-white px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
+                className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
@@ -446,16 +446,16 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   href={href}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                   style={active
-                    ? { background: "oklch(0.68 0.20 270 / 0.14)", color: "oklch(0.80 0.18 270)", fontWeight: 500 }
+                    ? { background: "oklch(0.78 0.18 65 / 0.14)", color: "oklch(0.88 0.16 65)", fontWeight: 500 }
                     : { color: "oklch(1 0 0 / 0.48)" }
                   }
                 >
-                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
+                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.88 0.16 65)" : "oklch(1 0 0 / 0.32)" }} />
                   <span>{label}</span>
                   {href === "/scratch" && scratchCount > 0 && !active && (
-                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.68 0.20 270 / 0.18)", color: "oklch(0.80 0.18 270)" }}>{scratchCount}</span>
+                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.78 0.18 65 / 0.18)", color: "oklch(0.88 0.16 65)" }}>{scratchCount}</span>
                   )}
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.80 0.18 270)" }} />}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.88 0.16 65)" }} />}
                 </Link>
               );
             })}
@@ -468,13 +468,13 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   href={href}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                   style={active
-                    ? { background: "oklch(0.68 0.20 270 / 0.14)", color: "oklch(0.80 0.18 270)", fontWeight: 500 }
+                    ? { background: "oklch(0.78 0.18 65 / 0.14)", color: "oklch(0.88 0.16 65)", fontWeight: 500 }
                     : { color: "oklch(1 0 0 / 0.48)" }
                   }
                 >
-                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.80 0.18 270)" : "oklch(1 0 0 / 0.32)" }} />
+                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.88 0.16 65)" : "oklch(1 0 0 / 0.32)" }} />
                   <span>{label}</span>
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.80 0.18 270)" }} />}
+                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.88 0.16 65)" }} />}
                 </Link>
               );
             })}
@@ -547,8 +547,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <WrenSidebarPresence />
             {user && (
               <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.68 0.20 270 / 0.18)" }}>
-                  <span className="text-xs font-semibold" style={{ color: "oklch(0.80 0.18 270)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.78 0.18 65 / 0.18)" }}>
+                  <span className="text-xs font-semibold" style={{ color: "oklch(0.88 0.16 65)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
@@ -584,7 +584,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         <button
           onClick={() => setIdeaOpen(true)}
           className="fixed z-40 bottom-6 right-6 w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
-          style={{ background: "oklch(0.52 0.22 270)", boxShadow: "0 4px 20px oklch(0.52 0.22 270 / 0.45), 0 0 0 2px var(--background)" }}
+          style={{ background: "oklch(0.78 0.18 65)", boxShadow: "0 4px 20px oklch(0.78 0.18 65 / 0.45), 0 0 0 2px var(--background)" }}
           title="Quick Capture (Idea Sanctuary)"
           aria-label="Capture an idea"
         >

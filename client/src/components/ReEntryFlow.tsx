@@ -87,7 +87,7 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
                 width: i === step && !done ? 20 : 6,
                 height: 6,
                 background: i <= step || done
-                  ? "oklch(0.80 0.18 270 / 0.8)"
+                  ? "oklch(0.78 0.18 65 / 0.8)"
                   : "oklch(1 0 0 / 0.12)",
               }}
             />
@@ -99,12 +99,12 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
           <div className="flex flex-col items-center text-center px-6 py-4 gap-4">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center"
-              style={{ background: "oklch(0.80 0.18 270 / 0.15)" }}
+              style={{ background: "oklch(0.78 0.18 65 / 0.15)" }}
             >
-              <Check className="w-7 h-7" style={{ color: "oklch(0.80 0.18 270)" }} />
+              <Check className="w-7 h-7" style={{ color: "oklch(0.78 0.18 65)" }} />
             </div>
             <div>
-              <p className="text-lg font-semibold mb-2" style={{ color: "oklch(0.92 0.06 270)" }}>
+              <p className="text-lg font-semibold mb-2" style={{ color: "oklch(0.93 0.06 65)" }}>
                 Thread picked up.
               </p>
               <p className="text-sm leading-relaxed" style={{ color: "oklch(1 0 0 / 0.42)" }}>
@@ -115,7 +115,7 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
             <Button
               onClick={handleClose}
               className="mt-2 w-full"
-              style={{ background: "oklch(0.80 0.18 270 / 0.18)", color: "oklch(0.88 0.10 270)", border: "none" }}
+              style={{ background: "oklch(0.78 0.18 65 / 0.18)", color: "oklch(0.90 0.12 65)", border: "none" }}
             >
               Continue
             </Button>
@@ -124,11 +124,11 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
           // Question steps
           <div className="px-5 pb-2">
             <p className="text-sm font-semibold uppercase tracking-widest mb-3"
-              style={{ color: "oklch(0.80 0.18 270 / 0.45)" }}>
+              style={{ color: "oklch(0.78 0.18 65 / 0.45)" }}>
               Re-entry · {step + 1} of {STEPS.length}
             </p>
             <h3 className="text-xl font-semibold mb-2 leading-snug"
-              style={{ color: "oklch(0.92 0.06 270)" }}>
+              style={{ color: "oklch(0.93 0.06 65)" }}>
               {current.question}
             </h3>
             <p className="text-sm mb-5" style={{ color: "oklch(1 0 0 / 0.35)" }}>
@@ -155,8 +155,8 @@ export function ReEntryFlow({ open, onClose }: ReEntryFlowProps) {
               disabled={!answer.trim()}
               className="w-full gap-2"
               style={{
-                background: answer.trim() ? "oklch(0.80 0.18 270 / 0.22)" : "oklch(1 0 0 / 0.05)",
-                color: answer.trim() ? "oklch(0.88 0.10 270)" : "oklch(1 0 0 / 0.25)",
+                background: answer.trim() ? "oklch(0.78 0.18 65 / 0.22)" : "oklch(1 0 0 / 0.05)",
+                color: answer.trim() ? "oklch(0.90 0.12 65)" : "oklch(1 0 0 / 0.25)",
                 border: "none",
               }}
             >
