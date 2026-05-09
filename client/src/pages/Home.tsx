@@ -913,6 +913,16 @@ export default function Home() {
   });
   const utils = trpc.useUtils();
   const { data: profile } = trpc.settings.getProfile.useQuery();
+  // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
+  const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
+    onSuccess: () => utils.settings.getProfile.invalidate(),
+  });
+  useEffect(() => {
+    if (profile && profile.seenAbout === false) {
+      markAboutSeen.mutate();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.seenAbout]);
   const updateSettings = trpc.settings.updateSettings.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),
   });
@@ -1876,38 +1886,45 @@ export default function Home() {
         {/* ════ RIGHT COLUMN ════ */}
         <div className="space-y-4">
 
-      {/* ── Wren Ambient Presence ─────────────────────────────────────────── */}
-      <div
-        className="relative overflow-hidden rounded-2xl hidden lg:flex items-end justify-center"
-        style={{
-          height: 220,
-          background: "linear-gradient(to top, oklch(0.10 0.022 240) 0%, oklch(0.13 0.028 240 / 0.6) 60%, transparent 100%)",
-        }}
-      >
-        {/* Subtle amber radial glow behind Wren */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at 50% 80%, oklch(0.78 0.18 65 / 0.10) 0%, transparent 65%)",
-          }}
-        />
-        <WrenPlayer
-          clip="holdingOrb"
-          size="2xl"
-          loop
-          autoPlay
-          muted
-          feather
-          featherDirection="bottom"
-          wrapperClassName="absolute inset-0 flex items-center justify-center"
-        />
-        {/* Tagline overlay */}
-        <div className="relative z-10 pb-4 text-center px-4">
-          <p className="text-xs font-brand-italic" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>
-            Your thread is holding.
-          </p>
-        </div>
-      </div>
+      {/* ── Wren Ambient Presence (time-of-day) ─────────────────────────── */}
+      {(() => {
+        // Morning 5–11: popsHead (alert, ready) | Midday 12–16: holdingOrb (focused, grounded) | Evening 17+: closesEyes (reflective, winding down)
+        const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
+        const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
+        return (
+          <div
+            className="relative overflow-hidden rounded-2xl hidden lg:flex items-end justify-center"
+            style={{
+              height: 220,
+              background: "linear-gradient(to top, oklch(0.10 0.022 240) 0%, oklch(0.13 0.028 240 / 0.6) 60%, transparent 100%)",
+            }}
+          >
+            {/* Subtle amber radial glow behind Wren */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: "radial-gradient(ellipse at 50% 80%, oklch(0.78 0.18 65 / 0.10) 0%, transparent 65%)",
+              }}
+            />
+            <WrenPlayer
+              clip={wrenClip}
+              size="2xl"
+              loop
+              autoPlay
+              muted
+              feather
+              featherDirection="bottom"
+              wrapperClassName="absolute inset-0 flex items-center justify-center"
+            />
+            {/* Tagline overlay */}
+            <div className="relative z-10 pb-4 text-center px-4">
+              <p className="text-xs font-brand-italic" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>
+                {wrenTagline}
+              </p>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
       <MoodWidget />

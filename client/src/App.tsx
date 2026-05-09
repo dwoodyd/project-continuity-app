@@ -43,6 +43,7 @@ const ScratchPadPage      = lazy(() => import("./pages/ScratchPadPage"));
 const TourPage            = lazy(() => import("./pages/TourPage"));
 const EmotionalCyclePage  = lazy(() => import("./pages/EmotionalCyclePage"));
 const FoundingMemberPage  = lazy(() => import("./pages/FoundingMemberPage"));
+const ApplyPage           = lazy(() => import("./pages/ApplyPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -65,6 +66,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/about-app" component={AboutAppPage} />
         <Route path="/landing" component={LandingPage} />
         <Route path="/tour" component={TourPage} />
+        <Route path="/apply" component={ApplyPage} />
         <Route path="/intro">{() => null}</Route>
         <Route>
           <AppLayout onPreviewIntro={onPreviewIntro}>

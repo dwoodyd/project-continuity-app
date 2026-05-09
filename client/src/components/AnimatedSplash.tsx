@@ -47,7 +47,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
       onClick={skip}
       className="fixed inset-0 z-[9999] flex flex-col items-center justify-center select-none cursor-pointer"
       style={{
-        background: "oklch(0.09 0.01 270)",
+        background: "oklch(0.09 0.015 240)",
         opacity: phase === "out" ? 0 : 1,
         transition: phase === "out" ? "opacity 0.42s ease-in" : "opacity 0.3s ease-out",
       }}
@@ -58,7 +58,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         width: 300,
         height: 300,
         borderRadius: "50%",
-        background: "radial-gradient(circle, oklch(0.45 0.16 270 / 0.15) 0%, transparent 70%)",
+        background: "radial-gradient(circle, oklch(0.78 0.18 65 / 0.18) 0%, transparent 70%)",
         opacity: phase === "hold" ? 1 : 0,
         transform: phase === "hold" ? "scale(1)" : "scale(0.5)",
         transition: "opacity 1.5s ease-out 0.1s, transform 1.7s ease-out 0.1s",
@@ -81,11 +81,11 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         opacity: revealed ? 1 : 0,
         transform: revealed ? "translateY(0)" : "translateY(8px)",
         transition: "opacity 0.65s ease-out 1.1s, transform 0.65s ease-out 1.1s",
-        fontFamily: "'Lora', Georgia, serif",
-        fontSize: 27,
-        fontWeight: 600,
+        fontFamily: "'Playfair Display', Georgia, serif",
+        fontSize: 28,
+        fontWeight: 700,
         letterSpacing: "0.01em",
-        color: "oklch(0.96 0.005 270)",
+        color: "oklch(0.97 0.01 80)",
       }}>
         Continuary
       </div>
@@ -98,7 +98,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         fontSize: 11,
         letterSpacing: "0.17em",
         textTransform: "uppercase",
-        color: "oklch(0.55 0.01 270)",
+        color: "oklch(0.78 0.18 65 / 0.75)",
         fontFamily: "Inter, sans-serif",
       }}>
         {isFirstSession ? "Your thread starts here" : "Your thread continues"}

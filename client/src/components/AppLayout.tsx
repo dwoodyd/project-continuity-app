@@ -237,7 +237,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     isAuthenticated &&
     !aiConsentDismissed &&
     profile?.onboardingCompleted === true &&
-    profile?.seenAbout === true &&
     profile?.aiConsentGiven === false;
 
   // Close more sheet on navigation
@@ -257,23 +256,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     }
   }, [isAuthenticated, user, profile, navigate, location]);
 
-  // About Continuary gate: show once to every new user after onboarding (admins bypass)
-  useEffect(() => {
-    if (isAuthenticated && user && user.role === "admin") return; // admins skip
-    if (
-      isAuthenticated &&
-      profile &&
-      profile.onboardingCompleted === true &&
-      profile.seenAbout === false &&
-      location !== "/about-app" &&
-      location !== "/onboarding" &&
-      location !== "/invite-gate"
-    ) {
-      navigate("/about-app");
-    }
-  }, [isAuthenticated, user, profile, navigate, location]);
-
   // Invite-only gate: block non-admin users who have not redeemed an invite code
+  // /about-app is no longer a forced gate — it is revisitable from the sidebar
   useEffect(() => {
     if (
       isAuthenticated &&
@@ -281,8 +265,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       user.role !== "admin" &&
       !user.hasRedeemedInvite &&
       location !== "/invite-gate" &&
-      location !== "/onboarding" &&
-      location !== "/about-app"
+      location !== "/onboarding"
     ) {
       navigate("/invite-gate");
     }

@@ -140,6 +140,10 @@ export function CommandPalette({ onAction }: CommandPaletteProps) {
             <>
               <CommandSeparator />
               <CommandGroup heading="Admin">
+                <CommandItem value="Admin: Applications" onSelect={() => handleNav("/admin/applications")} className="gap-2 cursor-pointer">
+                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span>Applications</span>
+                </CommandItem>
                 <CommandItem value="Admin: Invite Codes" onSelect={() => handleNav("/admin/invites")} className="gap-2 cursor-pointer">
                   <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span>Invite Codes</span>
@@ -254,6 +258,10 @@ export function CommandPaletteTrigger({ onAction }: CommandPaletteProps) {
             <>
               <CommandSeparator />
               <CommandGroup heading="Admin">
+                <CommandItem value="Admin: Applications" onSelect={() => handleNav("/admin/applications")} className="gap-2 cursor-pointer">
+                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span>Applications</span>
+                </CommandItem>
                 <CommandItem value="Admin: Invite Codes" onSelect={() => handleNav("/admin/invites")} className="gap-2 cursor-pointer">
                   <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
                   <span>Invite Codes</span>
