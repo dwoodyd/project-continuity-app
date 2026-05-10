@@ -1,28 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { getLoginUrl } from "@/const";
-import WrenPlayer from "@/components/WrenPlayer";
-
-const SHARE_CARD = "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/continuary-share-card-FauhVHKYVXhAVX4JSVfZAJ.png";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 
 const PAIN_POINTS = [
-  { icon: "🌀", text: "You open a project and can't remember where you left off." },
-  { icon: "🔥", text: "You start strong, then lose the thread mid-week." },
-  { icon: "😶", text: "You have 12 open tabs and zero clarity on what to do next." },
-  { icon: "🧠", text: "Your brain works in bursts — and every system punishes that." },
+  { label: "The restart tax", text: "You open a project and spend 20 minutes just remembering where you left off." },
+  { label: "The burst penalty", text: "You work in focused sprints — but every system was built for linear thinkers." },
+  { label: "The open tab spiral", text: "12 tabs. 3 half-finished docs. Zero clarity on what matters right now." },
+  { label: "The lost week", text: "You start strong on Monday. By Thursday, the thread is gone." },
 ];
 
 const HOW_IT_WORKS = [
-  { step: "01", title: "Morning check-in", desc: "Set direction before the day sets itself. 2 minutes." },
-  { step: "02", title: "Midday pulse", desc: "Catch drift before it becomes a lost day." },
-  { step: "03", title: "Evening close", desc: "Capture the day. Re-entry is ready for tomorrow." },
-  { step: "04", title: "Weekly Compass", desc: "One ritual to close the week and open the next with intention." },
+  { step: "01", title: "Morning check-in", italic: "Set direction.", desc: "Two minutes before the day sets itself. Your projects stay warm." },
+  { step: "02", title: "Midday pulse", italic: "Catch the drift.", desc: "A quiet moment to re-orient before the afternoon takes over." },
+  { step: "03", title: "Evening close", italic: "Capture the day.", desc: "Re-entry is ready for tomorrow. Nothing lost in the gap." },
+  { step: "04", title: "Weekly Compass", italic: "Close the loop.", desc: "One ritual to close the week and open the next with intention." },
 ];
 
 export default function LandingPage() {
   const [, navigate] = useLocation();
   const [inviteCode, setInviteCode] = useState("");
+  const [heroLoaded, setHeroLoaded] = useState(false);
   const inviteSectionRef = useRef<HTMLElement>(null);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
 
   // Pre-fill invite code from URL param: /landing?code=XXXX
   useEffect(() => {
@@ -31,16 +31,13 @@ export default function LandingPage() {
     if (codeParam) {
       const normalized = codeParam.trim().toUpperCase();
       setInviteCode(normalized);
-      // Immediately store it so it survives the OAuth redirect
       sessionStorage.setItem("pendingInviteCode", normalized);
-      // Scroll to the invite section after a short delay
       setTimeout(() => {
         inviteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 400);
     }
   }, []);
 
-  // Store invite code in sessionStorage so InviteGatePage can pre-fill it after sign-in
   const handleInviteSignIn = () => {
     if (inviteCode.trim()) {
       sessionStorage.setItem("pendingInviteCode", inviteCode.trim().toUpperCase());
@@ -49,110 +46,192 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white font-sans">
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0a0a0f]/90 backdrop-blur-md border-b border-white/5">
-        <div className="flex items-center gap-2">
-          <img src="/logo-navy.svg" alt="Continuary" className="w-8 h-8 rounded-xl" />
-          <span className="font-bold tracking-tight text-sm">Continuary</span>
+    <div className="min-h-screen text-white font-sans" style={{ background: "oklch(0.09 0.015 240)" }}>
+
+      {/* ── Fixed Nav ──────────────────────────────────────────────────────── */}
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4"
+        style={{ background: "oklch(0.09 0.015 240 / 0.85)", backdropFilter: "blur(12px)", borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
+        <div className="flex items-center gap-2.5">
+          <img src="/logo-navy.svg" alt="Continuary" className="w-9 h-9 rounded-xl" />
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, fontSize: 17, color: "oklch(0.97 0.01 80)", letterSpacing: "0.01em" }}>
+            Continuary
+          </span>
         </div>
         <div className="flex items-center gap-3">
-          <a href={getLoginUrl()} className="text-white/40 hover:text-white text-sm transition-colors">Sign in</a>
-          <a href={getLoginUrl()} className="bg-amber-400 hover:bg-amber-300 text-black text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
-            Get started free
+          <a href={getLoginUrl()} style={{ color: "oklch(0.97 0.01 80 / 0.4)", fontSize: 14 }} className="hover:opacity-80 transition-opacity">
+            Sign in
+          </a>
+          <a href="/apply"
+            style={{ background: "oklch(0.78 0.18 65)", color: "#0a0a0f", fontSize: 13, fontWeight: 700, padding: "8px 18px", borderRadius: 12 }}
+            className="hover:opacity-90 transition-opacity">
+            Apply for access
           </a>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="pt-32 pb-24 px-6 text-center max-w-3xl mx-auto">
-        {/* Wren mascot — the first thing visitors see */}
-        <div className="flex justify-center mb-4">
-          <WrenPlayer clip="luminousFloats" size="2xl" />
+      {/* ── Hero — Full Bleed Video ─────────────────────────────────────────── */}
+      <section className="relative flex flex-col items-center justify-center overflow-hidden" style={{ minHeight: "100svh" }}>
+        {/* Background video */}
+        <video
+          ref={heroVideoRef}
+          src={WREN_CLIPS.hoveringArchway}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onCanPlay={() => setHeroLoaded(true)}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            opacity: heroLoaded ? 1 : 0,
+            transition: "opacity 1.2s ease-out",
+            mixBlendMode: "screen",
+            filter: "brightness(0.7) saturate(1.1)",
+          }}
+        />
+
+        {/* Deep navy overlay — keeps text readable */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, oklch(0.09 0.015 240 / 0.55) 0%, oklch(0.09 0.015 240 / 0.3) 40%, oklch(0.09 0.015 240 / 0.7) 100%)" }} />
+
+        {/* Hero content */}
+        <div className="relative z-10 text-center px-6 max-w-3xl mx-auto" style={{ paddingTop: 96 }}>
+          {/* Eyebrow */}
+          <div className="inline-flex items-center gap-2 mb-10"
+            style={{ background: "oklch(0.78 0.18 65 / 0.12)", border: "1px solid oklch(0.78 0.18 65 / 0.25)", borderRadius: 999, padding: "6px 16px" }}>
+            <span style={{ color: "oklch(0.78 0.18 65)", fontSize: 11, fontWeight: 600, letterSpacing: "0.14em", textTransform: "uppercase" }}>
+              Built for non-linear thinkers
+            </span>
+          </div>
+
+          {/* Headline — marketing site roman/italic pattern */}
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, lineHeight: 1.12, marginBottom: 24 }}>
+            <span style={{ display: "block", fontSize: "clamp(42px, 7vw, 72px)", color: "oklch(0.97 0.01 80)" }}>
+              Your brain isn't broken.
+            </span>
+            <span style={{ display: "block", fontSize: "clamp(42px, 7vw, 72px)", color: "oklch(0.78 0.18 65)", fontStyle: "italic" }}>
+              Your system was.
+            </span>
+          </h1>
+
+          <p style={{ color: "oklch(0.97 0.01 80 / 0.55)", fontSize: "clamp(16px, 2.2vw, 20px)", lineHeight: 1.7, maxWidth: 520, margin: "0 auto 40px" }}>
+            Continuary keeps your thread. Three check-ins a day. Every project stays warm. You always know where you are.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="/apply"
+              style={{ background: "oklch(0.78 0.18 65)", color: "#0a0a0f", fontWeight: 700, fontSize: 15, padding: "16px 36px", borderRadius: 16 }}
+              className="hover:opacity-90 transition-opacity w-full sm:w-auto text-center">
+              Apply for founding access
+            </a>
+            <a href={getLoginUrl()}
+              style={{ color: "oklch(0.97 0.01 80 / 0.45)", fontSize: 14 }}
+              className="hover:opacity-80 transition-opacity">
+              Already have an account →
+            </a>
+          </div>
         </div>
-        <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/20 rounded-full px-4 py-1.5 text-amber-400 text-xs font-medium mb-8">
-          ✦ Built for ADHD, focus struggles, and non-linear thinkers
-        </div>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-          Your brain isn't broken.<br />
-          <span className="text-amber-400">Your system was.</span>
-        </h1>
-        <p className="text-white/50 text-xl leading-relaxed mb-10 max-w-xl mx-auto">
-          Continuary keeps your thread. Three check-ins a day. Every project stays warm. You always know where you are.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href={getLoginUrl()} className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-2xl text-base transition-colors w-full sm:w-auto text-center">
-            Start your thread — free
-          </a>
-          <a href={getLoginUrl()} className="text-white/40 hover:text-white text-sm transition-colors">
-            Already have an account →
-          </a>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
+          style={{ opacity: heroLoaded ? 0.4 : 0, transition: "opacity 1s ease-out 2s" }}>
+          <div style={{ width: 1, height: 40, background: "linear-gradient(to bottom, oklch(0.78 0.18 65), transparent)" }} />
+          <span style={{ fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "oklch(0.97 0.01 80 / 0.5)" }}>scroll</span>
         </div>
       </section>
 
-      {/* Share card image */}
-      <section className="px-6 max-w-2xl mx-auto mb-24">
-        <img src={SHARE_CARD} alt="Continuary — Your brain isn't broken" className="w-full rounded-3xl border border-white/10 shadow-2xl" />
-      </section>
+      {/* ── Pain Points ────────────────────────────────────────────────────── */}
+      <section className="px-6 py-28 max-w-3xl mx-auto">
+        {/* Section label */}
+        <div className="flex items-center gap-4 mb-14">
+          <div style={{ width: 32, height: 1, background: "oklch(0.78 0.18 65 / 0.5)" }} />
+          <span style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "oklch(0.78 0.18 65)", fontWeight: 600 }}>
+            Sound familiar
+          </span>
+        </div>
 
-      {/* Pain points */}
-      <section className="px-6 max-w-2xl mx-auto mb-24">
-        <h2 className="text-2xl font-bold mb-8 text-center">Sound familiar?</h2>
-        <div className="space-y-4">
+        <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, marginBottom: 48 }}>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 42px)", color: "oklch(0.97 0.01 80)" }}>The patterns that</span>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 42px)", color: "oklch(0.78 0.18 65)", fontStyle: "italic" }}>keep breaking your flow.</span>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {PAIN_POINTS.map((p) => (
-            <div key={p.text} className="flex items-start gap-4 bg-white/5 rounded-2xl p-5 border border-white/10">
-              <span className="text-2xl flex-shrink-0">{p.icon}</span>
-              <p className="text-white/70 leading-relaxed">{p.text}</p>
+            <div key={p.label} style={{ padding: "28px 28px", borderRadius: 16, border: "1px solid oklch(1 0 0 / 0.08)", background: "oklch(1 0 0 / 0.03)" }}>
+              <div style={{ color: "oklch(0.78 0.18 65)", fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 10 }}>
+                {p.label}
+              </div>
+              <p style={{ color: "oklch(0.97 0.01 80 / 0.6)", lineHeight: 1.65, fontSize: 15 }}>{p.text}</p>
             </div>
           ))}
         </div>
-        <p className="text-center text-white/40 text-sm mt-8">
-          You don't need more discipline. You need a system that works with your brain, not against it.
+
+        <p style={{ textAlign: "center", color: "oklch(0.97 0.01 80 / 0.3)", fontSize: 14, marginTop: 40, fontStyle: "italic" }}>
+          You don't need more discipline. You need a system that works with your brain.
         </p>
       </section>
 
-      {/* How it works */}
-      <section className="px-6 max-w-2xl mx-auto mb-24">
-        <h2 className="text-2xl font-bold mb-2 text-center">How it works</h2>
-        <p className="text-white/40 text-center text-sm mb-10">Four touchpoints. Zero shame. Total continuity.</p>
-        <div className="space-y-6">
-          {HOW_IT_WORKS.map((h) => (
-            <div key={h.step} className="flex items-start gap-5">
-              <div className="text-amber-400 font-mono text-sm font-bold flex-shrink-0 mt-1">{h.step}</div>
+      {/* ── Wren Feature Interlude ─────────────────────────────────────────── */}
+      <section className="relative overflow-hidden" style={{ minHeight: 480 }}>
+        <video
+          src={WREN_CLIPS.holdingOrb}
+          autoPlay loop muted playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ mixBlendMode: "screen", opacity: 0.55, filter: "brightness(0.8)" }}
+        />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, oklch(0.09 0.015 240 / 0.92) 0%, oklch(0.09 0.015 240 / 0.6) 50%, oklch(0.09 0.015 240 / 0.85) 100%)" }} />
+        <div className="relative z-10 flex flex-col justify-center h-full px-8 max-w-2xl mx-auto text-center py-24">
+          <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px, 3.5vw, 36px)", color: "oklch(0.97 0.01 80)", lineHeight: 1.4, marginBottom: 12 }}>
+            "The thread breaks
+          </p>
+          <p style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px, 3.5vw, 36px)", color: "oklch(0.78 0.18 65)", fontStyle: "italic", lineHeight: 1.4 }}>
+            quietly."
+          </p>
+          <p style={{ color: "oklch(0.97 0.01 80 / 0.4)", fontSize: 13, marginTop: 20, letterSpacing: "0.06em" }}>
+            Continuary catches it before you lose the day.
+          </p>
+        </div>
+      </section>
+
+      {/* ── How It Works ───────────────────────────────────────────────────── */}
+      <section className="px-6 py-28 max-w-3xl mx-auto">
+        <div className="flex items-center gap-4 mb-14">
+          <div style={{ width: 32, height: 1, background: "oklch(0.78 0.18 65 / 0.5)" }} />
+          <span style={{ fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "oklch(0.78 0.18 65)", fontWeight: 600 }}>
+            The ritual
+          </span>
+        </div>
+
+        <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, marginBottom: 56 }}>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 42px)", color: "oklch(0.97 0.01 80)" }}>Four touchpoints.</span>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 42px)", color: "oklch(0.78 0.18 65)", fontStyle: "italic" }}>Zero shame.</span>
+        </h2>
+
+        <div className="space-y-0">
+          {HOW_IT_WORKS.map((h, i) => (
+            <div key={h.step} className="flex items-start gap-8 py-8"
+              style={{ borderTop: i === 0 ? "1px solid oklch(1 0 0 / 0.08)" : "none", borderBottom: "1px solid oklch(1 0 0 / 0.08)" }}>
+              <div style={{ color: "oklch(0.78 0.18 65 / 0.5)", fontFamily: "monospace", fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", minWidth: 28, paddingTop: 3 }}>
+                {h.step}
+              </div>
               <div>
-                <div className="font-semibold mb-1">{h.title}</div>
-                <div className="text-white/50 text-sm">{h.desc}</div>
+                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, fontSize: 20, color: "oklch(0.97 0.01 80)", marginBottom: 6 }}>
+                  {h.title} — <em style={{ color: "oklch(0.78 0.18 65)" }}>{h.italic}</em>
+                </div>
+                <div style={{ color: "oklch(0.97 0.01 80 / 0.45)", fontSize: 14, lineHeight: 1.65 }}>{h.desc}</div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Early tester CTA */}
-      <section className="px-6 max-w-2xl mx-auto mb-24">
-        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 text-center">
-          <div className="text-3xl mb-4">🧵</div>
-          <h2 className="text-xl font-bold mb-2">Be an early voice</h2>
-          <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-            Continuary is new. If you try it and it helps — or doesn't — I want to hear from you directly.
-            Early feedback shapes everything.
-          </p>
-          <a
-            href="mailto:hello@soulengineer.online?subject=Continuary Early Feedback"
-            className="inline-block bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium px-6 py-3 rounded-xl transition-colors"
-          >
-            Send early feedback →
-          </a>
-        </div>
-      </section>
-
-      {/* Invite code section */}
-      <section ref={inviteSectionRef} className="px-6 max-w-xl mx-auto mb-24">
-        <div className="bg-white/5 rounded-3xl p-8 border border-amber-400/20 text-center">
-          <div className="text-amber-400 text-2xl mb-3">🔑</div>
-          <h2 className="text-xl font-bold mb-2">Have a beta invite code?</h2>
-          <p className="text-white/50 text-sm leading-relaxed mb-6 max-w-sm mx-auto">
-            Enter your code below and sign in — it'll be applied automatically so you can get straight to the app.
+      {/* ── Invite Code Section ─────────────────────────────────────────────── */}
+      <section ref={inviteSectionRef} className="px-6 py-16 max-w-xl mx-auto">
+        <div style={{ background: "oklch(1 0 0 / 0.03)", border: "1px solid oklch(0.78 0.18 65 / 0.25)", borderRadius: 24, padding: "40px 36px", textAlign: "center" }}>
+          <div style={{ width: 36, height: 1, background: "oklch(0.78 0.18 65 / 0.5)", margin: "0 auto 24px" }} />
+          <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, fontSize: 22, color: "oklch(0.97 0.01 80)", marginBottom: 10 }}>
+            Have an invite code?
+          </h2>
+          <p style={{ color: "oklch(0.97 0.01 80 / 0.4)", fontSize: 14, lineHeight: 1.65, marginBottom: 28, maxWidth: 300, margin: "0 auto 28px" }}>
+            Enter your code below — it'll be applied automatically when you sign in.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 max-w-sm mx-auto">
             <input
@@ -162,11 +241,12 @@ export default function LandingPage() {
               onKeyDown={(e) => e.key === "Enter" && handleInviteSignIn()}
               placeholder="ENTER CODE"
               maxLength={32}
-              className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm font-mono tracking-widest focus:outline-none focus:border-amber-400/60 transition-colors"
+              style={{ flex: 1, background: "oklch(1 0 0 / 0.06)", border: "1px solid oklch(1 0 0 / 0.15)", borderRadius: 12, padding: "12px 16px", color: "oklch(0.97 0.01 80)", fontSize: 13, fontFamily: "monospace", letterSpacing: "0.12em", outline: "none" }}
             />
             <button
               onClick={handleInviteSignIn}
-              className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3 rounded-xl text-sm transition-colors whitespace-nowrap"
+              style={{ background: "oklch(0.78 0.18 65)", color: "#0a0a0f", fontWeight: 700, fontSize: 13, padding: "12px 22px", borderRadius: 12, border: "none", cursor: "pointer", whiteSpace: "nowrap" }}
+              className="hover:opacity-90 transition-opacity"
             >
               Sign in →
             </button>
@@ -174,43 +254,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pro CTA */}
-      <section className="px-6 max-w-xl mx-auto mb-24 text-center">
-        <div className="bg-gradient-to-b from-amber-400/10 to-transparent border border-amber-400/20 rounded-3xl p-10">
-          <div className="text-amber-400 text-3xl mb-4">✦</div>
-          <h2 className="text-3xl font-bold mb-3">Ready to keep your thread?</h2>
-          <p className="text-white/50 mb-8 leading-relaxed">
-            Free to start. Pro for $4.99/month — unlimited Clarity Engine, full thread history, and smart nudges.
-          </p>
-          <a href={getLoginUrl()} className="inline-block bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-2xl text-base transition-colors">
-            Start free today
-          </a>
-          <p className="text-white/20 text-xs mt-4">No credit card required · Cancel anytime</p>
-        </div>
+      {/* ── Final CTA ──────────────────────────────────────────────────────── */}
+      <section className="px-6 py-24 max-w-2xl mx-auto text-center">
+        <div style={{ width: 48, height: 1, background: "oklch(0.78 0.18 65 / 0.4)", margin: "0 auto 32px" }} />
+        <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, marginBottom: 16 }}>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 44px)", color: "oklch(0.97 0.01 80)" }}>Ready to keep</span>
+          <span style={{ display: "block", fontSize: "clamp(28px, 4vw, 44px)", color: "oklch(0.78 0.18 65)", fontStyle: "italic" }}>your thread?</span>
+        </h2>
+        <p style={{ color: "oklch(0.97 0.01 80 / 0.4)", fontSize: 15, lineHeight: 1.7, marginBottom: 36, maxWidth: 400, margin: "0 auto 36px" }}>
+          Founding member access is limited. Apply now and be part of the first cohort.
+        </p>
+        <a href="/apply"
+          style={{ display: "inline-block", background: "oklch(0.78 0.18 65)", color: "#0a0a0f", fontWeight: 700, fontSize: 15, padding: "16px 40px", borderRadius: 16 }}
+          className="hover:opacity-90 transition-opacity">
+          Apply for founding access
+        </a>
+        <p style={{ color: "oklch(0.97 0.01 80 / 0.2)", fontSize: 11, marginTop: 16 }}>
+          No credit card required · Founding rate locked for life
+        </p>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-8 text-center text-white/20 text-xs">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <img src="/logo-navy.svg" alt="Continuary" className="w-6 h-6 rounded-lg" />
-          <span className="font-bold text-white/40">Continuary</span>
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)", padding: "32px 24px", textAlign: "center" }}>
+        <div className="flex items-center justify-center gap-2.5 mb-4">
+          <img src="/logo-navy.svg" alt="Continuary" className="w-7 h-7 rounded-lg" />
+          <span style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 700, fontSize: 15, color: "oklch(0.97 0.01 80 / 0.5)" }}>
+            Continuary
+          </span>
         </div>
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <button onClick={() => navigate("/privacy")} className="hover:text-white/50 transition-colors">Privacy</button>
-          <button onClick={() => navigate("/terms")} className="hover:text-white/50 transition-colors">Terms</button>
-          <a href={getLoginUrl()} className="hover:text-white/50 transition-colors">App</a>
+        <div className="flex items-center justify-center gap-6 mb-4" style={{ fontSize: 12, color: "oklch(0.97 0.01 80 / 0.25)" }}>
+          <button onClick={() => navigate("/privacy")} className="hover:opacity-60 transition-opacity">Privacy</button>
+          <button onClick={() => navigate("/terms")} className="hover:opacity-60 transition-opacity">Terms</button>
+          <a href={getLoginUrl()} className="hover:opacity-60 transition-opacity">Sign in</a>
         </div>
-        <div className="flex items-center justify-center">
-          <button
-            onClick={() => {
-              inviteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-              setTimeout(() => inviteSectionRef.current?.querySelector("input")?.focus(), 600);
-            }}
-            className="text-amber-400/60 hover:text-amber-400 transition-colors text-xs font-medium tracking-wide"
-          >
-            Already approved? Redeem your invite code →
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            inviteSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+            setTimeout(() => inviteSectionRef.current?.querySelector("input")?.focus(), 600);
+          }}
+          style={{ color: "oklch(0.78 0.18 65 / 0.55)", fontSize: 12, fontWeight: 500, letterSpacing: "0.04em", background: "none", border: "none", cursor: "pointer" }}
+          className="hover:opacity-80 transition-opacity"
+        >
+          Already approved? Redeem your invite code →
+        </button>
       </footer>
     </div>
   );

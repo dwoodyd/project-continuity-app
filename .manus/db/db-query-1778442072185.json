@@ -1,0 +1,19 @@
+{
+  "query": "SHOW TABLES LIKE 'founding_applications'; SELECT COUNT(*) as total FROM founding_applications;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SHOW TABLES LIKE 'founding_applications'; SELECT COUNT(*) as total FROM founding_applications;",
+  "rows": [
+    {
+      "Tables_in_VnvNaoJZPVnHWmB8F3cwwo (founding_applications)": "founding_applications"
+    },
+    {
+      "Tables_in_VnvNaoJZPVnHWmB8F3cwwo (founding_applications)": "total"
+    },
+    {
+      "Tables_in_VnvNaoJZPVnHWmB8F3cwwo (founding_applications)": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "Tables_in_VnvNaoJZPVnHWmB8F3cwwo (founding_applications)\nfounding_applications\ntotal\n1\n",
+  "stderr": "",
+  "execution_time_ms": 312
+}
