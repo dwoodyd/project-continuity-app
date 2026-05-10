@@ -1282,3 +1282,12 @@
 - [x] Auto-migrate existing beta users to founding member cohort 1 with 45-day extension
 - [x] Add Founding Member section to Settings page with referral code
 - [x] Wire /founding-member route in App.tsx and redirect trial users from /pro
+
+## Wren Video Clip Refresh + Tour Page Upgrade
+- [x] Register bouncingFunClean clip in wrenClips.ts (WrenBouncinghavingFun_dec95150.mov)
+- [x] Register wrenLetter clip in wrenClips.ts (WrenLetter_653dac1a.mov)
+- [x] Swap ScratchPadPage from bouncingFun (watermarked) to bouncingFunClean
+- [x] Swap WeeklyReviewPage from letter to wrenLetter (both occurrences)
+- [x] Fix EvidenceLogPage celebration timing: 3500ms → 6000ms + click-to-dismiss overlay
+- [x] Fix EmotionalCyclePage WrenPlayer: container 64×64 → 120×120, size sm → md, fix clip names to valid registry keys, add feather radial
+- [x] Rewrite TourPage.tsx: fix all invalid clip names, apply deep navy + amber-gold color system, Playfair Display headings, /apply CTA on final step

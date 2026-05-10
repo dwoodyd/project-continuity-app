@@ -8,6 +8,12 @@ const BASE = "/manus-storage";
 
 // ─── Video clips ─────────────────────────────────────────────────────────────
 export const WREN_CLIPS = {
+  // ── User-uploaded custom clips ──────────────────────────────────────────────
+  /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
+  bouncingFunClean:   `${BASE}/WrenBouncinghavingFun_dec95150.mov`,
+  /** Wren with glowing letter/document — Weekly Review and Evidence Log */
+  wrenLetter:         `${BASE}/WrenLetter_653dac1a.mov`,
+
   // ── Onboarding ──────────────────────────────────────────────────────────────
   /** Wren glowing and floating — cinematic splash / intro */
   luminousFloats:     `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
@@ -67,7 +73,7 @@ export const WREN_CLIPS = {
   cartwheels:         `${BASE}/wren_cartwheels_feefa3ef.mp4`,
   /** Wren happy split in two — big milestone / level up */
   happySplit:         `${BASE}/wren_happy_split_65367046.mp4`,
-  /** Wren bouncing having fun — emotional cycle high period */
+  /** Wren bouncing having fun — emotional cycle high period (original, has watermark) */
   bouncingFun:        `${BASE}/wren_bouncing_fun_52e9a11d.mp4`,
   /** Wren morphs into golden heart — love/appreciation moment */
   morphsHeart:        `${BASE}/wren_morphs_heart_9c861404.mp4`,
@@ -111,7 +117,7 @@ export const WREN_CLIPS = {
   privacyLock:        `${BASE}/wren_privacy_lock_9355f8a8.mp4`,
   /** Wren premium 3D — upgrade / pro page */
   premium3d:          `${BASE}/wren_premium_3d_d1631d91.mp4`,
-  /** Wren letter — notifications / messages */
+  /** Wren letter — notifications / messages (original) */
   letter:             `${BASE}/wren_letter_3a012f38.mp4`,
   /** Wren untitled 8 — extra clip A */
   extra8:             `${BASE}/wren_untitled_8_d1ab1787.mp4`,

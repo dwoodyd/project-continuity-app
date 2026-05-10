@@ -247,12 +247,14 @@ export default function EmotionalCyclePage() {
 
         {/* Wren + cycle analysis */}
         <div className="rounded-2xl p-4 flex gap-4 items-start" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="shrink-0" style={{ width: 64, height: 64 }}>
+          <div className="shrink-0" style={{ width: 120, height: 120 }}>
             <WrenPlayer
-              clip={cycle?.currentPhase === "high" ? "celebrate" : cycle?.currentPhase === "low" ? "resting" : "greeting"}
-              size="sm"
+              clip={cycle?.currentPhase === "high" ? "bouncingFunClean" : cycle?.currentPhase === "low" ? "inflates" : "holdingOrb"}
+              size="md"
               loop
               autoPlay
+              feather
+              featherDirection="radial"
             />
           </div>
           <div className="flex-1 min-w-0 space-y-2">
@@ -264,7 +266,7 @@ export default function EmotionalCyclePage() {
                     <span className="text-xs text-muted-foreground">~{cycle.cycleDays}-day cycle</span>
                   )}
                 </div>
-                <p className="text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>{cycle.message}</p>
+                <p className="text-sm text-foreground/90">{cycle.message}</p>
                 {(cycle.nextHighDate || cycle.nextLowDate) && (
                   <div className="flex gap-4 pt-1 flex-wrap">
                     {cycle.nextHighDate && (

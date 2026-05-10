@@ -258,16 +258,17 @@ export default function EvidenceLogPage() {
     if (sessionStorage.getItem(key)) return;
     sessionStorage.setItem(key, "1");
     setShowWrenCelebration(true);
-    setTimeout(() => setShowWrenCelebration(false), 3500);
+    setTimeout(() => setShowWrenCelebration(false), 6000);
   }, [summaries]);
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Wren celebration — shown once per session when evidence exists */}
+      {/* Wren celebration — shown once per session when evidence exists; tap to dismiss */}
       {showWrenCelebration && (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer"
           style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
+          onClick={() => setShowWrenCelebration(false)}
         >
           <WrenPlayer clip="checkmark" size="2xl" />
           <p
@@ -275,6 +276,9 @@ export default function EvidenceLogPage() {
             style={{ color: "oklch(0.85 0.12 65)" }}
           >
             This is your record. Every entry is proof.
+          </p>
+          <p className="mt-2 text-xs text-center" style={{ color: "oklch(0.65 0.08 65)" }}>
+            Tap anywhere to continue
           </p>
         </div>
       )}
