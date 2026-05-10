@@ -39,7 +39,7 @@ export const applicationsRouter = router({
       const { subject, html } = buildApplicationConfirmationEmail({
         recipientName: input.name.split(" ")[0] ?? input.name,
       });
-      await sendEmail({ to: input.email, subject, html });
+      await sendEmail({ to: input.email, subject, html, replyTo: "dwoodyd@gmail.com" });
 
       // Notify the owner
       await notifyOwner({
@@ -98,6 +98,7 @@ export const applicationsRouter = router({
         to: input.applicantEmail,
         subject,
         html,
+        replyTo: "dwoodyd@gmail.com",
       });
 
       return { success: true, code, emailSent };
