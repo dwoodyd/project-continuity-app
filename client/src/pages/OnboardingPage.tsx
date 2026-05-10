@@ -591,14 +591,14 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
 
   return (
     <VideoStage>
-      {/* Wren peeking — she's watching you type */}
+       {/* Wren peeking — she's watching you type */}
       <SmoothLoopVideo src={WREN_CLIPS.peeking} />
       <GradientOverlays top={false} />
-
-      {/* Frosted input panel at bottom */}
+      {/* Frosted input panel — right side on desktop, full-width on mobile */}
       <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        maxHeight: "88dvh", overflowY: "auto", overscrollBehavior: "contain",
+        position: "absolute", bottom: 0, right: 0,
+        width: "min(100%, 480px)",
+        maxHeight: "92dvh", overflowY: "auto", overscrollBehavior: "contain",
         display: "flex", flexDirection: "column", justifyContent: "flex-end",
       }}>
         <FrostedPanel>
@@ -650,7 +650,7 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
           </Fade>
 
           <Fade visible={visible} delay={400}>
-            <CTAButton onClick={onNext} disabled={!name.trim()}>
+            <CTAButton onClick={onNext} disabled={!name.trim() || !workStyle}>
               Continue <ArrowRight className="w-4 h-4" />
             </CTAButton>
           </Fade>
@@ -769,7 +769,7 @@ function StepFocus({ focusHour, setFocusHour, onNext, onBack }: {
 
   return (
     <VideoStage>
-      <SmoothLoopVideo src={WREN_CLIPS.hoversThread} />
+      <SmoothLoopVideo src={WREN_CLIPS.bouncingFun} />
       <GradientOverlays top={false} />
 
       <div style={{
@@ -989,8 +989,8 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const [step, setStep] = useState<number>(-1);
   const [name, setName] = useState("");
   const [workStyle, setWorkStyle] = useState<WorkStyle>("");
-  const [tone, setTone] = useState<TonePref | "">("direct");
-  const [focusHour, setFocusHour] = useState<FocusHour | "">("morning");
+  const [tone, setTone] = useState<TonePref | "">("");
+  const [focusHour, setFocusHour] = useState<FocusHour | "">("");
   const [projectTitle, setProjectTitle] = useState("");
   const [projectWhy, setProjectWhy] = useState("");
   const [projectNext, setProjectNext] = useState("");
