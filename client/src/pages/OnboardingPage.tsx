@@ -19,7 +19,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
 import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
@@ -67,63 +67,37 @@ const focusEndMap: Record<FocusHour, string> = {
   morning: "12:00", midday: "14:00", afternoon: "17:00", evening: "21:00", varies: "17:00",
 };
 
-// ─── Smooth crossfade loop video ──────────────────────────────────────────────
-function SmoothLoopVideo({ src, style, crossfadeDuration = 1.0 }: {
+// ─── Seamless native loop video ───────────────────────────────────────────────
+// Uses the browser's native loop attribute for instant, frame-perfect restart.
+// Copy animations are driven by independent state and never re-trigger on loop.
+function SmoothLoopVideo({ src, style }: {
   src: string;
   style?: React.CSSProperties;
-  crossfadeDuration?: number;
+  crossfadeDuration?: number; // kept for API compatibility, unused
 }) {
-  const aRef = useRef<HTMLVideoElement>(null);
-  const bRef = useRef<HTMLVideoElement>(null);
-  const [active, setActive] = useState<"a" | "b">("a");
-  const rafRef = useRef<number>(0);
-
-  const startLoop = useCallback(() => {
-    const check = () => {
-      const av = active === "a" ? aRef.current : bRef.current;
-      const sb = active === "a" ? bRef.current : aRef.current;
-      if (!av || !sb) { rafRef.current = requestAnimationFrame(check); return; }
-      const rem = av.duration - av.currentTime;
-      if (av.duration > 0 && rem <= crossfadeDuration + 0.05) {
-        sb.currentTime = 0;
-        sb.play().catch(() => {});
-        setActive(p => p === "a" ? "b" : "a");
-        setTimeout(() => { rafRef.current = requestAnimationFrame(check); }, (crossfadeDuration + 0.2) * 1000);
-        return;
-      }
-      rafRef.current = requestAnimationFrame(check);
-    };
-    rafRef.current = requestAnimationFrame(check);
-  }, [active, crossfadeDuration]);
-
+  const videoRef = useRef<HTMLVideoElement>(null);
   useEffect(() => {
-    aRef.current?.play().catch(() => {});
-    startLoop();
-    return () => cancelAnimationFrame(rafRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    cancelAnimationFrame(rafRef.current);
-    startLoop();
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [active, startLoop]);
-
-  const base: React.CSSProperties = {
-    position: "absolute", inset: 0, width: "100%", height: "100%",
-    objectFit: "cover", objectPosition: "center",
-    mixBlendMode: "screen",
-    transition: `opacity ${crossfadeDuration}s ease`,
-    ...style,
-  };
-
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    v.play().catch(() => {});
+  }, [src]);
   return (
-    <>
-      <video ref={aRef} src={src} muted playsInline preload="auto"
-        style={{ ...base, opacity: active === "a" ? 1 : 0 }} />
-      <video ref={bRef} src={src} muted playsInline preload="auto"
-        style={{ ...base, opacity: active === "b" ? 1 : 0 }} />
-    </>
+    <video
+      ref={videoRef}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      preload="auto"
+      style={{
+        position: "absolute", inset: 0, width: "100%", height: "100%",
+        objectFit: "cover", objectPosition: "center",
+        mixBlendMode: "screen",
+        ...style,
+      }}
+    />
   );
 }
 
