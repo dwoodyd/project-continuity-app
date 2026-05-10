@@ -357,10 +357,10 @@ export default function InviteGatePage() {
         <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.22)", textAlign: "center" as const }}>
           Don&apos;t have a code?{" "}
           <a
-            href="mailto:hello@soulengineer.online"
+            href="mailto:hello@continuary.app"
             style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px" }}
           >
-            Email hello@soulengineer.online
+            Email hello@continuary.app
           </a>
         </p>
         <button

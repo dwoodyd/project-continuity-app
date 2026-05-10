@@ -2,7 +2,7 @@
  * Email sending helper using Resend.
  *
  * All outbound emails for Continuary go through this module.
- * The FROM address is hello@continuary.soulengineer.online.
+ * The FROM address is hello@continuary.app.
  *
  * Usage:
  *   import { sendEmail } from "./_core/email";
@@ -10,7 +10,7 @@
  */
 import { Resend } from "resend";
 
-const FROM_ADDRESS = "Continuary <hello@continuary.soulengineer.online>";
+const FROM_ADDRESS = "Continuary <hello@continuary.app>";
 
 let _resend: Resend | null = null;
 

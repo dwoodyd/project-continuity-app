@@ -340,7 +340,7 @@ function useAmbientAudio(isCinematic: boolean) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   useEffect(() => {
     if (!audioRef.current) {
-      const a = new Audio("https://static-assets.manus.space/ambient_onboarding_processed_c9a1b2d3.mp3");
+      const a = new Audio("https://d36hbw14aib5lz.cloudfront.net/manus-storage/ambient-onboarding_3f8dcae8.mp3");
       a.loop = true;
       a.volume = 0;
       audioRef.current = a;

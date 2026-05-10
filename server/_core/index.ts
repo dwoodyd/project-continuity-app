@@ -83,7 +83,7 @@ async function startServer() {
   // Permanently redirect all traffic arriving via the manus.space domain to the
   // canonical personal domain. This ensures the Manus share card URL and any
   // old bookmarks automatically land on the correct address.
-  const CANONICAL_DOMAIN = "continuary.soulengineer.online";
+  const CANONICAL_DOMAIN = "continuary.app";
   const MANUS_DOMAINS = ["continuary.manus.space", "projcontinuity-vnvnaojz.manus.space"];
   app.use((req, res, next) => {
     const host = (req.headers["x-forwarded-host"] as string) || req.hostname;
@@ -298,7 +298,8 @@ async function startServer() {
         const isLocal = source.startsWith("http://localhost") || source.startsWith("http://127.0.0.1");
         const isKnown = [
           "continuary.manus.space",
-          "continuary.soulengineer.online",
+          "continuary.app",
+          "app.continuary.app",
           "projcontinuity-vnvnaojz.manus.space",
         ].some((d) => source === `https://${d}` || source.endsWith(`.${d}`));
         if (!isLocal && !isKnown && ENV.isProduction) {

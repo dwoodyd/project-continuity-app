@@ -1291,3 +1291,11 @@
 - [x] Fix EvidenceLogPage celebration timing: 3500ms → 6000ms + click-to-dismiss overlay
 - [x] Fix EmotionalCyclePage WrenPlayer: container 64×64 → 120×120, size sm → md, fix clip names to valid registry keys, add feather radial
 - [x] Rewrite TourPage.tsx: fix all invalid clip names, apply deep navy + amber-gold color system, Playfair Display headings, /apply CTA on final step
+
+## Domain Cleanup: continuary.app
+- [x] Update CANONICAL_DOMAIN in server/_core/index.ts from soulengineer.online to continuary.app
+- [x] Add continuary.app and app.continuary.app to CORS allowed origins in server/_core/index.ts
+- [x] Update FROM_ADDRESS in server/_core/email.ts to hello@continuary.app
+- [x] Update og:url in client/index.html to https://continuary.app/
+- [x] Update InviteGatePage contact email from hello@soulengineer.online to hello@continuary.app
+- [x] Fix OnboardingPage ambient audio URL from dead manus.space URL to webdev CDN
