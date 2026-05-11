@@ -1,0 +1,55 @@
+{
+  "query": "SELECT id, name, email, role, inviteCode, isPro, isFoundingMember FROM users ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT id, name, email, role, inviteCode, isPro, isFoundingMember FROM users ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1770006",
+      "name": "thelamontwoods",
+      "email": "thelamontwoods@gmail.com",
+      "role": "user",
+      "inviteCode": "7D4331066A5B3EC82376AD98",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1620002",
+      "name": "deletgo",
+      "email": "deletgo@gmail.com",
+      "role": "admin",
+      "inviteCode": "OWNER-BYPASS",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1410015",
+      "name": "E2E Test User",
+      "email": "NULL",
+      "role": "admin",
+      "inviteCode": "e2e-bypass",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "240001",
+      "name": "TheMermaidTM",
+      "email": "tatyananajee@gmail.com",
+      "role": "user",
+      "inviteCode": "NULL",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1",
+      "name": "DeWayne Woods",
+      "email": "dwoodyd@gmail.com",
+      "role": "admin",
+      "inviteCode": "OWNER-BYPASS",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tinviteCode\tisPro\tisFoundingMember\n1770006\tthelamontwoods\tthelamontwoods@gmail.com\tuser\t7D4331066A5B3EC82376AD98\t0\t0\n1620002\tdeletgo\tdeletgo@gmail.com\tadmin\tOWNER-BYPASS\t0\t0\n1410015\tE2E Test User\tNULL\tadmin\te2e-bypass\t0\t0\n240001\tTheMermaidTM\ttatyananajee@gmail.com\tuser\tNULL\t0\t0\n1\tDeWayne Woods\tdwoodyd@gmail.com\tadmin\tOWNER-BYPASS\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 255
+}
