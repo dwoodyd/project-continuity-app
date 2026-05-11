@@ -131,6 +131,10 @@ function App() {
 
   function handleOnboardingDone() {
     localStorage.setItem("continuary_onboarded", "1");
+    // Signal Home.tsx to show the Wren intro immediately after onboarding.
+    // Using sessionStorage so it fires once per session even if the profile
+    // query hasn't resolved yet when Home mounts.
+    sessionStorage.setItem("justCompletedOnboarding", "1");
     setOnboardingDone(true);
     setPreviewMode(false);
   }

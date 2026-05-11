@@ -943,8 +943,20 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.seenAbout]);
 
-  // Show Wren intro once profile loads and hasSeenWrenIntro is false
+  // Show Wren intro via two independent triggers:
+  // 1. sessionStorage flag set by App.tsx immediately after onboarding completes
+  //    (fires on the same device, same session — handles the post-onboarding case)
+  // 2. Server-side profile.hasSeenWrenIntro flag
+  //    (fires on any device/browser — handles returning users who haven't seen it)
   useEffect(() => {
+    // Trigger 1: just completed onboarding in this session
+    const justDone = sessionStorage.getItem("justCompletedOnboarding") === "1";
+    if (justDone) {
+      sessionStorage.removeItem("justCompletedOnboarding");
+      setShowWrenIntro(true);
+      return;
+    }
+    // Trigger 2: server flag — profile loaded, onboarding done, intro not yet seen
     if (profile && profile.hasSeenWrenIntro === false && profile.onboardingCompleted) {
       setShowWrenIntro(true);
     }

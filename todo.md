@@ -1405,3 +1405,13 @@
 ## Onboarding Skip Bug Fix (May 2026)
 
 - [x] Fix: new users who redeem a founding-member invite code were landing on the dashboard without seeing onboarding. InviteGatePage now routes new users (no continuary_onboarded flag) to / instead of /founding-member, so the App-level onboarding gate fires naturally. Returning users (already onboarded) still go directly to /founding-member.
+
+## Wren Intro Bug Fix (May 2026)
+
+- [x] Add needsOnboarding boolean column to user_profiles table (default true for new users) — NOT NEEDED: existing hasSeenWrenIntro column already serves this purpose
+- [x] Set needsOnboarding = true when a founding-member invite code is redeemed — NOT NEEDED: hasSeenWrenIntro defaults to false for all new users
+- [x] Expose needsOnboarding via auth.me query — NOT NEEDED: settings.getProfile already returns hasSeenWrenIntro
+- [x] In App.tsx onboarding gate: set sessionStorage justCompletedOnboarding flag after onboarding completes
+- [x] After onboarding completes: markWrenIntroSeen is already called by WrenIntroMoment.handleDone
+- [x] Verify: new founding member clicks magic link → OAuth → invite gate → onboarding fires → Today (dual-trigger: sessionStorage + server flag)
+- [x] Verify: subsequent logins skip the intro (hasSeenWrenIntro = true after markWrenIntroSeen fires)
