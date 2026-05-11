@@ -122,6 +122,41 @@ export const applicationsRouter = router({
       return { success: true };
     }),
 
+  // ── Admin: re-send approval invite email ───────────────────────────────────
+  resendInvite: protectedProcedure
+    .input(
+      z.object({
+        id: z.number().int().positive(),
+        applicantName: z.string(),
+        applicantEmail: z.string().email(),
+        inviteCode: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
+      const firstName = input.applicantName.split(" ")[0] ?? input.applicantName;
+      const { subject, html } = buildInviteCodeEmail({
+        recipientName: firstName,
+        inviteCode: input.inviteCode,
+        appUrl: "https://app.continuary.app",
+      });
+      const emailSent = await sendEmail({
+        to: input.applicantEmail,
+        subject,
+        html,
+        replyTo: "dwoodyd@gmail.com",
+      });
+      if (!emailSent) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send invite email. Check Resend configuration.",
+        });
+      }
+      return { success: true };
+    }),
+
   // ── Admin: manually re-send trial reminder email ──────────────────────────
   resendTrialReminder: protectedProcedure
     .input(

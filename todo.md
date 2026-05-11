@@ -1390,3 +1390,8 @@
 ## Deep Link URL Fix (May 2026)
 
 - [x] Fix approval email deep link: changed APP_URL to app.continuary.app in email.ts, applications.ts, and trialReminder.ts
+
+## Resend Invite Button (May 2026)
+
+- [x] Add applications.resendInvite tRPC procedure that re-sends the approval email with the corrected deep link for an approved applicant
+- [x] Add "Resend Invite" button to AdminApplicationsPage for all approved applications

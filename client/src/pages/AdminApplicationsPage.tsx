@@ -62,6 +62,15 @@ export default function AdminApplicationsPage() {
     },
   });
 
+  const resendInviteMutation = trpc.applications.resendInvite.useMutation({
+    onSuccess: () => {
+      toast.success("Invite email re-sent successfully.", { duration: 5000 });
+    },
+    onError: (err) => {
+      toast.error(`Failed to resend invite: ${err.message}`, { duration: 8000 });
+    },
+  });
+
   const resendReminderMutation = trpc.applications.resendTrialReminder.useMutation({
     onSuccess: () => {
       toast.success("Trial reminder email sent.", { duration: 5000 });
@@ -214,6 +223,26 @@ export default function AdminApplicationsPage() {
                         Approve + Send Code
                       </Button>
                     </div>
+                  )}
+                  {app.status === "approved" && app.inviteCodeSent && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs"
+                      style={{ borderColor: "oklch(0.78 0.18 65 / 0.5)", color: "oklch(0.78 0.18 65)" }}
+                      onClick={() =>
+                        resendInviteMutation.mutate({
+                          id: app.id,
+                          applicantName: app.name,
+                          applicantEmail: app.email,
+                          inviteCode: app.inviteCodeSent!,
+                        })
+                      }
+                      disabled={resendInviteMutation.isPending}
+                      title="Re-send the approval email with the invite deep link"
+                    >
+                      {resendInviteMutation.isPending ? "Sending…" : "✉ Resend Invite"}
+                    </Button>
                   )}
                   {app.status === "approved" && (app as any).hasRedeemed && (
                     <Button
