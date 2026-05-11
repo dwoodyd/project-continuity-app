@@ -223,3 +223,72 @@ export function stopTrialReminderCron(): void {
     reminderCronHandle = null;
   }
 }
+
+/**
+ * Manual admin trigger: send (or re-send) the trial reminder email to a
+ * specific user identified by their applicant email address.
+ * Resets trialReminderSentAt so the cron will also pick them up again if
+ * they are still within the reminder window.
+ *
+ * Returns { sent: boolean; reason?: string }
+ */
+export async function sendTrialReminderToEmail(
+  applicantEmail: string
+): Promise<{ sent: boolean; reason?: string }> {
+  const db = await getDb();
+  if (!db) return { sent: false, reason: "Database unavailable." };
+
+  const now = new Date();
+
+  const [user] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      isFoundingMember: users.isFoundingMember,
+      trialEndsAt: users.trialEndsAt,
+    })
+    .from(users)
+    .where(eq(users.email, applicantEmail))
+    .limit(1);
+
+  if (!user) {
+    return {
+      sent: false,
+      reason: "No user account found for this email. They may not have redeemed their invite yet.",
+    };
+  }
+  if (!user.isFoundingMember) {
+    return { sent: false, reason: "User is not a founding member." };
+  }
+  if (!user.email) {
+    return { sent: false, reason: "User has no email address on file." };
+  }
+
+  const trialEnd = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
+  const daysLeft = trialEnd
+    ? Math.max(0, Math.ceil((trialEnd.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+  const trialEndDate = trialEnd
+    ? trialEnd.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+    : "soon";
+
+  const { subject, html } = buildTrialReminderEmail({
+    recipientName: user.name ?? "there",
+    recipientEmail: user.email,
+    daysLeft,
+    trialEndDate,
+    appUrl: APP_URL,
+  });
+
+  const sent = await sendEmail({ to: user.email, subject, html });
+  if (sent) {
+    await db
+      .update(users)
+      .set({ trialReminderSentAt: now })
+      .where(eq(users.id, user.id));
+    console.log(`[TrialReminder] Manual reminder sent to ${user.email} by admin.`);
+    return { sent: true };
+  }
+  return { sent: false, reason: "Email send failed — check Resend logs." };
+}

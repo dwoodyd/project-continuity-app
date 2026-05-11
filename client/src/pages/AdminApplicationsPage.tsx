@@ -62,6 +62,15 @@ export default function AdminApplicationsPage() {
     },
   });
 
+  const resendReminderMutation = trpc.applications.resendTrialReminder.useMutation({
+    onSuccess: () => {
+      toast.success("Trial reminder email sent.", { duration: 5000 });
+    },
+    onError: (err) => {
+      toast.error(`Could not send reminder: ${err.message}`, { duration: 8000 });
+    },
+  });
+
   const handleApprove = (id: number, name: string, email: string) => {
     setConfirmApprove({ id, name, email });
   };
@@ -183,28 +192,45 @@ export default function AdminApplicationsPage() {
                   </p>
                 </div>
 
-                {app.status === "pending" && (
-                  <div className="flex gap-2 shrink-0">
+                <div className="flex gap-2 shrink-0 flex-col items-end">
+                  {app.status === "pending" && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        onClick={() => rejectMutation.mutate({ id: app.id })}
+                        disabled={rejectMutation.isPending}
+                      >
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="text-xs font-semibold"
+                        style={{ background: "oklch(0.78 0.18 65)", color: "#080a0f" }}
+                        onClick={() => handleApprove(app.id, app.name, app.email)}
+                        disabled={approveMutation.isPending}
+                      >
+                        Approve + Send Code
+                      </Button>
+                    </div>
+                  )}
+                  {app.status === "approved" && (app as any).hasRedeemed && (
                     <Button
                       size="sm"
                       variant="outline"
-                      className="text-xs border-red-500/30 text-red-400 hover:bg-red-500/10"
-                      onClick={() => rejectMutation.mutate({ id: app.id })}
-                      disabled={rejectMutation.isPending}
+                      className="text-xs"
+                      style={{ borderColor: "oklch(0.78 0.18 65 / 0.35)", color: "oklch(0.78 0.18 65)" }}
+                      onClick={() =>
+                        resendReminderMutation.mutate({ applicantEmail: app.email })
+                      }
+                      disabled={resendReminderMutation.isPending}
+                      title="Re-send the trial expiry reminder email to this founding member"
                     >
-                      Reject
+                      {resendReminderMutation.isPending ? "Sending…" : "Resend Reminder"}
                     </Button>
-                    <Button
-                      size="sm"
-                      className="text-xs font-semibold"
-                      style={{ background: "oklch(0.78 0.18 65)", color: "#080a0f" }}
-                      onClick={() => handleApprove(app.id, app.name, app.email)}
-                      disabled={approveMutation.isPending}
-                    >
-                      Approve + Send Code
-                    </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           ))}

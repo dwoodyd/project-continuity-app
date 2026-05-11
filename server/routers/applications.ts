@@ -26,6 +26,7 @@ import {
 void (0 as unknown as FoundingApplicationWithFM); // ensure type is used (prevents unused-import lint)
 import { notifyOwner } from "../_core/notification";
 import { sendEmail, buildInviteCodeEmail, buildApplicationConfirmationEmail } from "../_core/email";
+import { sendTrialReminderToEmail } from "../trialReminder";
 
 export const applicationsRouter = router({
   // ── Public: submit a founding member application ──────────────────────────
@@ -118,6 +119,28 @@ export const applicationsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
       }
       await rejectFoundingApplication(input.id);
+      return { success: true };
+    }),
+
+  // ── Admin: manually re-send trial reminder email ──────────────────────────
+  resendTrialReminder: protectedProcedure
+    .input(
+      z.object({
+        /** The applicant's email address (used to look up the user account) */
+        applicantEmail: z.string().email(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
+      const result = await sendTrialReminderToEmail(input.applicantEmail);
+      if (!result.sent) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: result.reason ?? "Failed to send reminder.",
+        });
+      }
       return { success: true };
     }),
 });

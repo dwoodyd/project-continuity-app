@@ -1381,3 +1381,8 @@
 
 - [x] S2: Trial expiry reminder email — trialReminderSentAt column + hourly cron + branded Resend template ("10 days left. Your founding rate is waiting.")
 - [x] S3: Admin applications table — FM badge with "Redeemed · Xd left" or "Not yet redeemed" shown next to invite code for approved applicants
+
+## Admin Manual Trigger (May 2026)
+
+- [x] Add tRPC procedure `applications.resendTrialReminder` that resets trialReminderSentAt and re-sends the reminder email for a given applicant email
+- [x] Add "Resend Reminder" button to admin panel for approved founding members who have redeemed their code
