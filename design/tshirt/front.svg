@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400" role="img" aria-labelledby="title desc">
+  <title id="title">Still Worth The Build — Front</title>
+  <desc id="desc">T-shirt front graphic: "I'm still worth the build, and so is everyone building with me."</desc>
+
+  <defs>
+    <!-- Scaffolding hatch pattern used as a subtle texture inside the emblem -->
+    <pattern id="hatch" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="14" stroke="currentColor" stroke-width="2" />
+    </pattern>
+
+    <!-- Reusable hammer-and-heart brand mark -->
+    <symbol id="brandmark" viewBox="-100 -100 200 200">
+      <!-- Heart shape -->
+      <path d="M 0 55
+               C -10 35, -55 25, -55 -10
+               C -55 -45, -25 -55, 0 -25
+               C 25 -55, 55 -45, 55 -10
+               C 55 25, 10 35, 0 55 Z"
+            fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>
+      <!-- Hammer crossing through, head top-left, handle bottom-right -->
+      <g stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- handle -->
+        <line x1="-35" y1="-35" x2="45" y2="45"/>
+        <!-- hammer head -->
+        <rect x="-78" y="-66" width="52" height="26" transform="rotate(-45 -52 -53)" fill="currentColor"/>
+      </g>
+    </symbol>
+  </defs>
+
+  <!-- All artwork inherits color from this group; change `color` to re-ink the design -->
+  <g color="#111111" font-family="'Impact', 'Oswald', 'Bebas Neue', 'Arial Black', sans-serif" text-anchor="middle">
+
+    <!-- Corner scaffolding marks -->
+    <g stroke="currentColor" stroke-width="6" fill="none" stroke-linecap="square">
+      <!-- top-left -->
+      <polyline points="120,180 120,120 180,120"/>
+      <!-- top-right -->
+      <polyline points="1080,180 1080,120 1020,120"/>
+      <!-- bottom-left -->
+      <polyline points="120,1220 120,1280 180,1280"/>
+      <!-- bottom-right -->
+      <polyline points="1020,1280 1080,1280 1080,1220"/>
+    </g>
+
+    <!-- Top kicker -->
+    <text x="600" y="220" font-size="44" letter-spacing="18" fill="currentColor"
+          font-family="'Courier New', monospace" font-weight="bold">
+      EST. TODAY · BUILD No. 001
+    </text>
+
+    <!-- Thin divider line under kicker -->
+    <line x1="260" y1="250" x2="940" y2="250" stroke="currentColor" stroke-width="3"/>
+
+    <!-- Headline block: I'M STILL / WORTH / THE BUILD -->
+    <text x="600" y="360" font-size="120" font-weight="900" fill="currentColor" letter-spacing="6">
+      I&#8217;M STILL
+    </text>
+
+    <!-- WORTH — oversized hero word with hatched fill -->
+    <g>
+      <text x="600" y="540" font-size="240" font-weight="900" fill="url(#hatch)" stroke="currentColor"
+            stroke-width="6" letter-spacing="10">WORTH</text>
+    </g>
+
+    <text x="600" y="680" font-size="140" font-weight="900" fill="currentColor" letter-spacing="8">
+      THE BUILD.
+    </text>
+
+    <!-- Brand emblem centered -->
+    <g transform="translate(600 820)">
+      <!-- Surrounding ring -->
+      <circle cx="0" cy="0" r="92" fill="none" stroke="currentColor" stroke-width="5"/>
+      <circle cx="0" cy="0" r="104" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="4 8"/>
+      <use href="#brandmark" x="-70" y="-70" width="140" height="140"/>
+    </g>
+
+    <!-- Lower block: AND SO IS EVERYONE / BUILDING WITH ME -->
+    <text x="600" y="1010" font-size="76" font-weight="900" fill="currentColor" letter-spacing="6">
+      AND SO IS EVERYONE
+    </text>
+
+    <!-- BUILDING — accented with underline frame -->
+    <g>
+      <text x="600" y="1120" font-size="140" font-weight="900" fill="currentColor" letter-spacing="10">
+        BUILDING
+      </text>
+      <line x1="200" y1="1148" x2="1000" y2="1148" stroke="currentColor" stroke-width="5"/>
+    </g>
+
+    <text x="600" y="1210" font-size="76" font-weight="900" fill="currentColor" letter-spacing="14">
+      WITH&#8201;·&#8201;ME
+    </text>
+
+    <!-- Footer tag -->
+    <text x="600" y="1340" font-size="36" letter-spacing="14" fill="currentColor"
+          font-family="'Courier New', monospace" font-weight="bold">
+      / / STILL UNDER CONSTRUCTION / /
+    </text>
+  </g>
+</svg>
