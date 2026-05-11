@@ -45,6 +45,7 @@ const EmotionalCyclePage  = lazy(() => import("./pages/EmotionalCyclePage"));
 const FoundingMemberPage  = lazy(() => import("./pages/FoundingMemberPage"));
 const ApplyPage           = lazy(() => import("./pages/ApplyPage"));
 const InviteRedeemPage    = lazy(() => import("./pages/InviteRedeemPage"));
+const RedeemReferralPage  = lazy(() => import("./pages/RedeemReferralPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -69,6 +70,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/tour" component={TourPage} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
+        <Route path="/redeem-referral" component={RedeemReferralPage} />
         <Route path="/intro">{() => null}</Route>
         <Route>
           <AppLayout onPreviewIntro={onPreviewIntro}>

@@ -1395,3 +1395,9 @@
 
 - [x] Add applications.resendInvite tRPC procedure that re-sends the approval email with the corrected deep link for an approved applicant
 - [x] Add "Resend Invite" button to AdminApplicationsPage for all approved applications
+
+## Referral Code Redemption UI (May 2026)
+
+- [x] Add "Have a referral code?" entry point on the apply confirmation page linking to referral redemption
+- [x] Add /redeem-referral route with a form that calls beta.redeemReferral and routes to /founding-member on success
+- [x] Add referral code entry option to the InviteGatePage as an alternative path

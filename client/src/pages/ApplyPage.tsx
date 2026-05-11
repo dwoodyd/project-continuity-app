@@ -56,7 +56,7 @@ export default function ApplyPage() {
           <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
             Check your inbox — a confirmation has been sent to <strong style={{ color: "oklch(0.78 0.18 65)" }}>{email}</strong>.
           </p>
-          <div className="pt-4">
+          <div className="pt-4 space-y-4">
             <Link href="/landing">
               <a
                 className="inline-flex items-center gap-2 text-sm transition-colors"
@@ -66,6 +66,22 @@ export default function ApplyPage() {
                 Back to Continuary
               </a>
             </Link>
+            <div
+              className="border-t pt-4"
+              style={{ borderColor: "oklch(0.25 0.015 240)" }}
+            >
+              <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
+                Already have a referral code from a founding member?{" "}
+                <Link href="/redeem-referral">
+                  <a
+                    className="underline underline-offset-4 transition-colors"
+                    style={{ color: "oklch(0.78 0.18 65)" }}
+                  >
+                    Skip the queue →
+                  </a>
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -187,18 +203,31 @@ export default function ApplyPage() {
           </Button>
         </form>
 
-        {/* Already have a code */}
-        <p className="text-center text-sm" style={{ color: "oklch(0.55 0.01 240)" }}>
-          Already approved?{" "}
-          <Link href="/landing">
-            <a
-              className="underline underline-offset-2 transition-colors"
-              style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
-            >
-              Redeem your invite code →
-            </a>
-          </Link>
-        </p>
+        {/* Entry points for users who already have a code */}
+        <div className="text-center space-y-2">
+          <p className="text-sm" style={{ color: "oklch(0.55 0.01 240)" }}>
+            Already approved?{" "}
+            <Link href="/invite-gate">
+              <a
+                className="underline underline-offset-2 transition-colors"
+                style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
+              >
+                Redeem your invite code →
+              </a>
+            </Link>
+          </p>
+          <p className="text-sm" style={{ color: "oklch(0.55 0.01 240)" }}>
+            Have a referral code from a founding member?{" "}
+            <Link href="/redeem-referral">
+              <a
+                className="underline underline-offset-2 transition-colors"
+                style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
+              >
+                Skip the queue →
+              </a>
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

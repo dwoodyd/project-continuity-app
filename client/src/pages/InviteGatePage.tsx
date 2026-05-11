@@ -365,6 +365,15 @@ export default function InviteGatePage() {
             Email hello@continuary.app
           </a>
         </p>
+        <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.22)", textAlign: "center" as const }}>
+          Have a referral code from a founding member?{" "}
+          <a
+            href="/redeem-referral"
+            style={{ color: "oklch(0.80 0.17 65 / 0.7)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          >
+            Redeem it here →
+          </a>
+        </p>
         <button
           onClick={() => logout()}
           style={{
