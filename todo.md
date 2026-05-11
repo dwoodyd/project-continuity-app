@@ -1386,3 +1386,7 @@
 
 - [x] Add tRPC procedure `applications.resendTrialReminder` that resets trialReminderSentAt and re-sends the reminder email for a given applicant email
 - [x] Add "Resend Reminder" button to admin panel for approved founding members who have redeemed their code
+
+## Deep Link URL Fix (May 2026)
+
+- [x] Fix approval email deep link: changed APP_URL to app.continuary.app in email.ts, applications.ts, and trialReminder.ts

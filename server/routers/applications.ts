@@ -99,7 +99,7 @@ export const applicationsRouter = router({
       const { subject, html } = buildInviteCodeEmail({
         recipientName: firstName,
         inviteCode: code,
-        appUrl: "https://continuary.app",
+        appUrl: "https://app.continuary.app",
       });
       const emailSent = await sendEmail({
         to: input.applicantEmail,

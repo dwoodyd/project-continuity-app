@@ -130,7 +130,8 @@ export function buildTrialReminderEmail(opts: {
 // ── Cron runner ───────────────────────────────────────────────────────────────
 
 const DAYS_BEFORE_EXPIRY = 10; // send at day 80 of a 90-day trial
-const APP_URL = "https://continuary.app";
+// Deep links go to the app subdomain, not the marketing site
+const APP_URL = "https://app.continuary.app";
 
 let reminderCronHandle: ReturnType<typeof setInterval> | null = null;
 

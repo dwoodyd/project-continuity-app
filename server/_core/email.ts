@@ -69,10 +69,10 @@ export function buildInviteCodeEmail(opts: {
   inviteCode: string;
   appUrl: string;
 }): { subject: string; html: string } {
-  // Always use the canonical domain, not whatever window.location.origin returns
-  const canonicalBase = "https://continuary.app";
+  // Deep links go to the app subdomain (not the marketing site)
+  const canonicalBase = "https://app.continuary.app";
   const deepLink = `${canonicalBase}/invite/${encodeURIComponent(opts.inviteCode)}`;
-  const fallbackSignin = `${canonicalBase}/signin`;
+  const fallbackSignin = `${canonicalBase}/invite-gate`;
   const subject = "Your seat is ready — welcome to Continuary";
 
   const html = `
