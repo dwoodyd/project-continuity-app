@@ -18,6 +18,7 @@ import {
   approveFoundingApplication,
   rejectFoundingApplication,
   createInviteCode,
+  markInviteAsFoundingMember,
 } from "../db";
 import { notifyOwner } from "../_core/notification";
 import { sendEmail, buildInviteCodeEmail, buildApplicationConfirmationEmail } from "../_core/email";
@@ -80,19 +81,20 @@ export const applicationsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
       }
 
-      // Generate a fresh invite code
+      // Generate a fresh invite code and mark it as a founding-member code
       const invite = await createInviteCode(ctx.user.id, `Founding: ${input.applicantName}`);
       const code = invite.code;
+      await markInviteAsFoundingMember(code);
 
       // Mark application as approved
       await approveFoundingApplication(input.id, code);
 
-      // Send the invite code email
+      // Send the invite code email — always use canonical domain
       const firstName = input.applicantName.split(" ")[0] ?? input.applicantName;
       const { subject, html } = buildInviteCodeEmail({
         recipientName: firstName,
         inviteCode: code,
-        appUrl: input.appUrl,
+        appUrl: "https://continuary.app",
       });
       const emailSent = await sendEmail({
         to: input.applicantEmail,

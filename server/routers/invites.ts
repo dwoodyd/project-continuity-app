@@ -20,6 +20,7 @@ import {
   validateInviteCode,
   markInviteUsed,
   setUserInviteCode,
+  grantFoundingMemberStatus,
 } from "../db";
 
 export const invitesRouter = router({
@@ -111,6 +112,12 @@ export const invitesRouter = router({
       }
       // Record which code this user redeemed (for audit trail)
       await setUserInviteCode(ctx.user.id, input.code.toUpperCase().trim());
-      return { redeemed: true };
+
+      // If the code was flagged as a founding-member code, grant the full status
+      if (invite.isFoundingMember && !ctx.user.isFoundingMember) {
+        await grantFoundingMemberStatus(ctx.user.id);
+      }
+
+      return { redeemed: true, isFoundingMember: invite.isFoundingMember };
     }),
 });

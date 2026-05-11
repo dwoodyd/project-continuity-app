@@ -50,6 +50,13 @@ export const appRouter = router({
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         lastSignedIn: u.lastSignedIn,
+        // Founding member fields
+        isFoundingMember: u.isFoundingMember ?? false,
+        foundingMemberCohort: u.foundingMemberCohort ?? null,
+        foundingMemberJoinedAt: u.foundingMemberJoinedAt ?? null,
+        trialEndsAt: u.trialEndsAt ?? null,
+        foundingRateLocked: u.foundingRateLocked ?? false,
+        referralCode: u.referralCode ?? null,
       };
     }),
     memberCount: publicProcedure.query(async () => {

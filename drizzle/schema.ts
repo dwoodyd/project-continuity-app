@@ -481,6 +481,8 @@ export const betaInvites = mysqlTable("beta_invites", {
   label: varchar("label", { length: 255 }),
   // Optional: if set, code cannot be redeemed after this timestamp
   expiresAt: timestamp("expiresAt"),
+  // If true, redeeming this code automatically grants founding-member status + 90-day trial
+  isFoundingMember: boolean("isFoundingMember").default(false).notNull(),
 });
 export type BetaInvite = typeof betaInvites.$inferSelect;
 export type InsertBetaInvite = typeof betaInvites.$inferInsert;

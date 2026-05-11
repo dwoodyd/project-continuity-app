@@ -36,12 +36,14 @@ export default function InviteGatePage() {
   const utils = trpc.useUtils();
 
   const redeem = trpc.invites.redeem.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       sessionStorage.removeItem("pendingInviteCode");
       setSuccess(true);
       await utils.auth.me.invalidate();
       if (refresh) refresh();
-      setTimeout(() => { window.location.href = "/"; }, 1200);
+      // Founding-member codes land on the status page; regular codes go home
+      const dest = data?.isFoundingMember ? "/founding-member" : "/";
+      setTimeout(() => { window.location.href = dest; }, 1200);
     },
     onError: (err) => {
       toast.error(err.message || "Invalid or already-used invite code.");

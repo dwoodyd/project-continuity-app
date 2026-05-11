@@ -1,0 +1,1 @@
+ALTER TABLE `beta_invites` ADD `isFoundingMember` boolean DEFAULT false NOT NULL;

@@ -881,6 +881,60 @@ export async function createInviteCode(
     .limit(1);
   return row;
 }
+/**
+ * Marks an invite code as a founding-member code so that redeeming it
+ * automatically grants founding-member status + 90-day trial.
+ */
+export async function markInviteAsFoundingMember(code: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(betaInvites)
+    .set({ isFoundingMember: true })
+    .where(eq(betaInvites.code, code.toUpperCase().trim()));
+}
+
+/**
+ * Grants full founding-member status to a user:
+ * - Sets isFoundingMember = true
+ * - Assigns cohort 1 (simple approach: no cohort gating for invite-based grants)
+ * - Sets 90-day trial
+ * - Generates referral code
+ * - Sets isPro = true
+ */
+export async function grantFoundingMemberStatus(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const { randomBytes } = await import("crypto");
+  const rand = randomBytes(4).toString("hex").toUpperCase();
+  const referralCode = `FOUND-REF-${userId}-${rand}`;
+  const now = new Date();
+  const trialEndsAt = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+  // Determine cohort: find the lowest cohort with < 25 members, default to 1
+  let cohort = 1;
+  try {
+    const { count } = await import("drizzle-orm");
+    for (let c = 1; c <= 4; c++) {
+      const [{ value }] = await db
+        .select({ value: count() })
+        .from(users)
+        .where(eq(users.foundingMemberCohort, c));
+      if (value < 25) { cohort = c; break; }
+    }
+  } catch { /* fallback to cohort 1 */ }
+  await db.update(users).set({
+    isBeta: true,
+    betaExpiresAt: trialEndsAt,
+    isPro: true,
+    proSince: now,
+    isFoundingMember: true,
+    foundingMemberCohort: cohort,
+    foundingMemberJoinedAt: now,
+    trialEndsAt,
+    referralCode,
+    foundingRateLocked: true,
+  }).where(eq(users.id, userId));
+}
 
 export async function getInviteCodes(
   createdByUserId: number

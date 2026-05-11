@@ -1348,3 +1348,12 @@
 ## Follow-up Improvements (May 11)
 - [x] Add close toggle visual cue on open check-in card (chevron/close indicator when form is open)
 - [x] Persist hasSeenWrenIntro to user profile table (not localStorage) so it survives device changes
+
+## Founding Member Invite Pipeline (May 2026)
+
+- [x] Rewrite approval email template with exact approved copy ("We're glad you're here")
+- [x] Change deep link from /landing?code=XXX to /invite/:code
+- [x] Add /invite/:code public route that auto-fills code and redirects to invite gate
+- [x] Set founding_member flags at invite redemption time for founding-member-sourced codes
+- [x] Repurpose /founding-member page from checkout gate to locked-rate status page
+- [x] Update admin approve mutation to pass continuary.app as appUrl (not window.location.origin)
