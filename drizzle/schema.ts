@@ -89,6 +89,7 @@ export const userProfiles = mysqlTable("user_profiles", {
   distractionPatterns: text("distractionPatterns"), // JSON string
   primaryDistraction: varchar("primaryDistraction", { length: 255 }),
   onboardingAbVariant: varchar("onboardingAbVariant", { length: 1 }),
+  hasSeenWrenIntro: boolean("hasSeenWrenIntro").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

@@ -1344,3 +1344,7 @@
 - [x] Fix onboarding step 1 work-type cards not selectable when replayed from Settings / About page (Continue greyed out)
 - [x] Fix greeting text color invisible on dark background ("Morning. The thread is ready.")
 - [x] Fix check-in tab active state not highlighting (Morning check-in / Midday pulse / Evening close tabs)
+
+## Follow-up Improvements (May 11)
+- [x] Add close toggle visual cue on open check-in card (chevron/close indicator when form is open)
+- [x] Persist hasSeenWrenIntro to user profile table (not localStorage) so it survives device changes

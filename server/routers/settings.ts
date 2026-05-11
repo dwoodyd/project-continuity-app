@@ -45,6 +45,7 @@ export const settingsRouter = router({
       distractionPatterns: null,
       primaryDistraction: null,
       onboardingAbVariant: null,
+      hasSeenWrenIntro: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -146,6 +147,15 @@ export const settingsRouter = router({
       }
       return { success: true };
     }),
+  markWrenIntroSeen: protectedProcedure.mutation(async ({ ctx }) => {
+    const existing = await getUserProfile(ctx.user.id);
+    if (existing) {
+      await updateUserProfile(ctx.user.id, { hasSeenWrenIntro: true } as any);
+    } else {
+      await upsertUserProfile({ userId: ctx.user.id, hasSeenWrenIntro: true } as any);
+    }
+    return { success: true };
+  }),
   markAboutSeen: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) {

@@ -3,7 +3,7 @@
  *
  * Full-screen first-run Wren introduction overlay shown the first time a user
  * lands on Today after completing onboarding. Shown once, persisted via
- * localStorage key "wren_intro_seen_v1".
+ * the user_profiles.hasSeenWrenIntro database column (survives device changes).
  *
  * Lines (from cleanup brief):
  *   "Hi. I'm Wren."
@@ -15,8 +15,7 @@
 import { useState, useEffect, useRef } from "react";
 import { WREN_CLIPS } from "@/lib/wrenClips";
 import { ArrowRight } from "lucide-react";
-
-const STORAGE_KEY = "wren_intro_seen_v1";
+import { trpc } from "@/lib/trpc";
 
 // Word-by-word reveal (same pattern as OnboardingPage)
 function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean; delay?: number }) {
@@ -55,6 +54,7 @@ function Fade({ visible, delay = 0, children, style }: {
       transition: visible
         ? `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`
         : "none",
+      pointerEvents: visible ? "auto" : "none",
       ...style,
     }}>
       {children}
@@ -80,6 +80,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   const [showCTA, setShowCTA] = useState(false);
   const [exiting, setExiting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const markSeen = trpc.settings.markWrenIntroSeen.useMutation();
 
   // Fade in video
   useEffect(() => {
@@ -112,7 +113,8 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   }, [lineIdx, lineActive]);
 
   const handleDone = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
+    // Persist to DB (fire-and-forget — don't block UX on network)
+    markSeen.mutate();
     setExiting(true);
     setTimeout(onDone, 700);
   };
@@ -253,9 +255,4 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
       </div>
     </div>
   );
-}
-
-/** Returns true if this is the user's first visit to Today (intro not yet seen) */
-export function shouldShowWrenIntro(): boolean {
-  return !localStorage.getItem(STORAGE_KEY);
 }

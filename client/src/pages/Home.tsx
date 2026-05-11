@@ -56,7 +56,7 @@ import { ThreadView } from "@/components/ThreadView";
 import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
-import { WrenIntroMoment, shouldShowWrenIntro } from "@/components/WrenIntroMoment";
+import { WrenIntroMoment } from "@/components/WrenIntroMoment";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -250,6 +250,7 @@ function CheckInCard({
   active,
   open,
   onOpen,
+  onClose,
 }: {
   type: CheckInStep;
   icon: React.ElementType;
@@ -259,11 +260,20 @@ function CheckInCard({
   active: boolean;
   open?: boolean;
   onOpen: () => void;
+  onClose?: () => void;
 }) {
   const highlighted = open || active;
+  const handleClick = () => {
+    if (completed) return;
+    if (open && onClose) {
+      onClose();
+    } else {
+      onOpen();
+    }
+  };
   return (
     <button
-      onClick={!completed ? onOpen : undefined}
+      onClick={handleClick}
       disabled={completed}
       className="flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden"
       style={completed
@@ -285,7 +295,10 @@ function CheckInCard({
           {label}
         </span>
         {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
-        {highlighted && !completed && (
+        {open && !completed && (
+          <ChevronUp className="ml-auto w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.88 0.16 65 / 0.70)" }} />
+        )}
+        {!open && active && !completed && (
           <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.88 0.16 65)" }} />
         )}
       </div>
@@ -854,7 +867,8 @@ export default function Home() {
   const [thresholdTask, setThresholdTask] = useState("");
   const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
   // Priority 8.8 — first-run Wren introduction moment
-  const [showWrenIntro, setShowWrenIntro] = useState(() => shouldShowWrenIntro());
+  // Wren intro: show if profile is loaded and hasSeenWrenIntro is false
+  const [showWrenIntro, setShowWrenIntro] = useState(false);
   // Gamification state
   const { data: gamStatus, refetch: refetchGam } = useGamificationStatus();
   const recordEvent = useRecordEvent();
@@ -928,6 +942,14 @@ export default function Home() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.seenAbout]);
+
+  // Show Wren intro once profile loads and hasSeenWrenIntro is false
+  useEffect(() => {
+    if (profile && profile.hasSeenWrenIntro === false && profile.onboardingCompleted) {
+      setShowWrenIntro(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.hasSeenWrenIntro, profile?.onboardingCompleted]);
   const updateSettings = trpc.settings.updateSettings.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),
   });
@@ -1467,6 +1489,7 @@ export default function Home() {
             active={activePeriod === "morning" && !morningDone}
             open={activeCheckIn === "morning"}
             onOpen={() => openCheckIn("morning")}
+            onClose={() => setActiveCheckIn(null)}
           />
           <CheckInCard
             type="midday"
@@ -1477,6 +1500,7 @@ export default function Home() {
             active={activePeriod === "midday" && morningDone && !middayDone}
             open={activeCheckIn === "midday"}
             onOpen={() => openCheckIn("midday")}
+            onClose={() => setActiveCheckIn(null)}
           />
           <CheckInCard
             type="evening"
@@ -1487,6 +1511,7 @@ export default function Home() {
             active={activePeriod === "evening" && !eveningDone}
             open={activeCheckIn === "evening"}
             onOpen={() => openCheckIn("evening")}
+            onClose={() => setActiveCheckIn(null)}
           />
         </div>
       </div>

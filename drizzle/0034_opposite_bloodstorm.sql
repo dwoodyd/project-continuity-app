@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` ADD `hasSeenWrenIntro` boolean DEFAULT false;

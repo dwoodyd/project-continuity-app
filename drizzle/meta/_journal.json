@@ -239,6 +239,13 @@
       "when": 1778367242714,
       "tag": "0033_stormy_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "5",
+      "when": 1778522288117,
+      "tag": "0034_opposite_bloodstorm",
+      "breakpoints": true
     }
   ]
 }
