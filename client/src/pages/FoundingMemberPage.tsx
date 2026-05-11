@@ -351,6 +351,51 @@ export default function FoundingMemberPage() {
           </div>
         )}
 
+        {/* What founding members get — Priority 7 value props */}
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Star size={14} className="text-amber-400" />
+            <h3 className="text-sm font-semibold text-white tracking-wide">What founding members get</h3>
+          </div>
+          <ul className="space-y-3">
+            <li className="flex items-start gap-3">
+              <span className="text-amber-400 mt-0.5 shrink-0">✦</span>
+              <div>
+                <p className="text-sm text-white font-medium">Free during beta</p>
+                <p className="text-xs text-white/50 mt-0.5">90 days of full Pro access — no card required to start.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-amber-400 mt-0.5 shrink-0">✦</span>
+              <div>
+                <p className="text-sm text-white font-medium">Your rate, locked for life</p>
+                <p className="text-xs text-white/50 mt-0.5">Founding pricing never increases — even as Continuary grows and retail rates rise.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-amber-400 mt-0.5 shrink-0">✦</span>
+              <div>
+                <p className="text-sm text-white font-medium">Direct line to the founder</p>
+                <p className="text-xs text-white/50 mt-0.5">DM access to DeWayne. Keeper members get monthly office hours.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-amber-400 mt-0.5 shrink-0">✦</span>
+              <div>
+                <p className="text-sm text-white font-medium">First access to Lifewoven &amp; Operator House</p>
+                <p className="text-xs text-white/50 mt-0.5">When the next tools launch, founding members get in first — at founding rates.</p>
+              </div>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-amber-400 mt-0.5 shrink-0">✦</span>
+              <div>
+                <p className="text-sm text-white font-medium">Founding Member badge</p>
+                <p className="text-xs text-white/50 mt-0.5">Visible in your app — a permanent mark of the people who were here first.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+
         {/* SKU grid */}
         <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2">
           {SKUS.map((sku) => (
