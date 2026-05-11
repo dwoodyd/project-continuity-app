@@ -32,6 +32,7 @@ import {
   Search,
 } from "lucide-react";
 import { GlossaryTerm } from "@/components/TermTooltip";
+import { WrenThinking } from "@/components/WrenThinking";
 
 type Mode =
   | "overwhelm"
@@ -285,7 +286,7 @@ function NewSessionView({
           {runSession.isPending ? (
             <>
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              Processing…
+              Wren is thinking…
             </>
           ) : (
             <>
@@ -1169,6 +1170,10 @@ export default function ClarityEnginePage() {
   });
 
   return (
+    <>
+    {runSession.isPending && (
+      <WrenThinking label="Wren is thinking…" size="lg" fullscreen />
+    )}
     <div className="px-5 py-7 max-w-4xl mx-auto">
       {view === "new" && (
         <NewSessionView
@@ -1228,5 +1233,6 @@ export default function ClarityEnginePage() {
         />
       )}
     </div>
+    </>
   );
 }

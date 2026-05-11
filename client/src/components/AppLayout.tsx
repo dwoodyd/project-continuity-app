@@ -76,14 +76,14 @@ const ALL_NAV_ITEMS = [
   { href: "/founding-member", label: "Founding Member", icon: Star,          section: "secondary" },
 ] as const;
 
-// ── Mobile bottom-tab items (5 visible) ──────────────────────────────────────
+// ── Mobile bottom-tab items (5 visible + More) ───────────────────────────────
 const PRIMARY_TABS = [
-  { href: "/",      label: "Today",    icon: Brain },
-  { href: "/projects", label: "Projects", icon: Archive },
-  { href: "/clarity",  label: "Clarity",  icon: Zap },
-  { href: "/vault",    label: "Vault",    icon: BookOpen },
-  { href: "/scratch",  label: "Pad",      icon: PenLine },
-  { href: "/more",     label: "More",     icon: MoreHorizontal },
+  { href: "/",        label: "Today",    icon: Brain },
+  { href: "/projects",label: "Projects", icon: Archive },
+  { href: "/clarity", label: "Clarity",  icon: Zap },
+  { href: "/compass", label: "Compass",  icon: Compass },
+  { href: "/vault",   label: "Vault",    icon: BookOpen },
+  { href: "/more",    label: "More",     icon: MoreHorizontal },
 ] as const;
 
 // ── Mobile "More" sheet items ─────────────────────────────────────────────────
@@ -651,13 +651,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
         {/* Bottom tab bar */}
         <nav
-          className="shrink-0 border-t border-white/10 z-30"
+          className="shrink-0 z-30"
           style={{
             background: "var(--sidebar)",
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)",
+            borderTop: "1px solid oklch(1 0 0 / 0.08)",
+            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
           }}
         >
-          <div className="flex items-stretch justify-around px-1">
+          <div className="flex items-stretch justify-around px-0.5 pt-1">
             {PRIMARY_TABS.map(({ href, label, icon: Icon }) => {
               const active = href === "/more" ? isMoreActive : isActive(href);
               return (
@@ -672,16 +673,30 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                       else navigate(href);
                     }
                   }}
-                  className={cn(
-                    "flex flex-col items-center gap-1 flex-1 pt-2.5 pb-1 transition-all duration-150 relative min-h-[52px]",
-                    active ? "text-amber-400" : "text-white/40 hover:text-white/70"
-                  )}
+                  className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
+                  style={{ color: active ? "oklch(0.88 0.16 65)" : "oklch(1 0 0 / 0.35)" }}
                 >
+                  {/* Active pill background */}
                   {active && (
-                    <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-b-full bg-amber-400" />
+                    <span
+                      className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-xl"
+                      style={{ background: "oklch(0.78 0.18 65 / 0.14)" }}
+                    />
                   )}
-                  <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-medium tracking-wide">{label}</span>
+                  {/* Top accent line */}
+                  {active && (
+                    <span
+                      className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
+                      style={{ background: "oklch(0.88 0.16 65)" }}
+                    />
+                  )}
+                  <Icon className="w-[18px] h-[18px] relative z-10" />
+                  <span
+                    className="text-[9px] font-semibold tracking-wide relative z-10"
+                    style={{ letterSpacing: "0.04em" }}
+                  >
+                    {label}
+                  </span>
                 </button>
               );
             })}

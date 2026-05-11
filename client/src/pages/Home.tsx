@@ -56,6 +56,7 @@ import { ThreadView } from "@/components/ThreadView";
 import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
+import { WrenIntroMoment, shouldShowWrenIntro } from "@/components/WrenIntroMoment";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -261,35 +262,34 @@ function CheckInCard({
     <button
       onClick={!completed ? onOpen : undefined}
       disabled={completed}
-      className={cn(
-        "flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden",
-        completed
-          ? "bg-muted/40 border-border opacity-60 cursor-default"
-          : active
-            ? "bg-primary border-primary hover:bg-primary/90 shadow-md shadow-primary/20 cursor-pointer"
-            : "bg-card border-border hover:bg-accent/50 hover:border-primary/20 cursor-pointer"
-      )}
+      className="flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden"
+      style={completed
+        ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
+        : active
+          ? { background: "oklch(0.78 0.18 65 / 0.14)", borderColor: "oklch(0.78 0.18 65 / 0.40)", boxShadow: "0 0 0 1px oklch(0.78 0.18 65 / 0.20), 0 4px 16px oklch(0.78 0.18 65 / 0.12)" }
+          : { background: "var(--card)", borderColor: "var(--border)" }
+      }
     >
       <div className="flex items-center gap-1.5 w-full">
-        <Icon className={cn(
-          "w-3.5 h-3.5 shrink-0",
-          completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
-        )} />
-        <span className={cn(
-          "text-xs font-medium tracking-[-0.01em] truncate",
-          completed ? "text-muted-foreground" : active ? "text-white" : "text-muted-foreground"
-        )}>
+        <Icon
+          className="w-3.5 h-3.5 shrink-0"
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : active ? "oklch(0.88 0.16 65)" : "oklch(0.55 0.01 270)" }}
+        />
+        <span
+          className="text-xs font-medium tracking-[-0.01em] truncate"
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : active ? "oklch(0.92 0.10 65)" : "oklch(0.65 0.01 270)" }}
+        >
           {label}
         </span>
         {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
         {active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse bg-amber-300" />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.88 0.16 65)" }} />
         )}
       </div>
-      <p className={cn(
-        "text-xs leading-tight pl-0.5 truncate w-full",
-        active ? "text-white/70" : "text-muted-foreground/55"
-      )}>{timeHint}</p>
+      <p
+        className="text-xs leading-tight pl-0.5 truncate w-full"
+        style={{ color: active ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
+      >{timeHint}</p>
     </button>
   );
 }
@@ -850,6 +850,8 @@ export default function Home() {
   const [thresholdOpen, setThresholdOpen] = useState(false);
   const [thresholdTask, setThresholdTask] = useState("");
   const [thresholdProjectId, setThresholdProjectId] = useState<number | undefined>();
+  // Priority 8.8 — first-run Wren introduction moment
+  const [showWrenIntro, setShowWrenIntro] = useState(() => shouldShowWrenIntro());
   // Gamification state
   const { data: gamStatus, refetch: refetchGam } = useGamificationStatus();
   const recordEvent = useRecordEvent();
@@ -1168,6 +1170,10 @@ export default function Home() {
   })();
 
   return (
+    <>
+    {showWrenIntro && (
+      <WrenIntroMoment onDone={() => setShowWrenIntro(false)} />
+    )}
     <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
       {/* ── Product Hunt launch banner ────────────────────────────────────── */}
       {showPhBanner && (
@@ -1439,7 +1445,7 @@ export default function Home() {
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Daily Rhythm</p>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.60)" }}>Daily Rhythm</p>
           {gamStatus?.rhythmToday && (
             <RhythmSegments
               morning={gamStatus.rhythmToday.morning}
@@ -1591,7 +1597,7 @@ export default function Home() {
       {tasks.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.60)" }}>
               Today's tasks
             </p>
             <span className="text-sm text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
@@ -1972,10 +1978,10 @@ export default function Home() {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
-              <PenLine className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Scratch Pad</p>
+              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Scratch Pad</p>
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
@@ -2023,9 +2029,9 @@ export default function Home() {
       {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
         <div
           className="p-4 rounded-xl border"
-          style={{ background: "var(--muted)", borderColor: "var(--border)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2 text-muted-foreground">Evidence of movement</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Evidence of movement</p>
           <MovementFeed events={gamStatus.recentEvents as any} />
         </div>
       )}
@@ -2267,5 +2273,6 @@ export default function Home() {
         />
       )}
     </div>
+    </>
   );
 }

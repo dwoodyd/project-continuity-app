@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { format, subDays, startOfWeek } from "date-fns";
 import DistractionInsightsCard from "@/components/DistractionInsightsCard";
 import WrenPlayer from "@/components/WrenPlayer";
+import { WrenThinking } from "@/components/WrenThinking";
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds < 1) return "0m";
@@ -93,7 +94,12 @@ export default function WeeklyReviewPage() {
       </div>
 
       {/* Generate AI Review */}
-      {!review ? (
+      {generating && (
+        <div className="flex flex-col items-center justify-center py-12">
+          <WrenThinking label="Reading your week…" size="lg" />
+        </div>
+      )}
+      {!review && !generating && (
         <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
           <div className="relative">
@@ -111,11 +117,12 @@ export default function WeeklyReviewPage() {
             >
               {generating
                 ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
-                : <><Sparkles className="w-4 h-4" />Generate review</>}
+                : <><Sparkles className="w-4 h-4" />Ask Wren to read your week</>}
             </Button>
           </div>
         </div>
-      ) : (
+      )}
+      {review && (
         <div className="p-5 rounded-xl border border-primary/30 space-y-4" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.72 0.17 65 / 0.06) 100%)'}}>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />

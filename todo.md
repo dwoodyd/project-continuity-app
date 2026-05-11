@@ -1326,3 +1326,16 @@
 
 ### Priority 5 — /landing decision
 - [ ] 5.0 Redirect /landing to continuary.app marketing site
+
+## Full Upgrade Sprint (Priority 0, 6, 8)
+
+- [ ] Priority 0: Rewrite /pro pricing page with full 5-tier PayPal ladder
+- [ ] Priority 6: Reconcile feature names on About page to canonical set
+- [ ] Priority 8.1: Typography pass — Playfair Display to all page titles, big stats, greetings
+- [ ] Priority 8.6: Utility microcopy upgrade — brand vocabulary on expressive actions
+- [ ] Priority 8.7: Rename /settings to "You & Wren" with relational framing
+- [ ] Priority 8.2: Mobile bottom tab bar (Today / Threads / Wren / You)
+- [ ] Priority 8.3: Color warmth pass — cream-on-navy contrast, warm gold active states
+- [ ] Priority 8.5: Dashboard widget restyle — larger radius, editorial numbers, warm tints
+- [ ] Priority 8.8: First-run Wren introduction moment on Today
+- [ ] Priority 8.9: Loading states — Wren-presence animation replacing generic spinners

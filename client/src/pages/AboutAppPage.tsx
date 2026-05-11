@@ -52,7 +52,7 @@ const SPACES = [
   {
     icon: DoorOpen,
     name: "Projects",
-    desc: "Every project has a Re-Entry Card that remembers exactly where you left off — open loops, context, and next step.",
+    desc: "Every project has a Re-Entry Card that remembers exactly where you left off — open loops, context, and next step. Project Memory tracks every decision and movement.",
     color: "text-amber-400",
     bg: "bg-amber-400/10",
     border: "border-violet-400/20",
@@ -84,7 +84,7 @@ const SPACES = [
   {
     icon: Lightbulb,
     name: "Idea Sanctuary",
-    desc: "A quick-capture button always one tap away. Ideas land safely without interrupting your current work session.",
+    desc: "A quick-capture button always one tap away. Ideas land safely without interrupting your current work session. Threshold Diagnosis helps you start when starting feels impossible.",
     color: "text-orange-400",
     bg: "bg-orange-400/10",
     border: "border-orange-400/20",
@@ -420,6 +420,28 @@ export default function AboutAppPage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* ── Deeper features ── */}
+        <div className="rounded-2xl border p-6 mb-10" style={{ background: "oklch(0.12 0.03 264 / 0.6)", borderColor: "oklch(0.72 0.14 65 / 0.12)" }}>
+          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
+            Features worth knowing
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { name: "Re-Entry Card", desc: "Every project remembers where you left off — stopping point, open decision, next action. No cold starts." },
+              { name: "Thread Strength", desc: "A continuity metric that reflects how consistently you're showing up — not a streak, a signal." },
+              { name: "Threshold Diagnosis", desc: "A 3-question diagnostic for when starting feels impossible. Identifies the real blocker and converts it to a first movable step." },
+              { name: "Project Memory", desc: "A timeline of every decision, vault import, focus session, and milestone for each project. Nothing is lost." },
+              { name: "Single Focus Mode", desc: "Full-screen, stripped-down work mode. One intention. One timer. No sidebar, no distractions." },
+              { name: "Distraction Insights", desc: "Pattern recognition across your check-ins. Surfaces your top distraction category and the time of day it peaks." },
+            ].map(({ name, desc }) => (
+              <div key={name} className="rounded-xl border border-white/8 p-4" style={{ background: "oklch(0.14 0.03 264 / 0.5)" }}>
+                <p className="text-sm font-semibold text-white mb-1">{name}</p>
+                <p className="text-xs text-white/55 leading-relaxed">{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 

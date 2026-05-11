@@ -431,9 +431,9 @@ export default function SettingsPage() {
   });
 
   const tabs = [
-    { id: "profile" as const, label: "Profile", icon: User },
+    { id: "profile" as const, label: "Your profile", icon: User },
     { id: "ideas" as const, label: "Idea Sanctuary", icon: Lightbulb },
-    { id: "preferences" as const, label: "Preferences", icon: Settings },
+    { id: "preferences" as const, label: "How you work", icon: Settings },
   ];
 
   const unresolvedIdeas = ideas?.filter((i) => !i.resolvedStatus && i.parkedStatus) ?? [];
@@ -444,8 +444,8 @@ export default function SettingsPage() {
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your account and preferences</p>
+        <h1 className="font-brand text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">You &amp; Wren</h1>
+        <p className="text-sm text-muted-foreground mt-1">What Wren knows about you, and how you work together.</p>
       </div>
 
       {/* Tabs */}
@@ -894,9 +894,9 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-foreground">ADHD Preferences</p>
             <div className="space-y-3">
               {[
-                { key: "morningNotifEnabled", label: "Morning check-in reminder", desc: "Daily reminder to set your focus" },
-                { key: "middayNotifEnabled", label: "Midday alignment pulse", desc: "Midday reminder to check your plan" },
-                { key: "eveningNotifEnabled", label: "Evening closure reminder", desc: "End-of-day reflection prompt" },
+                { key: "morningNotifEnabled", label: "Morning check-in reminder", desc: "Daily reminder to set your intention" },
+                { key: "middayNotifEnabled", label: "Midday pulse reminder", desc: "A gentle nudge to check your plan" },
+                { key: "eveningNotifEnabled", label: "Evening close reminder", desc: "End-of-day reflection prompt" },
                 { key: "focusModeEnabled", label: "Single Focus Mode", desc: "Distraction-free task execution" },
                 { key: "driftDetectionEnabled", label: "Drift detection", desc: "Alert when you stray from declared intention" },
               ].map(({ key, label, desc }) => (
@@ -959,8 +959,8 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   {[
                     { label: "Morning check-in", value: morningTime, setter: setMorningTime },
-                    { label: "Midday check-in", value: middayTime, setter: setMiddayTime },
-                    { label: "Evening closure", value: eveningTime, setter: setEveningTime },
+                    { label: "Midday pulse", value: middayTime, setter: setMiddayTime },
+                    { label: "Evening close", value: eveningTime, setter: setEveningTime },
                   ].map(({ label, value, setter }) => (
                     <div key={label} className="flex items-center justify-between gap-4">
                       <p className="text-xs text-muted-foreground">{label}</p>
