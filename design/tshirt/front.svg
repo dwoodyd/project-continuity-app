@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1400" width="1200" height="1400" role="img" aria-labelledby="title desc">
   <title id="title">Still Worth The Build — Front</title>
-  <desc id="desc">T-shirt front graphic: "I'm still worth the build, and so is everyone building with me."</desc>
+  <desc id="desc">T-shirt front graphic: "I'm still worth the build, and so is everyone else still building."</desc>
 
   <defs>
     <!-- Scaffolding hatch pattern used as a subtle texture inside the emblem -->
@@ -75,22 +75,22 @@
       <use href="#brandmark" x="-70" y="-70" width="140" height="140"/>
     </g>
 
-    <!-- Lower block: AND SO IS EVERYONE / BUILDING WITH ME -->
-    <text x="600" y="1010" font-size="76" font-weight="900" fill="currentColor" letter-spacing="6">
-      AND SO IS EVERYONE
+    <!-- Lower block: AND SO IS EVERYONE ELSE / STILL / BUILDING. -->
+    <text x="600" y="990" font-size="62" font-weight="900" fill="currentColor" letter-spacing="4">
+      AND SO IS EVERYONE ELSE
     </text>
 
-    <!-- BUILDING — accented with underline frame -->
+    <text x="600" y="1140" font-size="170" font-weight="900" fill="currentColor" letter-spacing="10">
+      STILL
+    </text>
+
+    <!-- BUILDING. — accented with underline frame -->
     <g>
-      <text x="600" y="1120" font-size="140" font-weight="900" fill="currentColor" letter-spacing="10">
-        BUILDING
+      <text x="600" y="1250" font-size="110" font-weight="900" fill="currentColor" letter-spacing="8">
+        BUILDING.
       </text>
-      <line x1="200" y1="1148" x2="1000" y2="1148" stroke="currentColor" stroke-width="5"/>
+      <line x1="280" y1="1272" x2="920" y2="1272" stroke="currentColor" stroke-width="5"/>
     </g>
-
-    <text x="600" y="1210" font-size="76" font-weight="900" fill="currentColor" letter-spacing="14">
-      WITH&#8201;·&#8201;ME
-    </text>
 
     <!-- Footer tag -->
     <text x="600" y="1340" font-size="36" letter-spacing="14" fill="currentColor"
