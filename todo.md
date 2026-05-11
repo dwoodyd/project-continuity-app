@@ -1401,3 +1401,7 @@
 - [x] Add "Have a referral code?" entry point on the apply confirmation page linking to referral redemption
 - [x] Add /redeem-referral route with a form that calls beta.redeemReferral and routes to /founding-member on success
 - [x] Add referral code entry option to the InviteGatePage as an alternative path
+
+## Onboarding Skip Bug Fix (May 2026)
+
+- [x] Fix: new users who redeem a founding-member invite code were landing on the dashboard without seeing onboarding. InviteGatePage now routes new users (no continuary_onboarded flag) to / instead of /founding-member, so the App-level onboarding gate fires naturally. Returning users (already onboarded) still go directly to /founding-member.

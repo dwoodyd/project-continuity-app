@@ -41,8 +41,20 @@ export default function InviteGatePage() {
       setSuccess(true);
       await utils.auth.me.invalidate();
       if (refresh) refresh();
-      // Founding-member codes land on the status page; regular codes go home
-      const dest = data?.isFoundingMember ? "/founding-member" : "/";
+      // For founding-member codes: if this is a brand-new user (no onboarding yet),
+      // route to / so the App-level onboarding gate fires before they see Today.
+      // The onboarding completion handler will land them on Today naturally.
+      // For returning users (already onboarded), send directly to /founding-member.
+      const alreadyOnboarded = localStorage.getItem("continuary_onboarded") === "1";
+      let dest: string;
+      if (data?.isFoundingMember) {
+        // Mark that this user just redeemed a founding-member code so the
+        // onboarding completion can show a special welcome if desired.
+        sessionStorage.setItem("justRedeemedFoundingInvite", "1");
+        dest = alreadyOnboarded ? "/founding-member" : "/";
+      } else {
+        dest = "/";
+      }
       setTimeout(() => { window.location.href = dest; }, 1200);
     },
     onError: (err) => {
