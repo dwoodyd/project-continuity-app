@@ -1303,39 +1303,44 @@
 ## Cleanup Brief Sprint (Priorities 0-2, 4-7)
 
 ### Priority 1 — Command Center string replacements
-- [ ] 1.1 Sign-in card: "COMMAND CENTER" → "YOUR MEMORY COMPANION", tagline, back link, preview link
-- [ ] 1.2 404 page: "Go to Command Center" → "Take me to Today"
-- [ ] 1.3 Evidence Log overlay: "Back to Command Center" → "Back to Today"
-- [ ] 1.4 Sidebar group label: "COMMAND" → "DAILY"
-- [ ] 1.5 About page: "Open Command Center" → "Open Today" (both buttons), Command Center card → Today
-- [ ] 1.6 Pricing page: "Today Command Center" row → "Today"
-- [ ] 1.7 Doing Mode label: "Executing, building, shipping" → "Make and move"; Being Mode → "Rest and notice"
+- [x] 1.1 Sign-in card: "COMMAND CENTER" → "YOUR MEMORY COMPANION", tagline, back link, preview link
+- [x] 1.2 404 page: "Go to Command Center" → "Take me to Today"
+- [x] 1.3 Evidence Log overlay: "Back to Command Center" → "Back to Today"
+- [x] 1.4 Sidebar group label: "COMMAND" → "DAILY"
+- [x] 1.5 About page: "Open Command Center" → "Open Today" (both buttons), Command Center card → Today
+- [x] 1.6 Pricing page: "Today Command Center" row → "Today"
+- [x] 1.7 Doing Mode label: "Executing, building, shipping" → "Make and move"; Being Mode → "Rest and notice"
 
 ### Priority 2 — Daily ritual names
-- [ ] 2.0 Lock ritual names everywhere: Morning check-in / Midday pulse / Evening close / Weekly Compass
-- [ ] 2.1 Tour step 2/9: replace old problem block with Restart Tax / Burst Penalty / Open Tab Spiral / Lost Week
+- [x] 2.0 Lock ritual names everywhere: Morning check-in / Midday pulse / Evening close / Weekly Compass
+- [x] 2.1 Tour step 2/9: replace old problem block with Restart Tax / Burst Penalty / Open Tab Spiral / Lost Week
 
 ### Priority 4 — Weekly Review JSON bug
-- [ ] 4.0 Build check-in card components (Morning/Midday/Evening) and render properly in /weekly
+- [x] 4.0 Build check-in card components (Morning/Midday/Evening) and render properly in /weekly
 
 ### Priority 0 — Pricing
-- [ ] 0.1 Rewrite /pro pricing page to show all 5 tiers with founding + retail prices
+- [x] 0.1 Rewrite /pro pricing page to show all 5 tiers with founding + retail prices
 
 ### Priority 7 — Founding Member value props
-- [ ] 7.0 Add "What founding members get" section above pricing tiles on /founding-member
+- [x] 7.0 Add "What founding members get" section above pricing tiles on /founding-member
 
 ### Priority 5 — /landing decision
-- [ ] 5.0 Redirect /landing to continuary.app marketing site
+- [x] 5.0 Redirect /landing to continuary.app marketing site
 
 ## Full Upgrade Sprint (Priority 0, 6, 8)
 
-- [ ] Priority 0: Rewrite /pro pricing page with full 5-tier PayPal ladder
-- [ ] Priority 6: Reconcile feature names on About page to canonical set
-- [ ] Priority 8.1: Typography pass — Playfair Display to all page titles, big stats, greetings
-- [ ] Priority 8.6: Utility microcopy upgrade — brand vocabulary on expressive actions
-- [ ] Priority 8.7: Rename /settings to "You & Wren" with relational framing
-- [ ] Priority 8.2: Mobile bottom tab bar (Today / Threads / Wren / You)
-- [ ] Priority 8.3: Color warmth pass — cream-on-navy contrast, warm gold active states
-- [ ] Priority 8.5: Dashboard widget restyle — larger radius, editorial numbers, warm tints
-- [ ] Priority 8.8: First-run Wren introduction moment on Today
-- [ ] Priority 8.9: Loading states — Wren-presence animation replacing generic spinners
+- [x] Priority 0: Rewrite /pro pricing page with full 5-tier PayPal ladder
+- [x] Priority 6: Reconcile feature names on About page to canonical set
+- [x] Priority 8.1: Typography pass — Playfair Display to all page titles, big stats, greetings
+- [x] Priority 8.6: Utility microcopy upgrade — brand vocabulary on expressive actions
+- [x] Priority 8.7: Rename /settings to "You & Wren" with relational framing
+- [x] Priority 8.2: Mobile bottom tab bar (Today / Threads / Wren / You)
+- [x] Priority 8.3: Color warmth pass — cream-on-navy contrast, warm gold active states
+- [x] Priority 8.5: Dashboard widget restyle — larger radius, editorial numbers, warm tints
+- [x] Priority 8.8: First-run Wren introduction moment on Today
+- [x] Priority 8.9: Loading states — Wren-presence animation replacing generic spinners
+
+## Bug Fixes (May 11)
+- [x] Fix onboarding step 1 work-type cards not selectable when replayed from Settings / About page (Continue greyed out)
+- [x] Fix greeting text color invisible on dark background ("Morning. The thread is ready.")
+- [x] Fix check-in tab active state not highlighting (Morning check-in / Midday pulse / Evening close tabs)

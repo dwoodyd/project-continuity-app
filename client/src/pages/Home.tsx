@@ -248,6 +248,7 @@ function CheckInCard({
   timeHint,
   completed,
   active,
+  open,
   onOpen,
 }: {
   type: CheckInStep;
@@ -256,8 +257,10 @@ function CheckInCard({
   timeHint: string;
   completed: boolean;
   active: boolean;
+  open?: boolean;
   onOpen: () => void;
 }) {
+  const highlighted = open || active;
   return (
     <button
       onClick={!completed ? onOpen : undefined}
@@ -265,7 +268,7 @@ function CheckInCard({
       className="flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden"
       style={completed
         ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
-        : active
+        : highlighted
           ? { background: "oklch(0.78 0.18 65 / 0.14)", borderColor: "oklch(0.78 0.18 65 / 0.40)", boxShadow: "0 0 0 1px oklch(0.78 0.18 65 / 0.20), 0 4px 16px oklch(0.78 0.18 65 / 0.12)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
       }
@@ -273,22 +276,22 @@ function CheckInCard({
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : active ? "oklch(0.88 0.16 65)" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.88 0.16 65)" : "oklch(0.55 0.01 270)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : active ? "oklch(0.92 0.10 65)" : "oklch(0.65 0.01 270)" }}
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.92 0.10 65)" : "oklch(0.65 0.01 270)" }}
         >
           {label}
         </span>
         {completed && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-auto" />}
-        {active && !completed && (
+        {highlighted && !completed && (
           <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.88 0.16 65)" }} />
         )}
       </div>
       <p
         className="text-xs leading-tight pl-0.5 truncate w-full"
-        style={{ color: active ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
+        style={{ color: highlighted ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
       >{timeHint}</p>
     </button>
   );
@@ -1462,6 +1465,7 @@ export default function Home() {
             timeHint="Set capacity + focus"
             completed={morningDone}
             active={activePeriod === "morning" && !morningDone}
+            open={activeCheckIn === "morning"}
             onOpen={() => openCheckIn("morning")}
           />
           <CheckInCard
@@ -1471,6 +1475,7 @@ export default function Home() {
             timeHint="Alignment pulse — on plan?"
             completed={middayDone}
             active={activePeriod === "midday" && morningDone && !middayDone}
+            open={activeCheckIn === "midday"}
             onOpen={() => openCheckIn("midday")}
           />
           <CheckInCard
@@ -1480,6 +1485,7 @@ export default function Home() {
             timeHint="Close the loop. Acknowledge what moved."
             completed={eveningDone}
             active={activePeriod === "evening" && !eveningDone}
+            open={activeCheckIn === "evening"}
             onOpen={() => openCheckIn("evening")}
           />
         </div>
@@ -1924,7 +1930,7 @@ export default function Home() {
             />
             {/* Tagline overlay */}
             <div className="relative z-10 pb-4 text-center px-4">
-              <p className="text-xs font-brand-italic" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>
+              <p className="text-xs font-brand-italic" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>
                 {wrenTagline}
               </p>
             </div>
