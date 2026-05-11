@@ -1,0 +1,19 @@
+{
+  "query": "SELECT COUNT(*) as total FROM founding_applications; SELECT id, name, email, status, createdAt FROM founding_applications ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT COUNT(*) as total FROM founding_applications; SELECT id, name, email, status, createdAt FROM founding_applications ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "total": "1"
+    },
+    {
+      "total": "id\tname\temail\tstatus\tcreatedAt"
+    },
+    {
+      "total": "1\tLamont Woods\tthelamontwoods@gmail.com\tpending\t1778441902368"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n1\nid\tname\temail\tstatus\tcreatedAt\n1\tLamont Woods\tthelamontwoods@gmail.com\tpending\t1778441902368\n",
+  "stderr": "",
+  "execution_time_ms": 270
+}

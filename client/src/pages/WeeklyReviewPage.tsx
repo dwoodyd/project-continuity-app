@@ -106,9 +106,9 @@ export default function WeeklyReviewPage() {
             <div className="flex justify-center mb-4">
               <WrenPlayer clip="wrenLetter" size="lg" />
             </div>
-            <p className="text-base font-semibold text-white mb-1">Generate your weekly review</p>
+            <p className="text-base font-semibold text-white mb-1">Ask Wren to read your week</p>
             <p className="text-sm text-white/70 mb-5">
-              AI will analyze your check-ins, projects, and patterns from the past 7 days.
+              Wren will read your past 7 days — check-ins, projects, patterns — and write you back.
             </p>
             <Button
               onClick={() => { setGenerating(true); generateReview.mutate(); }}

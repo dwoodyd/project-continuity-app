@@ -88,7 +88,7 @@ const TIERS = [
       "Wren voice check-ins",
       "Weekly Compass deep-dive",
       "Threshold Diagnosis tool",
-      "Study Mode & Focus Blocks",
+      "Single Focus Mode",
       "Monthly office hours with founder",
     ],
   },
@@ -137,7 +137,7 @@ const PRICING_TABLE: PricingRow[] = [
   { feature: "Markdown / Obsidian export", free: true, pro: true, keeper: true },
   { feature: "Wren voice check-ins", free: false, pro: false, keeper: true },
   { feature: "Threshold Diagnosis", free: false, pro: false, keeper: true },
-  { feature: "Study Mode & Focus Blocks", free: false, pro: false, keeper: true },
+  { feature: "Single Focus Mode", free: false, pro: false, keeper: true },
   { feature: "Monthly office hours", free: false, pro: false, keeper: true },
   { feature: "Priority support", free: false, pro: true, keeper: true },
 ];

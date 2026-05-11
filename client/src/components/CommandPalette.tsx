@@ -48,7 +48,7 @@ const NAV_ITEMS = [
   { icon: BarChart2, label: "Intelligence", path: "/intelligence", group: "Navigate", shortcut: "G I" },
   { icon: Settings, label: "Settings", path: "/settings", group: "Navigate" },
   { icon: Star, label: "Continuary Pro", path: "/pro", group: "Navigate" },
-  { icon: ClipboardList, label: "Study Mode", path: "/study", group: "Navigate" },
+  { icon: ClipboardList, label: "Single Focus Mode", path: "/study", group: "Navigate" },
 ];
 
 const QUICK_ACTIONS = [

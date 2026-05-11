@@ -1357,3 +1357,22 @@
 - [x] Set founding_member flags at invite redemption time for founding-member-sourced codes
 - [x] Repurpose /founding-member page from checkout gate to locked-rate status page
 - [x] Update admin approve mutation to pass continuary.app as appUrl (not window.location.origin)
+
+## Founding Member Launch Blockers (B-series, May 2026)
+
+- [ ] B1: OAuth callback URLs — add app.continuary.app to Manus authorized redirect URIs (platform config, not code)
+- [ ] B2: Resend sending domain — verify mail.continuary.app with SPF/DKIM/DMARC in Cloudflare DNS (DNS config, not code)
+- [x] B3: Application form → admin queue — verified: /apply writes to founding_applications, appears in Admin → Applications
+- [x] B4: "In queue" email fires on submission — verified: buildApplicationConfirmationEmail fires on submit via Resend
+- [x] B5: Approval action sends invite email with code — verified: approve generates founding-member code + fires approval email with /invite/:code deep link
+- [x] B6: /invite/:code magic-link redemption — verified: route stores code in sessionStorage, redeems at invite gate, grants founding flags, routes to /founding-member
+
+## Polish Items (P-series, May 2026)
+
+- [ ] P1: Marketing site header — add "Sign in" link pointing to https://app.continuary.app
+- [x] P2: Renamed "Study Mode" → "Single Focus Mode" in sidebar, More sheet, command palette, ProPage (tier + comparison table)
+- [x] P3: Weekly Review header copy updated to Wren voice: "Ask Wren to read your week" + new description
+- [x] P4: /founding-member status page verified: locked rate + exact 5 value props + redirect non-members to /apply
+- [x] P5: PayPal confirmed across the board (no Stripe); pricing page footer already says PayPal
+- [ ] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DeWayne decision)
+- [x] P7: /landing route is a clean redirect shim to continuary.app — no action needed

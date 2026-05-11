@@ -63,7 +63,7 @@ const ALL_NAV_ITEMS = [
   { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
-  { href: "/study",        label: "Study Mode",      icon: ClipboardList, section: "primary" },
+  { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
   { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
@@ -95,7 +95,7 @@ const MORE_ITEMS = [
   { href: "/intelligence", label: "Intelligence",     icon: Lightbulb },
   { href: "/welcome",      label: "About Continuary", icon: Home },
   { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
-  { href: "/study",        label: "Study Mode",       icon: ClipboardList },
+  { href: "/study",        label: "Single Focus Mode",  icon: ClipboardList },
   { href: "/settings",     label: "Settings",         icon: Settings },
   { href: "/founding-member", label: "Founding Member", icon: Star },
 ];

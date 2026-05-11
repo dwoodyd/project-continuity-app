@@ -197,14 +197,11 @@ export default function FoundingMemberPage() {
           </h2>
           <ul className="space-y-2.5">
             {[
-              "Unlimited projects, check-ins, and vault entries",
-              "Wren AI — daily planning, re-entry cards, unstick protocol",
-              "Morning, Midday, and Evening check-in flows",
-              "Knowledge Vault with AI clustering and mapping",
-              "Focus Mode, Emotional Cycle Tracker, Evidence Log",
-              "Weekly Compass and Weekly Review",
-              "Push notifications and offline capture",
-              "Direct access to the founding-member community",
+              "Free during beta — full access, no card required for 90 days",
+              "Founding rate locked for life — $4.99 Pro · $9.99 Keeper, never increases",
+              "Direct line to the founder — your feedback shapes what gets built",
+              "First access to Lifewoven and Operator House when they launch",
+              "Founding Member badge — permanent recognition in your profile",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
                 <Star className="w-3.5 h-3.5 text-amber-500/60 mt-0.5 shrink-0" />
