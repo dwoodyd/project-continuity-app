@@ -63,6 +63,7 @@ const ALL_NAV_ITEMS = [
   { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
+  { href: "/study",        label: "Study Mode",      icon: ClipboardList, section: "primary" },
   { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
@@ -94,6 +95,7 @@ const MORE_ITEMS = [
   { href: "/intelligence", label: "Intelligence",     icon: Lightbulb },
   { href: "/welcome",      label: "About Continuary", icon: Home },
   { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
+  { href: "/study",        label: "Study Mode",       icon: ClipboardList },
   { href: "/settings",     label: "Settings",         icon: Settings },
   { href: "/founding-member", label: "Founding Member", icon: Star },
 ];
@@ -305,12 +307,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               <img src="/logo-navy.svg" alt="Continuary" className="w-20 h-20 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
                 <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Lora', serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
-                <p className="text-sm text-muted-foreground tracking-widest uppercase">Command Center</p>
+                <p className="text-sm text-muted-foreground tracking-widest uppercase">Your Memory Companion</p>
               </div>
             </div>
             <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
               <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
-                A structured command center for execution. Turn scattered notes into daily focus.
+                Continuary keeps your thread. Pick up exactly where you left off.
               </p>
               {/* Social proof — avatar stack + member count */}
               <div className="flex items-center justify-center gap-3 mb-5" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.75rem',marginBottom:'1.25rem'}}>
@@ -355,7 +357,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-              <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← Back to landing page</a>
+              <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← See what's inside</a>
             </div>
           </div>
           {onPreviewIntro && (
@@ -364,11 +366,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 onClick={onPreviewIntro}
                 className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
               >
-                ✦ Preview intro
+                ✦ Watch the intro
               </button>
             </div>
           )}
-          <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that move fast.</p>
+          <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that keep going.</p>
           <p className="text-center text-sm text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
             <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy Policy</a>
             {" · "}
@@ -421,7 +423,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </div>
           {/* Nav */}
           <nav className="flex-1 px-2 py-3 space-y-0.5">
-            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Command</p>
+            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Daily</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "primary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (

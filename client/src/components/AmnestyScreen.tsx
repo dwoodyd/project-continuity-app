@@ -260,7 +260,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                   onClick={onComplete}
                   className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-2"
                 >
-                  Skip — take me to the Command Center
+                  Skip — take me to Today
                 </button>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                 onClick={onComplete}
                 className="w-full flex items-center justify-between px-5 py-4 bg-primary text-white rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors group"
               >
-                <span>Open Command Center</span>
+                <span>Open Today</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>

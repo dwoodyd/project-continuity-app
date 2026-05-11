@@ -287,7 +287,7 @@ export default function EvidenceLogPage() {
         <div className="space-y-1">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Command Center
+            Back to Today
           </Link>
           <div className="flex items-start justify-between gap-4">
             <div>

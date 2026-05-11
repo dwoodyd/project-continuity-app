@@ -529,7 +529,7 @@ export default function FocusModePage() {
                 }}
                 className="w-full"
               >
-                Back to Command Center
+                Back to Today
               </Button>
             </div>
           </div>

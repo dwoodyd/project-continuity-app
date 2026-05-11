@@ -179,7 +179,7 @@ export function useNotifications() {
       scheduleLocalNotification({
         id: "midday-checkin",
         title: "Continuary",
-        body: "Midday check-in is open. Still on track?",
+        body: "Midday pulse is open. Still on track?",
         tag: "midday-checkin",
         scheduledHour: hour,
         scheduledMinute: minute,

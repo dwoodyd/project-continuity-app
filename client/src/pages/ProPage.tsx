@@ -13,7 +13,7 @@ interface PricingRow {
 
 const PRICING_TABLE: PricingRow[] = [
   { feature: "Daily check-ins (Morning, Midday, Evening)", free: true, pro: true },
-  { feature: "Today Command Center", free: true, pro: true },
+  { feature: "Today", free: true, pro: true },
   { feature: "Projects (active)", free: "3 projects", pro: "Unlimited" },
   { feature: "Knowledge Vault entries", free: "50 entries", pro: "Unlimited" },
   { feature: "Scratch Pad notes", free: "25 notes", pro: "Unlimited" },

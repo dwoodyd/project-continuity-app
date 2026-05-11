@@ -35,7 +35,7 @@ const BRAND_LOGO = "/logo-navy.svg";
 const SPACES = [
   {
     icon: Brain,
-    name: "Command Center",
+    name: "Today",
     desc: "Your daily operating surface. Morning check-in, today's tasks, and the Next Best Step — all in one place.",
     color: "text-blue-400",
     bg: "bg-blue-400/10",
@@ -430,7 +430,7 @@ export default function AboutAppPage() {
           </p>
           <ol className="space-y-3">
             {[
-              "Complete your morning check-in on the Command Center — it takes 2 minutes.",
+              "Complete your morning check-in on Today — it takes 2 minutes.",
               "Add your active projects so the app can surface the right context.",
               "Capture anything on your mind into the Knowledge Vault — don't filter it.",
               "Come back tomorrow. That's the whole practice.",

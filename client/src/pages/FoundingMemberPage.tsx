@@ -38,7 +38,7 @@ const SKUS = [
       "Wren AI guidance every day",
       "Emotional Cycle Tracker",
       "Evidence Log & Knowledge Vault",
-      "Morning, Midday & Evening rituals",
+      "Morning check-in, Midday pulse & Evening close",
       "Founding rate — locked for life",
     ],
     highlight: false,

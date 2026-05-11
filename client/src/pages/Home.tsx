@@ -1113,9 +1113,9 @@ export default function Home() {
     setTimeout(() => setWrenCelebration(null), 3500);
     // Record gamification event for rhythm completion
     const rhythmLabels: Record<CheckInStep, string> = {
-      morning: "Morning plan set",
-      midday: "Midday check-in done",
-      evening: "Evening closure complete",
+      morning: "Morning check-in complete",
+      midday: "Midday pulse done",
+      evening: "Evening close complete",
     };
     recordEvent.mutate({ eventType: `rhythm_${type}`, label: rhythmLabels[type] });
     // After morning or evening check-in, gently surface unprocessed ideas when count > 3
@@ -1265,7 +1265,7 @@ export default function Home() {
         <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.78 0.18 65 / 0.28)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}>
           <div className="flex items-center gap-2 mb-1">
             <Sun className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning plan ready</p>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning check-in ready</p>
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </div>
@@ -1452,7 +1452,7 @@ export default function Home() {
           <CheckInCard
             type="morning"
             icon={Sun}
-            label="Morning plan"
+            label="Morning check-in"
             timeHint="Set capacity + focus"
             completed={morningDone}
             active={activePeriod === "morning" && !morningDone}
@@ -1461,7 +1461,7 @@ export default function Home() {
           <CheckInCard
             type="midday"
             icon={Zap}
-            label="Midday check-in"
+            label="Midday pulse"
             timeHint="Alignment pulse — on plan?"
             completed={middayDone}
             active={activePeriod === "midday" && morningDone && !middayDone}
@@ -1470,8 +1470,8 @@ export default function Home() {
           <CheckInCard
             type="evening"
             icon={Sunset}
-            label="Evening closure"
-            timeHint="Close the day, set tomorrow"
+            label="Evening close"
+            timeHint="Close the loop. Acknowledge what moved."
             completed={eveningDone}
             active={activePeriod === "evening" && !eveningDone}
             onOpen={() => openCheckIn("evening")}
@@ -2159,7 +2159,7 @@ export default function Home() {
               </TooltipProvider>
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {isPlanningMode ? "Thinking, mapping, deciding" : "Executing, building, shipping"}
+              {isPlanningMode ? "Thinking, mapping, deciding" : "Make and move"}
             </p>
           </div>
           <button

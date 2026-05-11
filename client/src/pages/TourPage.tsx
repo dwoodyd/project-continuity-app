@@ -257,13 +257,13 @@ export default function TourPage() {
         {step === "problem" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Problem" title="The gap between sessions is where work goes to die." wren="closesEyes" />
+              <Header eyebrow="Sound Familiar" title="The patterns that keep breaking your flow." wren="closesEyes" />
               <div className="grid md:grid-cols-2 gap-4">
                 {[
-                  { icon: "⏸", title: "You step away", body: "Life happens. A meeting runs long. A family emergency. A bad week. You leave your work mid-thought." },
-                  { icon: "🌫", title: "Context evaporates", body: "When you return, the thread is gone. You spend 40 minutes reconstructing what you were doing instead of doing it." },
-                  { icon: "🔁", title: "The restart tax", body: "Every interruption costs more than the time lost. The cognitive overhead of re-entry compounds across weeks and months." },
-                  { icon: "📉", title: "Momentum breaks", body: "Projects stall. Ideas go cold. The gap between who you are and what you're building quietly widens." },
+                  { icon: "⏸", title: "The Restart Tax", body: "You open a project and spend 20 minutes just remembering where you left off." },
+                  { icon: "⚡", title: "The Burst Penalty", body: "You work in focused sprints — but every system was built for linear thinkers." },
+                  { icon: "🗂", title: "The Open Tab Spiral", body: "12 tabs. 3 half-finished docs. Zero clarity on what matters right now." },
+                  { icon: "📉", title: "The Lost Week", body: "You start strong on Monday. By Thursday, the thread is gone." },
                 ].map(c => (
                   <div key={c.title} className="rounded-xl p-5 space-y-2" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
                     <div className="text-2xl">{c.icon}</div>
@@ -287,7 +287,9 @@ export default function TourPage() {
               <div className="space-y-3">
                 {[
                   { label: "Morning check-in", desc: "Set your intention, protect your focus, and prime the day." },
-                  { label: "Evening check-in", desc: "Close the loop, acknowledge what moved, and prepare tomorrow." },
+                  { label: "Midday pulse", desc: "Two-minute alignment check. On plan?" },
+                  { label: "Evening close", desc: "Close the loop. Acknowledge what moved." },
+                  { label: "Weekly Compass", desc: "One clear direction for the week." },
                   { label: "The Vault", desc: "A living knowledge base that grows with every thought you capture." },
                   { label: "Thread Strength", desc: "A real-time measure of your continuity — not productivity, continuity." },
                   { label: "Re-entry support", desc: "When you've been away, Wren meets you where you are and walks you back in." },

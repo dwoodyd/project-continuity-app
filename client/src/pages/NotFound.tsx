@@ -29,7 +29,7 @@ export default function NotFound() {
             onClick={() => navigate("/")}
             className="w-full sm:w-auto flex items-center justify-between px-5 py-3.5 bg-foreground text-background rounded-xl text-sm font-medium hover:bg-foreground/90 transition-colors"
           >
-            <span>Go to Command Center</span>
+            <span>Take me to Today</span>
             <svg className="w-4 h-4 ml-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

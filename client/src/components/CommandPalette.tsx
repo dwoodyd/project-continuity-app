@@ -28,6 +28,7 @@ import {
   Search,
   Star,
   Shield,
+  ClipboardList,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -37,7 +38,7 @@ interface CommandPaletteProps {
 }
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: "Command Center", path: "/", group: "Navigate", shortcut: "G H" },
+  { icon: LayoutDashboard, label: "Today", path: "/", group: "Navigate", shortcut: "G H" },
   { icon: Archive, label: "Vault", path: "/vault", group: "Navigate", shortcut: "G V" },
   { icon: FolderOpen, label: "Projects", path: "/projects", group: "Navigate", shortcut: "G P" },
   { icon: Calendar, label: "Weekly Review", path: "/weekly", group: "Navigate", shortcut: "G W" },
@@ -47,11 +48,12 @@ const NAV_ITEMS = [
   { icon: BarChart2, label: "Intelligence", path: "/intelligence", group: "Navigate", shortcut: "G I" },
   { icon: Settings, label: "Settings", path: "/settings", group: "Navigate" },
   { icon: Star, label: "Continuary Pro", path: "/pro", group: "Navigate" },
+  { icon: ClipboardList, label: "Study Mode", path: "/study", group: "Navigate" },
 ];
 
 const QUICK_ACTIONS = [
   { icon: Sun, label: "Morning Check-in", action: "morning-checkin", group: "Quick Actions" },
-  { icon: Moon, label: "Evening Closure", action: "evening-checkin", group: "Quick Actions" },
+  { icon: Moon, label: "Evening close", action: "evening-checkin", group: "Quick Actions" },
   { icon: Sparkles, label: "Brain Dump (Clarity Engine)", action: "brain-dump", group: "Quick Actions" },
   { icon: Zap, label: "Idea Sanctuary", action: "idea-sanctuary", group: "Quick Actions" },
   { icon: Search, label: "Threshold Diagnosis", action: "threshold-diagnosis", group: "Quick Actions" },

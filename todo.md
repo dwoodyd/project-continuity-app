@@ -1299,3 +1299,30 @@
 - [x] Update og:url in client/index.html to https://continuary.app/
 - [x] Update InviteGatePage contact email from hello@soulengineer.online to hello@continuary.app
 - [x] Fix OnboardingPage ambient audio URL from dead manus.space URL to webdev CDN
+
+## Cleanup Brief Sprint (Priorities 0-2, 4-7)
+
+### Priority 1 — Command Center string replacements
+- [ ] 1.1 Sign-in card: "COMMAND CENTER" → "YOUR MEMORY COMPANION", tagline, back link, preview link
+- [ ] 1.2 404 page: "Go to Command Center" → "Take me to Today"
+- [ ] 1.3 Evidence Log overlay: "Back to Command Center" → "Back to Today"
+- [ ] 1.4 Sidebar group label: "COMMAND" → "DAILY"
+- [ ] 1.5 About page: "Open Command Center" → "Open Today" (both buttons), Command Center card → Today
+- [ ] 1.6 Pricing page: "Today Command Center" row → "Today"
+- [ ] 1.7 Doing Mode label: "Executing, building, shipping" → "Make and move"; Being Mode → "Rest and notice"
+
+### Priority 2 — Daily ritual names
+- [ ] 2.0 Lock ritual names everywhere: Morning check-in / Midday pulse / Evening close / Weekly Compass
+- [ ] 2.1 Tour step 2/9: replace old problem block with Restart Tax / Burst Penalty / Open Tab Spiral / Lost Week
+
+### Priority 4 — Weekly Review JSON bug
+- [ ] 4.0 Build check-in card components (Morning/Midday/Evening) and render properly in /weekly
+
+### Priority 0 — Pricing
+- [ ] 0.1 Rewrite /pro pricing page to show all 5 tiers with founding + retail prices
+
+### Priority 7 — Founding Member value props
+- [ ] 7.0 Add "What founding members get" section above pricing tiles on /founding-member
+
+### Priority 5 — /landing decision
+- [ ] 5.0 Redirect /landing to continuary.app marketing site

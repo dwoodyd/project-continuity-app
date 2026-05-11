@@ -221,23 +221,41 @@ export default function WeeklyReviewPage() {
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent check-ins</p>
           <div className="space-y-2">
-            {recentCheckIns.slice(0, 10).map((checkIn) => (
-              <div key={checkIn.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card">
-                <div className={cn(
-                  "w-2 h-2 rounded-full mt-1.5 shrink-0",
-                  checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-blue-400" : "bg-violet-400"
-                )} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-xs font-medium text-foreground capitalize">{checkIn.type}</p>
-                    <p className="text-xs text-muted-foreground">{format(new Date(checkIn.createdAt), "MMM d")}</p>
+            {recentCheckIns.slice(0, 10).map((checkIn) => {
+              // Parse structured JSON payloads stored per check-in type
+              let summary: string | null = null;
+              try {
+                const parsed = JSON.parse(checkIn.userInput ?? "");
+                if (checkIn.type === "morning") {
+                  summary = parsed.notes || parsed.capacityLevel || null;
+                } else if (checkIn.type === "midday") {
+                  summary = parsed.workedOn || parsed.nextMove || null;
+                } else if (checkIn.type === "evening") {
+                  summary = parsed.whatMoved || parsed.whatLearned || null;
+                }
+              } catch {
+                // Plain text fallback (legacy entries)
+                summary = checkIn.userInput && !checkIn.userInput.startsWith("{") ? checkIn.userInput : null;
+              }
+              const typeLabel = checkIn.type === "morning" ? "Morning check-in" : checkIn.type === "midday" ? "Midday pulse" : "Evening close";
+              return (
+                <div key={checkIn.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card">
+                  <div className={cn(
+                    "w-2 h-2 rounded-full mt-1.5 shrink-0",
+                    checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-blue-400" : "bg-violet-400"
+                  )} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs font-medium text-foreground">{typeLabel}</p>
+                      <p className="text-xs text-muted-foreground">{format(new Date(checkIn.createdAt), "MMM d")}</p>
+                    </div>
+                    {summary && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{summary}</p>
+                    )}
                   </div>
-                  {checkIn.userInput && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{checkIn.userInput}</p>
-                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

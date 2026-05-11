@@ -69,7 +69,7 @@ function FadeSection({ children, className = "", delay = 0 }: { children: React.
 const FEATURES = [
   {
     icon: Brain,
-    title: "Command Center",
+    title: "Today",
     desc: "Your daily operating surface. Every morning it shows you what to focus on and surfaces the most important next step across all your projects.",
     color: "text-primary",
     bg: "bg-primary/10",
@@ -351,7 +351,7 @@ export default function WelcomePage() {
   const ctaButton = isAuthenticated ? (
     <Link href="/">
       <Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
-        Open Command Center <ArrowRight className="w-4 h-4" />
+        Open Today <ArrowRight className="w-4 h-4" />
       </Button>
     </Link>
   ) : (
@@ -690,7 +690,7 @@ export default function WelcomePage() {
           {isAuthenticated ? (
             <Link href="/">
               <Button size="lg" className="gap-2 px-10 font-semibold shadow-xl text-base" style={{ background: "oklch(0.72 0.14 65)", color: "oklch(0.12 0.03 264)" }}>
-                Open Command Center <ArrowRight className="w-5 h-5" />
+                Open Today <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
           ) : (
@@ -754,7 +754,7 @@ export default function WelcomePage() {
             {isAuthenticated ? (
               <>
                 {[
-                  { href: "/", label: "Command Center" },
+                  { href: "/", label: "Today" },
                   { href: "/vault", label: "Vault" },
                   { href: "/projects", label: "Projects" },
                   { href: "/clarity", label: "Clarity" },
