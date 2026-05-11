@@ -19,7 +19,11 @@ import {
   rejectFoundingApplication,
   createInviteCode,
   markInviteAsFoundingMember,
+  type FoundingApplicationWithFM,
 } from "../db";
+// FoundingApplicationWithFM is the enriched type returned by getFoundingApplications
+// It adds hasRedeemed and trialDaysLeft fields to each application row
+void (0 as unknown as FoundingApplicationWithFM); // ensure type is used (prevents unused-import lint)
 import { notifyOwner } from "../_core/notification";
 import { sendEmail, buildInviteCodeEmail, buildApplicationConfirmationEmail } from "../_core/email";
 

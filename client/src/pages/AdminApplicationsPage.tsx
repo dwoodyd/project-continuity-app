@@ -148,9 +148,29 @@ export default function AdminApplicationsPage() {
                     </p>
                   )}
                   {app.inviteCodeSent && (
-                    <p className="text-xs text-muted-foreground mt-2 font-mono">
-                      Code sent: <span style={{ color: "oklch(0.78 0.18 65)" }}>{app.inviteCodeSent}</span>
-                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <p className="text-xs text-muted-foreground font-mono">
+                        Code: <span style={{ color: "oklch(0.78 0.18 65)" }}>{app.inviteCodeSent}</span>
+                      </p>
+                      {(app as any).hasRedeemed ? (
+                        <span
+                          className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.78 0.18 65)", border: "1px solid oklch(0.78 0.18 65 / 0.35)" }}
+                        >
+                          FM · Redeemed
+                          {(app as any).trialDaysLeft !== null && (
+                            <span style={{ opacity: 0.75 }}> · {(app as any).trialDaysLeft}d left</span>
+                          )}
+                        </span>
+                      ) : (
+                        <span
+                          className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(255,255,255,0.04)", color: "rgba(240,237,230,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        >
+                          FM · Not yet redeemed
+                        </span>
+                      )}
+                    </div>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
                     Applied {new Date(app.createdAt).toLocaleDateString("en-US", {

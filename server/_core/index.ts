@@ -17,6 +17,7 @@ import { serveStatic, setupVite } from "./vite";
 import { startNotificationCron } from "../pushNotifications";
 import { paypalRouter } from "../paypal";
 import { startWeeklyDigestCron } from "../weeklyDigest";
+import { startTrialReminderCron } from "../trialReminder";
 import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
 import { registerCalendarRoutes } from "../calendarRoutes";
@@ -368,6 +369,8 @@ async function startServer() {
         if (owner) startWeeklyDigestCron(owner.id);
       }).catch(console.error);
     }
+    // Start trial reminder cron — sends day-80 email to founding members nearing trial end
+    startTrialReminderCron();
   });
 }
 

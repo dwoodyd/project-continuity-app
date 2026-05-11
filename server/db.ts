@@ -1396,15 +1396,69 @@ export async function createFoundingApplication(data: {
   return (result as any).insertId as number;
 }
 
-export async function getFoundingApplications(status?: "pending" | "approved" | "rejected"): Promise<FoundingApplication[]> {
+export type FoundingApplicationWithFM = FoundingApplication & {
+  hasRedeemed: boolean;
+  trialDaysLeft: number | null; // null if not redeemed or trial not set
+};
+
+export async function getFoundingApplications(
+  status?: "pending" | "approved" | "rejected"
+): Promise<FoundingApplicationWithFM[]> {
   const db = await getDb();
   if (!db) return [];
-  if (status) {
-    return db.select().from(foundingApplications)
-      .where(eq(foundingApplications.status, status))
-      .orderBy(desc(foundingApplications.createdAt));
+
+  const rows = await (status
+    ? db.select().from(foundingApplications)
+        .where(eq(foundingApplications.status, status))
+        .orderBy(desc(foundingApplications.createdAt))
+    : db.select().from(foundingApplications)
+        .orderBy(desc(foundingApplications.createdAt)));
+
+  // For approved rows that have a code sent, check if the code was redeemed
+  const codesNeeded = rows.filter((r) => r.inviteCodeSent).map((r) => r.inviteCodeSent!);
+  if (codesNeeded.length === 0) {
+    return rows.map((r) => ({ ...r, hasRedeemed: false, trialDaysLeft: null }));
   }
-  return db.select().from(foundingApplications).orderBy(desc(foundingApplications.createdAt));
+
+  // Fetch redemption status for all codes in one query
+  const inviteRows = await db
+    .select({ code: betaInvites.code, usedByUserId: betaInvites.usedByUserId })
+    .from(betaInvites)
+    .where(sql`${betaInvites.code} IN (${sql.join(codesNeeded.map((c) => sql`${c}`), sql`, `)})`);
+
+  // Fetch trialEndsAt for redeemed users
+  const redeemedUserIds = inviteRows
+    .filter((i) => i.usedByUserId)
+    .map((i) => i.usedByUserId!);
+
+  const userTrials: Record<number, Date | null> = {};
+  if (redeemedUserIds.length > 0) {
+    const trialRows = await db
+      .select({ id: users.id, trialEndsAt: users.trialEndsAt })
+      .from(users)
+      .where(sql`${users.id} IN (${sql.join(redeemedUserIds.map((id) => sql`${id}`), sql`, `)})`);
+    for (const u of trialRows) {
+      userTrials[u.id] = u.trialEndsAt ?? null;
+    }
+  }
+
+  // Build lookup: code -> { hasRedeemed, trialDaysLeft }
+  const codeMap: Record<string, { hasRedeemed: boolean; trialDaysLeft: number | null }> = {};
+  for (const inv of inviteRows) {
+    const redeemed = !!inv.usedByUserId;
+    let trialDaysLeft: number | null = null;
+    if (redeemed && inv.usedByUserId && userTrials[inv.usedByUserId]) {
+      const msLeft = userTrials[inv.usedByUserId]!.getTime() - Date.now();
+      trialDaysLeft = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+    }
+    codeMap[inv.code] = { hasRedeemed: redeemed, trialDaysLeft };
+  }
+
+  return rows.map((r) => ({
+    ...r,
+    hasRedeemed: r.inviteCodeSent ? (codeMap[r.inviteCodeSent]?.hasRedeemed ?? false) : false,
+    trialDaysLeft: r.inviteCodeSent ? (codeMap[r.inviteCodeSent]?.trialDaysLeft ?? null) : null,
+  }));
 }
 
 export async function approveFoundingApplication(

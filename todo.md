@@ -1376,3 +1376,8 @@
 - [x] P5: PayPal confirmed across the board (no Stripe); pricing page footer already says PayPal
 - [ ] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DeWayne decision)
 - [x] P7: /landing route is a clean redirect shim to continuary.app — no action needed
+
+## Suggestions 2 & 3 (May 2026)
+
+- [x] S2: Trial expiry reminder email — trialReminderSentAt column + hourly cron + branded Resend template ("10 days left. Your founding rate is waiting.")
+- [x] S3: Admin applications table — FM badge with "Redeemed · Xd left" or "Not yet redeemed" shown next to invite code for approved applicants

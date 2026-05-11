@@ -253,6 +253,13 @@
       "when": 1778524554084,
       "tag": "0035_quick_ken_ellis",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1778535021842,
+      "tag": "0036_cold_purifiers",
+      "breakpoints": true
     }
   ]
 }

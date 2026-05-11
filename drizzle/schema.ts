@@ -39,6 +39,8 @@ export const users = mysqlTable("users", {
   referredBy: int("referredBy"),
   referralBonusDays: int("referralBonusDays").default(0).notNull(),
   referralCode: varchar("referralCode", { length: 64 }),
+  /** Set when the 10-days-left trial reminder email has been sent — prevents duplicate sends */
+  trialReminderSentAt: timestamp("trialReminderSentAt"),
 });
 
 export type User = typeof users.$inferSelect;
