@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `users` ADD `billingStatus` enum('trialing_no_card','free_tier_founding_rate_waiting','active','cancelled') DEFAULT 'trialing_no_card';\nALTER TABLE `users` ADD `needsIntro` boolean DEFAULT true NOT NULL;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute ALTER TABLE `users` ADD `billingStatus` enum('trialing_no_card','free_tier_founding_rate_waiting','active','cancelled') DEFAULT 'trialing_no_card';\nALTER TABLE `users` ADD `needsIntro` boolean DEFAULT true NOT NULL;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 695
+}

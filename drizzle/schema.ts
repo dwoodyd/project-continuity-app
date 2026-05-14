@@ -41,6 +41,15 @@ export const users = mysqlTable("users", {
   referralCode: varchar("referralCode", { length: 64 }),
   /** Set when the 10-days-left trial reminder email has been sent — prevents duplicate sends */
   trialReminderSentAt: timestamp("trialReminderSentAt"),
+  /** Pattern C billing state machine */
+  billingStatus: mysqlEnum("billingStatus", [
+    "trialing_no_card",
+    "free_tier_founding_rate_waiting",
+    "active",
+    "cancelled",
+  ]).default("trialing_no_card"),
+  /** True until the user has seen the Wren intro animation on first dashboard load */
+  needsIntro: boolean("needsIntro").default(true).notNull(),
 });
 
 export type User = typeof users.$inferSelect;

@@ -22,6 +22,9 @@ import {
   Share,
   Mail,
   Unlink,
+  Crown,
+  CreditCard,
+  Star,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -381,7 +384,8 @@ export default function SettingsPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<"profile" | "ideas" | "preferences">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "ideas" | "preferences" | "subscription">("profile");
+  const { data: billingStatus } = trpc.paypal.status.useQuery();
   const [morningTime, setMorningTime] = useState("08:00");
   const [middayTime, setMiddayTime] = useState("12:00");
   const [eveningTime, setEveningTime] = useState("17:00");
@@ -434,6 +438,7 @@ export default function SettingsPage() {
     { id: "profile" as const, label: "Your profile", icon: User },
     { id: "ideas" as const, label: "Idea Sanctuary", icon: Lightbulb },
     { id: "preferences" as const, label: "How you work", icon: Settings },
+    { id: "subscription" as const, label: "Subscription", icon: CreditCard },
   ];
 
   const unresolvedIdeas = ideas?.filter((i) => !i.resolvedStatus && i.parkedStatus) ?? [];
@@ -1093,8 +1098,136 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
-    </div>
+      {/* ── Subscription Tab ─────────────────────────────────────────────── */}
+      {activeTab === "subscription" && (
+        <div className="space-y-4">
+          {/* Status card */}
+          {billingStatus && (() => {
+            const bs = billingStatus.billingStatus;
+            const isFoundingMember = billingStatus.isFoundingMember;
+            const daysRemaining = billingStatus.daysRemaining;
+            const betaEnd = billingStatus.betaEndDate ? new Date(billingStatus.betaEndDate) : null;
 
+            if (bs === "trialing_no_card" || bs === null || bs === undefined) {
+              return (
+                <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center">
+                      <Crown className="w-4 h-4 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Beta access — no card required</p>
+                      <p className="text-xs text-muted-foreground">
+                        {daysRemaining !== null ? `${daysRemaining} days remaining` : betaEnd ? `Ends ${betaEnd.toLocaleDateString()}` : "Full access during beta"}
+                      </p>
+                    </div>
+                    {isFoundingMember && (
+                      <span className="ml-auto text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">FOUNDING MEMBER</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    You have full access to all features during the beta period. No payment is required now.
+                    When you're ready to lock in your {isFoundingMember ? "founding rate for life" : "plan"}, you can upgrade at any time.
+                  </p>
+                  <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-black font-semibold" onClick={() => navigate("/pro")}>
+                    {isFoundingMember ? "Lock in my founding rate" : "View plans"}
+                  </Button>
+                </div>
+              );
+            }
+
+            if (bs === "free_tier_founding_rate_waiting") {
+              return (
+                <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+                      <Star className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Free tier</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isFoundingMember ? "Your founding rate is reserved and waiting" : "Upgrade to unlock full access"}
+                      </p>
+                    </div>
+                    {isFoundingMember && (
+                      <span className="ml-auto text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">FOUNDING RATE LOCKED</span>
+                    )}
+                  </div>
+                  {isFoundingMember && (
+                    <div className="rounded-lg bg-amber-500/5 border border-amber-500/15 p-3 space-y-1">
+                      <p className="text-xs font-semibold text-amber-300">Your founding rate is locked for life</p>
+                      <p className="text-xs text-white/50">Pro: $4.99/mo or $39.99/yr · Keeper: $9.99/mo or $79.99/yr</p>
+                      <p className="text-[10px] text-white/30">Retail rates after cohort: Pro $7.99/mo · Keeper $14.99/mo</p>
+                    </div>
+                  )}
+                  <Button size="sm" className="bg-amber-500 hover:bg-amber-400 text-black font-semibold" onClick={() => navigate("/pro")}>
+                    {isFoundingMember ? "Lock in my founding rate" : "Upgrade to Pro"}
+                  </Button>
+                </div>
+              );
+            }
+
+            if (bs === "active") {
+              const tier = billingStatus.foundingTier ?? (billingStatus.isPro ? "pro" : null);
+              const tierLabel = tier === "keeper" ? "Keeper" : tier === "pro" ? "Pro" : "Pro";
+              const tierColor = tier === "keeper" ? "text-violet-400" : "text-amber-400";
+              const tierBg = tier === "keeper" ? "bg-violet-500/10" : "bg-amber-500/10";
+              return (
+                <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("w-9 h-9 rounded-full flex items-center justify-center", tierBg)}>
+                      <Crown className={cn("w-4 h-4", tierColor)} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{tierLabel} — Active</p>
+                      <p className="text-xs text-muted-foreground">
+                        {billingStatus.proSince ? `Active since ${new Date(billingStatus.proSince).toLocaleDateString()}` : "Subscription active"}
+                      </p>
+                    </div>
+                    {isFoundingMember && (
+                      <span className="ml-auto text-[10px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">FOUNDING RATE</span>
+                    )}
+                  </div>
+                  {isFoundingMember && (
+                    <p className="text-xs text-muted-foreground">
+                      Your founding rate is locked for life — it never increases even as retail pricing rises.
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => navigate("/pro")} className="text-xs">
+                      Manage plan
+                    </Button>
+                  </div>
+                </div>
+              );
+            }
+
+            return null;
+          })()}
+
+          {/* What you get as a founding member */}
+          {billingStatus?.isFoundingMember && (
+            <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+              <p className="text-sm font-semibold text-foreground">Founding member perks</p>
+              <ul className="space-y-2">
+                {[
+                  "Free during beta — 90 days Pro access, no card required",
+                  "Founding rate locked for life — never increases",
+                  "Direct line to the founder — DM + monthly office hours (Keeper)",
+                  "First access to Lifewoven and Operator House",
+                  "Founding Member badge in app",
+                ].map((perk) => (
+                  <li key={perk} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
     {showPushInterstitial && (
       <PushPermissionInterstitial
         onAllow={() => { setShowPushInterstitial(false); requestPermission(); }}

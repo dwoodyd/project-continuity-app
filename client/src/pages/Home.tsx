@@ -856,6 +856,11 @@ export default function Home() {
   const phLaunchDate = import.meta.env.VITE_PH_LAUNCH_DATE as string | undefined;
   const [phBannerDismissed, setPhBannerDismissed] = useState(() => localStorage.getItem("ph_banner_dismissed") === "1");
   const showPhBanner = !phBannerDismissed && !!phLaunchDate && new Date().toISOString().slice(0, 10) === phLaunchDate;
+  // Beta / trial banner — dismissable per session
+  const { data: billingStatus } = trpc.paypal.status.useQuery();
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => sessionStorage.getItem("trial_banner_dismissed") === "1");
+  const showTrialBanner = !trialBannerDismissed && !!billingStatus && !billingStatus.isPro &&
+    (billingStatus.billingStatus === "trialing_no_card" || billingStatus.billingStatus === null || billingStatus.billingStatus === undefined);
   const [completedCheckIns, setCompletedCheckIns] = useState<Set<CheckInStep>>(new Set());
   const [wrenCelebration, setWrenCelebration] = useState<{ type: CheckInStep; message: string } | null>(null);
   const [reEntryProjectId, setReEntryProjectId] = useState<number | null>(null);
@@ -1212,6 +1217,43 @@ export default function Home() {
       <WrenIntroMoment onDone={() => setShowWrenIntro(false)} />
     )}
     <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
+      {/* ── Beta / trial banner ──────────────────────────────────────────── */}
+      {showTrialBanner && (
+        <div
+          className="flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl"
+          style={{
+            background: "linear-gradient(135deg, rgba(160,120,50,0.07) 0%, rgba(100,75,25,0.04) 100%)",
+            border: "1px solid rgba(160,120,50,0.16)",
+          }}
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <span
+              className="shrink-0 w-0.5 h-7 rounded-full"
+              style={{ background: "linear-gradient(180deg, rgba(160,120,50,0.65) 0%, rgba(160,120,50,0.1) 100%)" }}
+            />
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(190,155,80,0.80)", letterSpacing: "0.015em", fontWeight: 400 }}>
+              {billingStatus?.isFoundingMember
+                ? <>✨ You’re in beta — full access, no card required.{" "}
+                    <a href="/pro" style={{ color: "rgba(200,165,90,0.95)", textDecoration: "underline", textUnderlineOffset: "3px", textDecorationColor: "rgba(160,120,50,0.35)", fontWeight: 500 }}>Lock in your founding rate</a> whenever you’re ready.
+                  </>
+                : <>✨ You’re in beta — full access, no card required.{" "}
+                    <a href="/pro" style={{ color: "rgba(200,165,90,0.95)", textDecoration: "underline", textUnderlineOffset: "3px", textDecorationColor: "rgba(160,120,50,0.35)", fontWeight: 500 }}>View plans</a>.
+                  </>
+              }
+            </p>
+          </div>
+          <button
+            onClick={() => { setTrialBannerDismissed(true); sessionStorage.setItem("trial_banner_dismissed", "1"); }}
+            className="shrink-0 transition-opacity"
+            style={{ color: "rgba(160,120,50,0.35)" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "rgba(160,120,50,0.65)")}
+            onMouseLeave={e => (e.currentTarget.style.color = "rgba(160,120,50,0.35)")}
+            aria-label="Dismiss"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
       {/* ── Product Hunt launch banner ────────────────────────────────────── */}
       {showPhBanner && (
         <div

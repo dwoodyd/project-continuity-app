@@ -1419,8 +1419,8 @@
 ## Cleanup Brief — App (May 2026)
 
 ### Priority 0 — Pricing reconciliation
-- [ ] P0.1: Rewrite /pro Pricing page to show all 5 tiers (Free, Pro Monthly, Pro Annual, Keeper Monthly, Keeper Annual) with both founding and retail prices (DEFERRED — awaiting pricing decision)
-- [ ] P0.2: Confirm /pro and /founding-member both use PayPal — remove any Stripe checkout references from /pro (DEFERRED)
+- [x] P0.1: Rewrite /pro Pricing page — DONE: 3-tier card structure (Free/Pro/Keeper) with monthly/annual toggle and founding rates with retail strikethrough
+- [x] P0.2: /pro uses PayPal only — no Stripe references
 
 ### Priority 1 — Command Center string cleanup
 - [x] P1.1: Sign-in card — already correct (all strings updated in prior session)
@@ -1444,3 +1444,40 @@
 ### Priority 8 — Selected UX/copy upgrades
 - [x] P8.6: Utility microcopy — Start a new thread, Jot something down, Log this moment, Ask Wren (Clarity + Weekly already correct); Run Detection → Ask Wren to look; Score Projects → Ask Wren to score (IntelligencePage)
 - [x] P8.7: /settings — sidebar label updated to "You & Wren"; page heading already "You & Wren"
+
+## Pricing + Pattern C Billing (Handoff Section 7–9, May 2026)
+
+### Schema — Pattern C billing fields
+- [x] Add `billing_status` enum column to users table — DONE (on users table, not user_profiles)
+- [x] Add `beta_start_date` — already exists as foundingMemberJoinedAt on users table
+- [x] Add `beta_end_date` — already exists as trialEndsAt on users table
+- [x] Add `needs_intro` boolean — DONE: needsIntro column added to users table
+- [x] Add `founding_tier_locked` — already exists as foundingTier on users table
+- [x] Add `paypal_subscription_id` — already exists as paypalSubscriptionId on users table
+- [x] Generate and apply migration — DONE (migration 0037)
+
+### Backend — billing tRPC procedures
+- [x] Add `billing.getStatus` procedure — DONE via paypal.status (already returns billingStatus, daysRemaining, isFoundingMember, foundingTier, etc.)
+- [x] Add `billing.dismissBetaBanner` — client-side sessionStorage only, no procedure needed
+
+### /pro Pricing page rebuild (Section 7)
+- [x] 3-tier card structure: Free / Pro / Keeper
+- [x] Each paid tier shows: founding monthly + founding annual + retail monthly (strikethrough) + retail annual (strikethrough)
+- [x] Free card: $0 forever, feature list, CTA based on auth state
+- [x] Pro card: $4.99/mo founding · $39.99/yr founding · retail $7.99/mo · $79.99/yr (strikethrough) · "Lock in Pro" CTA
+- [x] Keeper card: $9.99/mo founding · $79.99/yr founding · retail $14.99/mo · $149.99/yr (strikethrough) · "Lock in Keeper" CTA
+- [x] CTA logic: not signed in → route to continuary.app/apply; founding member on Free → PayPal upgrade; founding member on Pro → "Current Plan" (Pro) / upgrade to Keeper; founding member on Keeper → "Current Plan" (Keeper) / downgrade to Pro
+- [x] "FOUNDING MEMBER" badge near user avatar in pricing page header when founding_member === true
+- [x] Remove any Stripe references from /pro page
+
+### Settings → Subscription page (Section 8)
+- [x] New Subscription tab within SettingsPage
+- [x] State 1 (trialing_no_card): beta days remaining, tier locked, founding rate, no card on file, "Lock in my founding rate" CTA
+- [x] State 2 (free_tier_founding_rate_waiting): founding rate locked display, "Lock in my founding rate" CTA
+- [x] State 3 (active): plan name, founding rate, active since date, "Manage plan" CTA
+
+### Trial-state dashboard banner (Section 9)
+- [x] Show banner on Today when billing_status === "trialing_no_card": "You're in beta — full access, no card required. Lock in your founding rate." (dismissable per session)
+- [x] Show different banner when billing_status === "free_tier_founding_rate_waiting" — covered by same banner logic
+- [x] Banner is dismissable per session (sessionStorage flag)
+- [x] Both banners route to /pro (pricing page)

@@ -1,0 +1,2 @@
+ALTER TABLE `users` ADD `billingStatus` enum('trialing_no_card','free_tier_founding_rate_waiting','active','cancelled') DEFAULT 'trialing_no_card';--> statement-breakpoint
+ALTER TABLE `users` ADD `needsIntro` boolean DEFAULT true NOT NULL;

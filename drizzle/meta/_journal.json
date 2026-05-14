@@ -260,6 +260,13 @@
       "when": 1778535021842,
       "tag": "0036_cold_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1778726132968,
+      "tag": "0037_empty_inhumans",
+      "breakpoints": true
     }
   ]
 }

@@ -27,8 +27,37 @@ const PAYPAL_BASE = process.env.PAYPAL_ENV === "live"
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID!;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET!;
 
-// ─── Pro plan price (monthly) ─────────────────────────────────────────────────
-export const PRO_PLAN_PRICE_USD = "4.99";
+// ─── Eight-plan registry ──────────────────────────────────────────────────────
+export type PlanKey =
+  | "pro_founding_monthly"
+  | "pro_founding_annual"
+  | "keeper_founding_monthly"
+  | "keeper_founding_annual"
+  | "pro_retail_monthly"
+  | "pro_retail_annual"
+  | "keeper_retail_monthly"
+  | "keeper_retail_annual";
+
+export const PLAN_CATALOG: Record<PlanKey, {
+  name: string;
+  tier: "pro" | "keeper";
+  rateType: "founding" | "retail";
+  billing: "monthly" | "annual";
+  priceUsd: string;
+  intervalUnit: "MONTH" | "YEAR";
+}> = {
+  pro_founding_monthly:    { name: "Continuary Pro Founding Monthly",   tier: "pro",    rateType: "founding", billing: "monthly", priceUsd: "4.99",   intervalUnit: "MONTH" },
+  pro_founding_annual:     { name: "Continuary Pro Founding Annual",     tier: "pro",    rateType: "founding", billing: "annual",  priceUsd: "39.99",  intervalUnit: "YEAR"  },
+  keeper_founding_monthly: { name: "Continuary Keeper Founding Monthly", tier: "keeper", rateType: "founding", billing: "monthly", priceUsd: "9.99",   intervalUnit: "MONTH" },
+  keeper_founding_annual:  { name: "Continuary Keeper Founding Annual",  tier: "keeper", rateType: "founding", billing: "annual",  priceUsd: "79.99",  intervalUnit: "YEAR"  },
+  pro_retail_monthly:      { name: "Continuary Pro Retail Monthly",      tier: "pro",    rateType: "retail",   billing: "monthly", priceUsd: "7.99",   intervalUnit: "MONTH" },
+  pro_retail_annual:       { name: "Continuary Pro Retail Annual",       tier: "pro",    rateType: "retail",   billing: "annual",  priceUsd: "79.99",  intervalUnit: "YEAR"  },
+  keeper_retail_monthly:   { name: "Continuary Keeper Retail Monthly",   tier: "keeper", rateType: "retail",   billing: "monthly", priceUsd: "14.99",  intervalUnit: "MONTH" },
+  keeper_retail_annual:    { name: "Continuary Keeper Retail Annual",    tier: "keeper", rateType: "retail",   billing: "annual",  priceUsd: "149.99", intervalUnit: "YEAR"  },
+};
+
+// Legacy exports kept for backward compat
+export const PRO_PLAN_PRICE_USD = PLAN_CATALOG.pro_founding_monthly.priceUsd;
 export const PRO_PLAN_NAME = "Continuary Pro";
 
 // ─── Get OAuth token ──────────────────────────────────────────────────────────
@@ -45,53 +74,70 @@ async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-// ─── Create or retrieve a billing plan ───────────────────────────────────────
-let cachedPlanId: string | null = null;
+// ─── Get plan ID for a given key ─────────────────────────────────────────────
+const planIdCache: Partial<Record<PlanKey, string>> = {};
 
-export async function getOrCreatePlan(): Promise<string> {
-  if (cachedPlanId) return cachedPlanId;
-  // Use pre-created plan ID from env if available (preferred)
-  if (process.env.PAYPAL_PLAN_ID) {
-    cachedPlanId = process.env.PAYPAL_PLAN_ID;
-    return cachedPlanId;
+export async function getPlanId(key: PlanKey): Promise<string> {
+  if (planIdCache[key]) return planIdCache[key]!;
+  const envKey = `PAYPAL_PLAN_${key.toUpperCase()}`;
+  if (process.env[envKey]) { planIdCache[key] = process.env[envKey]!; return planIdCache[key]!; }
+  // Legacy single-plan env var (backward compat)
+  if (key === "pro_founding_monthly" && process.env.PAYPAL_PLAN_ID) {
+    planIdCache[key] = process.env.PAYPAL_PLAN_ID; return planIdCache[key]!;
   }
+  const plan = PLAN_CATALOG[key];
   const token = await getAccessToken();
-
-  // Create product
   const productRes = await paypalFetch(`${PAYPAL_BASE}/v1/catalogs/products`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ name: PRO_PLAN_NAME, type: "SERVICE", category: "SOFTWARE" }),
+    body: JSON.stringify({ name: plan.name, type: "SERVICE", category: "SOFTWARE" }),
   });
   const product = await productRes.json() as { id: string };
-
-  // Create plan
   const planRes = await paypalFetch(`${PAYPAL_BASE}/v1/billing/plans`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      product_id: product.id,
-      name: `${PRO_PLAN_NAME} Monthly`,
-      status: "ACTIVE",
+      product_id: product.id, name: plan.name, status: "ACTIVE",
       billing_cycles: [{
-        frequency: { interval_unit: "MONTH", interval_count: 1 },
-        tenure_type: "REGULAR",
-        sequence: 1,
-        total_cycles: 0,
-        pricing_scheme: { fixed_price: { value: PRO_PLAN_PRICE_USD, currency_code: "USD" } },
+        frequency: { interval_unit: plan.intervalUnit, interval_count: 1 },
+        tenure_type: "REGULAR", sequence: 1, total_cycles: 0,
+        pricing_scheme: { fixed_price: { value: plan.priceUsd, currency_code: "USD" } },
       }],
-      payment_preferences: { auto_bill_outstanding: true, payment_failure_threshold: 3 },
+      payment_preferences: { auto_bill_outstanding: true, setup_fee_failure_action: "CONTINUE", payment_failure_threshold: 3 },
     }),
   });
-  const plan = await planRes.json() as { id: string };
-  cachedPlanId = plan.id;
-  return plan.id;
+  const createdPlan = await planRes.json() as { id: string };
+  planIdCache[key] = createdPlan.id;
+  console.log(`[PayPal] Created plan "${plan.name}" → ${createdPlan.id}. Set ${envKey}=${createdPlan.id} to persist.`);
+  return planIdCache[key]!;
+}
+
+// Legacy helper kept for backward compat
+export async function getOrCreatePlan(): Promise<string> {
+  return getPlanId("pro_founding_monthly");
 }
 
 // ─── Create subscription link ─────────────────────────────────────────────────
-export async function createSubscriptionLink(userId: number, returnUrl: string, cancelUrl: string): Promise<string> {
+export async function createSubscriptionLink(
+  userId: number,
+  planKeyOrReturnUrl: PlanKey | string,
+  returnUrlOrCancelUrl: string,
+  cancelUrlArg?: string,
+): Promise<string> {
+  // Support both old signature (userId, returnUrl, cancelUrl) and new (userId, planKey, returnUrl, cancelUrl)
+  let planKey: PlanKey = "pro_founding_monthly";
+  let returnUrl: string;
+  let cancelUrl: string;
+  if (cancelUrlArg !== undefined) {
+    planKey = planKeyOrReturnUrl as PlanKey;
+    returnUrl = returnUrlOrCancelUrl;
+    cancelUrl = cancelUrlArg;
+  } else {
+    returnUrl = planKeyOrReturnUrl;
+    cancelUrl = returnUrlOrCancelUrl;
+  }
   const token = await getAccessToken();
-  const planId = await getOrCreatePlan();
+  const planId = await getPlanId(planKey);
 
   const res = await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions`, {
     method: "POST",
@@ -123,6 +169,7 @@ export async function activateSubscription(subscriptionId: string, userId: numbe
     paypalSubscriptionId: subscriptionId,
     isPro: true,
     proSince: new Date(),
+    billingStatus: "active",
   }).where(eq(users.id, userId));
 }
 
@@ -136,7 +183,7 @@ export async function cancelSubscription(subscriptionId: string, userId: number)
   });
   const db2 = await getDb();
   if (!db2) return;
-  await db2.update(users).set({ isPro: false, paypalSubscriptionId: null }).where(eq(users.id, userId));
+  await db2.update(users).set({ isPro: false, paypalSubscriptionId: null, billingStatus: "free_tier_founding_rate_waiting" }).where(eq(users.id, userId));
 }
 
 // ─── Webhook router (mounted at /api/paypal) ──────────────────────────────────
@@ -176,7 +223,7 @@ paypalRouter.post("/webhook", express.json(), async (req, res) => {
     ) {
       const dbInst = await getDb();
       if (!isNaN(userId) && dbInst)
-        await dbInst.update(users).set({ isPro: false }).where(eq(users.id, userId));
+        await dbInst.update(users).set({ isPro: false, billingStatus: "free_tier_founding_rate_waiting" }).where(eq(users.id, userId));
 
     } else if (event.event_type === "BILLING.SUBSCRIPTION.PAYMENT.FAILED") {
       // Notify the owner so they can follow up; user retains Pro access until subscription expires
