@@ -1415,3 +1415,32 @@
 - [x] After onboarding completes: markWrenIntroSeen is already called by WrenIntroMoment.handleDone
 - [x] Verify: new founding member clicks magic link → OAuth → invite gate → onboarding fires → Today (dual-trigger: sessionStorage + server flag)
 - [x] Verify: subsequent logins skip the intro (hasSeenWrenIntro = true after markWrenIntroSeen fires)
+
+## Cleanup Brief — App (May 2026)
+
+### Priority 0 — Pricing reconciliation
+- [ ] P0.1: Rewrite /pro Pricing page to show all 5 tiers (Free, Pro Monthly, Pro Annual, Keeper Monthly, Keeper Annual) with both founding and retail prices (DEFERRED — awaiting pricing decision)
+- [ ] P0.2: Confirm /pro and /founding-member both use PayPal — remove any Stripe checkout references from /pro (DEFERRED)
+
+### Priority 1 — Command Center string cleanup
+- [x] P1.1: Sign-in card — already correct (all strings updated in prior session)
+- [x] P1.2: 404 page — already correct
+- [x] P1.3: Evidence Log overlay — already correct
+- [x] P1.4: Sidebar group label — already "Daily"
+- [x] P1.5: About page — no Command Center references found
+- [x] P1.6: Pricing page — no Command Center references found
+- [x] P1.7: Doing Mode — updated: off-state now shows Being Mode / Rest and notice
+
+### Priority 2 — Daily ritual names locked everywhere
+- [x] P2.1: Lock ritual names — WelcomePage headings updated; TourPage already correct
+- [x] P2.2: Tour step 2/9 — already correct (updated in prior session)
+
+### Priority 4 — Weekly Review JSON bug
+- [x] P4: Fix /weekly "Recent check-ins" section — full labeled card rendering per check-in type
+
+### Priority 7 — Founding Member page value props
+- [x] P7: Add "What founding members get" section — 5 value prop icon cards added above pricing tiles
+
+### Priority 8 — Selected UX/copy upgrades
+- [x] P8.6: Utility microcopy — Start a new thread, Jot something down, Log this moment, Ask Wren (Clarity + Weekly already correct); Run Detection → Ask Wren to look; Score Projects → Ask Wren to score (IntelligencePage)
+- [x] P8.7: /settings — sidebar label updated to "You & Wren"; page heading already "You & Wren"

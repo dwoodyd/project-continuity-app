@@ -7,13 +7,13 @@
  *
  * If the user is NOT a founding member, they are redirected to /apply.
  */
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Shield, Star, Clock, ArrowRight, Copy, Check } from "lucide-react";
+import { Shield, Star, Clock, ArrowRight, Copy, Check, Gift, Lock, MessageCircle, Rocket, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -158,6 +158,52 @@ export default function FoundingMemberPage() {
             When your trial ends, you'll choose a plan at your founding rate.
             No automatic charge — we'll send a reminder before anything happens.
           </p>
+        </div>
+
+        {/* What founding members get */}
+        <div className="space-y-4">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">
+            What founding members get
+          </h2>
+          <div className="space-y-3">
+            {([
+              {
+                icon: Gift,
+                title: "Free during beta",
+                desc: "90 days of full Pro access. No card required, no automatic charge.",
+              },
+              {
+                icon: Lock,
+                title: "Locked rate for life",
+                desc: "$4.99/mo Pro · $9.99/mo Keeper. Your price never increases at renewal — not in five years, not ever.",
+              },
+              {
+                icon: MessageCircle,
+                title: "Direct line to the founder",
+                desc: "DM access for feedback and questions. Keeper members also get a monthly office hour.",
+              },
+              {
+                icon: Rocket,
+                title: "First access to Lifewoven and Operator House",
+                desc: "When the next two products in the suite launch, founding members get in before the public.",
+              },
+              {
+                icon: BadgeCheck,
+                title: "Founding Member badge",
+                desc: "Permanent recognition in your profile. A quiet signal that you were here at the start.",
+              },
+            ] as { icon: React.ElementType; title: string; desc: string }[]).map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-4 p-4 rounded-xl border border-border bg-card">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon className="w-4 h-4 text-amber-500/80" />
+                </div>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">{title}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Locked rates */}

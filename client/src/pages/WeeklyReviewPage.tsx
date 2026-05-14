@@ -227,39 +227,66 @@ export default function WeeklyReviewPage() {
       {recentCheckIns && recentCheckIns.length > 0 && (
         <div>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent check-ins</p>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {recentCheckIns.slice(0, 10).map((checkIn) => {
               // Parse structured JSON payloads stored per check-in type
-              let summary: string | null = null;
+              type CheckInFields = { label: string; value: string }[];
+              let fields: CheckInFields = [];
+              let isPlainText = false;
               try {
-                const parsed = JSON.parse(checkIn.userInput ?? "");
+                const raw = checkIn.userInput ?? "";
+                if (!raw.startsWith("{")) throw new Error("plain");
+                const p = JSON.parse(raw);
                 if (checkIn.type === "morning") {
-                  summary = parsed.notes || parsed.capacityLevel || null;
+                  if (p.notes) fields.push({ label: "Notes", value: p.notes });
+                  if (p.capacityLevel) fields.push({ label: "Capacity", value: p.capacityLevel });
+                  if (p.primaryFocus) fields.push({ label: "Primary focus", value: p.primaryFocus });
+                  if (p.energyLevel) fields.push({ label: "Energy", value: p.energyLevel });
                 } else if (checkIn.type === "midday") {
-                  summary = parsed.workedOn || parsed.nextMove || null;
+                  if (p.workedOn) fields.push({ label: "Worked on", value: p.workedOn });
+                  if (p.wasOnPlan !== undefined) fields.push({ label: "On plan", value: p.wasOnPlan ? "Yes" : "No" });
+                  if (p.interruptions) fields.push({ label: "Interruptions", value: p.interruptions });
+                  if (p.nextMove) fields.push({ label: "Next move", value: p.nextMove });
                 } else if (checkIn.type === "evening") {
-                  summary = parsed.whatMoved || parsed.whatLearned || null;
+                  if (p.whatMoved) fields.push({ label: "What moved", value: p.whatMoved });
+                  if (p.whatRemains) fields.push({ label: "What remains", value: p.whatRemains });
+                  if (p.whatLearned) fields.push({ label: "What I learned", value: p.whatLearned });
+                  if (p.tomorrowFirst) fields.push({ label: "Tomorrow first", value: p.tomorrowFirst });
                 }
               } catch {
-                // Plain text fallback (legacy entries)
-                summary = checkIn.userInput && !checkIn.userInput.startsWith("{") ? checkIn.userInput : null;
+                isPlainText = true;
               }
               const typeLabel = checkIn.type === "morning" ? "Morning check-in" : checkIn.type === "midday" ? "Midday pulse" : "Evening close";
+              const accentColor = checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-blue-400" : "bg-violet-400";
+              const plainSummary = isPlainText && checkIn.userInput ? checkIn.userInput : null;
               return (
-                <div key={checkIn.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-card">
-                  <div className={cn(
-                    "w-2 h-2 rounded-full mt-1.5 shrink-0",
-                    checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-blue-400" : "bg-violet-400"
-                  )} />
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-medium text-foreground">{typeLabel}</p>
-                      <p className="text-xs text-muted-foreground">{format(new Date(checkIn.createdAt), "MMM d")}</p>
-                    </div>
-                    {summary && (
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{summary}</p>
-                    )}
+                <div key={checkIn.id} className="p-4 rounded-xl border border-border bg-card space-y-2">
+                  {/* Header */}
+                  <div className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full shrink-0", accentColor)} />
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      {typeLabel} · {format(new Date(checkIn.createdAt), "MMM d")}
+                    </p>
                   </div>
+                  {/* Structured fields */}
+                  {fields.length > 0 && (
+                    <div className="space-y-1.5 pt-1">
+                      {fields.map(f => (
+                        <div key={f.label} className="grid grid-cols-[120px_1fr] gap-2 text-xs">
+                          <span className="text-muted-foreground/60 font-medium shrink-0">{f.label}:</span>
+                          <span className="text-foreground/80 leading-relaxed">{f.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Plain-text fallback */}
+                  {plainSummary && (
+                    <p className="text-xs text-muted-foreground leading-relaxed pt-1">{plainSummary}</p>
+                  )}
+                  {/* Empty state */}
+                  {fields.length === 0 && !plainSummary && (
+                    <p className="text-xs text-muted-foreground/40 italic">No details recorded.</p>
+                  )}
                 </div>
               );
             })}

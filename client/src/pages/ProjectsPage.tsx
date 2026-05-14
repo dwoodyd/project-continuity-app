@@ -275,7 +275,7 @@ export default function ProjectsPage() {
         </div>
         <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5 shrink-0">
           <Plus className="w-4 h-4" />
-          New project
+          Start a new thread
         </Button>
       </div>
 

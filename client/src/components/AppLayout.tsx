@@ -69,7 +69,7 @@ const ALL_NAV_ITEMS = [
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
   { href: "/weekly",       label: "Weekly Review",   icon: Archive,       section: "secondary" },
   { href: "/intelligence", label: "Intelligence",    icon: Lightbulb,     section: "secondary" },
-  { href: "/settings",     label: "Settings",        icon: Settings,      section: "secondary" },
+  { href: "/settings",     label: "You & Wren",      icon: Settings,      section: "secondary" },
   { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
   { href: "/tour",         label: "Take the Tour",   icon: GraduationCap, section: "secondary" },
   { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
@@ -96,7 +96,7 @@ const MORE_ITEMS = [
   { href: "/welcome",      label: "About Continuary", icon: Home },
   { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
   { href: "/study",        label: "Single Focus Mode",  icon: ClipboardList },
-  { href: "/settings",     label: "Settings",         icon: Settings },
+  { href: "/settings",     label: "You & Wren",       icon: Settings },
   { href: "/founding-member", label: "Founding Member", icon: Star },
 ];
 

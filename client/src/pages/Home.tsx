@@ -2187,7 +2187,7 @@ export default function Home() {
             <div className="flex items-center gap-1.5">
               <p className="text-xs font-semibold text-foreground">
                 {isPlanningMode ? (
-                  <span>⚡ <GlossaryTerm name="gatheringMode" /></span>
+                  <span>🌿 Being Mode</span>
                 ) : (
                   <span>🎯 <GlossaryTerm name="doingMode" /></span>
                 )}
@@ -2200,15 +2200,15 @@ export default function Home() {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed space-y-2 p-3">
-                    <p><strong>⚡ Planning Mode</strong> — for thinking, mapping, and deciding. Use this when you’re figuring out what to do next, breaking down a project, or making decisions. The app surfaces your projects and next steps for review.</p>
-                    <p><strong>🎯 Doing Mode</strong> — for executing and building. Use this when you know exactly what to do and just need to get it done. The app focuses on your current task and minimises distractions.</p>
+                    <p><strong>🎯 Doing Mode</strong> — Make and move. Use this when you know exactly what to do and just need to get it done.</p>
+                    <p><strong>🌿 Being Mode</strong> — Rest and notice. Use this when you need to step back, restore, or simply be present without a task agenda.</p>
                     <p className="text-muted-foreground/60">Toggle this to match your mental state right now. Focus Mode (the ⚡ button in the sidebar) is a separate distraction-free timer session.</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {isPlanningMode ? "Thinking, mapping, deciding" : "Make and move"}
+              {isPlanningMode ? "Rest and notice" : "Make and move"}
             </p>
           </div>
           <button

@@ -203,7 +203,7 @@ function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
     <div className="flex items-center gap-2">
       <button onClick={() => setOpen(true)}
         className="flex-1 flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-sm">
-        <Plus className="w-4 h-4 shrink-0" /><span>New note</span>
+        <Plus className="w-4 h-4 shrink-0" /><span>Jot something down</span>
       </button>
       <div className="relative group">
         <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-xs">

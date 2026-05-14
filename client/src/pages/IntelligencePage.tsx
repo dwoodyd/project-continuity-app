@@ -407,7 +407,7 @@ export default function IntelligencePage() {
                   detectMutation.mutate();
                 }}
               >
-                {patternsLoading ? "Detecting…" : "Run Detection"}
+                {patternsLoading ? "Detecting…" : "Ask Wren to look"}
               </Button>
             </CardContent>
           </Card>
@@ -495,7 +495,7 @@ export default function IntelligencePage() {
                   scoreAllMutation.mutate();
                 }}
               >
-                {scoringLoading ? "Scoring…" : "Score Projects"}
+                {scoringLoading ? "Scoring…" : "Ask Wren to score"}
               </Button>
             </CardContent>
           </Card>

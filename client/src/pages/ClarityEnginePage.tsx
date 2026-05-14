@@ -290,7 +290,7 @@ function NewSessionView({
             </>
           ) : (
             <>
-              Run Clarity Engine
+              Ask Wren
               <ArrowRight className="w-4 h-4 ml-2" />
             </>
           )}

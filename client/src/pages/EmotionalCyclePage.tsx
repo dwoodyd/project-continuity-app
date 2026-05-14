@@ -336,7 +336,7 @@ export default function EmotionalCyclePage() {
               boxShadow: score ? "0 4px 20px oklch(0.78 0.18 65 / 0.35)" : "none",
             }}
           >
-            {logMutation.isPending ? "Saving…" : alreadyLogged ? "Update log" : "Save mood"}
+            {logMutation.isPending ? "Saving…" : alreadyLogged ? "Update log" : "Log this moment"}
           </button>
         </div>
 
