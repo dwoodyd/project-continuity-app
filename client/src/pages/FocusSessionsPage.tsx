@@ -619,11 +619,72 @@ export default function FocusSessionsPage() {
         )}
       </div>
 
-      {/* Main two-column layout */}
-      <div className="flex flex-1 flex-col lg:flex-row overflow-hidden">
+      {/* Main two-column layout — Wren left half, controls right half */}
+      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
 
-        {/* ── User workspace (left / center) ─────────────────────────────── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 py-10 gap-8">
+        {/* ── Wren's half — left 50% ──────────────────────────────────────── */}
+        <div
+          className="relative flex-shrink-0 flex flex-col items-center justify-end overflow-hidden"
+          style={{
+            width: "50%",
+            background: "oklch(0.07 0.02 240)",
+          }}
+        >
+          {/* Full-bleed Wren video — fills the entire left panel */}
+          <video
+            ref={wrenVideoRef}
+            src={WREN_VIDEOS[wrenActivity]}
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center top",
+              mixBlendMode: "screen",
+              filter: "brightness(1.15) saturate(1.3)",
+            }}
+          />
+
+          {/* Wren message bubble — floats over video */}
+          {wrenMessage && (
+            <div
+              className="absolute top-8 left-1/2 -translate-x-1/2 z-10 px-5 py-3 rounded-2xl text-sm text-center max-w-[260px]"
+              style={{
+                background: "oklch(0.12 0.04 240 / 0.85)",
+                border: "1px solid oklch(0.35 0.08 65 / 0.6)",
+                color: "oklch(0.92 0.08 65)",
+                backdropFilter: "blur(8px)",
+                animation: "fadeIn 0.4s ease",
+              }}
+            >
+              {wrenMessage}
+            </div>
+          )}
+
+          {/* Activity label — bottom of Wren panel */}
+          {phase === "active" && (
+            <p
+              className="relative z-10 mb-6 text-[11px] tracking-widest uppercase"
+              style={{ color: "oklch(0.45 0.04 240)" }}
+            >
+              {wrenStatusLine}
+            </p>
+          )}
+
+          {/* Subtle gradient at bottom to ground Wren */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+            style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240), transparent)" }}
+          />
+        </div>
+
+        {/* ── User workspace — right 50% ──────────────────────────────────── */}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 gap-8 overflow-y-auto">
 
           {/* IDLE — welcome */}
           {phase === "idle" && (
@@ -1024,70 +1085,6 @@ export default function FocusSessionsPage() {
           )}
         </div>
 
-        {/* ── Wren's workspace (right) ────────────────────────────────────── */}
-        <div
-          className="lg:w-72 flex flex-col items-center justify-end pb-8 pt-4 px-4 relative"
-          style={{ background: "oklch(0.08 0.02 240)" }}
-        >
-          {/* Wren message bubble */}
-          {wrenMessage && (
-            <div
-              className="absolute top-6 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-xl text-sm text-center max-w-[200px]"
-              style={{
-                background: "oklch(0.16 0.04 240)",
-                border: "1px solid oklch(0.28 0.06 65)",
-                color: "oklch(0.88 0.06 65)",
-                animation: "fadeIn 0.4s ease",
-              }}
-            >
-              {wrenMessage}
-            </div>
-          )}
-
-          {/* Wren video */}
-          <div className="relative w-full flex justify-center">
-            <video
-              ref={wrenVideoRef}
-              src={WREN_VIDEOS[wrenActivity]}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full max-w-[240px] lg:max-w-full"
-              style={{
-                mixBlendMode: "screen",
-                filter: "brightness(1.1) saturate(1.2)",
-              }}
-            />
-          </div>
-
-          {/* Wren's persistent artifact */}
-          {artifactData && artifactData.sessions.length > 0 && (
-            <div className="mt-4 flex flex-col items-center gap-2">
-              <WovenArtifact
-                sessions={artifactData.sessions}
-                totalSegments={artifactData.totalSegments}
-                size="full"
-              />
-              <div className="text-center px-2">
-                <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.55 0.06 65)" }}>
-                  Your focus record
-                </p>
-                <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.38 0.03 240)" }}>
-                  One row per session.
-                  Gold = progress &middot; Cream = thinking &middot; Navy = stuck.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Activity label — rotates every 6–10 min */}
-          {phase === "active" && (
-            <p className="text-[10px] mt-3 tracking-wide uppercase" style={{ color: "oklch(0.35 0.03 240)" }}>
-              {wrenStatusLine}
-            </p>
-          )}
-        </div>
       </div>
 
       <style>{`

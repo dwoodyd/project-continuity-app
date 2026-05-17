@@ -1,0 +1,50 @@
+{
+  "query": "SELECT id, openId, name, role, isPro, isFoundingMember FROM users ORDER BY id ASC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute SELECT id, openId, name, role, isPro, isFoundingMember FROM users ORDER BY id ASC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "openId": "AgwKxmfcKAZNbR6W4W477t",
+      "name": "DeWayne Woods",
+      "role": "admin",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "240001",
+      "openId": "Eq8v3GSuq7JVfexfT7zCXW",
+      "name": "TheMermaidTM",
+      "role": "user",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1410015",
+      "openId": "e2e-test-user-checkin-smoke",
+      "name": "E2E Test User",
+      "role": "admin",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1620002",
+      "openId": "CtGRcvhqCN4CNj42mjaTNH",
+      "name": "deletgo",
+      "role": "admin",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    },
+    {
+      "id": "1770006",
+      "openId": "i8KGXN6VdQS4ceNL3JAuUZ",
+      "name": "thelamontwoods",
+      "role": "user",
+      "isPro": "0",
+      "isFoundingMember": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\topenId\tname\trole\tisPro\tisFoundingMember\n1\tAgwKxmfcKAZNbR6W4W477t\tDeWayne Woods\tadmin\t0\t0\n240001\tEq8v3GSuq7JVfexfT7zCXW\tTheMermaidTM\tuser\t0\t0\n1410015\te2e-test-user-checkin-smoke\tE2E Test User\tadmin\t0\t0\n1620002\tCtGRcvhqCN4CNj42mjaTNH\tdeletgo\tadmin\t0\t0\n1770006\ti8KGXN6VdQS4ceNL3JAuUZ\tthelamontwoods\tuser\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 264
+}
