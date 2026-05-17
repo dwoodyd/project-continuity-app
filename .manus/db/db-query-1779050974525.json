@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `user_focus_configs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`focusTopic` text NOT NULL,\n\t`durationDays` int NOT NULL,\n\t`cadence` enum('daily','weekday','rhythm') NOT NULL DEFAULT 'daily',\n\t`wrenPrompts` boolean NOT NULL DEFAULT false,\n\t`startedAt` timestamp NOT NULL DEFAULT (now()),\n\t`endedAt` timestamp,\n\t`pausedUntil` timestamp,\n\t`status` enum('active','paused','ended','completed') NOT NULL DEFAULT 'active',\n\t`entriesCount` int NOT NULL DEFAULT 0,\n\t`currentStreak` int NOT NULL DEFAULT 0,\n\t`longestStreak` int NOT NULL DEFAULT 0,\n\t`lastEntryDate` varchar(10),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `user_focus_configs_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `user_focus_configs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`focusTopic` text NOT NULL,\n\t`durationDays` int NOT NULL,\n\t`cadence` enum('daily','weekday','rhythm') NOT NULL DEFAULT 'daily',\n\t`wrenPrompts` boolean NOT NULL DEFAULT false,\n\t`startedAt` timestamp NOT NULL DEFAULT (now()),\n\t`endedAt` timestamp,\n\t`pausedUntil` timestamp,\n\t`status` enum('active','paused','ended','completed') NOT NULL DEFAULT 'active',\n\t`entriesCount` int NOT NULL DEFAULT 0,\n\t`currentStreak` int NOT NULL DEFAULT 0,\n\t`longestStreak` int NOT NULL DEFAULT 0,\n\t`lastEntryDate` varchar(10),\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `user_focus_configs_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 361
+}

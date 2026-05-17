@@ -4,6 +4,63 @@ import { TRPCError } from "@trpc/server";
 import { assertProjectOwnedBy, createProjectMemoryEvent, getDb } from "../db";
 import { focusSessions, focusSessionArtifact, threadStrength, sourceItems } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
+import { invokeLLM } from "../_core/llm";
+
+// ── Time-of-day vibe ─────────────────────────────────────────────────────────
+function getWrenVibe(hour: number): { vibe: string; openingLine: string; defaultAmbient: string } {
+  if (hour >= 5 && hour < 8)  return { vibe: "gentle, slow-warming", openingLine: "You're early. Good. Let's start soft.", defaultAmbient: "silence" };
+  if (hour >= 8 && hour < 12) return { vibe: "alert, ready, present", openingLine: "I'm here. Let's work.", defaultAmbient: "cafe" };
+  if (hour >= 12 && hour < 15) return { vibe: "steady, grounded", openingLine: "Right after lunch. Good time to focus. I'm with you.", defaultAmbient: "cafe" };
+  if (hour >= 15 && hour < 18) return { vibe: "patient, supportive", openingLine: "The afternoon stretch. I've got you.", defaultAmbient: "rain" };
+  if (hour >= 18 && hour < 22) return { vibe: "warm, evening-soft", openingLine: "Evening session. I'll keep it quiet.", defaultAmbient: "rain" };
+  if (hour >= 22 || hour < 1)  return { vibe: "hushed, intimate", openingLine: "Late one. Okay. I'll be quiet.", defaultAmbient: "silence" };
+  return { vibe: "very still, almost whispered", openingLine: "You're here at this hour. I'll sit with you.", defaultAmbient: "silence" };
+}
+
+// ── Wren hard-rail system prompt ─────────────────────────────────────────────
+function buildWrenSystemPrompt(opts: {
+  intention: string;
+  durationMinutes: number;
+  elapsedMinutes: number;
+  vibe: string;
+  chatHistory: Array<{ role: string; content: string }>;
+}): string {
+  return `You are Wren — a quiet bird companion who sits with the user during a focus session. You are NOT a productivity assistant, coach, tutor, or task helper.
+
+Current session:
+- Intention: "${opts.intention || "not set"}"
+- Duration: ${opts.durationMinutes} minutes
+- Elapsed: ~${opts.elapsedMinutes} minutes
+- Your vibe right now: ${opts.vibe}
+
+Your role is presence, not assistance. You are body-doubling — being there, not doing the work.
+
+VOICE RULES:
+- Short messages. 1–2 sentences usually. Almost never more than 3.
+- Lowercase-friendly when the user is casual.
+- Present tense, present focus.
+- Never use productivity vocabulary: output, deliverable, progress, win, productive, optimize.
+- Occasional *— Wren* sign-off on longer messages.
+
+HARD RAILS — when the user asks a task-oriented question (homework, coding, factual lookup, writing help, strategy):
+- Gently decline and redirect to presence.
+- Example: User asks "Can you help me with this React component?" → You say: "Not right now. I'm here with you while you work it out yourself. What's the part that's snagging?"
+- Example: User asks "What's a good thesis statement?" → You say: "That one's yours to find. I'm sitting with you while you do. Want to talk through what you're trying to say?"
+- Never answer task questions. Always redirect to the person, not the problem.
+
+You may:
+- Ask gentle questions back
+- Acknowledge feelings (tired, stuck, frustrated)
+- Note the thread metaphor lightly (not constantly)
+- Be warm, quiet, and present
+
+You may NOT:
+- Answer factual questions
+- Edit or critique their work
+- Offer tips, frameworks, or advice
+- Set goals or track metrics
+- Be anything other than a quiet companion`;
+}
 
 // Thread units per duration
 const THREAD_UNITS: Record<number, number> = { 25: 1, 50: 2, 90: 3 };
@@ -219,6 +276,54 @@ export const focusSessionsRouter = router({
       lifetimeSessions: all.length,
     };
   }),
+
+  // ── Wren in-session chat ────────────────────────────────────────────────────
+  wrenChat: protectedProcedure
+    .input(z.object({
+      message: z.string().min(1).max(1000),
+      intention: z.string().max(500).optional(),
+      durationMinutes: z.union([z.literal(25), z.literal(50), z.literal(90)]).optional(),
+      elapsedMinutes: z.number().min(0).max(200).optional(),
+      clientHour: z.number().min(0).max(23).optional(), // user's local hour
+      chatHistory: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().max(500),
+      })).max(20).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const hour = input.clientHour ?? new Date().getHours();
+      const { vibe } = getWrenVibe(hour);
+      const systemPrompt = buildWrenSystemPrompt({
+        intention: input.intention ?? "",
+        durationMinutes: input.durationMinutes ?? 50,
+        elapsedMinutes: input.elapsedMinutes ?? 0,
+        vibe,
+        chatHistory: input.chatHistory ?? [],
+      });
+
+      const history = (input.chatHistory ?? []).slice(-10).map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      }));
+
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...history,
+          { role: "user", content: input.message },
+        ],
+      });
+
+      const reply = response?.choices?.[0]?.message?.content ?? "still here.";
+      return { reply };
+    }),
+
+  // ── Get time-of-day vibe (for client to read default ambient + opening line) ─
+  getSessionVibe: protectedProcedure
+    .input(z.object({ clientHour: z.number().min(0).max(23) }))
+    .query(({ input }) => {
+      return getWrenVibe(input.clientHour);
+    }),
 
   // ── Legacy: save (kept for backward compat) ─────────────────────────────────
   save: protectedProcedure

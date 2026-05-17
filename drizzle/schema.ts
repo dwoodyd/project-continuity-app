@@ -652,6 +652,29 @@ export const studyWeeklyReviews = mysqlTable("study_weekly_reviews", {
 export type StudyWeeklyReview = typeof studyWeeklyReviews.$inferSelect;
 export type InsertStudyWeeklyReview = typeof studyWeeklyReviews.$inferInsert;
 
+// ─── User Focus Configs (Single Focus Mode — generalized) ───────────────────────────────
+export const userFocusConfigs = mysqlTable("user_focus_configs", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  focusTopic: text("focusTopic").notNull(),
+  durationDays: int("durationDays").notNull(),
+  cadence: mysqlEnum("cadence", ["daily", "weekday", "rhythm"]).default("daily").notNull(),
+  wrenPrompts: boolean("wrenPrompts").default(false).notNull(),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  endedAt: timestamp("endedAt"),
+  pausedUntil: timestamp("pausedUntil"),
+  status: mysqlEnum("status", ["active", "paused", "ended", "completed"]).default("active").notNull(),
+  // Continuity tracking (internal only — never shown as digits)
+  entriesCount: int("entriesCount").default(0).notNull(),
+  currentStreak: int("currentStreak").default(0).notNull(),
+  longestStreak: int("longestStreak").default(0).notNull(),
+  lastEntryDate: varchar("lastEntryDate", { length: 10 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type UserFocusConfig = typeof userFocusConfigs.$inferSelect;
+export type InsertUserFocusConfig = typeof userFocusConfigs.$inferInsert;
+
 // ─── Feedback Submissions ─────────────────────────────────────────────────────
 export const feedbackSubmissions = mysqlTable("feedbackSubmissions", {
   id: int("id").autoincrement().primaryKey(),

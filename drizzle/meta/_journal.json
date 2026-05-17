@@ -281,6 +281,13 @@
       "when": 1779047076390,
       "tag": "0039_certain_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "5",
+      "when": 1779050963907,
+      "tag": "0040_slimy_silver_centurion",
+      "breakpoints": true
     }
   ]
 }

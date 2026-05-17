@@ -1540,3 +1540,30 @@
 - [x] Today dashboard widget in Home.tsx (shows session count + minutes)
 - [x] Sidebar nav item (Focus Sessions) in AppLayout.tsx
 - [x] Route registered in App.tsx (/focus → FocusSessionsPage, /focus-mode → FocusModePage)
+
+## Focus Sessions Build Updates (Continuary-FocusSessions-Build-Updates.md)
+- [x] Remove Body Doubling nav item from AppLayout sidebar and More sheet
+- [x] Fix "1 sessions" → "1 session" pluralization
+- [x] Add pre-session breath option on duration picker ("Take a breath first" link)
+- [x] Remember ambient sound choice in localStorage (rain/café persists across sessions)
+- [x] Wren status line rotates every 6–10 min (reading/writing/weaving/lookingup variants)
+- [x] Time-of-day vibe shifts on session opening line (7 time buckets)
+
+## Single Focus Mode Generalization (Continuary-SingleFocusMode-Generalization-Spec.md)
+- [x] Add userFocusConfigs table to schema (focusTopic, focusDescription, sessionDurationMinutes, cadence, wrenPromptsEnabled, wrenLine, status, pausedUntil, endedAt)
+- [x] Run drizzle migration and apply to DB
+- [x] Add tRPC procedures: study.createConfig, study.updateConfig, study.getActiveConfig, study.logDay, study.getRecentDays
+- [x] Rewrite StudyTrackerPage as generalized Single Focus Mode with first-run setup flow
+- [x] Setup flow: focus topic, description, session duration, cadence, Wren prompts toggle
+- [x] Replace hardcoded Python curriculum with user-defined focus topic/description
+- [x] Wren continuity line from config (replaces streak/progress bar)
+- [x] Day navigator with check-in form (intention, notes, energy, mood, duration)
+- [x] Settings panel (change focus, extend, pause, end)
+
+## Focus Sessions Phase 1.5 Wave 1 (Continuary-FocusSessions-Phase1.5-Addendum.md)
+- [x] Add wrenChat tRPC procedure to focusSessions router (hard rail system prompt: companion-only, no task assistance)
+- [x] Time-of-day vibe shifts on session opening line (7 buckets)
+- [x] Wren-initiated check-ins: 50min → 1 check-in at 27min; 90min → 2 check-ins at 30min and 70min
+- [x] In-session chat panel UI: collapsible, message thread, input with Enter-to-send
+- [x] Auto-collapse chat after 5 min of inactivity
+- [x] Chat history passed as context to wrenChat (last 12 messages, 400 char limit each)

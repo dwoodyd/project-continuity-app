@@ -304,6 +304,7 @@ export default function FocusSessionsPage() {
   const { data: artifactData, refetch: refetchArtifact } = trpc.focusSessions.getArtifact.useQuery();
   const startMutation = trpc.focusSessions.start.useMutation();
   const completeMutation = trpc.focusSessions.complete.useMutation();
+  const wrenChatMutation = trpc.focusSessions.wrenChat.useMutation();
 
   // ── Session state ─────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<SessionPhase>("idle");
@@ -316,15 +317,95 @@ export default function FocusSessionsPage() {
   const [midSessionShown, setMidSessionShown] = useState(false);
   const [midSessionVisible, setMidSessionVisible] = useState(false);
   const [wrenMessage, setWrenMessage] = useState<string | null>(null);
+  // ── Chat state ────────────────────────────────────────────────────────────
+  type ChatMsg = { role: "user" | "assistant"; content: string; ts: number };
+  const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatCollapsed, setChatCollapsed] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatInactivityRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const checkInTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // Auto-collapse chat after 5 min of inactivity
+  const resetChatInactivity = useCallback(() => {
+    if (chatInactivityRef.current) clearTimeout(chatInactivityRef.current);
+    setChatCollapsed(false);
+    chatInactivityRef.current = setTimeout(() => setChatCollapsed(true), 5 * 60 * 1000);
+  }, []);
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (!chatCollapsed) chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, chatCollapsed]);
+  // Schedule Wren-initiated check-ins
+  const scheduleCheckIns = useCallback((durationMin: number) => {
+    checkInTimersRef.current.forEach(clearTimeout);
+    checkInTimersRef.current = [];
+    const CHECKIN_LINES = [
+      "still here. thread's holding.",
+      "how's it going?",
+      "need anything?",
+      "halfway. you good?",
+      "this is a good rhythm.",
+    ];
+    const addCheckIn = (delayMs: number) => {
+      const t = setTimeout(() => {
+        const line = CHECKIN_LINES[Math.floor(Math.random() * CHECKIN_LINES.length)];
+        setChatMessages((prev) => [...prev, { role: "assistant", content: line, ts: Date.now() }]);
+        setChatCollapsed(false);
+      }, delayMs);
+      checkInTimersRef.current.push(t);
+    };
+    if (durationMin === 50) addCheckIn(27 * 60 * 1000);
+    if (durationMin === 90) { addCheckIn(30 * 60 * 1000); addCheckIn(70 * 60 * 1000); }
+  }, []);
+  // Send chat message to Wren
+  const handleSendChat = useCallback(async () => {
+    const msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+    setChatInput("");
+    setChatLoading(true);
+    resetChatInactivity();
+    const userMsg: ChatMsg = { role: "user", content: msg, ts: Date.now() };
+    setChatMessages((prev) => [...prev, userMsg]);
+    try {
+      const elapsedMinutes = Math.floor((durationMinutes * 60 - secondsLeft) / 60);
+      const history = [...chatMessages, userMsg].slice(-12).map((m) => ({ role: m.role, content: m.content.slice(0, 400) }));
+      const { reply } = await wrenChatMutation.mutateAsync({
+        message: msg,
+        intention: intention.trim() || undefined,
+        durationMinutes,
+        elapsedMinutes,
+        clientHour: new Date().getHours(),
+        chatHistory: history,
+      });
+      setChatMessages((prev) => [...prev, { role: "assistant", content: String(reply ?? "still here."), ts: Date.now() }]);
+    } catch {
+      setChatMessages((prev) => [...prev, { role: "assistant", content: "still here.", ts: Date.now() }]);
+    } finally {
+      setChatLoading(false);
+    }
+  }, [chatInput, chatLoading, chatMessages, durationMinutes, secondsLeft, intention, wrenChatMutation, resetChatInactivity]);
 
   // ── Wren activity ─────────────────────────────────────────────────────────
   const [wrenActivity, setWrenActivity] = useState<WrenActivity>("lookingup");
   const wrenVideoRef = useRef<HTMLVideoElement>(null);
   const activityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Ambient sound ─────────────────────────────────────────────────────────
-  const [ambientSound, setAmbientSound] = useState<"silence" | "rain" | "cafe">("silence");
-  const [ambientVolume, setAmbientVolume] = useState(30);
+  // ── Ambient sound — persisted in localStorage ───────────────────────────────
+  const [ambientSound, setAmbientSound] = useState<"silence" | "rain" | "cafe">(() => {
+    try { const s = localStorage.getItem("continuary-ambient-sound"); return (s === "rain" || s === "cafe") ? s : "silence"; } catch { return "silence"; }
+  });
+  const [ambientVolume, setAmbientVolume] = useState(() => {
+    try { const v = Number(localStorage.getItem("continuary-ambient-vol")); return isNaN(v) ? 30 : v; } catch { return 30; }
+  });
+  const handleSetAmbient = useCallback((s: "silence" | "rain" | "cafe") => {
+    setAmbientSound(s);
+    try { localStorage.setItem("continuary-ambient-sound", s); } catch {}
+  }, []);
+  const handleSetVolume = useCallback((v: number) => {
+    setAmbientVolume(v);
+    try { localStorage.setItem("continuary-ambient-vol", String(v)); } catch {}
+  }, []);
   useAmbientSound(ambientSound, ambientVolume / 100, phase === "active");
 
   // ── Timer ─────────────────────────────────────────────────────────────────
@@ -334,7 +415,26 @@ export default function FocusSessionsPage() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
   }, []);
 
-  // ── Wren activity rotation ────────────────────────────────────────────────
+    // ── Wren status line rotation (every 6–10 min) ──────────────────────────
+  const STATUS_LINES: Record<WrenActivity, string[]> = {
+    reading:   ["Wren is reading", "Wren is in her notes", "Wren is thinking"],
+    writing:   ["Wren is writing", "Wren is working", "Wren is making something"],
+    weaving:   ["Wren is weaving", "Wren is in the work", "Wren is with you"],
+    lookingup: ["Wren is checking in", "Wren is here"],
+  };
+  const [wrenStatusLine, setWrenStatusLine] = useState("Wren is here");
+  const statusRotationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduleNextStatus = useCallback((activity: WrenActivity) => {
+    if (statusRotationRef.current) clearTimeout(statusRotationRef.current);
+    const delay = (6 + Math.random() * 4) * 60 * 1000; // 6-10 min
+    statusRotationRef.current = setTimeout(() => {
+      const lines = STATUS_LINES[activity];
+      setWrenStatusLine(lines[Math.floor(Math.random() * lines.length)]);
+      scheduleNextStatus(activity);
+    }, delay);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Wren activity rotation ────────────────────────────────────────────
   const scheduleNextActivity = useCallback((currentActivity: WrenActivity, isLast5: boolean) => {
     if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
     const activities: WrenActivity[] = isLast5
@@ -344,9 +444,11 @@ export default function FocusSessionsPage() {
     const delay = (4 + Math.random() * 4) * 60 * 1000; // 4-8 min
     activityTimerRef.current = setTimeout(() => {
       setWrenActivity(next);
+      setWrenStatusLine(STATUS_LINES[next][0]);
+      scheduleNextStatus(next);
       scheduleNextActivity(next, isLast5);
     }, delay);
-  }, []);
+  }, [scheduleNextStatus]); // eslint-disable-line react-hooks/exhaustive-deps);
 
   // Switch Wren video when activity changes
   useEffect(() => {
@@ -371,13 +473,25 @@ export default function FocusSessionsPage() {
       setSessionId(result.id);
       setSecondsLeft(durationMinutes * 60);
       setMidSessionShown(false);
+      setChatMessages([]);
+      setChatCollapsed(false);
       setPhase("active");
       setWrenActivity("reading");
       scheduleNextActivity("reading", false);
+      scheduleCheckIns(durationMinutes);
 
-      // Show Wren's opening message
-      setWrenMessage("I'm here. Let's work.");
-      setTimeout(() => setWrenMessage(null), 4000);
+      // Show Wren's opening message — time-of-day vibe shift
+      const hour = new Date().getHours();
+      const openingLine =
+        hour >= 5  && hour < 8  ? "You're early. Good. Let's start soft." :
+        hour >= 8  && hour < 12 ? "I'm here. Let's work." :
+        hour >= 12 && hour < 15 ? "Right after lunch. Good time to focus. I'm with you." :
+        hour >= 15 && hour < 18 ? "The afternoon stretch. I've got you." :
+        hour >= 18 && hour < 22 ? "Evening session. I'll keep it quiet." :
+        hour >= 22 || hour < 1  ? "Late one. Okay. I'll be quiet." :
+        "You're here at this hour. I'll sit with you.";
+      setWrenMessage(openingLine);
+      setTimeout(() => setWrenMessage(null), 5000);
     } catch (e) {
       toast.error("Couldn't start session. Please try again.");
     }
@@ -493,12 +607,12 @@ export default function FocusSessionsPage() {
             with Wren
           </p>
         </div>
-        {artifactData && artifactData.sessions.length > 0 && (
+              {artifactData && artifactData.sessions.length > 0 && (
           <div className="flex items-center gap-2">
             <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
             <div className="text-right">
               <p className="text-xs font-medium" style={{ color: "oklch(0.80 0.08 65)" }}>
-                {artifactData.totalSegments} sessions
+                {artifactData.totalSegments} {artifactData.totalSegments === 1 ? "session" : "sessions"}
               </p>
             </div>
           </div>
@@ -624,6 +738,19 @@ export default function FocusSessionsPage() {
               >
                 {startMutation.isPending ? "Starting…" : "Begin →"}
               </Button>
+              <p className="text-xs mt-4 opacity-40" style={{ color: "oklch(0.70 0.04 240)" }}>
+                Not ready yet?{" "}
+                <button
+                  onClick={() => {
+                    setWrenActivity("lookingup");
+                    setWrenMessage("Take a breath. I'll be here.");
+                    setTimeout(() => setWrenMessage(null), 4000);
+                  }}
+                  className="underline underline-offset-2 hover:opacity-80 transition-opacity"
+                >
+                  Take a breath first
+                </button>
+              </p>
             </div>
           )}
 
@@ -666,7 +793,7 @@ export default function FocusSessionsPage() {
                 {(["silence", "rain", "cafe"] as const).map((s) => (
                   <button
                     key={s}
-                    onClick={() => setAmbientSound(s)}
+                    onClick={() => handleSetAmbient(s)}
                     className={cn(
                       "text-xs px-3 py-1.5 rounded-full transition-all",
                       ambientSound === s ? "font-medium" : "opacity-50"
@@ -686,7 +813,7 @@ export default function FocusSessionsPage() {
                     min={0}
                     max={100}
                     value={ambientVolume}
-                    onChange={(e) => setAmbientVolume(Number(e.target.value))}
+                    onChange={(e) => handleSetVolume(Number(e.target.value))}
                     className="w-20 accent-amber-400"
                   />
                 )}
@@ -699,6 +826,95 @@ export default function FocusSessionsPage() {
               >
                 End session early
               </button>
+
+              {/* Wren chat panel */}
+              <div
+                className="w-full max-w-sm mt-6 rounded-xl overflow-hidden"
+                style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)" }}
+              >
+                {/* Chat header */}
+                <button
+                  onClick={() => setChatCollapsed((c) => !c)}
+                  className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+                  style={{ borderBottom: chatCollapsed ? "none" : "1px solid oklch(0.18 0.03 240)" }}
+                >
+                  <span className="text-xs font-medium" style={{ color: "oklch(0.65 0.06 65)" }}>
+                    {chatLoading ? "Wren is thinking…" : "Talk to Wren"}
+                  </span>
+                  <span className="text-xs" style={{ color: "oklch(0.40 0.03 240)" }}>
+                    {chatCollapsed ? "▾" : "▴"}
+                  </span>
+                </button>
+
+                {!chatCollapsed && (
+                  <>
+                    {/* Messages */}
+                    <div
+                      className="flex flex-col gap-2 px-3 py-3 overflow-y-auto"
+                      style={{ maxHeight: 200 }}
+                    >
+                      {chatMessages.length === 0 && (
+                        <p className="text-xs text-center py-2" style={{ color: "oklch(0.38 0.03 240)" }}>
+                          Wren is here. Say something if you need to.
+                        </p>
+                      )}
+                      {chatMessages.map((m) => (
+                        <div
+                          key={m.ts}
+                          className={cn(
+                            "text-xs rounded-lg px-3 py-2 max-w-[85%]",
+                            m.role === "user" ? "self-end" : "self-start"
+                          )}
+                          style={{
+                            background: m.role === "user" ? "oklch(0.20 0.05 240)" : "oklch(0.16 0.03 240)",
+                            color: m.role === "user" ? "oklch(0.88 0.04 60)" : "oklch(0.75 0.06 65)",
+                          }}
+                        >
+                          {m.content}
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div
+                          className="self-start text-xs rounded-lg px-3 py-2"
+                          style={{ background: "oklch(0.16 0.03 240)", color: "oklch(0.45 0.03 240)" }}
+                        >
+                          …
+                        </div>
+                      )}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    {/* Input */}
+                    <div
+                      className="flex gap-2 px-3 pb-3"
+                      style={{ borderTop: "1px solid oklch(0.18 0.03 240)", paddingTop: 8 }}
+                    >
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
+                        placeholder="Type something…"
+                        maxLength={300}
+                        className="flex-1 text-xs rounded-lg px-3 py-2 outline-none"
+                        style={{
+                          background: "oklch(0.16 0.03 240)",
+                          border: "1px solid oklch(0.24 0.04 240)",
+                          color: "oklch(0.88 0.04 60)",
+                        }}
+                      />
+                      <button
+                        onClick={handleSendChat}
+                        disabled={chatLoading || !chatInput.trim()}
+                        className="text-xs px-3 py-2 rounded-lg disabled:opacity-30 transition-opacity"
+                        style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                      >
+                        ↵
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -865,10 +1081,10 @@ export default function FocusSessionsPage() {
             </div>
           )}
 
-          {/* Activity label */}
+          {/* Activity label — rotates every 6–10 min */}
           {phase === "active" && (
             <p className="text-[10px] mt-3 tracking-wide uppercase" style={{ color: "oklch(0.35 0.03 240)" }}>
-              Wren is {wrenActivity === "lookingup" ? "checking in" : wrenActivity}
+              {wrenStatusLine}
             </p>
           )}
         </div>
