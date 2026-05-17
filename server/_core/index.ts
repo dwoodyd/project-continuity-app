@@ -359,6 +359,10 @@ async function startServer() {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
+  // Initialize co-working WebSocket server
+  const { initCoworkingWS } = await import("../coworking-ws.js");
+  initCoworkingWS(server);
+
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
     // Start push notification cron (fires every minute, aligned to wall-clock minutes)

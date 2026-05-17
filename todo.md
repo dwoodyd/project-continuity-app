@@ -1360,8 +1360,8 @@
 
 ## Founding Member Launch Blockers (B-series, May 2026)
 
-- [ ] B1: OAuth callback URLs — add app.continuary.app to Manus authorized redirect URIs (platform config, not code)
-- [ ] B2: Resend sending domain — verify mail.continuary.app with SPF/DKIM/DMARC in Cloudflare DNS (DNS config, not code)
+- [ ] B1: OAuth callback URLs — add app.continuary.app to Manus authorized redirect URIs (PLATFORM CONFIG — not code, requires Manus project settings)
+- [ ] B2: Resend sending domain — verify mail.continuary.app with SPF/DKIM/DMARC in Cloudflare DNS (DNS CONFIG — not code, requires Cloudflare + Resend dashboard)
 - [x] B3: Application form → admin queue — verified: /apply writes to founding_applications, appears in Admin → Applications
 - [x] B4: "In queue" email fires on submission — verified: buildApplicationConfirmationEmail fires on submit via Resend
 - [x] B5: Approval action sends invite email with code — verified: approve generates founding-member code + fires approval email with /invite/:code deep link
@@ -1369,12 +1369,12 @@
 
 ## Polish Items (P-series, May 2026)
 
-- [ ] P1: Marketing site header — add "Sign in" link pointing to https://app.continuary.app
+- [ ] P1: Marketing site header — add "Sign in" link pointing to https://app.continuary.app (MARKETING SITE — separate codebase, not this app)
 - [x] P2: Renamed "Study Mode" → "Single Focus Mode" in sidebar, More sheet, command palette, ProPage (tier + comparison table)
 - [x] P3: Weekly Review header copy updated to Wren voice: "Ask Wren to read your week" + new description
 - [x] P4: /founding-member status page verified: locked rate + exact 5 value props + redirect non-members to /apply
 - [x] P5: PayPal confirmed across the board (no Stripe); pricing page footer already says PayPal
-- [ ] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DeWayne decision)
+- [ ] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DEWAYNE DECISION — awaiting confirmation)
 - [x] P7: /landing route is a clean redirect shim to continuary.app — no action needed
 
 ## Suggestions 2 & 3 (May 2026)
@@ -1481,3 +1481,43 @@
 - [x] Show different banner when billing_status === "free_tier_founding_rate_waiting" — covered by same banner logic
 - [x] Banner is dismissable per session (sessionStorage flag)
 - [x] Both banners route to /pro (pricing page)
+
+## ADHD Hacks Feature Build (May 2026)
+
+### Hack 1 — Transition Sound
+- [ ] Generate or source a short ambient chime (< 2s, soft, non-jarring) and upload to CDN
+- [ ] Play chime when Single Focus Mode session starts (setup → active transition)
+- [ ] Play chime when Doing Mode is toggled on/off in Home.tsx
+
+### Hack 3 — Environment Field (Morning Check-in)
+- [ ] Add `environment` varchar column to morning_checkins table (kitchen / coffee shop / office / outside / other)
+- [ ] Add environment picker to morning check-in form (icon buttons, not a dropdown)
+- [ ] Store environment value in the check-in record
+
+### Hack 8 — Environment Tracking in Intelligence
+- [ ] Add environment correlation card to IntelligencePage: "You check in most from [X] on [day]" pattern
+- [ ] Surface top environment by day-of-week from morning check-in data
+
+### Hack 2 — Body Doubling Room
+- [x] Install ws (WebSocket) package on server
+- [x] Add co-working rooms table to schema (id, name, created_at, is_active)
+- [x] Add room_participants table (id, room_id, user_id, status: working|stuck|done, intention, joined_at, left_at)
+- [x] Add WebSocket server endpoint /ws/coworking for presence channel
+- [x] Add tRPC procedures: coworking.listRooms, coworking.joinSession, coworking.leaveSession, coworking.updateStatus, coworking.myRecentSessions
+- [x] Build /coworking route — room lobby with participant status dots, session timer, intention field
+- [x] Session intake: "What are you working on this session?" (stored, no AI)
+- [x] Session close: one LLM call — feed project continuity note + session intention → one-sentence next step
+- [x] Add sidebar nav item (Body Doubling) in AppLayout.tsx
+
+### Hack 5 — Movement Prompt in Clarity Engine
+- [x] Detect overwhelm mode in Clarity Engine result view
+- [x] Show movement break card with suggested actions when mode is overwhelm or user marks "still unsure"
+
+### Hack 7 — Hunger/Energy Field (Midday Check-in)
+- [x] energy_level and hunger_level already captured in midday check-in userInput JSON
+- [x] Add getEnergyCorrelation procedure to intelligenceInsights router (parses midday check-in userInput)
+- [x] Add Energy & Alignment section to IntelligencePage showing correlation bar charts
+
+### Hack 9 — Third-Person Reframe in Clarity Engine
+- [x] Add third-person reframe card to ResultView when mode is overwhelm
+- [x] Card shows the user's whatIsHappening text rephrased as a third-person prompt

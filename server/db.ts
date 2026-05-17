@@ -77,6 +77,8 @@ import {
   InsertMoodLog,
   foundingApplications,
   FoundingApplication,
+  coworkingRooms,
+  coworkingSessions,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1480,4 +1482,92 @@ export async function rejectFoundingApplication(id: number) {
     .update(foundingApplications)
     .set({ status: "rejected" })
     .where(eq(foundingApplications.id, id));
+}
+
+// ─── Co-working Rooms ─────────────────────────────────────────────────────────
+export async function getCoworkingRooms() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(coworkingRooms).where(eq(coworkingRooms.isActive, true));
+}
+
+export async function createCoworkingSession(data: {
+  userId: number;
+  roomId: number;
+  workingOn: string;
+  projectId?: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Close any open sessions first
+  await db
+    .update(coworkingSessions)
+    .set({ leftAt: new Date(), durationMinutes: 0 })
+    .where(and(eq(coworkingSessions.userId, data.userId), isNull(coworkingSessions.leftAt)));
+  const result = await db.insert(coworkingSessions).values({
+    userId: data.userId,
+    roomId: data.roomId,
+    workingOn: data.workingOn,
+    projectId: data.projectId,
+    status: "working",
+    joinedAt: new Date(),
+  });
+  return (result[0] as any).insertId;
+}
+
+export async function getCoworkingSession(sessionId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(coworkingSessions)
+    .where(and(eq(coworkingSessions.id, sessionId), eq(coworkingSessions.userId, userId)))
+    .limit(1);
+  return result[0];
+}
+
+export async function closeCoworkingSession(
+  sessionId: number,
+  durationMinutes: number,
+  aiNextStep: string | null
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(coworkingSessions)
+    .set({ leftAt: new Date(), durationMinutes, aiNextStep, status: "done" })
+    .where(eq(coworkingSessions.id, sessionId));
+}
+
+export async function updateCoworkingSessionStatus(
+  sessionId: number,
+  userId: number,
+  status: "working" | "stuck" | "done"
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(coworkingSessions)
+    .set({ status })
+    .where(and(eq(coworkingSessions.id, sessionId), eq(coworkingSessions.userId, userId)));
+}
+
+export async function getRecentCoworkingSessions(userId: number, limit = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: coworkingSessions.id,
+      workingOn: coworkingSessions.workingOn,
+      status: coworkingSessions.status,
+      joinedAt: coworkingSessions.joinedAt,
+      leftAt: coworkingSessions.leftAt,
+      durationMinutes: coworkingSessions.durationMinutes,
+      aiNextStep: coworkingSessions.aiNextStep,
+      roomId: coworkingSessions.roomId,
+    })
+    .from(coworkingSessions)
+    .where(eq(coworkingSessions.userId, userId))
+    .orderBy(desc(coworkingSessions.joinedAt))
+    .limit(limit);
 }

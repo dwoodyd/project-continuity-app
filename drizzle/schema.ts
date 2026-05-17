@@ -814,3 +814,27 @@ export const foundingApplications = mysqlTable("founding_applications", {
 });
 export type FoundingApplication = typeof foundingApplications.$inferSelect;
 export type InsertFoundingApplication = typeof foundingApplications.$inferInsert;
+
+// ─── Co-working Rooms (Body Doubling — Hack #2) ───────────────────────────────
+export const coworkingRooms = mysqlTable("coworking_rooms", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  slug: varchar("slug", { length: 32 }).notNull().unique(),
+  description: text("description"),
+  maxParticipants: int("maxParticipants").default(8).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const coworkingSessions = mysqlTable("coworking_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  roomId: int("roomId").notNull().references(() => coworkingRooms.id),
+  workingOn: text("workingOn"),
+  status: mysqlEnum("status", ["working", "stuck", "done"]).default("working").notNull(),
+  joinedAt: timestamp("joinedAt").defaultNow().notNull(),
+  leftAt: timestamp("leftAt"),
+  durationMinutes: int("durationMinutes"),
+  aiNextStep: text("aiNextStep"),
+  projectId: int("projectId").references(() => projects.id),
+});

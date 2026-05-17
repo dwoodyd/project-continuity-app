@@ -500,6 +500,34 @@ function ResultView({
         ))}
       </div>
 
+      {/* ADHD Hack #5: Movement prompt when overwhelmed or still unsure */}
+      {(session.mode === "overwhelm" || session.progressMarker === "still_unsure") && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Movement break</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Your nervous system is activated. Before acting on your next step, try 2 minutes of movement — walk around the room, shake out your hands, or do 10 slow breaths. ADHD brains often need a physical reset to access clear thinking.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {["Walk around", "Shake it out", "10 slow breaths", "Stretch"].map((action) => (
+              <span key={action} className="px-3 py-1 rounded-full text-xs border border-amber-500/30 text-amber-400/80 bg-amber-500/10">
+                {action}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {/* ADHD Hack #9: Third-person reframe for overwhelm */}
+      {session.mode === "overwhelm" && session.whatIsHappening && (
+        <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-blue-400">Third-person perspective</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Imagine a close friend came to you with exactly this situation. What would you say to them? Sometimes the distance of the third person unlocks the clarity the first person can't access.
+          </p>
+          <p className="text-sm text-foreground/70 italic border-l-2 border-blue-400/40 pl-3">
+            "If my friend told me: '{session.whatIsHappening.substring(0, 80)}{session.whatIsHappening.length > 80 ? '…' : ''}' — I would tell them…"
+          </p>
+        </div>
+      )}
       {/* Progress marker */}
       <div>
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">

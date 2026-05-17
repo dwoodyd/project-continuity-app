@@ -299,6 +299,68 @@ Rules:
     };
   }),
 
+  // ── Query: energy/hunger correlation from midday check-ins (Hack #7) ────────────
+  getEnergyCorrelation: protectedProcedure.query(async ({ ctx }) => {
+    const recentCheckIns = await getRecentCheckIns(ctx.user.id, 30);
+    const middayCheckIns = recentCheckIns.filter(c => c.type === "midday" && c.userInput);
+    const rows: Array<{
+      date: string;
+      energyLevel: string | null;
+      hungerLevel: string | null;
+      alignmentStatus: string | null;
+    }> = [];
+    for (const c of middayCheckIns) {
+      try {
+        const parsed = JSON.parse(c.userInput ?? "{}");
+        if (parsed.energyLevel || parsed.hungerLevel) {
+          rows.push({
+            date: c.date,
+            energyLevel: parsed.energyLevel ?? null,
+            hungerLevel: parsed.hungerLevel ?? null,
+            alignmentStatus: c.alignmentStatus ?? null,
+          });
+        }
+      } catch { /* skip malformed */ }
+    }
+    if (rows.length === 0) return { hasData: false as const };
+    // Compute alignment rate by energy level
+    const energyAlignment: Record<string, { aligned: number; total: number }> = {};
+    const hungerAlignment: Record<string, { aligned: number; total: number }> = {};
+    for (const r of rows) {
+      if (r.energyLevel) {
+        if (!energyAlignment[r.energyLevel]) energyAlignment[r.energyLevel] = { aligned: 0, total: 0 };
+        energyAlignment[r.energyLevel].total++;
+        if (r.alignmentStatus === "aligned") energyAlignment[r.energyLevel].aligned++;
+      }
+      if (r.hungerLevel) {
+        if (!hungerAlignment[r.hungerLevel]) hungerAlignment[r.hungerLevel] = { aligned: 0, total: 0 };
+        hungerAlignment[r.hungerLevel].total++;
+        if (r.alignmentStatus === "aligned") hungerAlignment[r.hungerLevel].aligned++;
+      }
+    }
+    const energyStats = Object.entries(energyAlignment).map(([level, { aligned, total }]) => ({
+      level,
+      alignedPct: Math.round((aligned / total) * 100),
+      total,
+    })).sort((a, b) => b.alignedPct - a.alignedPct);
+    const hungerStats = Object.entries(hungerAlignment).map(([level, { aligned, total }]) => ({
+      level,
+      alignedPct: Math.round((aligned / total) * 100),
+      total,
+    })).sort((a, b) => b.alignedPct - a.alignedPct);
+    const bestEnergy = energyStats[0];
+    const insight = bestEnergy
+      ? `When your energy is ${bestEnergy.level}, you stay aligned ${bestEnergy.alignedPct}% of the time.`
+      : null;
+    return {
+      hasData: true as const,
+      sampleSize: rows.length,
+      energyStats,
+      hungerStats,
+      insight,
+    };
+  }),
+
   // ── Query: 14-day emotional state trend ────────────────────────────────────
   getEmotionalTrend: protectedProcedure.query(async ({ ctx }) => {
     const plans = await getRecentDailyPlans(ctx.user.id, 14);

@@ -161,6 +161,7 @@ export default function IntelligencePage() {
   const projectsQuery = trpc.projects.list.useQuery();
   const emotionalTrendQuery = trpc.insights.getEmotionalTrend.useQuery();
   const distractionQuery = trpc.insights.getDistractionPatterns.useQuery();
+  const energyCorrelationQuery = trpc.insights.getEnergyCorrelation.useQuery();
 
   const [scoringLoading, setScoringLoading] = useState(false);
   const [patternsLoading, setPatternsLoading] = useState(false);
@@ -362,8 +363,82 @@ export default function IntelligencePage() {
           </Card>
         )}
       </section>
+      {/* ── Energy & Hunger Correlation (ADHD Hack #7) ───────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-emerald-400" />
+          <h2 className="text-base font-medium text-foreground">Energy & Alignment</h2>
+          <span className="text-xs text-muted-foreground ml-1">From midday check-ins</span>
+        </div>
+        {energyCorrelationQuery.isLoading ? (
+          <div className="h-24 rounded-xl bg-muted/30 animate-pulse" />
+        ) : !energyCorrelationQuery.data?.hasData ? (
+          <Card className="border-dashed border-border/50 bg-transparent">
+            <CardContent className="flex flex-col items-center justify-center py-8 text-center gap-2">
+              <Zap className="w-5 h-5 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
+                No energy data yet. Log your energy level during midday check-ins to see how it correlates with staying on plan.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card/60 border-border/50">
+            <CardContent className="pt-4 pb-4 space-y-4">
+              {energyCorrelationQuery.data.insight && (
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-4 py-3">
+                  <p className="text-sm text-emerald-300">{energyCorrelationQuery.data.insight}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Based on {energyCorrelationQuery.data.sampleSize} midday check-ins
+                  </p>
+                </div>
+              )}
+              {energyCorrelationQuery.data.energyStats.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Energy level → alignment rate</p>
+                  {energyCorrelationQuery.data.energyStats.map((stat) => (
+                    <div key={stat.level} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-foreground capitalize">{stat.level} energy</span>
+                        <span className="text-muted-foreground tabular-nums">{stat.alignedPct}% aligned ({stat.total}×)</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{
+                            width: `${stat.alignedPct}%`,
+                            background: stat.level === "high" ? "oklch(0.72 0.17 145)" : stat.level === "medium" ? "oklch(0.78 0.17 65)" : "oklch(0.65 0.15 25)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {energyCorrelationQuery.data.hungerStats.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Hunger level → alignment rate</p>
+                  {energyCorrelationQuery.data.hungerStats.map((stat) => (
+                    <div key={stat.level} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-foreground capitalize">{stat.level.replace(/_/g, " ")}</span>
+                        <span className="text-muted-foreground tabular-nums">{stat.alignedPct}% aligned ({stat.total}×)</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-blue-500/70 transition-all duration-500"
+                          style={{ width: `${stat.alignedPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </section>
 
-      {/* ── Pattern Insights ─────────────────────────────────────────────────── */}
+      {/* ── Pattern Insights ──────────────────────────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-medium text-foreground">Pattern Insights</h2>

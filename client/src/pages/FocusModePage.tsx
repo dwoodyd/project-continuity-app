@@ -12,6 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTransitionSound } from "@/hooks/useTransitionSound";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -126,11 +127,14 @@ export default function FocusModePage() {
     }
   };
 
+  const { playChime } = useTransitionSound();
+
   const startFocus = () => {
     if (!intention.trim()) {
       toast.error("Set your intention first.");
       return;
     }
+    playChime("focus_start");
     setPhase("active");
     setTimeLeft(FOCUS_MINUTES * 60);
     setIsRunning(true);

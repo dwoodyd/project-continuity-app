@@ -36,6 +36,7 @@ import {
   PenLine,
   Star,
   ClipboardList,
+  Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
@@ -64,6 +65,7 @@ const ALL_NAV_ITEMS = [
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
   { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
+  { href: "/coworking",    label: "Body Doubling",     icon: Users,         section: "primary" },
   { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
@@ -96,6 +98,7 @@ const MORE_ITEMS = [
   { href: "/welcome",      label: "About Continuary", icon: Home },
   { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
   { href: "/study",        label: "Single Focus Mode",  icon: ClipboardList },
+  { href: "/coworking",    label: "Body Doubling",      icon: Users },
   { href: "/settings",     label: "You & Wren",       icon: Settings },
   { href: "/founding-member", label: "Founding Member", icon: Star },
 ];

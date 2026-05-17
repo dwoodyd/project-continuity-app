@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO coworking_rooms (name, slug, description, maxParticipants) VALUES\n('Deep Work', 'deep-work', 'Silent presence. No chat. Just work.', 8),\n('Open Studio', 'open-studio', 'Casual co-working. Say hi, share what you''re working on.', 12),\n('Sprint Room', 'sprint-room', 'Short focused bursts. 25-minute sessions.', 6),\n('Night Owls', 'night-owls', 'For the late-night builders and thinkers.', 8);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute INSERT INTO coworking_rooms (name, slug, description, maxParticipants) VALUES\n('Deep Work', 'deep-work', 'Silent presence. No chat. Just work.', 8),\n('Open Studio', 'open-studio', 'Casual co-working. Say hi, share what you''re working on.', 12),\n('Sprint Room', 'sprint-room', 'Short focused bursts. 25-minute sessions.', 6),\n('Night Owls', 'night-owls', 'For the late-night builders and thinkers.', 8);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 271
+}

@@ -54,6 +54,7 @@ export const checkInsRouter = router({
       userNotes: z.string().max(2000).optional(),
       emotionalState: z.enum(["focused", "anxious", "foggy", "energized", "drained"]).optional(),
       mentalLoad: z.enum(["light", "moderate", "heavy"]).optional(),
+      workLocation: z.enum(["home", "coffee_shop", "library", "office", "other"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
@@ -267,7 +268,7 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
         dailyPlanId: planId,
         date,
         type: "morning",
-        userInput: JSON.stringify({ capacityLevel: input.capacityLevel, notes: input.userNotes }),
+        userInput: JSON.stringify({ capacityLevel: input.capacityLevel, notes: input.userNotes, workLocation: input.workLocation }),
         generatedResponse: fullGuidance,
         completedAt: new Date(),
       });
@@ -281,6 +282,8 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       wasOnPlan: z.boolean(),
       interruptions: z.string().max(2000).optional(),
       nextMove: z.string().max(1000).optional(),
+      energyLevel: z.enum(["high", "medium", "low"]).optional(),
+      hungerLevel: z.enum(["full", "slightly_hungry", "hungry"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);

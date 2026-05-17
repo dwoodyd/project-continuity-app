@@ -57,6 +57,7 @@ import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
+import { useTransitionSound } from "@/hooks/useTransitionSound";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -322,12 +323,22 @@ const emotionalStateConfig: Record<EmotionalState, { label: string; emoji: strin
   drained:   { label: "Drained",   emoji: "🪫", color: "text-red-400",    clarityHint: "Overwhelm mode may help" },
 };
 
+type WorkLocation = "home" | "coffee_shop" | "library" | "office" | "other";
+const workLocationConfig: Record<WorkLocation, { label: string; emoji: string }> = {
+  home:        { label: "Home",         emoji: "🏠" },
+  coffee_shop: { label: "Coffee shop",  emoji: "☕" },
+  library:     { label: "Library",      emoji: "📚" },
+  office:      { label: "Office",       emoji: "🏢" },
+  other:       { label: "Other",        emoji: "📍" },
+};
+
 function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
   const [capacity, setCapacity] = useState<CapacityLevel>("partial");
   const [notes, setNotes] = useState("");
   const [primaryId, setPrimaryId] = useState<number | undefined>();
   const [emotionalState, setEmotionalState] = useState<EmotionalState | undefined>();
   const [mentalLoad, setMentalLoad] = useState<MentalLoad | undefined>();
+  const [workLocation, setWorkLocation] = useState<WorkLocation | undefined>();
   const [, navigate] = useLocation();
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
@@ -463,8 +474,30 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
           rows={2}
         />
       </div>
+      {/* Work Location — Hack #8: change environment, not willpower */}
+      <div>
+        <p className="text-sm font-medium text-muted-foreground mb-2">Where are you working today? <span className="font-normal opacity-60">(optional)</span></p>
+        <p className="text-xs text-muted-foreground/60 mb-2">Different spaces = different focus windows. Wren tracks which environments work best for you.</p>
+        <div className="flex flex-wrap gap-2">
+          {(Object.entries(workLocationConfig) as [WorkLocation, typeof workLocationConfig[WorkLocation]][]).map(([loc, cfg]) => (
+            <button
+              key={loc}
+              onClick={() => setWorkLocation(workLocation === loc ? undefined : loc)}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all",
+                workLocation === loc
+                  ? "border-primary/40 bg-primary/[0.08] text-foreground"
+                  : "border-border text-muted-foreground hover:border-primary/20"
+              )}
+            >
+              <span>{cfg.emoji}</span>
+              <span>{cfg.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
       <Button
-        onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad })}
+        onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation })}
         disabled={submit.isPending}
         className="w-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/25"
         size="sm"
@@ -482,6 +515,8 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   const [wasOnPlan, setWasOnPlan] = useState<boolean | null>(null);
   const [interruptions, setInterruptions] = useState("");
   const [nextMove, setNextMove] = useState("");
+  const [energyLevel, setEnergyLevel] = useState<"high" | "medium" | "low" | undefined>();
+  const [hungerLevel, setHungerLevel] = useState<"full" | "slightly_hungry" | "hungry" | undefined>();
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
@@ -537,6 +572,46 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
           rows={1}
         />
       </div>
+      {/* Energy + Hunger — Hack #7: use hunger as a focus window */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">Energy right now <span className="opacity-60">(optional)</span></p>
+          <div className="flex gap-1.5">
+            {(["high", "medium", "low"] as const).map((lvl) => (
+              <button
+                key={lvl}
+                onClick={() => setEnergyLevel(energyLevel === lvl ? undefined : lvl)}
+                className={cn(
+                  "flex-1 py-1.5 rounded-lg border text-xs font-medium capitalize transition-all",
+                  energyLevel === lvl
+                    ? "border-primary/40 bg-primary/[0.08] text-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/20"
+                )}
+              >{lvl === "high" ? "⚡ High" : lvl === "medium" ? "🟡 Mid" : "🌙 Low"}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1.5">Hunger level <span className="opacity-60">(optional)</span></p>
+          <div className="flex gap-1.5">
+            {(["full", "slightly_hungry", "hungry"] as const).map((lvl) => (
+              <button
+                key={lvl}
+                onClick={() => setHungerLevel(hungerLevel === lvl ? undefined : lvl)}
+                className={cn(
+                  "flex-1 py-1.5 rounded-lg border text-xs font-medium transition-all",
+                  hungerLevel === lvl
+                    ? "border-primary/40 bg-primary/[0.08] text-foreground"
+                    : "border-border text-muted-foreground hover:border-primary/20"
+                )}
+              >{lvl === "full" ? "👌 Full" : lvl === "slightly_hungry" ? "🍎 Peckish" : "👁️ Hungry"}</button>
+            ))}
+          </div>
+          {hungerLevel === "slightly_hungry" && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">💡 Slight hunger can sharpen focus — ride the window.</p>
+          )}
+        </div>
+      </div>
       <Button
         onClick={() => {
           if (!workedOn.trim() || wasOnPlan === null) {
@@ -547,7 +622,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
           if (interruptions.trim()) {
             classifyDistraction.mutate({ rawInput: interruptions, checkInType: "midday" });
           }
-          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined });
+          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel });
         }}
         disabled={submit.isPending}
         className="w-full"
@@ -971,7 +1046,11 @@ export default function Home() {
     onSuccess: () => utils.settings.getProfile.invalidate(),
   });
   const isPlanningMode = profile?.planningMode ?? false;
-  const togglePlanningMode = () => updateSettings.mutate({ planningMode: !isPlanningMode });
+  const { playChime: playModeChime } = useTransitionSound();
+  const togglePlanningMode = () => {
+    playModeChime("mode_toggle");
+    updateSettings.mutate({ planningMode: !isPlanningMode });
+  };
   const { data: nextBestStep } = trpc.dailyPlan.getNextBestStep.useQuery(
     { currentEnergyLevel: hour < 12 ? "high" : "low" },
     { enabled: !!todayPlan, staleTime: 5 * 60 * 1000 }
