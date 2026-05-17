@@ -928,7 +928,51 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
   );
 }
 
-// ─── SCREEN 6: Done / celebration ────────────────────────────────────────────
+// ─── SCREEN 6: Focus Sessions intro ─────────────────────────────────────────
+function StepFocusSessions({ onNext }: { onNext: () => void }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setVisible(true), 300); return () => clearTimeout(t); }, []);
+  return (
+    <VideoStage>
+      <SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers} />
+      <GradientOverlays />
+      <LowerThird>
+        <Fade visible={visible} delay={0} style={{ marginBottom: "0.5rem" }}>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
+            One last thing
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={100} style={{ marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "clamp(1.6rem, 5.5vw, 2.4rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.25, letterSpacing: "-0.02em" }}>
+            Focus Sessions — where you work{" "}
+            <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>with Wren</span>.
+          </h2>
+        </Fade>
+        <Fade visible={visible} delay={240} style={{ marginBottom: "1.75rem" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+            Set your intention. Choose 25, 50, or 90 minutes. Wren stays present the whole time —
+            weaving quietly, checking in at the halfway point, and helping you close out with a next step.
+            Your first session is always free.
+          </p>
+        </Fade>
+        <Fade visible={visible} delay={380} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <CTAButton onClick={onNext}>
+            Let's begin <ArrowRight className="w-4 h-4" />
+          </CTAButton>
+          <button
+            onClick={onNext}
+            className="text-xs text-center"
+            style={{ color: "rgba(255,255,255,0.35)", background: "none", border: "none", cursor: "pointer" }}
+          >
+            Maybe later
+          </button>
+        </Fade>
+      </LowerThird>
+    </VideoStage>
+  );
+}
+
+// ─── SCREEN 7: Done / celebration ────────────────────────────────────────────
 function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
   const [visible, setVisible] = useState(false);
   const [videoEnded, setVideoEnded] = useState(false);
@@ -1070,11 +1114,11 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const isPending = completeOnboarding.isPending || createProject.isPending;
 
   // Ambient audio: play on cinematic screens (0, 2, 6)
-  const isCinematic = step === 0 || step === 2 || step === 6;
+  const isCinematic = step === 0 || step === 2 || step === 6 || step === 7;
   useAmbientAudio(isCinematic);
 
   // Progress
-  const progressMap: Record<number, number> = { [-1]: 0, 0: 8, 1: 25, 2: 40, 3: 55, 4: 70, 5: 85, 6: 100 };
+  const progressMap: Record<number, number> = { [-1]: 0, 0: 8, 1: 22, 2: 36, 3: 50, 4: 64, 5: 78, 6: 90, 7: 100 };
   const progress = progressMap[step] ?? 0;
 
   if (!isAuthenticated) {
@@ -1138,7 +1182,8 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
             loading={isPending}
           />
         )}
-        {step === 6 && <DoneScreen name={name} onDone={onDone ?? (() => {})} />}
+        {step === 6 && <StepFocusSessions onNext={() => goForward(7)} />}
+        {step === 7 && <DoneScreen name={name} onDone={onDone ?? (() => {})} />}
       </FadeToBlackTransition>
     </div>
   );

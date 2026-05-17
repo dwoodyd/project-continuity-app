@@ -97,6 +97,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/admin/applications" component={AdminApplicationsPage} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/pro" component={ProPage} />
+              <Route path="/pricing" component={ProPage} />
               <Route path="/pro/success" component={ProSuccessPage} />
               <Route path="/pro/cancel" component={ProPage} />
               <Route path="/scratch" component={ScratchPadPage} />

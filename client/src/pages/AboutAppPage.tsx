@@ -97,6 +97,22 @@ const SPACES = [
     bg: "bg-teal-400/10",
     border: "border-teal-400/20",
   },
+  {
+    icon: Trophy,
+    name: "Focus Sessions",
+    desc: "A dedicated co-working space with Wren. Set your intention, choose a duration, and focus together. Wren checks in at the halfway point and helps you close out with a next step.",
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
+    border: "border-amber-400/20",
+  },
+  {
+    icon: Flame,
+    name: "Single Focus Mode",
+    desc: "One topic. One thread. A structured daily cadence for deep, sustained work on a single focus — with Wren's continuity language to keep you anchored.",
+    color: "text-violet-400",
+    bg: "bg-violet-400/10",
+    border: "border-violet-400/20",
+  },
 ];
 
 const PRINCIPLES = [
@@ -171,6 +187,7 @@ const WREN_APPEARANCES = [
   { location: "Streak milestones", desc: "Full-screen celebration at 3, 7, and 30 consecutive days.", clip: "celebration2" as const },
   { location: "Knowledge Vault", desc: "She greets you at the empty state — an invitation, not a void.", clip: "journal" as const },
   { location: "Clarity Engine", desc: "She's focused and ready when you need to clear the noise.", clip: "tablet" as const },
+  { location: "Focus Sessions", desc: "She's your co-working partner. She weaves during your session, checks in at the halfway point, and closes out with you.", clip: "homeVideo" as const },
 ];
 
 export default function AboutAppPage() {
@@ -254,7 +271,7 @@ export default function AboutAppPage() {
         {/* ── Spaces grid ── */}
         <div className="mb-12">
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5">
-            Eight spaces, one continuous thread
+            Ten spaces, one continuous thread
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
             {SPACES.map(({ icon: Icon, name, desc, color, bg, border }) => (
@@ -434,7 +451,8 @@ export default function AboutAppPage() {
               { name: "Thread Strength", desc: "A continuity metric that reflects how consistently you're showing up — not a streak, a signal." },
               { name: "Threshold Diagnosis", desc: "A 3-question diagnostic for when starting feels impossible. Identifies the real blocker and converts it to a first movable step." },
               { name: "Project Memory", desc: "A timeline of every decision, vault import, focus session, and milestone for each project. Nothing is lost." },
-              { name: "Single Focus Mode", desc: "Full-screen, stripped-down work mode. One intention. One timer. No sidebar, no distractions." },
+              { name: "Focus Sessions", desc: "A dedicated co-working space with Wren. Set your intention, choose 25, 50, or 90 minutes, and focus side-by-side. Wren checks in at the halfway mark and helps you close with a next step." },
+              { name: "Single Focus Mode", desc: "One topic. One thread. A structured daily cadence for deep, sustained work on a single focus — with Wren's continuity language to keep you anchored." },
               { name: "Distraction Insights", desc: "Pattern recognition across your check-ins. Surfaces your top distraction category and the time of day it peaks." },
             ].map(({ name, desc }) => (
               <div key={name} className="rounded-xl border border-white/8 p-4" style={{ background: "oklch(0.14 0.03 264 / 0.5)" }}>

@@ -1567,3 +1567,12 @@
 - [x] In-session chat panel UI: collapsible, message thread, input with Enter-to-send
 - [x] Auto-collapse chat after 5 min of inactivity
 - [x] Chat history passed as context to wrenChat (last 12 messages, 400 char limit each)
+
+## In-App Surface Updates (pasted_content_3.txt)
+- [x] /pricing route alias added (points to ProPage, same as /pro)
+- [x] ProPage feature table updated: Focus Sessions row added (1/week free, unlimited Pro), Single Focus Mode row added (Wren prompts = Pro)
+- [x] AboutAppPage: Focus Sessions added to SPACES list, WREN_APPEARANCES, and features section; Soul Engineer link added in footer; spaces count updated
+- [x] OnboardingPage: Focus Sessions intro step added as step 6 (between StepProject and DoneScreen); DoneScreen moved to step 7; progressMap updated
+- [x] TourPage: 2 new steps added — focus_sessions (step 9) and single_focus (step 10); invite moved to step 11; STEPS array and STEP_META updated
+- [x] Paywall audit: no Stripe references found in frontend; all CTAs point to /pro; FocusSessionsPage paywall card uses correct copy ($4.99/mo founding rate)
+- [x] Payment system confirmed: PayPal only throughout (ProPage.tsx uses trpc.paypal.* exclusively)

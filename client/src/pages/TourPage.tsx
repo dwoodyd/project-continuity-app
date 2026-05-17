@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 
-type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "invite";
+type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "focus_sessions" | "single_focus" | "invite";
 
-const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","graph","strength","invite"];
+const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","graph","strength","focus_sessions","single_focus","invite"];
 
 const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
   intro:    { label: "Welcome",         wren: "luminousFloats"  },
@@ -14,8 +14,10 @@ const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
   evening:  { label: "Evening",         wren: "kissingScreen"   },
   vault:    { label: "The Vault",       wren: "perchedDoc"      },
   graph:    { label: "Knowledge Graph", wren: "holdingOrb"      },
-  strength: { label: "Thread Strength", wren: "bouncingFunClean"},
-  invite:   { label: "Request Access",  wren: "hoveringArchway" },
+  strength:       { label: "Thread Strength",    wren: "bouncingFunClean" },
+  focus_sessions: { label: "Focus Sessions",     wren: "homeVideo"        },
+  single_focus:   { label: "Single Focus Mode",  wren: "perchedDoc"       },
+  invite:         { label: "Request Access",     wren: "hoveringArchway"  },
 };
 
 const MORNING_DEMO =
@@ -459,6 +461,72 @@ export default function TourPage() {
                       <p className="text-sm font-medium" style={{ color: "oklch(0.88 0.06 65)" }}>{s.label}</p>
                       <p className="text-xs" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>{s.range}</p>
                       <p className="text-xs leading-snug" style={{ color: "oklch(0.45 0.04 240)" }}>{s.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="Focus Sessions" />
+            </div>
+          </Fade>
+        )}
+
+        {step === "focus_sessions" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Focus Sessions" title="Work side-by-side with Wren." wren="homeVideo" />
+              <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
+                A Focus Session is a dedicated block of time where you and Wren work together. You set your intention,
+                choose 25, 50, or 90 minutes, and Wren stays present the whole time — weaving quietly in the background,
+                checking in at the halfway point, and helping you close out with a clear next step.
+              </p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>How a session works</p>
+                <div className="space-y-3">
+                  {[
+                    { step: "1", label: "Name your intention", desc: "One sentence: what are you working on this session?" },
+                    { step: "2", label: "Choose your duration", desc: "25, 50, or 90 minutes. Wren adjusts her check-in timing." },
+                    { step: "3", label: "Work together", desc: "Wren weaves on the left half of your screen. Chat with her if you need to." },
+                    { step: "4", label: "Close out", desc: "What moved? Wren suggests your next step. It's logged automatically." },
+                  ].map(s => (
+                    <div key={s.step} className="flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}>{s.step}</span>
+                      <div>
+                        <p className="text-sm font-medium text-white/90">{s.label}</p>
+                        <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="Single Focus Mode" />
+            </div>
+          </Fade>
+        )}
+
+        {step === "single_focus" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Single Focus Mode" title="One topic. One thread. Every day." wren="perchedDoc" />
+              <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
+                Single Focus Mode is for people who need to go deep on one thing for an extended period.
+                You define your focus topic, set a daily cadence, and Wren holds the continuity language
+                — reminding you where you left off and what the thread is.
+              </p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>What makes it different</p>
+                <div className="space-y-3">
+                  {[
+                    { label: "One focus, not a list", desc: "You name a single topic and commit to it. The app holds that commitment." },
+                    { label: "Wren's continuity line", desc: "Every day, Wren opens with a line that connects today to yesterday's thread." },
+                    { label: "Daily check-in form", desc: "A lightweight log: what you did, what moved, what's next. Takes 90 seconds." },
+                    { label: "Settings panel", desc: "Change your focus, extend your timeline, pause, or end — all in one place." },
+                  ].map(s => (
+                    <div key={s.label} className="flex items-start gap-3">
+                      <span className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65 / 0.7)" }} />
+                      <div>
+                        <p className="text-sm font-medium text-white/90">{s.label}</p>
+                        <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
