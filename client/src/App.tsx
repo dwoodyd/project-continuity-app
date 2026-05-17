@@ -47,6 +47,7 @@ const ApplyPage           = lazy(() => import("./pages/ApplyPage"));
 const InviteRedeemPage    = lazy(() => import("./pages/InviteRedeemPage"));
 const RedeemReferralPage  = lazy(() => import("./pages/RedeemReferralPage"));
 const CoworkingPage       = lazy(() => import("./pages/CoworkingPage"));
+const FocusSessionsPage   = lazy(() => import("./pages/FocusSessionsPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -62,7 +63,8 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/onboarding" component={OnboardingPage} />
-        <Route path="/focus" component={FocusModePage} />
+        <Route path="/focus" component={FocusSessionsPage} />
+        <Route path="/focus-mode" component={FocusModePage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/invite-gate" component={InviteGatePage} />
@@ -101,6 +103,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/emotional-cycle" component={EmotionalCyclePage} />
               <Route path="/founding-member" component={FoundingMemberPage} />
               <Route path="/coworking" component={CoworkingPage} />
+              <Route path="/focus" component={FocusSessionsPage} />
               <Route path="/404" component={NotFound} />
               <Route component={NotFound} />
             </Switch>

@@ -275,17 +275,29 @@ export const focusSessions = mysqlTable("focus_sessions", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   projectId: int("projectId"),
-  intention: text("intention").notNull(),
+  intention: text("intention"),
   startedAt: timestamp("startedAt").defaultNow().notNull(),
   durationSeconds: int("durationSeconds").notNull().default(0),
+  durationMinutes: int("durationMinutes").default(25), // 25, 50, or 90
   completedAt: timestamp("completedAt"),
   notes: text("notes"),
+  closingNote: text("closingNote"),
+  whatMoved: mysqlEnum("whatMoved", ["progress", "thinking", "stuck"]),
+  threadAddedUnits: int("threadAddedUnits").default(0),
   wasCompleted: int("wasCompleted").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
-
 export type FocusSession = typeof focusSessions.$inferSelect;
 export type InsertFocusSession = typeof focusSessions.$inferInsert;
+
+// ── Focus Session Artifact (one per user, rendered procedurally) ──────────────
+export const focusSessionArtifact = mysqlTable("focus_session_artifact", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  totalSegments: int("totalSegments").default(0).notNull(),
+  lastUpdatedAt: timestamp("lastUpdatedAt").defaultNow().notNull(),
+});
+export type FocusSessionArtifact = typeof focusSessionArtifact.$inferSelect;;
 
 // ── Distraction Events ────────────────────────────────────────────────────────
 export const distractionEvents = mysqlTable("distraction_events", {

@@ -274,6 +274,13 @@
       "when": 1779034804575,
       "tag": "0038_bumpy_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1779047076390,
+      "tag": "0039_certain_talon",
+      "breakpoints": true
     }
   ]
 }

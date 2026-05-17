@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `focus_session_artifact` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`totalSegments` int NOT NULL DEFAULT 0,\n\t`lastUpdatedAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `focus_session_artifact_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `focus_session_artifact_userId_unique` UNIQUE(`userId`)\n);\nALTER TABLE `focus_sessions` MODIFY COLUMN `intention` text;\nALTER TABLE `focus_sessions` ADD `durationMinutes` int DEFAULT 25;\nALTER TABLE `focus_sessions` ADD `closingNote` text;\nALTER TABLE `focus_sessions` ADD `whatMoved` enum('progress','thinking','stuck');\nALTER TABLE `focus_sessions` ADD `threadAddedUnits` int DEFAULT 0;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4A9VQZNRBpHGiCF.42405184c228 --database VnvNaoJZPVnHWmB8F3cwwo --execute CREATE TABLE `focus_session_artifact` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`totalSegments` int NOT NULL DEFAULT 0,\n\t`lastUpdatedAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `focus_session_artifact_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `focus_session_artifact_userId_unique` UNIQUE(`userId`)\n);\nALTER TABLE `focus_sessions` MODIFY COLUMN `intention` text;\nALTER TABLE `focus_sessions` ADD `durationMinutes` int DEFAULT 25;\nALTER TABLE `focus_sessions` ADD `closingNote` text;\nALTER TABLE `focus_sessions` ADD `whatMoved` enum('progress','thinking','stuck');\nALTER TABLE `focus_sessions` ADD `threadAddedUnits` int DEFAULT 0;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2347
+}

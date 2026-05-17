@@ -1003,6 +1003,8 @@ export default function Home() {
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
   const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { staleTime: 60_000 });
+  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
+  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
   const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
     staleTime: 30 * 60 * 1000,
@@ -2187,6 +2189,21 @@ export default function Home() {
             ↺ Pick up the thread
           </button>
         </div>
+      )}
+
+      {/* ── Focus Sessions Today Widget ─────────────────────────────────────── */}
+      {focusTodayStats && focusTodayStats.todaySessions > 0 && (
+        <a
+          href="/focus"
+          className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90"
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.12)" }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Focus sessions today</p>
+          <p className="text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>
+            {focusTodayStats.todaySessions} session{focusTodayStats.todaySessions !== 1 ? "s" : ""} · {focusTodayStats.todayMinutes} min
+            {focusArtifact && focusArtifact.totalSegments > 0 && ` · ${focusArtifact.totalSegments} woven total`}
+          </p>
+        </a>
       )}
 
       {/* ── Evidence of Movement Feed ────────────────────────────────────────── */}

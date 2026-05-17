@@ -1521,3 +1521,22 @@
 ### Hack 9 — Third-Person Reframe in Clarity Engine
 - [x] Add third-person reframe card to ResultView when mode is overwhelm
 - [x] Card shows the user's whatIsHappening text rephrased as a third-person prompt
+
+## Focus Sessions with Wren (Continuary-FocusSessions-Feature-Spec.md)
+- [x] Upload 4 Wren videos to CDN (weaving, reading, writing, lookingup) via manus-upload-file --webdev
+- [x] Extend focus_sessions schema (durationMinutes, whatMoved, closingNote, threadAddedUnits, wasCompleted)
+- [x] Add focus_session_artifact table (userId, totalSegments)
+- [x] Run drizzle-kit generate and apply migration via webdev_execute_sql
+- [x] tRPC procedures: start, complete, getArtifact, getTodayStats, checkWeeklyLimit
+- [x] Build /focus page (FocusSessionsPage.tsx) with full session flow
+- [x] Wren workspace: video rotation (reading/writing/weaving/lookingup) via mix-blend-mode:screen
+- [x] Session phases: idle → intake → duration → active (timer) → closure → reveal
+- [x] Mid-session moment: Wren looks up at halfway mark with "We're halfway."
+- [x] Procedural woven artifact: canvas drawing grows per session, color-coded by whatMoved
+- [x] Thread Strength bump on session complete
+- [x] Closing note saved to Knowledge Vault (sourceItems table)
+- [x] Ambient sound presets: silence / rain / café (Web Audio API)
+- [x] Free tier limit: 1 session/week, paywall card with upgrade CTA to /pro
+- [x] Today dashboard widget in Home.tsx (shows session count + minutes)
+- [x] Sidebar nav item (Focus Sessions) in AppLayout.tsx
+- [x] Route registered in App.tsx (/focus → FocusSessionsPage, /focus-mode → FocusModePage)
