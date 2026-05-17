@@ -35,31 +35,123 @@ const WREN_VIDEOS = {
 
 type WrenActivity = keyof typeof WREN_VIDEOS;
 
-// ── Ambient sound (royalty-free loops via Web Audio API oscillator fallback) ──
-// We use a simple Web Audio API tone as a placeholder until real audio files are
-// uploaded. The UI shows silence/rain/café but all resolve to the same tone for now.
+// ── Ambient sound — procedural noise via Web Audio API ───────────────────────
+// Rain: filtered white noise (low-pass ~800 Hz)
+// Café: filtered white noise (band-pass ~600 Hz) + subtle low-freq rumble
+// Both loop indefinitely using AudioBufferSourceNode with loopEnd
+function buildNoiseBuffer(ctx: AudioContext, seconds = 4): AudioBuffer {
+  const sampleRate = ctx.sampleRate;
+  const frameCount = sampleRate * seconds;
+  const buffer = ctx.createBuffer(1, frameCount, sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < frameCount; i++) {
+    data[i] = Math.random() * 2 - 1;
+  }
+  return buffer;
+}
+
 function useAmbientSound(sound: "silence" | "rain" | "cafe", volume: number, playing: boolean) {
   const ctxRef = useRef<AudioContext | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
+  const masterGainRef = useRef<GainNode | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const filterRef = useRef<BiquadFilterNode | null>(null);
+
+  // Tear down existing source nodes (but keep context)
+  const stopSource = () => {
+    try { sourceRef.current?.stop(); } catch (_) {}
+    sourceRef.current = null;
+    filterRef.current = null;
+  };
 
   useEffect(() => {
     if (!playing || sound === "silence") {
-      gainRef.current?.gain.setTargetAtTime(0, ctxRef.current?.currentTime ?? 0, 0.1);
+      // Fade out and stop
+      if (masterGainRef.current && ctxRef.current) {
+        masterGainRef.current.gain.setTargetAtTime(0, ctxRef.current.currentTime, 0.3);
+      }
+      setTimeout(stopSource, 500);
       return;
     }
-    // Create context on first use (must be triggered by user gesture)
-    if (!ctxRef.current) {
-      ctxRef.current = new AudioContext();
-      gainRef.current = ctxRef.current.createGain();
-      gainRef.current.connect(ctxRef.current.destination);
-    }
-    gainRef.current!.gain.setTargetAtTime(volume * 0.3, ctxRef.current.currentTime, 0.5);
-  }, [playing, sound, volume]);
 
+    // Create AudioContext on first user gesture
+    if (!ctxRef.current) {
+      const AC = window.AudioContext || (window as any).webkitAudioContext;
+      ctxRef.current = new AC();
+      masterGainRef.current = ctxRef.current.createGain();
+      masterGainRef.current.connect(ctxRef.current.destination);
+    }
+    const ctx = ctxRef.current;
+    if (ctx.state === "suspended") ctx.resume();
+
+    // Stop previous source before creating new one
+    stopSource();
+
+    // Build noise buffer (4s, looped)
+    const noiseBuffer = buildNoiseBuffer(ctx, 4);
+
+    // Source node
+    const source = ctx.createBufferSource();
+    source.buffer = noiseBuffer;
+    source.loop = true;
+    sourceRef.current = source;
+
+    // Filter shaping
+    const filter = ctx.createBiquadFilter();
+    filterRef.current = filter;
+
+    if (sound === "rain") {
+      // Rain: low-pass ~900 Hz — soft hiss
+      filter.type = "lowpass";
+      filter.frequency.value = 900;
+      filter.Q.value = 0.5;
+    } else {
+      // Café: band-pass ~700 Hz — warm murmur
+      filter.type = "bandpass";
+      filter.frequency.value = 700;
+      filter.Q.value = 0.8;
+    }
+
+    source.connect(filter);
+    filter.connect(masterGainRef.current!);
+
+    // For café, add a subtle low rumble (100 Hz sine)
+    if (sound === "cafe") {
+      const rumble = ctx.createOscillator();
+      const rumbleGain = ctx.createGain();
+      rumble.type = "sine";
+      rumble.frequency.value = 100;
+      rumbleGain.gain.value = 0.04;
+      rumble.connect(rumbleGain);
+      rumbleGain.connect(masterGainRef.current!);
+      rumble.start();
+      // Store rumble on source so we can stop it
+      (source as any)._rumble = rumble;
+      (source as any)._rumbleGain = rumbleGain;
+    }
+
+    // Set volume and fade in
+    masterGainRef.current!.gain.setValueAtTime(0, ctx.currentTime);
+    masterGainRef.current!.gain.setTargetAtTime(volume * 0.45, ctx.currentTime, 0.8);
+
+    source.start();
+  }, [playing, sound]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update volume without restarting source
+  useEffect(() => {
+    if (!masterGainRef.current || !ctxRef.current || !playing || sound === "silence") return;
+    masterGainRef.current.gain.setTargetAtTime(volume * 0.45, ctxRef.current.currentTime, 0.3);
+  }, [volume, playing, sound]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      gainRef.current?.gain.setTargetAtTime(0, ctxRef.current?.currentTime ?? 0, 0.1);
+      try {
+        if ((sourceRef.current as any)?._rumble) {
+          (sourceRef.current as any)._rumble.stop();
+        }
+        sourceRef.current?.stop();
+        ctxRef.current?.close();
+      } catch (_) {}
     };
   }, []);
 }
@@ -406,7 +498,7 @@ export default function FocusSessionsPage() {
             <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
             <div className="text-right">
               <p className="text-xs font-medium" style={{ color: "oklch(0.80 0.08 65)" }}>
-                {artifactData.totalSegments} sessions woven
+                {artifactData.totalSegments} sessions
               </p>
             </div>
           </div>
@@ -669,10 +761,10 @@ export default function FocusSessionsPage() {
           {phase === "reveal" && (
             <div className="w-full max-w-md text-center">
               <p className="text-xl font-light mb-2" style={{ color: "oklch(0.88 0.06 65)" }}>
-                Added to your weave.
+                Session logged.
               </p>
               <p className="text-sm mb-8" style={{ color: "oklch(0.55 0.04 240)" }}>
-                See you next time.
+                Each session adds a row to your focus record below.
               </p>
               {artifactData && (
                 <div className="flex justify-center mb-8">
@@ -683,9 +775,14 @@ export default function FocusSessionsPage() {
                   />
                 </div>
               )}
-              <p className="text-xs mb-6" style={{ color: "oklch(0.50 0.04 240)" }}>
-                {artifactData?.totalSegments ?? 0} sessions woven into your practice
-              </p>
+              <div className="mb-6 text-center">
+                <p className="text-xs" style={{ color: "oklch(0.50 0.04 240)" }}>
+                  {artifactData?.totalSegments ?? 0} sessions completed
+                </p>
+                <p className="text-[10px] mt-1" style={{ color: "oklch(0.38 0.03 240)" }}>
+                  Gold = progress &middot; Cream = thinking &middot; Navy = stuck
+                </p>
+              </div>
               <div className="flex gap-4 justify-center">
                 <Button
                   onClick={() => {
@@ -750,15 +847,21 @@ export default function FocusSessionsPage() {
 
           {/* Wren's persistent artifact */}
           {artifactData && artifactData.sessions.length > 0 && (
-            <div className="mt-4 flex flex-col items-center gap-1">
+            <div className="mt-4 flex flex-col items-center gap-2">
               <WovenArtifact
                 sessions={artifactData.sessions}
                 totalSegments={artifactData.totalSegments}
                 size="full"
               />
-              <p className="text-[10px] mt-1" style={{ color: "oklch(0.40 0.03 240)" }}>
-                your weave
-              </p>
+              <div className="text-center px-2">
+                <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(0.55 0.06 65)" }}>
+                  Your focus record
+                </p>
+                <p className="text-[9px] mt-0.5 leading-relaxed" style={{ color: "oklch(0.38 0.03 240)" }}>
+                  One row per session.
+                  Gold = progress &middot; Cream = thinking &middot; Navy = stuck.
+                </p>
+              </div>
             </div>
           )}
 
