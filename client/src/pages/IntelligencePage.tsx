@@ -162,6 +162,7 @@ export default function IntelligencePage() {
   const emotionalTrendQuery = trpc.insights.getEmotionalTrend.useQuery();
   const distractionQuery = trpc.insights.getDistractionPatterns.useQuery();
   const energyCorrelationQuery = trpc.insights.getEnergyCorrelation.useQuery();
+  const envCorrelationQuery = trpc.insights.getEnvironmentCorrelation.useQuery();
 
   const [scoringLoading, setScoringLoading] = useState(false);
   const [patternsLoading, setPatternsLoading] = useState(false);
@@ -363,6 +364,64 @@ export default function IntelligencePage() {
           </Card>
         )}
       </section>
+      {/* ── Environment Correlation (ADHD Hack #8) ────────────────────────────── */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-violet-400" />
+          <h2 className="text-base font-medium text-foreground">Environment Patterns</h2>
+          <span className="text-xs text-muted-foreground ml-1">From morning check-ins</span>
+        </div>
+        {envCorrelationQuery.isLoading ? (
+          <div className="h-20 rounded-xl bg-muted/30 animate-pulse" />
+        ) : !envCorrelationQuery.data?.hasData ? (
+          <Card className="border-dashed border-border/50 bg-transparent">
+            <CardContent className="flex flex-col items-center justify-center py-7 text-center gap-2">
+              <TrendingUp className="w-5 h-5 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">
+                No location data yet. Pick your work environment during morning check-ins to see where you show up most.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="bg-card/60 border-border/50">
+            <CardContent className="pt-4 pb-4 space-y-4">
+              {envCorrelationQuery.data.insight && (
+                <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-4 py-3">
+                  <p className="text-sm text-violet-300">{envCorrelationQuery.data.insight}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Based on {envCorrelationQuery.data.sampleSize} morning check-ins
+                  </p>
+                </div>
+              )}
+              {envCorrelationQuery.data.locationStats.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Check-ins by location</p>
+                  {envCorrelationQuery.data.locationStats.map((stat) => {
+                    const maxCount = (envCorrelationQuery.data as { hasData: true; locationStats: Array<{ loc: string; count: number }>; locationLabels: Record<string, string>; sampleSize: number; insight: string; topLocation: string; topDay: string | null }).locationStats[0]?.count ?? 1;
+                    const pct = Math.round((stat.count / maxCount) * 100);
+                    const label = (envCorrelationQuery.data as { hasData: true; locationStats: Array<{ loc: string; count: number }>; locationLabels: Record<string, string>; sampleSize: number; insight: string; topLocation: string; topDay: string | null }).locationLabels[stat.loc] ?? stat.loc;
+                    return (
+                      <div key={stat.loc} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-foreground capitalize">{label}</span>
+                          <span className="text-muted-foreground tabular-nums">{stat.count}×</span>
+                        </div>
+                        <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-violet-500/70 transition-all duration-500"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
       {/* ── Energy & Hunger Correlation (ADHD Hack #7) ───────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">

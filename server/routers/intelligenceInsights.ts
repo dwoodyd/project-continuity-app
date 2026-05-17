@@ -299,6 +299,54 @@ Rules:
     };
   }),
 
+  // ── Query: environment/location correlation from morning check-ins (Hack #8) ────────
+  getEnvironmentCorrelation: protectedProcedure.query(async ({ ctx }) => {
+    const recentCheckIns = await getRecentCheckIns(ctx.user.id, 60);
+    const morningCheckIns = recentCheckIns.filter(c => c.type === "morning" && c.userInput);
+    if (morningCheckIns.length === 0) return { hasData: false as const };
+    const DOW_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const locationCount: Record<string, number> = {};
+    const locationByDow: Record<string, Record<string, number>> = {};
+    for (const c of morningCheckIns) {
+      try {
+        const parsed = JSON.parse(c.userInput ?? "{}");
+        const loc: string | undefined = parsed.workLocation;
+        if (!loc) continue;
+        locationCount[loc] = (locationCount[loc] ?? 0) + 1;
+        const dow = DOW_LABELS[new Date(c.date).getDay()] ?? "?";
+        if (!locationByDow[loc]) locationByDow[loc] = {};
+        locationByDow[loc][dow] = (locationByDow[loc][dow] ?? 0) + 1;
+      } catch { /* skip */ }
+    }
+    if (Object.keys(locationCount).length === 0) return { hasData: false as const };
+    const topLocation = Object.entries(locationCount).sort((a, b) => b[1] - a[1])[0]!;
+    // Find top day for top location
+    const topLocDow = locationByDow[topLocation[0]] ?? {};
+    const topDay = Object.entries(topLocDow).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const locationStats = Object.entries(locationCount)
+      .sort((a, b) => b[1] - a[1])
+      .map(([loc, count]) => ({ loc, count }));
+    const LOCATION_LABELS: Record<string, string> = {
+      home: "Home",
+      coffee_shop: "Coffee shop",
+      library: "Library",
+      office: "Office",
+      other: "Other",
+    };
+    const insight = topDay
+      ? `You check in most from ${LOCATION_LABELS[topLocation[0]] ?? topLocation[0]} — especially on ${topDay}s.`
+      : `You check in most from ${LOCATION_LABELS[topLocation[0]] ?? topLocation[0]}.`;
+    return {
+      hasData: true as const,
+      sampleSize: morningCheckIns.length,
+      locationStats,
+      topLocation: topLocation[0],
+      topDay,
+      insight,
+      locationLabels: LOCATION_LABELS,
+    };
+  }),
+
   // ── Query: energy/hunger correlation from midday check-ins (Hack #7) ────────────
   getEnergyCorrelation: protectedProcedure.query(async ({ ctx }) => {
     const recentCheckIns = await getRecentCheckIns(ctx.user.id, 30);

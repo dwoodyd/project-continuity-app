@@ -1485,18 +1485,18 @@
 ## ADHD Hacks Feature Build (May 2026)
 
 ### Hack 1 — Transition Sound
-- [ ] Generate or source a short ambient chime (< 2s, soft, non-jarring) and upload to CDN
-- [ ] Play chime when Single Focus Mode session starts (setup → active transition)
-- [ ] Play chime when Doing Mode is toggled on/off in Home.tsx
+- [x] Web Audio API chime implemented in useTransitionSound.ts hook (no CDN needed)
+- [x] Chime plays when Single Focus Mode session starts (setup → active transition)
+- [x] Chime plays when Doing Mode is toggled on/off in Home.tsx
 
 ### Hack 3 — Environment Field (Morning Check-in)
-- [ ] Add `environment` varchar column to morning_checkins table (kitchen / coffee shop / office / outside / other)
-- [ ] Add environment picker to morning check-in form (icon buttons, not a dropdown)
-- [ ] Store environment value in the check-in record
+- [x] workLocation field already in morning check-in tRPC input (home/coffee_shop/library/office/other)
+- [x] Environment icon-button picker already in morning check-in form in Home.tsx
+- [x] workLocation stored in check-in userInput JSON
 
 ### Hack 8 — Environment Tracking in Intelligence
-- [ ] Add environment correlation card to IntelligencePage: "You check in most from [X] on [day]" pattern
-- [ ] Surface top environment by day-of-week from morning check-in data
+- [x] Add getEnvironmentCorrelation procedure to intelligenceInsights router
+- [x] Add Environment Patterns section to IntelligencePage with bar chart and insight sentence
 
 ### Hack 2 — Body Doubling Room
 - [x] Install ws (WebSocket) package on server
