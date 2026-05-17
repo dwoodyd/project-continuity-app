@@ -5,6 +5,7 @@ import { assertProjectOwnedBy, createProjectMemoryEvent, getDb } from "../db";
 import { focusSessions, focusSessionArtifact, threadStrength, sourceItems } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
+import { ENV } from "../_core/env";
 
 // ── Time-of-day vibe ─────────────────────────────────────────────────────────
 function getWrenVibe(hour: number): { vibe: string; openingLine: string; defaultAmbient: string } {
@@ -83,7 +84,9 @@ export const focusSessionsRouter = router({
     if (!db) return { canStart: true, usedThisWeek: 0, isPro: false };
 
     const user = ctx.user;
-    const isPro = user.isPro || user.isFoundingMember || user.isBeta;
+    // Admin, pro, founding members, and the app owner all get unlimited sessions
+    const isOwner = user.openId === ENV.ownerOpenId;
+    const isPro = user.isPro || user.isFoundingMember || (user as { isBeta?: boolean }).isBeta || user.role === "admin" || isOwner;
     if (isPro) return { canStart: true, usedThisWeek: 0, isPro: true };
 
     const weekStart = getWeekStart();
