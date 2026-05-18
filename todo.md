@@ -1630,3 +1630,16 @@
 ### Tour Polish
 - [x] McKinsey stat replaced with generic sample in Knowledge Vault slide
 - [x] Focus Sessions step 4 softened: Wren weaves artifact, user always picks next
+
+## About Page Root Cause Fix (May 17 2026)
+- [x] Identified that /welcome routes to WelcomePage.tsx (not AboutAppPage.tsx which is at /about-app)
+- [x] Applied all About fix spec changes to WelcomePage.tsx (the correct live component):
+  - [x] FEATURES array: "Distraction Insights" → "Intelligence", "Idea Sanctuary" → "Scratch Pad", "Project Memory" → "Projects"
+  - [x] Single Focus Mode description rewritten (no longer conflated with Focus Sessions)
+  - [x] Focus Sessions tile added to FEATURES grid
+  - [x] Feature grid heading: "Nine spaces" → "Ten spaces"
+  - [x] Wren caption: added 4-line voice doctrine below "Wren — your Continuary companion"
+  - [x] Footer: tagline → "Built for non-linear minds.", added "Founding member pricing" link (/pricing), added "Soul Engineer ecosystem" link
+  - [x] Footer nav labels updated: Vault → Knowledge Vault, Clarity → Clarity Engine, Evidence → Evidence Log
+  - [x] PhoneMockup sidebar preview updated with correct nav labels (Today / Knowledge Vault / Projects / Clarity Engine / Evidence Log)
+  - [x] "Who it's for" section: "Distraction Insights" → "Focus Sessions and Single Focus Mode"

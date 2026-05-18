@@ -97,14 +97,14 @@ const FEATURES = [
   },
   {
     icon: BarChart3,
-    title: "Distraction Insights",
+    title: "Intelligence",
     desc: "Weekly pattern recognition across your work. See your top distraction category and the time of day it peaks — then do something about it.",
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
   {
     icon: Lightbulb,
-    title: "Idea Sanctuary",
+    title: "Scratch Pad",
     desc: "A quick-capture button that's always one tap away. Ideas land safely without interrupting your current work session.",
     color: "text-orange-400",
     bg: "bg-orange-400/10",
@@ -119,13 +119,20 @@ const FEATURES = [
   {
     icon: Target,
     title: "Single Focus Mode",
-    desc: "Collapse the noise. Lock into one project with a dedicated timer, distraction log, and session brief — so the middle of your day stays uninterrupted.",
+    desc: "You name one topic and commit to it for an extended period. Wren holds the continuity language — opening every day with a line that connects today to yesterday's thread.",
     color: "text-rose-400",
     bg: "bg-rose-400/10",
   },
   {
+    icon: Clock,
+    title: "Focus Sessions",
+    desc: "Dedicated 25, 50, or 90-minute blocks where you and Wren work side-by-side. She checks in at the halfway point and helps you close out with a clear next step.",
+    color: "text-violet-400",
+    bg: "bg-violet-400/10",
+  },
+  {
     icon: Layers,
-    title: "Project Memory",
+    title: "Projects",
     desc: "Every project carries its own timeline of sessions, decisions, and breakthroughs. Nothing gets lost between sittings.",
     color: "text-teal-400",
     bg: "bg-teal-400/10",
@@ -208,6 +215,14 @@ function PhoneMockup() {
               <div className="w-4 h-4 rounded-full shrink-0" style={{ background: `oklch(${0.6 + i * 0.05} 0.12 ${140 + i * 20} / 0.4)` }} />
             </div>
           ))}
+          <div className="px-2 pt-1 pb-2 space-y-1.5">
+            {["Today", "Knowledge Vault", "Projects", "Clarity Engine", "Evidence Log"].map((label, i) => (
+              <div key={label} className="flex items-center gap-2 px-2 py-1 rounded-lg" style={{ background: i === 0 ? "oklch(0.78 0.18 65 / 0.15)" : "transparent" }}>
+                <div className="w-3 h-3 rounded-sm shrink-0" style={{ background: i === 0 ? "oklch(0.78 0.18 65 / 0.8)" : "oklch(0.45 0.04 240 / 0.5)" }} />
+                <div className="h-1.5 rounded-full" style={{ width: `${55 + i * 8}%`, background: i === 0 ? "oklch(0.78 0.18 65 / 0.6)" : "oklch(0.45 0.04 240 / 0.35)" }} />
+              </div>
+            ))}
+          </div>
           <div className="rounded-lg p-2.5 flex items-center justify-around" style={{ background: "var(--secondary)" }}>
             {["☀️", "🕐", "🌙"].map((emoji, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
@@ -399,6 +414,12 @@ export default function WelcomePage() {
             <WrenPlayer clip="popsHead" size="xl" />
             <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
               Wren — your Continuary companion
+            </p>
+            <p className="text-xs text-center mt-3 max-w-xs mx-auto leading-relaxed" style={{ color: "oklch(0.55 0.04 240)" }}>
+              She will not solve your problems. She will sit with you while you figure them out.
+              She will not tell you what to do. She will reflect back what you already know.
+              She will not celebrate your streaks. She will remember your thread.
+              She is not an assistant. She is a companion.
             </p>
           </div>
 
@@ -603,7 +624,7 @@ export default function WelcomePage() {
           <FadeSection className="text-center mb-14">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Everything you need</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              Nine spaces. One continuous thread.
+              Ten spaces. One continuous thread.
             </h2>
             <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">
               Each space does one thing well. Together they create a system that holds your work without holding you back.
@@ -651,7 +672,7 @@ export default function WelcomePage() {
               {
                 icon: Shield,
                 label: "The deep worker",
-                desc: "You need long uninterrupted blocks. Single Focus Mode and Distraction Insights structure the edges so the middle stays clear.",
+                desc: "You need long uninterrupted blocks. Focus Sessions and Single Focus Mode structure the edges so the middle stays clear.",
               },
             ].map(({ icon: Icon, label, desc }, i) => (
               <FadeSection key={label} delay={i * 80}>
@@ -755,10 +776,10 @@ export default function WelcomePage() {
               <>
                 {[
                   { href: "/", label: "Today" },
-                  { href: "/vault", label: "Vault" },
+                  { href: "/vault", label: "Knowledge Vault" },
                   { href: "/projects", label: "Projects" },
-                  { href: "/clarity", label: "Clarity" },
-                  { href: "/evidence", label: "Evidence" },
+                  { href: "/clarity", label: "Clarity Engine" },
+                  { href: "/evidence", label: "Evidence Log" },
                   { href: "/settings", label: "Settings" },
                 ].map(({ href, label }) => (
                   <Link key={href} href={href} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
@@ -772,7 +793,13 @@ export default function WelcomePage() {
               </a>
             )}
           </div>
-          <p className="text-xs text-muted-foreground/50">Built for minds that keep going.</p>
+          <div className="text-right space-y-1">
+            <p className="text-xs text-muted-foreground/50">Built for non-linear minds.</p>
+            <div className="flex items-center justify-end gap-3">
+              <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Founding member pricing</Link>
+              <a href="https://soulengineer.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Soul Engineer ecosystem</a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
