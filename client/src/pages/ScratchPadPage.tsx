@@ -466,7 +466,14 @@ export default function ScratchPadPage() {
             <WrenPlayer clip="bouncingFunClean" size="full" loop autoPlay />
           </div>
           <p className="text-sm text-muted-foreground mt-2">Nothing here yet.</p>
-          <p className="text-xs text-muted-foreground/50 mt-1">Add a note above — no labels, no projects, just words.</p>
+          <p className="text-xs text-muted-foreground/50 mt-1">No labels, no projects — just words.</p>
+          <button
+            onClick={() => create.mutate({ content: "" })}
+            className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-xl border border-dashed border-primary/40 hover:border-primary/70 hover:bg-primary/[0.04] text-sm text-primary/80 hover:text-primary transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Create your first note
+          </button>
         </div>
       ) : (
         <div className="space-y-2">

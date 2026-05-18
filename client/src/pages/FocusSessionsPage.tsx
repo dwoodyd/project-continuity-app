@@ -559,6 +559,27 @@ export default function FocusSessionsPage() {
       className="min-h-screen flex flex-col"
       style={{ background: "oklch(0.10 0.02 240)", color: "oklch(0.92 0.03 60)" }}
     >
+      {/* Persistent exit bar — always visible during any non-idle phase so users are never trapped */}
+      {phase !== "idle" && phase !== "reveal" && (
+        <div
+          className="flex items-center justify-between px-4 py-2 border-b"
+          style={{ borderColor: "oklch(0.16 0.03 240)", background: "oklch(0.08 0.015 240)" }}
+        >
+          <span className="text-xs" style={{ color: "oklch(0.42 0.04 240)" }}>
+            {phase === "active" ? `${formatTime(secondsLeft)} remaining` : phase === "intake" ? "Setting intention" : phase === "duration" ? "Choose duration" : "Closing"}
+          </span>
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+            style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Exit session
+          </button>
+        </div>
+      )}
       {/* Header — dims during active session */}
       <div
         className="flex items-center justify-between px-6 py-4 border-b transition-opacity duration-700"

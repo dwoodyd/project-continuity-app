@@ -1052,7 +1052,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Google Calendar Integration */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+          <div id="calendar" className="p-5 rounded-xl bg-card border border-border space-y-3">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-amber-500" />
               <p className="text-sm font-semibold text-foreground">Google Calendar</p>

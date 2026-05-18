@@ -251,12 +251,12 @@ export default function EvidenceLogPage() {
   const totalReturns = summaries?.reduce((acc, s) => acc + s.returnsAfterGap, 0) ?? 0;
   const totalHardDays = summaries?.reduce((acc, s) => acc + s.hardDaySessions, 0) ?? 0;
 
-  // Show Wren once per browser session when the user has evidence
+  // Show Wren celebration once ever (localStorage) when the user first has evidence — not on every visit
   useEffect(() => {
     if (!summaries || summaries.length === 0) return;
-    const key = "wren_evidence_celebrated";
-    if (sessionStorage.getItem(key)) return;
-    sessionStorage.setItem(key, "1");
+    const key = "continuary_evidence_celebrated_v1";
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
     setShowWrenCelebration(true);
     setTimeout(() => setShowWrenCelebration(false), 6000);
   }, [summaries]);

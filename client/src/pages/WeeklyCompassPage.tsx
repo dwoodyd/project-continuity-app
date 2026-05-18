@@ -33,8 +33,12 @@ function CalendarEventStrip() {
       <div className="flex items-center gap-2 px-1 py-2">
         <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
         <span className="text-xs text-muted-foreground/50">
-          Connect Google Calendar in{" "}
-          <a href="/settings" className="underline underline-offset-2 hover:text-muted-foreground transition-colors">Settings</a>{" "}
+          <a
+            href="/settings#calendar"
+            className="underline underline-offset-2 hover:text-muted-foreground transition-colors"
+          >
+            Connect Google Calendar
+          </a>{" "}
           to include your schedule in AI recommendations.
         </span>
       </div>

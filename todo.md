@@ -1643,3 +1643,9 @@
   - [x] Footer nav labels updated: Vault → Knowledge Vault, Clarity → Clarity Engine, Evidence → Evidence Log
   - [x] PhoneMockup sidebar preview updated with correct nav labels (Today / Knowledge Vault / Projects / Clarity Engine / Evidence Log)
   - [x] "Who it's for" section: "Distraction Insights" → "Focus Sessions and Single Focus Mode"
+
+## UX Bottleneck Fixes (May 17 2026)
+- [x] UX1: FocusSessionsPage — add persistent visible "Exit Session" / "Back to Dashboard" button so users aren't trapped without the sidebar
+- [x] UX2: EvidenceLogPage (or wherever the Evidence Log splash lives) — add localStorage guard so splash only shows on first visit, not every visit
+- [x] UX3: WeeklyCompassPage — turn the "connect Google Calendar in Settings" prompt into a clickable deep link to /settings#calendar (or the exact calendar integration section)
+- [x] UX4: ScratchPadPage — add a CTA button ("+ Create Your First Note") inside the empty state so novice users know what to do
