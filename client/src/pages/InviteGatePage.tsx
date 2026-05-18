@@ -371,10 +371,17 @@ export default function InviteGatePage() {
         <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.22)", textAlign: "center" as const }}>
           Don&apos;t have a code?{" "}
           <a
-            href="mailto:hello@continuary.app"
+            href="/apply"
             style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px" }}
           >
-            Email hello@continuary.app
+            Apply for founding access
+          </a>
+          {" "}or{" "}
+          <a
+            href="mailto:hello@continuary.app"
+            style={{ color: "rgba(255,255,255,0.30)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          >
+            email us
           </a>
         </p>
         <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.22)", textAlign: "center" as const }}>

@@ -80,6 +80,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
         <Route path="/intro">{() => null}</Route>
+        {/* Standalone 404 for unauthenticated visitors — must come before the AppLayout catch-all
+            so unknown routes show the branded 404 page instead of the sign-in card. */}
+        <Route path="/404" component={NotFound} />
         <Route>
           <AppLayout onPreviewIntro={onPreviewIntro}>
             <Switch>

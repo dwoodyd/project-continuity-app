@@ -20,8 +20,7 @@ export default function TermsPage() {
               <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
                 Privacy Policy
               </Link>
-              . If you do not agree, do not use the service. These terms apply to the closed beta
-              period and will be updated before public launch.
+              . If you do not agree, do not use the service.
             </p>
           </div>
 

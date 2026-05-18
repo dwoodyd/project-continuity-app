@@ -1654,3 +1654,30 @@
 - [x] BUG1: Double sidebar in Single Focus Mode (/study) — page renders two sidebars side-by-side, breaking the focused experience
 - [x] BUG2: Heatmap month labels overflow container in Evidence Log — labels overlap sidebar on smaller screens
 - [x] BUG3: tRPC unauthorized fetch noise on early render — scratchPad.list, checkIns.getStreak, settings.getProfile fire before auth resolves
+
+## Launch-Readiness Review Fixes (May 18 2026)
+
+### P0 — Critical
+- [x] P0-1: Root URL / — confirmed sign-in card IS shown (AppLayout gate); no change needed
+- [x] P0-2: /redeem-referral — form now shows before auth; code stored in sessionStorage, auto-redeemed after OAuth
+
+### P1 — High
+- [x] P1-1: Renamed 'Watch the intro' → 'Take the tour' in AppLayout sign-in card
+- [x] P1-2: /apply question changed to 'What’s your relationship with consistency?'
+- [x] P1-3: Standalone /404 route added outside AppLayout; NotFound page already branded with CTA
+- [x] P1-5: Splash contrast verified correct — wordmark is oklch(0.97) near-white on dark bg; no change needed
+
+### P2 — Code-fixable
+- [x] P2-3: Terms of Service — removed 'will be updated before public launch' clause
+- [x] P2-4: External links verified — all target=_blank links already have rel=noopener noreferrer
+- [x] P2-5: <title>Continuary</title> already in index.html line 7 — no change needed
+- [x] P2-7: /invite-gate now has 'Apply for founding access' link to /apply + 'email us' fallback
+- [x] P2-8: 'June 15th' not found in app codebase — only user-facing book ref is 'Companion app to Permission to Start' (no date). Likely on marketing site (separate codebase)
+
+### P2 — External/Not code (note only)
+- [ ] P1-4: Mobile nav on continuary.app marketing site (SEPARATE CODEBASE — not this app)
+- [ ] P2-1: Pricing page "Clarity Engine" terminology not in signup flow (low priority, terminology is correct in app)
+- [ ] P2-2: Privacy/Terms dated April 2026 (LEGAL REVIEW — owner action needed)
+- [ ] P2-6: Social proof avatars are initials only (CONTENT — owner to provide real photos)
+- [ ] P2-9: Cross-domain transitions between continuary.app and app.continuary.app (ACCEPTABLE — standard practice)
+- [ ] P2-10: og:tags for social sharing on app routes (INFRASTRUCTURE — SSR or meta proxy needed)

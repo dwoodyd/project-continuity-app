@@ -369,7 +369,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 onClick={onPreviewIntro}
                 className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
               >
-                ✦ Watch the intro
+                ✦ Take the tour
               </button>
             </div>
           )}

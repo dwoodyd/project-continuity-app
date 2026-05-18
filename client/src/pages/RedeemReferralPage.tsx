@@ -8,28 +8,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+const STORAGE_KEY = "continuary_pending_referral";
+
 /**
  * /redeem-referral — lets a new user enter a referral code from an existing
  * founding member to skip the application queue and get immediate access.
  *
- * Requires authentication. Calls beta.redeemReferral on submit.
- * On success, redirects to /founding-member.
+ * UX flow (P0-2 fix):
+ *   1. Unauthenticated: show the code entry form immediately — no auth gate.
+ *      On submit, store the code in sessionStorage and redirect to OAuth.
+ *   2. Authenticated (post-OAuth return): auto-redeem the stored code, or
+ *      show the form again if no stored code.
+ *   3. Already a founding member: redirect to /founding-member.
  */
 export default function RedeemReferralPage() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const [code, setCode] = useState("");
+
+  // Pre-fill from sessionStorage if returning after OAuth
+  const [code, setCode] = useState(() => {
+    return sessionStorage.getItem(STORAGE_KEY) ?? "";
+  });
   const [success, setSuccess] = useState(false);
   const [bonusDays, setBonusDays] = useState(30);
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !user) {
-      // Store intent so we can come back after OAuth
-      sessionStorage.setItem("postLoginRedirect", "/redeem-referral");
-      window.location.href = getLoginUrl();
-    }
-  }, [user, authLoading]);
 
   // Already a founding member — send to status page
   useEffect(() => {
@@ -40,9 +41,9 @@ export default function RedeemReferralPage() {
 
   const redeemMutation = trpc.beta.redeemReferral.useMutation({
     onSuccess: (data) => {
+      sessionStorage.removeItem(STORAGE_KEY);
       setBonusDays(data.bonusDays ?? 30);
       setSuccess(true);
-      // Give the user a moment to read the success state, then navigate
       setTimeout(() => navigate("/founding-member"), 2800);
     },
     onError: (err) => {
@@ -52,30 +53,52 @@ export default function RedeemReferralPage() {
     },
   });
 
+  // Auto-redeem stored code once user is authenticated
+  useEffect(() => {
+    if (!user || authLoading) return;
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored && !redeemMutation.isPending && !success) {
+      redeemMutation.mutate({ referralCode: stored.trim().toUpperCase() });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = code.trim().toUpperCase();
     if (!trimmed) return;
+
+    if (!user) {
+      // Not logged in: store code and send to OAuth
+      sessionStorage.setItem(STORAGE_KEY, trimmed);
+      localStorage.setItem("continuary_return_path", "/redeem-referral");
+      window.location.href = getLoginUrl();
+      return;
+    }
+
     redeemMutation.mutate({ referralCode: trimmed });
   };
-
-  if (authLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ background: "oklch(0.09 0.015 240)" }}
-      >
-        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "oklch(0.78 0.18 65)" }} />
-      </div>
-    );
-  }
-
-  if (!user) return null; // redirecting to login
 
   const accent = "oklch(0.78 0.18 65)";
   const bg = "oklch(0.09 0.015 240)";
   const text = "oklch(0.97 0.01 80)";
   const muted = "oklch(0.60 0.01 240)";
+
+  // Loading spinner only while auth is resolving AND we have a stored code
+  // (i.e. user just returned from OAuth and we're about to auto-redeem)
+  const pendingAutoRedeem = authLoading && !!sessionStorage.getItem(STORAGE_KEY);
+
+  if (pendingAutoRedeem || (user && redeemMutation.isPending && !success)) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        style={{ background: bg, color: text }}
+      >
+        <Loader2 className="w-6 h-6 animate-spin" style={{ color: accent }} />
+        <p className="text-sm" style={{ color: muted }}>Verifying your referral code…</p>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -178,10 +201,18 @@ export default function RedeemReferralPage() {
                 <Loader2 className="w-4 h-4 animate-spin" />
                 Verifying…
               </span>
-            ) : (
+            ) : user ? (
               "Redeem code"
+            ) : (
+              "Continue to sign in →"
             )}
           </Button>
+
+          {!user && (
+            <p className="text-xs text-center" style={{ color: muted }}>
+              You'll be asked to sign in — your code will be applied automatically.
+            </p>
+          )}
         </form>
 
         {/* Divider + apply link */}

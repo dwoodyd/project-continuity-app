@@ -172,7 +172,7 @@ export default function ApplyPage() {
               className="text-sm font-medium"
               style={{ color: "oklch(0.85 0.01 80)" }}
             >
-              What's your relationship with getting things done?
+              What's your relationship with consistency?
             </label>
             <Textarea
               id="relationship"
