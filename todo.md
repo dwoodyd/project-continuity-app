@@ -1612,3 +1612,21 @@
 - [x] Rename "Vault" → "Knowledge Vault" throughout tour
 - [x] Fix nav bug: prev/next buttons work correctly on all 14 slides
 - [x] Rewrite final invite slide per spec
+
+## Fix Specs Wave 2 (May 17 2026 — follow-up)
+### Pricing Page Polish
+- [x] Keeper card border visual weight matches Pro card
+- [x] Annual savings note more prominent
+- [x] Feature table toggle arrow direction fix
+### About Page Polish
+- [x] SPACES list: Intelligence, Scratch Pad, Projects names corrected
+- [x] Focus Sessions tile updated
+- [x] Single Focus Mode tile rewritten
+- [x] Wren doctrine 4 lines present
+- [x] Soul Engineer footer present
+- [x] Pricing link present
+- [x] Tagline "non-linear minds" present
+- [x] Notification dot on About nav item confirmed absent (never existed)
+### Tour Polish
+- [x] McKinsey stat replaced with generic sample in Knowledge Vault slide
+- [x] Focus Sessions step 4 softened: Wren weaves artifact, user always picks next

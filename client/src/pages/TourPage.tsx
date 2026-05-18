@@ -436,7 +436,7 @@ export default function TourPage() {
               <div className="space-y-3">
                 {[
                   { type: "Idea",     preview: "What if the second chapter opened with the scene from 2019 instead of the prologue?",          tag: "Writing"   },
-                  { type: "Research", preview: "Knowledge workers lose 28% of their week to context-switching.",                               tag: "Reference" },
+                  { type: "Research", preview: "Our team's deep-work blocks are happening before 10am 4× more often than after lunch.",                  tag: "Reference" },
                   { type: "Decision", preview: "Decided to cut the third service offering and focus entirely on the core product.",             tag: "Strategy"  },
                   { type: "Draft",    preview: "Opening paragraph for the investor update — needs tightening before Thursday.",                 tag: "Writing"   },
                 ].map(item => (
@@ -660,7 +660,7 @@ export default function TourPage() {
                     { n: "1", label: "Name your intention",  desc: "One sentence: what are you working on this session?" },
                     { n: "2", label: "Choose your duration", desc: "25, 50, or 90 minutes. Wren adjusts her check-in timing." },
                     { n: "3", label: "Work together",        desc: "Wren is present on the right side of your screen. Chat with her if you need to — she's a companion, not a task manager." },
-                    { n: "4", label: "Close out",            desc: "What moved? Wren suggests your next step. It's logged to your Evidence Log automatically." },
+                    { n: "4", label: "Close out",            desc: "Wren weaves a small artifact of what moved. You always pick what’s next — she just notes what happened. Logged to your Evidence Log." },
                   ].map(s => (
                     <div key={s.n} className="flex items-start gap-3">
                       <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}>{s.n}</span>

@@ -302,7 +302,7 @@ export default function ProPage() {
                     {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
                   </div>
                   {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo — best value</p>
+                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                   )}
                   {isFoundingMember && (
                     <p className="text-[10px] text-amber-400/70 mt-0.5">Retail: ${p.retailMonthly}/mo · ${p.retailAnnual}/yr</p>
@@ -350,7 +350,7 @@ export default function ProPage() {
             const retailStrike = billing === "annual" ? k.retailAnnual : k.retailMonthly;
             const cta = getCtaLabel("keeper");
             return (
-              <div className="relative rounded-2xl border border-violet-500/30 bg-violet-500/5 p-5 flex flex-col gap-3">
+              <div className="relative rounded-2xl border border-violet-500/40 bg-violet-500/5 p-5 flex flex-col gap-3">
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-white text-sm">Keeper</span>
@@ -367,7 +367,7 @@ export default function ProPage() {
                     {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
                   </div>
                   {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo — best value</p>
+                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                   )}
                   {isFoundingMember && (
                     <p className="text-[10px] text-violet-400/70 mt-0.5">Retail: ${k.retailMonthly}/mo · ${k.retailAnnual}/yr</p>
@@ -424,7 +424,7 @@ export default function ProPage() {
             className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors py-3 border border-white/8 rounded-xl flex items-center justify-center gap-1.5"
           >
             {showTable ? "Hide full feature comparison" : "Show full feature comparison"}
-            {showTable ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {showTable ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
           </button>
           {showTable && (
             <div className="mt-4 rounded-2xl border border-white/8 overflow-x-auto">
