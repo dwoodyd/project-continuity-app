@@ -993,27 +993,31 @@ export default function Home() {
   const hour = now.getHours();
   const activePeriod: CheckInStep = hour < 12 ? "morning" : hour < 17 ? "midday" : "evening";
 
-  const { data: todayPlan, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery();
-  const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery();
-  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery();
-  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery();
-  const { data: activeProjects } = trpc.projects.listActive.useQuery();
-  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery();
-  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery();
-  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery();
-  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery();
-  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { staleTime: 60_000 });
-  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
-  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { staleTime: 5 * 60 * 1000 });
-  const { data: healthScores } = trpc.insights.getHealthScores.useQuery();
+  // Guard all queries behind auth — prevents TRPCClientError 10001 noise before session resolves
+  const authed = !!user;
+  const { data: todayPlan, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(undefined, { enabled: authed });
+  const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery(undefined, { enabled: authed });
+  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery(undefined, { enabled: authed });
+  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery(undefined, { enabled: authed });
+  const { data: activeProjects } = trpc.projects.listActive.useQuery(undefined, { enabled: authed });
+  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: authed });
+  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: authed });
+  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: authed });
+  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: authed });
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: authed, staleTime: 60_000 });
+  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: authed, staleTime: 5 * 60 * 1000 });
+  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { enabled: authed, staleTime: 5 * 60 * 1000 });
+  const { data: healthScores } = trpc.insights.getHealthScores.useQuery(undefined, { enabled: authed });
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
+    enabled: authed,
     staleTime: 30 * 60 * 1000,
   });
   const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
+    enabled: authed,
     staleTime: 5 * 60 * 1000,
   });
   const utils = trpc.useUtils();
-  const { data: profile } = trpc.settings.getProfile.useQuery();
+  const { data: profile } = trpc.settings.getProfile.useQuery(undefined, { enabled: authed });
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),

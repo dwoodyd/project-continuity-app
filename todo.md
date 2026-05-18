@@ -1649,3 +1649,8 @@
 - [x] UX2: EvidenceLogPage (or wherever the Evidence Log splash lives) — add localStorage guard so splash only shows on first visit, not every visit
 - [x] UX3: WeeklyCompassPage — turn the "connect Google Calendar in Settings" prompt into a clickable deep link to /settings#calendar (or the exact calendar integration section)
 - [x] UX4: ScratchPadPage — add a CTA button ("+ Create Your First Note") inside the empty state so novice users know what to do
+
+## Application Review Report Bugs (May 17 2026)
+- [x] BUG1: Double sidebar in Single Focus Mode (/study) — page renders two sidebars side-by-side, breaking the focused experience
+- [x] BUG2: Heatmap month labels overflow container in Evidence Log — labels overlap sidebar on smaller screens
+- [x] BUG3: tRPC unauthorized fetch noise on early render — scratchPad.list, checkIns.getStreak, settings.getProfile fire before auth resolves

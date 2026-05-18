@@ -1,22 +1,33 @@
 /**
  * ActivityHeatmap — luxury GitHub-style contribution grid
  * Gold/charcoal palette, 52 weeks × 7 days
+ *
+ * Fix (May 2026): month labels were position:absolute with left offsets
+ * calculated from grid column index but the outer container had no
+ * position:relative, causing them to escape and overlap the sidebar on
+ * narrow screens. Now the entire grid (labels + cells) lives inside a
+ * single overflow-x-auto scroll wrapper so labels are always clipped.
  */
 import { useMemo } from "react";
-import { format, parseISO } from "date-fns";
+import { parseISO } from "date-fns";
 import { trpc } from "@/lib/trpc";
 
 // 5 intensity levels: 0 = empty, 1-4 = activity
 const CELL_COLORS = [
-  "oklch(1 0 0 / 0.05)",   // 0 — empty
-  "oklch(0.72 0.17 65 / 0.25)", // 1 — faint gold
-  "oklch(0.72 0.17 65 / 0.50)", // 2 — mid gold
-  "oklch(0.72 0.17 65 / 0.75)", // 3 — rich gold
-  "oklch(0.72 0.17 65 / 1.00)", // 4 — full gold
+  "oklch(1 0 0 / 0.05)",          // 0 — empty
+  "oklch(0.72 0.17 65 / 0.25)",   // 1 — faint gold
+  "oklch(0.72 0.17 65 / 0.50)",   // 2 — mid gold
+  "oklch(0.72 0.17 65 / 0.75)",   // 3 — rich gold
+  "oklch(0.72 0.17 65 / 1.00)",   // 4 — full gold
 ];
 
 const MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const DAY_LABELS = ["","Mon","","Wed","","Fri",""];
+const DAY_LABELS   = ["","Mon","","Wed","","Fri",""];
+
+const CELL = 11; // px per cell
+const GAP  = 2;
+const UNIT = CELL + GAP;
+const DAY_LABEL_W = 22; // px for Mon/Wed/Fri labels on left
 
 export function ActivityHeatmap() {
   const { data = [], isLoading } = trpc.checkIns.getHeatmapData.useQuery(undefined, {
@@ -27,15 +38,12 @@ export function ActivityHeatmap() {
   // Pad to full 52-week grid (364 cells) starting on Sunday
   const grid = useMemo(() => {
     if (data.length === 0) return [];
-    // data is 365 days oldest→newest
-    // Find day-of-week of first cell to pad
     const firstDate = parseISO(data[0]!.date);
     const dow = firstDate.getDay(); // 0=Sun
     const padded: (typeof data[0] | null)[] = [
       ...Array(dow).fill(null),
       ...data,
     ];
-    // Split into weeks (columns)
     const weeks: (typeof data[0] | null)[][] = [];
     for (let i = 0; i < padded.length; i += 7) {
       weeks.push(padded.slice(i, i + 7));
@@ -43,7 +51,7 @@ export function ActivityHeatmap() {
     return weeks;
   }, [data]);
 
-  // Month label positions
+  // Month label positions — one label per calendar month transition
   const monthPositions = useMemo(() => {
     const positions: { label: string; col: number }[] = [];
     let lastMonth = -1;
@@ -67,91 +75,91 @@ export function ActivityHeatmap() {
     );
   }
 
-  const CELL = 11; // px per cell
-  const GAP = 2;
-  const UNIT = CELL + GAP;
+  // Total pixel width of the grid (all weeks + gaps)
+  const gridWidth = grid.length * UNIT - GAP;
 
   return (
     <div className="space-y-2">
-      {/* Month labels */}
-      <div className="flex" style={{ paddingLeft: 24 }}>
-        {monthPositions.map(({ label, col }) => (
+      {/*
+        Single overflow-x-auto wrapper so month labels are always clipped
+        to the scroll container and never escape into the sidebar.
+      */}
+      <div className="overflow-x-auto pb-1">
+        <div style={{ display: "flex", minWidth: DAY_LABEL_W + gridWidth }}>
+          {/* Day-of-week labels (Mon / Wed / Fri) */}
           <div
-            key={`${label}-${col}`}
-            className="text-[10px] shrink-0"
             style={{
-              width: UNIT,
-              marginLeft: col === 0 ? 0 : (col - (monthPositions[monthPositions.indexOf({ label, col })]?.col ?? 0)) * UNIT,
-              color: "oklch(1 0 0 / 0.30)",
-              position: "absolute",
-              left: 24 + col * UNIT,
+              display: "flex",
+              flexDirection: "column",
+              gap: GAP,
+              paddingTop: 14 + 2, // match month-label row height
+              flexShrink: 0,
+              width: DAY_LABEL_W,
             }}
           >
-            {label}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex gap-0.5 overflow-x-auto pb-1" style={{ position: "relative" }}>
-        {/* Day labels */}
-        <div className="flex flex-col shrink-0" style={{ gap: GAP, paddingTop: 14 }}>
-          {DAY_LABELS.map((label, i) => (
-            <div
-              key={i}
-              style={{
-                height: CELL,
-                width: 20,
-                fontSize: 9,
-                color: "oklch(1 0 0 / 0.25)",
-                lineHeight: `${CELL}px`,
-                textAlign: "right",
-                paddingRight: 3,
-              }}
-            >
-              {label}
-            </div>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div style={{ position: "relative" }}>
-          {/* Month labels row */}
-          <div style={{ height: 14, position: "relative", marginBottom: 2 }}>
-            {monthPositions.map(({ label, col }) => (
-              <span
-                key={`ml-${col}`}
+            {DAY_LABELS.map((label, i) => (
+              <div
+                key={i}
                 style={{
-                  position: "absolute",
-                  left: col * UNIT,
+                  height: CELL,
+                  width: DAY_LABEL_W,
                   fontSize: 9,
-                  color: "oklch(1 0 0 / 0.30)",
-                  lineHeight: "14px",
+                  color: "oklch(1 0 0 / 0.25)",
+                  lineHeight: `${CELL}px`,
+                  textAlign: "right",
+                  paddingRight: 3,
                 }}
               >
                 {label}
-              </span>
+              </div>
             ))}
           </div>
 
-          {/* Weeks */}
-          <div className="flex" style={{ gap: GAP }}>
-            {grid.map((week, wi) => (
-              <div key={wi} className="flex flex-col" style={{ gap: GAP }}>
-                {week.map((day, di) => (
-                  <div
-                    key={di}
-                    title={day ? `${day.date}: ${day.checkInCount} check-ins, ${day.focusCount} focus sessions` : ""}
-                    style={{
-                      width: CELL,
-                      height: CELL,
-                      borderRadius: 2,
-                      background: day ? CELL_COLORS[day.level] : CELL_COLORS[0],
-                      flexShrink: 0,
-                    }}
-                  />
-                ))}
-              </div>
-            ))}
+          {/* Grid + month labels */}
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            {/* Month labels row — absolutely positioned within this container */}
+            <div style={{ height: 14, position: "relative", marginBottom: 2 }}>
+              {monthPositions.map(({ label, col }) => (
+                <span
+                  key={`ml-${col}`}
+                  style={{
+                    position: "absolute",
+                    left: col * UNIT,
+                    fontSize: 9,
+                    color: "oklch(1 0 0 / 0.30)",
+                    lineHeight: "14px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            {/* Week columns */}
+            <div style={{ display: "flex", gap: GAP }}>
+              {grid.map((week, wi) => (
+                <div key={wi} style={{ display: "flex", flexDirection: "column", gap: GAP }}>
+                  {week.map((day, di) => (
+                    <div
+                      key={di}
+                      title={
+                        day
+                          ? `${day.date}: ${day.checkInCount} check-in${day.checkInCount !== 1 ? "s" : ""}, ${day.focusCount} focus session${day.focusCount !== 1 ? "s" : ""}`
+                          : ""
+                      }
+                      style={{
+                        width: CELL,
+                        height: CELL,
+                        borderRadius: 2,
+                        background: day ? CELL_COLORS[day.level] : CELL_COLORS[0],
+                        flexShrink: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

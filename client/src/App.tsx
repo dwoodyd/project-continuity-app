@@ -65,6 +65,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/focus" component={FocusSessionsPage} />
         <Route path="/focus-mode" component={FocusModePage} />
+        {/* /study is Single Focus Mode — full-screen, no sidebar. Must be outside AppLayout. */}
+        <Route path="/study" component={StudyTrackerPage} />
+        <Route path="/admin/study" component={StudyTrackerPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/invite-gate" component={InviteGatePage} />
@@ -93,8 +96,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/admin/invites" component={AdminInviteCodesPage} />
               <Route path="/admin/feedback" component={AdminFeedbackPage} />
               <Route path="/admin/beta" component={AdminBetaCodesPage} />
-              <Route path="/study" component={StudyTrackerPage} />
-              <Route path="/admin/study" component={StudyTrackerPage} />
+              {/* /study routes moved outside AppLayout above — prevents double sidebar */}
               <Route path="/admin/onboarding" component={AdminOnboardingFunnelPage} />
               <Route path="/admin/applications" component={AdminApplicationsPage} />
               <Route path="/settings" component={SettingsPage} />
