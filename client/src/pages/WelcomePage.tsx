@@ -419,6 +419,8 @@ export default function WelcomePage() {
               She will not solve your problems. She will sit with you while you figure them out.
               She will not tell you what to do. She will reflect back what you already know.
               She will not celebrate your streaks. She will remember your thread.
+              She returns without rebuke — no matter how long you've been away.
+              And when you're ready to work, she's there — reading, writing, weaving — while you do.
               She is not an assistant. She is a companion.
             </p>
           </div>
@@ -662,7 +664,7 @@ export default function WelcomePage() {
               {
                 icon: Brain,
                 label: "The multi-project mind",
-                desc: "You work across several things at once. Project Memory and the Re-Entry Card hold the context for all of them so you don't have to.",
+                desc: "You work across several things at once. Projects and the Re-Entry Card hold the context for all of them so you don't have to.",
               },
               {
                 icon: TrendingUp,

@@ -68,7 +68,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/invite-gate" component={InviteGatePage} />
-        <Route path="/about-app" component={AboutAppPage} />
+        {/* /about-app is a legacy route — the canonical About page is /welcome (WelcomePage).
+            Redirect here so old links don't 404 and future builders aren't confused. */}
+        <Route path="/about-app">{() => { if (typeof window !== "undefined") window.location.replace("/welcome"); return null; }}</Route>
         <Route path="/landing" component={LandingPage} />
         <Route path="/tour" component={TourPage} />
         <Route path="/apply" component={ApplyPage} />
