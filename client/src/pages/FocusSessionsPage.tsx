@@ -36,124 +36,92 @@ const WREN_VIDEOS = {
 type WrenActivity = keyof typeof WREN_VIDEOS;
 
 // ── Ambient sound — procedural noise via Web Audio API ───────────────────────
-// Rain: filtered white noise (low-pass ~800 Hz)
-// Café: filtered white noise (band-pass ~600 Hz) + subtle low-freq rumble
-// Both loop indefinitely using AudioBufferSourceNode with loopEnd
-function buildNoiseBuffer(ctx: AudioContext, seconds = 4): AudioBuffer {
-  const sampleRate = ctx.sampleRate;
-  const frameCount = sampleRate * seconds;
-  const buffer = ctx.createBuffer(1, frameCount, sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < frameCount; i++) {
-    data[i] = Math.random() * 2 - 1;
-  }
-  return buffer;
-}
+// Ambient sound CDN URLs (real recordings, royalty-free)
+const AMBIENT_URLS = {
+  rain: "/manus-storage/rain-loop_bce93e52.mp3",
+  cafe: "/manus-storage/cafe-loop_b75ecfbe.mp3",
+};
 
 function useAmbientSound(sound: "silence" | "rain" | "cafe", volume: number, playing: boolean) {
-  const ctxRef = useRef<AudioContext | null>(null);
-  const masterGainRef = useRef<GainNode | null>(null);
-  const sourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const filterRef = useRef<BiquadFilterNode | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Tear down existing source nodes (but keep context)
-  const stopSource = () => {
-    try { sourceRef.current?.stop(); } catch (_) {}
-    sourceRef.current = null;
-    filterRef.current = null;
+  const clearFade = () => {
+    if (fadeTimerRef.current) { clearInterval(fadeTimerRef.current); fadeTimerRef.current = null; }
+  };
+
+  const fadeIn = (audio: HTMLAudioElement, targetVol: number) => {
+    clearFade();
+    audio.volume = 0;
+    const step = targetVol / 30;
+    fadeTimerRef.current = setInterval(() => {
+      if (audio.volume + step >= targetVol) {
+        audio.volume = targetVol;
+        clearFade();
+      } else {
+        audio.volume = Math.min(1, audio.volume + step);
+      }
+    }, 50);
+  };
+
+  const fadeOut = (audio: HTMLAudioElement, onDone?: () => void) => {
+    clearFade();
+    const step = audio.volume / 20;
+    fadeTimerRef.current = setInterval(() => {
+      if (audio.volume - step <= 0) {
+        audio.volume = 0;
+        audio.pause();
+        clearFade();
+        onDone?.();
+      } else {
+        audio.volume = Math.max(0, audio.volume - step);
+      }
+    }, 50);
   };
 
   useEffect(() => {
-    if (!playing || sound === "silence") {
-      // Fade out and stop
-      if (masterGainRef.current && ctxRef.current) {
-        masterGainRef.current.gain.setTargetAtTime(0, ctxRef.current.currentTime, 0.3);
-      }
-      setTimeout(stopSource, 500);
-      return;
+    // Stop and clean up previous audio
+    if (audioRef.current) {
+      const prev = audioRef.current;
+      fadeOut(prev, () => { prev.src = ""; });
+      audioRef.current = null;
     }
 
-    // Create AudioContext on first user gesture
-    if (!ctxRef.current) {
-      const AC = window.AudioContext || (window as any).webkitAudioContext;
-      ctxRef.current = new AC();
-      masterGainRef.current = ctxRef.current.createGain();
-      masterGainRef.current.connect(ctxRef.current.destination);
-    }
-    const ctx = ctxRef.current;
-    if (ctx.state === "suspended") ctx.resume();
+    if (!playing || sound === "silence") return;
 
-    // Stop previous source before creating new one
-    stopSource();
+    const audio = new Audio(AMBIENT_URLS[sound]);
+    audio.loop = true;
+    audio.volume = 0;
+    audioRef.current = audio;
 
-    // Build noise buffer (4s, looped)
-    const noiseBuffer = buildNoiseBuffer(ctx, 4);
+    const targetVol = Math.min(1, (volume / 100) * 0.8);
+    audio.play().then(() => fadeIn(audio, targetVol)).catch(() => {});
 
-    // Source node
-    const source = ctx.createBufferSource();
-    source.buffer = noiseBuffer;
-    source.loop = true;
-    sourceRef.current = source;
-
-    // Filter shaping
-    const filter = ctx.createBiquadFilter();
-    filterRef.current = filter;
-
-    if (sound === "rain") {
-      // Rain: low-pass ~900 Hz — soft hiss
-      filter.type = "lowpass";
-      filter.frequency.value = 900;
-      filter.Q.value = 0.5;
-    } else {
-      // Café: band-pass ~700 Hz — warm murmur
-      filter.type = "bandpass";
-      filter.frequency.value = 700;
-      filter.Q.value = 0.8;
-    }
-
-    source.connect(filter);
-    filter.connect(masterGainRef.current!);
-
-    // For café, add a subtle low rumble (100 Hz sine)
-    if (sound === "cafe") {
-      const rumble = ctx.createOscillator();
-      const rumbleGain = ctx.createGain();
-      rumble.type = "sine";
-      rumble.frequency.value = 100;
-      rumbleGain.gain.value = 0.04;
-      rumble.connect(rumbleGain);
-      rumbleGain.connect(masterGainRef.current!);
-      rumble.start();
-      // Store rumble on source so we can stop it
-      (source as any)._rumble = rumble;
-      (source as any)._rumbleGain = rumbleGain;
-    }
-
-    // Set volume and fade in
-    masterGainRef.current!.gain.setValueAtTime(0, ctx.currentTime);
-    masterGainRef.current!.gain.setTargetAtTime(volume * 0.45, ctx.currentTime, 0.8);
-
-    source.start();
+    return () => {
+      clearFade();
+      audio.pause();
+      audio.src = "";
+    };
   }, [playing, sound]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Update volume without restarting source
+  // Update volume without restarting
   useEffect(() => {
-    if (!masterGainRef.current || !ctxRef.current || !playing || sound === "silence") return;
-    masterGainRef.current.gain.setTargetAtTime(volume * 0.45, ctxRef.current.currentTime, 0.3);
+    if (!audioRef.current || !playing || sound === "silence") return;
+    const targetVol = Math.min(1, (volume / 100) * 0.8);
+    clearFade();
+    audioRef.current.volume = targetVol;
   }, [volume, playing, sound]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      try {
-        if ((sourceRef.current as any)?._rumble) {
-          (sourceRef.current as any)._rumble.stop();
-        }
-        sourceRef.current?.stop();
-        ctxRef.current?.close();
-      } catch (_) {}
+      clearFade();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 // ── Closure chime via Web Audio API ──────────────────────────────────────────
