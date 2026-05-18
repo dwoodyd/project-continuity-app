@@ -2,22 +2,43 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 
-type Step = "intro" | "problem" | "thread" | "morning" | "evening" | "vault" | "graph" | "strength" | "focus_sessions" | "single_focus" | "invite";
+type Step =
+  | "intro"
+  | "problem"
+  | "thread"
+  | "morning"
+  | "evening"
+  | "vault"
+  | "graph"
+  | "strength"
+  | "evidence"
+  | "threshold"
+  | "reentry"
+  | "focus_sessions"
+  | "single_focus"
+  | "invite";
 
-const STEPS: Step[] = ["intro","problem","thread","morning","evening","vault","graph","strength","focus_sessions","single_focus","invite"];
+const STEPS: Step[] = [
+  "intro","problem","thread","morning","evening",
+  "vault","graph","strength","evidence","threshold",
+  "reentry","focus_sessions","single_focus","invite",
+];
 
 const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
-  intro:    { label: "Welcome",         wren: "luminousFloats"  },
-  problem:  { label: "The Problem",     wren: "closesEyes"      },
-  thread:   { label: "Your Thread",     wren: "carryingThread"  },
-  morning:  { label: "Morning",         wren: "popsHead"        },
-  evening:  { label: "Evening",         wren: "kissingScreen"   },
-  vault:    { label: "The Vault",       wren: "perchedDoc"      },
-  graph:    { label: "Knowledge Graph", wren: "holdingOrb"      },
-  strength:       { label: "Thread Strength",    wren: "bouncingFunClean" },
-  focus_sessions: { label: "Focus Sessions",     wren: "homeVideo"        },
-  single_focus:   { label: "Single Focus Mode",  wren: "perchedDoc"       },
-  invite:         { label: "Request Access",     wren: "hoveringArchway"  },
+  intro:          { label: "Welcome",             wren: "luminousFloats"   },
+  problem:        { label: "The Problem",         wren: "closesEyes"       },
+  thread:         { label: "Your Thread",         wren: "carryingThread"   },
+  morning:        { label: "Morning",             wren: "popsHead"         },
+  evening:        { label: "Evening",             wren: "kissingScreen"    },
+  vault:          { label: "Knowledge Vault",     wren: "perchedDoc"       },
+  graph:          { label: "Knowledge Graph",     wren: "holdingOrb"       },
+  strength:       { label: "Thread Strength",     wren: "bouncingFunClean" },
+  evidence:       { label: "Evidence Log",        wren: "perchedDoc"       },
+  threshold:      { label: "Threshold Diagnosis", wren: "closesEyes"       },
+  reentry:        { label: "Re-Entry",            wren: "carryingThread"   },
+  focus_sessions: { label: "Focus Sessions",      wren: "homeVideo"        },
+  single_focus:   { label: "Single Focus Mode",   wren: "perchedDoc"       },
+  invite:         { label: "Begin",               wren: "hoveringArchway"  },
 };
 
 const MORNING_DEMO =
@@ -29,11 +50,11 @@ const EVENING_DEMO =
 // ─── Knowledge Graph Demo ────────────────────────────────────────────────────
 const GRAPH_NODES = [
   { id: "n1", x: 50,  y: 30,  label: "Investor update draft",       tag: "Writing",   primary: true },
-  { id: "n2", x: 20,  y: 60,  label: "McKinsey context-switching",   tag: "Research",  primary: false },
-  { id: "n3", x: 80,  y: 60,  label: "Cut third service offering",   tag: "Decision",  primary: false },
-  { id: "n4", x: 35,  y: 80,  label: "Focus block — Tue morning",    tag: "Session",   primary: false },
-  { id: "n5", x: 65,  y: 80,  label: "Positioning note — Feb 2024",  tag: "Idea",      primary: false },
-  { id: "n6", x: 50,  y: 55,  label: "Chapter 2 opening scene",      tag: "Writing",   primary: false },
+  { id: "n2", x: 20,  y: 60,  label: "Research: context-switching", tag: "Research",  primary: false },
+  { id: "n3", x: 80,  y: 60,  label: "Cut third service offering",  tag: "Decision",  primary: false },
+  { id: "n4", x: 35,  y: 80,  label: "Focus block — Tue morning",   tag: "Session",   primary: false },
+  { id: "n5", x: 65,  y: 80,  label: "Positioning note — Feb 2024", tag: "Idea",      primary: false },
+  { id: "n6", x: 50,  y: 55,  label: "Chapter 2 opening scene",     tag: "Writing",   primary: false },
 ];
 const GRAPH_EDGES = [
   { from: "n1", to: "n2", suggested: false },
@@ -193,7 +214,6 @@ export default function TourPage() {
   const [evening, setEvening] = useState({ wins: "", incomplete: "", tomorrow: "" });
 
   const idx = STEPS.indexOf(step);
-  const progress = ((idx + 1) / STEPS.length) * 100;
   const next = () => { const n = STEPS[idx + 1]; if (n) setStep(n); };
   const prev = () => { const p = STEPS[idx - 1]; if (p) setStep(p); };
 
@@ -215,7 +235,7 @@ export default function TourPage() {
 
       {/* Progress bar */}
       <div className="fixed top-[57px] inset-x-0 z-40 h-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.08)" }}>
-        <div className="h-full transition-all duration-500" style={{ width: `${progress}%`, background: "oklch(0.78 0.18 65 / 0.7)" }} />
+        <div className="h-full transition-all duration-500" style={{ width: `${((idx + 1) / STEPS.length) * 100}%`, background: "oklch(0.78 0.18 65 / 0.7)" }} />
       </div>
 
       {/* Step dots */}
@@ -235,6 +255,7 @@ export default function TourPage() {
       {/* Content */}
       <main className="pt-28 pb-24 px-4 max-w-3xl mx-auto">
 
+        {/* ── 1. Welcome ── */}
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
@@ -248,14 +269,23 @@ export default function TourPage() {
                   A personal operating system for people who do deep, meaningful work — and who know how hard it is to pick that work back up after life interrupts.
                 </p>
               </div>
-              <div className="flex items-center gap-3 text-xs" style={{ color: "oklch(0.55 0.04 240)" }}>
-                <span>Meet Wren</span><span>·</span><span>Your continuity companion</span>
+              {/* Wren voice doctrine */}
+              <div className="rounded-2xl px-8 py-6 max-w-md w-full text-left space-y-1" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
+                <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Meet Wren · Your continuity companion</p>
+                <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.75 0.04 240)" }}>
+                  Wren notices, doesn't judge.<br />
+                  She remembers, doesn't measure.<br />
+                  She returns, doesn't rebuke.<br />
+                  And when you're ready to work, she's there —<br />
+                  <span style={{ color: "oklch(0.85 0.15 65)" }}>reading, writing, weaving — while you do.</span>
+                </p>
               </div>
               <Btn onClick={next} label="Begin the tour" />
             </div>
           </Fade>
         )}
 
+        {/* ── 2. The Problem ── */}
         {step === "problem" && (
           <Fade>
             <div className="space-y-8">
@@ -279,6 +309,7 @@ export default function TourPage() {
           </Fade>
         )}
 
+        {/* ── 3. Your Thread ── */}
         {step === "thread" && (
           <Fade>
             <div className="space-y-8">
@@ -288,13 +319,15 @@ export default function TourPage() {
               </p>
               <div className="space-y-3">
                 {[
-                  { label: "Morning check-in", desc: "Set your intention, protect your focus, and prime the day." },
-                  { label: "Midday pulse", desc: "Two-minute alignment check. On plan?" },
-                  { label: "Evening close", desc: "Close the loop. Acknowledge what moved." },
-                  { label: "Weekly Compass", desc: "One clear direction for the week." },
-                  { label: "The Vault", desc: "A living knowledge base that grows with every thought you capture." },
-                  { label: "Thread Strength", desc: "A real-time measure of your continuity — not productivity, continuity." },
-                  { label: "Re-entry support", desc: "When you've been away, Wren meets you where you are and walks you back in." },
+                  { label: "Morning check-in",      desc: "Set your intention, protect your focus, and prime the day." },
+                  { label: "Midday pulse",           desc: "Two-minute alignment check. On plan?" },
+                  { label: "Evening close",          desc: "Close the loop. Acknowledge what moved." },
+                  { label: "Weekly Compass",         desc: "One clear direction for the week." },
+                  { label: "Knowledge Vault",        desc: "A living knowledge base that grows with every thought you capture." },
+                  { label: "Focus Sessions",         desc: "Work side-by-side with Wren for 25, 50, or 90 minutes." },
+                  { label: "Single Focus Mode",      desc: "One topic. One thread. Wren holds the continuity language every day." },
+                  { label: "Thread Strength",        desc: "A qualitative read on how connected you've been to your work." },
+                  { label: "Re-entry support",       desc: "When you've been away, Wren meets you where you are and walks you back in." },
                 ].map(f => (
                   <div key={f.label} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
                     <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65)" }} />
@@ -310,6 +343,7 @@ export default function TourPage() {
           </Fade>
         )}
 
+        {/* ── 4. Morning ── */}
         {step === "morning" && (
           <Fade>
             <div className="space-y-6">
@@ -358,6 +392,7 @@ export default function TourPage() {
           </Fade>
         )}
 
+        {/* ── 5. Evening ── */}
         {step === "evening" && (
           <Fade>
             <div className="space-y-6">
@@ -385,22 +420,23 @@ export default function TourPage() {
                   <p className="leading-relaxed whitespace-pre-line" style={{ color: "oklch(0.85 0.04 240)" }}>{EVENING_DEMO}</p>
                 </div>
               )}
-              <Nav onPrev={prev} onNext={next} nextLabel="See the Vault" />
+              <Nav onPrev={prev} onNext={next} nextLabel="See the Knowledge Vault" />
             </div>
           </Fade>
         )}
 
+        {/* ── 6. Knowledge Vault ── */}
         {step === "vault" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Vault" title="Every thought you've ever had about your work, in one place." wren="perchedDoc" />
+              <Header eyebrow="Knowledge Vault" title="Every thought you've ever had about your work, in one place." wren="perchedDoc" />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
-                The Vault is your knowledge base — not a note-taking app, but a living intelligence layer that connects your ideas, drafts, research, and decisions to your active projects.
+                The Knowledge Vault is your intelligence layer — not a note-taking app, but a living base that connects your ideas, drafts, research, and decisions to your active projects.
               </p>
               <div className="space-y-3">
                 {[
                   { type: "Idea",     preview: "What if the second chapter opened with the scene from 2019 instead of the prologue?",          tag: "Writing"   },
-                  { type: "Research", preview: "Knowledge workers lose 28% of their week to context-switching. (McKinsey)",                     tag: "Reference" },
+                  { type: "Research", preview: "Knowledge workers lose 28% of their week to context-switching.",                               tag: "Reference" },
                   { type: "Decision", preview: "Decided to cut the third service offering and focus entirely on the core product.",             tag: "Strategy"  },
                   { type: "Draft",    preview: "Opening paragraph for the investor update — needs tightening before Thursday.",                 tag: "Writing"   },
                 ].map(item => (
@@ -417,12 +453,13 @@ export default function TourPage() {
           </Fade>
         )}
 
+        {/* ── 7. Knowledge Graph ── */}
         {step === "graph" && (
           <Fade>
             <div className="space-y-8">
               <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." wren="holdingOrb" />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
-                As your Vault grows, Continuary maps the connections between your entries — surfacing hidden links between ideas, decisions, and research you captured months apart.
+                As your Knowledge Vault grows, Continuary maps the connections between your entries — surfacing hidden links between ideas, decisions, and research you captured months apart.
               </p>
               <KnowledgeGraphDemo />
               <p className="text-sm" style={{ color: "oklch(0.45 0.04 240)" }}>
@@ -433,63 +470,200 @@ export default function TourPage() {
           </Fade>
         )}
 
+        {/* ── 8. Thread Strength ── */}
         {step === "strength" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Thread Strength" title="A living measure of your continuity." wren="bouncingFunClean" />
+              <Header eyebrow="Thread Strength" title="Not a score. A read." wren="bouncingFunClean" />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
-                Thread Strength doesn't measure how much you did. It measures how consistently you've stayed connected to your work — and how well you've returned after gaps.
+                Thread Strength doesn't measure how much you did. It's a qualitative read on how connected you've stayed to your work — and how well you've returned after gaps.
               </p>
-              <div className="space-y-4">
-                <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm" style={{ color: "oklch(0.65 0.04 240)" }}>Your Thread Strength</span>
-                    <span className="font-bold text-2xl" style={{ color: "oklch(0.78 0.18 65)" }}>74</span>
+              <p className="text-sm leading-relaxed" style={{ color: "oklch(0.55 0.04 240)" }}>
+                Wren remembers, doesn't measure. There are no points, no streaks, no percentages. Just three honest states — and Wren's read on where you are.
+              </p>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: "Gathering",
+                    desc: "Just starting, or returning after a long gap. The thread is thin but present. Wren meets you here without comment.",
+                    accent: "oklch(0.65 0.12 65 / 0.8)",
+                    bg: "oklch(0.65 0.12 65 / 0.06)",
+                    border: "oklch(0.65 0.12 65 / 0.15)",
+                  },
+                  {
+                    label: "Weaving",
+                    desc: "Building rhythm. You're showing up, the check-ins are landing, and the thread is getting stronger with each return.",
+                    accent: "oklch(0.78 0.18 65 / 0.9)",
+                    bg: "oklch(0.78 0.18 65 / 0.06)",
+                    border: "oklch(0.78 0.18 65 / 0.2)",
+                  },
+                  {
+                    label: "Holding",
+                    desc: "Deep continuity. The thread is strong. You know where you left off. Wren carries it forward without you having to ask.",
+                    accent: "oklch(0.88 0.14 65)",
+                    bg: "oklch(0.88 0.14 65 / 0.06)",
+                    border: "oklch(0.88 0.14 65 / 0.2)",
+                  },
+                ].map(s => (
+                  <div key={s.label} className="rounded-xl p-5 space-y-2" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+                    <p className="font-semibold text-base" style={{ color: s.accent }}>{s.label}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "oklch(0.65 0.04 240)" }}>{s.desc}</p>
                   </div>
-                  <div className="w-full rounded-full h-2" style={{ background: "oklch(0.78 0.18 65 / 0.12)" }}>
-                    <div className="h-2 rounded-full" style={{ width: "74%", background: "linear-gradient(to right, oklch(0.65 0.18 65), oklch(0.85 0.18 65))" }} />
-                  </div>
-                  <p className="text-sm font-medium" style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}>Weaving — strong momentum, consistent returns</p>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
+                ))}
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="See the Evidence Log" />
+            </div>
+          </Fade>
+        )}
+
+        {/* ── 9. Evidence Log ── */}
+        {step === "evidence" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Evidence Log" title="Proof that you showed up." wren="perchedDoc" />
+              <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
+                Every check-in, every session, every note you capture — Wren logs it as evidence. Not metrics. Evidence. The difference matters.
+              </p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>What gets logged</p>
+                <div className="space-y-3">
                   {[
-                    { label: "Gathering", range: "0–25",   desc: "Just starting or returning after a long gap" },
-                    { label: "Weaving",   range: "26–75",  desc: "Building rhythm, consistent check-ins" },
-                    { label: "Holding",   range: "76–100", desc: "Deep continuity, strong thread" },
-                  ].map(s => (
-                    <div key={s.label} className="rounded-xl p-3 space-y-1" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
-                      <p className="text-sm font-medium" style={{ color: "oklch(0.88 0.06 65)" }}>{s.label}</p>
-                      <p className="text-xs" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>{s.range}</p>
-                      <p className="text-xs leading-snug" style={{ color: "oklch(0.45 0.04 240)" }}>{s.desc}</p>
+                    { icon: "🌅", label: "Morning check-ins",    desc: "Your intention, energy, and what you named as worth protecting." },
+                    { icon: "🌙", label: "Evening closes",        desc: "What moved, what didn't, and what goes first tomorrow." },
+                    { icon: "🧵", label: "Focus Sessions",        desc: "Your intention, duration, what moved, and Wren's suggested next step." },
+                    { icon: "💡", label: "Knowledge Vault saves", desc: "Every idea, draft, decision, and research note you capture." },
+                    { icon: "📍", label: "Re-entry moments",      desc: "Every time you came back after a gap — logged as a return, not a failure." },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-start gap-3">
+                      <span className="text-lg shrink-0">{item.icon}</span>
+                      <div>
+                        <p className="text-sm font-medium text-white/90">{item.label}</p>
+                        <p className="text-xs text-white/50 leading-relaxed">{item.desc}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
+              </div>
+              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
+                <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
+                  "On the days you feel like you did nothing — the Evidence Log is the thing that shows you otherwise. You showed up. It's here."
+                </p>
+                <p className="text-xs mt-2" style={{ color: "oklch(0.55 0.08 65)" }}>— Wren</p>
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="See Threshold Diagnosis" />
+            </div>
+          </Fade>
+        )}
+
+        {/* ── 10. Threshold Diagnosis ── */}
+        {step === "threshold" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Threshold Diagnosis" title="Wren knows the difference between tired and stuck." wren="closesEyes" />
+              <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
+                When you open Continuary and something feels off, Wren doesn't push you to be productive. She reads the signals — your check-in language, your energy, your pattern — and names what she sees.
+              </p>
+              <div className="space-y-3">
+                {[
+                  {
+                    state: "Tired",
+                    wren: "You've been running hard. This isn't resistance — it's your body asking for something. Rest is part of the work.",
+                    colour: "oklch(0.60 0.10 240 / 0.8)",
+                    bg: "oklch(0.60 0.10 240 / 0.06)",
+                    border: "oklch(0.60 0.10 240 / 0.2)",
+                  },
+                  {
+                    state: "Stuck",
+                    wren: "Something specific is in the way. Let's name it before we try to move it. What's the actual block?",
+                    colour: "oklch(0.75 0.14 50 / 0.9)",
+                    bg: "oklch(0.75 0.14 50 / 0.06)",
+                    border: "oklch(0.75 0.14 50 / 0.2)",
+                  },
+                  {
+                    state: "Overwhelmed",
+                    wren: "Everything feels urgent and nothing feels possible. That's not a productivity problem — that's a threshold problem. One thing. Just one.",
+                    colour: "oklch(0.70 0.16 30 / 0.9)",
+                    bg: "oklch(0.70 0.16 30 / 0.06)",
+                    border: "oklch(0.70 0.16 30 / 0.2)",
+                  },
+                  {
+                    state: "Ready",
+                    wren: "The thread is here. You're here. Let's go.",
+                    colour: "oklch(0.78 0.18 65 / 0.9)",
+                    bg: "oklch(0.78 0.18 65 / 0.06)",
+                    border: "oklch(0.78 0.18 65 / 0.2)",
+                  },
+                ].map(s => (
+                  <div key={s.state} className="rounded-xl p-5 space-y-2" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+                    <p className="font-semibold text-sm uppercase tracking-wide" style={{ color: s.colour }}>{s.state}</p>
+                    <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>"{s.wren}"</p>
+                    <p className="text-xs" style={{ color: "oklch(0.45 0.04 240)" }}>— Wren</p>
+                  </div>
+                ))}
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="See Re-Entry" />
+            </div>
+          </Fade>
+        )}
+
+        {/* ── 11. Re-Entry / Amnesty Protocol ── */}
+        {step === "reentry" && (
+          <Fade>
+            <div className="space-y-8">
+              <Header eyebrow="Re-Entry" title="You're allowed to come back." wren="carryingThread" />
+              <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
+                Most productivity systems punish you for disappearing. Continuary doesn't. When you've been away — a week, a month, longer — Wren doesn't ask where you've been. She asks where you want to go next.
+              </p>
+              <div className="rounded-2xl p-6 space-y-5" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>The Amnesty Protocol</p>
+                <p className="text-sm leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
+                  When you return after a gap, Wren surfaces your last continuity note — the thread you left — and offers three options:
+                </p>
+                <div className="space-y-3">
+                  {[
+                    { label: "Pick up the thread",  desc: "Resume exactly where you left off. Wren reads back your last note and your next step." },
+                    { label: "Start fresh",          desc: "The old thread is archived, not deleted. You begin a new one. No guilt attached." },
+                    { label: "Just check in",        desc: "Not ready to commit to either. Wren meets you here and asks one question: what do you need today?" },
+                  ].map(opt => (
+                    <div key={opt.label} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "oklch(0.12 0.02 240 / 0.5)", border: "1px solid oklch(0.78 0.18 65 / 0.1)" }}>
+                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65)" }} />
+                      <div>
+                        <p className="text-sm font-medium text-white/90">{opt.label}</p>
+                        <p className="text-xs text-white/50 leading-relaxed">{opt.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-sm italic" style={{ color: "oklch(0.65 0.06 65)" }}>
+                  "The thread doesn't break when you leave. It waits." — Wren
+                </p>
               </div>
               <Nav onPrev={prev} onNext={next} nextLabel="Focus Sessions" />
             </div>
           </Fade>
         )}
 
+        {/* ── 12. Focus Sessions ── */}
         {step === "focus_sessions" && (
           <Fade>
             <div className="space-y-8">
               <Header eyebrow="Focus Sessions" title="Work side-by-side with Wren." wren="homeVideo" />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 A Focus Session is a dedicated block of time where you and Wren work together. You set your intention,
-                choose 25, 50, or 90 minutes, and Wren stays present the whole time — weaving quietly in the background,
+                choose 25, 50, or 90 minutes, and Wren stays present the whole time — weaving quietly on the right side of your screen,
                 checking in at the halfway point, and helping you close out with a clear next step.
               </p>
               <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
                 <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>How a session works</p>
                 <div className="space-y-3">
                   {[
-                    { step: "1", label: "Name your intention", desc: "One sentence: what are you working on this session?" },
-                    { step: "2", label: "Choose your duration", desc: "25, 50, or 90 minutes. Wren adjusts her check-in timing." },
-                    { step: "3", label: "Work together", desc: "Wren weaves on the left half of your screen. Chat with her if you need to." },
-                    { step: "4", label: "Close out", desc: "What moved? Wren suggests your next step. It's logged automatically." },
+                    { n: "1", label: "Name your intention",  desc: "One sentence: what are you working on this session?" },
+                    { n: "2", label: "Choose your duration", desc: "25, 50, or 90 minutes. Wren adjusts her check-in timing." },
+                    { n: "3", label: "Work together",        desc: "Wren is present on the right side of your screen. Chat with her if you need to — she's a companion, not a task manager." },
+                    { n: "4", label: "Close out",            desc: "What moved? Wren suggests your next step. It's logged to your Evidence Log automatically." },
                   ].map(s => (
-                    <div key={s.step} className="flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}>{s.step}</span>
+                    <div key={s.n} className="flex items-start gap-3">
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}>{s.n}</span>
                       <div>
                         <p className="text-sm font-medium text-white/90">{s.label}</p>
                         <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
@@ -498,11 +672,16 @@ export default function TourPage() {
                   ))}
                 </div>
               </div>
+              <div className="flex items-center gap-3 text-sm" style={{ color: "oklch(0.55 0.04 240)" }}>
+                <span>🎧</span>
+                <span>Pick from Silence · Rain · Café — whatever helps you settle.</span>
+              </div>
               <Nav onPrev={prev} onNext={next} nextLabel="Single Focus Mode" />
             </div>
           </Fade>
         )}
 
+        {/* ── 13. Single Focus Mode ── */}
         {step === "single_focus" && (
           <Fade>
             <div className="space-y-8">
@@ -516,10 +695,10 @@ export default function TourPage() {
                 <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>What makes it different</p>
                 <div className="space-y-3">
                   {[
-                    { label: "One focus, not a list", desc: "You name a single topic and commit to it. The app holds that commitment." },
-                    { label: "Wren's continuity line", desc: "Every day, Wren opens with a line that connects today to yesterday's thread." },
-                    { label: "Daily check-in form", desc: "A lightweight log: what you did, what moved, what's next. Takes 90 seconds." },
-                    { label: "Settings panel", desc: "Change your focus, extend your timeline, pause, or end — all in one place." },
+                    { label: "One focus, not a list",     desc: "You name a single topic and commit to it. The app holds that commitment." },
+                    { label: "Wren's continuity line",    desc: "Every day, Wren opens with a line that connects today to yesterday's thread." },
+                    { label: "Daily check-in form",       desc: "A lightweight log: what you did, what moved, what's next. Takes 90 seconds." },
+                    { label: "Settings panel",            desc: "Change your focus, extend your timeline, pause, or end — all in one place." },
                   ].map(s => (
                     <div key={s.label} className="flex items-start gap-3">
                       <span className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65 / 0.7)" }} />
@@ -531,23 +710,45 @@ export default function TourPage() {
                   ))}
                 </div>
               </div>
-              <Nav onPrev={prev} onNext={next} nextLabel="Request access" />
+              {/* Sample Wren continuity line */}
+              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
+                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Wren's continuity line — Day 8</p>
+                <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.75 0.04 240)" }}>
+                  "Day 8 of Learning Python. You're back. Yesterday you stalled on for-loops — that's where the thread picks up."
+                </p>
+                <p className="text-xs mt-2" style={{ color: "oklch(0.55 0.08 65)" }}>— Wren</p>
+              </div>
+              <Nav onPrev={prev} onNext={next} nextLabel="Ready to begin" />
             </div>
           </Fade>
         )}
 
+        {/* ── 14. Invite / Begin ── */}
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
               <WrenPlayer clip="hoveringArchway" size="xl" feather featherDirection="bottom" />
               <div className="space-y-3">
-                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>Invite Only</p>
+                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
                   Ready to <em className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>begin?</em>
                 </h2>
                 <p className="max-w-md mx-auto leading-relaxed" style={{ color: "oklch(0.65 0.04 240)" }}>
-                  Continuary is currently invite-only. Apply for founding member access and we'll review your application personally.
+                  Continuary is currently invite-only. Founding members get lifetime access at the price they join — and they help shape what gets built next.
                 </p>
+              </div>
+              {/* Pricing */}
+              <div className="grid sm:grid-cols-2 gap-4 w-full max-w-md">
+                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
+                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Pro</p>
+                  <p className="text-2xl font-bold" style={{ color: "oklch(0.92 0.06 65)" }}>$4.99<span className="text-sm font-normal text-white/40">/mo</span></p>
+                  <p className="text-xs leading-relaxed" style={{ color: "oklch(0.55 0.04 240)" }}>Full access to all features. Locked in for life at founding rate.</p>
+                </div>
+                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.78 0.18 65 / 0.08)", border: "1px solid oklch(0.78 0.18 65 / 0.35)" }}>
+                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}>Keeper</p>
+                  <p className="text-2xl font-bold" style={{ color: "oklch(0.88 0.15 65)" }}>$9.99<span className="text-sm font-normal text-white/40">/mo</span></p>
+                  <p className="text-xs leading-relaxed" style={{ color: "oklch(0.65 0.06 65)" }}>Everything in Pro + priority access to new features and direct input on the roadmap.</p>
+                </div>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <Link href="/apply"
@@ -555,13 +756,15 @@ export default function TourPage() {
                   style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.12 0.02 240)" }}>
                   Apply for access →
                 </Link>
-                <Link href="/landing"
+                <Link href="/pricing"
                   className="px-6 py-3 rounded-xl text-sm transition-colors"
                   style={{ background: "oklch(0.78 0.18 65 / 0.08)", color: "oklch(0.65 0.08 65)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
-                  Back to home
+                  See full pricing
                 </Link>
               </div>
-              <button onClick={prev} className="text-sm transition-colors" style={{ color: "oklch(0.45 0.04 240)" }}>← Back to Thread Strength</button>
+              <button onClick={prev} className="text-sm transition-colors" style={{ color: "oklch(0.45 0.04 240)" }}>
+                ← Back to {STEP_META[STEPS[STEPS.length - 2]].label}
+              </button>
             </div>
           </Fade>
         )}

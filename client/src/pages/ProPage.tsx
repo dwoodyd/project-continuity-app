@@ -5,47 +5,36 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Check, X, ArrowLeft, Sparkles, Star, Crown } from "lucide-react";
-// Plan keys — must match server/paypal.ts PlanKey exactly
+import { Check, X, ArrowLeft, Sparkles, Star, Crown, ChevronDown, ChevronUp } from "lucide-react";
+
 type PlanKey =
   | "pro_founding_monthly" | "pro_founding_annual"
   | "keeper_founding_monthly" | "keeper_founding_annual"
   | "pro_retail_monthly" | "pro_retail_annual"
   | "keeper_retail_monthly" | "keeper_retail_annual";
 
-// ── Pricing source-of-truth ────────────────────────────────────────────────────
 const PRICING = {
   pro: {
-    foundingMonthly: "4.99",
-    foundingAnnual: "39.99",
-    foundingAnnualEquiv: "3.33",
-    retailMonthly: "7.99",
-    retailAnnual: "79.99",
+    foundingMonthly: "4.99", foundingAnnual: "39.99", foundingAnnualEquiv: "3.33",
+    retailMonthly: "7.99", retailAnnual: "79.99",
     planKeys: {
-      foundingMonthly: "pro_founding_monthly" as PlanKey,
-      foundingAnnual: "pro_founding_annual" as PlanKey,
-      retailMonthly: "pro_retail_monthly" as PlanKey,
-      retailAnnual: "pro_retail_annual" as PlanKey,
+      foundingMonthly: "pro_founding_monthly" as PlanKey, foundingAnnual: "pro_founding_annual" as PlanKey,
+      retailMonthly: "pro_retail_monthly" as PlanKey, retailAnnual: "pro_retail_annual" as PlanKey,
     },
   },
   keeper: {
-    foundingMonthly: "9.99",
-    foundingAnnual: "79.99",
-    foundingAnnualEquiv: "6.67",
-    retailMonthly: "14.99",
-    retailAnnual: "149.99",
+    foundingMonthly: "9.99", foundingAnnual: "79.99", foundingAnnualEquiv: "6.67",
+    retailMonthly: "14.99", retailAnnual: "149.99",
     planKeys: {
-      foundingMonthly: "keeper_founding_monthly" as PlanKey,
-      foundingAnnual: "keeper_founding_annual" as PlanKey,
-      retailMonthly: "keeper_retail_monthly" as PlanKey,
-      retailAnnual: "keeper_retail_annual" as PlanKey,
+      foundingMonthly: "keeper_founding_monthly" as PlanKey, foundingAnnual: "keeper_founding_annual" as PlanKey,
+      retailMonthly: "keeper_retail_monthly" as PlanKey, retailAnnual: "keeper_retail_annual" as PlanKey,
     },
   },
 };
 
-// ── Feature comparison table ───────────────────────────────────────────────────
 interface PricingRow { feature: string; free: string | boolean; pro: string | boolean; keeper: string | boolean; }
 const PRICING_TABLE: PricingRow[] = [
+  // Core daily tools
   { feature: "Daily check-ins (Morning, Midday, Evening)", free: true, pro: true, keeper: true },
   { feature: "Today dashboard", free: true, pro: true, keeper: true },
   { feature: "Projects", free: true, pro: true, keeper: true },
@@ -57,31 +46,32 @@ const PRICING_TABLE: PricingRow[] = [
   { feature: "Weekly Review", free: "Basic", pro: "Full", keeper: "Full" },
   { feature: "Intelligence", free: "Basic", pro: "Full", keeper: "Full" },
   { feature: "Weekly Compass", free: true, pro: true, keeper: true },
+  { feature: "Weekly Compass deep-dive", free: false, pro: false, keeper: true },
   { feature: "Thread Strength tracking", free: true, pro: true, keeper: true },
-  { feature: "Idea Sanctuary", free: true, pro: true, keeper: true },
+  { feature: "Threshold Diagnosis", free: true, pro: true, keeper: true },
   { feature: "Markdown / Obsidian export", free: true, pro: true, keeper: true },
   // Focus Sessions
   { feature: "Focus Sessions — on-demand", free: "1 / week", pro: "Unlimited", keeper: "Unlimited" },
-  { feature: "Focus Sessions — book ahead", free: false, pro: true, keeper: true },
-  { feature: "Focus Sessions — recurring sessions", free: false, pro: true, keeper: true },
+  { feature: "Focus Sessions — ambient soundscapes", free: true, pro: true, keeper: true },
   { feature: "Focus Sessions — chat with Wren", free: true, pro: true, keeper: true },
   { feature: "Focus Sessions — Wren check-ins", free: true, pro: true, keeper: true },
+  { feature: "Focus Sessions — book ahead", free: false, pro: true, keeper: true },
+  { feature: "Focus Sessions — recurring sessions", free: false, pro: true, keeper: true },
   { feature: "Focus Sessions — pop-out window", free: false, pro: true, keeper: true },
-  { feature: "Focus Sessions — export focus record", free: false, pro: true, keeper: true },
+  { feature: "Focus Sessions — picture-in-picture (PIP)", free: false, pro: true, keeper: true },
+  { feature: "Focus Sessions — export weave", free: false, pro: true, keeper: true },
   { feature: "Focus Sessions — chat history", free: "Current session", pro: "Last 7 days", keeper: "Full history" },
   // Single Focus Mode
-  { feature: "Single Focus Mode — active focuses", free: "1", pro: "Up to 2", keeper: "Unlimited" },
+  { feature: "Single Focus Mode — active focuses", free: "1 (up to 60 days)", pro: "Up to 2 (365 days)", keeper: "Unlimited" },
   { feature: "Single Focus Mode — Wren daily prompts", free: false, pro: true, keeper: true },
   { feature: "Single Focus Mode — past focuses history", free: "Last 3", pro: "Unlimited", keeper: "Unlimited" },
   { feature: "Single Focus Mode — export focus log", free: false, pro: true, keeper: true },
-  { feature: "Single Focus Mode — max duration", free: "60 days", pro: "365 days", keeper: "Unlimited" },
-  // Other
+  // Studios (Phase 2)
+  { feature: "Studios — Wren-hosted group focus sessions", free: false, pro: true, keeper: "Priority" },
+  // Keeper-only
   { feature: "Deep Intelligence reports", free: false, pro: true, keeper: true },
-  { feature: "Smart push nudges", free: false, pro: true, keeper: true },
-  { feature: "Wren voice check-ins", free: false, pro: false, keeper: true },
-  { feature: "Threshold Diagnosis", free: false, pro: false, keeper: true },
+  { feature: "Priority support — direct founder access", free: false, pro: true, keeper: true },
   { feature: "Monthly office hours with founder", free: false, pro: false, keeper: true },
-  { feature: "Priority support", free: false, pro: true, keeper: true },
 ];
 
 function Cell({ value }: { value: string | boolean }) {
@@ -108,10 +98,7 @@ export default function ProPage() {
   const isActive = billingStatus === "active";
 
   const handleUpgrade = async (planKey: PlanKey, tierLabel: string) => {
-    if (!user) {
-      window.location.href = `https://continuary.app/apply`;
-      return;
-    }
+    if (!user) { window.open("https://continuary.app/#apply", "_blank"); return; }
     try {
       toast(`Redirecting to PayPal…`, { description: `Opening secure checkout for ${tierLabel}.` });
       const { approvalUrl } = await createSub.mutateAsync({ origin: window.location.origin, planKey });
@@ -130,29 +117,31 @@ export default function ProPage() {
       toast("Subscription cancelled", { description: "Your access will remain until the period ends." });
     } catch {
       toast.error("Could not cancel. Please try again.");
-    } finally {
-      setCancelling(false);
-    }
+    } finally { setCancelling(false); }
   };
 
-  // Determine which plan key to use based on founding status + billing toggle
   const getPlanKey = (tier: "pro" | "keeper"): PlanKey => {
     const p = PRICING[tier];
-    if (isFoundingMember) {
-      return billing === "annual" ? p.planKeys.foundingAnnual : p.planKeys.foundingMonthly;
-    }
+    if (isFoundingMember) return billing === "annual" ? p.planKeys.foundingAnnual : p.planKeys.foundingMonthly;
     return billing === "annual" ? p.planKeys.retailAnnual : p.planKeys.retailMonthly;
   };
 
-  // CTA label logic per handoff spec
-  const getCtaLabel = (tier: "pro" | "keeper"): { label: string; disabled: boolean; variant: "current" | "upgrade" | "downgrade" | "lock" | "apply" } => {
+  // Pattern C CTA: "Reserve X at this rate" for founding members not yet active
+  const getCtaLabel = (tier: "pro" | "keeper"): { label: string; sublabel?: string; disabled: boolean; variant: "current" | "upgrade" | "downgrade" | "lock" | "apply" } => {
     if (!user) return { label: "Apply for access", disabled: false, variant: "apply" };
     if (!isActive) {
-      return { label: `Lock in ${tier === "pro" ? "Pro" : "Keeper"}`, disabled: false, variant: "lock" };
+      const tierName = tier === "pro" ? "Pro" : "Keeper";
+      if (isFoundingMember) {
+        return {
+          label: `Reserve ${tierName} at this rate`,
+          sublabel: "No card now — beta access stays free. Your founding rate is locked for life when you upgrade.",
+          disabled: false, variant: "lock",
+        };
+      }
+      return { label: `Lock in ${tierName}`, disabled: false, variant: "lock" };
     }
-    // Active subscription
     const currentTier = foundingTier ?? (isPro ? "pro" : null);
-    if (currentTier === tier) return { label: "Current Plan", disabled: true, variant: "current" };
+    if (currentTier === tier) return { label: "Your active plan", disabled: true, variant: "current" };
     if (tier === "keeper" && currentTier === "pro") return { label: "Upgrade to Keeper", disabled: false, variant: "upgrade" };
     if (tier === "pro" && currentTier === "keeper") return { label: "Switch to Pro", disabled: false, variant: "downgrade" };
     return { label: `Lock in ${tier === "pro" ? "Pro" : "Keeper"}`, disabled: false, variant: "lock" };
@@ -190,6 +179,17 @@ export default function ProPage() {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
+        {/* Non-founding member banner */}
+        {!isFoundingMember && (
+          <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between gap-3">
+            <p className="text-xs text-white/60">Continuary is currently invite-only.</p>
+            <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
+              Apply for a slot →
+            </a>
+          </div>
+        )}
+
         {/* Hero */}
         <div className="text-center mb-8">
           {isFoundingMember ? (
@@ -213,7 +213,7 @@ export default function ProPage() {
               </div>
               <h1 className="font-brand text-3xl text-white mb-3">Start free. Go deeper when you're ready.</h1>
               <p className="text-white/50 text-sm leading-relaxed max-w-sm mx-auto">
-                Founding rates are locked for life — they never increase even as retail pricing rises.
+                Founding rates are locked for life. 100 slots total — reviewed personally.
               </p>
             </>
           )}
@@ -222,25 +222,21 @@ export default function ProPage() {
         {/* Billing toggle */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/8">
-            <button
-              onClick={() => setBilling("monthly")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${billing === "monthly" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}
-            >
+            <button onClick={() => setBilling("monthly")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${billing === "monthly" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}>
               Monthly
             </button>
-            <button
-              onClick={() => setBilling("annual")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${billing === "annual" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}
-            >
+            <button onClick={() => setBilling("annual")}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${billing === "annual" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}>
               Annual
-              <span className="text-emerald-400 text-[10px] font-bold">SAVE ~33%</span>
+              <span className="text-emerald-400 text-[10px] font-bold bg-emerald-400/10 px-1.5 py-0.5 rounded-full">SAVE ~33%</span>
             </button>
           </div>
         </div>
 
-        {/* Tier cards — 3 columns */}
+        {/* Tier cards */}
         <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3">
-          {/* ── Free ── */}
+          {/* Free */}
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
             <div>
               <span className="font-semibold text-white text-sm">Free</span>
@@ -251,7 +247,17 @@ export default function ProPage() {
               <span className="text-sm text-white/35">forever</span>
             </div>
             <ul className="space-y-1.5 flex-1">
-              {["3 active projects", "50 Vault entries", "25 Scratch Pad notes", "5 Clarity Engine sessions / mo", "30 Evidence Log entries", "Weekly Compass & Review"].map((f) => (
+              {[
+                "All daily check-ins",
+                "Today dashboard & projects",
+                "Knowledge Vault & Scratch Pad",
+                "Evidence Log & Emotional Cycle",
+                "Weekly Compass & Review",
+                "Clarity Engine (basic)",
+                "Single Focus Mode (1 active, 60 days)",
+                "Focus Sessions (1 / week, chat with Wren)",
+                "Thread Strength & Threshold Diagnosis",
+              ].map((f) => (
                 <li key={f} className="flex items-start gap-2 text-xs text-white/60">
                   <Check size={11} className="text-white/30 mt-0.5 shrink-0" />{f}
                 </li>
@@ -269,7 +275,7 @@ export default function ProPage() {
             )}
           </div>
 
-          {/* ── Pro ── */}
+          {/* Pro */}
           {(() => {
             const p = PRICING.pro;
             const monthly = isFoundingMember ? p.foundingMonthly : p.retailMonthly;
@@ -284,9 +290,7 @@ export default function ProPage() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-white text-sm">Pro</span>
                     {isFoundingMember && (
-                      <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/25">
-                        Founding Rate
-                      </Badge>
+                      <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/25">Founding Rate</Badge>
                     )}
                   </div>
                   <p className="text-xs text-white/45">Your daily thread, always on.</p>
@@ -295,37 +299,48 @@ export default function ProPage() {
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-white">${displayPrice}</span>
                     <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                    {isFoundingMember && (
-                      <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>
-                    )}
+                    {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
                   </div>
                   {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 mt-0.5">≈ ${annualEquiv} / mo</p>
+                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo — best value</p>
                   )}
                   {isFoundingMember && (
                     <p className="text-[10px] text-amber-400/70 mt-0.5">Retail: ${p.retailMonthly}/mo · ${p.retailAnnual}/yr</p>
                   )}
                 </div>
                 <ul className="space-y-1.5 flex-1">
-                  {["Unlimited projects, Vault & Scratch Pad", "Unlimited Clarity Engine sessions", "Unlimited Evidence Log entries", "Unlimited voice dictation", "Deep Intelligence reports", "Smart push nudges & cold-project alerts", "Priority support — direct founder access", "Markdown / Obsidian export"].map((f) => (
+                  {[
+                    "Everything in Free — unlimited",
+                    "Unlimited Focus Sessions",
+                    "Focus Sessions: book ahead, recurring, pop-out, PIP, export weave",
+                    "Single Focus Mode: 2 focuses, Wren prompts, 365-day max",
+                    "Deep Intelligence reports",
+                    "Priority support — direct founder access",
+                    "Markdown / Obsidian export",
+                  ].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-white/65">
                       <Check size={11} className="text-amber-400 mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <Button
-                  size="sm"
-                  className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-amber-500 hover:bg-amber-400 text-black"}`}
-                  onClick={() => !cta.disabled && handleUpgrade(getPlanKey("pro"), "Pro")}
-                  disabled={cta.disabled || createSub.isPending}
-                >
-                  {createSub.isPending ? "Opening PayPal…" : cta.label}
-                </Button>
+                <div className="space-y-1.5">
+                  <Button
+                    size="sm"
+                    className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-amber-500 hover:bg-amber-400 text-black"}`}
+                    onClick={() => !cta.disabled && handleUpgrade(getPlanKey("pro"), "Pro")}
+                    disabled={cta.disabled || createSub.isPending}
+                  >
+                    {createSub.isPending ? "Opening PayPal…" : cta.label}
+                  </Button>
+                  {cta.sublabel && (
+                    <p className="text-[10px] text-white/35 text-center leading-relaxed">{cta.sublabel}</p>
+                  )}
+                </div>
               </div>
             );
           })()}
 
-          {/* ── Keeper ── */}
+          {/* Keeper */}
           {(() => {
             const k = PRICING.keeper;
             const monthly = isFoundingMember ? k.foundingMonthly : k.retailMonthly;
@@ -340,9 +355,7 @@ export default function ProPage() {
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-white text-sm">Keeper</span>
                     {isFoundingMember && (
-                      <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-300 border-violet-500/25">
-                        Founding Rate
-                      </Badge>
+                      <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-300 border-violet-500/25">Founding Rate</Badge>
                     )}
                   </div>
                   <p className="text-xs text-white/45">For those who go deeper.</p>
@@ -351,38 +364,47 @@ export default function ProPage() {
                   <div className="flex items-baseline gap-1">
                     <span className="text-2xl font-bold text-white">${displayPrice}</span>
                     <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                    {isFoundingMember && (
-                      <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>
-                    )}
+                    {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
                   </div>
                   {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 mt-0.5">≈ ${annualEquiv} / mo</p>
+                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo — best value</p>
                   )}
                   {isFoundingMember && (
                     <p className="text-[10px] text-violet-400/70 mt-0.5">Retail: ${k.retailMonthly}/mo · ${k.retailAnnual}/yr</p>
                   )}
                 </div>
                 <ul className="space-y-1.5 flex-1">
-                  {["Everything in Pro", "Wren voice check-ins", "Weekly Compass deep-dive", "Threshold Diagnosis tool", "Single Focus Mode", "Monthly office hours with founder"].map((f) => (
+                  {[
+                    "Everything in Pro",
+                    "Unlimited Single Focus Mode — no duration cap",
+                    "Weekly Compass deep-dive",
+                    "Studios — priority access (Phase 2)",
+                    "Monthly office hours with founder",
+                  ].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-white/65">
                       <Check size={11} className="text-violet-400 mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <Button
-                  size="sm"
-                  className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-violet-500 hover:bg-violet-400 text-white"}`}
-                  onClick={() => !cta.disabled && handleUpgrade(getPlanKey("keeper"), "Keeper")}
-                  disabled={cta.disabled || createSub.isPending}
-                >
-                  {createSub.isPending ? "Opening PayPal…" : cta.label}
-                </Button>
+                <div className="space-y-1.5">
+                  <Button
+                    size="sm"
+                    className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-violet-500 hover:bg-violet-400 text-white"}`}
+                    onClick={() => !cta.disabled && handleUpgrade(getPlanKey("keeper"), "Keeper")}
+                    disabled={cta.disabled || createSub.isPending}
+                  >
+                    {createSub.isPending ? "Opening PayPal…" : cta.label}
+                  </Button>
+                  {cta.sublabel && (
+                    <p className="text-[10px] text-white/35 text-center leading-relaxed">{cta.sublabel}</p>
+                  )}
+                </div>
               </div>
             );
           })()}
         </div>
 
-        {/* Cancel option for active subscription */}
+        {/* Cancel option */}
         {isActive && (
           <div className="text-center mb-8 space-y-2">
             <p className="text-xs text-white/30">
@@ -395,41 +417,64 @@ export default function ProPage() {
           </div>
         )}
 
-        {/* Comparison table toggle */}
+        {/* Feature comparison table */}
         <div className="mb-8">
           <button
             onClick={() => setShowTable(!showTable)}
-            className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors py-3 border border-white/8 rounded-xl"
+            className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors py-3 border border-white/8 rounded-xl flex items-center justify-center gap-1.5"
           >
-            {showTable ? "Hide" : "Show"} full feature comparison ↓
+            {showTable ? "Hide full feature comparison" : "Show full feature comparison"}
+            {showTable ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
           {showTable && (
-            <div className="mt-4 rounded-2xl border border-white/8 overflow-hidden">
-              <div className="grid grid-cols-[1fr_auto_auto_auto] bg-white/[0.03]">
-                <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25">Feature</div>
-                <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25 text-center w-16">Free</div>
-                <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-amber-400 text-center w-16">Pro</div>
-                <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-violet-400 text-center w-16">Keeper</div>
-              </div>
-              {PRICING_TABLE.map((row, i) => (
-                <div key={row.feature} className="grid grid-cols-[1fr_auto_auto_auto] border-t border-white/[0.05]"
-                  style={{ background: i % 2 === 0 ? "transparent" : "oklch(1 0 0 / 0.012)" }}>
-                  <div className="px-4 py-2.5 text-xs text-white/60">{row.feature}</div>
-                  <div className="px-4 py-2.5 text-center w-16 flex items-center justify-center"><Cell value={row.free} /></div>
-                  <div className="px-4 py-2.5 text-center w-16 flex items-center justify-center"><Cell value={row.pro} /></div>
-                  <div className="px-4 py-2.5 text-center w-16 flex items-center justify-center"><Cell value={row.keeper} /></div>
+            <div className="mt-4 rounded-2xl border border-white/8 overflow-x-auto">
+              <div className="min-w-[420px]">
+                <div className="grid grid-cols-[1fr_auto_auto_auto] bg-white/[0.03]">
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25">Feature</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25 text-center w-20">Free</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-amber-400 text-center w-20">Pro</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-violet-400 text-center w-20">Keeper</div>
                 </div>
-              ))}
+                {PRICING_TABLE.map((row, i) => (
+                  <div key={row.feature} className="grid grid-cols-[1fr_auto_auto_auto] border-t border-white/[0.05]"
+                    style={{ background: i % 2 === 0 ? "transparent" : "oklch(1 0 0 / 0.012)" }}>
+                    <div className="px-4 py-2.5 text-xs text-white/60">{row.feature}</div>
+                    <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.free} /></div>
+                    <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.pro} /></div>
+                    <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.keeper} /></div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Footer note */}
-        <p className="text-white/18 text-xs text-center max-w-sm mx-auto pb-8">
-          Continuary is built by one person, for people who work differently. Your subscription directly funds continued development.
-          <br /><br />
-          Secure checkout via PayPal · Cancel anytime · No hidden fees
-        </p>
+        {/* Footer */}
+        <div className="border-t border-white/8 pt-8 pb-8 space-y-4 text-center">
+          <p className="text-white/18 text-xs max-w-sm mx-auto leading-relaxed">
+            Continuary is built by one person, for people who work differently. Your subscription directly funds continued development.
+            <br /><br />
+            Secure checkout via PayPal · Cancel anytime · No hidden fees
+          </p>
+          <p className="text-white/20 text-xs">
+            Continuary works alongside{" "}
+            <a href="https://soulengineer.online" target="_blank" rel="noopener noreferrer"
+              className="text-white/40 hover:text-amber-400 transition-colors underline underline-offset-2">
+              Permission to Start
+            </a>
+            , the Companion Book.
+          </p>
+          <div className="flex items-center justify-center gap-6">
+            <a href="https://soulengineer.online" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-white/25 hover:text-white/50 transition-colors">
+              An app from Soul Engineer →
+            </a>
+            <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
+              className="text-xs text-white/25 hover:text-amber-400 transition-colors">
+              Apply for founding member access →
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

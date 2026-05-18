@@ -9,13 +9,14 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import WrenPlayer from "@/components/WrenPlayer";
+import { useAuth } from "@/_core/hooks/useAuth";
 import {
   Brain,
   Zap,
   BookOpen,
   Compass,
   BarChart3,
-  Lightbulb,
+  PenLine,
   DoorOpen,
   Shield,
   ArrowRight,
@@ -28,6 +29,7 @@ import {
   MessageCircle,
   Trophy,
   Moon,
+  Target,
 } from "lucide-react";
 
 const BRAND_LOGO = "/logo-navy.svg";
@@ -82,9 +84,9 @@ const SPACES = [
     border: "border-rose-400/20",
   },
   {
-    icon: Lightbulb,
-    name: "Idea Sanctuary",
-    desc: "A quick-capture button always one tap away. Ideas land safely without interrupting your current work session. Threshold Diagnosis helps you start when starting feels impossible.",
+    icon: PenLine,
+    name: "Scratch Pad",
+    desc: "A quick-capture space always one tap away. Ideas land safely without interrupting your current work session.",
     color: "text-orange-400",
     bg: "bg-orange-400/10",
     border: "border-orange-400/20",
@@ -98,20 +100,20 @@ const SPACES = [
     border: "border-teal-400/20",
   },
   {
-    icon: Trophy,
-    name: "Focus Sessions",
-    desc: "A dedicated co-working space with Wren. Set your intention, choose a duration, and focus together. Wren checks in at the halfway point and helps you close out with a next step.",
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-    border: "border-amber-400/20",
-  },
-  {
-    icon: Flame,
+    icon: Target,
     name: "Single Focus Mode",
-    desc: "One topic. One thread. A structured daily cadence for deep, sustained work on a single focus — with Wren's continuity language to keep you anchored.",
+    desc: "Continuary's default lets you hold many threads at once. Single Focus Mode is the opposite — pick one focus area (learning Python, training for a marathon, writing a draft) and lock the dashboard to it for as long as you commit. When you're done, pick another, or return to your usual multi-project rhythm.",
     color: "text-violet-400",
     bg: "bg-violet-400/10",
     border: "border-violet-400/20",
+  },
+  {
+    icon: Trophy,
+    name: "Focus Sessions",
+    desc: "When you're ready to work, Wren works with you. Reading, writing, weaving — alongside you, not watching you. Book ahead like an appointment, or start one whenever the moment hits. Pick 25, 50, or 90 minutes.",
+    color: "text-amber-400",
+    bg: "bg-amber-400/10",
+    border: "border-amber-400/20",
   },
 ];
 
@@ -192,6 +194,7 @@ const WREN_APPEARANCES = [
 
 export default function AboutAppPage() {
   const [, navigate] = useLocation();
+  const { user } = useAuth();
   const utils = trpc.useUtils();
   const markSeen = trpc.settings.markAboutSeen.useMutation({
     onSuccess: () => {
@@ -270,7 +273,9 @@ export default function AboutAppPage() {
 
         {/* ── Spaces grid ── */}
         <div className="mb-12">
-          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5">
+          <p className="text-sm font-semibold text-foreground mb-1">Every space does one thing well.</p>
+          <p className="text-xs text-white/40 mb-5">Together they create a system that holds your work without holding you back.</p>
+          <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5" style={{display:'none'}}>
             Ten spaces, one continuous thread
           </p>
           <div className="grid sm:grid-cols-2 gap-3">
@@ -353,15 +358,16 @@ export default function AboutAppPage() {
                   <Sparkles className="w-3 h-3" />
                   Continuary's mascot
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2">Wren</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">Who is Wren?</h3>
                 <p className="text-sm text-white/70 leading-relaxed mb-3">
-                  A small bird with a golden thread. She appeared the moment the first user opened Continuary
-                  and has been carrying threads ever since. She doesn't speak in notifications or push you toward
-                  productivity — she simply holds the space between your sessions.
+                  A quiet companion built on the framework of <em>Permission to Start</em>.
                 </p>
-                <p className="text-xs text-white/40 italic">
-                  "She doesn't judge gaps. She just helps you find your way back."
-                </p>
+                <div className="space-y-1 mb-3 pl-3 border-l-2" style={{ borderColor: 'oklch(0.72 0.14 65 / 0.3)' }}>
+                  <p className="text-xs text-white/55 italic">Wren notices, doesn't judge.</p>
+                  <p className="text-xs text-white/55 italic">She remembers, doesn't measure.</p>
+                  <p className="text-xs text-white/55 italic">She returns, doesn't rebuke.</p>
+                  <p className="text-xs text-white/55 italic">And when you're ready to work, she's there —<br />reading, writing, weaving — while you do.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -450,10 +456,10 @@ export default function AboutAppPage() {
               { name: "Re-Entry Card", desc: "Every project remembers where you left off — stopping point, open decision, next action. No cold starts." },
               { name: "Thread Strength", desc: "A continuity metric that reflects how consistently you're showing up — not a streak, a signal." },
               { name: "Threshold Diagnosis", desc: "A 3-question diagnostic for when starting feels impossible. Identifies the real blocker and converts it to a first movable step." },
-              { name: "Project Memory", desc: "A timeline of every decision, vault import, focus session, and milestone for each project. Nothing is lost." },
+              { name: "Projects", desc: "A timeline of every decision, vault import, focus session, and milestone for each project. Nothing is lost." },
               { name: "Focus Sessions", desc: "A dedicated co-working space with Wren. Set your intention, choose 25, 50, or 90 minutes, and focus side-by-side. Wren checks in at the halfway mark and helps you close with a next step." },
-              { name: "Single Focus Mode", desc: "One topic. One thread. A structured daily cadence for deep, sustained work on a single focus — with Wren's continuity language to keep you anchored." },
-              { name: "Distraction Insights", desc: "Pattern recognition across your check-ins. Surfaces your top distraction category and the time of day it peaks." },
+              { name: "Single Focus Mode", desc: "Pick one focus area and lock the dashboard to it. When you're done, return to your usual multi-project rhythm." },
+              { name: "Intelligence", desc: "Pattern recognition across your check-ins. Surfaces your top distraction category, energy correlations, and the time of day focus peaks." },
             ].map(({ name, desc }) => (
               <div key={name} className="rounded-xl border border-white/8 p-4" style={{ background: "oklch(0.14 0.03 264 / 0.5)" }}>
                 <p className="text-sm font-semibold text-white mb-1">{name}</p>
@@ -488,6 +494,18 @@ export default function AboutAppPage() {
           </ol>
         </div>
 
+        {/* ── Pricing link ── */}
+        <div className="text-center mb-6">
+          {(user as any)?.isFoundingMember ? (
+            <p className="text-xs" style={{ color: 'oklch(0.82 0.14 65 / 0.7)' }}>✦ Founding member — your rate is locked for life.</p>
+          ) : (
+            <p className="text-xs text-white/35">
+              Not yet a founding member?{" "}
+              <button onClick={() => navigate("/pricing")} className="hover:text-amber-400 transition-colors underline underline-offset-2" style={{ color: 'oklch(0.82 0.14 65)' }}>See pricing →</button>
+            </p>
+          )}
+        </div>
+
         {/* ── CTA ── */}
         <div className="text-center">
           <Button
@@ -505,6 +523,21 @@ export default function AboutAppPage() {
           </Button>
           <p className="text-xs text-muted-foreground mt-3">
             You won't see this screen again — but you can replay it from Settings.
+          </p>
+        </div>
+
+        {/* ── Footer ── */}
+        <div className="mt-12 pt-8 border-t border-white/8 flex flex-col items-center gap-2">
+          <a
+            href="https://soulengineer.online"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-white/20 hover:text-amber-400 transition-colors"
+          >
+            An app from Soul Engineer →
+          </a>
+          <p className="text-[10px] text-white/12">
+            Built for multi-project professionals and non-linear minds.
           </p>
         </div>
       </div>

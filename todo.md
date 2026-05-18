@@ -1576,3 +1576,39 @@
 - [x] TourPage: 2 new steps added — focus_sessions (step 9) and single_focus (step 10); invite moved to step 11; STEPS array and STEP_META updated
 - [x] Paywall audit: no Stripe references found in frontend; all CTAs point to /pro; FocusSessionsPage paywall card uses correct copy ($4.99/mo founding rate)
 - [x] Payment system confirmed: PayPal only throughout (ProPage.tsx uses trpc.paypal.* exclusively)
+
+## Fix Specs (May 17 2026)
+
+### Pricing Page Fix Spec
+- [x] Rewrite Free tier card: "Start here. No card required." headline, 5 correct bullet points
+- [x] Rewrite Founding Member card: "Lock in your rate forever." headline, 7 correct bullet points, founding member badge
+- [x] Rewrite Pro card: "Everything, always." headline, 7 correct bullet points
+- [x] Reconcile feature table: 14 rows with correct tier access per spec
+- [x] Pattern C CTAs: Founding Member = "Become a Founding Member", Pro = "Start Pro — $9.99/mo"
+- [x] Add "Founding Member spots are limited" scarcity banner above tier cards
+- [x] Add "Questions? Read the tour" and "Back to the app" footer links
+- [x] Verify PayPal only — no Stripe references anywhere
+
+### About Page Fix Spec
+- [x] Fix feature grid names: "Clarity Engine" (not Clarity Mode), "Knowledge Vault" (not just Vault), Body Doubling removed
+- [x] Fix spaces header count to 7
+- [x] Update Focus Sessions tile copy per spec
+- [x] Update Single Focus Mode copy per spec
+- [x] Fix Wren section: remove "AI assistant" framing, add voice doctrine paragraph
+- [x] Add sidebar dot (amber) to Focus Sessions in spaces list
+- [x] Fix features worth knowing names: "Continuity Notes", "Thread Strength", "Evidence Log"
+- [x] Add /pricing link in CTA section
+- [x] Add Soul Engineer footer link
+- [x] Fix tagline and CTA headline per spec
+
+### Tour Fix Spec
+- [x] Slide 1: Add Wren voice doctrine ("She will not solve your problems. She will sit with you while you figure them out.")
+- [x] Slide 3: Add Focus Sessions + Single Focus Mode to the daily rhythm list
+- [x] Slide 7 (Thread Strength): Remove score/bar, rewrite as relationship signal not gamification
+- [x] Slide 9 (Focus Sessions): Fix direction (Wren left, controls right), add ambient sound note
+- [x] Add slide: Re-Entry Protocol (how Continuary helps you pick up where you left off)
+- [x] Add slide: Evidence Log (what it is, how it builds over time)
+- [x] Add slide: Threshold Diagnosis (Clarity Engine overwhelm detection)
+- [x] Rename "Vault" → "Knowledge Vault" throughout tour
+- [x] Fix nav bug: prev/next buttons work correctly on all 14 slides
+- [x] Rewrite final invite slide per spec
