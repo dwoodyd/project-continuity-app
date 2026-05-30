@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
+import { PageMeta } from "@/components/PageMeta";
 
 type Step =
   | "intro"
@@ -218,6 +219,12 @@ export default function TourPage() {
   const prev = () => { const p = STEPS[idx - 1]; if (p) setStep(p); };
 
   return (
+    <>
+      <PageMeta
+        title="Take the Tour"
+        description="See how Continuary works — daily check-ins, Focus Sessions with Wren, Single Focus Mode, Knowledge Vault, and the thread that holds it all together."
+        path="/tour"
+      />
     <div className="min-h-screen text-white font-sans overflow-x-hidden" style={{ background: "oklch(0.09 0.015 240)" }}>
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.92)", borderBottom: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
@@ -776,6 +783,7 @@ export default function TourPage() {
         </div>
       )}
     </div>
+    </>
   );
 }
 

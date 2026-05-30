@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Check, X, ArrowLeft, Sparkles, Star, Crown, ChevronDown, ChevronUp } from "lucide-react";
+import { PageMeta } from "@/components/PageMeta";
 
 type PlanKey =
   | "pro_founding_monthly" | "pro_founding_annual"
@@ -154,6 +155,12 @@ export default function ProPage() {
   );
 
   return (
+    <>
+      <PageMeta
+        title="Pricing"
+        description="Continuary starts free. Founding member rates are locked for life — $4.99/mo for Pro, $9.99/mo for Keeper. 100 slots total."
+        path="/pricing"
+      />
     <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
       {/* Header */}
       <div className="sticky top-0 z-10 bg-[#0a0a0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center gap-3">
@@ -477,5 +484,6 @@ export default function ProPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

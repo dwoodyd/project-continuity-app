@@ -1701,3 +1701,7 @@
 - [x] Frontend: on exit — logSession mutation fires, groundModeActive resets, AI returns to normal system prompt
 - [x] Tests: vitest for spiral detection helper (true positives, false positives, crisis exclusion) — 9/9 passing
 - [x] Tests: vitest for groundMode enter/exit/log procedures — 9/9 passing (GROUND_MODE_SYSTEM_PROMPT export verified)
+
+## OG Tags + Marketing Site Mobile Nav (May 30 2026)
+- [x] OG1: Added react-helmet-async + PageMeta component; OG/Twitter tags on /apply, /pricing, /tour
+- [x] OG2: Diagnosed marketing site mobile nav bug — hamburger has inline display:none overriding CSS media query. Fix documented (cannot apply — separate project). See result message.

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { PageMeta } from "@/components/PageMeta";
 
 /**
  * Public /apply page — no auth required.
@@ -89,6 +90,12 @@ export default function ApplyPage() {
   }
 
   return (
+    <>
+      <PageMeta
+        title="Apply for Founding Access"
+        description="Continuary is in closed beta. Apply for one of 100 founding member slots — a quiet companion built for non-linear minds."
+        path="/apply"
+      />
     <div
       className="min-h-screen flex flex-col items-center justify-center px-6 py-16"
       style={{ background: "oklch(0.09 0.015 240)", color: "oklch(0.97 0.01 80)" }}
@@ -230,5 +237,6 @@ export default function ApplyPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
