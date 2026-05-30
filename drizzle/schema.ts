@@ -873,3 +873,24 @@ export const coworkingSessions = mysqlTable("coworking_sessions", {
   aiNextStep: text("aiNextStep"),
   projectId: int("projectId").references(() => projects.id),
 });
+
+// ─── Ground Mode ─────────────────────────────────────────────────────────────
+export const groundSessions = mysqlTable("ground_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  enteredAt: bigint("enteredAt", { mode: "number" }).notNull(),
+  entryMethod: mysqlEnum("entryMethod", ["manual", "contextual_offer"]).notNull(),
+  exitedAt: bigint("exitedAt", { mode: "number" }),
+  exitMethod: mysqlEnum("exitMethod", ["manual", "soft_expire", "crisis_break", "session_end"]),
+  durationMs: int("durationMs"),
+});
+export type GroundSession = typeof groundSessions.$inferSelect;
+export type InsertGroundSession = typeof groundSessions.$inferInsert;
+
+// ─── App Config ───────────────────────────────────────────────────────────────
+export const appConfig = mysqlTable("app_config", {
+  key: varchar("key", { length: 100 }).primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+export type AppConfig = typeof appConfig.$inferSelect;

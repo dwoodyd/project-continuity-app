@@ -1681,3 +1681,23 @@
 - [ ] P2-6: Social proof avatars are initials only (CONTENT — owner to provide real photos)
 - [ ] P2-9: Cross-domain transitions between continuary.app and app.continuary.app (ACCEPTABLE — standard practice)
 - [ ] P2-10: og:tags for social sharing on app routes (INFRASTRUCTURE — SSR or meta proxy needed)
+
+## Revision Brief 6 — Ground Mode
+
+- [x] DB: ground_sessions table (id, userId, enteredAt, entryMethod, exitedAt, exitMethod, durationMs)
+- [x] DB: app_config table or row for spiral_check_threshold (default: 3) and spiral_read_window (default: 2 turns)
+- [x] Backend: groundMode tRPC router — logSession mutation, checkSpiralOffer query, groundModeAsk mutation
+- [x] Backend: Ground Mode system prompt stored as GROUND_MODE_SYSTEM_PROMPT constant in groundMode.ts
+- [x] Backend: AI session ground_mode_active flag — client-side React state (groundModeActive) passed as input to AI calls
+- [x] Backend: crisis override — groundModeAsk detects crisis signals, exits mode and responds with care
+- [x] Backend: spiral detection helper — detectSpiral() reads last N check-in texts, fires on 3+ signals or clear escalation
+- [x] Backend: alert-priority resolver — spiral_offer alert type added after blocker, before sanctuary_nudge in Home.tsx
+- [x] Frontend: manual entry Anchor button in Command Center header (always visible when not in Ground Mode)
+- [x] Frontend: manual entry available via header button (check-in and project surfaces share the same Home.tsx state)
+- [x] Frontend: groundModeActive state available to all surfaces via Home.tsx (project detail uses separate page)
+- [x] Frontend: spiral_offer alert card with 'Enter Ground Mode' and 'Not now' buttons wired to enterGroundMode
+- [x] Frontend: Ground Mode banner (slate, 'Ground Mode: facts only' label, countdown, Exit button) shown when groundModeActive
+- [x] Frontend: soft-expiry timer — 15-minute setTimeout in useEffect, exits silently via exitGroundMode('soft_expire')
+- [x] Frontend: on exit — logSession mutation fires, groundModeActive resets, AI returns to normal system prompt
+- [x] Tests: vitest for spiral detection helper (true positives, false positives, crisis exclusion) — 9/9 passing
+- [x] Tests: vitest for groundMode enter/exit/log procedures — 9/9 passing (GROUND_MODE_SYSTEM_PROMPT export verified)

@@ -30,6 +30,7 @@ import { workspaceRouter } from "./routers/workspace";
 import { moodLogsRouter } from "./routers/moodLogs";
 import { applicationsRouter } from "./routers/applications";
 import { coworkingRouter } from "./routers/coworking";
+import { groundModeRouter } from "./routers/groundMode";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -108,6 +109,7 @@ export const appRouter = router({
   moodLogs: moodLogsRouter,
   applications: applicationsRouter,
   coworking: coworkingRouter,
+  groundMode: groundModeRouter,
 });
 
 export type AppRouter = typeof appRouter;

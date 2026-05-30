@@ -29,6 +29,7 @@ import {
   HelpCircle,
   Shuffle,
   PenLine,
+  Anchor,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -1284,12 +1285,54 @@ export default function Home() {
     const dayOfWeek = now.getDay(); // 0 = Sunday
     return dayOfWeek === 0;
   })();
-  type AlertType = "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
+  // Spiral offer: check server-side detection (fires after blocker, before sanctuary nudge)
+  const { data: spiralCheck } = trpc.groundMode.checkSpiralOffer.useQuery(undefined, {
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // recheck every 5 min
+  });
+  const [groundModeActive, setGroundModeActive] = useState(false);
+  const [groundModeEnteredAt, setGroundModeEnteredAt] = useState<number | null>(null);
+  const [groundModeEntryMethod, setGroundModeEntryMethod] = useState<"manual" | "contextual_offer">("manual");
+  const [groundModeCrisisBreak, setGroundModeCrisisBreak] = useState(false);
+  const logGroundSession = trpc.groundMode.logSession.useMutation();
+
+  const enterGroundMode = (method: "manual" | "contextual_offer") => {
+    setGroundModeActive(true);
+    setGroundModeEnteredAt(Date.now());
+    setGroundModeEntryMethod(method);
+    setGroundModeCrisisBreak(false);
+  };
+
+  const exitGroundMode = (method: "manual" | "soft_expire" | "crisis_break" | "session_end") => {
+    if (!groundModeEnteredAt) return;
+    logGroundSession.mutate({
+      enteredAt: groundModeEnteredAt,
+      entryMethod: groundModeEntryMethod,
+      exitedAt: Date.now(),
+      exitMethod: method,
+    });
+    setGroundModeActive(false);
+    setGroundModeEnteredAt(null);
+    if (method === "crisis_break") setGroundModeCrisisBreak(true);
+  };
+
+  // Soft-expiry: auto-exit after 15 minutes
+  useEffect(() => {
+    if (!groundModeActive || !groundModeEnteredAt) return;
+    const remaining = 15 * 60 * 1000 - (Date.now() - groundModeEnteredAt);
+    if (remaining <= 0) { exitGroundMode("soft_expire"); return; }
+    const timer = setTimeout(() => exitGroundMode("soft_expire"), remaining);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groundModeActive, groundModeEnteredAt]);
+
+  type AlertType = "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "spiral_offer" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
   const topAlert: AlertType = (() => {
     if (!morningDone && activePeriod === "morning") return "check_in_due";
     if (todayPlan && capacityLevel === "low") return "capacity_low";
     if (todayPlan && capacityLevel === "partial") return "capacity_partial";
     if (hasBlockedProject) return "blocker";
+    if (spiralCheck?.offer && !groundModeActive && !groundModeCrisisBreak) return "spiral_offer";
     if (weeklyReviewDue && morningDone) return "weekly_review";
     if (tomorrowBrief && !morningDone) return "tomorrow_brief";
     if (pendingIdeaCount > 3) return "sanctuary_nudge";
@@ -1378,6 +1421,30 @@ export default function Home() {
           </button>
         </div>
       )}
+      {/* ── Ground Mode Banner ─────────────────────────────────────────────── */}
+      {groundModeActive && (
+        <div
+          className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
+          style={{ background: "oklch(0.18 0.02 240 / 0.80)", border: "1px solid oklch(0.35 0.04 240 / 0.50)" }}
+        >
+          <div className="flex items-center gap-2">
+            <Anchor className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.65 0.05 240)" }} />
+            <span className="text-xs font-medium" style={{ color: "oklch(0.80 0.04 240)" }}>Ground Mode: facts only</span>
+            {groundModeEnteredAt && (
+              <span className="text-xs" style={{ color: "oklch(0.50 0.03 240)" }}>
+                · {Math.max(0, Math.round((15 * 60 * 1000 - (Date.now() - groundModeEnteredAt)) / 60000))}m left
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => exitGroundMode("manual")}
+            className="text-xs px-2.5 py-1 rounded-lg transition-colors"
+            style={{ color: "oklch(0.60 0.03 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
+          >
+            Exit
+          </button>
+        </div>
+      )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -1403,6 +1470,17 @@ export default function Home() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {/* Manual Ground Mode entry */}
+          {!groundModeActive && (
+            <button
+              onClick={() => enterGroundMode("manual")}
+              title="Enter Ground Mode — facts only, no warmth"
+              className="p-1.5 rounded-lg transition-colors"
+              style={{ color: "oklch(0.45 0.04 240 / 0.70)", border: "1px solid oklch(0.35 0.04 240 / 0.30)" }}
+            >
+              <Anchor className="w-3.5 h-3.5" />
+            </button>
+          )}
           {pendingIdeaCount > 0 && (
             <button
               onClick={() => navigate("/settings?tab=ideas")}
@@ -1472,6 +1550,37 @@ export default function Home() {
           </div>
         );
       })()}
+      {topAlert === "spiral_offer" && (
+        <div
+          className="p-4 rounded-xl border"
+          style={{ background: "oklch(0.22 0.02 240 / 0.60)", borderColor: "oklch(0.45 0.04 240 / 0.50)" }}
+        >
+          <div className="flex items-start gap-3">
+            <Anchor className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "oklch(0.72 0.06 240)" }} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium mb-0.5" style={{ color: "oklch(0.88 0.04 240)" }}>Ground Mode available</p>
+              <p className="text-xs leading-relaxed" style={{ color: "oklch(0.65 0.03 240)" }}>
+                Your recent notes have some spiral signals. Ground Mode strips the AI back to facts only — no warmth, no framing, just what's observable and one next action.
+              </p>
+              <div className="flex items-center gap-3 mt-2.5">
+                <button
+                  onClick={() => enterGroundMode("contextual_offer")}
+                  className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+                  style={{ background: "oklch(0.35 0.04 240 / 0.70)", color: "oklch(0.90 0.04 240)", border: "1px solid oklch(0.50 0.04 240 / 0.40)" }}
+                >
+                  Enter Ground Mode
+                </button>
+                <button
+                  onClick={() => setGroundModeCrisisBreak(true)}
+                  className="text-xs" style={{ color: "oklch(0.55 0.03 240)" }}
+                >
+                  Not now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {topAlert === "weekly_review" && (
         <div className="p-3 rounded-xl border" style={{ background: "oklch(0.78 0.18 65 / 0.06)", borderColor: "oklch(0.78 0.18 65 / 0.20)" }}>
           <div className="flex items-center justify-between">

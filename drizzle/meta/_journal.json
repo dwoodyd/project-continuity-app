@@ -288,6 +288,13 @@
       "when": 1779050963907,
       "tag": "0040_slimy_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1780150582255,
+      "tag": "0041_living_james_howlett",
+      "breakpoints": true
     }
   ]
 }
