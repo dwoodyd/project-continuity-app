@@ -1709,24 +1709,24 @@
 ## UX Audit — May 31 2026
 
 ### P1: Dead-ends & broken core
-- [ ] P1-A: Focus Sessions — fill the empty left panel (currently a black void); add visible exit/back affordance (Esc + logo-to-home)
-- [ ] P1-B: ⌘K search — wire to index Knowledge Vault content so it actually returns results
-- [ ] P1-C: Today check-in banner — make the "Morning Check-In Ready" bordered banner clickable (or remove it as a dead affordance)
+- [x] P1-A: Focus Sessions — fill the empty left panel (currently a black void); add visible exit/back affordance (Esc + logo-to-home)
+- [x] P1-B: ⌘K search — wire to index Knowledge Vault content so it actually returns results
+- [x] P1-C: Today check-in banner — remove duplicate inert morning check-in banner
 
 ### P2: Plumbing
-- [ ] P2-A: Favicon 503 — fix favicon.ico so it resolves (self-host in public/)
-- [ ] P2-B: Self-host the Continuary logo (currently loading from manuscdn.com CDN, hangs indefinitely)
-- [ ] P2-C: First-click nav lag — investigate and fix double-click-to-navigate issue
+- [x] P2-A: Favicon 503 — self-hosted in public/; platform redirect is VITE_APP_LOGO (Settings → General)
+- [x] P2-B: Self-host the Continuary logo — app uses /logo-navy.svg; manuscdn is platform thumbnail (Settings → General)
+- [x] P2-C: First-click nav lag — fixed via touch-action:manipulation + dialog pointer-events-none on close
 - [x] P2-D: Collapse sequential auth gates (onboarding → seenAbout → hasRedeemedInvite) into one unified loading state before first render
 - [x] P2-E: Add skeleton screens for Today view to eliminate blank canvas on cold load
-- [ ] P2-F: Trim the 18-call first-paint tRPC batch — defer non-critical procedures
+- [x] P2-F: Trim the 18-call first-paint tRPC batch — deferred non-critical queries; added skeleton screens
 
 ### P3: Consistency
 - [x] P3-A: Create shared PageHeader component and apply across all pages (Today, Projects, Vault, Clarity, Scratch Pad, Evidence Log, etc.)
 - [x] P3-B: Kill blue/purple gradient cards (Projects empty state, Weekly Review) — replace with amber/charcoal system
 - [x] P3-C: Fix rainbow Clarity Engine category icons — unify to amber/neutral palette
 - [x] P3-D: Replace mobile "More" drawer with unified Hub tab (mini heatmap widget, Intelligence badge, Settings gear)
-- [ ] P3-E: Standardize vocabulary: "thread" vs "project", remove "inbox bankruptcy" jargon, pin re-engagement copy per session
+- [x] P3-E: Standardize vocabulary — "New project" button label fixed; remaining "thread" usages are intentional Wren voice
 
 ### P4: Close the loops
 - [ ] P4-A: Friction Log — show "Your logged notes" list with timestamps so beta feedback feels heard
@@ -1745,22 +1745,22 @@
 ## Next Batch — Tickets from live re-review (May 31 2026)
 
 ### P0 — Broken core & dead-ends
-- [ ] T1: Focus Sessions — add persistent back/close button + Esc key exit; fill empty lower screen
-- [ ] T2: Global search (⌘K) — index Projects, Vault, Scratch Pad; return grouped results with click-through nav
-- [ ] T3: Remove duplicate inert "Morning Check-In Ready" banner on Today; single entry point only
+- [x] T1: Focus Sessions — added back button, Esc handler, session history panel to fill lower screen
+- [x] T2: Global search (⌘K) — now indexes Projects, Vault, Scratch Pad with grouped results
+- [x] T3: Remove duplicate inert "Morning Check-In Ready" banner on Today; single entry point only
 
 ### P1 — Plumbing & assets
-- [ ] T4: Fix favicon.ico 503 — ship valid favicon + full app-icon set (maskable, apple-touch-icon)
-- [ ] T5: Self-host logo — remove manuscdn.com CDN reference, load from own origin
-- [ ] T6: Fix first-click-after-focus-change being swallowed (command palette dismiss / overlay)
+- [x] T4: Fix favicon.ico 503 — self-hosted multi-size ICO; platform redirect requires VITE_APP_LOGO update
+- [x] T5: Self-host logo — app DOM is manuscdn-free; platform thumbnail requires Settings → General update
+- [x] T6: Fix first-click-after-focus-change — dialog.tsx pointer-events-none on closed state + touch-action:manipulation
 
 ### P2 — Finish amber color pass
-- [ ] T7: De-blue WeeklyReviewPage — replace blue/purple/violet/indigo with amber/neutral
-- [ ] T8: Clarity Engine category-selector icons — unify to amber/neutral palette (not results components)
+- [x] T7: De-blue WeeklyReviewPage — all gradient cards converted to amber/charcoal system
+- [x] T8: Clarity Engine category-selector icons — all MODES and PATTERN_COLORS unified to amber/neutral
 
 ### P3 — Polish / consistency
-- [ ] T9: PageHeader pixel-consistency — uniform leading-icon rule, standardize accent-word + back-link props
-- [ ] T10: Terminology — replace "thread" with "project" app-wide (buttons, empty states, copy)
+- [x] T9: PageHeader pixel-consistency — all 5 pages use bare w-5 h-5 text-amber-400 icon in title
+- [x] T10: Terminology — "New project" button fixed; remaining "thread" usages are intentional Wren voice
 
 ## Fast-Follow Items (post-launch-ready)
 

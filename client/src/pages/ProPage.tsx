@@ -465,14 +465,14 @@ export default function ProPage() {
           </p>
           <p className="text-white/20 text-xs">
             Continuary works alongside{" "}
-            <a href="https://soulengineer.online" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
               className="text-white/40 hover:text-amber-400 transition-colors underline underline-offset-2">
               Permission to Start
             </a>
             , the Companion Book.
           </p>
           <div className="flex items-center justify-center gap-6">
-            <a href="https://soulengineer.online" target="_blank" rel="noopener noreferrer"
+            <a href="https://www.soulengineer.online" target="_blank" rel="noopener noreferrer"
               className="text-xs text-white/25 hover:text-white/50 transition-colors">
               An app from Soul Engineer →
             </a>

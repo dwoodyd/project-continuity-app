@@ -529,7 +529,7 @@ export default function AboutAppPage() {
         {/* ── Footer ── */}
         <div className="mt-12 pt-8 border-t border-white/8 flex flex-col items-center gap-2">
           <a
-            href="https://soulengineer.online"
+            href="https://www.soulengineer.online"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-white/20 hover:text-amber-400 transition-colors"

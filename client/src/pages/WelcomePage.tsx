@@ -799,7 +799,7 @@ export default function WelcomePage() {
             <p className="text-xs text-muted-foreground/50">Built for non-linear minds.</p>
             <div className="flex items-center justify-end gap-3">
               <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Founding member pricing</Link>
-              <a href="https://soulengineer.com" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Soul Engineer ecosystem</a>
+              <a href="https://www.soulengineer.online" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Soul Engineer ecosystem</a>
             </div>
           </div>
         </div>

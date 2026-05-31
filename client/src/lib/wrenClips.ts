@@ -79,8 +79,10 @@ export const WREN_CLIPS = {
   morphsHeart:        `${BASE}/wren_morphs_heart_9c861404.mp4`,
   /** Wren turns into heart (alternate) */
   turnsHeart:         `${BASE}/wren_turns_heart_a0b21e56.mp4`,
-  /** Wren checkmark — task/goal completed */
-  checkmark:          `${BASE}/wren_checkmark_37ecf545.mp4`,
+  /** Wren checkmark — task/goal completed (new WrenCheckmark.mov upload) */
+  checkmark:          `${BASE}/WrenCheckmark_5fa19af2.mov`,
+  /** Wren checkmark legacy (original mp4) */
+  checkmarkLegacy:    `${BASE}/wren_checkmark_37ecf545.mp4`,
   /** Wren barrel roll — energetic celebration */
   barrelRoll:         `${BASE}/wren_barrel_roll_d4e1a2ad.mp4`,
   /** Wren rockets upward — breakthrough / launch moment */
