@@ -41,7 +41,7 @@ type ProjectStatus = "idea" | "mapped" | "active" | "paused" | "completed" | "ar
 
 const statusConfig: Record<ProjectStatus, { label: string; color: string; dot: string }> = {
   idea: { label: "Idea", color: "text-muted-foreground", dot: "bg-muted-foreground/40" },
-  mapped: { label: "Mapped", color: "text-blue-600 dark:text-blue-400", dot: "bg-blue-400" },
+  mapped: { label: "Mapped", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400" },
   active: { label: "Active", color: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-400" },
   paused: { label: "Paused", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400" },
   completed: { label: "Completed", color: "text-slate-500", dot: "bg-slate-400" },
@@ -333,14 +333,14 @@ export default function ProjectsPage() {
       {/* Projects list */}
       {filtered.length === 0 ? (
         filter === "all" ? (
-          <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
+          <div className="relative overflow-hidden p-10 rounded-2xl text-center border border-amber-500/20" style={{background: 'linear-gradient(135deg, oklch(0.22 0.03 65) 0%, oklch(0.18 0.02 65) 100%)'}}>
+            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.78 0.18 65) 0%, transparent 55%), radial-gradient(circle at 80% 20%, oklch(0.78 0.18 65 / 0.4) 0%, transparent 45%)'}} />
             <div className="relative">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                <Brain className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center mx-auto mb-4">
+                <Brain className="w-6 h-6 text-amber-400" />
               </div>
-              <p className="text-base font-semibold text-white mb-1">No projects yet.</p>
-              <p className="text-sm text-white/70 mb-5">Projects are the containers for your work. Start by defining one.</p>
+              <p className="text-base font-semibold text-foreground mb-1">No projects yet.</p>
+              <p className="text-sm text-muted-foreground mb-5">Projects are the containers for your work. Start by defining one.</p>
               <Button size="sm" onClick={() => setCreateOpen(true)} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0 gap-1.5">
                 <Plus className="w-3.5 h-3.5" />
                 Create first project

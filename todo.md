@@ -1761,3 +1761,10 @@
 ### P3 — Polish / consistency
 - [ ] T9: PageHeader pixel-consistency — uniform leading-icon rule, standardize accent-word + back-link props
 - [ ] T10: Terminology — replace "thread" with "project" app-wide (buttons, empty states, copy)
+
+## Fast-Follow Items (post-launch-ready)
+
+- [x] F1: Desktop first-click-after-palette-close swallow — fixed by adding `data-[state=closed]:pointer-events-none` to both DialogOverlay and DialogContent in dialog.tsx
+- [x] F2: Projects empty-state blue/purple gradient — replaced with amber/charcoal system; also fixed "mapped" status dot from blue to amber
+- [ ] F3: favicon.ico 503 — platform-level: update VITE_APP_LOGO in Settings → General to `https://app.continuary.app/icon-96.png`
+- [ ] F4: manuscdn.com stray request — same root cause as F3; resolves automatically once VITE_APP_LOGO is updated
