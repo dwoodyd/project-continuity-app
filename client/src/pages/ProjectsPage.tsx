@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/PageHeader";
 import {
   Archive,
   Brain,
@@ -266,18 +267,16 @@ export default function ProjectsPage() {
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {projects?.filter((p) => p.status === "active").length ?? 0} active · {projects?.length ?? 0} total
-          </p>
-        </div>
-        <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5 shrink-0">
-          <Plus className="w-4 h-4" />
-          Start a new thread
-        </Button>
-      </div>
+      <PageHeader
+        title="Projects"
+        subtitle={`${projects?.filter((p) => p.status === "active").length ?? 0} active · ${projects?.length ?? 0} total`}
+        action={
+          <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5 shrink-0">
+            <Plus className="w-4 h-4" />
+            Start a new thread
+          </Button>
+        }
+      />
 
       {/* Filter tabs */}
       <div className="flex gap-1.5 flex-wrap">

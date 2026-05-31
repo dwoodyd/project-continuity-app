@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import WrenPlayer from "@/components/WrenPlayer";
 import { trpc } from "@/lib/trpc";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -381,28 +382,32 @@ export default function ScratchPadPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-xl bg-primary/10"><PenLine className="w-4 h-4 text-primary" /></div>
-        <div>
-          <h1 className="text-base font-semibold text-foreground leading-tight">Scratch Pad</h1>
-          <p className="text-xs text-muted-foreground">Quick notes, lists, anything. Not linked to projects.</p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          {notes.length > 0 && <span className="text-xs text-muted-foreground/60">{notes.length} note{notes.length !== 1 ? "s" : ""}</span>}
-          {notes.length > 1 && (
-            <button onClick={() => setSortOrder(v => v === "newest" ? "oldest" : "newest")}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-all" title={sortOrder === "newest" ? "Showing newest first" : "Showing oldest first"}>
-              <ArrowUpDown className="w-3 h-3" />{sortOrder === "newest" ? "Newest" : "Oldest"}
-            </button>
-          )}
-          {notes.length > 1 && (
-            <button onClick={() => { setSelectMode(v => !v); if (selectMode) exitSelectMode(); }}
-              className={cn("text-xs px-2 py-1 rounded-lg border transition-all", selectMode ? "border-primary/40 text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground")}>
-              {selectMode ? "Cancel" : "Select"}
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title={
+          <span className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-primary/10"><PenLine className="w-4 h-4 text-primary" /></span>
+            Scratch Pad
+          </span>
+        }
+        subtitle="Quick notes, lists, anything. Not linked to projects."
+        action={
+          <div className="flex items-center gap-2">
+            {notes.length > 0 && <span className="text-xs text-muted-foreground/60">{notes.length} note{notes.length !== 1 ? "s" : ""}</span>}
+            {notes.length > 1 && (
+              <button onClick={() => setSortOrder(v => v === "newest" ? "oldest" : "newest")}
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg border border-border text-muted-foreground hover:text-foreground transition-all" title={sortOrder === "newest" ? "Showing newest first" : "Showing oldest first"}>
+                <ArrowUpDown className="w-3 h-3" />{sortOrder === "newest" ? "Newest" : "Oldest"}
+              </button>
+            )}
+            {notes.length > 1 && (
+              <button onClick={() => { setSelectMode(v => !v); if (selectMode) exitSelectMode(); }}
+                className={cn("text-xs px-2 py-1 rounded-lg border transition-all", selectMode ? "border-primary/40 text-primary bg-primary/10" : "border-border text-muted-foreground hover:text-foreground")}>
+                {selectMode ? "Cancel" : "Select"}
+              </button>
+            )}
+          </div>
+        }
+      />
 
       {/* Bulk action bar */}
       {selectMode && selected.size > 0 && (

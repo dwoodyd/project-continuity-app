@@ -82,21 +82,21 @@ const MODES: {
     label: "Identity Drift",
     description: "Disconnected from who you are or what you're building",
     icon: Wind,
-    color: "text-blue-400",
+    color: "text-amber-400",
   },
   {
     id: "relationship_tension",
     label: "Relationship Tension",
     description: "Carrying weight from a person or dynamic",
     icon: Users,
-    color: "text-purple-400",
+    color: "text-amber-300",
   },
   {
     id: "purpose_fog",
     label: "Purpose Fog",
     description: "Questioning direction, unsure what matters",
     icon: Compass,
-    color: "text-teal-400",
+    color: "text-amber-500",
   },
 ];
 
@@ -454,7 +454,7 @@ function ResultView({
 
       {/* Signal Line */}
       {session.signalLine && (
-        <div className="bg-gradient-to-r from-indigo-900/40 to-indigo-800/20 border border-indigo-500/30 rounded-xl p-5">
+        <div className="bg-gradient-to-r from-amber-900/20 to-amber-800/10 border border-amber-500/20 rounded-xl p-5">
           <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">
             <GlossaryTerm name="signalLine" />
           </p>
@@ -470,17 +470,17 @@ function ResultView({
           {
             label: "What's actually happening",
             content: session.whatIsHappening,
-            color: "border-l-blue-400",
+            color: "border-l-amber-500",
           },
           {
             label: "What you actually feel",
             content: session.whatYouFeel,
-            color: "border-l-purple-400",
+            color: "border-l-amber-400",
           },
           {
             label: "What you actually need",
             content: session.whatYouNeed,
-            color: "border-l-teal-400",
+            color: "border-l-amber-300",
           },
           {
             label: "Your next right step",
@@ -518,12 +518,12 @@ function ResultView({
       )}
       {/* ADHD Hack #9: Third-person reframe for overwhelm */}
       {session.mode === "overwhelm" && session.whatIsHappening && (
-        <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-blue-400">Third-person perspective</p>
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Third-person perspective</p>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Imagine a close friend came to you with exactly this situation. What would you say to them? Sometimes the distance of the third person unlocks the clarity the first person can't access.
           </p>
-          <p className="text-sm text-foreground/70 italic border-l-2 border-blue-400/40 pl-3">
+          <p className="text-sm text-foreground/70 italic border-l-2 border-amber-400/40 pl-3">
             "If my friend told me: '{session.whatIsHappening.substring(0, 80)}{session.whatIsHappening.length > 80 ? '…' : ''}' — I would tell them…"
           </p>
         </div>
@@ -1054,7 +1054,7 @@ function WeeklyView({
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Signal lines this week</p>
               <div className="space-y-2">
                 {weeklySummary.signalLines.map((line: string, i: number) => (
-                  <p key={i} className="text-sm text-foreground italic border-l-2 border-indigo-500/50 pl-3">"{line}"</p>
+                  <p key={i} className="text-sm text-foreground italic border-l-2 border-amber-500/50 pl-3">"{line}"</p>
                 ))}
               </div>
             </div>

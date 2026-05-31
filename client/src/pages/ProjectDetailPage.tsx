@@ -72,7 +72,7 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
       <DialogContent className="sm:max-w-lg p-0 flex flex-col max-h-[85vh]">
         <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-            <RefreshCw className="w-4 h-4 text-blue-500" />
+            <RefreshCw className="w-4 h-4 text-amber-400" />
             Re-Entry Card
           </DialogTitle>
         </DialogHeader>
@@ -150,9 +150,9 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-2">Where you left off:</p>
-                    <p className="text-sm text-blue-900 dark:text-blue-100 leading-relaxed">{generateReturn.data.summary}</p>
+                  <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                    <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2">Where you left off:</p>
+                    <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">{generateReturn.data.summary}</p>
                   </div>
                   {generateReturn.data.nextAction && (
                     <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800">
@@ -176,9 +176,9 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
 // ─── Timeline Event Icon ──────────────────────────────────────────────────────
 function TimelineEventIcon({ type }: { type: string }) {
   const map: Record<string, { icon: React.ReactNode; color: string }> = {
-    created: { icon: <Sparkles className="w-3 h-3" />, color: "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" },
+    created: { icon: <Sparkles className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
     focus_session: { icon: <Target className="w-3 h-3" />, color: "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400" },
-    milestone: { icon: <CheckCircle2 className="w-3 h-3" />, color: "bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400" },
+    milestone: { icon: <CheckCircle2 className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
     blocker: { icon: <AlertTriangle className="w-3 h-3" />, color: "bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" },
     decision: { icon: <GitBranch className="w-3 h-3" />, color: "bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400" },
     next_step_change: { icon: <ChevronRight className="w-3 h-3" />, color: "bg-foreground/10 text-foreground/60" },
@@ -250,7 +250,7 @@ export default function ProjectDetailPage() {
     active: "text-emerald-600 dark:text-emerald-400",
     paused: "text-amber-600 dark:text-amber-400",
     idea: "text-muted-foreground",
-    mapped: "text-blue-600 dark:text-blue-400",
+    mapped: "text-amber-600 dark:text-amber-400",
     completed: "text-slate-500",
     archived: "text-muted-foreground/50",
   };
@@ -764,7 +764,7 @@ function WorkspaceFilesTab({ projectId }: { projectId: number }) {
   }
 
   function fileIcon(mime: string) {
-    if (mime.startsWith("image/")) return <Image className="w-4 h-4 text-blue-500" />;
+    if (mime.startsWith("image/")) return <Image className="w-4 h-4 text-amber-400" />;
     if (mime === "application/pdf") return <FileText className="w-4 h-4 text-red-500" />;
     return <File className="w-4 h-4 text-muted-foreground" />;
   }

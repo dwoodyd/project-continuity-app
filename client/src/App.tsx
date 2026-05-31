@@ -48,6 +48,7 @@ const InviteRedeemPage    = lazy(() => import("./pages/InviteRedeemPage"));
 const RedeemReferralPage  = lazy(() => import("./pages/RedeemReferralPage"));
 const CoworkingPage       = lazy(() => import("./pages/CoworkingPage"));
 const FocusSessionsPage   = lazy(() => import("./pages/FocusSessionsPage"));
+const HubPage             = lazy(() => import("./pages/HubPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -112,6 +113,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/founding-member" component={FoundingMemberPage} />
               <Route path="/coworking" component={CoworkingPage} />
               <Route path="/focus" component={FocusSessionsPage} />
+              <Route path="/hub" component={HubPage} />
               <Route path="/404" component={NotFound} />
               <Route component={NotFound} />
             </Switch>

@@ -9,6 +9,7 @@
  * On screens >= 1024px the default is "desktop"; below that it is always "compact".
  */
 import { useAuth } from "@/_core/hooks/useAuth";
+import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { getLoginUrl } from "@/const";
 import { cn } from "@/lib/utils";
 import {
@@ -78,14 +79,14 @@ const ALL_NAV_ITEMS = [
   { href: "/founding-member", label: "Founding Member", icon: Star,          section: "secondary" },
 ] as const;
 
-// ── Mobile bottom-tab items (5 visible + More) ───────────────────────────────
+// ── Mobile bottom-tab items (5 visible + Hub) ────────────────────────────────
 const PRIMARY_TABS = [
   { href: "/",        label: "Today",    icon: Brain },
   { href: "/projects",label: "Projects", icon: Archive },
   { href: "/clarity", label: "Clarity",  icon: Zap },
   { href: "/compass", label: "Compass",  icon: Compass },
   { href: "/vault",   label: "Vault",    icon: BookOpen },
-  { href: "/more",    label: "More",     icon: MoreHorizontal },
+  { href: "/hub",     label: "Hub",      icon: MoreHorizontal },
 ] as const;
 
 // ── Mobile "More" sheet items ─────────────────────────────────────────────────
@@ -299,6 +300,17 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     }
   }, [isAuthenticated, authLoading, navigate]);
 
+  // ── Unified loading state (P2-D) ─────────────────────────────────────────────
+  // Wait for auth.me AND profile to resolve before deciding which gate to show.
+  // This prevents the sequential flicker: authLoading → onboarding → invite-gate.
+  // profileLoading is only relevant once we know the user is authenticated.
+  const profileLoading = isAuthenticated && profile === undefined;
+  const authGateResolving = authLoading || profileLoading;
+
+  if (authGateResolving) {
+    return <DashboardLayoutSkeleton />;
+  }
+
   // ── Unauthenticated landing ─────────────────────────────────────────────────
   // Show sign-in card for any unauthenticated route — wait for auth to resolve first
   if (!authLoading && !isAuthenticated) {
@@ -395,8 +407,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
-  const isMoreActive = MORE_ITEMS.some((item) => isActive(item.href));
-
   // ── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
   if (isDesktopMode) {
     return (
@@ -663,18 +673,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         >
           <div className="flex items-stretch justify-around px-0.5 pt-1">
             {PRIMARY_TABS.map(({ href, label, icon: Icon }) => {
-              const active = href === "/more" ? isMoreActive : isActive(href);
+              const active = isActive(href);
               return (
                 <button
                   key={href}
                   onClick={() => {
-                    if (href === "/more") {
-                      setMoreOpen((o) => !o);
-                    } else {
-                      setMoreOpen(false);
-                      if (active) window.scrollTo({ top: 0, behavior: "smooth" });
-                      else navigate(href);
-                    }
+                    setMoreOpen(false);
+                    if (active) window.scrollTo({ top: 0, behavior: "smooth" });
+                    else navigate(href);
                   }}
                   className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
                   style={{ color: active ? "oklch(0.88 0.16 65)" : "oklch(1 0 0 / 0.35)" }}

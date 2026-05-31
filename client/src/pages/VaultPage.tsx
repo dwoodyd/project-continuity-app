@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import { PageHeader } from "@/components/PageHeader";
 import { cn } from "@/lib/utils";
 import { VaultGraph } from "@/components/VaultGraph";
 import WrenPlayer from "@/components/WrenPlayer";
@@ -55,7 +56,7 @@ const stateConfig: Record<SourceState, { label: string; className: string }> = {
 
 const contentClassConfig: Record<string, string> = {
   idea: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-  draft: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  draft: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
   research: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
   outline: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
   decision: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
@@ -345,7 +346,7 @@ const SourceItemCard = React.memo(function SourceItemCard({
               <p className="text-xs font-medium text-muted-foreground mb-1.5">Suggested projects</p>
               <div className="flex flex-wrap gap-1.5">
                 {projectCandidates.map((p) => (
-                  <span key={p} className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <span key={p} className="text-xs px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800">
                     {p}
                   </span>
                 ))}
@@ -525,14 +526,10 @@ export default function VaultPage() {
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Knowledge Vault</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {items?.length ?? 0} items · {inboxCount} in inbox
-            {reviewCount > 0 && ` · ${reviewCount} need review`}
-          </p>
-        </div>
+      <PageHeader
+        title="Knowledge Vault"
+        subtitle={`${items?.length ?? 0} items · ${inboxCount} in inbox${reviewCount > 0 ? ` · ${reviewCount} need review` : ''}`}
+        action={
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -582,7 +579,8 @@ export default function VaultPage() {
             Add source
           </Button>
         </div>
-      </div>
+        }
+      />
 
       {/* Graph onboarding nudge */}
       {showGraphNudge && (
@@ -868,7 +866,7 @@ export default function VaultPage() {
                     <p className="text-xs font-medium text-muted-foreground mb-1.5">Suggested projects</p>
                     <div className="flex flex-wrap gap-1.5">
                       {projectCandidates.map((p: string) => (
-                        <span key={p} className="text-xs px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800">{p}</span>
+                        <span key={p} className="text-xs px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg border border-amber-200 dark:border-amber-800">{p}</span>
                       ))}
                     </div>
                   </div>

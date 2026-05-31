@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -219,17 +220,15 @@ export default function IntelligencePage() {
   return (
     <div className="px-5 py-7 space-y-10 max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
+      <PageHeader
+        title={
+          <span className="flex items-center gap-2">
             <Brain className="w-5 h-5 text-amber-400" />
-            <h1 className="text-xl font-semibold text-foreground">Intelligence</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Cross-project patterns and health scores. Run on demand — each analysis uses one AI call.
-          </p>
-        </div>
-      </div>
+            Intelligence
+          </span>
+        }
+        subtitle="Cross-project patterns and health scores. Run on demand — each analysis uses one AI call."
+      />
 
       {/* ── Activity Heatmap ────────────────────────────────────────────── */}
       <div
@@ -367,7 +366,7 @@ export default function IntelligencePage() {
       {/* ── Environment Correlation (ADHD Hack #8) ────────────────────────────── */}
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-4 h-4 text-violet-400" />
+          <TrendingUp className="w-4 h-4 text-amber-400" />
           <h2 className="text-base font-medium text-foreground">Environment Patterns</h2>
           <span className="text-xs text-muted-foreground ml-1">From morning check-ins</span>
         </div>
@@ -386,8 +385,8 @@ export default function IntelligencePage() {
           <Card className="bg-card/60 border-border/50">
             <CardContent className="pt-4 pb-4 space-y-4">
               {envCorrelationQuery.data.insight && (
-                <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 px-4 py-3">
-                  <p className="text-sm text-violet-300">{envCorrelationQuery.data.insight}</p>
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                  <p className="text-sm text-amber-300">{envCorrelationQuery.data.insight}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Based on {envCorrelationQuery.data.sampleSize} morning check-ins
                   </p>
@@ -408,7 +407,7 @@ export default function IntelligencePage() {
                         </div>
                         <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
                           <div
-                            className="h-full rounded-full bg-violet-500/70 transition-all duration-500"
+                            className="h-full rounded-full bg-amber-500/70 transition-all duration-500"
                             style={{ width: `${pct}%` }}
                           />
                         </div>
@@ -484,7 +483,7 @@ export default function IntelligencePage() {
                       </div>
                       <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
                         <div
-                          className="h-full rounded-full bg-blue-500/70 transition-all duration-500"
+                          className="h-full rounded-full bg-amber-400/70 transition-all duration-500"
                           style={{ width: `${stat.alignedPct}%` }}
                         />
                       </div>

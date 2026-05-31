@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import {
   Command,
@@ -29,8 +29,12 @@ import {
   Star,
   Shield,
   ClipboardList,
+  FileText,
+  PenLine,
+  ScrollText,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 interface CommandPaletteProps {
   /** Called when the user triggers a quick action (e.g. open morning check-in) */
@@ -39,7 +43,7 @@ interface CommandPaletteProps {
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Today", path: "/", group: "Navigate", shortcut: "G H" },
-  { icon: Archive, label: "Vault", path: "/vault", group: "Navigate", shortcut: "G V" },
+  { icon: Archive, label: "Knowledge Vault", path: "/vault", group: "Navigate", shortcut: "G V" },
   { icon: FolderOpen, label: "Projects", path: "/projects", group: "Navigate", shortcut: "G P" },
   { icon: Calendar, label: "Weekly Review", path: "/weekly", group: "Navigate", shortcut: "G W" },
   { icon: Compass, label: "Weekly Compass", path: "/compass", group: "Navigate", shortcut: "G C" },
@@ -49,6 +53,7 @@ const NAV_ITEMS = [
   { icon: Settings, label: "Settings", path: "/settings", group: "Navigate" },
   { icon: Star, label: "Continuary Pro", path: "/pro", group: "Navigate" },
   { icon: ClipboardList, label: "Single Focus Mode", path: "/study", group: "Navigate" },
+  { icon: PenLine, label: "Scratch Pad", path: "/scratch", group: "Navigate" },
 ];
 
 const QUICK_ACTIONS = [
@@ -59,33 +64,62 @@ const QUICK_ACTIONS = [
   { icon: Search, label: "Threshold Diagnosis", action: "threshold-diagnosis", group: "Quick Actions" },
 ];
 
-export function CommandPalette({ onAction }: CommandPaletteProps) {
-  const [open, setOpen] = useState(false);
+/** Shared inner dialog content — used by both CommandPalette and CommandPaletteTrigger */
+function CommandPaletteContent({
+  open,
+  setOpen,
+  onAction,
+}: {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  onAction?: (action: string) => void;
+}) {
+  const [query, setQuery] = useState("");
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
-  const handleOpen = useCallback(() => setOpen(true), []);
+  // Fetch vault entries and scratch pad notes when the palette is open
+  const { data: vaultEntries } = trpc.vault.list.useQuery(undefined, {
+    enabled: open && !!user,
+    staleTime: 30_000,
+  });
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, {
+    enabled: open && !!user,
+    staleTime: 30_000,
+  });
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "F1") {
-        e.preventDefault();
-        setOpen((o) => !o);
-      }
-    };
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  // Filter vault entries by query (title + contentClass)
+  const filteredVault = useMemo(() => {
+    if (!vaultEntries || !query.trim()) return [];
+    const q = query.toLowerCase();
+    return vaultEntries
+      .filter((e: any) =>
+        e.title?.toLowerCase().includes(q) ||
+        e.contentClass?.toLowerCase().includes(q) ||
+        e.summary?.toLowerCase().includes(q)
+      )
+      .slice(0, 6);
+  }, [vaultEntries, query]);
+
+  // Filter scratch notes by content
+  const filteredScratch = useMemo(() => {
+    if (!scratchNotes || !query.trim()) return [];
+    const q = query.toLowerCase();
+    return (scratchNotes as any[])
+      .filter((n: any) => n.content?.toLowerCase().includes(q))
+      .slice(0, 4);
+  }, [scratchNotes, query]);
 
   const handleNav = (path: string) => {
     setOpen(false);
+    setQuery("");
     navigate(path);
   };
 
   const handleAction = (action: string) => {
     setOpen(false);
+    setQuery("");
     onAction?.(action);
-    // Fallback: navigate to the relevant page if no handler provided
     if (!onAction) {
       const fallbackMap: Record<string, string> = {
         "brain-dump": "/clarity",
@@ -98,80 +132,141 @@ export function CommandPalette({ onAction }: CommandPaletteProps) {
     }
   };
 
+  const showContentResults = query.trim().length > 0 && (filteredVault.length > 0 || filteredScratch.length > 0);
+
   return (
-    <>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search pages, actions, projects…" />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+    <CommandDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery(""); }}>
+      <CommandInput
+        placeholder="Search pages, vault entries, notes…"
+        value={query}
+        onValueChange={setQuery}
+      />
+      <CommandList>
+        <CommandEmpty>No results found.</CommandEmpty>
 
-          <CommandGroup heading="Navigate">
-            {NAV_ITEMS.map((item) => (
-              <CommandItem
-                key={item.path}
-                value={item.label}
-                onSelect={() => handleNav(item.path)}
-                className="gap-2 cursor-pointer"
-              >
-                <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{item.label}</span>
-                {item.shortcut && (
-                  <CommandShortcut>{item.shortcut}</CommandShortcut>
-                )}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Quick Actions">
-            {QUICK_ACTIONS.map((item) => (
-              <CommandItem
-                key={item.action}
-                value={item.label}
-                onSelect={() => handleAction(item.action)}
-                className="gap-2 cursor-pointer"
-              >
-                <item.icon className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>{item.label}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          {user?.role === "admin" && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Admin">
-                <CommandItem value="Admin: Applications" onSelect={() => handleNav("/admin/applications")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Applications</span>
-                </CommandItem>
-                <CommandItem value="Admin: Invite Codes" onSelect={() => handleNav("/admin/invites")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Invite Codes</span>
-                </CommandItem>
-                <CommandItem value="Admin: Feedback" onSelect={() => handleNav("/admin/feedback")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Feedback</span>
-                </CommandItem>
-                <CommandItem value="Admin: Beta Codes" onSelect={() => handleNav("/admin/beta")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Beta Codes</span>
-                </CommandItem>
+        {/* ── Content search results (only when query is non-empty) ── */}
+        {showContentResults && (
+          <>
+            {filteredVault.length > 0 && (
+              <CommandGroup heading="Knowledge Vault">
+                {filteredVault.map((entry: any) => (
+                  <CommandItem
+                    key={`vault-${entry.id}`}
+                    value={`vault-${entry.id}-${entry.title}`}
+                    onSelect={() => handleNav(`/vault?entry=${entry.id}`)}
+                    className="gap-2 cursor-pointer"
+                  >
+                    <FileText className="w-4 h-4 text-amber-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="block truncate">{entry.title || "Untitled"}</span>
+                      {entry.contentClass && (
+                        <span className="text-xs text-muted-foreground capitalize">{entry.contentClass}</span>
+                      )}
+                    </div>
+                  </CommandItem>
+                ))}
               </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </CommandDialog>
-    </>
+            )}
+            {filteredScratch.length > 0 && (
+              <CommandGroup heading="Scratch Pad">
+                {filteredScratch.map((note: any) => (
+                  <CommandItem
+                    key={`scratch-${note.id}`}
+                    value={`scratch-${note.id}-${note.content}`}
+                    onSelect={() => handleNav("/scratch")}
+                    className="gap-2 cursor-pointer"
+                  >
+                    <PenLine className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="truncate text-sm">{note.content?.slice(0, 60) || "Empty note"}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+            <CommandSeparator />
+          </>
+        )}
+
+        <CommandGroup heading="Navigate">
+          {NAV_ITEMS.map((item) => (
+            <CommandItem
+              key={item.path}
+              value={item.label}
+              onSelect={() => handleNav(item.path)}
+              className="gap-2 cursor-pointer"
+            >
+              <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span>{item.label}</span>
+              {item.shortcut && (
+                <CommandShortcut>{item.shortcut}</CommandShortcut>
+              )}
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Quick Actions">
+          {QUICK_ACTIONS.map((item) => (
+            <CommandItem
+              key={item.action}
+              value={item.label}
+              onSelect={() => handleAction(item.action)}
+              className="gap-2 cursor-pointer"
+            >
+              <item.icon className="w-4 h-4 text-amber-500 shrink-0" />
+              <span>{item.label}</span>
+            </CommandItem>
+          ))}
+        </CommandGroup>
+
+        {user?.role === "admin" && (
+          <>
+            <CommandSeparator />
+            <CommandGroup heading="Admin">
+              <CommandItem value="Admin: Applications" onSelect={() => handleNav("/admin/applications")} className="gap-2 cursor-pointer">
+                <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Applications</span>
+              </CommandItem>
+              <CommandItem value="Admin: Invite Codes" onSelect={() => handleNav("/admin/invites")} className="gap-2 cursor-pointer">
+                <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Invite Codes</span>
+              </CommandItem>
+              <CommandItem value="Admin: Feedback" onSelect={() => handleNav("/admin/feedback")} className="gap-2 cursor-pointer">
+                <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Feedback</span>
+              </CommandItem>
+              <CommandItem value="Admin: Beta Codes" onSelect={() => handleNav("/admin/beta")} className="gap-2 cursor-pointer">
+                <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+                <span>Beta Codes</span>
+              </CommandItem>
+            </CommandGroup>
+          </>
+        )}
+      </CommandList>
+    </CommandDialog>
   );
+}
+
+export function CommandPalette({ onAction }: CommandPaletteProps) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if ((e.key === "k" && (e.metaKey || e.ctrlKey)) || e.key === "F1") {
+        e.preventDefault();
+        setOpen((o) => !o);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
+  return <CommandPaletteContent open={open} setOpen={setOpen} onAction={onAction} />;
 }
 
 /** Small trigger button that opens the command palette on click */
 export function CommandPaletteTrigger({ onAction }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
-  const [, navigate] = useLocation();
-  const { user } = useAuth();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -183,26 +278,6 @@ export function CommandPaletteTrigger({ onAction }: CommandPaletteProps) {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-
-  const handleNav = (path: string) => {
-    setOpen(false);
-    navigate(path);
-  };
-
-  const handleAction = (action: string) => {
-    setOpen(false);
-    onAction?.(action);
-    if (!onAction) {
-      const fallbackMap: Record<string, string> = {
-        "brain-dump": "/clarity",
-        "threshold-diagnosis": "/clarity",
-        "morning-checkin": "/",
-        "evening-checkin": "/",
-        "idea-sanctuary": "/vault",
-      };
-      if (fallbackMap[action]) navigate(fallbackMap[action]);
-    }
-  };
 
   return (
     <>
@@ -218,69 +293,7 @@ export function CommandPaletteTrigger({ onAction }: CommandPaletteProps) {
         </kbd>
       </button>
 
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Search pages, actions, projects…" />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-
-          <CommandGroup heading="Navigate">
-            {NAV_ITEMS.map((item) => (
-              <CommandItem
-                key={item.path}
-                value={item.label}
-                onSelect={() => handleNav(item.path)}
-                className="gap-2 cursor-pointer"
-              >
-                <item.icon className="w-4 h-4 text-muted-foreground shrink-0" />
-                <span>{item.label}</span>
-                {item.shortcut && (
-                  <CommandShortcut>{item.shortcut}</CommandShortcut>
-                )}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          <CommandSeparator />
-
-          <CommandGroup heading="Quick Actions">
-            {QUICK_ACTIONS.map((item) => (
-              <CommandItem
-                key={item.action}
-                value={item.label}
-                onSelect={() => handleAction(item.action)}
-                className="gap-2 cursor-pointer"
-              >
-                <item.icon className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>{item.label}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          {user?.role === "admin" && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading="Admin">
-                <CommandItem value="Admin: Applications" onSelect={() => handleNav("/admin/applications")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Applications</span>
-                </CommandItem>
-                <CommandItem value="Admin: Invite Codes" onSelect={() => handleNav("/admin/invites")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Invite Codes</span>
-                </CommandItem>
-                <CommandItem value="Admin: Feedback" onSelect={() => handleNav("/admin/feedback")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Feedback</span>
-                </CommandItem>
-                <CommandItem value="Admin: Beta Codes" onSelect={() => handleNav("/admin/beta")} className="gap-2 cursor-pointer">
-                  <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <span>Beta Codes</span>
-                </CommandItem>
-              </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </CommandDialog>
+      <CommandPaletteContent open={open} setOpen={setOpen} onAction={onAction} />
     </>
   );
 }

@@ -1705,3 +1705,39 @@
 ## OG Tags + Marketing Site Mobile Nav (May 30 2026)
 - [x] OG1: Added react-helmet-async + PageMeta component; OG/Twitter tags on /apply, /pricing, /tour
 - [x] OG2: Diagnosed marketing site mobile nav bug — hamburger has inline display:none overriding CSS media query. Fix documented (cannot apply — separate project). See result message.
+
+## UX Audit — May 31 2026
+
+### P1: Dead-ends & broken core
+- [ ] P1-A: Focus Sessions — fill the empty left panel (currently a black void); add visible exit/back affordance (Esc + logo-to-home)
+- [ ] P1-B: ⌘K search — wire to index Knowledge Vault content so it actually returns results
+- [ ] P1-C: Today check-in banner — make the "Morning Check-In Ready" bordered banner clickable (or remove it as a dead affordance)
+
+### P2: Plumbing
+- [ ] P2-A: Favicon 503 — fix favicon.ico so it resolves (self-host in public/)
+- [ ] P2-B: Self-host the Continuary logo (currently loading from manuscdn.com CDN, hangs indefinitely)
+- [ ] P2-C: First-click nav lag — investigate and fix double-click-to-navigate issue
+- [x] P2-D: Collapse sequential auth gates (onboarding → seenAbout → hasRedeemedInvite) into one unified loading state before first render
+- [x] P2-E: Add skeleton screens for Today view to eliminate blank canvas on cold load
+- [ ] P2-F: Trim the 18-call first-paint tRPC batch — defer non-critical procedures
+
+### P3: Consistency
+- [x] P3-A: Create shared PageHeader component and apply across all pages (Today, Projects, Vault, Clarity, Scratch Pad, Evidence Log, etc.)
+- [x] P3-B: Kill blue/purple gradient cards (Projects empty state, Weekly Review) — replace with amber/charcoal system
+- [x] P3-C: Fix rainbow Clarity Engine category icons — unify to amber/neutral palette
+- [x] P3-D: Replace mobile "More" drawer with unified Hub tab (mini heatmap widget, Intelligence badge, Settings gear)
+- [ ] P3-E: Standardize vocabulary: "thread" vs "project", remove "inbox bankruptcy" jargon, pin re-engagement copy per session
+
+### P4: Close the loops
+- [ ] P4-A: Friction Log — show "Your logged notes" list with timestamps so beta feedback feels heard
+- [ ] P4-B: Clarity Engine conversion — show inline preview of updated project card after "Convert next step → Project Note"
+- [ ] P4-C: Offline sync indicator — subtle header pulse during sync, resolves to checkmark (Apple Notes–style)
+
+### P5: Premium polish (after P1–P4)
+- [ ] P5-A: Spring motion (framer-motion) + swipe-to-dismiss on sheets
+- [ ] P5-B: Frosted glass on nav chrome (header, tab bars, sheets)
+- [ ] P5-C: Tactile press response (active:scale-[0.96]) on buttons
+- [ ] P5-D: Full PWA icon set (maskable, apple-touch-icon, theme-color, splash images)
+- [ ] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
+- [ ] P5-F: 44px minimum touch targets across all interactive elements
+- [ ] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session

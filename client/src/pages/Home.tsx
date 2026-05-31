@@ -30,6 +30,7 @@ import {
   Shuffle,
   PenLine,
   Anchor,
+  ChevronRight,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -996,29 +997,35 @@ export default function Home() {
 
   // Guard all queries behind auth — prevents TRPCClientError 10001 noise before session resolves
   const authed = !!user;
-  const { data: todayPlan, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(undefined, { enabled: authed });
+
+  // ── Critical-path queries (fire immediately on auth) ─────────────────────────
+  const { data: todayPlan, isLoading: planLoading, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(undefined, { enabled: authed });
   const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery(undefined, { enabled: authed });
-  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery(undefined, { enabled: authed });
-  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery(undefined, { enabled: authed });
   const { data: activeProjects } = trpc.projects.listActive.useQuery(undefined, { enabled: authed });
-  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: authed });
-  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: authed });
-  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: authed });
-  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: authed });
-  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: authed, staleTime: 60_000 });
-  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: authed, staleTime: 5 * 60 * 1000 });
-  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { enabled: authed, staleTime: 5 * 60 * 1000 });
-  const { data: healthScores } = trpc.insights.getHealthScores.useQuery(undefined, { enabled: authed });
-  const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
-    enabled: authed,
-    staleTime: 30 * 60 * 1000,
-  });
   const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
     enabled: authed,
     staleTime: 5 * 60 * 1000,
   });
   const utils = trpc.useUtils();
   const { data: profile } = trpc.settings.getProfile.useQuery(undefined, { enabled: authed });
+
+  // ── Deferred queries (fire only after critical path resolves) ─────────────────
+  // These are secondary data that don't block the initial render.
+  const criticalReady = authed && !planLoading;
+  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery(undefined, { enabled: criticalReady });
+  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery(undefined, { enabled: criticalReady });
+  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: criticalReady });
+  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: criticalReady });
+  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: criticalReady });
+  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: criticalReady });
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: criticalReady, staleTime: 60_000 });
+  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: criticalReady, staleTime: 5 * 60 * 1000 });
+  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { enabled: criticalReady, staleTime: 5 * 60 * 1000 });
+  const { data: healthScores } = trpc.insights.getHealthScores.useQuery(undefined, { enabled: criticalReady });
+  const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
+    enabled: criticalReady,
+    staleTime: 30 * 60 * 1000,
+  });
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),
@@ -1339,6 +1346,42 @@ export default function Home() {
     return null;
   })();
 
+  // ── Today dashboard skeleton (P2-E) ───────────────────────────────────────
+  // Show a lightweight skeleton while the critical-path data loads.
+  if (authed && planLoading) {
+    return (
+      <div className="px-5 py-7 max-w-4xl mx-auto space-y-7 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-muted shrink-0" />
+            <div className="space-y-2">
+              <div className="h-8 w-48 rounded-lg bg-muted" />
+              <div className="h-4 w-32 rounded bg-muted" />
+            </div>
+          </div>
+          <div className="h-7 w-24 rounded-full bg-muted" />
+        </div>
+        {/* Alert card skeleton */}
+        <div className="h-16 w-full rounded-xl bg-muted" />
+        {/* Task list skeleton */}
+        <div className="space-y-3">
+          <div className="h-5 w-28 rounded bg-muted" />
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-12 w-full rounded-xl bg-muted" />
+          ))}
+        </div>
+        {/* Projects skeleton */}
+        <div className="space-y-3">
+          <div className="h-5 w-24 rounded bg-muted" />
+          {[1, 2].map((i) => (
+            <div key={i} className="h-20 w-full rounded-xl bg-muted" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
     {showWrenIntro && (
@@ -1510,13 +1553,20 @@ export default function Home() {
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
       {topAlert === "check_in_due" && (
-        <div className="p-4 rounded-xl border" style={{ borderColor: "oklch(0.78 0.18 65 / 0.28)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Sun className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning check-in ready</p>
+        <button
+          onClick={() => openCheckIn("morning")}
+          className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
+          style={{ borderColor: "oklch(0.78 0.18 65 / 0.28)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}
+        >
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Sun className="w-3.5 h-3.5 text-primary" />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning check-in ready</p>
+            </div>
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }} />
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
-        </div>
+        </button>
       )}
       {topAlert === "capacity_low" && (
         <div className="p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800">

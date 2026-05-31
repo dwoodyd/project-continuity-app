@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
+import { PageHeader } from "@/components/PageHeader";
 import WrenPlayer from "@/components/WrenPlayer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -289,52 +290,54 @@ export default function EvidenceLogPage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Today
           </Link>
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand flex items-center gap-2">
+          <PageHeader
+            title={
+              <span className="flex items-center gap-2">
                 <BookOpen className="w-6 h-6" style={{ color: "oklch(0.78 0.18 65)" }} />
                 Evidence <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>Log</span>
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                The record of who you actually are — not who you think you should be.
-              </p>
-            </div>
-            <Button
-              onClick={handleGenerateCurrent}
-              disabled={isGenerating}
-              size="sm"
-              className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30"
-              variant="outline"
-            >
-              {isGenerating ? (
-                <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              ) : (
-                <Flame className="w-3.5 h-3.5 mr-1.5" />
-              )}
-              Update this month
-            </Button>
-            <Button
-              onClick={async () => {
-                try {
-                  const result = await utils.evidence.exportMarkdown.fetch();
-                  const blob = new Blob([result.markdown], { type: "text/markdown" });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `continuary-evidence-log-${new Date().toISOString().slice(0,10)}.md`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                  toast.success("Evidence Log exported");
-                } catch { toast.error("Export failed"); }
-              }}
-              size="sm"
-              variant="outline"
-              className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
-              title="Export as Markdown"
-            >
-              <Download className="w-3.5 h-3.5" />
-            </Button>
-          </div>
+              </span>
+            }
+            subtitle="The record of who you actually are — not who you think you should be."
+            action={
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleGenerateCurrent}
+                  disabled={isGenerating}
+                  size="sm"
+                  className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30"
+                  variant="outline"
+                >
+                  {isGenerating ? (
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  ) : (
+                    <Flame className="w-3.5 h-3.5 mr-1.5" />
+                  )}
+                  Update this month
+                </Button>
+                <Button
+                  onClick={async () => {
+                    try {
+                      const result = await utils.evidence.exportMarkdown.fetch();
+                      const blob = new Blob([result.markdown], { type: "text/markdown" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `continuary-evidence-log-${new Date().toISOString().slice(0,10)}.md`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success("Evidence Log exported");
+                    } catch { toast.error("Export failed"); }
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
+                  title="Export as Markdown"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            }
+          />
         </div>
 
         {/* All-time summary pills */}

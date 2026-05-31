@@ -131,7 +131,7 @@ export const studyRouter = router({
   saveDayLog: protectedProcedure
     .input(
       z.object({
-        dayNum: z.number().int().min(1).max(3650),
+        dayNum: z.number().int().min(1).max(30),
         logDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
         capacity: z.string().max(50).optional(),
         firstMove: z.string().max(500).optional(),
