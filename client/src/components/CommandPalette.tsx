@@ -30,6 +30,7 @@ import {
   Shield,
   ClipboardList,
   FileText,
+  FolderKanban,
   PenLine,
   ScrollText,
 } from "lucide-react";
@@ -78,12 +79,16 @@ function CommandPaletteContent({
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
-  // Fetch vault entries and scratch pad notes when the palette is open
+  // Fetch vault entries, scratch pad notes, and projects when the palette is open
   const { data: vaultEntries } = trpc.vault.list.useQuery(undefined, {
     enabled: open && !!user,
     staleTime: 30_000,
   });
   const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, {
+    enabled: open && !!user,
+    staleTime: 30_000,
+  });
+  const { data: projects } = trpc.projects.list.useQuery(undefined, {
     enabled: open && !!user,
     staleTime: 30_000,
   });
@@ -110,6 +115,19 @@ function CommandPaletteContent({
       .slice(0, 4);
   }, [scratchNotes, query]);
 
+  // Filter projects by title, description, and tags
+  const filteredProjects = useMemo(() => {
+    if (!projects || !query.trim()) return [];
+    const q = query.toLowerCase();
+    return (projects as any[])
+      .filter((p: any) =>
+        p.title?.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.tags?.some((t: string) => t.toLowerCase().includes(q))
+      )
+      .slice(0, 5);
+  }, [projects, query]);
+
   const handleNav = (path: string) => {
     setOpen(false);
     setQuery("");
@@ -132,7 +150,7 @@ function CommandPaletteContent({
     }
   };
 
-  const showContentResults = query.trim().length > 0 && (filteredVault.length > 0 || filteredScratch.length > 0);
+  const showContentResults = query.trim().length > 0 && (filteredVault.length > 0 || filteredScratch.length > 0 || filteredProjects.length > 0);
 
   return (
     <CommandDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery(""); }}>
@@ -147,6 +165,26 @@ function CommandPaletteContent({
         {/* ── Content search results (only when query is non-empty) ── */}
         {showContentResults && (
           <>
+            {filteredProjects.length > 0 && (
+              <CommandGroup heading="Projects">
+                {filteredProjects.map((project: any) => (
+                  <CommandItem
+                    key={`project-${project.id}`}
+                    value={`project-${project.id}-${project.title}`}
+                    onSelect={() => handleNav(`/projects/${project.id}`)}
+                    className="gap-2 cursor-pointer"
+                  >
+                    <FolderKanban className="w-4 h-4 text-amber-500 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="block truncate">{project.title || "Untitled"}</span>
+                      {project.status && (
+                        <span className="text-xs text-muted-foreground capitalize">{project.status}</span>
+                      )}
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
             {filteredVault.length > 0 && (
               <CommandGroup heading="Knowledge Vault">
                 {filteredVault.map((entry: any) => (

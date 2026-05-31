@@ -61,7 +61,7 @@ const MODES: {
     label: "Overwhelm",
     description: "Too much, too loud, unclear where to start",
     icon: Brain,
-    color: "text-red-400",
+    color: "text-amber-400",
   },
   {
     id: "decision",
@@ -75,7 +75,7 @@ const MODES: {
     label: "Creative Block",
     description: "The work won't come, the page is blank",
     icon: Lightbulb,
-    color: "text-yellow-400",
+    color: "text-amber-400",
   },
   {
     id: "identity_drift",
@@ -869,12 +869,12 @@ function PatternsView({
 
 //// ── Threshold History view ───────────────────────────────────────────────────
 const PATTERN_COLORS: Record<string, string> = {
-  perfectionism: "border-l-rose-400",
+  perfectionism: "border-l-amber-300",
   ambiguity: "border-l-amber-400",
-  emotional_weight: "border-l-purple-400",
-  executive_function: "border-l-blue-400",
-  shame_spiral: "border-l-red-400",
-  permission_deficit: "border-l-teal-400",
+  emotional_weight: "border-l-amber-500",
+  executive_function: "border-l-amber-400",
+  shame_spiral: "border-l-amber-300",
+  permission_deficit: "border-l-amber-200",
 };
 
 function ThresholdHistoryView({

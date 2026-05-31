@@ -220,6 +220,9 @@
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
+    /* Eliminate 300ms tap delay on iOS/Android — prevents first-click swallow */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
     outline: 2px solid oklch(0.78 0.18 65 / 0.65);

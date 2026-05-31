@@ -427,6 +427,27 @@ export default function FocusSessionsPage() {
     video.play().catch(() => {});
   }, [wrenActivity]);
 
+  // ── Esc key — always provides an exit ────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (phase === "active") {
+        // Esc during active session triggers end-early (goes to closure)
+        stopTimer();
+        if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
+        setPhase("closure");
+        setWrenActivity("lookingup");
+      } else if (phase === "idle" || phase === "reveal") {
+        navigate("/");
+      } else {
+        // intake / duration / closure — go back to idle
+        setPhase("idle");
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [phase, navigate, stopTimer]);
+
   // ── Start session ─────────────────────────────────────────────────────────
   const handleStartSession = useCallback(async () => {
     if (!limitData?.canStart && !limitData?.isPro) {
@@ -588,13 +609,29 @@ export default function FocusSessionsPage() {
           opacity: phase === "active" ? 0.3 : 1,
         }}
       >
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.92 0.08 65)" }}>
-            Focus Sessions
-          </h1>
-          <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>
-            with Wren
-          </p>
+        <div className="flex items-center gap-3">
+          {/* Back button — always visible in idle/reveal so users are never trapped */}
+          {(phase === "idle" || phase === "reveal") && (
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1 text-xs rounded-lg px-2 py-1.5"
+              style={{ color: "oklch(0.55 0.04 240)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.20 0.04 240)" }}
+              aria-label="Back to Today"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Today
+            </button>
+          )}
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.92 0.08 65)" }}>
+              Focus Sessions
+            </h1>
+            <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>
+              with Wren
+            </p>
+          </div>
         </div>
               {artifactData && artifactData.sessions.length > 0 && (
           <div className="flex items-center gap-2">
@@ -710,6 +747,59 @@ export default function FocusSessionsPage() {
                 >
                   Start a session
                 </Button>
+              )}
+
+              {/* Session history — fills the lower screen in idle phase */}
+              {artifactData && artifactData.sessions.length > 0 && (
+                <div className="w-full max-w-sm mt-8">
+                  <p className="text-xs uppercase tracking-widest mb-3 text-left" style={{ color: "oklch(0.40 0.04 240)" }}>
+                    Your focus record
+                  </p>
+                  <div className="flex gap-4 items-start">
+                    <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="full" />
+                    <div className="flex-1 flex flex-col gap-2">
+                      {artifactData.sessions.slice(-5).reverse().map((s) => (
+                        <div
+                          key={s.id}
+                          className="rounded-lg px-3 py-2"
+                          style={{ background: "oklch(0.13 0.02 240)", border: "1px solid oklch(0.20 0.04 240)" }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-2 h-2 rounded-full shrink-0"
+                              style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
+                            />
+                            <span className="text-xs font-medium" style={{ color: "oklch(0.78 0.06 65)" }}>
+                              {s.durationMinutes ?? 25} min
+                            </span>
+                            {s.completedAt && (
+                              <span className="text-[10px] ml-auto" style={{ color: "oklch(0.38 0.03 240)" }}>
+                                {new Date(s.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] mt-0.5 capitalize" style={{ color: "oklch(0.48 0.04 240)" }}>
+                            {s.whatMoved === "progress" ? "Made progress" : s.whatMoved === "thinking" ? "Mostly thinking" : s.whatMoved === "stuck" ? "Stuck or scattered" : "Session"}
+                          </p>
+                        </div>
+                      ))}
+                      {artifactData.sessions.length > 5 && (
+                        <p className="text-[10px]" style={{ color: "oklch(0.35 0.03 240)" }}>
+                          +{artifactData.sessions.length - 5} earlier sessions
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state hint when no sessions yet */}
+              {(!artifactData || artifactData.sessions.length === 0) && (
+                <div className="mt-8 text-center max-w-xs">
+                  <p className="text-xs" style={{ color: "oklch(0.32 0.03 240)" }}>
+                    Each session weaves a row into your focus record. Start your first one above.
+                  </p>
+                </div>
               )}
             </div>
           )}

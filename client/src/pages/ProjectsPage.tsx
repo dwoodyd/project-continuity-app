@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Circle,
+  FolderKanban,
   Loader2,
   Plus,
   RefreshCw,
@@ -268,12 +269,17 @@ export default function ProjectsPage() {
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <PageHeader
-        title="Projects"
+        title={
+          <span className="flex items-center gap-2">
+            <FolderKanban className="w-5 h-5 text-amber-400" />
+            Projects
+          </span>
+        }
         subtitle={`${projects?.filter((p) => p.status === "active").length ?? 0} active · ${projects?.length ?? 0} total`}
         action={
           <Button onClick={() => setCreateOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="w-4 h-4" />
-            Start a new thread
+            New project
           </Button>
         }
       />

@@ -100,14 +100,13 @@ export default function WeeklyReviewPage() {
         </div>
       )}
       {!review && !generating && (
-        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
+        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{ background: "oklch(0.13 0.03 60)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
           <div className="relative">
             <div className="flex justify-center mb-4">
               <WrenPlayer clip="wrenLetter" size="lg" />
             </div>
-            <p className="text-base font-semibold text-white mb-1">Ask Wren to read your week</p>
-            <p className="text-sm text-white/70 mb-5">
+            <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.92 0.08 65)" }}>Ask Wren to read your week</p>
+            <p className="text-sm mb-5" style={{ color: "oklch(0.60 0.05 65)" }}>
               Wren will read your past 7 days — check-ins, projects, patterns — and write you back.
             </p>
             <Button
@@ -123,7 +122,7 @@ export default function WeeklyReviewPage() {
         </div>
       )}
       {review && (
-        <div className="p-5 rounded-xl border border-primary/30 space-y-4" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.72 0.17 65 / 0.06) 100%)'}}>
+        <div className="p-5 rounded-xl space-y-4" style={{ background: "oklch(0.78 0.18 65 / 0.06)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <p className="text-xs font-medium text-primary uppercase tracking-wide">AI Weekly Review</p>
@@ -161,14 +160,13 @@ export default function WeeklyReviewPage() {
         </div>
 
         {!focusSessions || focusSessions.length === 0 ? (
-          <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-            <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
+          <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{ background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}>
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mx-auto mb-3 backdrop-blur-sm">
-                <Timer className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "oklch(0.20 0.04 240)" }}>
+                <Timer className="w-5 h-5" style={{ color: "oklch(0.72 0.10 65)" }} />
               </div>
-              <p className="text-sm font-semibold text-white mb-1">No focus sessions this week yet.</p>
-              <p className="text-xs text-white/70">Use Single Focus Mode to log your work blocks.</p>
+              <p className="text-sm font-semibold mb-1" style={{ color: "oklch(0.88 0.06 65)" }}>No focus sessions this week yet.</p>
+              <p className="text-xs" style={{ color: "oklch(0.55 0.04 240)" }}>Use Focus Sessions to log your work blocks.</p>
             </div>
           </div>
         ) : (
@@ -257,7 +255,7 @@ export default function WeeklyReviewPage() {
                 isPlainText = true;
               }
               const typeLabel = checkIn.type === "morning" ? "Morning check-in" : checkIn.type === "midday" ? "Midday pulse" : "Evening close";
-              const accentColor = checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-blue-400" : "bg-violet-400";
+              const accentColor = checkIn.type === "morning" ? "bg-amber-400" : checkIn.type === "midday" ? "bg-amber-300" : "bg-amber-200";
               const plainSummary = isPlainText && checkIn.userInput ? checkIn.userInput : null;
               return (
                 <div key={checkIn.id} className="p-4 rounded-xl border border-border bg-card space-y-2">

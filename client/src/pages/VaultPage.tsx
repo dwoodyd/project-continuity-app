@@ -527,7 +527,12 @@ export default function VaultPage() {
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
       <PageHeader
-        title="Knowledge Vault"
+        title={
+          <span className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-amber-400" />
+            Knowledge Vault
+          </span>
+        }
         subtitle={`${items?.length ?? 0} items · ${inboxCount} in inbox${reviewCount > 0 ? ` · ${reviewCount} need review` : ''}`}
         action={
         <div className="flex items-center gap-2">

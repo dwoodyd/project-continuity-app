@@ -1670,10 +1670,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.12) 0%, oklch(0.72 0.17 65 / 0.08) 100%)'}}>
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.78 0.18 65 / 0.06)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <p className="text-xs font-semibold text-primary uppercase tracking-widest">Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65)" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -2531,34 +2531,11 @@ export default function Home() {
         </div>
       </div>     </div>
       </div>
-      {/* ── Empty state — no plan yet (full width below grid) ───────────────────────────────────────── */}
-      {!todayPlan && !activeCheckIn && (
-        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.72 0.17 65) 0%, transparent 50%), radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 40%)'}} />
-          <div className="relative">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-              <Sun className="w-6 h-6 text-white" />
-            </div>
-            <p className="text-base font-semibold text-white mb-1">No plan for today yet.</p>
-            <p className="text-sm text-white/70 mb-5">Start with the morning check-in to set your capacity and focus.</p>
-            <div className="flex items-center justify-center gap-3 flex-wrap">
-              <Button size="sm" onClick={() => openCheckIn("morning")} className="bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold shadow-lg shadow-black/20 border-0">
-                Start morning check-in
-              </Button>
-              <button
-                onClick={() => navigate("/clarity")}
-                className="text-sm text-white/70 hover:text-white transition-colors underline underline-offset-2"
-              >
-                ⚡ Feeling scattered? Open Clarity Engine
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Empty state banner removed — the top-alert check_in_due card and Daily Rhythm tiles already surface the morning check-in. A third CTA was redundant and used an off-palette purple gradient. */}
 
       {/* ── Notification Permission Prompt ─────────────────────────────────── */}
       {showNotifPrompt && (
-        <div className="relative p-5 rounded-2xl border border-primary/20 shadow-lg overflow-hidden" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.51 0.24 264 / 0.04) 100%)'}}>
+        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Bell className="w-5 h-5 text-primary" />

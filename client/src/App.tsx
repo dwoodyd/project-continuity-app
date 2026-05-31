@@ -64,7 +64,6 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/onboarding" component={OnboardingPage} />
-        <Route path="/focus" component={FocusSessionsPage} />
         <Route path="/focus-mode" component={FocusModePage} />
         {/* /study is Single Focus Mode — full-screen, no sidebar. Must be outside AppLayout. */}
         <Route path="/study" component={StudyTrackerPage} />

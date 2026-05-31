@@ -1,7 +1,7 @@
 {
   "name": "Continuary",
   "short_name": "Continuary",
-  "description": "Your personal continuity system — stay in motion on what matters.",
+  "description": "Your personal continuity system \u2014 stay in motion on what matters.",
   "start_url": "/",
   "scope": "/",
   "id": "/",
@@ -9,70 +9,73 @@
   "orientation": "portrait",
   "background_color": "#080a0f",
   "theme_color": "#080a0f",
-  "categories": ["productivity", "lifestyle"],
+  "categories": [
+    "productivity",
+    "lifestyle"
+  ],
   "icons": [
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_16_e92d78f5.png",
+      "src": "/icon-16.png",
       "sizes": "16x16",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_32_0b8961a5.png",
+      "src": "/icon-32.png",
       "sizes": "32x32",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-72_00621126.png",
+      "src": "/icon-96.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
+      "src": "/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-128_ca7fc314.png",
+      "src": "/icon-128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-144_900f6b43.png",
+      "src": "/icon-128.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-152_d2e01d0c.png",
+      "src": "/icon-180.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-180_fcf8c384.png",
+      "src": "/icon-180.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_192_6b761079.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-384_475aced8.png",
+      "src": "/icon-512.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_512_286881db.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -86,7 +89,7 @@
       "url": "/?checkin=morning",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
+          "src": "/icon-96.png",
           "sizes": "96x96"
         }
       ]
@@ -98,7 +101,7 @@
       "url": "/vault",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
+          "src": "/icon-96.png",
           "sizes": "96x96"
         }
       ]
@@ -110,7 +113,7 @@
       "url": "/clarity",
       "icons": [
         {
-          "src": "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon_fixed_96_edfda2e2.png",
+          "src": "/icon-96.png",
           "sizes": "96x96"
         }
       ]

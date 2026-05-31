@@ -1741,3 +1741,23 @@
 - [ ] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
 - [ ] P5-F: 44px minimum touch targets across all interactive elements
 - [ ] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session
+
+## Next Batch — Tickets from live re-review (May 31 2026)
+
+### P0 — Broken core & dead-ends
+- [ ] T1: Focus Sessions — add persistent back/close button + Esc key exit; fill empty lower screen
+- [ ] T2: Global search (⌘K) — index Projects, Vault, Scratch Pad; return grouped results with click-through nav
+- [ ] T3: Remove duplicate inert "Morning Check-In Ready" banner on Today; single entry point only
+
+### P1 — Plumbing & assets
+- [ ] T4: Fix favicon.ico 503 — ship valid favicon + full app-icon set (maskable, apple-touch-icon)
+- [ ] T5: Self-host logo — remove manuscdn.com CDN reference, load from own origin
+- [ ] T6: Fix first-click-after-focus-change being swallowed (command palette dismiss / overlay)
+
+### P2 — Finish amber color pass
+- [ ] T7: De-blue WeeklyReviewPage — replace blue/purple/violet/indigo with amber/neutral
+- [ ] T8: Clarity Engine category-selector icons — unify to amber/neutral palette (not results components)
+
+### P3 — Polish / consistency
+- [ ] T9: PageHeader pixel-consistency — uniform leading-icon rule, standardize accent-word + back-link props
+- [ ] T10: Terminology — replace "thread" with "project" app-wide (buttons, empty states, copy)

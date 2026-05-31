@@ -89,20 +89,7 @@ const PRIMARY_TABS = [
   { href: "/hub",     label: "Hub",      icon: MoreHorizontal },
 ] as const;
 
-// ── Mobile "More" sheet items ─────────────────────────────────────────────────
-const MORE_ITEMS = [
-  { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2 },
-  { href: "/evidence",     label: "Evidence Log",    icon: ScrollText },
-  { href: "/compass",      label: "Weekly Compass",   icon: Compass },
-  { href: "/weekly",       label: "Weekly Review",    icon: Archive },
-  { href: "/intelligence", label: "Intelligence",     icon: Lightbulb },
-  { href: "/welcome",      label: "About Continuary", icon: Home },
-  { href: "/tour",         label: "Take the Tour",    icon: GraduationCap },
-  { href: "/study",        label: "Single Focus Mode",  icon: ClipboardList },
-  { href: "/focus",        label: "Focus Sessions",    icon: Users },
-  { href: "/settings",     label: "You & Wren",       icon: Settings },
-  { href: "/founding-member", label: "Founding Member", icon: Star },
-];
+// MORE_ITEMS removed — replaced by Hub tab (/hub page)
 
 // ── Wren sidebar presence with meet-Wren tooltip ────────────────────────────
 const WREN_TOOLTIP_KEY = "continuary-wren-tooltip-seen";
@@ -163,7 +150,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [ideaOpen, setIdeaOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
   // browser session doesn't force the user through the re-entry screen again.
@@ -244,11 +230,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     !aiConsentDismissed &&
     profile?.onboardingCompleted === true &&
     profile?.aiConsentGiven === false;
-
-  // Close more sheet on navigation
-  useEffect(() => {
-    setMoreOpen(false);
-  }, [location]);
 
   // Onboarding gate — admin users bypass entirely (they may not have a profile yet)
   useEffect(() => {
@@ -678,7 +659,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <button
                   key={href}
                   onClick={() => {
-                    setMoreOpen(false);
                     if (active) window.scrollTo({ top: 0, behavior: "smooth" });
                     else navigate(href);
                   }}
@@ -713,71 +693,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         </nav>
       </div>
 
-      {/* "More" slide-up sheet */}
-      {moreOpen && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setMoreOpen(false)} />
-          <div
-            className="fixed bottom-0 z-50 w-full max-w-md bg-card border border-border rounded-t-2xl shadow-2xl"
-            style={{ left: "50%", transform: "translateX(-50%)" }}
-          >
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
-            </div>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
-              <p className="text-sm font-semibold text-foreground">More</p>
-              <button onClick={() => setMoreOpen(false)} className="p-1.5 rounded-lg hover:bg-accent transition-colors text-muted-foreground">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="px-3 py-3 space-y-0.5">
-              {MORE_ITEMS.map(({ href, label, icon: Icon }) => {
-                const active = isActive(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors",
-                      active ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Icon className={cn("w-4.5 h-4.5 shrink-0", active ? "text-primary" : "text-muted-foreground")} />
-                    <span>{label}</span>
-                  </Link>
-                );
-              })}
-              {/* Feedback */}
-              <button
-                onClick={() => { setMoreOpen(false); setFeedbackOpen(true); }}
-                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors w-full text-left text-foreground hover:bg-accent"
-              >
-                <MessageSquare className="w-4.5 h-4.5 shrink-0 text-muted-foreground" />
-                <span>Send Feedback</span>
-              </button>
-              {/* Admin-only entry */}
-              {user?.role === "admin" && (
-                <>
-                  <div className="px-3 pt-3 pb-1">
-                    <p className="text-[10px] font-semibold text-amber-500/60 uppercase tracking-widest">Admin</p>
-                  </div>
-                  <Link
-                    href="/admin/invites"
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-colors",
-                      isActive("/admin/invites") ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-accent"
-                    )}
-                  >
-                    <Ticket className={cn("w-4.5 h-4.5 shrink-0", isActive("/admin/invites") ? "text-primary" : "text-amber-500")} />
-                    <span>Invite Codes</span>
-                  </Link>
-                </>
-              )}
-            </div>
-            <div style={{ height: "max(env(safe-area-inset-bottom, 0px), 12px)" }} />
-          </div>
-        </>
-      )}
+      {/* More drawer removed — replaced by Hub tab (/hub) */}
 
       {/* FAB */}
       <button

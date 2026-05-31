@@ -293,7 +293,7 @@ export default function EvidenceLogPage() {
           <PageHeader
             title={
               <span className="flex items-center gap-2">
-                <BookOpen className="w-6 h-6" style={{ color: "oklch(0.78 0.18 65)" }} />
+                <BookOpen className="w-5 h-5 text-amber-400" />
                 Evidence <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>Log</span>
               </span>
             }
