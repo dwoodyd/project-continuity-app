@@ -24,6 +24,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import UnstickModal from "@/components/UnstickModal";
+import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
 
 // ── CDN video URLs ────────────────────────────────────────────────────────────
 const WREN_VIDEOS = {
@@ -270,15 +272,25 @@ export default function FocusSessionsPage() {
   // ── tRPC ──────────────────────────────────────────────────────────────────
   const { data: limitData } = trpc.focusSessions.checkWeeklyLimit.useQuery();
   const { data: artifactData, refetch: refetchArtifact } = trpc.focusSessions.getArtifact.useQuery();
+  const { data: calibrationData } = trpc.focusSessions.getCalibration.useQuery();
   const startMutation = trpc.focusSessions.start.useMutation();
   const completeMutation = trpc.focusSessions.complete.useMutation();
   const wrenChatMutation = trpc.focusSessions.wrenChat.useMutation();
+  const logSurfaceEventMutation = trpc.focusSessions.logSurfaceEvent.useMutation();
 
   // ── Session state ─────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<SessionPhase>("idle");
   const [intention, setIntention] = useState("");
   const [durationMinutes, setDurationMinutes] = useState<25 | 50 | 90>(25);
+  const [hardStop, setHardStop] = useState<string>(""); // "HH:MM" local time
+  const [showUnstickModal, setShowUnstickModal] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
+  // ── Surface state ──────────────────────────────────────────────────────────────────
+  const [surfaceVisible, setSurfaceVisible] = useState(false);
+  const [surfaceTrigger, setSurfaceTrigger] = useState<SurfaceTrigger>("interval");
+  const hardStopMsRef = useRef<number | null>(null); // UTC ms of hard stop
+  const lastSurfaceElapsedRef = useRef<number>(0); // elapsed seconds at last surface show
+  const hardStopWarnedRef = useRef(false); // prevent double-fire for approaching_hard_stop
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [whatMoved, setWhatMoved] = useState<"progress" | "thinking" | "stuck" | null>(null);
   const [closingNote, setClosingNote] = useState("");
@@ -326,6 +338,22 @@ export default function FocusSessionsPage() {
     if (durationMin === 50) addCheckIn(27 * 60 * 1000);
     if (durationMin === 90) { addCheckIn(30 * 60 * 1000); addCheckIn(70 * 60 * 1000); }
   }, []);
+  // ── Divergence detection — show Surface card if user seems off-task ─────────
+  const DIVERGENCE_KEYWORDS = [
+    "different task", "other project", "something else", "switched to", "working on",
+    "distracted", "went off", "off track", "rabbit hole", "tangent", "got sidetracked",
+    "forgot what", "lost the thread", "not sure what", "doing something",
+  ];
+  const checkDivergence = useCallback((msg: string) => {
+    if (!intention.trim()) return;
+    const lower = msg.toLowerCase();
+    const isDivergent = DIVERGENCE_KEYWORDS.some((kw) => lower.includes(kw));
+    if (isDivergent && !surfaceVisible) {
+      setSurfaceTrigger("divergence");
+      setSurfaceVisible(true);
+    }
+  }, [intention, surfaceVisible]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Send chat message to Wren
   const handleSendChat = useCallback(async () => {
     const msg = chatInput.trim();
@@ -333,6 +361,7 @@ export default function FocusSessionsPage() {
     setChatInput("");
     setChatLoading(true);
     resetChatInactivity();
+    checkDivergence(msg);
     const userMsg: ChatMsg = { role: "user", content: msg, ts: Date.now() };
     setChatMessages((prev) => [...prev, userMsg]);
     try {
@@ -455,15 +484,29 @@ export default function FocusSessionsPage() {
       return;
     }
     try {
+      // Compute hard stop UTC ms from local HH:MM
+      let hardStopMs: number | undefined;
+      if (hardStop) {
+        const [hh, mm] = hardStop.split(":").map(Number);
+        const hs = new Date();
+        hs.setHours(hh, mm, 0, 0);
+        if (hs.getTime() > Date.now()) hardStopMs = hs.getTime();
+      }
       const result = await startMutation.mutateAsync({
         intention: intention.trim() || undefined,
         durationMinutes,
+        hardStop: hardStopMs,
       });
       setSessionId(result.id);
       setSecondsLeft(durationMinutes * 60);
       setMidSessionShown(false);
       setChatMessages([]);
       setChatCollapsed(false);
+      // Reset Surface tracking
+      setSurfaceVisible(false);
+      hardStopMsRef.current = hardStopMs ?? null;
+      lastSurfaceElapsedRef.current = 0;
+      hardStopWarnedRef.current = false;
       setPhase("active");
       setWrenActivity("reading");
       scheduleNextActivity("reading", false);
@@ -495,6 +538,7 @@ export default function FocusSessionsPage() {
         const next = prev - 1;
         const total = durationMinutes * 60;
         const midpoint = Math.floor(total / 2);
+        const elapsed = total - next;
 
         // Mid-session moment
         if (next === midpoint && !midSessionShown) {
@@ -514,6 +558,29 @@ export default function FocusSessionsPage() {
         if (next === 5 * 60) {
           setWrenActivity("weaving");
           scheduleNextActivity("weaving", true);
+        }
+
+        // ── Surface triggers ────────────────────────────────────────────────
+        // 1. Every 25 minutes of elapsed time
+        const SURFACE_INTERVAL_SECS = 25 * 60;
+        if (
+          elapsed > 0 &&
+          elapsed % SURFACE_INTERVAL_SECS === 0 &&
+          elapsed !== lastSurfaceElapsedRef.current
+        ) {
+          lastSurfaceElapsedRef.current = elapsed;
+          setSurfaceTrigger("interval");
+          setSurfaceVisible(true);
+        }
+
+        // 2. Approaching hard stop — 5 min before
+        if (hardStopMsRef.current && !hardStopWarnedRef.current) {
+          const msUntilHardStop = hardStopMsRef.current - Date.now();
+          if (msUntilHardStop > 0 && msUntilHardStop <= 5 * 60 * 1000) {
+            hardStopWarnedRef.current = true;
+            setSurfaceTrigger("approaching_hard_stop");
+            setSurfaceVisible(true);
+          }
         }
 
         // Done
@@ -551,6 +618,48 @@ export default function FocusSessionsPage() {
       toast.error("Couldn't save session. Please try again.");
     }
   }, [sessionId, whatMoved, closingNote, completeMutation, refetchArtifact]);
+
+  // ── Surface card handlers ────────────────────────────────────────────────
+  const handleSurfaceDismiss = useCallback(() => {
+    const elapsed = durationMinutes * 60 - secondsLeft;
+    logSurfaceEventMutation.mutate({
+      sessionId: sessionId ?? undefined,
+      elapsedSeconds: elapsed,
+      trigger: surfaceTrigger,
+      userResponse: "dismissed",
+    });
+    setSurfaceVisible(false);
+  }, [durationMinutes, secondsLeft, sessionId, surfaceTrigger, logSurfaceEventMutation]);
+
+  const handleSurfaceTakeBreak = useCallback(() => {
+    const elapsed = durationMinutes * 60 - secondsLeft;
+    logSurfaceEventMutation.mutate({
+      sessionId: sessionId ?? undefined,
+      elapsedSeconds: elapsed,
+      trigger: surfaceTrigger,
+      userResponse: "took_break",
+    });
+    setSurfaceVisible(false);
+    stopTimer();
+    if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
+    setPhase("closure");
+    setWrenActivity("lookingup");
+  }, [durationMinutes, secondsLeft, sessionId, surfaceTrigger, logSurfaceEventMutation, stopTimer]);
+
+  const handleSurfaceEndSession = useCallback(() => {
+    const elapsed = durationMinutes * 60 - secondsLeft;
+    logSurfaceEventMutation.mutate({
+      sessionId: sessionId ?? undefined,
+      elapsedSeconds: elapsed,
+      trigger: surfaceTrigger,
+      userResponse: "ended_session",
+    });
+    setSurfaceVisible(false);
+    stopTimer();
+    if (activityTimerRef.current) clearTimeout(activityTimerRef.current);
+    setPhase("closure");
+    setWrenActivity("lookingup");
+  }, [durationMinutes, secondsLeft, sessionId, surfaceTrigger, logSurfaceEventMutation, stopTimer]);
 
   // ── End early ─────────────────────────────────────────────────────────────
   const handleEndEarly = useCallback(() => {
@@ -870,6 +979,31 @@ export default function FocusSessionsPage() {
                   </button>
                 ))}
               </div>
+              {/* Hard stop pre-set */}
+              <div className="flex items-center justify-center gap-2 mb-5">
+                <label className="text-xs" style={{ color: "oklch(0.50 0.04 240)" }}>Hard stop at</label>
+                <input
+                  type="time"
+                  value={hardStop}
+                  onChange={(e) => setHardStop(e.target.value)}
+                  className="text-xs rounded px-2 py-1"
+                  style={{
+                    background: "oklch(0.14 0.03 240)",
+                    border: "1px solid oklch(0.25 0.05 240)",
+                    color: hardStop ? "oklch(0.88 0.08 65)" : "oklch(0.40 0.03 240)",
+                    colorScheme: "dark",
+                  }}
+                />
+                {hardStop && (
+                  <button
+                    onClick={() => setHardStop("")}
+                    className="text-xs opacity-50 hover:opacity-80"
+                    style={{ color: "oklch(0.60 0.04 240)" }}
+                  >
+                    clear
+                  </button>
+                )}
+              </div>
               <Button
                 onClick={handleStartSession}
                 disabled={startMutation.isPending}
@@ -928,6 +1062,28 @@ export default function FocusSessionsPage() {
                 </p>
               )}
 
+              {/* Hard stop countdown */}
+              {hardStopMsRef.current && (() => {
+                const msLeft = hardStopMsRef.current! - Date.now();
+                if (msLeft <= 0) return null;
+                const minLeft = Math.ceil(msLeft / 60000);
+                return (
+                  <div
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 text-xs"
+                    style={{
+                      background: minLeft <= 5 ? "oklch(0.22 0.08 30 / 0.5)" : "oklch(0.16 0.04 240)",
+                      border: `1px solid ${minLeft <= 5 ? "oklch(0.50 0.12 30 / 0.5)" : "oklch(0.28 0.05 240)"}`,
+                      color: minLeft <= 5 ? "oklch(0.80 0.10 30)" : "oklch(0.60 0.04 240)",
+                    }}
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Hard stop in {minLeft} min
+                  </div>
+                );
+              })()}
+
               {/* Ambient sound */}
               <div className="flex items-center justify-center gap-3 mb-8">
                 {(["silence", "rain", "cafe"] as const).map((s) => (
@@ -959,13 +1115,23 @@ export default function FocusSessionsPage() {
                 )}
               </div>
 
-              <button
-                onClick={handleEndEarly}
-                className="text-xs opacity-40 hover:opacity-70 transition-opacity"
-                style={{ color: "oklch(0.60 0.04 240)" }}
-              >
-                End session early
-              </button>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  onClick={() => setShowUnstickModal(true)}
+                  className="text-xs opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1.5"
+                  style={{ color: "oklch(0.72 0.16 65)" }}
+                >
+                  <span>⚡</span> I’m stuck
+                </button>
+                <span className="text-xs opacity-20" style={{ color: "oklch(0.60 0.04 240)" }}>·</span>
+                <button
+                  onClick={handleEndEarly}
+                  className="text-xs opacity-40 hover:opacity-70 transition-opacity"
+                  style={{ color: "oklch(0.60 0.04 240)" }}
+                >
+                  End session early
+                </button>
+              </div>
 
               {/* Wren chat panel */}
               <div
@@ -1139,6 +1305,35 @@ export default function FocusSessionsPage() {
                   Gold = progress &middot; Cream = thinking &middot; Navy = stuck
                 </p>
               </div>
+
+              {/* Time Sense calibration widget */}
+              {calibrationData && calibrationData.sampleCount >= 2 && (
+                <div
+                  className="mx-auto mb-6 rounded-xl px-5 py-4 text-left max-w-xs"
+                  style={{ background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.05 240)" }}
+                >
+                  <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.72 0.12 65)" }}>
+                    Your time sense
+                  </p>
+                  <p className="text-xs mb-1" style={{ color: "oklch(0.65 0.04 240)" }}>
+                    Across {calibrationData.sampleCount} sessions, you typically take{" "}
+                    <span style={{ color: "oklch(0.85 0.10 65)" }}>
+                      {calibrationData.avgMultiplier !== null
+                        ? calibrationData.avgMultiplier < 0.9
+                          ? "less time than you estimate"
+                          : calibrationData.avgMultiplier > 1.2
+                          ? `${Math.round(calibrationData.avgMultiplier * 100 - 100)}% longer than you estimate`
+                          : "about as long as you estimate"
+                        : "—"}
+                    </span>.
+                  </p>
+                  {calibrationData.recentMultiplier !== null && (
+                    <p className="text-[10px]" style={{ color: "oklch(0.42 0.04 240)" }}>
+                      Recent trend: {calibrationData.recentMultiplier.toFixed(1)}× your estimate
+                    </p>
+                  )}
+                </div>
+              )}
               <div className="flex gap-4 justify-center">
                 <Button
                   onClick={() => {
@@ -1165,6 +1360,34 @@ export default function FocusSessionsPage() {
         </div>
 
       </div>
+
+      {/* Surface card — ambient check-in during active session */}
+      {surfaceVisible && phase === "active" && (
+        <SurfaceCard
+          trigger={surfaceTrigger}
+          minutesUntilHardStop={
+            hardStopMsRef.current
+              ? Math.max(0, Math.ceil((hardStopMsRef.current - Date.now()) / 60000))
+              : undefined
+          }
+          onDismiss={handleSurfaceDismiss}
+          onTakeBreak={handleSurfaceTakeBreak}
+          onEndSession={handleSurfaceEndSession}
+        />
+      )}
+
+      {/* Unstick modal — triggered from active session */}
+      {showUnstickModal && (
+        <UnstickModal
+          task={{
+            id: sessionId ? String(sessionId) : "session",
+            title: intention.trim() || "this task",
+            projectId: null,
+          }}
+          onClose={() => setShowUnstickModal(false)}
+          entryMethod="manual"
+        />
+      )}
 
       <style>{`
         @keyframes fadeIn {

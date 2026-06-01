@@ -14,6 +14,7 @@ import {
   getUserProfile,
   updateIdeaCapture,
   updateProject,
+  logUnstickInvocation,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
@@ -219,44 +220,46 @@ Return JSON: { stoppingPoint, unresolvedDecision, whatWasRuledOut, nextPhysicalA
       return { success: true };
     }),
 
-  // ─── Unstick Protocol ────────────────────────────────────────────────────────
+  // ─── Unstick Protocol (v2 — recursive decomposition + timebox offer) ─────────
   unstickTask: protectedProcedure
     .input(z.object({
-      taskTitle: z.string().max(500, "Task title must be under 500 characters"),
+      taskTitle: z.string().max(500),
       projectId: z.number().optional(),
       context: z.string().max(2000).optional(),
+      // depth > 0 means we're recursively decomposing a step that was still too big
+      depth: z.number().min(0).max(3).default(0),
+      // entryMethod: 'manual' = user clicked I'm Stuck; 'resolver_offer' = Surface card offered it
+      entryMethod: z.enum(["manual", "resolver_offer"]).default("manual"),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
       const project = input.projectId ? await getProjectById(input.projectId, ctx.user.id) : null;
 
+      const systemPrompt = `You are an executive-function support system helping someone who is stuck.
+Your job is to remove ALL decisions from the next action.
+Rules:
+- The first step MUST take under 2 minutes and require zero decisions.
+- Steps must be physical, observable actions (open file, write one sentence, set timer).
+- Never use motivational language. Never say "just" or "simply".
+- If depth > 0, you are breaking down a step that was still too big — go even smaller.
+- Return JSON only.`;
+
+      const depthNote = input.depth > 0
+        ? `\nNote: The user said the previous step was still too big. Go even smaller. Depth: ${input.depth}.`
+        : "";
+
       const response = await invokeLLM({
         messages: [
-          {
-            role: "system",
-            content: `You help people with ADHD get unstuck on tasks. 
-Break down the task into embarrassingly small, undeniable, zero-friction physical actions.
-The first step should take less than 2 minutes. Be extremely specific and concrete.
-Never use motivational language. Return JSON only.`,
-          },
+          { role: "system", content: systemPrompt },
           {
             role: "user",
-            content: `Task: "${input.taskTitle}"
-Project context: "${project?.title ?? "none"}"
-Additional context: "${input.context ?? "none"}"
-
-Break this into micro-steps. First step must be something that takes under 2 minutes.
-Return JSON: { 
-  microSteps: [{step: number, action: string, duration: string}],
-  firstAction: string,
-  encouragement: string (1 calm sentence, no exclamation points)
-}`,
+            content: `Task: "${input.taskTitle}"\nProject: "${project?.title ?? "none"}"\nContext: "${input.context ?? "none"}"${depthNote}\n\nReturn JSON:\n{\n  microSteps: [{step: number, action: string, duration: string, canDecomposeFurther: boolean}],\n  firstAction: string (the single most undeniable physical first action),\n  timeboxOffer: string (offer a 5-minute timebox framing, e.g. "Set a 5-minute timer. Do only step 1."),\n  encouragement: string (1 calm grounded sentence, no exclamation points)\n}`,
           },
         ],
         response_format: {
           type: "json_schema",
           json_schema: {
-            name: "unstick_protocol",
+            name: "unstick_protocol_v2",
             strict: true,
             schema: {
               type: "object",
@@ -269,15 +272,17 @@ Return JSON: {
                       step: { type: "number" },
                       action: { type: "string" },
                       duration: { type: "string" },
+                      canDecomposeFurther: { type: "boolean" },
                     },
-                    required: ["step", "action", "duration"],
+                    required: ["step", "action", "duration", "canDecomposeFurther"],
                     additionalProperties: false,
                   },
                 },
                 firstAction: { type: "string" },
+                timeboxOffer: { type: "string" },
                 encouragement: { type: "string" },
               },
-              required: ["microSteps", "firstAction", "encouragement"],
+              required: ["microSteps", "firstAction", "timeboxOffer", "encouragement"],
               additionalProperties: false,
             },
           },
@@ -285,7 +290,20 @@ Return JSON: {
       });
 
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
-      return JSON.parse(raw);
+      const result = JSON.parse(raw);
+
+      // Log the invocation
+      await logUnstickInvocation({
+        userId: ctx.user.id,
+        taskTitle: input.taskTitle,
+        decompositionDepth: input.depth,
+        launchedTimebox: 0,
+        launchedBodyDoubling: 0,
+        entryMethod: input.entryMethod,
+        createdAt: Date.now(),
+      }).catch(() => {/* non-blocking */});
+
+      return { ...result, depth: input.depth };
     }),
 
   // ─── Good Enough Threshold Check ─────────────────────────────────────────────

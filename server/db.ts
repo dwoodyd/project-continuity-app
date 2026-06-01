@@ -79,6 +79,13 @@ import {
   FoundingApplication,
   coworkingRooms,
   coworkingSessions,
+  taskEstimates,
+  TaskEstimate,
+  InsertTaskEstimate,
+  surfaceEvents,
+  InsertSurfaceEvent,
+  unstickInvocations,
+  InsertUnstickInvocation,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1570,4 +1577,93 @@ export async function getRecentCoworkingSessions(userId: number, limit = 5) {
     .where(eq(coworkingSessions.userId, userId))
     .orderBy(desc(coworkingSessions.joinedAt))
     .limit(limit);
+}
+
+// ─── Task Estimates (Time Sense) ──────────────────────────────────────────────
+export async function createTaskEstimate(data: Omit<InsertTaskEstimate, "id">): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(taskEstimates).values(data);
+  return (result[0] as any).insertId;
+}
+
+export async function updateTaskEstimateActual(id: number, userId: number, actualMinutes: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(taskEstimates)
+    .set({ actualMinutes, completedAt: Date.now() })
+    .where(and(eq(taskEstimates.id, id), eq(taskEstimates.userId, userId)));
+}
+
+export async function getTaskEstimates(userId: number, limit = 50): Promise<TaskEstimate[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(taskEstimates)
+    .where(and(eq(taskEstimates.userId, userId)))
+    .orderBy(desc(taskEstimates.createdAt))
+    .limit(limit);
+}
+
+export async function getEstimationCalibration(userId: number): Promise<{
+  sampleCount: number;
+  avgMultiplier: number | null;
+  recentMultiplier: number | null;
+}> {
+  const db = await getDb();
+  if (!db) return { sampleCount: 0, avgMultiplier: null, recentMultiplier: null };
+  // Fetch estimates that have both estimate and actual
+  const rows = await db.select({
+    estimateMinutes: taskEstimates.estimateMinutes,
+    actualMinutes: taskEstimates.actualMinutes,
+    createdAt: taskEstimates.createdAt,
+  })
+    .from(taskEstimates)
+    .where(and(
+      eq(taskEstimates.userId, userId),
+      sql`${taskEstimates.estimateMinutes} IS NOT NULL`,
+      sql`${taskEstimates.actualMinutes} IS NOT NULL`,
+    ))
+    .orderBy(desc(taskEstimates.createdAt))
+    .limit(100);
+
+  if (rows.length === 0) return { sampleCount: 0, avgMultiplier: null, recentMultiplier: null };
+
+  const multipliers = rows
+    .filter(r => r.estimateMinutes && r.estimateMinutes > 0 && r.actualMinutes !== null)
+    .map(r => (r.actualMinutes as number) / (r.estimateMinutes as number));
+
+  if (multipliers.length === 0) return { sampleCount: 0, avgMultiplier: null, recentMultiplier: null };
+
+  const avgMultiplier = multipliers.reduce((a, b) => a + b, 0) / multipliers.length;
+  const recentSlice = multipliers.slice(0, Math.min(5, multipliers.length));
+  const recentMultiplier = recentSlice.reduce((a, b) => a + b, 0) / recentSlice.length;
+
+  return {
+    sampleCount: multipliers.length,
+    avgMultiplier: Math.round(avgMultiplier * 100) / 100,
+    recentMultiplier: Math.round(recentMultiplier * 100) / 100,
+  };
+}
+
+// ─── Surface Events ───────────────────────────────────────────────────────────
+export async function logSurfaceEvent(data: Omit<InsertSurfaceEvent, "id">): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(surfaceEvents).values(data);
+}
+
+// ─── Unstick Invocations ──────────────────────────────────────────────────────
+export async function logUnstickInvocation(data: Omit<InsertUnstickInvocation, "id">): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(unstickInvocations).values(data);
+}
+
+export async function getUnstickInvocationCount(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`COUNT(*)` })
+    .from(unstickInvocations)
+    .where(eq(unstickInvocations.userId, userId));
+  return result[0]?.count ?? 0;
 }

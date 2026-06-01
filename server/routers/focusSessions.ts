@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { assertProjectOwnedBy, createProjectMemoryEvent, getDb } from "../db";
-import { focusSessions, focusSessionArtifact, threadStrength, sourceItems } from "../../drizzle/schema";
+import { assertProjectOwnedBy, createProjectMemoryEvent, getDb, logSurfaceEvent as logSurfaceEventDb, getEstimationCalibration } from "../db";
+import { focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { ENV } from "../_core/env";
@@ -111,6 +111,7 @@ export const focusSessionsRouter = router({
       intention: z.string().max(500).optional(),
       projectId: z.number().optional(),
       durationMinutes: z.union([z.literal(25), z.literal(50), z.literal(90)]),
+      hardStop: z.number().optional(), // UTC ms — user's next hard commitment
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -128,6 +129,7 @@ export const focusSessionsRouter = router({
         durationSeconds: input.durationMinutes * 60,
         threadAddedUnits: threadUnits,
         wasCompleted: 0,
+        hardStop: input.hardStop ?? null,
       });
 
       const sessionId = (result as { insertId: number }).insertId;
@@ -141,6 +143,9 @@ export const focusSessionsRouter = router({
       whatMoved: z.enum(["progress", "thinking", "stuck"]),
       closingNote: z.string().max(1000).optional(),
       wasEarlyEnd: z.boolean().default(false),
+      // Time Sense: optional estimate for calibration
+      estimatedMinutes: z.number().int().min(1).max(480).optional(),
+      taskTitle: z.string().max(500).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -164,6 +169,21 @@ export const focusSessionsRouter = router({
           wasCompleted: 1,
         })
         .where(eq(focusSessions.id, input.sessionId));
+
+      // Time Sense: record estimate vs actual for calibration
+      if (input.estimatedMinutes && session.durationMinutes) {
+        try {
+          await db.insert(taskEstimates).values({
+            userId: ctx.user.id,
+            taskTitle: input.taskTitle ?? session.intention ?? "unknown",
+            estimateMinutes: input.estimatedMinutes,
+            actualMinutes: session.durationMinutes ?? undefined,
+            sessionId: input.sessionId,
+            completedAt: Date.now(),
+            createdAt: Date.now(),
+          });
+        } catch (_) { /* non-critical, don't fail the session */ }
+      }
 
       // Upsert artifact
       const existing = await db
@@ -397,6 +417,29 @@ export const focusSessionsRouter = router({
         .orderBy(desc(focusSessions.startedAt));
       return sessions.filter((s) => s.startedAt < end);
     }),
+
+  logSurfaceEvent: protectedProcedure
+    .input(z.object({
+      sessionId: z.number().optional(),
+      elapsedSeconds: z.number(),
+      trigger: z.enum(["interval", "approaching_hard_stop", "divergence"]),
+      userResponse: z.enum(["dismissed", "took_break", "ended_session"]).optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      await logSurfaceEventDb({
+        userId: ctx.user.id,
+        sessionId: input.sessionId,
+        elapsedSeconds: input.elapsedSeconds,
+        trigger: input.trigger,
+        userResponse: input.userResponse,
+        createdAt: Date.now(),
+      });
+      return { ok: true };
+    }),
+
+  getCalibration: protectedProcedure.query(async ({ ctx }) => {
+    return getEstimationCalibration(ctx.user.id);
+  }),
 
   getWeekStats: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();

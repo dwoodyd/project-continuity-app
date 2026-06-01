@@ -285,6 +285,7 @@ export const focusSessions = mysqlTable("focus_sessions", {
   whatMoved: mysqlEnum("whatMoved", ["progress", "thinking", "stuck"]),
   threadAddedUnits: int("threadAddedUnits").default(0),
   wasCompleted: int("wasCompleted").default(0).notNull(),
+  hardStop: bigint("hardStop", { mode: "number" }), // optional hard stop timestamp (ms)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type FocusSession = typeof focusSessions.$inferSelect;
@@ -894,3 +895,57 @@ export const appConfig = mysqlTable("app_config", {
   updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
 });
 export type AppConfig = typeof appConfig.$inferSelect;
+
+// ─── Time Sense — Task Estimation ────────────────────────────────────────────
+// Tracks estimate vs actual minutes per task for the estimation calibration loop.
+export const taskEstimates = mysqlTable("task_estimates", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  projectId: int("projectId").references(() => projects.id),
+  taskTitle: varchar("taskTitle", { length: 500 }).notNull(),
+  estimateMinutes: int("estimateMinutes"),          // user's rough guess (nullable = skipped)
+  actualMinutes: int("actualMinutes"),              // accumulated from session tracking
+  sessionId: int("sessionId"),                      // focus session that closed this task
+  completedAt: bigint("completedAt", { mode: "number" }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type TaskEstimate = typeof taskEstimates.$inferSelect;
+export type InsertTaskEstimate = typeof taskEstimates.$inferInsert;
+
+// ─── Surface Events Log ───────────────────────────────────────────────────────
+// One row per Surface card shown. No message content stored.
+export const surfaceEvents = mysqlTable("surface_events", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  sessionId: int("sessionId"),
+  elapsedSeconds: int("elapsedSeconds").notNull(),
+  trigger: mysqlEnum("trigger", [
+    "interval",
+    "approaching_hard_stop",
+    "divergence",
+  ]).notNull(),
+  userResponse: mysqlEnum("userResponse", [
+    "dismissed",
+    "took_break",
+    "ended_session",
+  ]),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type SurfaceEvent = typeof surfaceEvents.$inferSelect;
+export type InsertSurfaceEvent = typeof surfaceEvents.$inferInsert;
+
+// ─── Unstick Invocations Log ──────────────────────────────────────────────────
+// One row per Unstick session. No message content stored.
+export const unstickInvocations = mysqlTable("unstick_invocations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  taskId: varchar("taskId", { length: 100 }),
+  taskTitle: varchar("taskTitle", { length: 500 }),
+  decompositionDepth: int("decompositionDepth").default(0).notNull(),
+  launchedTimebox: int("launchedTimebox").default(0).notNull(),
+  launchedBodyDoubling: int("launchedBodyDoubling").default(0).notNull(),
+  entryMethod: mysqlEnum("entryMethod", ["manual", "resolver_offer"]).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type UnstickInvocation = typeof unstickInvocations.$inferSelect;
+export type InsertUnstickInvocation = typeof unstickInvocations.$inferInsert;

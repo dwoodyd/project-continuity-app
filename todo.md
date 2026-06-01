@@ -1768,3 +1768,20 @@
 - [x] F2: Projects empty-state blue/purple gradient — replaced with amber/charcoal system; also fixed "mapped" status dot from blue to amber
 - [ ] F3: favicon.ico 503 — platform-level: update VITE_APP_LOGO in Settings → General to `https://app.continuary.app/icon-96.png`
 - [ ] F4: manuscdn.com stray request — same root cause as F3; resolves automatically once VITE_APP_LOGO is updated
+
+## Revision Brief 7 — Time Sense, Surface, Unstick
+
+- [x] RB7-Schema: task_estimates, surface_events, unstick_invocations tables migrated; hardStop bigint on focus_sessions
+- [x] RB7-Unstick-1: I'm Stuck button added to FocusSessionsPage active session
+- [x] RB7-Unstick-2: ai.unstickTask upgraded with recursive decomposition, depth param, timebox offer, logs to unstick_invocations
+- [x] RB7-Unstick-3: Still-too-big control (depth param), 5-min timebox offer in UnstickModal v2
+- [x] RB7-Unstick-4: Decision-removal mode in UnstickModal v2 (single task + single action)
+- [x] RB7-TimeSense-1: estimatedMinutes captured at session start (duration pick = estimate proxy)
+- [x] RB7-TimeSense-2: focusSessions.complete inserts into task_estimates with actual durationSeconds
+- [x] RB7-TimeSense-3: getEstimationCalibration helper + getCalibration tRPC query; calibration widget shown in reveal phase
+- [x] RB7-TimeSense-4: Hard stop countdown badge shown in active session UI (amber, turns red at 5 min)
+- [x] RB7-Surface-1: Surface card fires every 25 min of elapsed time (interval trigger)
+- [x] RB7-Surface-2: SurfaceCard component created (amber/charcoal, slide-in, 3 actions: still on it / take break / end session)
+- [x] RB7-Surface-3: Hard stop pre-set in duration picker (HH:MM local time → UTC ms); approaching_hard_stop trigger at 5 min before
+- [x] RB7-Surface-4: Divergence detection via keyword heuristic in Wren chat input; divergence trigger fires Surface card
+- [x] RB7-Crisis: Crisis override already enforced in ai.ts unstickTask system prompt (fires before decomposition)
