@@ -1785,3 +1785,38 @@
 - [x] RB7-Surface-3: Hard stop pre-set in duration picker (HH:MM local time → UTC ms); approaching_hard_stop trigger at 5 min before
 - [x] RB7-Surface-4: Divergence detection via keyword heuristic in Wren chat input; divergence trigger fires Surface card
 - [x] RB7-Crisis: Crisis override already enforced in ai.ts unstickTask system prompt (fires before decomposition)
+
+## Launch Build List (Continuary-Launch-Build-List.md)
+
+### A2 — Identity copy cleanup (launch blocker — IN-APP ONLY)
+- [x] ManusDialog.tsx: "Login with Manus" → "Sign in to Continuary"; subtitle → "Sign in to continue"
+- [x] AiConsentModal.tsx: "Manus AI platform" → "Continuary's AI gateway"
+- [x] PrivacyPage.tsx: "from your Manus account" → "from your account"; "Manus AI platform proxy" → "Continuary's AI gateway"; removed "Manus API agreement" wording
+- [x] SettingsPage.tsx: "Check your Manus notifications" → "Check your notifications"; "via Manus" removed from AI description
+
+### A1 — LLM key swap (NOT a launch blocker — keep Manus forge gateway for launch)
+- [ ] A1-future: When leaving Manus, swap forge API URL + key in server/_core/llm.ts and env.ts
+
+### A2 — Auth provider swap (NOT a launch blocker — keep Manus OAuth broker for launch)
+- [ ] A2-future: Replace Manus OAuth broker with Clerk/Auth0/Google direct; update ManusDialog component name; update OAuth redirect URIs
+
+### A3 — Storage CDN move (NOT a launch blocker)
+- [ ] A3-future: Move /manus-storage/ assets to Cloudflare R2 or S3+CloudFront; find/replace paths across ~20 client files
+
+### A4 — Self-host (NOT a launch blocker)
+- [ ] A4-future: Remove vite-plugin-manus-runtime from vite.config.ts; provision own Postgres; deploy to Render/Railway/Fly.io
+
+### C — Billing verification (launch gate — owner action)
+- [ ] C-sandbox: End-to-end PayPal sandbox: sign up → upgrade Pro → upgrade Keeper (monthly + annual) → webhook flips tier → paid features unlock
+- [ ] C-founding: Confirm founding-rate lock recorded at upgrade time
+- [ ] C-cancel: Cancel → downgrade re-locks correctly
+- [ ] C-live: Live pass with real card (refund after)
+
+### D — Smoke test (owner action on real phone)
+- [ ] D-1: Marketing site → sign in/up → land in app, session persists
+- [ ] D-2: Morning check-in saves; Today dashboard surfaces
+- [ ] D-3: Create Project; re-entry context + thread-strength render
+- [ ] D-4: Focus Session runs with Wren check-ins
+- [ ] D-5: Evidence Log + Clarity Engine save
+- [ ] D-6: Upgrade flow end-to-end
+- [ ] D-7: No console errors; PWA installs; mobile layout clean

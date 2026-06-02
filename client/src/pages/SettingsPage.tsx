@@ -241,7 +241,7 @@ function WeeklyDigestCard() {
   const sendDigest = trpc.system.sendWeeklyDigest.useMutation({
     onSuccess: (data) => {
       if (data.success) {
-        toast.success("Digest sent! Check your Manus notifications.");
+        toast.success("Digest sent! Check your notifications.");
       } else {
         toast.error("Could not send digest. Try again later.");
       }
@@ -606,7 +606,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-foreground">AI-assisted features</p>
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   {settings?.aiConsentGiven
-                    ? "Your notes and check-in answers are sent to Google Gemini (via Manus) to generate plans and insights."
+                    ? "Your notes and check-in answers are sent to Google Gemini to generate plans and insights."
                     : "AI features are disabled. Enable to allow note content to be sent to Google Gemini for plan generation."}
                 </p>
               </div>

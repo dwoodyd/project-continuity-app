@@ -25,7 +25,7 @@ export default function PrivacyPage() {
               We collect only what you explicitly provide:
             </p>
             <ul className="list-disc list-inside space-y-1 text-foreground/80">
-              <li>Your name and email address (from your Manus account, used for login only)</li>
+              <li>Your name and email address (from your account, used for login only)</li>
               <li>Projects, tasks, and notes you create inside the app</li>
               <li>Check-in responses (morning, midday, evening)</li>
               <li>Ideas, vault items, and Clarity Engine sessions you submit</li>
@@ -56,9 +56,9 @@ export default function PrivacyPage() {
               for processing:
             </p>
             <ul className="list-disc list-inside space-y-1 text-foreground/80 mb-2">
-              <li><strong>Service:</strong> Google Gemini 2.5 Flash, accessed via the Manus AI platform proxy</li>
+              <li><strong>Service:</strong> Google Gemini 2.5 Flash, accessed via Continuary's AI gateway</li>
               <li><strong>Data sent:</strong> Project titles, descriptions, next steps; check-in answers; vault item summaries (not raw file content)</li>
-              <li><strong>Retention:</strong> Data is processed in real time for your response only. Google does not store or use your content to train models under the Manus API agreement.</li>
+              <li><strong>Retention:</strong> Data is processed in real time for your response only. Google does not store or use your content to train models.</li>
               <li><strong>Purpose:</strong> Generating personalised plans, insights, and guidance</li>
             </ul>
             <p className="mb-2">
