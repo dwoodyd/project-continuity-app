@@ -272,8 +272,13 @@ async function startServer() {
     store: makeUpstashStore("rl:api:", apiWindowMs),
   });;
 
-  // Clerk session middleware — must be mounted before any route that reads auth
-  app.use(clerkMiddleware());
+  // Clerk session middleware — must be mounted before any route that reads auth.
+  // Pass keys explicitly because @clerk/express reads CLERK_PUBLISHABLE_KEY (no VITE_ prefix)
+  // but the Manus platform injects them as VITE_CLERK_PUBLISHABLE_KEY.
+  app.use(clerkMiddleware({
+    publishableKey: ENV.clerkPublishableKey,
+    secretKey: ENV.clerkSecretKey,
+  }));
 
   // PayPal webhook
   app.use("/api/paypal", paypalRouter);

@@ -9,9 +9,11 @@ import * as db from "../db";
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.length > 0;
 
-// Clerk client — reads CLERK_SECRET_KEY from env automatically
+// Clerk client — pass keys explicitly because the Manus platform injects
+// VITE_CLERK_PUBLISHABLE_KEY (not CLERK_PUBLISHABLE_KEY) for the publishable key.
 const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY ?? process.env.CLERK_PUBLISHABLE_KEY ?? "",
+  secretKey: process.env.CLERK_SECRET_KEY ?? "",
 });
 
 // ─── Legacy types kept for backward compatibility ──────────────────────────

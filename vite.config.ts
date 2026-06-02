@@ -154,6 +154,12 @@ const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(
 
 export default defineConfig({
   plugins,
+  define: {
+    // Forward system-injected VITE_* env vars to the frontend bundle.
+    // Vite only auto-exposes vars from .env files; system env vars must be
+    // explicitly forwarded via define.
+    "import.meta.env.VITE_CLERK_PUBLISHABLE_KEY": JSON.stringify(process.env.VITE_CLERK_PUBLISHABLE_KEY ?? ""),
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
