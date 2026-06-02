@@ -6,8 +6,13 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { getLoginUrl } from "./const";
+import { ClerkProvider } from "@clerk/clerk-react";
 import "./index.css";
+
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+if (!PUBLISHABLE_KEY) {
+  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,7 +34,7 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  window.location.href = getLoginUrl();
+  // With Clerk, unauthenticated users are redirected by the ClerkProvider/SignedOut gate.
 };
 
 queryClient.getQueryCache().subscribe(event => {
@@ -65,10 +70,12 @@ const trpcClient = trpc.createClient({
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </trpc.Provider>
+    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignInUrl="/" afterSignUpUrl="/">
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </trpc.Provider>
+    </ClerkProvider>
   </HelmetProvider>
 );

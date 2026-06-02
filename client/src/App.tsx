@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Route, Switch } from "wouter";
+import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AppLayout from "./components/AppLayout";
@@ -172,8 +173,13 @@ function App() {
               <OnboardingPageWithCallback onDone={handleOnboardingDone} />
             </div>
           )}
-          <Router onPreviewIntro={handlePreviewIntro} />
-          <PWAInstallBanner />
+          <SignedIn>
+            <Router onPreviewIntro={handlePreviewIntro} />
+            <PWAInstallBanner />
+          </SignedIn>
+          <SignedOut>
+            <RedirectToSignIn />
+          </SignedOut>
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
