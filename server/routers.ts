@@ -49,6 +49,11 @@ export const appRouter = router({
         hasRedeemedInvite: u.inviteCode !== null,
         isPro: u.isPro ?? false,
         proSince: u.proSince ?? null,
+        // Tier fields — use these for feature gating instead of isPro boolean
+        tier: u.tier ?? null,
+        planKey: u.planKey ?? null,
+        rateType: u.rateType ?? null,
+        isKeeper: u.tier === "keeper",
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         lastSignedIn: u.lastSignedIn,

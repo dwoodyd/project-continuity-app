@@ -1820,3 +1820,11 @@
 - [ ] D-5: Evidence Log + Clarity Engine save
 - [ ] D-6: Upgrade flow end-to-end
 - [ ] D-7: No console errors; PWA installs; mobile layout clean
+
+## PayPal Security Fixes (Jun 2026)
+
+- [x] PAYPAL-SEC-1: Webhook signature verification — verifyWebhookSignature() calls PayPal /v1/notifications/verify-webhook-signature before processing any event; returns 401 on failure; requires PAYPAL_WEBHOOK_ID env var (fail-closed if not set)
+- [x] PAYPAL-SEC-2: confirmSubscription server-side validation — verifyAndGetSubscriptionPlanKey() fetches subscription from PayPal, checks status=ACTIVE and custom_id matches ctx.user.id before granting tier; throws FORBIDDEN on mismatch
+- [x] PAYPAL-SEC-3: Tier/planKey/rateType schema — added tier enum('pro','keeper'), planKey varchar(64), rateType enum('founding','retail') to users table; migration 0043 applied; activateSubscription and cancelSubscription write/clear all three fields
+- [x] PAYPAL-SEC-4: auth.me exposes tier/planKey/rateType/isKeeper for frontend feature gating; security regression test SAFE_FIELDS updated
+- [x] PAYPAL-SEC-5: paypal.status tRPC query exposes tier, isKeeper, rateType for billing UI

@@ -1,6 +1,16 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
-import { createSubscriptionLink, activateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
+import {
+  createSubscriptionLink,
+  activateSubscription,
+  cancelSubscription,
+  verifyAndGetSubscriptionPlanKey,
+  PRO_PLAN_PRICE_USD,
+  PRO_PLAN_NAME,
+  PLAN_CATALOG,
+  type PlanKey,
+} from "../paypal";
 
 export const paypalRouter = router({
   // Get billing status + plan info
@@ -10,6 +20,11 @@ export const paypalRouter = router({
     subscriptionId: ctx.user.paypalSubscriptionId ?? null,
     planName: PRO_PLAN_NAME,
     priceUsd: PRO_PLAN_PRICE_USD,
+    // Tier fields (new — replaces the isPro boolean for feature gating)
+    tier: ctx.user.tier ?? null,
+    planKey: ctx.user.planKey ?? null,
+    rateType: ctx.user.rateType ?? null,
+    isKeeper: ctx.user.tier === "keeper",
     // Pattern C billing fields
     isFoundingMember: ctx.user.isFoundingMember ?? false,
     foundingRateLocked: ctx.user.foundingRateLocked ?? false,
@@ -43,12 +58,24 @@ export const paypalRouter = router({
       return { approvalUrl };
     }),
 
-  // Called after PayPal redirects back with subscription_id
+  // Called after PayPal redirects back with subscription_id.
+  // FIX #2: Verifies the subscription with PayPal before granting any tier.
+  // A client cannot self-upgrade by supplying an arbitrary subscriptionId.
   confirmSubscription: protectedProcedure
     .input(z.object({ subscriptionId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      await activateSubscription(input.subscriptionId, ctx.user.id);
-      return { success: true };
+      let planKey: PlanKey;
+      try {
+        planKey = await verifyAndGetSubscriptionPlanKey(input.subscriptionId, ctx.user.id);
+      } catch (err) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: err instanceof Error ? err.message : "Subscription verification failed",
+        });
+      }
+      await activateSubscription(input.subscriptionId, ctx.user.id, planKey);
+      const plan = PLAN_CATALOG[planKey];
+      return { success: true, tier: plan.tier, planKey };
     }),
 
   // Cancel subscription
