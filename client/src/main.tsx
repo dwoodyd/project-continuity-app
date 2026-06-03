@@ -9,9 +9,26 @@ import App from "./App";
 import { ClerkProvider } from "@clerk/clerk-react";
 import "./index.css";
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Read from runtime config injected by the Express server (works in both dev and production).
+// Falls back to import.meta.env for local Vite-only dev setups.
+declare global {
+  interface Window {
+    __RUNTIME_CONFIG__?: { VITE_CLERK_PUBLISHABLE_KEY?: string };
+  }
+}
+const PUBLISHABLE_KEY =
+  window.__RUNTIME_CONFIG__?.VITE_CLERK_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
 if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
+  // Render a visible error instead of a blank white screen
+  document.getElementById("root")!.innerHTML =
+    '<div style="font-family:sans-serif;padding:2rem;color:#c00">' +
+    '<h2>Configuration error</h2>' +
+    '<p>VITE_CLERK_PUBLISHABLE_KEY is not set. ' +
+    'Please add it in Settings → Secrets and redeploy.</p>' +
+    '</div>';
+  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
 }
 
 const queryClient = new QueryClient({

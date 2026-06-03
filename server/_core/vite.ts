@@ -6,6 +6,30 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 
+/**
+ * Build a runtime config script tag that injects server-side env vars into
+ * the HTML before the React bundle loads. This is the correct pattern for
+ * vars that are only available at server runtime (not at Vite build time).
+ *
+ * The frontend reads these via window.__RUNTIME_CONFIG__.KEY.
+ */
+function buildRuntimeConfigScript(): string {
+  const config = {
+    VITE_CLERK_PUBLISHABLE_KEY:
+      process.env.VITE_CLERK_PUBLISHABLE_KEY ??
+      process.env.CLERK_PUBLISHABLE_KEY ??
+      "",
+  };
+  return `<script>window.__RUNTIME_CONFIG__ = ${JSON.stringify(config)};</script>`;
+}
+
+/**
+ * Inject the runtime config script into the HTML just before </head>.
+ */
+function injectRuntimeConfig(html: string): string {
+  return html.replace("</head>", `${buildRuntimeConfigScript()}</head>`);
+}
+
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -38,6 +62,8 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
+      // Inject runtime config before the app bundle
+      template = injectRuntimeConfig(template);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -60,8 +86,15 @@ export function serveStatic(app: Express) {
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
+  // fall through to index.html — inject runtime config on every request
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const indexPath = path.resolve(distPath, "index.html");
+    try {
+      let html = fs.readFileSync(indexPath, "utf-8");
+      html = injectRuntimeConfig(html);
+      res.status(200).set({ "Content-Type": "text/html" }).end(html);
+    } catch {
+      res.sendFile(indexPath);
+    }
   });
 }
