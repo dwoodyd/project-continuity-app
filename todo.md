@@ -1820,3 +1820,10 @@
 - [ ] D-5: Evidence Log + Clarity Engine save
 - [ ] D-6: Upgrade flow end-to-end
 - [ ] D-7: No console errors; PWA installs; mobile layout clean
+
+## PayPal Checkout Crash Fix (Jun 3, 2026)
+
+- [x] PAYPAL-CRASH-1: Fix "Cannot read properties of undefined (reading 'find')" in createSubscriptionLink — check res.ok and Array.isArray(subBody.links) before accessing .links; log full PayPal error body with HTTP status
+- [x] PAYPAL-CRASH-2: Harden getAccessToken — check CLIENT_ID/CLIENT_SECRET are set; log and throw meaningful error if PayPal auth fails (invalid_client, etc.)
+- [ ] OWNER ACTION: Claim the PayPal sandbox at https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE5lUFFQUXdYUkRSV2phLDE3NzcxNTI1MjYv100GN0oMfd4 before 2026-06-17 — credentials are inactive until claimed
+- [ ] OWNER ACTION: After claiming, re-test upgrade flow — server will now log the exact PayPal error message in the server console if it fails again

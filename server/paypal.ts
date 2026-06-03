@@ -62,6 +62,9 @@ export const PRO_PLAN_NAME = "Continuary Pro";
 
 // ─── Get OAuth token ──────────────────────────────────────────────────────────
 async function getAccessToken(): Promise<string> {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error("PayPal credentials not configured. Set PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Settings → Secrets.");
+  }
   const res = await paypalFetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
     method: "POST",
     headers: {
@@ -70,7 +73,12 @@ async function getAccessToken(): Promise<string> {
     },
     body: "grant_type=client_credentials",
   });
-  const data = await res.json() as { access_token: string };
+  const data = await res.json() as { access_token?: string; error?: string; error_description?: string };
+  if (!data.access_token) {
+    const errMsg = data.error_description ?? data.error ?? `HTTP ${res.status}`;
+    console.error(`[PayPal] getAccessToken failed: ${errMsg}`);
+    throw new Error(`PayPal authentication failed: ${errMsg}. Check PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET in Settings → Secrets, and ensure the sandbox is claimed at dashboard.paypal.com.`);
+  }
   return data.access_token;
 }
 
@@ -155,8 +163,14 @@ export async function createSubscriptionLink(
       },
     }),
   });
-  const sub = await res.json() as { links: { rel: string; href: string }[] };
-  const approvalLink = sub.links.find((l) => l.rel === "approve");
+  const subBody = await res.json() as { links?: { rel: string; href: string }[]; name?: string; message?: string; details?: unknown };
+  if (!res.ok || !Array.isArray(subBody.links)) {
+    const errMsg = subBody.message ?? subBody.name ?? `HTTP ${res.status}`;
+    const details = subBody.details ? ` Details: ${JSON.stringify(subBody.details)}` : "";
+    console.error(`[PayPal] createSubscription failed (${res.status}): ${errMsg}${details}`);
+    throw new Error(`PayPal subscription creation failed: ${errMsg}${details}`);
+  }
+  const approvalLink = subBody.links.find((l) => l.rel === "approve");
   if (!approvalLink) throw new Error("No approval link in PayPal response");
   return approvalLink.href;
 }
