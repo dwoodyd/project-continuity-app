@@ -1,7 +1,7 @@
+import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { TRPCClientError } from "@trpc/client";
 import { useCallback, useEffect, useMemo } from "react";
-import { useClerk } from "@clerk/clerk-react";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -9,10 +9,9 @@ type UseAuthOptions = {
 };
 
 export function useAuth(options?: UseAuthOptions) {
-  const { redirectOnUnauthenticated = false, redirectPath = "/sign-in" } =
+  const { redirectOnUnauthenticated = false, redirectPath = getLoginUrl() } =
     options ?? {};
   const utils = trpc.useUtils();
-  const { signOut } = useClerk();
 
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
@@ -27,15 +26,20 @@ export function useAuth(options?: UseAuthOptions) {
 
   const logout = useCallback(async () => {
     try {
-      // Call tRPC logout to clear any legacy session cookie (no-op with Clerk)
-      await logoutMutation.mutateAsync().catch(() => {});
+      await logoutMutation.mutateAsync();
+    } catch (error: unknown) {
+      if (
+        error instanceof TRPCClientError &&
+        error.data?.code === "UNAUTHORIZED"
+      ) {
+        return;
+      }
+      throw error;
     } finally {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
-      // Clerk handles session revocation and redirects to sign-in
-      await signOut({ redirectUrl: "/" });
     }
-  }, [logoutMutation, utils, signOut]);
+  }, [logoutMutation, utils]);
 
   const state = useMemo(() => {
     // M5 fix: do NOT persist user PII (id, name, email, role) to localStorage.

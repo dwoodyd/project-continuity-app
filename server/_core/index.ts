@@ -22,7 +22,6 @@ import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
 import { registerCalendarRoutes } from "../calendarRoutes";
 import { sdk } from "./sdk";
-import { clerkMiddleware } from "@clerk/express";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -107,17 +106,6 @@ async function startServer() {
 
   // CDN domain used for all uploaded static assets (icons, OG images, vault files)
   const CDN_ORIGIN = "https://d2xsxph8kpxj0f.cloudfront.net";
-  // Clerk domains for hosted sign-in and session management
-  const CLERK_ORIGINS = [
-    "https://clerk.continuary.app",
-    "https://accounts.clerk.dev",
-    "https://*.clerk.accounts.dev",
-    "https://clerk.com",
-    "https://*.clerk.com",
-    "https://api.clerk.com",
-    "https://frontend-api.clerk.dev",
-    "https://*.clerk.dev",
-  ];
   // Secondary CDN domain for webdev-static-assets (Wren art, uploaded media via manus-upload-file --webdev)
   const CDN_STATIC_ORIGIN = "https://d36hbw14aib5lz.cloudfront.net";
   // Manus built-in API used for LLM, storage, and push services
@@ -174,7 +162,6 @@ async function startServer() {
             "blob:",           // Canvas-generated share card blobs
             CDN_ORIGIN,
             CDN_STATIC_ORIGIN, // webdev-static-assets (Wren art, uploaded media)
-            ...CLERK_ORIGINS,
           ],
           mediaSrc: [
             "'self'",
@@ -189,7 +176,6 @@ async function startServer() {
             "https://fonts.googleapis.com",
             "https://fonts.gstatic.com",
             "https://www.paypal.com",
-            ...CLERK_ORIGINS,
             "https://api-m.sandbox.paypal.com",
             "https://api-m.paypal.com",
             // Vite HMR websocket in development
@@ -272,17 +258,10 @@ async function startServer() {
     store: makeUpstashStore("rl:api:", apiWindowMs),
   });;
 
-  // Clerk session middleware — must be mounted before any route that reads auth.
-  // Pass keys explicitly because @clerk/express reads CLERK_PUBLISHABLE_KEY (no VITE_ prefix)
-  // but the Manus platform injects them as VITE_CLERK_PUBLISHABLE_KEY.
-  app.use(clerkMiddleware({
-    publishableKey: ENV.clerkPublishableKey,
-    secretKey: ENV.clerkSecretKey,
-  }));
-
   // PayPal webhook
   app.use("/api/paypal", paypalRouter);
-  // OAuth callback stub (no-op with Clerk)
+  // OAuth callback under /api/oauth/callback
+  app.use("/api/oauth", oauthLimiter);
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   registerCalendarRoutes(app);

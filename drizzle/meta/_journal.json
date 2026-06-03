@@ -302,13 +302,6 @@
       "when": 1780334477546,
       "tag": "0042_fresh_william_stryker",
       "breakpoints": true
-    },
-    {
-      "idx": 43,
-      "version": "5",
-      "when": 1780436688610,
-      "tag": "0043_wandering_captain_cross",
-      "breakpoints": true
     }
   ]
 }

@@ -41,12 +41,6 @@ export const users = mysqlTable("users", {
   referralCode: varchar("referralCode", { length: 64 }),
   /** Set when the 10-days-left trial reminder email has been sent — prevents duplicate sends */
   trialReminderSentAt: timestamp("trialReminderSentAt"),
-  /** Subscription tier: null = free, 'pro' = Pro, 'keeper' = Keeper */
-  tier: mysqlEnum("tier", ["pro", "keeper"]),
-  /** The PLAN_CATALOG key of the active subscription (e.g. 'pro_founding_monthly') */
-  planKey: varchar("planKey", { length: 64 }),
-  /** 'founding' | 'retail' — rate type locked at subscription time */
-  rateType: mysqlEnum("rateType", ["founding", "retail"]),
   /** Pattern C billing state machine */
   billingStatus: mysqlEnum("billingStatus", [
     "trialing_no_card",

@@ -31,7 +31,7 @@ import { moodLogsRouter } from "./routers/moodLogs";
 import { applicationsRouter } from "./routers/applications";
 import { coworkingRouter } from "./routers/coworking";
 import { groundModeRouter } from "./routers/groundMode";
-import { getMemberCount } from "./db";
+import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
 export const appRouter = router({
@@ -49,11 +49,6 @@ export const appRouter = router({
         hasRedeemedInvite: u.inviteCode !== null,
         isPro: u.isPro ?? false,
         proSince: u.proSince ?? null,
-        // Tier fields — use these for feature gating instead of isPro boolean
-        tier: u.tier ?? null,
-        planKey: u.planKey ?? null,
-        rateType: u.rateType ?? null,
-        isKeeper: u.tier === "keeper",
         createdAt: u.createdAt,
         updatedAt: u.updatedAt,
         lastSignedIn: u.lastSignedIn,
@@ -70,10 +65,19 @@ export const appRouter = router({
       return { count: await getMemberCount() };
     }),
     logout: publicProcedure.mutation(async ({ ctx }) => {
-      // Clerk handles session revocation via its own SDK.
-      // Clear the legacy app_session_id cookie for any users who still have it.
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      // Server-side session revocation: add jti to the blacklist so the JWT
+      // cannot be replayed even if the cookie is somehow retained.
+      if (ctx.user && ctx.sessionJti && ctx.sessionExp) {
+        await revokeSession(
+          ctx.sessionJti,
+          ctx.user.id,
+          new Date(ctx.sessionExp * 1000)
+        ).catch(() => {
+          // Non-fatal: cookie is already cleared; revocation is defence-in-depth
+        });
+      }
       return { success: true } as const;
     }),
   }),

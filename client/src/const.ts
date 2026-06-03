@@ -1,13 +1,17 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-/**
- * Returns the path/URL to redirect unauthenticated users to.
- * With Clerk, sign-in is handled by Clerk's hosted page — the SDK's
- * RedirectToSignIn component uses this path internally.
- * We keep getLoginUrl() so all existing call sites continue to compile.
- */
-export const getLoginUrl = (_returnPath?: string): string => {
-  // Clerk's RedirectToSignIn handles the actual redirect.
-  // Return "/sign-in" as a fallback path for any imperative redirects.
-  return "/sign-in";
+// Generate login URL at runtime so redirect URI reflects the current origin.
+export const getLoginUrl = () => {
+  const oauthPortalUrl = import.meta.env.VITE_OAUTH_PORTAL_URL;
+  const appId = import.meta.env.VITE_APP_ID;
+  const redirectUri = `${window.location.origin}/api/oauth/callback`;
+  const state = btoa(redirectUri);
+
+  const url = new URL(`${oauthPortalUrl}/app-auth`);
+  url.searchParams.set("appId", appId);
+  url.searchParams.set("redirectUri", redirectUri);
+  url.searchParams.set("state", state);
+  url.searchParams.set("type", "signIn");
+
+  return url.toString();
 };

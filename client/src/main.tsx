@@ -6,30 +6,8 @@ import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { getLoginUrl } from "./const";
 import "./index.css";
-
-// Read from runtime config injected by the Express server (works in both dev and production).
-// Falls back to import.meta.env for local Vite-only dev setups.
-declare global {
-  interface Window {
-    __RUNTIME_CONFIG__?: { VITE_CLERK_PUBLISHABLE_KEY?: string };
-  }
-}
-const PUBLISHABLE_KEY =
-  window.__RUNTIME_CONFIG__?.VITE_CLERK_PUBLISHABLE_KEY ||
-  import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  // Render a visible error instead of a blank white screen
-  document.getElementById("root")!.innerHTML =
-    '<div style="font-family:sans-serif;padding:2rem;color:#c00">' +
-    '<h2>Configuration error</h2>' +
-    '<p>VITE_CLERK_PUBLISHABLE_KEY is not set. ' +
-    'Please add it in Settings → Secrets and redeploy.</p>' +
-    '</div>';
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
-}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,7 +29,7 @@ const redirectToLoginIfUnauthorized = (error: unknown) => {
 
   if (!isUnauthorized) return;
 
-  // With Clerk, unauthenticated users are redirected by the ClerkProvider/SignedOut gate.
+  window.location.href = getLoginUrl();
 };
 
 queryClient.getQueryCache().subscribe(event => {
@@ -87,12 +65,10 @@ const trpcClient = trpc.createClient({
 
 createRoot(document.getElementById("root")!).render(
   <HelmetProvider>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignInUrl="/" afterSignUpUrl="/">
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <App />
-        </QueryClientProvider>
-      </trpc.Provider>
-    </ClerkProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </trpc.Provider>
   </HelmetProvider>
 );
