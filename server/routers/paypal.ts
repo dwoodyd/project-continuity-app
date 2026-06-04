@@ -26,6 +26,9 @@ export const paypalRouter = router({
     foundingRateLocked: ctx.user.foundingRateLocked ?? false,
     foundingTier: ctx.user.foundingTier ?? null,
     billingStatus: ctx.user.billingStatus ?? "trialing_no_card",
+    tier: ctx.user.tier ?? null,
+    planKey: ctx.user.planKey ?? null,
+    rateType: ctx.user.rateType ?? null,
     betaStartDate: ctx.user.foundingMemberJoinedAt ?? null,
     betaEndDate: ctx.user.trialEndsAt ?? null,
     daysRemaining: ctx.user.trialEndsAt
@@ -56,9 +59,10 @@ export const paypalRouter = router({
 
   // Called after PayPal redirects back with subscription_id
   confirmSubscription: protectedProcedure
-    .input(z.object({ subscriptionId: z.string() }))
+    .input(z.object({ subscriptionId: z.string(), planKey: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
-      await activateSubscription(input.subscriptionId, ctx.user.id);
+      const planKey = (input.planKey && input.planKey in PLAN_CATALOG) ? input.planKey as PlanKey : undefined;
+      await activateSubscription(input.subscriptionId, ctx.user.id, planKey);
       return { success: true };
     }),
 

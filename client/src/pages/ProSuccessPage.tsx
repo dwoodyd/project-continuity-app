@@ -15,9 +15,15 @@ export default function ProSuccessPage() {
   useEffect(() => {
     if (!subscriptionId || ran.current) return;
     ran.current = true;
-    confirm.mutateAsync({ subscriptionId }).then(async () => {
+    // Retrieve the planKey stored before PayPal redirect so tier/rateType are set correctly
+    const planKey = sessionStorage.getItem("pendingPlanKey") ?? undefined;
+    sessionStorage.removeItem("pendingPlanKey");
+    confirm.mutateAsync({ subscriptionId, planKey }).then(async () => {
       await utils.paypal.status.invalidate();
-      toast("Welcome to Pro! ✦", { description: "Your thread is fully supported." });
+      const isKeeper = planKey?.startsWith("keeper");
+      toast(isKeeper ? "Welcome to Keeper! ✦" : "Welcome to Pro! ✦", {
+        description: "Your thread is fully supported.",
+      });
       navigate("/pro");
     }).catch(() => {
       toast.error("Could not confirm subscription. Please contact support.");
@@ -29,7 +35,7 @@ export default function ProSuccessPage() {
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
       <div className="text-center space-y-4">
         <div className="w-10 h-10 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin mx-auto" />
-        <p className="text-white/50 text-sm">Activating your Pro access…</p>
+        <p className="text-white/50 text-sm">Activating your access…</p>
       </div>
     </div>
   );

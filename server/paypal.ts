@@ -155,7 +155,7 @@ export async function createSubscriptionLink(
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       plan_id: planId,
-      custom_id: String(userId),
+      custom_id: `${userId}:${planKey}`,
       application_context: {
         brand_name: "Continuary",
         locale: "en-US",
@@ -179,14 +179,22 @@ export async function createSubscriptionLink(
 }
 
 // ─── Activate subscription after user returns ─────────────────────────────────
-export async function activateSubscription(subscriptionId: string, userId: number) {
+export async function activateSubscription(subscriptionId: string, userId: number, planKey?: PlanKey) {
   const db = await getDb();
   if (!db) return;
+  const plan = planKey ? PLAN_CATALOG[planKey] : null;
   await db.update(users).set({
     paypalSubscriptionId: subscriptionId,
     isPro: true,
     proSince: new Date(),
     billingStatus: "active",
+    ...(plan ? {
+      tier: plan.tier,
+      planKey,
+      rateType: plan.rateType as "founding" | "retail",
+      isFoundingMember: plan.rateType === "founding" ? true : undefined,
+      foundingRateLocked: plan.rateType === "founding" ? true : undefined,
+    } : {}),
   }).where(eq(users.id, userId));
 }
 
@@ -229,10 +237,13 @@ paypalRouter.post("/webhook", express.json(), async (req, res) => {
         }
       }
     }
-    const userId = parseInt(event.resource?.custom_id ?? "");
+    const customId = event.resource?.custom_id ?? "";
+    const [userIdStr, planKeyStr] = customId.split(":");
+    const userId = parseInt(userIdStr ?? "");
+    const planKey = (planKeyStr && planKeyStr in PLAN_CATALOG) ? planKeyStr as PlanKey : undefined;
 
     if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
-      if (!isNaN(userId)) await activateSubscription(event.resource.id, userId);
+      if (!isNaN(userId)) await activateSubscription(event.resource.id, userId, planKey);
 
     } else if (
       event.event_type === "BILLING.SUBSCRIPTION.CANCELLED" ||

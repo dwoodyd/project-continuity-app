@@ -103,6 +103,7 @@ export default function ProPage() {
     try {
       toast(`Redirecting to PayPal…`, { description: `Opening secure checkout for ${tierLabel}.` });
       const { approvalUrl } = await createSub.mutateAsync({ origin: window.location.origin, planKey });
+      sessionStorage.setItem("pendingPlanKey", planKey);
       window.open(approvalUrl, "_blank");
     } catch {
       toast.error("Could not start checkout. Please try again.");
