@@ -30,6 +30,8 @@ import {
   BookOpen,
   Save,
   Search,
+  FolderOpen,
+  Loader2,
 } from "lucide-react";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenThinking } from "@/components/WrenThinking";
@@ -343,6 +345,7 @@ function NewSessionView({
 /// ── Session result ────────────────────────────────────────────────────────────
 function ResultView({
   activeSession,
+  convertPreviewData,
   projects,
   sessions,
   setView,
@@ -352,12 +355,13 @@ function ResultView({
   saveToVault,
 }: {
   activeSession: any;
+  convertPreviewData: { projectTitle: string; nextStep: string } | null;
   projects: { id: number; title: string }[] | undefined;
   sessions: { id: number }[] | undefined;
   setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
   setActiveSessionId: (id: number | null) => void;
   setProgressMarker: { mutate: (args: { sessionId: number; marker: "clearer" | "still_unsure" | "ready_to_act" | "need_to_revisit" }) => void };
-  convertToAction: { isPending: boolean; mutate: (args: { sessionId: number; convertTo: ConvertTo }) => void };
+  convertToAction: { isPending: boolean; mutate: (args: { sessionId: number; convertTo: ConvertTo }, callbacks?: { onSuccess?: (result: { success: boolean; convertedTo: string; content: string; projectTitle: string | null; projectUpdated: boolean }) => void }) => void };
   saveToVault: { isPending: boolean; mutate: (args: { title?: string; content: string; contentClass?: "idea" | "draft" | "research" | "outline" | "decision" | "tasks" | "archive" }) => void };
 }) {
   const session = activeSession;
@@ -565,12 +569,36 @@ function ResultView({
           Convert your next right step into
         </p>
         {session.convertedTo ? (
-          <div className="flex items-center gap-2 text-sm text-emerald-400">
-            <CheckCircle2 className="w-4 h-4" />
-            Added to{" "}
-            <span className="font-medium">
-              {CONVERT_OPTIONS.find((o) => o.id === session.convertedTo)?.label}
-            </span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm text-emerald-400">
+              <CheckCircle2 className="w-4 h-4" />
+              Added to{" "}
+              <span className="font-medium">
+                {CONVERT_OPTIONS.find((o) => o.id === session.convertedTo)?.label}
+              </span>
+            </div>
+            {/* Inline project card preview */}
+            {convertPreviewData && convertPreviewData.projectTitle && (
+              <div className="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="w-4 h-4 text-amber-400" />
+                    <span className="text-sm font-medium text-amber-300">{convertPreviewData.projectTitle}</span>
+                  </div>
+                  <a
+                    href={`/projects`}
+                    className="text-xs text-amber-400/70 hover:text-amber-400 transition-colors underline underline-offset-2"
+                  >
+                    Open project →
+                  </a>
+                </div>
+                <div className="flex items-start gap-2">
+                  <ChevronRight className="w-3.5 h-3.5 text-amber-500/60 mt-0.5 shrink-0" />
+                  <p className="text-sm text-foreground/80 leading-relaxed">{convertPreviewData.nextStep}</p>
+                </div>
+                <p className="text-[11px] text-muted-foreground/50">Next step updated · will appear on Today</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -584,12 +612,9 @@ function ResultView({
               return (
                 <button
                   key={opt.id}
-                  onClick={() =>
-                    convertToAction.mutate({
-                      sessionId: session.id,
-                      convertTo: opt.id,
-                    })
-                  }
+                  onClick={() => {
+                    convertToAction.mutate({ sessionId: session.id, convertTo: opt.id });
+                  }}
                   disabled={convertToAction.isPending}
                   className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm border transition-all ${
                     showProjectHint
@@ -598,7 +623,7 @@ function ResultView({
                   }`}
                   title={showProjectHint ? `Saves next step to "${linkedProject!.title}" and updates Command Center` : undefined}
                 >
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  {convertToAction.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronRight className="w-3.5 h-3.5" />}
                   {showProjectHint ? `${opt.label} → ${linkedProject!.title}` : opt.label}
                 </button>
               );
@@ -1118,6 +1143,7 @@ export default function ClarityEnginePage() {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
   const [showProjectPicker, setShowProjectPicker] = useState(false);
+  const [convertPreviewData, setConvertPreviewData] = useState<{ projectTitle: string; nextStep: string } | null>(null);
 
   const { data: projects } = trpc.projects.listActive.useQuery();
   const { data: patterns, isLoading: patternsLoading } = trpc.clarity.analyzePatterns.useQuery(
@@ -1173,6 +1199,7 @@ export default function ClarityEnginePage() {
   const convertToAction = trpc.clarity.convertToAction.useMutation({
     onSuccess: (result) => {
       if (result.projectUpdated && result.projectTitle) {
+        setConvertPreviewData({ projectTitle: result.projectTitle, nextStep: result.content ?? "" });
         toast.success(`Next step saved to "${result.projectTitle}"`, {
           description: "It will appear on your Command Center immediately.",
           duration: 5000,
@@ -1223,6 +1250,7 @@ export default function ClarityEnginePage() {
       {view === "result" && activeSession && (
         <ResultView
           activeSession={activeSession}
+          convertPreviewData={convertPreviewData}
           projects={projects}
           sessions={sessions}
           setView={setView}

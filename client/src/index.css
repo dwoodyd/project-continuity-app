@@ -409,3 +409,44 @@
 video {
   mix-blend-mode: screen;
 }
+
+/* ── Frosted glass nav (compact header + bottom tab bar) ────────────────────
+   Applies a subtle backdrop blur so content scrolling behind the nav feels
+   layered and premium. The sidebar CSS variable already provides the base
+   colour; we just add translucency + blur.                                  */
+.nav-glass {
+  background: oklch(from var(--sidebar) l c h / 0.88) !important;
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+/* ── Spring pop keyframe ─────────────────────────────────────────────────────
+   Used for modals, sheets, and cards that should feel physically springy.   */
+@keyframes springPop {
+  0%   { opacity: 0; transform: scale(0.94) translateY(6px); }
+  60%  { opacity: 1; transform: scale(1.02) translateY(-2px); }
+  80%  { transform: scale(0.99) translateY(0.5px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-spring-pop {
+  animation: springPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Tactile press for raw <button> elements (non-shadcn) ───────────────────
+   Applies globally to any button not already handled by the shadcn variant. */
+button:not([data-slot="button"]):not(:disabled):active {
+  transform: scale(0.96);
+  opacity: 0.88;
+  transition: transform 80ms ease, opacity 80ms ease;
+}
+
+/* ── Minimum 44px touch target for all interactive elements ─────────────────
+   Ensures WCAG 2.5.5 compliance on mobile without changing visual size.     */
+@media (pointer: coarse) {
+  button:not([data-slot="button"]),
+  [role="button"],
+  a[href] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

@@ -39,7 +39,7 @@ import {
   ClipboardList,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
 import { IntroContext } from "../contexts/IntroContext";
@@ -160,6 +160,29 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     try { sessionStorage.setItem("continuary-amnesty-dismissed", "1"); } catch { /* ignore */ }
     setAmnestyDismissed(true);
   };
+
+  // ── Online / sync indicator state ─────────────────────────────────────────
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [syncState, setSyncState] = useState<"idle" | "syncing" | "done">("idle");
+  const triggerSyncPulse = useCallback(() => {
+    setSyncState("syncing");
+    const t = setTimeout(() => {
+      setSyncState("done");
+      const t2 = setTimeout(() => setSyncState("idle"), 2000);
+      return () => clearTimeout(t2);
+    }, 1200);
+    return () => clearTimeout(t);
+  }, []);
+  useEffect(() => {
+    const onOnline = () => { setIsOnline(true); triggerSyncPulse(); };
+    const onOffline = () => { setIsOnline(false); setSyncState("idle"); };
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, [triggerSyncPulse]);
 
   // ── Desktop layout state ──────────────────────────────────────────────────
   const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth >= 1024);
@@ -603,9 +626,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       <div className="w-full max-w-md h-full flex flex-col bg-background relative overflow-hidden shadow-2xl">
         {/* Top header */}
         <header
-          className="flex items-center justify-between px-4 shrink-0 z-30 border-b border-white/10"
+          className="flex items-center justify-between px-4 shrink-0 z-30 border-b border-white/10 nav-glass"
           style={{
-            background: "var(--sidebar)",
             paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
             paddingBottom: "12px",
           }}
@@ -619,6 +641,25 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             )}
           </Link>
           <div className="flex items-center gap-1">
+            {/* Sync / offline indicator */}
+            {!isOnline && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-medium" title="Offline">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                Offline
+              </span>
+            )}
+            {isOnline && syncState === "syncing" && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-medium animate-pulse" title="Syncing">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Syncing
+              </span>
+            )}
+            {isOnline && syncState === "done" && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-medium" title="Synced">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Synced
+              </span>
+            )}
             {isLargeScreen && (
               <button
                 onClick={toggleLayoutMode}
@@ -645,9 +686,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
         {/* Bottom tab bar */}
         <nav
-          className="shrink-0 z-30"
+          className="shrink-0 z-30 nav-glass"
           style={{
-            background: "var(--sidebar)",
             borderTop: "1px solid oklch(1 0 0 / 0.08)",
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
           }}

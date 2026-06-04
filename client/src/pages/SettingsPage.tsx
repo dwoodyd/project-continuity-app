@@ -391,6 +391,8 @@ export default function SettingsPage() {
   const [eveningTime, setEveningTime] = useState("17:00");
   const [frictionOpen, setFrictionOpen] = useState(false);
   const [frictionNote, setFrictionNote] = useState("");
+  const [showFrictionHistory, setShowFrictionHistory] = useState(false);
+  const { data: frictionLogs } = trpc.friction.list.useQuery();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
@@ -430,6 +432,7 @@ export default function SettingsPage() {
       toast.success("Noted. Thank you.");
       setFrictionNote("");
       setFrictionOpen(false);
+      utils.friction.list.invalidate();
     },
     onError: () => toast.error("Could not save note."),
   });
@@ -560,14 +563,24 @@ export default function SettingsPage() {
           </div>
 
           {/* Friction log */}
-          <div className="p-4 rounded-xl border border-dashed border-border">
+          <div className="p-4 rounded-xl border border-dashed border-border space-y-3">
             {!frictionOpen ? (
-              <button
-                onClick={() => setFrictionOpen(true)}
-                className="w-full text-left text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
-              >
-                Something felt off? <span className="underline underline-offset-2">Leave a quick note</span>
-              </button>
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={() => setFrictionOpen(true)}
+                  className="text-left text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  Something felt off? <span className="underline underline-offset-2">Leave a quick note</span>
+                </button>
+                {frictionLogs && frictionLogs.length > 0 && (
+                  <button
+                    onClick={() => setShowFrictionHistory(!showFrictionHistory)}
+                    className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors underline underline-offset-2"
+                  >
+                    {showFrictionHistory ? "Hide" : `View ${frictionLogs.length} note${frictionLogs.length === 1 ? "" : "s"}`}
+                  </button>
+                )}
+              </div>
             ) : (
               <div className="space-y-3">
                 <p className="text-xs font-medium text-foreground">What felt off?</p>
@@ -593,6 +606,27 @@ export default function SettingsPage() {
                   >
                     Cancel
                   </button>
+                </div>
+              </div>
+            )}
+            {/* Friction log history */}
+            {showFrictionHistory && frictionLogs && frictionLogs.length > 0 && (
+              <div className="pt-2 border-t border-border space-y-2">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Your logged notes</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {frictionLogs.map((log) => (
+                    <div key={log.id} className="p-3 rounded-lg bg-muted/40 space-y-1">
+                      <p className="text-xs text-foreground leading-relaxed">{log.note}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-[10px] text-muted-foreground/60">
+                          {format(new Date(log.createdAt), "MMM d, yyyy · h:mm a")}
+                        </p>
+                        {log.pageContext && (
+                          <span className="text-[10px] text-muted-foreground/40">· {log.pageContext}</span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

@@ -23,7 +23,7 @@ import { Copy, Download, Share2 } from "lucide-react";
 
 // ─── Brand CDN icon (white bird on navy) ─────────────────────────────────────
 const BRAND_ICON_URL =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-monochrome-dark_502b7aa6.png";
+  "/icon-monochrome.png";
 
 // ─── Canvas drawing ───────────────────────────────────────────────────────────
 

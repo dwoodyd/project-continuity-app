@@ -92,9 +92,9 @@ export default function PWAInstallBanner() {
       className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
       style={{ background: "linear-gradient(to top, oklch(0.16 0.04 264) 80%, transparent)" }}
     >
-      <div className="max-w-lg mx-auto rounded-2xl border border-white/10 bg-[oklch(0.20_0.06_264)] shadow-2xl shadow-black/40 p-4 flex items-start gap-3">
+      <div className="max-w-lg mx-auto rounded-2xl border border-white/10 bg-[oklch(0.20_0.06_264)] shadow-2xl shadow-black/40 p-4 flex items-start gap-3 animate-spring-pop">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_e5c53296.png"
+          src="/icon-96.png"
           alt="Continuary"
           className="w-12 h-12 rounded-xl shrink-0"
         />

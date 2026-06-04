@@ -1,7 +1,7 @@
 // Continuary — Service Worker
 // Handles: push notifications, offline capture queuing, background sync, app-shell caching
 
-const CACHE_VERSION = "continuity-v6";
+const CACHE_VERSION = "continuity-v7";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const OFFLINE_QUEUE_KEY = "offline-idea-queue";
 
@@ -97,8 +97,8 @@ self.addEventListener("push", (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       tag: data.tag ?? "continuity",
-      icon: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-192_37f393f1.png",
-      badge: "https://d2xsxph8kpxj0f.cloudfront.net/310519663270045694/VnvNaoJZPVnHWmB8F3cwwo/icon-96_11f888c1.png",
+      icon: "/icon-192.png",
+      badge: "/icon-96.png",
       silent: false,
       requireInteraction: false,
       data: data.url ? { url: data.url } : undefined,

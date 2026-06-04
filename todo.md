@@ -1729,18 +1729,18 @@
 - [x] P3-E: Standardize vocabulary — "New project" button label fixed; remaining "thread" usages are intentional Wren voice
 
 ### P4: Close the loops
-- [ ] P4-A: Friction Log — show "Your logged notes" list with timestamps so beta feedback feels heard
-- [ ] P4-B: Clarity Engine conversion — show inline preview of updated project card after "Convert next step → Project Note"
-- [ ] P4-C: Offline sync indicator — subtle header pulse during sync, resolves to checkmark (Apple Notes–style)
+- [x] P4-A: Friction Log — show "Your logged notes" list with timestamps so beta feedback feels heard
+- [x] P4-B: Clarity Engine conversion — show inline preview of updated project card after "Convert next step → Project Note"
+- [x] P4-C: Offline sync indicator — subtle header pulse during sync, resolves to checkmark (Apple Notes–style)
 
 ### P5: Premium polish (after P1–P4)
-- [ ] P5-A: Spring motion (framer-motion) + swipe-to-dismiss on sheets
-- [ ] P5-B: Frosted glass on nav chrome (header, tab bars, sheets)
-- [ ] P5-C: Tactile press response (active:scale-[0.96]) on buttons
-- [ ] P5-D: Full PWA icon set (maskable, apple-touch-icon, theme-color, splash images)
-- [ ] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
-- [ ] P5-F: 44px minimum touch targets across all interactive elements
-- [ ] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session
+- [x] P5-A: Spring motion (framer-motion) + swipe-to-dismiss on sheets
+- [x] P5-B: Frosted glass on nav chrome (header, tab bars, sheets)
+- [x] P5-C: Tactile press response (active:scale-[0.96]) on buttons
+- [x] P5-D: Full PWA icon set (maskable, apple-touch-icon, theme-color, splash images)
+- [x] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
+- [x] P5-F: 44px minimum touch targets across all interactive elements
+- [x] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session
 
 ## Next Batch — Tickets from live re-review (May 31 2026)
 
@@ -1827,3 +1827,24 @@
 - [x] PAYPAL-CRASH-2: Harden getAccessToken — check CLIENT_ID/CLIENT_SECRET are set; log and throw meaningful error if PayPal auth fails (invalid_client, etc.)
 - [ ] OWNER ACTION: Claim the PayPal sandbox at https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE5lUFFQUXdYUkRSV2phLDE3NzcxNTI1MjYv100GN0oMfd4 before 2026-06-17 — credentials are inactive until claimed
 - [ ] OWNER ACTION: After claiming, re-test upgrade flow — server will now log the exact PayPal error message in the server console if it fails again
+
+## Auth Scope Decision (Jun 2026)
+
+- [x] Clerk auth permanently removed from scope — Manus OAuth stays as the auth provider for all future builds
+- [x] A2-future (Clerk/Auth0 swap) removed from active roadmap — marked N/A
+
+## P4 — Close the Loops (Jun 2026)
+
+- [x] P4-A: Friction Log — show "Your logged notes" list with timestamps in Settings so beta feedback feels heard
+- [x] P4-B: Clarity Engine conversion — show inline preview of updated project card after "Convert next step → Project Note"
+- [x] P4-C: Offline sync indicator — subtle header pulse during sync, resolves to checkmark (Apple Notes–style)
+
+## P5 — Premium Polish (Jun 2026)
+
+- [x] P5-A: Spring motion (framer-motion) + swipe-to-dismiss on sheets
+- [x] P5-B: Frosted glass on nav chrome (header, tab bars, sheets)
+- [x] P5-C: Tactile press response (active:scale-[0.96]) on all buttons
+- [x] P5-D: Full PWA icon set (maskable, apple-touch-icon, theme-color, splash images)
+- [x] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
+- [x] P5-F: 44px minimum touch targets across all interactive elements
+- [x] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session
