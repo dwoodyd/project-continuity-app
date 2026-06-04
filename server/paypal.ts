@@ -89,9 +89,12 @@ export async function getPlanId(key: PlanKey): Promise<string> {
   if (planIdCache[key]) return planIdCache[key]!;
   const envKey = `PAYPAL_PLAN_${key.toUpperCase()}`;
   if (process.env[envKey]) { planIdCache[key] = process.env[envKey]!; return planIdCache[key]!; }
-  // Legacy single-plan env var (backward compat)
+  // Legacy single-plan env vars (backward compat)
   if (key === "pro_founding_monthly" && process.env.PAYPAL_PLAN_ID) {
     planIdCache[key] = process.env.PAYPAL_PLAN_ID; return planIdCache[key]!;
+  }
+  if (key === "keeper_founding_monthly" && process.env.PAYPAL_KEEPER_PLAN_ID) {
+    planIdCache[key] = process.env.PAYPAL_KEEPER_PLAN_ID; return planIdCache[key]!;
   }
   const plan = PLAN_CATALOG[key];
   const token = await getAccessToken();
