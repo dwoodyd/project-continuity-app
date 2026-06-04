@@ -5,7 +5,7 @@ export default function PrivacyPage() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
         <p className="text-muted-foreground text-sm mb-10">
-          Last updated: April 2026 · Continuary (Beta)
+          Last updated: June 2026 · Continuary (Beta)
         </p>
 
         <section className="space-y-8 text-sm leading-relaxed text-foreground/90">

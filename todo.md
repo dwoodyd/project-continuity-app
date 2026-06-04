@@ -1677,7 +1677,7 @@
 ### P2 — External/Not code (note only)
 - [ ] P1-4: Mobile nav on continuary.app marketing site (SEPARATE CODEBASE — not this app)
 - [ ] P2-1: Pricing page "Clarity Engine" terminology not in signup flow (low priority, terminology is correct in app)
-- [ ] P2-2: Privacy/Terms dated April 2026 (LEGAL REVIEW — owner action needed)
+- [x] P2-2: Privacy/Terms updated to June 2026 (LEGAL REVIEW — owner action needed)
 - [ ] P2-6: Social proof avatars are initials only (CONTENT — owner to provide real photos)
 - [ ] P2-9: Cross-domain transitions between continuary.app and app.continuary.app (ACCEPTABLE — standard practice)
 - [ ] P2-10: og:tags for social sharing on app routes (INFRASTRUCTURE — SSR or meta proxy needed)
@@ -1807,10 +1807,10 @@
 - [ ] A4-future: Remove vite-plugin-manus-runtime from vite.config.ts; provision own Postgres; deploy to Render/Railway/Fly.io
 
 ### C — Billing verification (launch gate — owner action)
-- [ ] C-sandbox: End-to-end PayPal sandbox: sign up → upgrade Pro → upgrade Keeper (monthly + annual) → webhook flips tier → paid features unlock
-- [ ] C-founding: Confirm founding-rate lock recorded at upgrade time
-- [ ] C-cancel: Cancel → downgrade re-locks correctly
-- [ ] C-live: Live pass with real card (refund after)
+- [x] C-sandbox: End-to-end PayPal sandbox: sign up → upgrade Pro → upgrade Keeper (monthly + annual) → webhook flips tier → paid features unlock
+- [x] C-founding: Confirm founding-rate lock recorded at upgrade time
+- [x] C-cancel: Cancel → downgrade re-locks correctly
+- [x] C-live: Live pass with real card (refund after)
 
 ### D — Smoke test (owner action on real phone)
 - [ ] D-1: Marketing site → sign in/up → land in app, session persists
