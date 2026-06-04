@@ -1,8 +1,19 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { createSubscriptionLink, activateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
 
 export const paypalRouter = router({
+  // Public diagnostics — returns masked credential status (safe to expose)
+  diagnostics: publicProcedure.query(() => ({
+    hasClientId: !!process.env.PAYPAL_CLIENT_ID,
+    clientIdPrefix: process.env.PAYPAL_CLIENT_ID?.slice(0, 8) ?? null,
+    hasClientSecret: !!process.env.PAYPAL_CLIENT_SECRET,
+    hasPlanId: !!process.env.PAYPAL_PLAN_ID,
+    planId: process.env.PAYPAL_PLAN_ID ?? null,
+    hasKeeperPlanId: !!process.env.PAYPAL_KEEPER_PLAN_ID,
+    keeperPlanId: process.env.PAYPAL_KEEPER_PLAN_ID ?? null,
+    paypalEnv: process.env.PAYPAL_ENV ?? "sandbox",
+  })),
   // Get billing status + plan info
   status: protectedProcedure.query(({ ctx }) => ({
     isPro: ctx.user.isPro ?? false,
