@@ -754,17 +754,31 @@ export default function FocusSessionsPage() {
         )}
       </div>
 
-      {/* Main two-column layout — Wren left half, controls right half */}
-      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+      {/* Main layout — stacked on mobile, side-by-side on desktop */}
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden" style={{ minHeight: 0 }}>
 
-        {/* ── Wren's half — left 50% ──────────────────────────────────────── */}
-        <div
-          className="relative flex-shrink-0 flex flex-col items-center justify-end overflow-hidden"
-          style={{
-            width: "50%",
-            background: "oklch(0.07 0.02 240)",
-          }}
-        >
+        {/* ── Wren's panel — top strip on mobile (fixed height), left 45% on desktop ── */}
+        <style>{`
+          .wren-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: oklch(0.07 0.02 240);
+            height: min(42vw, 300px);
+            width: 100%;
+          }
+          @media (min-width: 768px) {
+            .wren-panel {
+              height: 100%;
+              width: 45%;
+            }
+          }
+        `}</style>
+        <div className="wren-panel">
           {/* Full-bleed Wren video — fills the entire left panel */}
           <video
             ref={wrenVideoRef}

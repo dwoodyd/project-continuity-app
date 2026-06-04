@@ -1491,7 +1491,7 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" />
+          <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" fallbackStill="luminousIdle" />
           <div>
           <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand">
             {greeting}, <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>{firstName}</span>.

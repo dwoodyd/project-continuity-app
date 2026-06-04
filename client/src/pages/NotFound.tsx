@@ -4,7 +4,7 @@ export default function NotFound() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background px-6">
+    <div className="w-full flex items-center justify-center bg-background px-6 py-16">
       <div className="max-w-md w-full text-center space-y-6">
         {/* Subtle label */}
         <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">

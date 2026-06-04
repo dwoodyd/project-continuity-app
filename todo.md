@@ -1360,8 +1360,8 @@
 
 ## Founding Member Launch Blockers (B-series, May 2026)
 
-- [ ] B1: OAuth callback URLs — add app.continuary.app to Manus authorized redirect URIs (PLATFORM CONFIG — not code, requires Manus project settings)
-- [ ] B2: Resend sending domain — verify mail.continuary.app with SPF/DKIM/DMARC in Cloudflare DNS (DNS CONFIG — not code, requires Cloudflare + Resend dashboard)
+- [x] B1: OAuth callback URLs — Manus auto-registers on custom domain; confirmed working
+- [x] B2: Resend sending domain — verified via Cloudflare auto-configure (Jun 04 2026)
 - [x] B3: Application form → admin queue — verified: /apply writes to founding_applications, appears in Admin → Applications
 - [x] B4: "In queue" email fires on submission — verified: buildApplicationConfirmationEmail fires on submit via Resend
 - [x] B5: Approval action sends invite email with code — verified: approve generates founding-member code + fires approval email with /invite/:code deep link
@@ -1766,8 +1766,8 @@
 
 - [x] F1: Desktop first-click-after-palette-close swallow — fixed by adding `data-[state=closed]:pointer-events-none` to both DialogOverlay and DialogContent in dialog.tsx
 - [x] F2: Projects empty-state blue/purple gradient — replaced with amber/charcoal system; also fixed "mapped" status dot from blue to amber
-- [ ] F3: favicon.ico 503 — platform-level: update VITE_APP_LOGO in Settings → General to `https://app.continuary.app/icon-96.png`
-- [ ] F4: manuscdn.com stray request — same root cause as F3; resolves automatically once VITE_APP_LOGO is updated
+- [x] F3: favicon.ico 503 — VITE_APP_LOGO set to app.continuary.app/icon-96.png in Settings (Jun 04 2026)
+- [x] F4: manuscdn.com stray request — resolved by F3 fix (Jun 04 2026)
 
 ## Revision Brief 7 — Time Sense, Surface, Unstick
 
@@ -1825,8 +1825,8 @@
 
 - [x] PAYPAL-CRASH-1: Fix "Cannot read properties of undefined (reading 'find')" in createSubscriptionLink — check res.ok and Array.isArray(subBody.links) before accessing .links; log full PayPal error body with HTTP status
 - [x] PAYPAL-CRASH-2: Harden getAccessToken — check CLIENT_ID/CLIENT_SECRET are set; log and throw meaningful error if PayPal auth fails (invalid_client, etc.)
-- [ ] OWNER ACTION: Claim the PayPal sandbox at https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE5lUFFQUXdYUkRSV2phLDE3NzcxNTI1MjYv100GN0oMfd4 before 2026-06-17 — credentials are inactive until claimed
-- [ ] OWNER ACTION: After claiming, re-test upgrade flow — server will now log the exact PayPal error message in the server console if it fails again
+- [x] OWNER ACTION: PayPal sandbox tested and working end-to-end (Jun 04 2026)
+- [x] OWNER ACTION: Upgrade flow confirmed end-to-end with sandbox (Jun 04 2026)
 
 ## Auth Scope Decision (Jun 2026)
 
@@ -1848,3 +1848,9 @@
 - [x] P5-E: D3 node/edge polish in VaultGraph (gradient fills, glow, curved edges)
 - [x] P5-F: 44px minimum touch targets across all interactive elements
 - [x] P5-G: Microcopy pass — standardize vocabulary, pin re-engagement message per session
+
+## Smoke Test Bugs (Jun 04 2026)
+
+- [x] BUG-1 (Medium): /focus — Wren mascot image overflows and clips into content area; text on right side truncated. Visible in session start and pre-session views.
+- [x] BUG-2 (Low): Today header — Wren bird avatar intermittently fails to render (broken placeholder), returns on reload. Likely race condition on image load.
+- [x] BUG-3 (Low): 404 page — Hub bottom nav tab does nothing when on 404; user must tap "Take me to Today" first. Nav should work from any page.
