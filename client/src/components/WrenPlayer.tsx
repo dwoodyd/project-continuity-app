@@ -10,7 +10,7 @@
  * All clips use mix-blend-mode: screen to remove black backgrounds.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { WREN_CLIPS as NEW_CLIPS, WREN_STILLS, type WrenClipKey } from "@/lib/wrenClips";
 
@@ -109,6 +109,7 @@ export default function WrenPlayer({
   onEnded,
 }: WrenPlayerProps) {
   const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
+  const [videoReady, setVideoReady] = useState(false);
 
   const maskStyle: React.CSSProperties = feather
     ? {
@@ -132,8 +133,8 @@ export default function WrenPlayer({
       className={cn("flex items-center justify-center relative", SIZE_CLASSES[size], wrapperClassName)}
       style={maskStyle}
     >
-      {/* Static fallback shown while video loads */}
-      {fallbackStill && (
+      {/* Static fallback shown while video loads — hidden once video is ready */}
+      {fallbackStill && !videoReady && (
         <img
           src={WREN_STILLS[fallbackStill]}
           alt="Wren"
@@ -149,6 +150,7 @@ export default function WrenPlayer({
         muted={muted}
         playsInline
         onEnded={onEnded}
+        onCanPlay={() => setVideoReady(true)}
         className={cn("w-full h-full object-contain relative", className)}
         style={{ mixBlendMode: "screen" }}
       />
