@@ -819,85 +819,87 @@ export default function FocusSessionsPage() {
         </div>
 
         {/* ── User workspace — right 50% ──────────────────────────────────── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-5 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-center px-5 py-8 gap-0 overflow-y-auto">
 
           {/* IDLE — welcome */}
           {phase === "idle" && (
-            <div className="text-center max-w-sm">
-              <p className="text-2xl font-light mb-2" style={{ color: "oklch(0.88 0.06 65)" }}>
+            <div className="text-center w-full">
+              <p
+                className="font-light leading-snug mb-2"
+                style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)", color: "oklch(0.90 0.07 65)" }}
+              >
                 Ready when you are.
               </p>
-              <p className="text-sm mb-8" style={{ color: "oklch(0.55 0.04 240)" }}>
-                Wren will sit with you — reading, writing, weaving — while you work.
+              <p className="text-xs mb-6 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
+                Wren sits with you while you work.
               </p>
               {showPaywall ? (
                 <div
-                  className="rounded-xl p-6 text-center"
-                  style={{ background: "oklch(0.14 0.03 240)", border: "1px solid oklch(0.25 0.05 240)" }}
+                  className="rounded-2xl p-5 text-center mb-4"
+                  style={{
+                    background: "oklch(0.12 0.03 240)",
+                    border: "1px solid oklch(0.22 0.05 240)",
+                  }}
                 >
-                  <p className="text-sm font-medium mb-1" style={{ color: "oklch(0.80 0.08 65)" }}>
-                    You've used your free session this week
+                  <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.78 0.10 65)" }}>
+                    Free session used this week
                   </p>
-                  <p className="text-xs mb-4" style={{ color: "oklch(0.55 0.04 240)" }}>
-                    Pro unlocks unlimited Focus Sessions — $4.99/mo founding rate.
+                  <p className="text-[11px] mb-4 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
+                    Pro unlocks unlimited sessions
                   </p>
-                  <Button
+                  <button
                     onClick={() => navigate("/pro")}
+                    className="w-full py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-opacity hover:opacity-90"
                     style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
                   >
-                    Unlock unlimited sessions →
-                  </Button>
+                    Unlock Pro →
+                  </button>
                 </div>
               ) : (
-                <Button
+                <button
                   onClick={() => setPhase("intake")}
-                  className="px-8 py-3 text-base"
+                  className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] mb-4"
                   style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
                 >
-                  Start a session
-                </Button>
+                  Begin session
+                </button>
               )}
 
-              {/* Session history — fills the lower screen in idle phase */}
+              {/* Session history — compact list below CTA */}
               {artifactData && artifactData.sessions.length > 0 && (
-                <div className="w-full max-w-sm mt-8">
-                  <p className="text-xs uppercase tracking-widest mb-3 text-left" style={{ color: "oklch(0.40 0.04 240)" }}>
-                    Your focus record
+                <div className="w-full mt-5">
+                  <p className="text-[10px] uppercase tracking-widest mb-2 text-left" style={{ color: "oklch(0.35 0.04 240)" }}>
+                    Recent sessions
                   </p>
-                  <div className="flex gap-4 items-start">
-                    <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="full" />
-                    <div className="flex-1 flex flex-col gap-2">
-                      {artifactData.sessions.slice(-5).reverse().map((s) => (
-                        <div
-                          key={s.id}
-                          className="rounded-lg px-3 py-2"
-                          style={{ background: "oklch(0.13 0.02 240)", border: "1px solid oklch(0.20 0.04 240)" }}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="w-2 h-2 rounded-full shrink-0"
-                              style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
-                            />
-                            <span className="text-xs font-medium" style={{ color: "oklch(0.78 0.06 65)" }}>
-                              {s.durationMinutes ?? 25} min
-                            </span>
-                            {s.completedAt && (
-                              <span className="text-[10px] ml-auto" style={{ color: "oklch(0.38 0.03 240)" }}>
-                                {new Date(s.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[10px] mt-0.5 capitalize" style={{ color: "oklch(0.48 0.04 240)" }}>
-                            {s.whatMoved === "progress" ? "Made progress" : s.whatMoved === "thinking" ? "Mostly thinking" : s.whatMoved === "stuck" ? "Stuck or scattered" : "Session"}
-                          </p>
-                        </div>
-                      ))}
-                      {artifactData.sessions.length > 5 && (
-                        <p className="text-[10px]" style={{ color: "oklch(0.35 0.03 240)" }}>
-                          +{artifactData.sessions.length - 5} earlier sessions
-                        </p>
-                      )}
-                    </div>
+                  <div className="flex flex-col gap-1.5">
+                    {artifactData.sessions.slice(-4).reverse().map((s) => (
+                      <div
+                        key={s.id}
+                        className="flex items-center gap-2 rounded-lg px-3 py-2"
+                        style={{ background: "oklch(0.11 0.02 240)", border: "1px solid oklch(0.17 0.03 240)" }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
+                        />
+                        <span className="text-[11px] font-medium" style={{ color: "oklch(0.72 0.06 65)" }}>
+                          {s.durationMinutes ?? 25} min
+                        </span>
+                        <span className="text-[10px] flex-1" style={{ color: "oklch(0.45 0.04 240)" }}>
+                          {s.whatMoved === "progress" ? "progress" : s.whatMoved === "thinking" ? "thinking" : s.whatMoved === "stuck" ? "scattered" : "—"}
+                        </span>
+                        {s.completedAt && (
+                          <span className="text-[10px]" style={{ color: "oklch(0.32 0.03 240)" }}>
+                            {new Date(s.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {artifactData.sessions.length > 4 && (
+                      <p className="text-[10px] text-center mt-0.5" style={{ color: "oklch(0.30 0.03 240)" }}>
+                        +{artifactData.sessions.length - 4} earlier
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -915,150 +917,152 @@ export default function FocusSessionsPage() {
 
           {/* INTAKE — intention */}
           {phase === "intake" && (
-            <div className="w-full max-w-md">
-              <p className="text-xl font-light mb-6 text-center" style={{ color: "oklch(0.88 0.06 65)" }}>
-                What are we working on this session?
+            <div className="w-full">
+              <p
+                className="font-light leading-snug mb-1 text-center"
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+              >
+                What are we working on?
               </p>
-              <Textarea
+              <p className="text-[11px] text-center mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
+                Anything. Even “I don’t know yet.”
+              </p>
+              <textarea
                 value={intention}
                 onChange={(e) => setIntention(e.target.value)}
-                placeholder="Anything. Even 'I don't know yet.'"
-                className="resize-none text-sm mb-4"
+                placeholder="Type your intention…"
                 rows={3}
-                style={{
-                  background: "oklch(0.14 0.03 240)",
-                  border: "1px solid oklch(0.25 0.05 240)",
-                  color: "oklch(0.88 0.04 60)",
-                }}
                 maxLength={500}
+                className="w-full resize-none text-sm rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
+                style={{
+                  background: "oklch(0.12 0.02 240)",
+                  border: "1px solid oklch(0.22 0.04 240)",
+                  color: "oklch(0.88 0.04 60)",
+                  caretColor: "oklch(0.72 0.16 65)",
+                }}
               />
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setPhase("duration")}
-                  className="flex-1"
-                  style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
-                >
-                  {intention.trim() ? "Set intention →" : "Skip →"}
-                </Button>
-              </div>
+              <button
+                onClick={() => setPhase("duration")}
+                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
+                style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+              >
+                {intention.trim() ? "Set intention →" : "Skip →"}
+              </button>
             </div>
           )}
 
           {/* DURATION — pick */}
           {phase === "duration" && (
-            <div className="w-full max-w-md text-center">
-              <p className="text-xl font-light mb-2" style={{ color: "oklch(0.88 0.06 65)" }}>
+            <div className="w-full text-center">
+              <p
+                className="font-light leading-snug mb-1"
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+              >
                 How long?
               </p>
               {intention.trim() && (
-                <p className="text-xs mb-6 italic" style={{ color: "oklch(0.55 0.04 240)" }}>
-                  "{intention.trim()}"
+                <p className="text-[11px] mb-4 italic leading-relaxed" style={{ color: "oklch(0.45 0.04 240)" }}>
+                  “{intention.trim()}”
                 </p>
               )}
-              <div className="flex gap-4 justify-center mb-8">
+              {!intention.trim() && <div className="mb-4" />}
+              <div className="flex gap-2 justify-center mb-5">
                 {([25, 50, 90] as const).map((d) => (
                   <button
                     key={d}
                     onClick={() => setDurationMinutes(d)}
-                    className={cn(
-                      "rounded-xl px-6 py-4 text-center transition-all",
-                      durationMinutes === d
-                        ? "ring-2"
-                        : "opacity-60 hover:opacity-90"
-                    )}
+                    className="flex-1 rounded-xl py-3 text-center transition-all active:scale-[0.97]"
                     style={{
-                      background: durationMinutes === d ? "oklch(0.18 0.04 240)" : "oklch(0.14 0.03 240)",
-                      border: "1px solid oklch(0.25 0.05 240)",
-                      outline: durationMinutes === d ? "2px solid oklch(0.72 0.16 65)" : "none",
+                      background: durationMinutes === d ? "oklch(0.16 0.04 240)" : "oklch(0.11 0.02 240)",
+                      border: `1px solid ${durationMinutes === d ? "oklch(0.72 0.16 65)" : "oklch(0.20 0.04 240)"}`,
+                      opacity: durationMinutes === d ? 1 : 0.65,
                     }}
                   >
-                    <p className="text-2xl font-bold" style={{ color: "oklch(0.88 0.08 65)" }}>{d}</p>
-                    <p className="text-xs mt-1" style={{ color: "oklch(0.55 0.04 240)" }}>
-                      {d === 25 ? "Quick burst" : d === 50 ? "Full session" : "Deep work"}
+                    <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.90 0.08 65)" }}>{d}</p>
+                    <p className="text-[10px] mt-1" style={{ color: "oklch(0.48 0.04 240)" }}>
+                      {d === 25 ? "quick" : d === 50 ? "full" : "deep"}
                     </p>
                   </button>
                 ))}
               </div>
-              {/* Hard stop pre-set */}
+              {/* Hard stop */}
               <div className="flex items-center justify-center gap-2 mb-5">
-                <label className="text-xs" style={{ color: "oklch(0.50 0.04 240)" }}>Hard stop at</label>
+                <span className="text-[11px]" style={{ color: "oklch(0.42 0.04 240)" }}>Hard stop at</span>
                 <input
                   type="time"
                   value={hardStop}
                   onChange={(e) => setHardStop(e.target.value)}
-                  className="text-xs rounded px-2 py-1"
+                  className="text-[11px] rounded-lg px-2 py-1 outline-none"
                   style={{
-                    background: "oklch(0.14 0.03 240)",
-                    border: "1px solid oklch(0.25 0.05 240)",
-                    color: hardStop ? "oklch(0.88 0.08 65)" : "oklch(0.40 0.03 240)",
+                    background: "oklch(0.12 0.02 240)",
+                    border: "1px solid oklch(0.22 0.04 240)",
+                    color: hardStop ? "oklch(0.85 0.08 65)" : "oklch(0.38 0.03 240)",
                     colorScheme: "dark",
                   }}
                 />
                 {hardStop && (
                   <button
                     onClick={() => setHardStop("")}
-                    className="text-xs opacity-50 hover:opacity-80"
+                    className="text-[10px] opacity-40 hover:opacity-70"
                     style={{ color: "oklch(0.60 0.04 240)" }}
                   >
                     clear
                   </button>
                 )}
               </div>
-              <Button
+              <button
                 onClick={handleStartSession}
                 disabled={startMutation.isPending}
-                className="px-10 py-3 text-base"
+                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
                 style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
               >
                 {startMutation.isPending ? "Starting…" : "Begin →"}
-              </Button>
-              <p className="text-xs mt-4 opacity-40" style={{ color: "oklch(0.70 0.04 240)" }}>
-                Not ready yet?{" "}
-                <button
-                  onClick={() => {
-                    setWrenActivity("lookingup");
-                    setWrenMessage("Take a breath. I'll be here.");
-                    setTimeout(() => setWrenMessage(null), 4000);
-                  }}
-                  className="underline underline-offset-2 hover:opacity-80 transition-opacity"
-                >
-                  Take a breath first
-                </button>
-              </p>
+              </button>
+              <button
+                onClick={() => {
+                  setWrenActivity("lookingup");
+                  setWrenMessage("Take a breath. I'll be here.");
+                  setTimeout(() => setWrenMessage(null), 4000);
+                }}
+                className="text-[11px] mt-3 opacity-30 hover:opacity-60 transition-opacity underline underline-offset-2"
+                style={{ color: "oklch(0.70 0.04 240)" }}
+              >
+                Take a breath first
+              </button>
             </div>
           )}
 
           {/* ACTIVE — timer */}
           {phase === "active" && (
-            <div className="text-center w-full max-w-sm">
+            <div className="text-center w-full">
               {/* Progress ring */}
-              <div className="relative mx-auto mb-6" style={{ width: 180, height: 180 }}>
-                <svg width="180" height="180" className="absolute inset-0 -rotate-90">
-                  <circle cx="90" cy="90" r="80" fill="none" stroke="oklch(0.18 0.03 240)" strokeWidth="6" />
+              <div className="relative mx-auto mb-3" style={{ width: 140, height: 140 }}>
+                <svg width="140" height="140" className="absolute inset-0 -rotate-90">
+                  <circle cx="70" cy="70" r="60" fill="none" stroke="oklch(0.15 0.03 240)" strokeWidth="5" />
                   <circle
-                    cx="90" cy="90" r="80"
+                    cx="70" cy="70" r="60"
                     fill="none"
                     stroke="oklch(0.72 0.16 65)"
-                    strokeWidth="6"
+                    strokeWidth="5"
                     strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 80}`}
-                    strokeDashoffset={`${2 * Math.PI * 80 * (1 - progressPct / 100)}`}
+                    strokeDasharray={`${2 * Math.PI * 60}`}
+                    strokeDashoffset={`${2 * Math.PI * 60 * (1 - progressPct / 100)}`}
                     style={{ transition: "stroke-dashoffset 1s linear" }}
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-4xl font-mono font-bold" style={{ color: "oklch(0.92 0.08 65)" }}>
+                  <span className="text-3xl font-mono font-bold tracking-tight" style={{ color: "oklch(0.92 0.08 65)" }}>
                     {formatTime(secondsLeft)}
                   </span>
-                  <span className="text-xs mt-1" style={{ color: "oklch(0.50 0.04 240)" }}>
-                    {durationMinutes} min session
+                  <span className="text-[10px] mt-0.5" style={{ color: "oklch(0.42 0.04 240)" }}>
+                    {durationMinutes} min
                   </span>
                 </div>
               </div>
 
               {intention.trim() && (
-                <p className="text-sm italic mb-6" style={{ color: "oklch(0.60 0.04 240)" }}>
-                  "{intention.trim()}"
+                <p className="text-[11px] italic mb-3 leading-relaxed" style={{ color: "oklch(0.50 0.04 240)" }}>
+                  “{intention.trim()}”
                 </p>
               )}
 
@@ -1069,14 +1073,14 @@ export default function FocusSessionsPage() {
                 const minLeft = Math.ceil(msLeft / 60000);
                 return (
                   <div
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-4 text-xs"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-3 text-[10px]"
                     style={{
-                      background: minLeft <= 5 ? "oklch(0.22 0.08 30 / 0.5)" : "oklch(0.16 0.04 240)",
-                      border: `1px solid ${minLeft <= 5 ? "oklch(0.50 0.12 30 / 0.5)" : "oklch(0.28 0.05 240)"}`,
-                      color: minLeft <= 5 ? "oklch(0.80 0.10 30)" : "oklch(0.60 0.04 240)",
+                      background: minLeft <= 5 ? "oklch(0.20 0.08 30 / 0.5)" : "oklch(0.14 0.03 240)",
+                      border: `1px solid ${minLeft <= 5 ? "oklch(0.45 0.12 30 / 0.5)" : "oklch(0.22 0.04 240)"}`,
+                      color: minLeft <= 5 ? "oklch(0.78 0.10 30)" : "oklch(0.50 0.04 240)",
                     }}
                   >
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     Hard stop in {minLeft} min
@@ -1085,22 +1089,20 @@ export default function FocusSessionsPage() {
               })()}
 
               {/* Ambient sound */}
-              <div className="flex items-center justify-center gap-3 mb-8">
+              <div className="flex items-center justify-center gap-1.5 mb-4">
                 {(["silence", "rain", "cafe"] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => handleSetAmbient(s)}
-                    className={cn(
-                      "text-xs px-3 py-1.5 rounded-full transition-all",
-                      ambientSound === s ? "font-medium" : "opacity-50"
-                    )}
+                    className="text-[10px] px-2.5 py-1 rounded-full transition-all active:scale-[0.97]"
                     style={{
-                      background: ambientSound === s ? "oklch(0.20 0.04 240)" : "transparent",
-                      border: "1px solid oklch(0.25 0.05 240)",
-                      color: "oklch(0.75 0.04 60)",
+                      background: ambientSound === s ? "oklch(0.18 0.04 240)" : "transparent",
+                      border: `1px solid ${ambientSound === s ? "oklch(0.30 0.06 240)" : "oklch(0.20 0.03 240)"}`,
+                      color: ambientSound === s ? "oklch(0.78 0.06 65)" : "oklch(0.42 0.03 240)",
+                      fontWeight: ambientSound === s ? 600 : 400,
                     }}
                   >
-                    {s === "silence" ? "🔇 Silence" : s === "rain" ? "🌧 Rain" : "☕ Café"}
+                    {s === "silence" ? "Silence" : s === "rain" ? "Rain" : "Café"}
                   </button>
                 ))}
                 {ambientSound !== "silence" && (
@@ -1110,57 +1112,62 @@ export default function FocusSessionsPage() {
                     max={100}
                     value={ambientVolume}
                     onChange={(e) => handleSetVolume(Number(e.target.value))}
-                    className="w-20 accent-amber-400"
+                    className="w-14 accent-amber-400"
                   />
                 )}
               </div>
 
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-4 mb-4">
                 <button
                   onClick={() => setShowUnstickModal(true)}
-                  className="text-xs opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1.5"
+                  className="text-[11px] transition-opacity hover:opacity-100 opacity-70 flex items-center gap-1"
                   style={{ color: "oklch(0.72 0.16 65)" }}
                 >
-                  <span>⚡</span> I’m stuck
+                  <span>⚡</span> Stuck
                 </button>
-                <span className="text-xs opacity-20" style={{ color: "oklch(0.60 0.04 240)" }}>·</span>
+                <span className="text-[10px] opacity-15" style={{ color: "oklch(0.60 0.04 240)" }}>·</span>
                 <button
                   onClick={handleEndEarly}
-                  className="text-xs opacity-40 hover:opacity-70 transition-opacity"
+                  className="text-[11px] opacity-30 hover:opacity-60 transition-opacity"
                   style={{ color: "oklch(0.60 0.04 240)" }}
                 >
-                  End session early
+                  End early
                 </button>
               </div>
 
-              {/* Wren chat panel */}
+              {/* Wren chat — refined */}
               <div
-                className="w-full max-w-sm mt-6 rounded-xl overflow-hidden"
-                style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)" }}
+                className="w-full rounded-2xl overflow-hidden"
+                style={{ background: "oklch(0.11 0.02 240)", border: "1px solid oklch(0.18 0.03 240)" }}
               >
-                {/* Chat header */}
                 <button
                   onClick={() => setChatCollapsed((c) => !c)}
                   className="w-full flex items-center justify-between px-4 py-2.5 text-left"
-                  style={{ borderBottom: chatCollapsed ? "none" : "1px solid oklch(0.18 0.03 240)" }}
+                  style={{ borderBottom: chatCollapsed ? "none" : "1px solid oklch(0.16 0.03 240)" }}
                 >
-                  <span className="text-xs font-medium" style={{ color: "oklch(0.65 0.06 65)" }}>
+                  <span className="text-[11px] font-medium" style={{ color: "oklch(0.62 0.08 65)" }}>
                     {chatLoading ? "Wren is thinking…" : "Talk to Wren"}
                   </span>
-                  <span className="text-xs" style={{ color: "oklch(0.40 0.03 240)" }}>
-                    {chatCollapsed ? "▾" : "▴"}
-                  </span>
+                  <svg
+                    className="w-3.5 h-3.5 transition-transform"
+                    style={{
+                      color: "oklch(0.35 0.03 240)",
+                      transform: chatCollapsed ? "rotate(0deg)" : "rotate(180deg)"
+                    }}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
 
                 {!chatCollapsed && (
                   <>
-                    {/* Messages */}
                     <div
                       className="flex flex-col gap-2 px-3 py-3 overflow-y-auto"
-                      style={{ maxHeight: 200 }}
+                      style={{ maxHeight: 160 }}
                     >
                       {chatMessages.length === 0 && (
-                        <p className="text-xs text-center py-2" style={{ color: "oklch(0.38 0.03 240)" }}>
+                        <p className="text-[10px] text-center py-2 leading-relaxed" style={{ color: "oklch(0.32 0.03 240)" }}>
                           Wren is here. Say something if you need to.
                         </p>
                       )}
@@ -1168,12 +1175,12 @@ export default function FocusSessionsPage() {
                         <div
                           key={m.ts}
                           className={cn(
-                            "text-xs rounded-lg px-3 py-2 max-w-[85%]",
+                            "text-[11px] rounded-xl px-3 py-2 max-w-[88%] leading-relaxed",
                             m.role === "user" ? "self-end" : "self-start"
                           )}
                           style={{
-                            background: m.role === "user" ? "oklch(0.20 0.05 240)" : "oklch(0.16 0.03 240)",
-                            color: m.role === "user" ? "oklch(0.88 0.04 60)" : "oklch(0.75 0.06 65)",
+                            background: m.role === "user" ? "oklch(0.18 0.04 240)" : "oklch(0.14 0.03 240)",
+                            color: m.role === "user" ? "oklch(0.85 0.04 60)" : "oklch(0.72 0.06 65)",
                           }}
                         >
                           {m.content}
@@ -1181,8 +1188,8 @@ export default function FocusSessionsPage() {
                       ))}
                       {chatLoading && (
                         <div
-                          className="self-start text-xs rounded-lg px-3 py-2"
-                          style={{ background: "oklch(0.16 0.03 240)", color: "oklch(0.45 0.03 240)" }}
+                          className="self-start text-[11px] rounded-xl px-3 py-2"
+                          style={{ background: "oklch(0.14 0.03 240)", color: "oklch(0.38 0.03 240)" }}
                         >
                           …
                         </div>
@@ -1190,32 +1197,32 @@ export default function FocusSessionsPage() {
                       <div ref={chatEndRef} />
                     </div>
 
-                    {/* Input */}
                     <div
                       className="flex gap-2 px-3 pb-3"
-                      style={{ borderTop: "1px solid oklch(0.18 0.03 240)", paddingTop: 8 }}
+                      style={{ borderTop: "1px solid oklch(0.15 0.02 240)", paddingTop: 8 }}
                     >
                       <input
                         type="text"
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendChat(); } }}
-                        placeholder="Type something…"
+                        placeholder="Say something…"
                         maxLength={300}
-                        className="flex-1 text-xs rounded-lg px-3 py-2 outline-none"
+                        className="flex-1 text-[11px] rounded-xl px-3 py-2 outline-none"
                         style={{
-                          background: "oklch(0.16 0.03 240)",
-                          border: "1px solid oklch(0.24 0.04 240)",
+                          background: "oklch(0.14 0.02 240)",
+                          border: "1px solid oklch(0.20 0.04 240)",
                           color: "oklch(0.88 0.04 60)",
+                          caretColor: "oklch(0.72 0.16 65)",
                         }}
                       />
                       <button
                         onClick={handleSendChat}
                         disabled={chatLoading || !chatInput.trim()}
-                        className="text-xs px-3 py-2 rounded-lg disabled:opacity-30 transition-opacity"
+                        className="text-[11px] px-3 py-2 rounded-xl disabled:opacity-30 transition-opacity active:scale-[0.97]"
                         style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
                       >
-                        ↵
+                        →
                       </button>
                     </div>
                   </>
@@ -1226,67 +1233,72 @@ export default function FocusSessionsPage() {
 
           {/* CLOSURE — what moved */}
           {phase === "closure" && (
-            <div className="w-full max-w-md text-center">
-              <p className="text-2xl font-light mb-8" style={{ color: "oklch(0.88 0.06 65)" }}>
+            <div className="w-full text-center">
+              <p
+                className="font-light leading-snug mb-5"
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+              >
                 What moved?
               </p>
-              <div className="flex flex-col gap-3 mb-8">
+              <div className="flex flex-col gap-2 mb-4">
                 {([
                   { value: "progress", label: "Made progress", sub: "Productive session" },
-                  { value: "thinking", label: "Mostly thinking", sub: "Cognitive session — equally valid" },
-                  { value: "stuck",    label: "Stuck or scattered", sub: "The showing up is the point" },
+                  { value: "thinking", label: "Mostly thinking", sub: "Cognitive — equally valid" },
+                  { value: "stuck",    label: "Stuck or scattered", sub: "Showing up is the point" },
                 ] as const).map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setWhatMoved(opt.value)}
-                    className={cn(
-                      "rounded-xl px-5 py-4 text-left transition-all",
-                      whatMoved === opt.value ? "" : "opacity-60 hover:opacity-90"
-                    )}
+                    className="rounded-xl px-4 py-3 text-left transition-all active:scale-[0.98]"
                     style={{
-                      background: whatMoved === opt.value ? "oklch(0.18 0.04 240)" : "oklch(0.13 0.02 240)",
-                      border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.16 65)" : "oklch(0.22 0.04 240)"}`,
+                      background: whatMoved === opt.value ? "oklch(0.15 0.04 240)" : "oklch(0.10 0.02 240)",
+                      border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.16 65)" : "oklch(0.18 0.03 240)"}`,
+                      opacity: whatMoved && whatMoved !== opt.value ? 0.55 : 1,
                     }}
                   >
-                    <p className="font-medium text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>{opt.label}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>{opt.sub}</p>
+                    <p className="text-xs font-semibold" style={{ color: "oklch(0.88 0.06 65)" }}>{opt.label}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.45 0.04 240)" }}>{opt.sub}</p>
                   </button>
                 ))}
               </div>
 
-              <Textarea
+              <textarea
                 value={closingNote}
                 onChange={(e) => setClosingNote(e.target.value)}
-                placeholder="What I did / didn't do / want to come back to (optional — saves to Vault)"
-                className="resize-none text-sm mb-4"
+                placeholder="What I did / didn’t do / want to come back to (saves to Vault)"
                 rows={2}
-                style={{
-                  background: "oklch(0.14 0.03 240)",
-                  border: "1px solid oklch(0.25 0.05 240)",
-                  color: "oklch(0.88 0.04 60)",
-                }}
                 maxLength={1000}
+                className="w-full resize-none text-[11px] rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
+                style={{
+                  background: "oklch(0.11 0.02 240)",
+                  border: "1px solid oklch(0.20 0.04 240)",
+                  color: "oklch(0.85 0.04 60)",
+                  caretColor: "oklch(0.72 0.16 65)",
+                }}
               />
 
-              <Button
+              <button
                 onClick={handleComplete}
                 disabled={!whatMoved || completeMutation.isPending}
-                className="w-full py-3"
+                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-30"
                 style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
               >
                 {completeMutation.isPending ? "Saving…" : "Finish session →"}
-              </Button>
+              </button>
             </div>
           )}
 
           {/* REVEAL — artifact grows */}
           {phase === "reveal" && (
-            <div className="w-full max-w-md text-center">
-              <p className="text-xl font-light mb-2" style={{ color: "oklch(0.88 0.06 65)" }}>
+            <div className="w-full text-center">
+              <p
+                className="font-light leading-snug mb-1"
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+              >
                 Session logged.
               </p>
-              <p className="text-sm mb-8" style={{ color: "oklch(0.55 0.04 240)" }}>
-                Each session adds a row to your focus record below.
+              <p className="text-[11px] mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
+                Each session adds a row to your focus record.
               </p>
               {artifactData && (
                 <div className="flex justify-center mb-8">
@@ -1334,8 +1346,8 @@ export default function FocusSessionsPage() {
                   )}
                 </div>
               )}
-              <div className="flex gap-4 justify-center">
-                <Button
+              <div className="flex gap-3 justify-center">
+                <button
                   onClick={() => {
                     setPhase("intake");
                     setWhatMoved(null);
@@ -1343,17 +1355,22 @@ export default function FocusSessionsPage() {
                     setIntention("");
                     setSessionId(null);
                   }}
-                  variant="outline"
-                  style={{ borderColor: "oklch(0.30 0.05 240)", color: "oklch(0.75 0.04 60)" }}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all hover:opacity-80 active:scale-[0.97]"
+                  style={{
+                    background: "oklch(0.13 0.03 240)",
+                    border: "1px solid oklch(0.25 0.05 240)",
+                    color: "oklch(0.72 0.06 65)",
+                  }}
                 >
                   Another round →
-                </Button>
-                <Button
+                </button>
+                <button
                   onClick={() => navigate("/")}
+                  className="flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
                   style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
                 >
-                  Close the session
-                </Button>
+                  Done
+                </button>
               </div>
             </div>
           )}
