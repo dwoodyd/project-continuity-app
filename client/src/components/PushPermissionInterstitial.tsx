@@ -12,6 +12,7 @@
  */
 
 import { useState } from "react";
+import { urlBase64ToUint8Array } from "@/lib/push";
 
 interface Props {
   onAllow: () => void;
@@ -38,7 +39,7 @@ export function PushPermissionInterstitial({ onAllow, onDismiss }: Props) {
           if (vapidKey) {
             await reg.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: vapidKey,
+              applicationServerKey: urlBase64ToUint8Array(vapidKey),
             });
           }
         } catch {

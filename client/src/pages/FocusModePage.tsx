@@ -162,7 +162,8 @@ export default function FocusModePage() {
   };
 
   const startBreak = async () => {
-    await persistSession(true);
+    // User ended the session early to take a break — this is NOT a completed session.
+    await persistSession(false);
     setPhase("break");
     setTimeLeft(BREAK_MINUTES * 60);
     setIsRunning(true);

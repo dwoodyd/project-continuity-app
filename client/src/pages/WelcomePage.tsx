@@ -5,6 +5,7 @@
  */
 import { Link } from "wouter";
 import WrenPlayer from "@/components/WrenPlayer";
+import { urlBase64ToUint8Array } from "@/lib/push";
 import {
   ArrowRight,
   Brain,
@@ -352,7 +353,7 @@ export default function WelcomePage() {
           const reg = await navigator.serviceWorker.ready;
           const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
           if (vapidKey) {
-            await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey });
+            await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) });
           }
         } catch {
           // SW not ready yet — permission saved, subscription registered on next login

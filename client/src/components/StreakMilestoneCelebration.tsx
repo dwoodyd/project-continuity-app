@@ -22,7 +22,11 @@ function getStorageKey(streak: Milestone) {
 }
 
 function shouldShow(streak: number): Milestone | null {
-  for (const m of MILESTONES) {
+  // Surface the HIGHEST milestone the user has reached but not yet celebrated.
+  // Iterating ascending would show "3 days" to someone who arrives already at a
+  // 7- or 30-day streak (e.g. a new device with cleared storage).
+  for (let i = MILESTONES.length - 1; i >= 0; i--) {
+    const m = MILESTONES[i];
     if (streak >= m) {
       try {
         if (!localStorage.getItem(getStorageKey(m))) return m;

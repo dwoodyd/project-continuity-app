@@ -72,11 +72,14 @@ export async function generateImage(
   }
 
   const result = (await response.json()) as {
-    image: {
-      b64Json: string;
-      mimeType: string;
+    image?: {
+      b64Json?: string;
+      mimeType?: string;
     };
   };
+  if (!result?.image?.b64Json) {
+    throw new Error("Image generation returned no image data");
+  }
   const base64Data = result.image.b64Json;
   const buffer = Buffer.from(base64Data, "base64");
 
@@ -84,7 +87,7 @@ export async function generateImage(
   const { url } = await storagePut(
     `generated/${Date.now()}.png`,
     buffer,
-    result.image.mimeType
+    result.image.mimeType ?? "image/png"
   );
   return {
     url,

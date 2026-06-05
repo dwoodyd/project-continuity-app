@@ -1,7 +1,7 @@
 // Continuary — Service Worker
 // Handles: push notifications, offline capture queuing, background sync, app-shell caching
 
-const CACHE_VERSION = "continuity-v7";
+const CACHE_VERSION = "continuity-v8";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const OFFLINE_QUEUE_KEY = "offline-idea-queue";
 
@@ -66,21 +66,26 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // For static assets (JS, CSS, images, fonts): cache-first
+  // For static assets (JS, CSS, images, fonts): stale-while-revalidate.
+  // Serve from cache immediately (fast, offline-capable) but ALWAYS kick off a
+  // background fetch to refresh the cache. Plain cache-first never revalidated,
+  // so a re-deployed non-hashed asset (logo, icon) could be served stale forever.
   if (
     url.pathname.match(/\.(js|css|woff2?|ttf|png|jpg|jpeg|svg|ico|webp)$/)
   ) {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        if (cached) return cached;
-        return fetch(request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(SHELL_CACHE).then((cache) => cache.put(request, clone));
-          }
-          return response;
-        });
-      })
+      caches.open(SHELL_CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          const network = fetch(request)
+            .then((response) => {
+              if (response.ok) cache.put(request, response.clone());
+              return response;
+            })
+            .catch(() => cached);
+          // Return cache first if present, otherwise wait for the network.
+          return cached || network;
+        })
+      )
     );
     return;
   }

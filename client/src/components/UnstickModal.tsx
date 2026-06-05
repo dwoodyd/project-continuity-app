@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { Loader2, Zap, ChevronDown, Timer, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,12 @@ export default function UnstickModal({ task, onClose, entryMethod = "manual" }: 
     }, 1000);
     setTimeboxInterval(interval);
   };
+
+  // Clear the timebox countdown if the modal unmounts without an explicit close,
+  // so it doesn't keep ticking setState on an unmounted component.
+  useEffect(() => {
+    return () => { if (timeboxInterval) clearInterval(timeboxInterval); };
+  }, [timeboxInterval]);
 
   const handleClose = () => {
     if (timeboxInterval) clearInterval(timeboxInterval);

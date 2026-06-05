@@ -743,6 +743,7 @@ export default function StudyTrackerPage() {
           <div className="flex-1 p-6 overflow-y-auto">
             {activeTab === "daily" && (
               <DayCard
+                key={selectedDay}
                 dayNum={selectedDay}
                 config={config}
                 existingLog={existingLog}

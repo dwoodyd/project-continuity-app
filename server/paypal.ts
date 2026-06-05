@@ -198,6 +198,49 @@ export async function activateSubscription(subscriptionId: string, userId: numbe
   }).where(eq(users.id, userId));
 }
 
+// ─── Fetch subscription details from PayPal ───────────────────────────────────
+export async function getSubscriptionDetails(subscriptionId: string): Promise<{
+  id: string;
+  status: string;
+  custom_id?: string;
+  plan_id?: string;
+} | null> {
+  const token = await getAccessToken();
+  const res = await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    console.error(`[PayPal] getSubscriptionDetails failed (${res.status})${detail ? `: ${detail}` : ""}`);
+    return null;
+  }
+  return await res.json() as { id: string; status: string; custom_id?: string; plan_id?: string };
+}
+
+// ─── Verify a subscription with PayPal, then activate it ──────────────────────
+// Security: never trust a client-supplied subscriptionId/planKey. Confirm with
+// PayPal that the subscription exists, is active, and belongs to this user before
+// granting Pro. The plan is derived from PayPal's record (custom_id), not the client.
+export async function verifyAndActivateSubscription(subscriptionId: string, userId: number): Promise<boolean> {
+  const sub = await getSubscriptionDetails(subscriptionId);
+  if (!sub) return false;
+  // Must be a live subscription (ACTIVE after approval; APPROVED briefly before first bill).
+  if (sub.status !== "ACTIVE" && sub.status !== "APPROVED") {
+    console.warn(`[PayPal] verifyAndActivateSubscription: ${subscriptionId} status=${sub.status}, refusing to activate`);
+    return false;
+  }
+  // custom_id was set at creation as `${userId}:${planKey}` — it must match the caller.
+  const [ownerIdStr, planKeyStr] = (sub.custom_id ?? "").split(":");
+  if (parseInt(ownerIdStr ?? "", 10) !== userId) {
+    console.warn(`[PayPal] verifyAndActivateSubscription: ${subscriptionId} owner mismatch (custom_id="${sub.custom_id}", expected user ${userId})`);
+    return false;
+  }
+  const planKey = (planKeyStr && planKeyStr in PLAN_CATALOG) ? planKeyStr as PlanKey : undefined;
+  await activateSubscription(subscriptionId, userId, planKey);
+  return true;
+}
+
 // ─── Cancel subscription ──────────────────────────────────────────────────────
 export async function cancelSubscription(subscriptionId: string, userId: number) {
   const token = await getAccessToken();

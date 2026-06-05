@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
-import { createSubscriptionLink, activateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
+import { createSubscriptionLink, verifyAndActivateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
 
 export const paypalRouter = router({
   // Public diagnostics — returns masked credential status (safe to expose)
@@ -57,12 +58,19 @@ export const paypalRouter = router({
       return { approvalUrl };
     }),
 
-  // Called after PayPal redirects back with subscription_id
+  // Called after PayPal redirects back with subscription_id.
+  // The subscriptionId/planKey are verified against PayPal before granting Pro —
+  // we never trust the client's claim that a subscription is paid/active.
   confirmSubscription: protectedProcedure
     .input(z.object({ subscriptionId: z.string(), planKey: z.string().optional() }))
     .mutation(async ({ ctx, input }) => {
-      const planKey = (input.planKey && input.planKey in PLAN_CATALOG) ? input.planKey as PlanKey : undefined;
-      await activateSubscription(input.subscriptionId, ctx.user.id, planKey);
+      const ok = await verifyAndActivateSubscription(input.subscriptionId, ctx.user.id);
+      if (!ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't verify that subscription with PayPal. If you just paid, it may take a moment to activate — please refresh, or contact support.",
+        });
+      }
       return { success: true };
     }),
 
