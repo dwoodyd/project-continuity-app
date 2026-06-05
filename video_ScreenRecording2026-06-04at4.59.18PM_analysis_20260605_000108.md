@@ -1,0 +1,5 @@
+Based on the video provided, here is a description of the layout issue on the Wren Focus Sessions page:
+
+*   **Screen Layout:** The screen shows a split-screen arrangement on a macOS desktop. On the left side, there is a dark, vertical panel displaying several application thumbnails or icons. On the right, taking up the majority of the screen, is a web browser window open to the Wren application. The Wren app itself has a semi-transparent, blurred background showing a bright, airy room.
+*   **Video/Mascot Positioning:** A very large, animated, translucent orange bird (the Wren mascot) is positioned centrally within the main content area of the "Focus Sessions" page.
+*   **Obscured Text:** The large mascot is placed directly in front of and overlaps the main user interface elements. Specifically, it obscures the heading text "**Ready when you are**" and the yellow "**Start a session**" button located just below it. Because the mascot is translucent, the text and button can still be seen through it, but it creates a clear layout conflict where the animation interferes with the primary call-to-action.
