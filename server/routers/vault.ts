@@ -243,7 +243,21 @@ ${content.substring(0, 3000)}`,
       });
 
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
-      const parsed = JSON.parse(raw);
+      let parsed: {
+        summary?: string;
+        tags?: string[];
+        contentClass?: string;
+        projectCandidates?: string[];
+        nextActions?: string[];
+      };
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Couldn't process this item right now. Please try again.",
+        });
+      }
 
       // Derive confidence: "likely" if 1 candidate, "possible" if 2+, "needs_review" if 0
       const candidateCount = (parsed.projectCandidates ?? []).length;

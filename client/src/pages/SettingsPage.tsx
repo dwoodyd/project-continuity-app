@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { urlBase64ToUint8Array } from "@/lib/push";
 import {
   Bell,
   Calendar,
@@ -309,7 +310,7 @@ export default function SettingsPage() {
         if (vapidKey) {
           const sub = await reg.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: vapidKey,
+            applicationServerKey: urlBase64ToUint8Array(vapidKey),
           });
           const key = sub.getKey("p256dh");
           const authKey = sub.getKey("auth");

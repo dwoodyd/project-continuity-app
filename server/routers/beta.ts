@@ -11,7 +11,7 @@ import { TRPCError } from "@trpc/server";
 import { protectedProcedure, adminProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { betaCodes, users } from "../../drizzle/schema";
-import { eq, and, isNull, lte, count } from "drizzle-orm";
+import { eq, and, isNull, lte, count, asc } from "drizzle-orm";
 import crypto from "crypto";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -36,11 +36,13 @@ async function assignCohort(db: NonNullable<Awaited<ReturnType<typeof getDb>>>):
       // Cohort has space — but is it open yet?
       if (cohort === 1) return 1; // Cohort 1 always open
 
-      // Check if previous cohort has hit day 14
+      // Check if previous cohort has hit day 14 — measured from its EARLIEST joiner,
+      // so order ascending by join date rather than picking an arbitrary row.
       const prevCohortRows = await db
         .select({ foundingMemberJoinedAt: users.foundingMemberJoinedAt })
         .from(users)
         .where(eq(users.foundingMemberCohort, cohort - 1))
+        .orderBy(asc(users.foundingMemberJoinedAt))
         .limit(1);
 
       const prevJoined = prevCohortRows[0]?.foundingMemberJoinedAt;

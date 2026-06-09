@@ -8,7 +8,7 @@ import {
   studyWeeklyReviews,
   userFocusConfigs,
 } from "../../drizzle/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, ne } from "drizzle-orm";
 
 const err = () =>
   new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
@@ -67,7 +67,7 @@ export const studyRouter = router({
       .where(
         and(
           eq(userFocusConfigs.userId, ctx.user.id),
-          // not active
+          ne(userFocusConfigs.status, "active"),
         )
       )
       .orderBy(desc(userFocusConfigs.createdAt))
@@ -166,7 +166,7 @@ export const studyRouter = router({
         const [cfg] = await db
           .select()
           .from(userFocusConfigs)
-          .where(eq(userFocusConfigs.id, input.focusConfigId))
+          .where(and(eq(userFocusConfigs.id, input.focusConfigId), eq(userFocusConfigs.userId, ctx.user.id)))
           .limit(1);
         if (cfg) {
           const today = new Date().toISOString().slice(0, 10);
@@ -183,7 +183,7 @@ export const studyRouter = router({
               longestStreak: Math.max(cfg.longestStreak, newStreak),
               lastEntryDate: today,
             })
-            .where(eq(userFocusConfigs.id, cfg.id));
+            .where(and(eq(userFocusConfigs.id, cfg.id), eq(userFocusConfigs.userId, ctx.user.id)));
         }
       }
       return { id: (result as any).insertId };
