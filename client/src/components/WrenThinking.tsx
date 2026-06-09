@@ -87,7 +87,7 @@ export function WrenThinking({
         {/* Amber radial glow */}
         <div style={{
           position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
-          background: "radial-gradient(circle at 50% 60%, oklch(0.78 0.18 65 / 0.18) 0%, transparent 70%)",
+          background: "radial-gradient(circle at 50% 60%, oklch(0.74 0.14 72 / 0.18) 0%, transparent 70%)",
         }} />
         <video
           src={WREN_CLIPS.inflates}
@@ -109,10 +109,10 @@ export function WrenThinking({
       {/* Label */}
       <p style={{
         fontSize: labelSize,
-        color: "oklch(0.78 0.18 65 / 0.70)",
+        color: "oklch(0.74 0.14 72 / 0.70)",
         letterSpacing: "0.04em",
         fontStyle: "italic",
-        fontFamily: "'Playfair Display', Georgia, serif",
+        fontFamily: "'Space Grotesk', system-ui, sans-serif",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(4px)",
         transition: "opacity 0.3s ease, transform 0.3s ease",

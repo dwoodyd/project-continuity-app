@@ -56,7 +56,7 @@ export default function InviteRedeemPage() {
           height: 32,
           borderRadius: "50%",
           border: "2px solid rgba(245,166,35,0.3)",
-          borderTopColor: "oklch(0.80 0.17 65)",
+          borderTopColor: "oklch(0.80 0.14 72)",
           animation: "spin 0.8s linear infinite",
         }}
       />

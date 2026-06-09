@@ -734,7 +734,7 @@ export default function FocusSessionsPage() {
             </button>
           )}
           <div>
-            <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.92 0.08 65)" }}>
+            <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>
               Focus Sessions
             </h1>
             <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>
@@ -746,7 +746,7 @@ export default function FocusSessionsPage() {
           <div className="flex items-center gap-2">
             <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
             <div className="text-right">
-              <p className="text-xs font-medium" style={{ color: "oklch(0.80 0.08 65)" }}>
+              <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
                 {artifactData.totalSegments} {artifactData.totalSegments === 1 ? "session" : "sessions"}
               </p>
             </div>
@@ -792,7 +792,7 @@ export default function FocusSessionsPage() {
               style={{
                 background: "oklch(0.12 0.04 240 / 0.85)",
                 border: "1px solid oklch(0.35 0.08 65 / 0.6)",
-                color: "oklch(0.92 0.08 65)",
+                color: "oklch(0.74 0.14 72)",
                 backdropFilter: "blur(8px)",
                 animation: "fadeIn 0.4s ease",
               }}
@@ -826,7 +826,7 @@ export default function FocusSessionsPage() {
             <div className="text-center w-full">
               <p
                 className="font-light leading-snug mb-2"
-                style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)", color: "oklch(0.90 0.07 65)" }}
+                style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)", color: "oklch(0.74 0.14 72)" }}
               >
                 Ready when you are.
               </p>
@@ -850,7 +850,7 @@ export default function FocusSessionsPage() {
                   <button
                     onClick={() => navigate("/pro")}
                     className="w-full py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-opacity hover:opacity-90"
-                    style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                    style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
                   >
                     Unlock Pro →
                   </button>
@@ -859,7 +859,7 @@ export default function FocusSessionsPage() {
                 <button
                   onClick={() => setPhase("intake")}
                   className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] mb-4"
-                  style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                  style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
                 >
                   Begin session
                 </button>
@@ -882,7 +882,7 @@ export default function FocusSessionsPage() {
                           className="w-1.5 h-1.5 rounded-full shrink-0"
                           style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
                         />
-                        <span className="text-[11px] font-medium" style={{ color: "oklch(0.72 0.06 65)" }}>
+                        <span className="text-[11px] font-medium" style={{ color: "oklch(0.60 0.08 72)" }}>
                           {s.durationMinutes ?? 25} min
                         </span>
                         <span className="text-[10px] flex-1" style={{ color: "oklch(0.45 0.04 240)" }}>
@@ -920,7 +920,7 @@ export default function FocusSessionsPage() {
             <div className="w-full">
               <p
                 className="font-light leading-snug mb-1 text-center"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
               >
                 What are we working on?
               </p>
@@ -938,13 +938,13 @@ export default function FocusSessionsPage() {
                   background: "oklch(0.12 0.02 240)",
                   border: "1px solid oklch(0.22 0.04 240)",
                   color: "oklch(0.88 0.04 60)",
-                  caretColor: "oklch(0.72 0.16 65)",
+                  caretColor: "oklch(0.72 0.14 72)",
                 }}
               />
               <button
                 onClick={() => setPhase("duration")}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
-                style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
               >
                 {intention.trim() ? "Set intention →" : "Skip →"}
               </button>
@@ -956,7 +956,7 @@ export default function FocusSessionsPage() {
             <div className="w-full text-center">
               <p
                 className="font-light leading-snug mb-1"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
               >
                 How long?
               </p>
@@ -974,11 +974,11 @@ export default function FocusSessionsPage() {
                     className="flex-1 rounded-xl py-3 text-center transition-all active:scale-[0.97]"
                     style={{
                       background: durationMinutes === d ? "oklch(0.16 0.04 240)" : "oklch(0.11 0.02 240)",
-                      border: `1px solid ${durationMinutes === d ? "oklch(0.72 0.16 65)" : "oklch(0.20 0.04 240)"}`,
+                      border: `1px solid ${durationMinutes === d ? "oklch(0.72 0.14 72)" : "oklch(0.20 0.04 240)"}`,
                       opacity: durationMinutes === d ? 1 : 0.65,
                     }}
                   >
-                    <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.90 0.08 65)" }}>{d}</p>
+                    <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.74 0.14 72)" }}>{d}</p>
                     <p className="text-[10px] mt-1" style={{ color: "oklch(0.48 0.04 240)" }}>
                       {d === 25 ? "quick" : d === 50 ? "full" : "deep"}
                     </p>
@@ -1014,7 +1014,7 @@ export default function FocusSessionsPage() {
                 onClick={handleStartSession}
                 disabled={startMutation.isPending}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
-                style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
               >
                 {startMutation.isPending ? "Starting…" : "Begin →"}
               </button>
@@ -1042,7 +1042,7 @@ export default function FocusSessionsPage() {
                   <circle
                     cx="70" cy="70" r="60"
                     fill="none"
-                    stroke="oklch(0.72 0.16 65)"
+                    stroke="oklch(0.72 0.14 72)"
                     strokeWidth="5"
                     strokeLinecap="round"
                     strokeDasharray={`${2 * Math.PI * 60}`}
@@ -1051,7 +1051,7 @@ export default function FocusSessionsPage() {
                   />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-mono font-bold tracking-tight" style={{ color: "oklch(0.92 0.08 65)" }}>
+                  <span className="text-3xl font-log font-bold tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>
                     {formatTime(secondsLeft)}
                   </span>
                   <span className="text-[10px] mt-0.5" style={{ color: "oklch(0.42 0.04 240)" }}>
@@ -1121,7 +1121,7 @@ export default function FocusSessionsPage() {
                 <button
                   onClick={() => setShowUnstickModal(true)}
                   className="text-[11px] transition-opacity hover:opacity-100 opacity-70 flex items-center gap-1"
-                  style={{ color: "oklch(0.72 0.16 65)" }}
+                  style={{ color: "oklch(0.72 0.14 72)" }}
                 >
                   <span>⚡</span> Stuck
                 </button>
@@ -1145,7 +1145,7 @@ export default function FocusSessionsPage() {
                   className="w-full flex items-center justify-between px-4 py-2.5 text-left"
                   style={{ borderBottom: chatCollapsed ? "none" : "1px solid oklch(0.16 0.03 240)" }}
                 >
-                  <span className="text-[11px] font-medium" style={{ color: "oklch(0.62 0.08 65)" }}>
+                  <span className="text-[11px] font-medium" style={{ color: "oklch(0.60 0.08 72)" }}>
                     {chatLoading ? "Wren is thinking…" : "Talk to Wren"}
                   </span>
                   <svg
@@ -1180,7 +1180,7 @@ export default function FocusSessionsPage() {
                           )}
                           style={{
                             background: m.role === "user" ? "oklch(0.18 0.04 240)" : "oklch(0.14 0.03 240)",
-                            color: m.role === "user" ? "oklch(0.85 0.04 60)" : "oklch(0.72 0.06 65)",
+                            color: m.role === "user" ? "oklch(0.85 0.04 60)" : "oklch(0.60 0.08 72)",
                           }}
                         >
                           {m.content}
@@ -1213,14 +1213,14 @@ export default function FocusSessionsPage() {
                           background: "oklch(0.14 0.02 240)",
                           border: "1px solid oklch(0.20 0.04 240)",
                           color: "oklch(0.88 0.04 60)",
-                          caretColor: "oklch(0.72 0.16 65)",
+                          caretColor: "oklch(0.72 0.14 72)",
                         }}
                       />
                       <button
                         onClick={handleSendChat}
                         disabled={chatLoading || !chatInput.trim()}
                         className="text-[11px] px-3 py-2 rounded-xl disabled:opacity-30 transition-opacity active:scale-[0.97]"
-                        style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                        style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
                       >
                         →
                       </button>
@@ -1236,7 +1236,7 @@ export default function FocusSessionsPage() {
             <div className="w-full text-center">
               <p
                 className="font-light leading-snug mb-5"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
               >
                 What moved?
               </p>
@@ -1252,7 +1252,7 @@ export default function FocusSessionsPage() {
                     className="rounded-xl px-4 py-3 text-left transition-all active:scale-[0.98]"
                     style={{
                       background: whatMoved === opt.value ? "oklch(0.15 0.04 240)" : "oklch(0.10 0.02 240)",
-                      border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.16 65)" : "oklch(0.18 0.03 240)"}`,
+                      border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.14 72)" : "oklch(0.18 0.03 240)"}`,
                       opacity: whatMoved && whatMoved !== opt.value ? 0.55 : 1,
                     }}
                   >
@@ -1273,7 +1273,7 @@ export default function FocusSessionsPage() {
                   background: "oklch(0.11 0.02 240)",
                   border: "1px solid oklch(0.20 0.04 240)",
                   color: "oklch(0.85 0.04 60)",
-                  caretColor: "oklch(0.72 0.16 65)",
+                  caretColor: "oklch(0.72 0.14 72)",
                 }}
               />
 
@@ -1281,7 +1281,7 @@ export default function FocusSessionsPage() {
                 onClick={handleComplete}
                 disabled={!whatMoved || completeMutation.isPending}
                 className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-30"
-                style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
               >
                 {completeMutation.isPending ? "Saving…" : "Finish session →"}
               </button>
@@ -1293,7 +1293,7 @@ export default function FocusSessionsPage() {
             <div className="w-full text-center">
               <p
                 className="font-light leading-snug mb-1"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.90 0.07 65)" }}
+                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
               >
                 Session logged.
               </p>
@@ -1359,7 +1359,7 @@ export default function FocusSessionsPage() {
                   style={{
                     background: "oklch(0.13 0.03 240)",
                     border: "1px solid oklch(0.25 0.05 240)",
-                    color: "oklch(0.72 0.06 65)",
+                    color: "oklch(0.60 0.08 72)",
                   }}
                 >
                   Another round →
@@ -1367,7 +1367,7 @@ export default function FocusSessionsPage() {
                 <button
                   onClick={() => navigate("/")}
                   className="flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
-                  style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+                  style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
                 >
                   Done
                 </button>

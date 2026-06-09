@@ -326,7 +326,7 @@ export function CommandPaletteTrigger({ onAction }: CommandPaletteProps) {
       >
         <Search className="w-3.5 h-3.5" />
         <span className="text-xs">Search…</span>
-        <kbd className="ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-muted rounded border border-border text-muted-foreground group-hover:border-foreground/20">
+        <kbd className="ml-1 px-1.5 py-0.5 text-[10px] font-log bg-muted rounded border border-border text-muted-foreground group-hover:border-foreground/20">
           ⌘K
         </kbd>
       </button>

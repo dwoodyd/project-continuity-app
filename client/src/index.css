@@ -4,6 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-log: 'DM Mono', 'Fira Mono', 'Courier New', monospace;
+  --font-brand: 'Space Grotesk', system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -52,65 +54,65 @@
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Continuary — Light Mode
-   Warm ivory with deep navy sidebar and amber-gold primary accent
-   Aligned with marketing site: siliconwren-kbzwg7lf.manus.space
+   Cool slate-white surfaces, deep navy sidebar, gold accent
+   Brief: #0C1322 navy · #D9A441 gold · Space Grotesk + Inter + DM Mono
 ══════════════════════════════════════════════════════════════════════════════ */
 :root {
   --radius: 0.75rem;
 
-  /* ── Primary: amber-gold (matches marketing site CTA + accent) ── */
-  --primary: oklch(0.72 0.16 62);            /* #E8A020 warm amber-gold */
-  --primary-foreground: oklch(0.12 0.03 62); /* near-black on amber */
+  /* ── Primary: gold accent #D9A441 ── */
+  --primary: oklch(0.72 0.14 72);            /* #D9A441 gold */
+  --primary-foreground: oklch(0.12 0.03 72); /* near-black on gold */
 
-  /* ── Brand gold (same as primary in this palette) ── */
-  --brand: oklch(0.72 0.16 62);
-  --brand-foreground: oklch(0.12 0.03 62);
-  --brand-muted: oklch(0.96 0.04 62);
+  /* ── Brand gold ── */
+  --brand: oklch(0.72 0.14 72);
+  --brand-foreground: oklch(0.12 0.03 72);
+  --brand-muted: oklch(0.96 0.04 72);
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.72 0.16 62);
-  --amber-foreground: oklch(0.12 0.03 62);
+  --amber: oklch(0.72 0.14 72);
+  --amber-foreground: oklch(0.12 0.03 72);
   --emerald: oklch(0.62 0.17 155);
   --emerald-foreground: oklch(0.99 0 0);
 
-  /* ── Page surfaces: warm ivory ── */
-  --background: oklch(0.98 0.006 60);
-  --foreground: oklch(0.14 0.03 240);
+  /* ── Page surfaces: cool slate-white ── */
+  --background: oklch(0.97 0.004 240);
+  --foreground: oklch(0.14 0.025 240);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.14 0.03 240);
+  --card-foreground: oklch(0.14 0.025 240);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.14 0.03 240);
+  --popover-foreground: oklch(0.14 0.025 240);
 
-  --secondary: oklch(0.95 0.012 60);
-  --secondary-foreground: oklch(0.35 0.06 240);
+  --secondary: oklch(0.94 0.008 240);
+  --secondary-foreground: oklch(0.35 0.04 240);
 
-  --muted: oklch(0.95 0.008 60);
-  --muted-foreground: oklch(0.52 0.022 240);
+  --muted: oklch(0.94 0.006 240);
+  --muted-foreground: oklch(0.52 0.018 240);
 
-  --accent: oklch(0.95 0.012 60);
-  --accent-foreground: oklch(0.72 0.16 62);
+  --accent: oklch(0.94 0.008 240);
+  --accent-foreground: oklch(0.72 0.14 72);
 
   --destructive: oklch(0.55 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.90 0.010 60);
-  --input: oklch(0.90 0.010 60);
-  --ring: oklch(0.72 0.16 62);
+  --border: oklch(0.89 0.008 240);
+  --input: oklch(0.89 0.008 240);
+  --ring: oklch(0.72 0.14 72);
 
-  /* ── Sidebar: deep navy (matches marketing site background) ── */
-  --sidebar: oklch(0.12 0.025 240);
-  --sidebar-foreground: oklch(0.88 0.010 240);
-  --sidebar-primary: oklch(0.72 0.16 62);
-  --sidebar-primary-foreground: oklch(0.12 0.03 62);
-  --sidebar-accent: oklch(0.18 0.030 240);
-  --sidebar-accent-foreground: oklch(0.88 0.010 240);
-  --sidebar-border: oklch(0.20 0.028 240);
-  --sidebar-ring: oklch(0.72 0.16 62);
+  /* ── Sidebar: deep navy #0C1322 ── */
+  --sidebar: oklch(0.115 0.028 245);
+  --sidebar-foreground: oklch(0.87 0.010 240);
+  --sidebar-primary: oklch(0.72 0.14 72);
+  --sidebar-primary-foreground: oklch(0.12 0.03 72);
+  --sidebar-accent: oklch(0.17 0.032 245);
+  --sidebar-accent-foreground: oklch(0.87 0.010 240);
+  --sidebar-border: oklch(0.20 0.028 245);
+  --sidebar-ring: oklch(0.72 0.14 72);
 
   /* ── Charts ── */
-  --chart-1: oklch(0.72 0.16 62);
+  --chart-1: oklch(0.72 0.14 72);
   --chart-2: oklch(0.62 0.17 155);
   --chart-3: oklch(0.55 0.22 22);
   --chart-4: oklch(0.52 0.22 270);
@@ -119,63 +121,63 @@
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Continuary — Dark Mode
-   Deep navy background, amber-gold primary, warm ivory text
-   Directly mirrors marketing site atmosphere
+   Deep navy #0C1322 ground, gold #D9A441 accent, cool slate text #E6E9EF
+   Brief: cool architectural workspace — distinct from warm Soul Engineer
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
-  /* ── Primary: amber-gold (brighter for dark bg) ── */
-  --primary: oklch(0.78 0.18 65);            /* #F5A623 marketing site amber */
-  --primary-foreground: oklch(0.10 0.03 65);
+  /* ── Primary: gold #D9A441 ── */
+  --primary: oklch(0.74 0.14 72);            /* #D9A441 gold accent */
+  --primary-foreground: oklch(0.10 0.03 72);
 
   /* ── Brand gold ── */
-  --brand: oklch(0.78 0.18 65);
-  --brand-foreground: oklch(0.10 0.03 65);
-  --brand-muted: oklch(0.18 0.06 65);
+  --brand: oklch(0.74 0.14 72);
+  --brand-foreground: oklch(0.10 0.03 72);
+  --brand-muted: oklch(0.17 0.05 72);
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.78 0.18 65);
-  --amber-foreground: oklch(0.10 0.03 65);
+  --amber: oklch(0.74 0.14 72);
+  --amber-foreground: oklch(0.10 0.03 72);
   --emerald: oklch(0.68 0.17 155);
   --emerald-foreground: oklch(0.10 0.02 155);
 
-  /* ── Page surfaces: deep navy (marketing site: ~#0d1117 / #0a0e1a) ── */
-  --background: oklch(0.10 0.022 240);
-  --foreground: oklch(0.93 0.008 60);        /* warm ivory text */
+  /* ── Page surfaces: deep navy #0C1322 / #131C30 ── */
+  --background: oklch(0.105 0.028 245);      /* #0C1322 navy ground */
+  --foreground: oklch(0.93 0.006 240);       /* #E6E9EF cool slate text */
 
-  --card: oklch(0.14 0.028 240);
-  --card-foreground: oklch(0.93 0.008 60);
+  --card: oklch(0.135 0.030 245);            /* #131C30 raised cards */
+  --card-foreground: oklch(0.93 0.006 240);
 
-  --popover: oklch(0.16 0.030 240);
-  --popover-foreground: oklch(0.93 0.008 60);
+  --popover: oklch(0.155 0.032 245);         /* slightly lighter for popovers */
+  --popover-foreground: oklch(0.93 0.006 240);
 
-  --secondary: oklch(0.20 0.035 240);
-  --secondary-foreground: oklch(0.78 0.012 60);
+  --secondary: oklch(0.195 0.036 245);       /* #233048 slate panels */
+  --secondary-foreground: oklch(0.78 0.010 240);
 
-  --muted: oklch(0.18 0.030 240);
-  --muted-foreground: oklch(0.55 0.018 240);
+  --muted: oklch(0.175 0.030 245);
+  --muted-foreground: oklch(0.54 0.016 240);
 
-  --accent: oklch(0.20 0.035 240);
-  --accent-foreground: oklch(0.78 0.18 65);
+  --accent: oklch(0.195 0.036 245);
+  --accent-foreground: oklch(0.74 0.14 72);
 
   --destructive: oklch(0.60 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.22 0.030 240);
-  --input: oklch(0.22 0.030 240);
-  --ring: oklch(0.78 0.18 65);
+  --border: oklch(0.215 0.030 245);
+  --input: oklch(0.215 0.030 245);
+  --ring: oklch(0.74 0.14 72);
 
   /* ── Sidebar: darkest navy layer ── */
-  --sidebar: oklch(0.075 0.018 240);
-  --sidebar-foreground: oklch(0.82 0.012 240);
-  --sidebar-primary: oklch(0.78 0.18 65);
-  --sidebar-primary-foreground: oklch(0.10 0.03 65);
-  --sidebar-accent: oklch(0.14 0.025 240);
-  --sidebar-accent-foreground: oklch(0.82 0.012 240);
-  --sidebar-border: oklch(0.17 0.025 240);
-  --sidebar-ring: oklch(0.78 0.18 65);
+  --sidebar: oklch(0.075 0.020 245);
+  --sidebar-foreground: oklch(0.82 0.010 240);
+  --sidebar-primary: oklch(0.74 0.14 72);
+  --sidebar-primary-foreground: oklch(0.10 0.03 72);
+  --sidebar-accent: oklch(0.135 0.028 245);
+  --sidebar-accent-foreground: oklch(0.82 0.010 240);
+  --sidebar-border: oklch(0.165 0.026 245);
+  --sidebar-ring: oklch(0.74 0.14 72);
 
   /* ── Charts ── */
-  --chart-1: oklch(0.78 0.18 65);
+  --chart-1: oklch(0.74 0.14 72);
   --chart-2: oklch(0.68 0.17 155);
   --chart-3: oklch(0.62 0.20 22);
   --chart-4: oklch(0.68 0.20 270);
@@ -201,14 +203,20 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     line-height: 1.7;
   }
-  /* Brand serif — Playfair Display for display headlines and brand moments */
+  /* Brand heading — Space Grotesk for greetings, section titles, display moments */
   .font-brand {
-    font-family: 'Playfair Display', 'Lora', Georgia, 'Times New Roman', serif;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-style: normal;
   }
-  /* Italic serif accent — used for the second-line italic headline pattern */
+  /* Accent weight — Space Grotesk semibold for emphasis (replaces italic serif) */
   .font-brand-italic {
-    font-family: 'Playfair Display', 'Lora', Georgia, serif;
-    font-style: italic;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-style: normal;
+    font-weight: 600;
+  }
+  /* Mono accent — DM Mono for timestamps, Thread Strength, Evidence Log, Focus timer */
+  .font-log {
+    font-family: 'DM Mono', 'Fira Mono', 'Courier New', monospace;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -225,7 +233,7 @@
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 2px solid oklch(0.78 0.18 65 / 0.65);
+    outline: 2px solid oklch(0.74 0.14 72 / 0.65);
     outline-offset: 2px;
   }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -299,7 +307,7 @@
 
   /* ── Amber glow ── */
   .glow-accent {
-    box-shadow: 0 0 0 1px oklch(0.78 0.18 65 / 0.3), 0 0 20px oklch(0.78 0.18 65 / 0.12);
+    box-shadow: 0 0 0 1px oklch(0.74 0.14 72 / 0.3), 0 0 20px oklch(0.74 0.14 72 / 0.12);
   }
 
   /* ── Interactive card lift ── */
@@ -322,12 +330,12 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.78 0.18 65 / 0.75);
+    color: oklch(0.74 0.14 72 / 0.75);
   }
   .section-label::before {
     content: '·';
     display: inline;
-    color: oklch(0.78 0.18 65);
+    color: oklch(0.74 0.14 72);
     font-size: 1rem;
     line-height: 1;
     flex-shrink: 0;
@@ -335,7 +343,7 @@
 
   /* ── Gradient text: amber to warm white ── */
   .text-gradient {
-    background: linear-gradient(135deg, oklch(0.78 0.18 65), oklch(0.93 0.008 60));
+    background: linear-gradient(135deg, oklch(0.74 0.14 72), oklch(0.93 0.006 240));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -372,7 +380,7 @@
     width: 2px;
     height: 60%;
     border-radius: 0 2px 2px 0;
-    background: linear-gradient(180deg, oklch(0.78 0.18 65 / 0.9) 0%, oklch(0.78 0.18 65 / 0.3) 100%);
+    background: linear-gradient(180deg, oklch(0.74 0.14 72 / 0.9) 0%, oklch(0.74 0.14 72 / 0.3) 100%);
     transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 250ms ease;
     opacity: 0;
   }
@@ -385,10 +393,10 @@
     opacity: 1;
   }
   [data-slot="sidebar-menu-button"]:hover:not([data-active="true"]) {
-    box-shadow: inset 0 0 0 1px oklch(0.78 0.18 65 / 0.07);
+    box-shadow: inset 0 0 0 1px oklch(0.74 0.14 72 / 0.07);
   }
   [data-slot="sidebar-menu-button"][data-active="true"] {
-    box-shadow: inset 0 0 0 1px oklch(0.78 0.18 65 / 0.13), 0 0 14px oklch(0.78 0.18 65 / 0.05);
+    box-shadow: inset 0 0 0 1px oklch(0.74 0.14 72 / 0.13), 0 0 14px oklch(0.74 0.14 72 / 0.05);
   }
 
   /* ── Divider with label ── */

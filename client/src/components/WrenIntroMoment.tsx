@@ -161,7 +161,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
       {/* Amber radial glow */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        background: "radial-gradient(ellipse at 50% 60%, oklch(0.78 0.18 65 / 0.08) 0%, transparent 60%)",
+        background: "radial-gradient(ellipse at 50% 60%, oklch(0.74 0.14 72 / 0.08) 0%, transparent 60%)",
       }} />
 
       {/* Exit fade-to-black */}
@@ -207,7 +207,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
             color: "rgba(255,255,255,0.95)",
             lineHeight: 1.25,
             letterSpacing: "-0.02em",
-            fontFamily: "'Playfair Display', Georgia, serif",
+            fontFamily: "'Space Grotesk', system-ui, sans-serif",
           }}>
             <WordReveal text={LINES[lineIdx].text} active={lineActive} />
           </p>
@@ -218,9 +218,9 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
           <Fade visible={showCTA} delay={0} style={{ marginBottom: "1.25rem" }}>
             <p style={{
               fontSize: "0.9rem",
-              color: "oklch(0.78 0.18 65 / 0.65)",
+              color: "oklch(0.74 0.14 72 / 0.65)",
               fontStyle: "italic",
-              fontFamily: "'Playfair Display', Georgia, serif",
+              fontFamily: "'Space Grotesk', system-ui, sans-serif",
               letterSpacing: "0.01em",
             }}>
               — Wren
@@ -238,13 +238,13 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
                 padding: "1rem 1.5rem",
                 borderRadius: "1rem",
-                background: "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+                background: "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))",
                 color: "oklch(0.12 0.02 65)",
                 fontSize: "0.9rem",
                 fontWeight: 600,
                 border: "none",
                 cursor: "pointer",
-                boxShadow: "0 4px 20px oklch(0.78 0.18 65 / 0.35)",
+                boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.35)",
                 fontFamily: "inherit",
               }}
             >

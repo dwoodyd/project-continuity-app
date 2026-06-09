@@ -65,7 +65,7 @@ export default function AdminBetaCodesPage() {
             <tbody>
               {codes?.map((c) => (
                 <tr key={c.id} className="border-t border-border hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-2 font-mono text-xs">{c.code}</td>
+                  <td className="px-4 py-2 font-log text-xs">{c.code}</td>
                   <td className="px-4 py-2">
                     {c.usedBy ? (
                       <Badge variant="secondary" className="text-xs">Used</Badge>

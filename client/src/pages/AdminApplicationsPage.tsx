@@ -102,7 +102,7 @@ export default function AdminApplicationsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="font-brand text-2xl text-foreground">
-            Founding Member <em className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>Applications</em>
+            Founding Member <em className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>Applications</em>
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Review and approve applications from the marketing site.
@@ -111,7 +111,7 @@ export default function AdminApplicationsPage() {
         <div className="flex items-center gap-3">
           {pendingCount > 0 && (
             <Badge
-              style={{ background: "oklch(0.78 0.18 65)", color: "#080a0f" }}
+              style={{ background: "oklch(0.74 0.14 72)", color: "#080a0f" }}
               className="text-xs font-semibold"
             >
               {pendingCount} pending
@@ -167,13 +167,13 @@ export default function AdminApplicationsPage() {
                   )}
                   {app.inviteCodeSent && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <p className="text-xs text-muted-foreground font-mono">
-                        Code: <span style={{ color: "oklch(0.78 0.18 65)" }}>{app.inviteCodeSent}</span>
+                      <p className="text-xs text-muted-foreground font-log">
+                        Code: <span style={{ color: "oklch(0.74 0.14 72)" }}>{app.inviteCodeSent}</span>
                       </p>
                       {(app as any).hasRedeemed ? (
                         <span
                           className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-                          style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.78 0.18 65)", border: "1px solid oklch(0.78 0.18 65 / 0.35)" }}
+                          style={{ background: "oklch(0.74 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.35)" }}
                         >
                           FM · Redeemed
                           {(app as any).trialDaysLeft !== null && (
@@ -216,7 +216,7 @@ export default function AdminApplicationsPage() {
                       <Button
                         size="sm"
                         className="text-xs font-semibold"
-                        style={{ background: "oklch(0.78 0.18 65)", color: "#080a0f" }}
+                        style={{ background: "oklch(0.74 0.14 72)", color: "#080a0f" }}
                         onClick={() => handleApprove(app.id, app.name, app.email)}
                         disabled={approveMutation.isPending}
                       >
@@ -229,7 +229,7 @@ export default function AdminApplicationsPage() {
                       size="sm"
                       variant="outline"
                       className="text-xs"
-                      style={{ borderColor: "oklch(0.78 0.18 65 / 0.5)", color: "oklch(0.78 0.18 65)" }}
+                      style={{ borderColor: "oklch(0.74 0.14 72 / 0.5)", color: "oklch(0.74 0.14 72)" }}
                       onClick={() =>
                         resendInviteMutation.mutate({
                           id: app.id,
@@ -249,7 +249,7 @@ export default function AdminApplicationsPage() {
                       size="sm"
                       variant="outline"
                       className="text-xs"
-                      style={{ borderColor: "oklch(0.78 0.18 65 / 0.35)", color: "oklch(0.78 0.18 65)" }}
+                      style={{ borderColor: "oklch(0.74 0.14 72 / 0.35)", color: "oklch(0.74 0.14 72)" }}
                       onClick={() =>
                         resendReminderMutation.mutate({ applicantEmail: app.email })
                       }
@@ -281,7 +281,7 @@ export default function AdminApplicationsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmApproval}
-              style={{ background: "oklch(0.78 0.18 65)", color: "#080a0f" }}
+              style={{ background: "oklch(0.74 0.14 72)", color: "#080a0f" }}
               disabled={approveMutation.isPending}
             >
               {approveMutation.isPending ? "Sending…" : "Approve & Send Email"}

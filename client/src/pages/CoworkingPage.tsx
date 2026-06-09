@@ -247,7 +247,7 @@ export default function CoworkingPage() {
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-foreground" style={{ fontFamily: "Playfair Display, serif" }}>
+        <h1 className="text-2xl font-semibold text-foreground" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}>
           Body Doubling
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -284,7 +284,7 @@ export default function CoworkingPage() {
                 <p className="text-xs text-muted-foreground uppercase tracking-wide">In room</p>
                 <p className="text-lg font-semibold text-foreground">{selectedRoom.name}</p>
               </div>
-              <div className="flex items-center gap-2 text-amber-400 font-mono text-xl">
+              <div className="flex items-center gap-2 text-amber-400 font-log text-xl">
                 <Clock className="h-5 w-5" />
                 {formatDuration(elapsedSeconds)}
               </div>

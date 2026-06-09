@@ -282,14 +282,14 @@ function CheckInCard({
       style={completed
         ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
         : highlighted
-          ? { background: "oklch(0.78 0.18 65 / 0.14)", borderColor: "oklch(0.78 0.18 65 / 0.40)", boxShadow: "0 0 0 1px oklch(0.78 0.18 65 / 0.20), 0 4px 16px oklch(0.78 0.18 65 / 0.12)" }
+          ? { background: "oklch(0.74 0.14 72 / 0.14)", borderColor: "oklch(0.74 0.14 72 / 0.40)", boxShadow: "0 0 0 1px oklch(0.74 0.14 72 / 0.20), 0 4px 16px oklch(0.74 0.14 72 / 0.12)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
       }
     >
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.88 0.16 65)" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.74 0.14 72)" : "oklch(0.55 0.01 270)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
@@ -302,7 +302,7 @@ function CheckInCard({
           <ChevronUp className="ml-auto w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.88 0.16 65 / 0.70)" }} />
         )}
         {!open && active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.88 0.16 65)" }} />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.74 0.14 72)" }} />
         )}
       </div>
       <p
@@ -758,7 +758,7 @@ function MoodWidget() {
 
   function phaseColor(score: number) {
     if (score >= 7) return "oklch(0.75 0.18 145)";
-    if (score >= 4) return "oklch(0.75 0.15 65)";
+    if (score >= 4) return "oklch(0.74 0.14 72)";
     return "oklch(0.65 0.18 30)";
   }
 
@@ -1493,8 +1493,8 @@ export default function Home() {
         <div className="flex items-center gap-3">
           <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" fallbackStill="luminousIdle" />
           <div>
-          <h1 className="text-[1.9rem] font-normal tracking-[-0.01em] text-foreground leading-tight font-brand">
-            {greeting}, <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>{firstName}</span>.
+          <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
+            {greeting}, <span style={{ color: "oklch(0.74 0.14 72)" }}>{firstName}</span>.
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
@@ -1503,7 +1503,7 @@ export default function Home() {
             {streakData && streakData.streak >= 2 && (
               <span
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.16 58)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
+                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
                 title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
               >
                 🔥 {streakData.streak}d
@@ -1556,14 +1556,14 @@ export default function Home() {
         <button
           onClick={() => openCheckIn("morning")}
           className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
-          style={{ borderColor: "oklch(0.78 0.18 65 / 0.28)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}
+          style={{ borderColor: "oklch(0.74 0.14 72 / 0.28)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <Sun className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Morning check-in ready</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Morning check-in ready</p>
             </div>
-            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }} />
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }} />
           </div>
           <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
         </button>
@@ -1632,15 +1632,15 @@ export default function Home() {
         </div>
       )}
       {topAlert === "weekly_review" && (
-        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.78 0.18 65 / 0.06)", borderColor: "oklch(0.78 0.18 65 / 0.20)" }}>
+        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.74 0.14 72 / 0.06)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65)" }} />
-              <p className="text-xs" style={{ color: "oklch(0.88 0.12 65)" }}>Weekly review is ready for this week.</p>
+              <BarChart2 className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72)" }}>Weekly review is ready for this week.</p>
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-xs font-medium hover:underline" style={{ color: "oklch(0.78 0.18 65)" }}
+              className="text-xs font-medium hover:underline" style={{ color: "oklch(0.74 0.14 72)" }}
             >Open</button>
           </div>
         </div>
@@ -1670,10 +1670,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.78 0.18 65 / 0.06)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65)" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65)" }}>Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -1768,7 +1768,7 @@ export default function Home() {
       {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.60)" }}>Daily Rhythm</p>
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>Daily Rhythm</p>
           {gamStatus?.rhythmToday && (
             <RhythmSegments
               morning={gamStatus.rhythmToday.morning}
@@ -1831,7 +1831,7 @@ export default function Home() {
               <WrenPlayer clip="cartwheels" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
-                style={{ color: "oklch(0.85 0.12 65)" }}
+                style={{ color: "oklch(0.74 0.14 72)" }}
               >
                 {wrenCelebration.message}
               </p>
@@ -1926,7 +1926,7 @@ export default function Home() {
       {tasks.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.60)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>
               Today's tasks
             </p>
             <span className="text-sm text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
@@ -2056,12 +2056,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.78 0.18 65 / 0.25)", background: "linear-gradient(135deg, oklch(0.78 0.18 65 / 0.08) 0%, oklch(0.78 0.18 65 / 0.03) 100%)" }}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.74 0.14 72 / 0.25)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-primary-foreground" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.88 0.16 65)" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
                 className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -2238,7 +2238,7 @@ export default function Home() {
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "radial-gradient(ellipse at 50% 80%, oklch(0.78 0.18 65 / 0.10) 0%, transparent 65%)",
+                background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.10) 0%, transparent 65%)",
               }}
             />
             <WrenPlayer
@@ -2253,7 +2253,7 @@ export default function Home() {
             />
             {/* Tagline overlay */}
             <div className="relative z-10 pb-4 text-center px-4">
-              <p className="text-xs font-brand-italic" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>
+              <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>
                 {wrenTagline}
               </p>
             </div>
@@ -2307,10 +2307,10 @@ export default function Home() {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border transition-all group" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.10)" }}>
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
-              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Scratch Pad</p>
+              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Scratch Pad</p>
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
@@ -2345,8 +2345,8 @@ export default function Home() {
             onClick={() => setReEntryOpen(true)}
             className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
             style={{
-              background: "oklch(0.78 0.18 65 / 0.08)",
-              color: "oklch(0.78 0.18 65 / 0.65)",
+              background: "oklch(0.74 0.14 72 / 0.08)",
+              color: "oklch(0.74 0.14 72 / 0.65)",
             }}
           >
             ↺ Pick up the thread
@@ -2359,9 +2359,9 @@ export default function Home() {
         <a
           href="/focus"
           className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.12)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Focus sessions today</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Focus sessions today</p>
           <p className="text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>
             {focusTodayStats.todaySessions} session{focusTodayStats.todaySessions !== 1 ? "s" : ""} · {focusTodayStats.todayMinutes} min
             {focusArtifact && focusArtifact.totalSegments > 0 && ` · ${focusArtifact.totalSegments} woven total`}
@@ -2373,9 +2373,9 @@ export default function Home() {
       {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
         <div
           className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.78 0.18 65 / 0.12)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>Evidence of movement</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Evidence of movement</p>
           <MovementFeed events={gamStatus.recentEvents as any} />
         </div>
       )}
@@ -2535,7 +2535,7 @@ export default function Home() {
 
       {/* ── Notification Permission Prompt ─────────────────────────────────── */}
       {showNotifPrompt && (
-        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
+        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Bell className="w-5 h-5 text-primary" />

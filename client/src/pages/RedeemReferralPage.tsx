@@ -79,7 +79,7 @@ export default function RedeemReferralPage() {
     redeemMutation.mutate({ referralCode: trimmed });
   };
 
-  const accent = "oklch(0.78 0.18 65)";
+  const accent = "oklch(0.74 0.14 72)";
   const bg = "oklch(0.09 0.015 240)";
   const text = "oklch(0.97 0.01 80)";
   const muted = "oklch(0.60 0.01 240)";
@@ -110,7 +110,7 @@ export default function RedeemReferralPage() {
           <CheckCircle2 className="w-14 h-14 mx-auto" style={{ color: accent }} />
           <h1
             className="text-3xl font-bold"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
           >
             You're in.
           </h1>
@@ -152,7 +152,7 @@ export default function RedeemReferralPage() {
           </div>
           <h1
             className="text-3xl font-bold leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
           >
             Enter your referral code.
           </h1>
@@ -181,7 +181,7 @@ export default function RedeemReferralPage() {
               autoCorrect="off"
               autoCapitalize="characters"
               spellCheck={false}
-              className="font-mono text-base tracking-wider h-12"
+              className="font-log text-base tracking-wider h-12"
               style={{
                 background: "oklch(0.13 0.015 240)",
                 border: `1px solid oklch(0.25 0.015 240)`,

@@ -336,7 +336,7 @@ const SourceItemCard = React.memo(function SourceItemCard({
           {item.rawContent && (
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-1">Content preview</p>
-              <p className="text-xs text-foreground/70 leading-relaxed line-clamp-6 font-mono bg-background rounded-lg p-3 border border-border/60">
+              <p className="text-xs text-foreground/70 leading-relaxed line-clamp-6 font-log bg-background rounded-lg p-3 border border-border/60">
                 {item.rawContent.substring(0, 600)}{item.rawContent.length > 600 ? "..." : ""}
               </p>
             </div>
@@ -589,7 +589,7 @@ export default function VaultPage() {
 
       {/* Graph onboarding nudge */}
       {showGraphNudge && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border text-sm" style={{ borderColor: "oklch(0.78 0.18 65 / 0.20)", background: "oklch(0.78 0.18 65 / 0.06)" }}>
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl border text-sm" style={{ borderColor: "oklch(0.74 0.14 72 / 0.20)", background: "oklch(0.74 0.14 72 / 0.06)" }}>
           <svg className="w-4 h-4 text-primary shrink-0" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
             <circle cx="8" cy="8" r="2" /><circle cx="2" cy="4" r="1.5" /><circle cx="14" cy="3" r="1.5" />
             <circle cx="13" cy="13" r="1.5" /><circle cx="3" cy="13" r="1.5" />
@@ -861,7 +861,7 @@ export default function VaultPage() {
                 {item.rawContent && (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground mb-1.5">Content preview</p>
-                    <p className="text-xs text-foreground/70 leading-relaxed font-mono bg-muted/40 rounded-lg p-3 border border-border/60 whitespace-pre-wrap">
+                    <p className="text-xs text-foreground/70 leading-relaxed font-log bg-muted/40 rounded-lg p-3 border border-border/60 whitespace-pre-wrap">
                       {item.rawContent.substring(0, 800)}{item.rawContent.length > 800 ? "..." : ""}
                     </p>
                   </div>

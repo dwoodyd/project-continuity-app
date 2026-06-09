@@ -158,7 +158,7 @@ export default function InviteGatePage() {
           fontWeight: 700,
           letterSpacing: "0.2em",
           textTransform: "uppercase" as const,
-          color: "oklch(0.80 0.17 65)",
+          color: "oklch(0.80 0.14 72)",
           marginBottom: "0.75rem",
           position: "relative",
           zIndex: 1,
@@ -264,7 +264,7 @@ export default function InviteGatePage() {
                       fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
                       fontSize: "clamp(0.85rem, 2.5vw, 1.1rem)",
                       fontWeight: 600,
-                      color: isFilled ? "oklch(0.85 0.12 65)" : "transparent",
+                      color: isFilled ? "oklch(0.74 0.14 72)" : "transparent",
                       cursor: "text",
                       transition: "border-color 0.15s ease, background 0.15s ease, color 0.15s ease",
                       position: "relative",
@@ -322,7 +322,7 @@ export default function InviteGatePage() {
             borderRadius: "100px",
             border: "none",
             background: raw.length === TOTAL_CHARS && !redeem.isPending && !success
-              ? "linear-gradient(135deg, oklch(0.80 0.17 65) 0%, oklch(0.72 0.20 55) 100%)"
+              ? "linear-gradient(135deg, oklch(0.80 0.14 72) 0%, oklch(0.72 0.20 55) 100%)"
               : "rgba(255,255,255,0.07)",
             color: raw.length === TOTAL_CHARS && !redeem.isPending && !success
               ? "#080a0f"

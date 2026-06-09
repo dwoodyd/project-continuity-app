@@ -464,7 +464,7 @@ export default function IntelligencePage() {
                           className="h-full rounded-full transition-all duration-500"
                           style={{
                             width: `${stat.alignedPct}%`,
-                            background: stat.level === "high" ? "oklch(0.72 0.17 145)" : stat.level === "medium" ? "oklch(0.78 0.17 65)" : "oklch(0.65 0.15 25)",
+                            background: stat.level === "high" ? "oklch(0.72 0.17 145)" : stat.level === "medium" ? "oklch(0.74 0.14 72)" : "oklch(0.65 0.15 25)",
                           }}
                         />
                       </div>

@@ -100,13 +100,13 @@ export default function WeeklyReviewPage() {
         </div>
       )}
       {!review && !generating && (
-        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{ background: "oklch(0.13 0.03 60)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
+        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{ background: "oklch(0.13 0.03 60)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
           <div className="relative">
             <div className="flex justify-center mb-4">
               <WrenPlayer clip="wrenLetter" size="lg" />
             </div>
-            <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.92 0.08 65)" }}>Ask Wren to read your week</p>
-            <p className="text-sm mb-5" style={{ color: "oklch(0.60 0.05 65)" }}>
+            <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.74 0.14 72)" }}>Ask Wren to read your week</p>
+            <p className="text-sm mb-5" style={{ color: "oklch(0.60 0.05 240)" }}>
               Wren will read your past 7 days — check-ins, projects, patterns — and write you back.
             </p>
             <Button
@@ -122,7 +122,7 @@ export default function WeeklyReviewPage() {
         </div>
       )}
       {review && (
-        <div className="p-5 rounded-xl space-y-4" style={{ background: "oklch(0.78 0.18 65 / 0.06)", border: "1px solid oklch(0.78 0.18 65 / 0.18)" }}>
+        <div className="p-5 rounded-xl space-y-4" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
             <p className="text-xs font-medium text-primary uppercase tracking-wide">AI Weekly Review</p>
@@ -185,7 +185,7 @@ export default function WeeklyReviewPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-sm text-foreground leading-snug">{session.intention}</p>
-                      <span className="text-xs text-muted-foreground shrink-0 font-mono tabular-nums">
+                      <span className="text-xs text-muted-foreground shrink-0 font-log tabular-nums">
                         {formatDuration(session.durationSeconds)}
                       </span>
                     </div>

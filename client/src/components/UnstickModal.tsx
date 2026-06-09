@@ -155,7 +155,7 @@ export default function UnstickModal({ task, onClose, entryMethod = "manual" }: 
                   <Timer className={cn("w-4 h-4 shrink-0", timeboxActive ? "text-amber-500" : "text-muted-foreground")} />
                   <span className="text-sm truncate">
                     {timeboxActive
-                      ? <span className="font-mono font-medium text-amber-600 dark:text-amber-400">{formatTime(timeboxSeconds)} remaining</span>
+                      ? <span className="font-log font-medium text-amber-600 dark:text-amber-400">{formatTime(timeboxSeconds)} remaining</span>
                       : <span className="text-muted-foreground">{result.timeboxOffer}</span>
                     }
                   </span>

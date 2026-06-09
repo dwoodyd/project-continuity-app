@@ -12,7 +12,7 @@ function formatDate(iso: string) {
 
 function phaseColor(score: number): string {
   if (score >= 7) return "oklch(0.75 0.18 145)";   // green-ish — elation
-  if (score >= 4) return "oklch(0.75 0.15 65)";    // amber — neutral
+  if (score >= 4) return "oklch(0.74 0.14 72)";    // amber — neutral
   return "oklch(0.65 0.18 30)";                     // red-ish — worry
 }
 
@@ -87,8 +87,8 @@ function CycleChart({ data }: { data: { date: string; score: number }[] }) {
         {/* Gradient fill under curve */}
         <defs>
           <linearGradient id="cycleGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.78 0.18 65)" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="oklch(0.78 0.18 65)" stopOpacity={0.0} />
+            <stop offset="0%" stopColor="oklch(0.74 0.14 72)" stopOpacity={0.25} />
+            <stop offset="100%" stopColor="oklch(0.74 0.14 72)" stopOpacity={0.0} />
           </linearGradient>
         </defs>
         {pathD && (
@@ -100,7 +100,7 @@ function CycleChart({ data }: { data: { date: string; score: number }[] }) {
 
         {/* Main curve */}
         {pathD && (
-          <path d={pathD} fill="none" stroke="oklch(0.78 0.18 65)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke="oklch(0.74 0.14 72)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
         )}
 
         {/* Dots */}
@@ -168,7 +168,7 @@ function ScorePicker({ value, onChange }: { value: number | null; onChange: (v: 
 // ─── Phase badge ──────────────────────────────────────────────────────────────
 function PhaseBadge({ phase }: { phase: "high" | "neutral" | "low" | null }) {
   if (!phase) return null;
-  const colors: Record<string, string> = { high: "oklch(0.75 0.18 145)", neutral: "oklch(0.75 0.15 65)", low: "oklch(0.65 0.18 30)" };
+  const colors: Record<string, string> = { high: "oklch(0.75 0.18 145)", neutral: "oklch(0.74 0.14 72)", low: "oklch(0.65 0.18 30)" };
   const labels: Record<string, string> = { high: "High Period", neutral: "Neutral Phase", low: "Low Period" };
   return (
     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", padding: "0.2rem 0.7rem", borderRadius: "999px", fontSize: "0.75rem", fontWeight: 600, background: `${colors[phase]}22`, color: colors[phase], border: `1px solid ${colors[phase]}44` }}>
@@ -330,10 +330,10 @@ export default function EmotionalCyclePage() {
             disabled={!score || logMutation.isPending}
             className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
             style={{
-              background: score ? "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))" : "rgba(255,255,255,0.06)",
+              background: score ? "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))" : "rgba(255,255,255,0.06)",
               color: score ? "white" : "rgba(255,255,255,0.3)",
               cursor: score ? "pointer" : "not-allowed",
-              boxShadow: score ? "0 4px 20px oklch(0.78 0.18 65 / 0.35)" : "none",
+              boxShadow: score ? "0 4px 20px oklch(0.74 0.14 72 / 0.35)" : "none",
             }}
           >
             {logMutation.isPending ? "Saving…" : alreadyLogged ? "Update log" : "Log this moment"}

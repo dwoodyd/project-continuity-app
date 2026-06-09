@@ -171,7 +171,7 @@ export function VoiceDictation({ onTranscript, context, className, disabled }: P
       ) : (
         <Mic
           className="w-4 h-4"
-          style={{ color: isRecording ? "oklch(0.72 0.17 65)" : "oklch(1 0 0 / 0.45)" }}
+          style={{ color: isRecording ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.45)" }}
         />
       )}
       {/* Recording pulse ring */}

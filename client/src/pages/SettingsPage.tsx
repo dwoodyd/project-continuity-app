@@ -801,7 +801,7 @@ export default function SettingsPage() {
                 {inviteCodes.map((code) => (
                   <div key={code.id} className="flex items-center justify-between px-4 py-3 gap-3">
                     <div className="min-w-0">
-                      <p className="text-sm font-mono font-medium text-foreground tracking-widest">{code.code}</p>
+                      <p className="text-sm font-log font-medium text-foreground tracking-widest">{code.code}</p>
                       {code.label && (
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">{code.label}</p>
                       )}
@@ -1035,7 +1035,7 @@ export default function SettingsPage() {
                 <p className="text-sm font-semibold text-foreground">Cold project alert</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Notify me when a project hasn't moved in:</p>
               </div>
-              <span className="text-sm font-semibold tabular-nums" style={{ color: "oklch(0.74 0.16 58)" }}>
+              <span className="text-sm font-semibold tabular-nums" style={{ color: "oklch(0.74 0.14 72)" }}>
                 {settings?.coldProjectThresholdDays ?? 5} days
               </span>
             </div>
@@ -1109,7 +1109,7 @@ export default function SettingsPage() {
                 { v: "v1.0", note: "Daily check-ins, Clarity Engine, project health scores" },
               ].map(({ v, note }) => (
                 <div key={v} className="flex gap-2 items-start">
-                  <span className="text-xs font-mono shrink-0 mt-0.5" style={{ color: "#f6c878" }}>{v}</span>
+                  <span className="text-xs font-log shrink-0 mt-0.5" style={{ color: "#f6c878" }}>{v}</span>
                   <span className="text-xs text-muted-foreground">{note}</span>
                 </div>
               ))}

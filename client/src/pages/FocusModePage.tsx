@@ -346,7 +346,7 @@ export default function FocusModePage() {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className={cn(
-                  "text-5xl font-mono font-light tabular-nums",
+                  "text-5xl font-log font-light tabular-nums",
                   phase === "active" ? "text-white" : "text-emerald-300"
                 )}>
                   {formatTime(timeLeft)}

@@ -236,9 +236,9 @@ export default function AboutAppPage() {
           <div
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
             style={{
-              background: "oklch(0.72 0.14 65 / 0.12)",
-              borderColor: "oklch(0.72 0.14 65 / 0.3)",
-              color: "oklch(0.85 0.12 65)",
+              background: "oklch(0.72 0.14 72 / 0.12)",
+              borderColor: "oklch(0.72 0.14 72 / 0.3)",
+              color: "oklch(0.74 0.14 72)",
             }}
           >
             Welcome to Continuary
@@ -246,7 +246,7 @@ export default function AboutAppPage() {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight leading-[1.15] mb-5">
             You don't need more productivity.
             <br />
-            <span style={{ color: "oklch(0.82 0.14 65)" }}>
+            <span style={{ color: "oklch(0.74 0.14 72)" }}>
               You need proof you're already moving.
             </span>
           </h1>
@@ -305,7 +305,7 @@ export default function AboutAppPage() {
           <div className="text-center mb-8">
             <p
               className="text-xs font-semibold tracking-widest uppercase mb-2"
-              style={{ color: "oklch(0.82 0.14 65)" }}
+              style={{ color: "oklch(0.74 0.14 72)" }}
             >
               Meet Wren
             </p>
@@ -323,15 +323,15 @@ export default function AboutAppPage() {
             className="rounded-2xl overflow-hidden mb-6 relative"
             style={{
               background: "oklch(0.12 0.04 264)",
-              border: "1px solid oklch(0.72 0.14 65 / 0.2)",
-              boxShadow: "0 0 60px oklch(0.72 0.14 65 / 0.08)",
+              border: "1px solid oklch(0.72 0.14 72 / 0.2)",
+              boxShadow: "0 0 60px oklch(0.72 0.14 72 / 0.08)",
             }}
           >
             {/* Ambient glow */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
-                background: "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.72 0.14 65 / 0.12) 0%, transparent 70%)",
+                background: "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.72 0.14 72 / 0.12) 0%, transparent 70%)",
               }}
             />
             <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-6 p-6 sm:p-8 relative z-10">
@@ -343,8 +343,8 @@ export default function AboutAppPage() {
                   height: 200,
                   borderRadius: "1.25rem",
                   overflow: "hidden",
-                  boxShadow: "0 8px 40px oklch(0.72 0.14 65 / 0.25)",
-                  border: "1px solid oklch(0.72 0.14 65 / 0.2)",
+                  boxShadow: "0 8px 40px oklch(0.72 0.14 72 / 0.25)",
+                  border: "1px solid oklch(0.72 0.14 72 / 0.2)",
                 }}
               >
                 <WrenPlayer clip="luminousFloats" size="full" loop autoPlay feather featherDirection="radial" />
@@ -353,7 +353,7 @@ export default function AboutAppPage() {
               <div className="flex-1 text-center sm:text-left">
                 <div
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-3"
-                  style={{ background: "oklch(0.72 0.14 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}
+                  style={{ background: "oklch(0.72 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)" }}
                 >
                   <Sparkles className="w-3 h-3" />
                   Continuary's mascot
@@ -362,7 +362,7 @@ export default function AboutAppPage() {
                 <p className="text-sm text-white/70 leading-relaxed mb-3">
                   A quiet companion built on the framework of <em>Permission to Start</em>.
                 </p>
-                <div className="space-y-1 mb-3 pl-3 border-l-2" style={{ borderColor: 'oklch(0.72 0.14 65 / 0.3)' }}>
+                <div className="space-y-1 mb-3 pl-3 border-l-2" style={{ borderColor: 'oklch(0.72 0.14 72 / 0.3)' }}>
                   <p className="text-xs text-white/55 italic">Wren notices, doesn't judge.</p>
                   <p className="text-xs text-white/55 italic">She remembers, doesn't measure.</p>
                   <p className="text-xs text-white/55 italic">She returns, doesn't rebuke.</p>
@@ -392,7 +392,7 @@ export default function AboutAppPage() {
                       height: 64,
                       borderRadius: "0.75rem",
                       overflow: "hidden",
-                      border: "1px solid oklch(0.72 0.14 65 / 0.15)",
+                      border: "1px solid oklch(0.72 0.14 72 / 0.15)",
                     }}
                   >
                     <WrenPlayer clip={clip} size="full" loop autoPlay />
@@ -414,7 +414,7 @@ export default function AboutAppPage() {
             className="rounded-2xl border p-6"
             style={{
               background: "oklch(0.14 0.03 264 / 0.6)",
-              borderColor: "oklch(0.72 0.14 65 / 0.15)",
+              borderColor: "oklch(0.72 0.14 72 / 0.15)",
             }}
           >
             <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-5">
@@ -431,7 +431,7 @@ export default function AboutAppPage() {
                       height: 48,
                       borderRadius: "0.625rem",
                       overflow: "hidden",
-                      border: "1px solid oklch(0.72 0.14 65 / 0.15)",
+                      border: "1px solid oklch(0.72 0.14 72 / 0.15)",
                     }}
                   >
                     <WrenPlayer clip={clip} size="full" loop autoPlay />
@@ -447,7 +447,7 @@ export default function AboutAppPage() {
         </div>
 
         {/* ── Deeper features ── */}
-        <div className="rounded-2xl border p-6 mb-10" style={{ background: "oklch(0.12 0.03 264 / 0.6)", borderColor: "oklch(0.72 0.14 65 / 0.12)" }}>
+        <div className="rounded-2xl border p-6 mb-10" style={{ background: "oklch(0.12 0.03 264 / 0.6)", borderColor: "oklch(0.72 0.14 72 / 0.12)" }}>
           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-4">
             Features worth knowing
           </p>
@@ -484,7 +484,7 @@ export default function AboutAppPage() {
               <li key={i} className="flex items-start gap-3">
                 <span
                   className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
-                  style={{ background: "oklch(0.72 0.14 65 / 0.2)", color: "oklch(0.85 0.12 65)" }}
+                  style={{ background: "oklch(0.72 0.14 72 / 0.2)", color: "oklch(0.74 0.14 72)" }}
                 >
                   {i + 1}
                 </span>
@@ -501,7 +501,7 @@ export default function AboutAppPage() {
           ) : (
             <p className="text-xs text-white/35">
               Not yet a founding member?{" "}
-              <button onClick={() => navigate("/pricing")} className="hover:text-amber-400 transition-colors underline underline-offset-2" style={{ color: 'oklch(0.82 0.14 65)' }}>See pricing →</button>
+              <button onClick={() => navigate("/pricing")} className="hover:text-amber-400 transition-colors underline underline-offset-2" style={{ color: 'oklch(0.74 0.14 72)' }}>See pricing →</button>
             </p>
           )}
         </div>
@@ -514,7 +514,7 @@ export default function AboutAppPage() {
             size="lg"
             className="w-full sm:w-auto px-10 py-4 text-base font-semibold rounded-2xl gap-2 shadow-lg"
             style={{
-              background: "oklch(0.72 0.14 65)",
+              background: "oklch(0.72 0.14 72)",
               color: "oklch(0.15 0.03 264)",
             }}
           >

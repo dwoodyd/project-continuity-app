@@ -78,7 +78,7 @@ export function FirstMovableStepCard({
           size="sm"
           onClick={handleStart}
           disabled={markUsed.isPending}
-          className="gap-1.5" style={{ background: 'oklch(0.78 0.18 65)', color: 'oklch(0.12 0.02 65)' }}
+          className="gap-1.5" style={{ background: 'oklch(0.74 0.14 72)', color: 'oklch(0.12 0.02 65)' }}
         >
           {markUsed.isPending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -256,7 +256,7 @@ export default function AdminInviteCodesPage() {
 
                   {/* Code + label */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-mono text-sm font-semibold tracking-widest text-foreground">{c.code}</p>
+                    <p className="font-log text-sm font-semibold tracking-widest text-foreground">{c.code}</p>
                     {c.label && (
                       <p className="text-xs text-muted-foreground truncate">{c.label}</p>
                     )}

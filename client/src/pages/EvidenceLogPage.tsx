@@ -274,11 +274,11 @@ export default function EvidenceLogPage() {
           <WrenPlayer clip="checkmark" size="2xl" />
           <p
             className="mt-4 text-lg font-semibold text-center px-8"
-            style={{ color: "oklch(0.85 0.12 65)" }}
+            style={{ color: "oklch(0.74 0.14 72)" }}
           >
             This is your record. Every entry is proof.
           </p>
-          <p className="mt-2 text-xs text-center" style={{ color: "oklch(0.65 0.08 65)" }}>
+          <p className="mt-2 text-xs text-center" style={{ color: "oklch(0.60 0.08 72)" }}>
             Tap anywhere to continue
           </p>
         </div>
@@ -294,7 +294,7 @@ export default function EvidenceLogPage() {
             title={
               <span className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-amber-400" />
-                Evidence <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>Log</span>
+                Evidence <span className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>Log</span>
               </span>
             }
             subtitle="The record of who you actually are — not who you think you should be."

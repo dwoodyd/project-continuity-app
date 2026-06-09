@@ -96,7 +96,7 @@ export function PushPermissionInterstitial({ onAllow, onDismiss }: Props) {
 
         {/* Headline */}
         <h2 style={{
-          fontFamily: "'Lora', Georgia, serif",
+          fontFamily: "'Space Grotesk', system-ui, sans-serif",
           fontSize: 22,
           fontWeight: 600,
           color: "oklch(0.96 0.005 270)",

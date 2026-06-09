@@ -152,7 +152,7 @@ export default function WeeklyCompassPage() {
           `}</style>
           <div className="text-5xl">🧭</div>
           <div>
-            <h2 className="text-xl font-normal text-foreground mb-1 font-brand">Week <span className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>gathered.</span></h2>
+            <h2 className="text-xl font-normal text-foreground mb-1 font-brand">Week <span className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>gathered.</span></h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Your compass is set. The thread is clear.
             </p>

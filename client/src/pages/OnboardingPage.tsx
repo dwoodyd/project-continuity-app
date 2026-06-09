@@ -285,9 +285,9 @@ function CTAButton({ onClick, disabled, loading, children, secondary }: {
       } : {
         background: disabled || loading
           ? "rgba(255,255,255,0.08)"
-          : "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+          : "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))",
         color: disabled || loading ? "rgba(255,255,255,0.3)" : "oklch(0.12 0.02 65)",
-        boxShadow: disabled || loading ? "none" : "0 4px 20px oklch(0.78 0.18 65 / 0.35)",
+        boxShadow: disabled || loading ? "none" : "0 4px 20px oklch(0.74 0.14 72 / 0.35)",
         cursor: disabled || loading ? "not-allowed" : "pointer",
       }}
     >
@@ -302,7 +302,7 @@ function ProgressBar({ value }: { value: number }) {
     <div className="fixed top-0 inset-x-0 z-50 h-0.5" style={{ background: "rgba(255,255,255,0.06)" }}>
       <div className="h-full transition-all duration-700 ease-out" style={{
         width: `${value}%`,
-        background: "linear-gradient(90deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+        background: "linear-gradient(90deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))",
         boxShadow: "0 0 8px oklch(0.65 0.18 65 / 0.7)",
       }} />
     </div>
@@ -425,7 +425,7 @@ function InviteGateScreen({ onSuccess }: { onSuccess: () => void }) {
             onKeyDown={e => e.key === "Enter" && checkInvite()}
             placeholder="INVITE CODE"
             autoFocus
-            className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-widest outline-none"
+            className="w-full px-5 py-4 rounded-2xl text-sm font-log tracking-widest outline-none"
             style={{
               background: "rgba(255,255,255,0.08)",
               border: inviteError ? "1.5px solid oklch(0.65 0.22 25)" : "1.5px solid rgba(255,255,255,0.15)",
@@ -453,7 +453,7 @@ function InviteGateScreen({ onSuccess }: { onSuccess: () => void }) {
                 onKeyDown={e => e.key === "Enter" && checkBeta()}
                 placeholder="BETA CODE"
                 autoFocus
-                className="w-full px-5 py-4 rounded-2xl text-sm font-mono tracking-widest outline-none"
+                className="w-full px-5 py-4 rounded-2xl text-sm font-log tracking-widest outline-none"
                 style={{
                   background: "rgba(255,255,255,0.06)",
                   border: betaError ? "1.5px solid oklch(0.65 0.22 25)" : "1.5px solid oklch(0.80 0.17 65 / 0.3)",
@@ -463,7 +463,7 @@ function InviteGateScreen({ onSuccess }: { onSuccess: () => void }) {
               {betaError && <p className="text-xs px-1" style={{ color: "oklch(0.72 0.18 25)" }}>{betaError}</p>}
               <button onClick={checkBeta} disabled={!betaCode.trim() || betaChecking}
                 className="w-full py-3 rounded-2xl text-sm font-semibold"
-                style={{ background: "oklch(0.80 0.17 65 / 0.12)", border: "1.5px solid oklch(0.80 0.17 65 / 0.3)", color: "oklch(0.80 0.17 65)" }}>
+                style={{ background: "oklch(0.80 0.17 65 / 0.12)", border: "1.5px solid oklch(0.80 0.17 65 / 0.3)", color: "oklch(0.80 0.14 72)" }}>
                 {betaChecking ? "Checking…" : "Activate beta access"}
               </button>
             </div>
@@ -631,7 +631,7 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.74 0.14 72 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -679,7 +679,7 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
         </Fade>
         <Fade visible={visible} delay={120} style={{ marginBottom: "0.75rem" }}>
           <h2 style={{ fontSize: "clamp(1.6rem, 5.5vw, 2.6rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
-            Good to meet you, <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>{name || "friend"}</span>.
+            Good to meet you, <span style={{ color: "oklch(0.74 0.14 72)", fontWeight: 600 }}>{name || "friend"}</span>.
           </h2>
         </Fade>
         <Fade visible={visible} delay={280} style={{ marginBottom: "2rem" }}>
@@ -874,7 +874,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.74 0.14 72 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -891,7 +891,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.74 0.14 72 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -907,7 +907,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
                 border: "1.5px solid rgba(255,255,255,0.12)",
                 color: "rgba(255,255,255,0.9)",
               }}
-              onFocus={e => (e.target.style.borderColor = "oklch(0.78 0.18 65 / 0.6)")}
+              onFocus={e => (e.target.style.borderColor = "oklch(0.74 0.14 72 / 0.6)")}
               onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,0.12)")}
             />
           </Fade>
@@ -945,7 +945,7 @@ function StepFocusSessions({ onNext }: { onNext: () => void }) {
         <Fade visible={visible} delay={100} style={{ marginBottom: "0.75rem" }}>
           <h2 style={{ fontSize: "clamp(1.6rem, 5.5vw, 2.4rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.25, letterSpacing: "-0.02em" }}>
             Focus Sessions — where you work{" "}
-            <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>with Wren</span>.
+            <span style={{ color: "oklch(0.74 0.14 72)", fontWeight: 600 }}>with Wren</span>.
           </h2>
         </Fade>
         <Fade visible={visible} delay={240} style={{ marginBottom: "1.75rem" }}>
@@ -996,7 +996,7 @@ function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
         </Fade>
         <Fade visible={visible} delay={120} style={{ marginBottom: "0.75rem" }}>
           <h2 style={{ fontSize: "clamp(1.8rem, 6vw, 2.8rem)", fontWeight: 300, color: "rgba(255,255,255,0.95)", lineHeight: 1.2, letterSpacing: "-0.02em" }}>
-            Welcome to Continuary, <span style={{ color: "oklch(0.88 0.15 65)", fontWeight: 600 }}>{name || "friend"}</span>.
+            Welcome to Continuary, <span style={{ color: "oklch(0.74 0.14 72)", fontWeight: 600 }}>{name || "friend"}</span>.
           </h2>
         </Fade>
         <Fade visible={visible} delay={280} style={{ marginBottom: "2rem" }}>
@@ -1133,9 +1133,9 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
           <a href={getLoginUrl()}
             className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl text-sm font-semibold"
             style={{
-              background: "linear-gradient(135deg, oklch(0.65 0.18 65), oklch(0.80 0.17 65))",
+              background: "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))",
               color: "oklch(0.12 0.02 65)",
-              boxShadow: "0 4px 20px oklch(0.78 0.18 65 / 0.35)",
+              boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.35)",
             }}>
             Sign in <ChevronRight className="w-4 h-4" />
           </a>

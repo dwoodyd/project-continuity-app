@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 import { GlossaryTerm } from "@/components/TermTooltip";
 
 /* Amber accent constants — matches marketing site #F5A623 */
-const AMBER = "oklch(0.78 0.18 65)";
-const AMBER_DIM = "oklch(0.78 0.18 65 / 0.65)";
-const AMBER_FAINT = "oklch(0.78 0.18 65 / 0.18)";
+const AMBER = "oklch(0.74 0.14 72)";
+const AMBER_DIM = "oklch(0.74 0.14 72 / 0.65)";
+const AMBER_FAINT = "oklch(0.74 0.14 72 / 0.18)";
 const AMBER_TEXT = "oklch(0.90 0.10 65)";
 
 // ─── Return Marker ────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ export function ReturnMarker({ message, onDismiss }: { message: string; onDismis
       className="relative flex items-start gap-3 px-4 py-3 rounded-2xl border"
       style={{
         background: "oklch(0.16 0.03 65 / 0.55)",
-        borderColor: "oklch(0.78 0.18 65 / 0.18)",
+        borderColor: "oklch(0.74 0.14 72 / 0.18)",
         backdropFilter: "blur(8px)",
       }}
     >
@@ -80,14 +80,14 @@ export function RhythmSegments({
           />
           <span
             className="text-sm font-medium transition-colors duration-500"
-            style={{ color: done ? "oklch(0.78 0.18 65 / 0.7)" : "oklch(1 0 0 / 0.22)" }}
+            style={{ color: done ? "oklch(0.74 0.14 72 / 0.7)" : "oklch(1 0 0 / 0.22)" }}
           >
             {label}
           </span>
         </div>
       ))}
       {count === 3 && (
-        <span className="text-xs ml-1" style={{ color: "oklch(0.78 0.18 65 / 0.55)" }}>
+        <span className="text-xs ml-1" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>
           · Full day held
         </span>
       )}
@@ -157,7 +157,7 @@ export function MovementFeed({ events }: { events: Array<{ id: number; label: st
         const Icon = EVENT_ICONS[ev.eventType] ?? Zap;
         return (
           <div key={ev.id} className="flex items-center gap-2.5 py-1">
-            <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.78 0.18 65 / 0.45)" }} />
+            <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.45)" }} />
             <span className="text-xs flex-1 truncate" style={{ color: "oklch(1 0 0 / 0.50)" }}>
               {ev.label ?? ev.eventType.replace(/_/g, " ")}
             </span>
@@ -190,14 +190,14 @@ export function MilestoneCard({
       )}
       style={{
         background: "linear-gradient(135deg, oklch(0.16 0.04 65 / 0.8), oklch(0.13 0.02 65 / 0.9))",
-        borderColor: "oklch(0.78 0.18 65 / 0.22)",
+        borderColor: "oklch(0.74 0.14 72 / 0.22)",
       }}
     >
       {/* Subtle amber glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse at 20% 50%, oklch(0.78 0.18 65 / 0.06) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse at 20% 50%, oklch(0.74 0.14 72 / 0.06) 0%, transparent 70%)",
         }}
       />
       <button

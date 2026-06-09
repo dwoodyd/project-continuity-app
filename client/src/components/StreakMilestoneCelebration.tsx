@@ -135,7 +135,7 @@ export default function StreakMilestoneCelebration({ streak }: Props) {
           fontWeight: 700,
           letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: "oklch(0.80 0.17 65)",
+          color: "oklch(0.80 0.14 72)",
           marginBottom: "0.75rem",
           position: "relative",
           zIndex: 1,

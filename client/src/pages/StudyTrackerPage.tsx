@@ -214,7 +214,7 @@ function SetupScreen({ onDone }: { onDone: () => void }) {
           onClick={handleSubmit}
           disabled={createMutation.isPending}
           className="w-full py-3"
-          style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+          style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
         >
           {createMutation.isPending ? "Setting up…" : "Begin →"}
         </Button>
@@ -241,7 +241,7 @@ function EmptyState({ onSetup }: { onSetup: () => void }) {
       </p>
       <Button
         onClick={onSetup}
-        style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+        style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
       >
         Set up your focus →
       </Button>
@@ -431,7 +431,7 @@ function DayNavigator({
           style={{
             background:
               selectedDay === d
-                ? "oklch(0.72 0.16 65)"
+                ? "oklch(0.72 0.14 72)"
                 : completedDays.has(d)
                 ? "oklch(0.22 0.04 65)"
                 : "oklch(0.16 0.02 240)",
@@ -581,7 +581,7 @@ function DayCard({
       <Button
         onClick={handleSave}
         disabled={saving}
-        style={{ background: "oklch(0.72 0.16 65)", color: "oklch(0.10 0.02 240)" }}
+        style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
       >
         {saving ? "Saving…" : "Save Day →"}
       </Button>
@@ -710,7 +710,7 @@ export default function StudyTrackerPage() {
               )}
               style={
                 activeTab === tab
-                  ? { borderColor: "oklch(0.72 0.16 65)", color: "oklch(0.80 0.10 65)" }
+                  ? { borderColor: "oklch(0.72 0.14 72)", color: "oklch(0.80 0.10 65)" }
                   : {}
               }
             >

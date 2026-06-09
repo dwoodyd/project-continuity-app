@@ -105,7 +105,7 @@ function KnowledgeGraphDemo() {
 
   return (
     <div className="space-y-3">
-      <div className="relative rounded-2xl overflow-hidden" style={{ paddingBottom: "56%", background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
+      <div className="relative rounded-2xl overflow-hidden" style={{ paddingBottom: "56%", background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.12)" }}>
         <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
           {GRAPH_EDGES.map((e, i) => {
             const from = GRAPH_NODES.find(n => n.id === e.from)!;
@@ -173,9 +173,9 @@ function KnowledgeGraphDemo() {
             const fromNode = GRAPH_NODES.find(n => n.id === e.from)!;
             const toNode   = GRAPH_NODES.find(n => n.id === e.to)!;
             return (
-              <div key={e.i} className="flex items-center justify-between gap-3 rounded-xl px-4 py-3" style={{ background: "oklch(0.78 0.18 65 / 0.06)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
+              <div key={e.i} className="flex items-center justify-between gap-3 rounded-xl px-4 py-3" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
                 <div className="text-xs text-white/70 leading-snug flex-1">
-                  <span className="font-medium" style={{ color: "oklch(0.85 0.15 65)" }}>Suggested link</span>
+                  <span className="font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>Suggested link</span>
                   {" — "}
                   <span className="text-white/50">{fromNode.label}</span>
                   {" ↔ "}
@@ -201,7 +201,7 @@ function KnowledgeGraphDemo() {
         </div>
       )}
       {!active && (
-        <p className="text-center text-xs" style={{ color: "oklch(0.65 0.08 65)" }}>Tap a node to explore its connections</p>
+        <p className="text-center text-xs" style={{ color: "oklch(0.60 0.08 72)" }}>Tap a node to explore its connections</p>
       )}
     </div>
   );
@@ -227,22 +227,22 @@ export default function TourPage() {
       />
     <div className="min-h-screen text-white font-sans overflow-x-hidden" style={{ background: "oklch(0.09 0.015 240)" }}>
       {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.92)", borderBottom: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
+      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.92)", borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
         <div className="flex items-center gap-2.5">
           <WrenPlayer clip="popsHead" size="xs" />
-          <span className="font-brand text-lg tracking-tight" style={{ color: "oklch(0.92 0.06 65)" }}>Continuary</span>
+          <span className="font-brand text-lg tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>Continuary</span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/landing" className="text-sm transition-colors" style={{ color: "oklch(0.65 0.06 65)" }}>← Back</Link>
-          <Link href="/apply" className="text-sm px-4 py-1.5 rounded-full font-medium transition-colors" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.15 65)", border: "1px solid oklch(0.78 0.18 65 / 0.3)" }}>
+          <Link href="/apply" className="text-sm px-4 py-1.5 rounded-full font-medium transition-colors" style={{ background: "oklch(0.74 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.3)" }}>
             Apply for access
           </Link>
         </div>
       </nav>
 
       {/* Progress bar */}
-      <div className="fixed top-[57px] inset-x-0 z-40 h-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.08)" }}>
-        <div className="h-full transition-all duration-500" style={{ width: `${((idx + 1) / STEPS.length) * 100}%`, background: "oklch(0.78 0.18 65 / 0.7)" }} />
+      <div className="fixed top-[57px] inset-x-0 z-40 h-0.5" style={{ background: "oklch(0.74 0.14 72 / 0.08)" }}>
+        <div className="h-full transition-all duration-500" style={{ width: `${((idx + 1) / STEPS.length) * 100}%`, background: "oklch(0.74 0.14 72 / 0.7)" }} />
       </div>
 
       {/* Step dots */}
@@ -253,7 +253,7 @@ export default function TourPage() {
             style={{
               width: i === idx ? 20 : 6,
               height: 6,
-              background: i === idx ? "oklch(0.78 0.18 65)" : i < idx ? "oklch(0.78 0.18 65 / 0.4)" : "oklch(0.78 0.18 65 / 0.15)",
+              background: i === idx ? "oklch(0.74 0.14 72)" : i < idx ? "oklch(0.74 0.14 72 / 0.4)" : "oklch(0.74 0.14 72 / 0.15)",
             }}
           />
         ))}
@@ -268,23 +268,23 @@ export default function TourPage() {
             <div className="flex flex-col items-center text-center gap-8">
               <WrenPlayer clip="luminousFloats" size="xl" feather featherDirection="radial" />
               <div className="space-y-4">
-                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>Welcome to Continuary</p>
+                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Welcome to Continuary</p>
                 <h1 className="text-4xl md:text-5xl leading-tight font-brand">
-                  Your thread<br /><em className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>continues here.</em>
+                  Your thread<br /><em className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>continues here.</em>
                 </h1>
                 <p className="text-lg max-w-xl mx-auto leading-relaxed" style={{ color: "oklch(0.75 0.04 240)" }}>
                   A personal operating system for people who do deep, meaningful work — and who know how hard it is to pick that work back up after life interrupts.
                 </p>
               </div>
               {/* Wren voice doctrine */}
-              <div className="rounded-2xl px-8 py-6 max-w-md w-full text-left space-y-1" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
-                <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Meet Wren · Your continuity companion</p>
+              <div className="rounded-2xl px-8 py-6 max-w-md w-full text-left space-y-1" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.15)" }}>
+                <p className="text-xs tracking-widest uppercase mb-3" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }}>Meet Wren · Your continuity companion</p>
                 <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.75 0.04 240)" }}>
                   Wren notices, doesn't judge.<br />
                   She remembers, doesn't measure.<br />
                   She returns, doesn't rebuke.<br />
                   And when you're ready to work, she's there —<br />
-                  <span style={{ color: "oklch(0.85 0.15 65)" }}>reading, writing, weaving — while you do.</span>
+                  <span style={{ color: "oklch(0.74 0.14 72)" }}>reading, writing, weaving — while you do.</span>
                 </p>
               </div>
               <Btn onClick={next} label="Begin the tour" />
@@ -304,9 +304,9 @@ export default function TourPage() {
                   { icon: "🗂", title: "The Open Tab Spiral", body: "12 tabs. 3 half-finished docs. Zero clarity on what matters right now." },
                   { icon: "📉", title: "The Lost Week", body: "You start strong on Monday. By Thursday, the thread is gone." },
                 ].map(c => (
-                  <div key={c.title} className="rounded-xl p-5 space-y-2" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
+                  <div key={c.title} className="rounded-xl p-5 space-y-2" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
                     <div className="text-2xl">{c.icon}</div>
-                    <h3 className="font-semibold" style={{ color: "oklch(0.92 0.06 65)" }}>{c.title}</h3>
+                    <h3 className="font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>{c.title}</h3>
                     <p className="text-sm leading-relaxed" style={{ color: "oklch(0.65 0.04 240)" }}>{c.body}</p>
                   </div>
                 ))}
@@ -322,7 +322,7 @@ export default function TourPage() {
             <div className="space-y-8">
               <Header eyebrow="The Thread" title="Continuity isn't a habit. It's a practice of returning." wren="carryingThread" />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
-                Continuary doesn't ask you to be consistent. It asks you to <em className="not-italic font-medium" style={{ color: "oklch(0.85 0.15 65)" }}>return</em>. Every time you come back — even after days away — the thread picks up exactly where you left it.
+                Continuary doesn't ask you to be consistent. It asks you to <em className="not-italic font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>return</em>. Every time you come back — even after days away — the thread picks up exactly where you left it.
               </p>
               <div className="space-y-3">
                 {[
@@ -336,10 +336,10 @@ export default function TourPage() {
                   { label: "Thread Strength",        desc: "A qualitative read on how connected you've been to your work." },
                   { label: "Re-entry support",       desc: "When you've been away, Wren meets you where you are and walks you back in." },
                 ].map(f => (
-                  <div key={f.label} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
-                    <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65)" }} />
+                  <div key={f.label} className="flex items-start gap-3 py-3" style={{ borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
+                    <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.74 0.14 72)" }} />
                     <div>
-                      <span className="font-medium" style={{ color: "oklch(0.92 0.06 65)" }}>{f.label}</span>
+                      <span className="font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>{f.label}</span>
                       <span className="text-sm" style={{ color: "oklch(0.55 0.04 240)" }}> — {f.desc}</span>
                     </div>
                   </div>
@@ -368,8 +368,8 @@ export default function TourPage() {
                           <button key={e} onClick={() => setMorning(p => ({ ...p, energy: e }))}
                             className="px-4 py-2 rounded-lg text-sm transition-all"
                             style={morning.energy === e
-                              ? { background: "oklch(0.78 0.18 65 / 0.2)", border: "1px solid oklch(0.78 0.18 65 / 0.6)", color: "oklch(0.85 0.15 65)" }
-                              : { background: "transparent", border: "1px solid oklch(0.78 0.18 65 / 0.12)", color: "oklch(0.55 0.04 240)" }}>
+                              ? { background: "oklch(0.74 0.14 72 / 0.2)", border: "1px solid oklch(0.74 0.14 72 / 0.6)", color: "oklch(0.74 0.14 72)" }
+                              : { background: "transparent", border: "1px solid oklch(0.74 0.14 72 / 0.12)", color: "oklch(0.55 0.04 240)" }}>
                             {e}
                           </button>
                         ))}
@@ -378,14 +378,14 @@ export default function TourPage() {
                   </div>
                   <button onClick={() => setMorningDone(true)} disabled={!morning.focus}
                     className="w-full py-3 rounded-xl font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.15 0.02 240)" }}>
+                    style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.15 0.02 240)" }}>
                     Submit morning check-in
                   </button>
                 </>
               ) : (
                 <div className="space-y-4">
-                  <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
-                    <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>
+                  <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
+                    <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
                       <WrenPlayer clip="closesEyes" size="xs" />
                       <span>Wren responds</span>
                     </div>
@@ -414,13 +414,13 @@ export default function TourPage() {
                   </div>
                   <button onClick={() => setEveningDone(true)} disabled={!evening.wins}
                     className="w-full py-3 rounded-xl font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.15 0.02 240)" }}>
+                    style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.15 0.02 240)" }}>
                     Close the day
                   </button>
                 </>
               ) : (
-                <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>
+                <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
                     <WrenPlayer clip="closesEyes" size="xs" />
                     <span>Wren responds</span>
                   </div>
@@ -447,10 +447,10 @@ export default function TourPage() {
                   { type: "Decision", preview: "Decided to cut the third service offering and focus entirely on the core product.",             tag: "Strategy"  },
                   { type: "Draft",    preview: "Opening paragraph for the investor update — needs tightening before Thursday.",                 tag: "Writing"   },
                 ].map(item => (
-                  <div key={item.preview} className="flex items-start gap-3 rounded-xl p-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.08)" }}>
-                    <span className="text-xs rounded-full mt-0.5 shrink-0 px-2 py-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.12)", color: "oklch(0.65 0.08 65)" }}>{item.type}</span>
+                  <div key={item.preview} className="flex items-start gap-3 rounded-xl p-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
+                    <span className="text-xs rounded-full mt-0.5 shrink-0 px-2 py-0.5" style={{ background: "oklch(0.74 0.14 72 / 0.12)", color: "oklch(0.60 0.08 72)" }}>{item.type}</span>
                     <p className="text-sm leading-relaxed flex-1" style={{ color: "oklch(0.75 0.04 240)" }}>{item.preview}</p>
-                    <span className="text-xs shrink-0" style={{ color: "oklch(0.78 0.18 65 / 0.5)" }}>{item.tag}</span>
+                    <span className="text-xs shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.5)" }}>{item.tag}</span>
                   </div>
                 ))}
               </div>
@@ -500,14 +500,14 @@ export default function TourPage() {
                   {
                     label: "Weaving",
                     desc: "Building rhythm. You're showing up, the check-ins are landing, and the thread is getting stronger with each return.",
-                    accent: "oklch(0.78 0.18 65 / 0.9)",
-                    bg: "oklch(0.78 0.18 65 / 0.06)",
-                    border: "oklch(0.78 0.18 65 / 0.2)",
+                    accent: "oklch(0.74 0.14 72 / 0.9)",
+                    bg: "oklch(0.74 0.14 72 / 0.06)",
+                    border: "oklch(0.74 0.14 72 / 0.2)",
                   },
                   {
                     label: "Holding",
                     desc: "Deep continuity. The thread is strong. You know where you left off. Wren carries it forward without you having to ask.",
-                    accent: "oklch(0.88 0.14 65)",
+                    accent: "oklch(0.74 0.14 72)",
                     bg: "oklch(0.88 0.14 65 / 0.06)",
                     border: "oklch(0.88 0.14 65 / 0.2)",
                   },
@@ -531,8 +531,8 @@ export default function TourPage() {
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Every check-in, every session, every note you capture — Wren logs it as evidence. Not metrics. Evidence. The difference matters.
               </p>
-              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
-                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>What gets logged</p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>What gets logged</p>
                 <div className="space-y-3">
                   {[
                     { icon: "🌅", label: "Morning check-ins",    desc: "Your intention, energy, and what you named as worth protecting." },
@@ -551,7 +551,7 @@ export default function TourPage() {
                   ))}
                 </div>
               </div>
-              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
+              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.15)" }}>
                 <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
                   "On the days you feel like you did nothing — the Evidence Log is the thing that shows you otherwise. You showed up. It's here."
                 </p>
@@ -596,9 +596,9 @@ export default function TourPage() {
                   {
                     state: "Ready",
                     wren: "The thread is here. You're here. Let's go.",
-                    colour: "oklch(0.78 0.18 65 / 0.9)",
-                    bg: "oklch(0.78 0.18 65 / 0.06)",
-                    border: "oklch(0.78 0.18 65 / 0.2)",
+                    colour: "oklch(0.74 0.14 72 / 0.9)",
+                    bg: "oklch(0.74 0.14 72 / 0.06)",
+                    border: "oklch(0.74 0.14 72 / 0.2)",
                   },
                 ].map(s => (
                   <div key={s.state} className="rounded-xl p-5 space-y-2" style={{ background: s.bg, border: `1px solid ${s.border}` }}>
@@ -621,8 +621,8 @@ export default function TourPage() {
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Most productivity systems punish you for disappearing. Continuary doesn't. When you've been away — a week, a month, longer — Wren doesn't ask where you've been. She asks where you want to go next.
               </p>
-              <div className="rounded-2xl p-6 space-y-5" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
-                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>The Amnesty Protocol</p>
+              <div className="rounded-2xl p-6 space-y-5" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>The Amnesty Protocol</p>
                 <p className="text-sm leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
                   When you return after a gap, Wren surfaces your last continuity note — the thread you left — and offers three options:
                 </p>
@@ -632,8 +632,8 @@ export default function TourPage() {
                     { label: "Start fresh",          desc: "The old thread is archived, not deleted. You begin a new one. No guilt attached." },
                     { label: "Just check in",        desc: "Not ready to commit to either. Wren meets you here and asks one question: what do you need today?" },
                   ].map(opt => (
-                    <div key={opt.label} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "oklch(0.12 0.02 240 / 0.5)", border: "1px solid oklch(0.78 0.18 65 / 0.1)" }}>
-                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65)" }} />
+                    <div key={opt.label} className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: "oklch(0.12 0.02 240 / 0.5)", border: "1px solid oklch(0.74 0.14 72 / 0.1)" }}>
+                      <div className="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.74 0.14 72)" }} />
                       <div>
                         <p className="text-sm font-medium text-white/90">{opt.label}</p>
                         <p className="text-xs text-white/50 leading-relaxed">{opt.desc}</p>
@@ -660,8 +660,8 @@ export default function TourPage() {
                 choose 25, 50, or 90 minutes, and Wren stays present the whole time — weaving quietly on the right side of your screen,
                 checking in at the halfway point, and helping you close out with a clear next step.
               </p>
-              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
-                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>How a session works</p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>How a session works</p>
                 <div className="space-y-3">
                   {[
                     { n: "1", label: "Name your intention",  desc: "One sentence: what are you working on this session?" },
@@ -670,7 +670,7 @@ export default function TourPage() {
                     { n: "4", label: "Close out",            desc: "Wren weaves a small artifact of what moved. You always pick what’s next — she just notes what happened. Logged to your Evidence Log." },
                   ].map(s => (
                     <div key={s.n} className="flex items-start gap-3">
-                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.78 0.18 65 / 0.15)", color: "oklch(0.85 0.12 65)" }}>{s.n}</span>
+                      <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5" style={{ background: "oklch(0.74 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)" }}>{s.n}</span>
                       <div>
                         <p className="text-sm font-medium text-white/90">{s.label}</p>
                         <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
@@ -698,8 +698,8 @@ export default function TourPage() {
                 You define your focus topic, set a daily cadence, and Wren holds the continuity language
                 — reminding you where you left off and what the thread is.
               </p>
-              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.12)" }}>
-                <p className="text-sm font-semibold" style={{ color: "oklch(0.88 0.12 65)" }}>What makes it different</p>
+              <div className="rounded-2xl p-6 space-y-4" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.12)" }}>
+                <p className="text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>What makes it different</p>
                 <div className="space-y-3">
                   {[
                     { label: "One focus, not a list",     desc: "You name a single topic and commit to it. The app holds that commitment." },
@@ -708,7 +708,7 @@ export default function TourPage() {
                     { label: "Settings panel",            desc: "Change your focus, extend your timeline, pause, or end — all in one place." },
                   ].map(s => (
                     <div key={s.label} className="flex items-start gap-3">
-                      <span className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.78 0.18 65 / 0.7)" }} />
+                      <span className="w-2 h-2 rounded-full mt-2 shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.7)" }} />
                       <div>
                         <p className="text-sm font-medium text-white/90">{s.label}</p>
                         <p className="text-xs text-white/50 leading-relaxed">{s.desc}</p>
@@ -718,8 +718,8 @@ export default function TourPage() {
                 </div>
               </div>
               {/* Sample Wren continuity line */}
-              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.78 0.18 65 / 0.05)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
-                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Wren's continuity line — Day 8</p>
+              <div className="rounded-xl px-5 py-4" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.15)" }}>
+                <p className="text-xs uppercase tracking-widest mb-2" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }}>Wren's continuity line — Day 8</p>
                 <p className="text-sm italic leading-relaxed" style={{ color: "oklch(0.75 0.04 240)" }}>
                   "Day 8 of Learning Python. You're back. Yesterday you stalled on for-loops — that's where the thread picks up."
                 </p>
@@ -736,9 +736,9 @@ export default function TourPage() {
             <div className="flex flex-col items-center text-center gap-8">
               <WrenPlayer clip="hoveringArchway" size="xl" feather featherDirection="bottom" />
               <div className="space-y-3">
-                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>Founding Member Access</p>
+                <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
-                  Ready to <em className="font-brand-italic" style={{ color: "oklch(0.78 0.18 65)" }}>begin?</em>
+                  Ready to <em className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>begin?</em>
                 </h2>
                 <p className="max-w-md mx-auto leading-relaxed" style={{ color: "oklch(0.65 0.04 240)" }}>
                   Continuary is currently invite-only. Founding members get lifetime access at the price they join — and they help shape what gets built next.
@@ -746,26 +746,26 @@ export default function TourPage() {
               </div>
               {/* Pricing */}
               <div className="grid sm:grid-cols-2 gap-4 w-full max-w-md">
-                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.78 0.18 65 / 0.15)" }}>
-                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.6)" }}>Pro</p>
-                  <p className="text-2xl font-bold" style={{ color: "oklch(0.92 0.06 65)" }}>$4.99<span className="text-sm font-normal text-white/40">/mo</span></p>
+                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.12 0.02 240 / 0.6)", border: "1px solid oklch(0.74 0.14 72 / 0.15)" }}>
+                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }}>Pro</p>
+                  <p className="text-2xl font-bold" style={{ color: "oklch(0.74 0.14 72)" }}>$4.99<span className="text-sm font-normal text-white/40">/mo</span></p>
                   <p className="text-xs leading-relaxed" style={{ color: "oklch(0.55 0.04 240)" }}>Full access to all features. Locked in for life at founding rate.</p>
                 </div>
-                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.78 0.18 65 / 0.08)", border: "1px solid oklch(0.78 0.18 65 / 0.35)" }}>
-                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}>Keeper</p>
-                  <p className="text-2xl font-bold" style={{ color: "oklch(0.88 0.15 65)" }}>$9.99<span className="text-sm font-normal text-white/40">/mo</span></p>
+                <div className="rounded-2xl p-5 space-y-2 text-left" style={{ background: "oklch(0.74 0.14 72 / 0.08)", border: "1px solid oklch(0.74 0.14 72 / 0.35)" }}>
+                  <p className="text-xs uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.8)" }}>Keeper</p>
+                  <p className="text-2xl font-bold" style={{ color: "oklch(0.74 0.14 72)" }}>$9.99<span className="text-sm font-normal text-white/40">/mo</span></p>
                   <p className="text-xs leading-relaxed" style={{ color: "oklch(0.65 0.06 65)" }}>Everything in Pro + priority access to new features and direct input on the roadmap.</p>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-3">
                 <Link href="/apply"
                   className="px-8 py-3 rounded-xl font-semibold transition-colors"
-                  style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.12 0.02 240)" }}>
+                  style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.12 0.02 240)" }}>
                   Apply for access →
                 </Link>
                 <Link href="/pricing"
                   className="px-6 py-3 rounded-xl text-sm transition-colors"
-                  style={{ background: "oklch(0.78 0.18 65 / 0.08)", color: "oklch(0.65 0.08 65)", border: "1px solid oklch(0.78 0.18 65 / 0.2)" }}>
+                  style={{ background: "oklch(0.74 0.14 72 / 0.08)", color: "oklch(0.60 0.08 72)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
                   See full pricing
                 </Link>
               </div>
@@ -797,8 +797,8 @@ function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren
     <div className="flex items-start gap-5">
       <WrenPlayer clip={wren} size="sm" />
       <div className="space-y-1">
-        <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}>{eyebrow}</p>
-        <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.92 0.06 65)" }}>{title}</h2>
+        <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
+        <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>
       </div>
     </div>
   );
@@ -810,7 +810,7 @@ function Field({ label, placeholder, value, onChange, multiline = false, type = 
   const base: React.CSSProperties = {
     width: "100%",
     background: "oklch(0.12 0.02 240 / 0.6)",
-    border: "1px solid oklch(0.78 0.18 65 / 0.12)",
+    border: "1px solid oklch(0.74 0.14 72 / 0.12)",
     borderRadius: "0.75rem",
     padding: "0.75rem 1rem",
     color: "oklch(0.85 0.04 240)",
@@ -831,7 +831,7 @@ function Field({ label, placeholder, value, onChange, multiline = false, type = 
 function Btn({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button onClick={onClick} className="px-8 py-3 rounded-xl font-semibold transition-colors"
-      style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.12 0.02 240)" }}>
+      style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.12 0.02 240)" }}>
       {label} →
     </button>
   );
@@ -842,7 +842,7 @@ function Nav({ onPrev, onNext, nextLabel = "Continue" }: { onPrev: () => void; o
     <div className="flex items-center justify-between pt-2">
       <button onClick={onPrev} className="text-sm transition-colors" style={{ color: "oklch(0.45 0.04 240)" }}>← Back</button>
       <button onClick={onNext} className="px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors"
-        style={{ background: "oklch(0.78 0.18 65)", color: "oklch(0.12 0.02 240)" }}>
+        style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.12 0.02 240)" }}>
         {nextLabel} →
       </button>
     </div>

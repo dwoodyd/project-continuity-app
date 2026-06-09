@@ -44,10 +44,10 @@ export default function ApplyPage() {
         style={{ background: "oklch(0.09 0.015 240)", color: "oklch(0.97 0.01 80)" }}
       >
         <div className="max-w-md w-full text-center space-y-6">
-          <CheckCircle2 className="w-12 h-12 mx-auto" style={{ color: "oklch(0.78 0.18 65)" }} />
+          <CheckCircle2 className="w-12 h-12 mx-auto" style={{ color: "oklch(0.74 0.14 72)" }} />
           <h1
             className="text-3xl font-bold"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.97 0.01 80)" }}
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", color: "oklch(0.97 0.01 80)" }}
           >
             Application received.
           </h1>
@@ -55,13 +55,13 @@ export default function ApplyPage() {
             Thank you for applying to Continuary's founding cohort. We'll review your application and reach out within a few days with your invite code.
           </p>
           <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
-            Check your inbox — a confirmation has been sent to <strong style={{ color: "oklch(0.78 0.18 65)" }}>{email}</strong>.
+            Check your inbox — a confirmation has been sent to <strong style={{ color: "oklch(0.74 0.14 72)" }}>{email}</strong>.
           </p>
           <div className="pt-4 space-y-4">
             <Link href="/landing">
               <a
                 className="inline-flex items-center gap-2 text-sm transition-colors"
-                style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
+                style={{ color: "oklch(0.74 0.14 72 / 0.8)" }}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Continuary
@@ -76,7 +76,7 @@ export default function ApplyPage() {
                 <Link href="/redeem-referral">
                   <a
                     className="underline underline-offset-4 transition-colors"
-                    style={{ color: "oklch(0.78 0.18 65)" }}
+                    style={{ color: "oklch(0.74 0.14 72)" }}
                   >
                     Skip the queue →
                   </a>
@@ -105,7 +105,7 @@ export default function ApplyPage() {
         <Link href="/landing">
           <a
             className="inline-flex items-center gap-2 text-sm transition-colors"
-            style={{ color: "oklch(0.78 0.18 65 / 0.7)" }}
+            style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}
           >
             <ArrowLeft className="w-4 h-4" />
             Back
@@ -116,13 +116,13 @@ export default function ApplyPage() {
         <div className="space-y-3">
           <p
             className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: "oklch(0.78 0.18 65)" }}
+            style={{ color: "oklch(0.74 0.14 72)" }}
           >
             Founding Member Application
           </p>
           <h1
             className="text-4xl font-bold leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.97 0.01 80)" }}
+            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", color: "oklch(0.97 0.01 80)" }}
           >
             Apply for founding access.
           </h1>
@@ -201,7 +201,7 @@ export default function ApplyPage() {
             disabled={submit.isPending}
             className="w-full h-12 text-base font-semibold"
             style={{
-              background: "oklch(0.78 0.18 65)",
+              background: "oklch(0.74 0.14 72)",
               color: "oklch(0.12 0.02 240)",
               border: "none",
             }}
@@ -217,7 +217,7 @@ export default function ApplyPage() {
             <Link href="/invite-gate">
               <a
                 className="underline underline-offset-2 transition-colors"
-                style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
+                style={{ color: "oklch(0.74 0.14 72 / 0.8)" }}
               >
                 Redeem your invite code →
               </a>
@@ -228,7 +228,7 @@ export default function ApplyPage() {
             <Link href="/redeem-referral">
               <a
                 className="underline underline-offset-2 transition-colors"
-                style={{ color: "oklch(0.78 0.18 65 / 0.8)" }}
+                style={{ color: "oklch(0.74 0.14 72 / 0.8)" }}
               >
                 Skip the queue →
               </a>

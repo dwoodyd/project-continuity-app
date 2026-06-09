@@ -145,7 +145,7 @@ export default function AdminFeedbackPage() {
                     <p className="text-xs text-muted-foreground">— {item.userName}</p>
                   )}
                   {item.deviceInfo && (
-                    <p className="text-[10px] text-muted-foreground/50 font-mono truncate">{item.deviceInfo}</p>
+                    <p className="text-[10px] text-muted-foreground/50 font-log truncate">{item.deviceInfo}</p>
                   )}
                 </div>
               );

@@ -268,7 +268,7 @@ export default function FoundingMemberPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <code className="flex-1 rounded-lg bg-muted px-3 py-2 text-sm font-mono text-foreground tracking-widest">
+              <code className="flex-1 rounded-lg bg-muted px-3 py-2 text-sm font-log text-foreground tracking-widest">
                 {referralCode}
               </code>
               <Button

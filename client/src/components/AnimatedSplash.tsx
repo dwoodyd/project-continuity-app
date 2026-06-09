@@ -58,7 +58,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         width: 480,
         height: 480,
         borderRadius: "50%",
-        background: "radial-gradient(circle, oklch(0.78 0.18 65 / 0.14) 0%, transparent 70%)",
+        background: "radial-gradient(circle, oklch(0.74 0.14 72 / 0.14) 0%, transparent 70%)",
         opacity: revealed ? 1 : 0,
         transform: revealed ? "scale(1)" : "scale(0.4)",
         transition: "opacity 2s ease-out 0.2s, transform 2.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s",
@@ -69,7 +69,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
       <div style={{
         width: revealed ? 48 : 0,
         height: 1,
-        background: "oklch(0.78 0.18 65 / 0.45)",
+        background: "oklch(0.74 0.14 72 / 0.45)",
         marginBottom: 20,
         transition: "width 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.5s",
       }} />
@@ -79,7 +79,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         opacity: revealed ? 1 : 0,
         transform: revealed ? "translateY(0)" : "translateY(12px)",
         transition: "opacity 0.8s ease-out 0.2s, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s",
-        fontFamily: "'Playfair Display', Georgia, serif",
+        fontFamily: "'Space Grotesk', system-ui, sans-serif",
         fontSize: 38,
         fontWeight: 700,
         letterSpacing: "0.01em",
@@ -97,7 +97,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
         fontSize: 10,
         letterSpacing: "0.20em",
         textTransform: "uppercase",
-        color: "oklch(0.78 0.18 65 / 0.65)",
+        color: "oklch(0.74 0.14 72 / 0.65)",
         fontFamily: "Inter, sans-serif",
       }}>
         {isFirstSession ? "Your thread starts here" : "Your thread continues"}
@@ -107,7 +107,7 @@ export function AnimatedSplash({ onComplete, isFirstSession = false }: { onCompl
       <div style={{
         width: revealed ? 48 : 0,
         height: 1,
-        background: "oklch(0.78 0.18 65 / 0.45)",
+        background: "oklch(0.74 0.14 72 / 0.45)",
         marginTop: 20,
         transition: "width 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.7s",
       }} />

@@ -334,7 +334,7 @@ export default function ProjectsPage() {
       {filtered.length === 0 ? (
         filter === "all" ? (
           <div className="relative overflow-hidden p-10 rounded-2xl text-center border border-amber-500/20" style={{background: 'linear-gradient(135deg, oklch(0.22 0.03 65) 0%, oklch(0.18 0.02 65) 100%)'}}>
-            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.78 0.18 65) 0%, transparent 55%), radial-gradient(circle at 80% 20%, oklch(0.78 0.18 65 / 0.4) 0%, transparent 45%)'}} />
+            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(circle at 20% 50%, oklch(0.74 0.14 72) 0%, transparent 55%), radial-gradient(circle at 80% 20%, oklch(0.74 0.14 72 / 0.4) 0%, transparent 45%)'}} />
             <div className="relative">
               <div className="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center mx-auto mb-4">
                 <Brain className="w-6 h-6 text-amber-400" />
