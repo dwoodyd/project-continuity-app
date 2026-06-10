@@ -67,6 +67,7 @@ import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
 import { BentoCard } from "@/components/BentoCard";
 import { useTransitionSound } from "@/hooks/useTransitionSound";
+import { useMasonry } from "@/hooks/useMasonry";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -1069,6 +1070,7 @@ export default function Home() {
   });
   const isPlanningMode = profile?.planningMode ?? false;
   const { playChime: playModeChime } = useTransitionSound();
+  const gridRef = useMasonry(8, 12);
   const togglePlanningMode = () => {
     playModeChime("mode_toggle");
     updateSettings.mutate({ planningMode: !isPlanningMode });
@@ -1793,7 +1795,11 @@ export default function Home() {
       })()}
 
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start" style={{ gridAutoFlow: "dense" }}>
+      <div
+        ref={gridRef}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+        style={{ gridAutoRows: "8px", gridAutoFlow: "dense" }}
+      >
 
         {/* ── Daily Rhythm — spans 2 cols, top-left ──────────────────────────── */}
         <BentoCard
@@ -2246,7 +2252,7 @@ export default function Home() {
         const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
         const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
         return (
-          <BentoCard noPadding style={{ height: 240, position: "relative", overflow: "hidden" }}>
+          <BentoCard noPadding className="wren-ambient-card" style={{ height: 220, position: "relative", overflow: "hidden" }}>
             {/* Subtle warm glow behind Wren */}
             <div
               className="absolute inset-0 pointer-events-none"
