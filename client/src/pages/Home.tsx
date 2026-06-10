@@ -1843,8 +1843,8 @@ export default function Home() {
         </div>
       </BentoCard>
 
-      {/* Bento masonry grid — 3-col desktop → 2-col tablet → 1-col mobile */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-3">
+      {/* Bento masonry grid — 3-col at xl (1280px+) → 2-col at md/lg (768-1279px) → 1-col mobile */}
+      <div className="columns-1 md:columns-2 xl:columns-3 gap-3">
 
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (

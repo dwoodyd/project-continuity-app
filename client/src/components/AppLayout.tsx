@@ -417,68 +417,70 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     return (
       <IntroContext.Provider value={{ replayIntro: onPreviewIntro ?? (() => {}) }}>
       <div className="h-screen w-full flex overflow-hidden bg-background">
-        {/* Left Sidebar */}
+        {/* Left Sidebar — full (w-60) at lg+, icon-only (w-14) at md */}
         <aside
-          className="w-60 shrink-0 flex flex-col h-full overflow-y-auto"
+          className="shrink-0 flex flex-col h-full overflow-y-auto w-14 lg:w-60"
           style={{ background: "var(--sidebar)", borderRight: "1px solid oklch(1 0 0 / 0.06)" }}
         >
           {/* Brand header */}
-          <div className="flex items-center gap-3 px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
+          <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
               <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
-              <span className="text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
+              <span className="hidden lg:block text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
             </Link>
             {streak > 0 && (
-              <span className="ml-auto shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.14 72)" }} title={`${streak}-day streak`}>
+              <span className="hidden lg:flex ml-auto shrink-0 items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.14 72)" }} title={`${streak}-day streak`}>
                 🔥 {streak}d
               </span>
             )}
           </div>
 
-          {/* ⌘K Command palette trigger */}
-          <div className="px-2 pt-2 pb-1">
+          {/* ⌘K Command palette trigger — hidden in icon-only mode */}
+          <div className="hidden lg:block px-2 pt-2 pb-1">
             <CommandPaletteTrigger />
           </div>
           {/* Nav */}
-          <nav className="flex-1 px-2 py-3 space-y-0.5">
-            <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Daily</p>
+          <nav className="flex-1 px-1 lg:px-2 py-3 space-y-0.5">
+            <p className="hidden lg:block px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Daily</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "primary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                  title={label}
+                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                   style={active
                     ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
                     : { color: "oklch(1 0 0 / 0.48)" }
                   }
                 >
                    <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span>{label}</span>
+                  <span className="hidden lg:block">{label}</span>
                   {href === "/scratch" && scratchCount > 0 && !active && (
-                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
+                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
                   )}
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
+                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
                 </Link>
               );
             })}
-            <p className="px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
+            <p className="hidden lg:block px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
             {ALL_NAV_ITEMS.filter(i => i.section === "secondary").map(({ href, label, icon: Icon }) => {
               const active = isActive(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                  title={label}
+                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                   style={active
                     ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
                     : { color: "oklch(1 0 0 / 0.48)" }
                   }
                 >
                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span>{label}</span>
-                  {active && <span className="ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
+                  <span className="hidden lg:block">{label}</span>
+                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
                 </Link>
               );
             })}
@@ -486,11 +488,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             {/* Feedback */}
             <button
               onClick={() => setFeedbackOpen(true)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full text-left"
+              title="Send Feedback"
+              className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full text-left"
               style={{ color: "oklch(1 0 0 / 0.48)" }}
             >
               <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "oklch(1 0 0 / 0.32)" }} />
-              <span>Send Feedback</span>
+              <span className="hidden lg:block">Send Feedback</span>
             </button>
 
             {/* Admin-only section */}
@@ -557,34 +560,35 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </nav>
 
           {/* Sidebar footer */}
-          <div className="px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
-            {/* Wren resting — persistent looping mascot with meet-Wren tooltip */}
-            <WrenSidebarPresence />
+          <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
+            {/* Wren resting — hidden in icon-only mode */}
+            <div className="hidden lg:block">
+              <WrenSidebarPresence />
+            </div>
             {user && (
-              <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl">
+              <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.18)" }}>
                   <span className="text-xs font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="hidden lg:block min-w-0 flex-1">
                   <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
                   {user.role === "admin" && <p className="text-[10px] font-medium" style={{ color: "oklch(0.80 0.17 65 / 0.65)" }}>Admin</p>}
                 </div>
               </div>
             )}
-            <div className="flex items-center gap-1 px-1">
-              <button onClick={toggleTheme} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Toggle theme">
-                {theme === "dark" ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                <span>{theme === "dark" ? "Light" : "Dark"}</span>
+            {/* Footer action buttons — icon-only at md, icon+label at lg */}
+            <div className="flex flex-col lg:flex-row items-center gap-1 px-0.5 lg:px-1">
+              <button onClick={toggleTheme} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
+                {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" /> : <Moon className="w-3.5 h-3.5 shrink-0" />}
+                <span className="hidden lg:block">{theme === "dark" ? "Light" : "Dark"}</span>
               </button>
-              <div className="w-px h-5 bg-white/10 shrink-0" />
-              <button onClick={toggleLayoutMode} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
-                <PanelLeft className="w-3.5 h-3.5" />
-                <span>Compact</span>
+              <button onClick={toggleLayoutMode} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
+                <PanelLeft className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:block">Compact</span>
               </button>
-              <div className="w-px h-5 bg-white/10 shrink-0" />
-              <button onClick={() => logout()} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Sign out</span>
+              <button onClick={() => logout()} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
+                <LogOut className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:block">Sign out</span>
               </button>
             </div>
           </div>
