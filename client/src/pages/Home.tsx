@@ -31,6 +31,10 @@ import {
   PenLine,
   Anchor,
   ChevronRight,
+  Plus,
+  MessageCircle,
+  FolderPlus,
+  Pause,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -59,6 +63,7 @@ import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
+import { BentoCard } from "@/components/BentoCard";
 import { useTransitionSound } from "@/hooks/useTransitionSound";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1551,6 +1556,38 @@ export default function Home() {
         </div>
       </div>
 
+      {/* ── Primary Action Row (#3) ──────────────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => {
+            const period = activePeriod as CheckInStep;
+            const target = !morningDone ? "morning" : !middayDone ? "midday" : "evening";
+            openCheckIn(target);
+          }}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+          style={{ background: "oklch(0.74 0.14 72 / 0.12)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.22)" }}
+        >
+          <Sun className="w-3.5 h-3.5" />
+          Start check-in
+        </button>
+        <button
+          onClick={() => navigate("/clarity")}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+          style={{ background: "oklch(0.18 0.02 240 / 0.80)", color: "oklch(0.80 0.04 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
+        >
+          <MessageCircle className="w-3.5 h-3.5" />
+          Ask Wren
+        </button>
+        <button
+          onClick={() => navigate("/projects?new=1")}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
+          style={{ background: "oklch(0.18 0.02 240 / 0.80)", color: "oklch(0.80 0.04 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
+        >
+          <FolderPlus className="w-3.5 h-3.5" />
+          New project
+        </button>
+      </div>
+
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
       {topAlert === "check_in_due" && (
         <button
@@ -1711,56 +1748,43 @@ export default function Home() {
         ))
       }
 
-      {/* ── Onboarding Checklist (new users only) ──────────────────────────── */}
+      {/* ── Onboarding Banner (new users only, compact dismissible) ──────────── */}
       {(() => {
-        const hasCheckin = morningDone || middayDone || eveningDone;
         const hasProject = activeProjects && activeProjects.length > 0;
-        const hasIdea = pendingIdeas && pendingIdeas.length > 0;
-        const allDone = hasCheckin && hasProject && hasIdea;
-        // Only show if at least one step is incomplete and user hasn't dismissed
         const dismissed = (() => { try { return !!localStorage.getItem('continuary_onboarding_done'); } catch { return false; } })();
-        // Hide for returning users who already have projects (prevents "Add your first project"
-        // showing with 3 projects already in the system — biggest trust-breaker for new users).
-        // Use project count alone as source of truth — do NOT require onboardingCompleted flag.
-        const isReturningUser = hasProject;
-        if (dismissed || allDone || isReturningUser) return null;
+        if (dismissed || hasProject) return null;
+        const steps = [
+          { done: morningDone || middayDone || eveningDone, label: "First check-in" },
+          { done: !!hasProject, label: "Add a project" },
+          { done: !!(pendingIdeas && pendingIdeas.length > 0), label: "Capture an idea" },
+        ];
+        const doneCount = steps.filter(s => s.done).length;
         return (
-          <div className="p-4 rounded-xl border bg-card" style={{ borderColor: "var(--border)" }}>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-primary uppercase tracking-widest">Getting started</p>
-              <button
-                onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} }}
-                className="text-muted-foreground hover:text-foreground text-xs underline underline-offset-2"
-              >Dismiss</button>
+          <div
+            className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
+            style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.14)" }}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex gap-1">
+                {steps.map((s, i) => (
+                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "oklch(0.74 0.14 72)" : "oklch(0.74 0.14 72 / 0.25)" }} />
+                ))}
+              </div>
+              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72 / 0.75)" }}>
+                Getting started · {doneCount}/{steps.length}
+                {doneCount < steps.length && (
+                  <span style={{ color: "oklch(0.74 0.14 72 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
+                )}
+              </p>
             </div>
-            <div className="space-y-2">
-              {[{
-                done: hasCheckin,
-                label: "Complete your first check-in",
-                hint: "Tap Morning, Midday, or Evening above",
-              }, {
-                done: !!hasProject,
-                label: "Add your first project",
-                hint: "Go to Projects in the sidebar",
-              }, {
-                done: !!hasIdea,
-                label: "Capture an idea in the Vault",
-                hint: "Go to Vault in the sidebar",
-              }].map((step, i) => (
-                <div key={i} className="flex items-start gap-2.5">
-                  <div className={cn(
-                    "mt-0.5 w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center",
-                    step.done ? "bg-emerald-500/20 border-emerald-500/50" : "border-foreground/20"
-                  )}>
-                    {step.done && <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />}
-                  </div>
-                  <div>
-                    <p className={cn("text-xs font-medium", step.done && "line-through text-muted-foreground")}>{step.label}</p>
-                    {!step.done && <p className="text-sm text-muted-foreground mt-0.5">{step.hint}</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <button
+              onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} window.location.reload(); }}
+              className="shrink-0 transition-opacity"
+              style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}
+              aria-label="Dismiss"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         );
       })()}
@@ -1817,10 +1841,11 @@ export default function Home() {
       {/* ──────────────────────────────────────────────────────────────────────────────
            Two-column grid on desktop: left = primary, right = supporting
       ───────────────────────────────────────────────────────────────────────────── */}
-      <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-6 lg:items-start space-y-6 lg:space-y-0">
+      {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile (#1) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
 
-        {/* ════ LEFT COLUMN ════ */}
-        <div className="space-y-6">
+        {/* ════ MAIN COLUMN (spans 2 on lg) ════ */}
+        <div className="lg:col-span-2 space-y-4">
 
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (
@@ -2218,7 +2243,7 @@ export default function Home() {
 
         </div>
 
-        {/* ════ RIGHT COLUMN ════ */}
+        {/* ════ SIDE COLUMN ════ */}
         <div className="space-y-4">
 
       {/* ── Wren Ambient Presence (time-of-day) ─────────────────────────── */}
@@ -2332,27 +2357,64 @@ export default function Home() {
         <span className="text-sm text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
       </a>
 
-      {/* ── Thread Strength + Re-Entry Shortcut */}
-      {gamStatus?.threadStrength && (       <div
-          className="p-4 rounded-xl border"
-          style={{ background: "var(--card)", borderColor: "var(--border)" }}
-        >
-          <ContinuityRing
-            score={gamStatus.threadStrength.score}
-            state={gamStatus.threadStrength.state}
-          />
-          <button
-            onClick={() => setReEntryOpen(true)}
-            className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
-            style={{
-              background: "oklch(0.74 0.14 72 / 0.08)",
-              color: "oklch(0.74 0.14 72 / 0.65)",
-            }}
+      {/* ── Thread Strength — gentle arc + named-state dot meter (#5) ────────── */}
+      {gamStatus?.threadStrength && (() => {
+        const STATES = ["fraying", "thin", "holding", "strong", "woven"];
+        const currentIdx = STATES.indexOf(gamStatus.threadStrength.state.toLowerCase());
+        const pct = Math.min(100, (gamStatus.threadStrength.score / 90) * 100);
+        const r = 22; const circ = 2 * Math.PI * r;
+        const dash = (pct / 100) * circ;
+        return (
+          <BentoCard
+            icon={<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" /></svg>}
+            title="Thread Strength"
           >
-            ↺ Pick up the thread
-          </button>
-        </div>
-      )}
+            <div className="flex items-center gap-4 pt-1">
+              {/* Arc */}
+              <svg width={52} height={52} viewBox="0 0 52 52" className="-rotate-90 shrink-0">
+                <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5} stroke="oklch(1 0 0 / 0.07)" />
+                <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5}
+                  stroke="oklch(0.74 0.14 72 / 0.70)"
+                  strokeDasharray={`${dash} ${circ}`}
+                  strokeLinecap="round"
+                  style={{ transition: "stroke-dasharray 1.2s ease" }}
+                />
+              </svg>
+              {/* State label + dot meter */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold capitalize" style={{ color: "oklch(0.74 0.14 72)" }}>
+                  {gamStatus.threadStrength.state}
+                </p>
+                <div className="flex items-center gap-1 mt-1.5">
+                  {STATES.map((s, i) => (
+                    <div
+                      key={s}
+                      className="rounded-full transition-all"
+                      style={{
+                        width: i === currentIdx ? 8 : 5,
+                        height: i === currentIdx ? 8 : 5,
+                        background: i <= currentIdx
+                          ? "oklch(0.74 0.14 72)"
+                          : "oklch(0.74 0.14 72 / 0.18)",
+                      }}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: "oklch(1 0 0 / 0.30)" }}>
+                  <GlossaryTerm name="threadStrength" />
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setReEntryOpen(true)}
+              className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
+              style={{ background: "oklch(0.74 0.14 72 / 0.08)", color: "oklch(0.74 0.14 72 / 0.65)" }}
+            >
+              ↺ Pick up the thread
+            </button>
+          </BentoCard>
+        );
+      })()}
 
       {/* ── Focus Sessions Today Widget ─────────────────────────────────────── */}
       {focusTodayStats && focusTodayStats.todaySessions > 0 && (
@@ -2369,16 +2431,52 @@ export default function Home() {
         </a>
       )}
 
-      {/* ── Evidence of Movement Feed ────────────────────────────────────────── */}
+      {/* ── Evidence of Movement — promoted first-class bento card (#4) ────── */}
       {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
-        <div
-          className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
+        <BentoCard
+          icon={<Zap className="w-3.5 h-3.5" />}
+          title="Evidence of Movement"
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Evidence of movement</p>
           <MovementFeed events={gamStatus.recentEvents as any} />
-        </div>
+        </BentoCard>
       )}
+
+      {/* ── Quietly Waiting — paused / holding threads (#6) ──────────────────── */}
+      {activeProjects && activeProjects.filter(p => p.status === 'paused').length > 0 && (() => {
+        const waiting = activeProjects.filter(p => p.status === 'paused');
+        return (
+          <BentoCard
+            icon={<Pause className="w-3.5 h-3.5" />}
+            title="Quietly Waiting"
+          >
+            <div className="space-y-2 pt-1">
+              {waiting.slice(0, 3).map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => navigate(`/projects/${p.id}`)}
+                  className="w-full flex items-start gap-2.5 text-left group"
+                >
+                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.35)" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-foreground/80 truncate group-hover:text-foreground transition-colors">{p.title}</p>
+                    {p.nextStep && (
+                      <p className="text-xs text-muted-foreground/50 truncate mt-0.5">re-entry: {p.nextStep}</p>
+                    )}
+                  </div>
+                  <span className="text-xs shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}>
+                    paused
+                  </span>
+                </button>
+              ))}
+              {waiting.length > 3 && (
+                <p className="text-xs text-muted-foreground/40 pt-1">
+                  +{waiting.length - 3} more
+                </p>
+              )}
+            </div>
+          </BentoCard>
+        );
+      })()}
 
       {/* ── Weekly Presence Dots ────────────────────────────────────────────────────── */}
       <ThreadView />
@@ -2435,32 +2533,31 @@ export default function Home() {
 
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
       {clarityRec && !clarityNudgeDismissed && (
-        <div className="relative overflow-hidden p-4 rounded-xl border border-primary/20 bg-primary/5">
+        <BentoCard
+          icon={<Sparkles className="w-3.5 h-3.5" />}
+          title="Pattern Detected"
+          headerRight={
+            <button
+              onClick={dismissClarityNudge}
+              className="p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-foreground/5 transition-colors"
+              aria-label="Dismiss for 24 hours"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          }
+        >
+          <p className="text-sm font-medium text-foreground mb-1">{clarityRec.modeLabel}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>
+          {clarityRec.context && (
+            <p className="text-xs text-muted-foreground/50 italic mb-3">{clarityRec.context}</p>
+          )}
           <button
-            onClick={dismissClarityNudge}
-            className="absolute top-2 right-2 p-1 rounded-md text-muted-foreground/40 hover:text-muted-foreground hover:bg-foreground/5 transition-colors"
-            aria-label="Dismiss for 24 hours"
+            onClick={() => navigate(`/clarity?mode=${clarityRec.mode}`)}
+            className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
           >
-            <X className="w-3.5 h-3.5" />
+            Start a session <ArrowRight className="w-3 h-3" />
           </button>
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-              <Sparkles className="w-4 h-4 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0 pr-4">
-              <p className="text-xs font-semibold text-primary/70 uppercase tracking-widest mb-1">Pattern detected</p>
-              <p className="text-sm font-medium text-foreground mb-1">{clarityRec.modeLabel}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-2">{clarityRec.nudge}</p>
-              <p className="text-sm text-muted-foreground/50 italic mb-3">{clarityRec.context}</p>
-              <button
-                onClick={() => navigate(`/clarity?mode=${clarityRec.mode}`)}
-                className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                Start a session <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        </div>
+        </BentoCard>
       )}
 
       {/* ── Recent Decisions (right col) ────────────────────────────────────────────────────────── */}
