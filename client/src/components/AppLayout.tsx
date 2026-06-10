@@ -185,14 +185,15 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   }, [triggerSyncPulse]);
 
   // ── Desktop layout state ──────────────────────────────────────────────────
-  const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth >= 1024);
+  const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth >= 768);
   const [userLayoutPref, setUserLayoutPref] = useState<"desktop" | "compact" | null>(() => {
     const stored = localStorage.getItem(LAYOUT_STORAGE_KEY);
     return (stored === "desktop" || stored === "compact") ? stored : null;
   });
 
   useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
+    // 768px = md breakpoint — iPad landscape triggers desktop sidebar layout
+    const mql = window.matchMedia("(min-width: 768px)");
     const onChange = () => setIsLargeScreen(mql.matches);
     mql.addEventListener("change", onChange);
     return () => mql.removeEventListener("change", onChange);
@@ -680,7 +681,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain pb-4">
+        <main className="flex-1 overflow-y-auto overscroll-contain pb-20">
           {children}
         </main>
 
