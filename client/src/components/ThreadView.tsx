@@ -1,14 +1,13 @@
 /**
  * ThreadView — Real-data weekly thread visualization.
  * Shows after the user has 3+ days of check-in data.
- * Displays morning/midday/evening dots + strength bars for each day.
+ * Displays morning/midday/evening dots for each day.
+ * NO percentages, NO streak counts — named states only.
  */
 
 import React from "react";
 import { trpc } from "@/lib/trpc";
 import { format, parseISO } from "date-fns";
-
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function getDayLabel(dateStr: string): string {
   try {
@@ -17,6 +16,23 @@ function getDayLabel(dateStr: string): string {
   } catch {
     return "—";
   }
+}
+
+/** Map a numeric strength score to a named state — no digits ever shown */
+function strengthToState(score: number): string {
+  if (score >= 80) return "Woven";
+  if (score >= 60) return "Strong";
+  if (score >= 40) return "Holding";
+  if (score >= 20) return "Thin";
+  return "Fraying";
+}
+
+/** A short warm sentence for the sub-header — no counts, no % */
+function weekSentence(daysWithData: number): string {
+  if (daysWithData >= 6) return "You've been here almost every day.";
+  if (daysWithData >= 4) return "You've returned several times this week.";
+  if (daysWithData >= 3) return "You've checked in a few times this week.";
+  return "The thread is here whenever you are.";
 }
 
 export function ThreadView() {
@@ -31,7 +47,7 @@ export function ThreadView() {
     if (activeDays >= 3) {
       import("sonner").then(({ toast }) => {
         toast("Your thread is taking shape", {
-          description: "3 active days — your continuity is building.",
+          description: "You've returned a few times — your continuity is building.",
           duration: 5000,
         });
       });
@@ -66,12 +82,12 @@ export function ThreadView() {
 
   if (!threadData || threadData.length === 0) return null;
 
-  // Only show if user has 3+ days with at least one check-in
   const daysWithData = threadData.filter((d) => d.morning || d.midday || d.evening).length;
   if (daysWithData < 3) return null;
 
   const totalStrength = threadData.reduce((sum, d) => sum + d.strength, 0);
   const avgStrength = Math.round(totalStrength / threadData.length);
+  const stateName = strengthToState(avgStrength);
 
   return (
     <div style={{
@@ -80,10 +96,10 @@ export function ThreadView() {
       padding: "16px 14px 14px",
       border: "1px solid oklch(0.20 0.03 270)",
     }}>
-      {/* Header */}
+      {/* Header — named state only, no % or count */}
       <div style={{
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "space-between",
         marginBottom: 14,
       }}>
@@ -103,49 +119,35 @@ export function ThreadView() {
             fontFamily: "Inter, sans-serif",
             marginTop: 2,
           }}>
-            {daysWithData} of 7 days active
+            {weekSentence(daysWithData)}
           </div>
         </div>
+        {/* Named state badge — no number */}
         <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
+          fontSize: 11,
+          fontWeight: 600,
+          color: "oklch(0.74 0.14 72)",
+          fontFamily: "Inter, sans-serif",
+          background: "oklch(0.74 0.14 72 / 0.10)",
+          border: "1px solid oklch(0.74 0.14 72 / 0.22)",
+          borderRadius: 20,
+          padding: "2px 10px",
+          whiteSpace: "nowrap",
         }}>
-          <div style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: avgStrength >= 70
-              ? "oklch(0.72 0.15 150)"
-              : avgStrength >= 40
-              ? "oklch(0.75 0.14 270)"
-              : "oklch(0.55 0.01 270)",
-            fontFamily: "Inter, sans-serif",
-            lineHeight: 1,
-          }}>
-            {avgStrength}%
-          </div>
-          <div style={{
-            fontSize: 10,
-            color: "oklch(0.42 0.01 270)",
-            fontFamily: "Inter, sans-serif",
-            marginTop: 2,
-          }}>
-            thread strength
-          </div>
+          {stateName}
         </div>
       </div>
 
-      {/* Day columns */}
+      {/* Day columns — dots only, no strength bars */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
         {threadData.map((day, i) => {
           const isToday = i === threadData.length - 1;
-          const hasAny = day.morning || day.midday || day.evening;
           return (
-            <div key={day.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+            <div key={day.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
               {/* Day label */}
               <div style={{
                 fontSize: 9,
-                color: isToday ? "oklch(0.75 0.14 270)" : "oklch(0.38 0.01 270)",
+                color: isToday ? "oklch(0.74 0.14 72)" : "oklch(0.38 0.01 270)",
                 fontFamily: "Inter, sans-serif",
                 letterSpacing: "0.04em",
                 fontWeight: isToday ? 700 : 400,
@@ -168,43 +170,6 @@ export function ThreadView() {
                   transition: "background 0.3s ease-out",
                 }} />
               ))}
-
-              {/* Strength bar */}
-              <div style={{
-                width: "100%",
-                height: 28,
-                borderRadius: 4,
-                background: "oklch(0.16 0.03 270)",
-                overflow: "hidden",
-                position: "relative",
-                marginTop: 2,
-              }}>
-                <div style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: `${day.strength}%`,
-                  background: !hasAny
-                    ? "oklch(0.20 0.02 270)"
-                    : day.strength === 100
-                    ? "linear-gradient(to top, oklch(0.62 0.14 270), oklch(0.75 0.16 270))"
-                    : day.strength >= 67
-                    ? "linear-gradient(to top, oklch(0.50 0.11 270), oklch(0.62 0.14 270))"
-                    : "linear-gradient(to top, oklch(0.35 0.08 270), oklch(0.45 0.10 270))",
-                  borderRadius: 4,
-                  transition: "height 0.8s ease-out",
-                }} />
-                {isToday && (
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    border: "1px solid oklch(0.75 0.14 270 / 0.4)",
-                    borderRadius: 4,
-                    pointerEvents: "none",
-                  }} />
-                )}
-              </div>
             </div>
           );
         })}

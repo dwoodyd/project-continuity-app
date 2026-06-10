@@ -1793,57 +1793,58 @@ export default function Home() {
       })()}
 
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-3">
+      {/* Daily Rhythm — full-width above masonry so check-in cells never truncate */}
+      <BentoCard
+        className="w-full mb-3"
+        icon={<Sun className="w-3.5 h-3.5" />}
+        title="Daily Rhythm"
+        headerRight={gamStatus?.rhythmToday && (
+          <RhythmSegments
+            morning={gamStatus.rhythmToday.morning}
+            midday={gamStatus.rhythmToday.midday}
+            evening={gamStatus.rhythmToday.evening}
+          />
+        )}
+      >
+        <div className="flex gap-2">
+          <CheckInCard
+            type="morning"
+            icon={Sun}
+            label="Morning check-in"
+            timeHint="Set capacity + focus"
+            completed={morningDone}
+            active={activePeriod === "morning" && !morningDone}
+            open={activeCheckIn === "morning"}
+            onOpen={() => openCheckIn("morning")}
+            onClose={() => setActiveCheckIn(null)}
+          />
+          <CheckInCard
+            type="midday"
+            icon={Zap}
+            label="Midday pulse"
+            timeHint="Alignment pulse — on plan?"
+            completed={middayDone}
+            active={activePeriod === "midday" && morningDone && !middayDone}
+            open={activeCheckIn === "midday"}
+            onOpen={() => openCheckIn("midday")}
+            onClose={() => setActiveCheckIn(null)}
+          />
+          <CheckInCard
+            type="evening"
+            icon={Sunset}
+            label="Evening close"
+            timeHint="Close the loop. Acknowledge what moved."
+            completed={eveningDone}
+            active={activePeriod === "evening" && !eveningDone}
+            open={activeCheckIn === "evening"}
+            onOpen={() => openCheckIn("evening")}
+            onClose={() => setActiveCheckIn(null)}
+          />
+        </div>
+      </BentoCard>
 
-        {/* ── Daily Rhythm — spans 2 cols, top-left ──────────────────────────── */}
-        <BentoCard
-          className="break-inside-avoid mb-3"
-          icon={<Sun className="w-3.5 h-3.5" />}
-          title="Daily Rhythm"
-          headerRight={gamStatus?.rhythmToday && (
-            <RhythmSegments
-              morning={gamStatus.rhythmToday.morning}
-              midday={gamStatus.rhythmToday.midday}
-              evening={gamStatus.rhythmToday.evening}
-            />
-          )}
-        >
-          <div className="flex gap-2">
-            <CheckInCard
-              type="morning"
-              icon={Sun}
-              label="Morning check-in"
-              timeHint="Set capacity + focus"
-              completed={morningDone}
-              active={activePeriod === "morning" && !morningDone}
-              open={activeCheckIn === "morning"}
-              onOpen={() => openCheckIn("morning")}
-              onClose={() => setActiveCheckIn(null)}
-            />
-            <CheckInCard
-              type="midday"
-              icon={Zap}
-              label="Midday pulse"
-              timeHint="Alignment pulse — on plan?"
-              completed={middayDone}
-              active={activePeriod === "midday" && morningDone && !middayDone}
-              open={activeCheckIn === "midday"}
-              onOpen={() => openCheckIn("midday")}
-              onClose={() => setActiveCheckIn(null)}
-            />
-            <CheckInCard
-              type="evening"
-              icon={Sunset}
-              label="Evening close"
-              timeHint="Close the loop. Acknowledge what moved."
-              completed={eveningDone}
-              active={activePeriod === "evening" && !eveningDone}
-              open={activeCheckIn === "evening"}
-              onOpen={() => openCheckIn("evening")}
-              onClose={() => setActiveCheckIn(null)}
-            />
-          </div>
-        </BentoCard>
+      {/* Bento masonry grid — 3-col desktop → 2-col tablet → 1-col mobile */}
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-3">
 
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (
