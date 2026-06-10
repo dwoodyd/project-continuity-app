@@ -5,6 +5,7 @@ import {
   createProjectMemoryEvent,
   getActiveProjects,
   getColdProjects,
+  getPausedProjects,
   getProjectById,
   getProjects,
   updateProject,
@@ -33,6 +34,10 @@ export const projectsRouter = router({
 
   listCold: protectedProcedure.query(async ({ ctx }) => {
     return getColdProjects(ctx.user.id, 5);
+  }),
+
+  listPaused: protectedProcedure.query(async ({ ctx }) => {
+    return getPausedProjects(ctx.user.id);
   }),
 
   getById: protectedProcedure

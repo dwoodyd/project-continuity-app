@@ -1009,6 +1009,7 @@ export default function Home() {
   const { data: todayPlan, isLoading: planLoading, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(undefined, { enabled: authed });
   const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery(undefined, { enabled: authed });
   const { data: activeProjects } = trpc.projects.listActive.useQuery(undefined, { enabled: authed });
+  const { data: pausedProjects } = trpc.projects.listPaused.useQuery(undefined, { enabled: authed });
   const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
     enabled: authed,
     staleTime: 5 * 60 * 1000,
@@ -1792,7 +1793,7 @@ export default function Home() {
       })()}
 
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start" style={{ gridAutoFlow: "dense" }}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start" style={{ gridAutoFlow: "dense" }}>
 
         {/* ── Daily Rhythm — spans 2 cols, top-left ──────────────────────────── */}
         <BentoCard
@@ -2245,23 +2246,26 @@ export default function Home() {
         const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
         const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
         return (
-          <BentoCard noPadding style={{ minHeight: 200, position: "relative", overflow: "hidden" }}>
+          <BentoCard noPadding style={{ height: 240, position: "relative", overflow: "hidden" }}>
+            {/* Subtle warm glow behind Wren */}
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.10) 0%, transparent 65%)" }}
+              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.12) 0%, transparent 65%)" }}
             />
+            {/* Wren fills the card — mix-blend-mode:screen removes the dark bg */}
             <WrenPlayer
               clip={wrenClip}
-              size="2xl"
+              size="full"
               loop
               autoPlay
               muted
               feather
               featherDirection="bottom"
-              wrapperClassName="absolute inset-0 flex items-center justify-center"
+              wrapperClassName="absolute inset-0"
             />
-            <div className="absolute bottom-0 left-0 right-0 pb-4 text-center px-4 z-10"
-              style={{ background: "linear-gradient(to top, oklch(0.10 0.022 240) 0%, transparent 100%)" }}
+            {/* Tagline pinned to bottom */}
+            <div className="absolute bottom-0 left-0 right-0 pb-3 text-center px-4 z-10"
+              style={{ background: "linear-gradient(to top, oklch(0.10 0.022 240 / 0.85) 0%, transparent 100%)" }}
             >
               <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>{wrenTagline}</p>
             </div>
@@ -2424,8 +2428,8 @@ export default function Home() {
       )}
 
       {/* ── Quietly Waiting — paused / holding threads (#6) ──────────────────── */}
-      {activeProjects && activeProjects.filter(p => p.status === 'paused').length > 0 && (() => {
-        const waiting = activeProjects.filter(p => p.status === 'paused');
+      {pausedProjects && pausedProjects.length > 0 && (() => {
+        const waiting = pausedProjects;
         return (
           <BentoCard
             icon={<Pause className="w-3.5 h-3.5" />}

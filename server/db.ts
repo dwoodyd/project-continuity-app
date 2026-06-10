@@ -188,6 +188,14 @@ export async function getActiveProjects(userId: number): Promise<Project[]> {
     .orderBy(desc(projects.lastTouchedAt));
 }
 
+export async function getPausedProjects(userId: number): Promise<Project[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(projects)
+    .where(and(eq(projects.userId, userId), eq(projects.status, "paused")))
+    .orderBy(desc(projects.updatedAt));
+}
+
 export async function getProjectById(id: number, userId: number): Promise<Project | undefined> {
   const db = await getDb();
   if (!db) return undefined;
