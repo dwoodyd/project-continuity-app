@@ -1854,3 +1854,12 @@
 - [x] BUG-1 (Medium): /focus — Wren mascot image overflows and clips into content area; text on right side truncated. Visible in session start and pre-session views.
 - [x] BUG-2 (Low): Today header — Wren bird avatar intermittently fails to render (broken placeholder), returns on reload. Likely race condition on image load.
 - [x] BUG-3 (Low): 404 page — Hub bottom nav tab does nothing when on 404; user must tap "Take me to Today" first. Nav should work from any page.
+
+## Evening Close → Morning Handoff + Check-in Reset (Jun 10, 2026)
+- [x] EVENING-1: Audit Evening Close submit mutation — confirm "what goes first tomorrow", "tomorrow's activities", "what remains" fields are actually persisted to DB (not dropped)
+- [x] EVENING-2: Save each tomorrow task as its own task row tagged to tomorrow's date; "first thing" item gets top/priority position
+- [x] MORNING-1: Morning view reads stored evening tasks verbatim — no AI-generated, inferred, or seeded tasks; if nothing stored, show gentle empty state ("No plan set last night — start fresh")
+- [x] MORNING-2: Wren handoff message: "Here's what you set up last night." — invitation, not command
+- [x] MORNING-3: Tasks are checkable (local state); top task feeds Next Best Step / Single Focus Mode
+- [x] MORNING-4: Unfinished tasks roll into tomorrow's list automatically ("still waiting"), never deleted, never shamed
+- [x] CHECKIN-RESET: Fix Daily Rhythm check-in completion display — compare stored check-in date to today's local date (YYYY-MM-DD); if date differs, treat Morning/Midday/Evening as un-completed for display

@@ -37,10 +37,16 @@ function getTodayDate(): string {
 }
 
 export const checkInsRouter = router({
-  getToday: protectedProcedure.query(async ({ ctx }) => {
-    const date = getTodayDate();
-    return getCheckIns(ctx.user.id, date);
-  }),
+  getToday: protectedProcedure
+    .input(z.object({
+      // Client passes its local YYYY-MM-DD so the server uses the user's actual calendar day,
+      // not the UTC date (which can differ by up to ±14 hours from the user's local midnight).
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      const date = input?.localDate ?? getTodayDate();
+      return getCheckIns(ctx.user.id, date);
+    }),
 
   getRecent: protectedProcedure.query(async ({ ctx }) => {
     return getRecentCheckIns(ctx.user.id, 14);
@@ -146,14 +152,30 @@ IMPORTANT: The weekly primary project MUST appear in today's tasks unless capaci
         ? `Note: The user selected a different primary project than the weekly compass primary. Acknowledge this briefly in the guidance (1 sentence) — don't judge, just note the shift.`
         : "";
 
-      const planPrompt = `You are a thoughtful productivity assistant for someone with ADHD. 
+      // ── When the user pre-planned tasks last night, use them verbatim — no AI task generation ──
+      // The AI only writes guidance text and time blocks. Tasks come from the user's own words.
+      const hasPrePlannedTasks = tomorrowTasksFromYesterday.length > 0;
+
+      // Prompt varies: if pre-planned tasks exist, ask AI for guidance + time blocks only (no criticalTasks).
+      // If no pre-planned tasks, AI generates the full plan as before.
+      const planPromptBase = `You are a thoughtful productivity assistant for someone with ADHD. 
 Tone: ${tone}. Never use exclamation points, gamification, or motivational poster language.
 The user's capacity today is: ${input.capacityLevel}.
 Capacity rules: ${capacityRules[input.capacityLevel]}
 ${compassContext}
 Active projects: ${activeProjects.slice(0, 5).map(p => `"${p.title}" (next step: ${p.nextStep ?? "not set"})`).join(", ") || "none yet"}.
 User notes: ${input.userNotes ?? "none"}.${carryoverContext}${decisionsContext}
-${divergenceNote}
+${divergenceNote}`;
+
+      const planPrompt = hasPrePlannedTasks
+        ? `${planPromptBase}
+
+The user already set their tasks for today last night. Do NOT generate or suggest any tasks.
+Write a 2-3 sentence morning guidance message that hands back their own plan — start with "Here's what you set up last night." or similar warm invitation.
+Also suggest time blocks based on their pre-planned tasks and capacity.
+
+Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [], timeBlocks: [{label: string, duration: string}] }`
+        : `${planPromptBase}
 
 Generate a morning guidance message (2-3 sentences) and suggest tasks based on capacity rules above.
 For each task, include a carryoverCount field (0 for new tasks, or the count from carryover context if applicable).
@@ -211,23 +233,33 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
       const parsed = JSON.parse(raw);
 
-      // Assign project IDs from input if provided; preserve carryoverCount
-      // Also merge in energy/time metadata from pre-planned tomorrow tasks
-      const tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => {
-        // Try to find a matching pre-planned task to inherit its metadata
-        const prePlanned = tomorrowTasksFromYesterday.find(
-          (pt) => pt.title.toLowerCase().trim() === (t.title ?? "").toLowerCase().trim()
-        );
-        return {
-          ...t,
-          id: prePlanned?.id ?? `task-${Date.now()}-${i}`,
+      // Build the task list:
+      // If user pre-planned tasks last night — use those verbatim, respect capacity limits.
+      // If no pre-planned tasks — use AI-generated tasks as before.
+      let tasksWithIds: any[];
+      if (hasPrePlannedTasks) {
+        // Capacity limits: full=3, partial=2, low=1
+        const capacityLimit = input.capacityLevel === "full" ? 3 : input.capacityLevel === "partial" ? 2 : 1;
+        tasksWithIds = tomorrowTasksFromYesterday.slice(0, capacityLimit).map((pt, i) => ({
+          id: pt.id ?? `task-${Date.now()}-${i}`,
+          title: pt.title,
           done: false,
-          projectId: t.projectId ?? prePlanned?.projectId ?? input.primaryProjectId ?? null,
+          projectId: pt.projectId ?? input.primaryProjectId ?? null,
+          carryoverCount: 0,
+          energyLevel: pt.energyLevel,
+          estimatedMinutes: pt.estimatedMinutes,
+          notes: pt.notes,
+        }));
+      } else {
+        // AI-generated tasks — assign IDs and project IDs
+        tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => ({
+          ...t,
+          id: `task-${Date.now()}-${i}`,
+          done: false,
+          projectId: t.projectId ?? input.primaryProjectId ?? null,
           carryoverCount: t.carryoverCount ?? 0,
-          energyLevel: prePlanned?.energyLevel ?? t.energyLevel ?? undefined,
-          estimatedMinutes: prePlanned?.estimatedMinutes ?? t.estimatedMinutes ?? undefined,
-        };
-      });
+        }));
+      }
 
       // Combine guidance with divergence note if present
       const fullGuidance = parsed.divergenceNote
