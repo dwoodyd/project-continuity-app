@@ -1793,13 +1793,13 @@ export default function Home() {
       })()}
 
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 items-start" style={{ gridAutoFlow: "dense" }}>
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-3">
 
         {/* ── Daily Rhythm — spans 2 cols, top-left ──────────────────────────── */}
         <BentoCard
+          className="break-inside-avoid mb-3"
           icon={<Sun className="w-3.5 h-3.5" />}
           title="Daily Rhythm"
-          span2
           headerRight={gamStatus?.rhythmToday && (
             <RhythmSegments
               morning={gamStatus.rhythmToday.morning}
@@ -2246,7 +2246,7 @@ export default function Home() {
         const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
         const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
         return (
-          <BentoCard noPadding className="wren-ambient-card" style={{ height: 220, position: "relative", overflow: "hidden" }}>
+          <BentoCard noPadding className="wren-ambient-card break-inside-avoid mb-3" style={{ height: 220, position: "relative", overflow: "hidden" }}>
             {/* Subtle warm glow behind Wren */}
             <div
               className="absolute inset-0 pointer-events-none"
@@ -2274,13 +2274,13 @@ export default function Home() {
       })()}
 
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
-      <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding>
+      <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3">
         <MoodWidget />
       </BentoCard>
 
       {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
       {tomorrowPlanTasks && tomorrowPlanTasks.length > 0 && (
-        <div className="p-4 rounded-xl border border-border bg-card space-y-3">
+        <div className="p-4 rounded-xl border border-border bg-card space-y-3 break-inside-avoid mb-3">
           <div className="flex items-center gap-2">
             <Moon className="w-3.5 h-3.5 text-muted-foreground" />
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Planned for today</p>
@@ -2321,7 +2321,7 @@ export default function Home() {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border transition-all group" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.10)" }}>
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
               <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }} />
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Scratch Pad</p>
@@ -2337,8 +2337,8 @@ export default function Home() {
       })()}
 
       {/* ── Knowledge Graph Shortcut ─────────────────────────────────────── */}
-      <a href="/vault" className="block no-underline">
-        <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer">
+      <a href="/vault" className="block no-underline break-inside-avoid mb-3">
+        <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer break-inside-avoid mb-3">
           <p className="text-sm text-foreground/60">View your vault connections →</p>
         </BentoCard>
       </a>
@@ -2352,6 +2352,7 @@ export default function Home() {
         const dash = (pct / 100) * circ;
         return (
           <BentoCard
+          className="break-inside-avoid mb-3"
             icon={<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" /></svg>}
             title="Thread Strength"
           >
@@ -2406,7 +2407,7 @@ export default function Home() {
       {focusTodayStats && focusTodayStats.todaySessions > 0 && (
         <a
           href="/focus"
-          className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90"
+          className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90 break-inside-avoid mb-3"
           style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
         >
           <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Focus sessions today</p>
@@ -2420,6 +2421,7 @@ export default function Home() {
       {/* ── Evidence of Movement — promoted first-class bento card (#4) ────── */}
       {gamStatus?.recentEvents && gamStatus.recentEvents.length > 0 && (
         <BentoCard
+          className="break-inside-avoid mb-3"
           icon={<Zap className="w-3.5 h-3.5" />}
           title="Evidence of Movement"
         >
@@ -2432,6 +2434,7 @@ export default function Home() {
         const waiting = pausedProjects;
         return (
           <BentoCard
+            className="break-inside-avoid mb-3"
             icon={<Pause className="w-3.5 h-3.5" />}
             title="Quietly Waiting"
           >
@@ -2465,10 +2468,10 @@ export default function Home() {
       })()}
 
       {/* ── Weekly Presence Dots ────────────────────────────────────────────────────── */}
-      <ThreadView />
+      <div className="break-inside-avoid mb-3"><ThreadView /></div>
       {/* ── Evidence Log monthly sentence ─────────────────────────────────────────────────────────────────── */}
       {evidenceMonth?.summaryLine && (
-        <div className="px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5">
+        <div className="px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 break-inside-avoid mb-3">
           <p className="text-xs font-semibold text-amber-400/70 uppercase tracking-widest mb-1">Your evidence</p>
           <p className="text-sm text-foreground/70 italic leading-relaxed">{evidenceMonth.summaryLine}</p>
         </div>
@@ -2532,6 +2535,7 @@ export default function Home() {
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
       {clarityRec && !clarityNudgeDismissed && (
         <BentoCard
+          className="break-inside-avoid mb-3"
           icon={<Sparkles className="w-3.5 h-3.5" />}
           title="Pattern Detected"
           headerRight={
@@ -2577,7 +2581,7 @@ export default function Home() {
       )}
 
        {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────────── */}
-      <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode">
+      <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode" className="break-inside-avoid mb-3">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
