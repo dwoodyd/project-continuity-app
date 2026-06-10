@@ -35,6 +35,8 @@ import {
   MessageCircle,
   FolderPlus,
   Pause,
+  Heart,
+  ToggleLeft,
 } from "lucide-react";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
@@ -1789,63 +1791,58 @@ export default function Home() {
         );
       })()}
 
-      {/* ── Daily Rhythm Check-Ins ──────────────────────────────────────────── */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>Daily Rhythm</p>
-          {gamStatus?.rhythmToday && (
+      {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start" style={{ gridAutoFlow: "dense" }}>
+
+        {/* ── Daily Rhythm — spans 2 cols, top-left ──────────────────────────── */}
+        <BentoCard
+          icon={<Sun className="w-3.5 h-3.5" />}
+          title="Daily Rhythm"
+          span2
+          headerRight={gamStatus?.rhythmToday && (
             <RhythmSegments
               morning={gamStatus.rhythmToday.morning}
               midday={gamStatus.rhythmToday.midday}
               evening={gamStatus.rhythmToday.evening}
             />
           )}
-        </div>
-        <div className="flex gap-2">
-          <CheckInCard
-            type="morning"
-            icon={Sun}
-            label="Morning check-in"
-            timeHint="Set capacity + focus"
-            completed={morningDone}
-            active={activePeriod === "morning" && !morningDone}
-            open={activeCheckIn === "morning"}
-            onOpen={() => openCheckIn("morning")}
-            onClose={() => setActiveCheckIn(null)}
-          />
-          <CheckInCard
-            type="midday"
-            icon={Zap}
-            label="Midday pulse"
-            timeHint="Alignment pulse — on plan?"
-            completed={middayDone}
-            active={activePeriod === "midday" && morningDone && !middayDone}
-            open={activeCheckIn === "midday"}
-            onOpen={() => openCheckIn("midday")}
-            onClose={() => setActiveCheckIn(null)}
-          />
-          <CheckInCard
-            type="evening"
-            icon={Sunset}
-            label="Evening close"
-            timeHint="Close the loop. Acknowledge what moved."
-            completed={eveningDone}
-            active={activePeriod === "evening" && !eveningDone}
-            open={activeCheckIn === "evening"}
-            onOpen={() => openCheckIn("evening")}
-            onClose={() => setActiveCheckIn(null)}
-          />
-        </div>
-      </div>
-
-      {/* ──────────────────────────────────────────────────────────────────────────────
-           Two-column grid on desktop: left = primary, right = supporting
-      ───────────────────────────────────────────────────────────────────────────── */}
-      {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile (#1) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-
-        {/* ════ MAIN COLUMN (spans 2 on lg) ════ */}
-        <div className="lg:col-span-2 space-y-4">
+        >
+          <div className="flex gap-2">
+            <CheckInCard
+              type="morning"
+              icon={Sun}
+              label="Morning check-in"
+              timeHint="Set capacity + focus"
+              completed={morningDone}
+              active={activePeriod === "morning" && !morningDone}
+              open={activeCheckIn === "morning"}
+              onOpen={() => openCheckIn("morning")}
+              onClose={() => setActiveCheckIn(null)}
+            />
+            <CheckInCard
+              type="midday"
+              icon={Zap}
+              label="Midday pulse"
+              timeHint="Alignment pulse — on plan?"
+              completed={middayDone}
+              active={activePeriod === "midday" && morningDone && !middayDone}
+              open={activeCheckIn === "midday"}
+              onOpen={() => openCheckIn("midday")}
+              onClose={() => setActiveCheckIn(null)}
+            />
+            <CheckInCard
+              type="evening"
+              icon={Sunset}
+              label="Evening close"
+              timeHint="Close the loop. Acknowledge what moved."
+              completed={eveningDone}
+              active={activePeriod === "evening" && !eveningDone}
+              open={activeCheckIn === "evening"}
+              onOpen={() => openCheckIn("evening")}
+              onClose={() => setActiveCheckIn(null)}
+            />
+          </div>
+        </BentoCard>
 
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (
@@ -2241,30 +2238,17 @@ export default function Home() {
         );
       })()}
 
-        </div>
 
-        {/* ════ SIDE COLUMN ════ */}
-        <div className="space-y-4">
 
       {/* ── Wren Ambient Presence (time-of-day) ─────────────────────────── */}
       {(() => {
-        // Morning 5–11: popsHead (alert, ready) | Midday 12–16: holdingOrb (focused, grounded) | Evening 17+: closesEyes (reflective, winding down)
         const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
         const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
         return (
-          <div
-            className="relative overflow-hidden rounded-2xl hidden lg:flex items-end justify-center"
-            style={{
-              height: 220,
-              background: "linear-gradient(to top, oklch(0.10 0.022 240) 0%, oklch(0.13 0.028 240 / 0.6) 60%, transparent 100%)",
-            }}
-          >
-            {/* Subtle amber radial glow behind Wren */}
+          <BentoCard noPadding style={{ minHeight: 200, position: "relative", overflow: "hidden" }}>
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{
-                background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.10) 0%, transparent 65%)",
-              }}
+              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.10) 0%, transparent 65%)" }}
             />
             <WrenPlayer
               clip={wrenClip}
@@ -2276,18 +2260,19 @@ export default function Home() {
               featherDirection="bottom"
               wrapperClassName="absolute inset-0 flex items-center justify-center"
             />
-            {/* Tagline overlay */}
-            <div className="relative z-10 pb-4 text-center px-4">
-              <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>
-                {wrenTagline}
-              </p>
+            <div className="absolute bottom-0 left-0 right-0 pb-4 text-center px-4 z-10"
+              style={{ background: "linear-gradient(to top, oklch(0.10 0.022 240) 0%, transparent 100%)" }}
+            >
+              <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>{wrenTagline}</p>
             </div>
-          </div>
+          </BentoCard>
         );
       })()}
 
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
-      <MoodWidget />
+      <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding>
+        <MoodWidget />
+      </BentoCard>
 
       {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
       {tomorrowPlanTasks && tomorrowPlanTasks.length > 0 && (
@@ -2348,13 +2333,10 @@ export default function Home() {
       })()}
 
       {/* ── Knowledge Graph Shortcut ─────────────────────────────────────── */}
-      <a href="/vault" className="flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/20 hover:bg-primary/[0.02] transition-all group">
-        <span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Knowledge Graph</p>
-          <p className="text-sm text-foreground/60 mt-0.5">View your vault connections</p>
-        </div>
-        <span className="text-sm text-muted-foreground/40 group-hover:text-primary/60 transition-colors">→</span>
+      <a href="/vault" className="block no-underline">
+        <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer">
+          <p className="text-sm text-foreground/60">View your vault connections →</p>
+        </BentoCard>
       </a>
 
       {/* ── Thread Strength — gentle arc + named-state dot meter (#5) ────────── */}
@@ -2487,49 +2469,61 @@ export default function Home() {
           <p className="text-sm text-foreground/70 italic leading-relaxed">{evidenceMonth.summaryLine}</p>
         </div>
       )}
-      {/* ── Active Projects Quick Access (right col) ────────────────────────────────────────────────────────── */}
-      {activeProjects && activeProjects.length > 0 && (
-        <div>
-          <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Active projects</p>
-          <div className="space-y-2">
-            {activeProjects.slice(0, capacityLevel === "low" ? 1 : capacityLevel === "partial" ? 2 : 3).map((project) => (
-              <button
-                key={project.id}
-                onClick={() => navigate(`/projects/${project.id}`)}
-                className="w-full flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-foreground/20 hover:bg-accent transition-colors text-left group"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-foreground truncate">{project.title}</p>
-                    {momentumByProject[project.id] && (
-                      <span className={`text-xs font-semibold uppercase tracking-wide shrink-0 ${
-                        momentumByProject[project.id] === 'rising' ? 'text-emerald-500' :
-                        momentumByProject[project.id] === 'fading' ? 'text-amber-500' :
-                        momentumByProject[project.id] === 'stalled' ? 'text-red-400' :
-                        'text-muted-foreground'
-                      }`}>
-                        {momentumByProject[project.id] === 'rising' ? '↑' :
-                         momentumByProject[project.id] === 'fading' ? '↓' :
-                         momentumByProject[project.id] === 'stalled' ? '⚠' : '→'}
-                        {' '}{momentumByProject[project.id]}
+      {/* ── Active Projects — momentum state bars ──────────────────────────── */}
+      {activeProjects && activeProjects.length > 0 && (() => {
+        const stateLabel = (m: string) =>
+          m === 'rising' ? 'weaving' :
+          m === 'fading' ? 'holding' :
+          m === 'stalled' ? 'holding' : 'gathering';
+        const stateColor = (m: string): string =>
+          m === 'rising' ? 'oklch(0.65 0.12 150)' :
+          m === 'fading' || m === 'stalled' ? 'oklch(0.74 0.14 72 / 0.70)' :
+          'oklch(0.74 0.14 72 / 0.40)';
+        const stateFill = (m: string): number =>
+          m === 'rising' ? 0.75 : m === 'fading' ? 0.45 : m === 'stalled' ? 0.25 : 0.55;
+        return (
+          <BentoCard icon={<FolderPlus className="w-3.5 h-3.5" />} title="Projects">
+            <div className="space-y-3">
+              {activeProjects.slice(0, capacityLevel === "low" ? 1 : capacityLevel === "partial" ? 2 : 3).map((project) => {
+                const m = momentumByProject[project.id] ?? 'steady';
+                return (
+                  <button
+                    key={project.id}
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                    className="w-full text-left group"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-xs font-medium text-foreground truncate flex-1">{project.title}</p>
+                      <span className="text-xs ml-2 shrink-0 font-log" style={{ color: stateColor(m) }}>
+                        {stateLabel(m)}
                       </span>
+                    </div>
+                    {/* Soft momentum fill bar — state-labeled, no % */}
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "oklch(1 0 0 / 0.07)" }}>
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${stateFill(m) * 100}%`,
+                          background: stateColor(m),
+                          opacity: 0.8,
+                        }}
+                      />
+                    </div>
+                    {project.nextStep && (
+                      <p className="text-xs text-muted-foreground/50 truncate mt-1">next: {project.nextStep}</p>
                     )}
-                  </div>
-                  {project.nextStep && (
-                    <p className="text-sm text-muted-foreground truncate mt-0.5">Next: {project.nextStep}</p>
-                  )}
-                </div>
-                <ChevronDown className="w-4 h-4 text-muted-foreground rotate-[-90deg] shrink-0 ml-2 group-hover:translate-x-0.5 transition-transform" />
-              </button>
-            ))}
-            {capacityLevel === "low" && activeProjects.length > 1 && (
-              <p className="text-sm text-muted-foreground/60 text-center py-1">
-                {activeProjects.length - 1} other project{activeProjects.length - 1 > 1 ? "s" : ""} paused for today
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+                  </button>
+                );
+              })}
+              {capacityLevel === "low" && activeProjects.length > 1 && (
+                <p className="text-xs text-muted-foreground/40 text-center pt-1">
+                  {activeProjects.length - 1} other project{activeProjects.length - 1 > 1 ? "s" : ""} resting today
+                </p>
+              )}
+            </div>
+          </BentoCard>
+        );
+      })()}
 
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
       {clarityRec && !clarityNudgeDismissed && (
@@ -2579,7 +2573,7 @@ export default function Home() {
       )}
 
        {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-xl border border-border bg-card">
+      <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
@@ -2626,7 +2620,7 @@ export default function Home() {
             )} />
           </button>
         </div>
-      </div>     </div>
+      </BentoCard>
       </div>
       {/* Empty state banner removed — the top-alert check_in_due card and Daily Rhythm tiles already surface the morning check-in. A third CTA was redundant and used an off-palette purple gradient. */}
 
