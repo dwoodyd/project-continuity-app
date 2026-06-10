@@ -1,38 +1,30 @@
 /**
- * ThreadView — Real-data weekly thread visualization.
+ * ThreadView — Weekly thread presence card.
  * Shows after the user has 3+ days of check-in data.
- * Displays morning/midday/evening dots for each day.
- * NO percentages, NO streak counts — named states only.
+ * Named states only: Gathering · Weaving · Holding — all honored, none judgmental.
+ * No heatmap, no streak grid, no dots highlighting absent days.
  */
 
 import React from "react";
 import { trpc } from "@/lib/trpc";
-import { format, parseISO } from "date-fns";
 
-function getDayLabel(dateStr: string): string {
-  try {
-    const d = parseISO(dateStr);
-    return format(d, "EEE").slice(0, 3);
-  } catch {
-    return "—";
+/** Map a numeric strength score to a non-judgmental named state */
+function strengthToState(score: number): "Gathering" | "Weaving" | "Holding" {
+  if (score >= 60) return "Holding";
+  if (score >= 30) return "Weaving";
+  return "Gathering";
+}
+
+/** A warm, non-comparative sentence — never mentions what's missing */
+function warmSentence(state: "Gathering" | "Weaving" | "Holding"): string {
+  switch (state) {
+    case "Holding":
+      return "You've been here. The thread is strong.";
+    case "Weaving":
+      return "You're returning. That's the whole thing.";
+    case "Gathering":
+      return "You showed up. That's where every thread begins.";
   }
-}
-
-/** Map a numeric strength score to a named state — no digits ever shown */
-function strengthToState(score: number): string {
-  if (score >= 80) return "Woven";
-  if (score >= 60) return "Strong";
-  if (score >= 40) return "Holding";
-  if (score >= 20) return "Thin";
-  return "Fraying";
-}
-
-/** A short warm sentence for the sub-header — no counts, no % */
-function weekSentence(daysWithData: number): string {
-  if (daysWithData >= 6) return "You've been here almost every day.";
-  if (daysWithData >= 4) return "You've returned several times this week.";
-  if (daysWithData >= 3) return "You've checked in a few times this week.";
-  return "The thread is here whenever you are.";
 }
 
 export function ThreadView() {
@@ -56,30 +48,7 @@ export function ThreadView() {
     }
   }, [threadData, toastShown]);
 
-  if (isLoading) {
-    return (
-      <div style={{
-        background: "oklch(0.12 0.02 270)",
-        borderRadius: 16,
-        padding: "16px 14px",
-        border: "1px solid oklch(0.20 0.03 270)",
-        opacity: 0.6,
-      }}>
-        <div style={{
-          height: 80,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: 12,
-          color: "oklch(0.42 0.01 270)",
-          fontFamily: "Inter, sans-serif",
-        }}>
-          Loading thread…
-        </div>
-      </div>
-    );
-  }
-
+  if (isLoading) return null;
   if (!threadData || threadData.length === 0) return null;
 
   const daysWithData = threadData.filter((d) => d.morning || d.midday || d.evening).length;
@@ -87,43 +56,40 @@ export function ThreadView() {
 
   const totalStrength = threadData.reduce((sum, d) => sum + d.strength, 0);
   const avgStrength = Math.round(totalStrength / threadData.length);
-  const stateName = strengthToState(avgStrength);
+  const state = strengthToState(avgStrength);
+  const sentence = warmSentence(state);
 
   return (
     <div style={{
-      background: "oklch(0.12 0.02 270)",
+      background: "oklch(0.12 0.02 240)",
       borderRadius: 16,
-      padding: "16px 14px 14px",
-      border: "1px solid oklch(0.20 0.03 270)",
+      padding: "16px 18px",
+      border: "1px solid oklch(0.20 0.03 240)",
     }}>
-      {/* Header — named state only, no % or count */}
-      <div style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        marginBottom: 14,
-      }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div>
           <div style={{
             fontSize: 13,
             fontWeight: 600,
-            color: "oklch(0.88 0.005 270)",
+            color: "oklch(0.88 0.005 240)",
             fontFamily: "Inter, sans-serif",
             letterSpacing: "-0.01em",
+            marginBottom: 4,
           }}>
             Your thread this week
           </div>
           <div style={{
-            fontSize: 11,
-            color: "oklch(0.45 0.01 270)",
+            fontSize: 12,
+            color: "oklch(0.55 0.01 240)",
             fontFamily: "Inter, sans-serif",
-            marginTop: 2,
+            lineHeight: 1.5,
           }}>
-            {weekSentence(daysWithData)}
+            {sentence}
           </div>
         </div>
-        {/* Named state badge — no number */}
+        {/* Named state badge — no number, no judgment */}
         <div style={{
+          flexShrink: 0,
           fontSize: 11,
           fontWeight: 600,
           color: "oklch(0.74 0.14 72)",
@@ -131,82 +97,11 @@ export function ThreadView() {
           background: "oklch(0.74 0.14 72 / 0.10)",
           border: "1px solid oklch(0.74 0.14 72 / 0.22)",
           borderRadius: 20,
-          padding: "2px 10px",
+          padding: "3px 12px",
           whiteSpace: "nowrap",
         }}>
-          {stateName}
+          {state}
         </div>
-      </div>
-
-      {/* Day columns — dots only, no strength bars */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 4 }}>
-        {threadData.map((day, i) => {
-          const isToday = i === threadData.length - 1;
-          return (
-            <div key={day.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              {/* Day label */}
-              <div style={{
-                fontSize: 9,
-                color: isToday ? "oklch(0.74 0.14 72)" : "oklch(0.38 0.01 270)",
-                fontFamily: "Inter, sans-serif",
-                letterSpacing: "0.04em",
-                fontWeight: isToday ? 700 : 400,
-              }}>
-                {getDayLabel(day.date)}
-              </div>
-
-              {/* Check-in dots: morning / midday / evening */}
-              {[
-                { has: day.morning, color: "oklch(0.62 0.14 270)", glow: "oklch(0.62 0.14 270 / 0.5)" },
-                { has: day.midday, color: "oklch(0.72 0.15 150)", glow: "oklch(0.72 0.15 150 / 0.4)" },
-                { has: day.evening, color: "oklch(0.65 0.14 30)", glow: "oklch(0.65 0.14 30 / 0.4)" },
-              ].map((slot, si) => (
-                <div key={si} style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: slot.has ? slot.color : "oklch(0.20 0.02 270)",
-                  boxShadow: slot.has ? `0 0 5px 2px ${slot.glow}` : "none",
-                  transition: "background 0.3s ease-out",
-                }} />
-              ))}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Legend */}
-      <div style={{
-        display: "flex",
-        gap: 12,
-        marginTop: 10,
-        justifyContent: "center",
-      }}>
-        {[
-          { color: "oklch(0.62 0.14 270)", label: "Morning" },
-          { color: "oklch(0.72 0.15 150)", label: "Midday" },
-          { color: "oklch(0.65 0.14 30)", label: "Evening" },
-        ].map((item) => (
-          <div key={item.label} style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-          }}>
-            <div style={{
-              width: 6,
-              height: 6,
-              borderRadius: "50%",
-              background: item.color,
-            }} />
-            <span style={{
-              fontSize: 9,
-              color: "oklch(0.40 0.01 270)",
-              fontFamily: "Inter, sans-serif",
-            }}>
-              {item.label}
-            </span>
-          </div>
-        ))}
       </div>
     </div>
   );

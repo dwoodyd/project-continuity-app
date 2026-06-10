@@ -2346,8 +2346,13 @@ export default function Home() {
 
       {/* ── Thread Strength — gentle arc + named-state dot meter (#5) ────────── */}
       {gamStatus?.threadStrength && (() => {
-        const STATES = ["fraying", "thin", "holding", "strong", "woven"];
-        const currentIdx = STATES.indexOf(gamStatus.threadStrength.state.toLowerCase());
+        const STATES = ["gathering", "weaving", "holding"];
+        // Map legacy backend states to the 3 honored states
+        const rawState = gamStatus.threadStrength.state.toLowerCase();
+        const mappedState = rawState === "fraying" || rawState === "thin" ? "gathering"
+          : rawState === "strong" || rawState === "woven" ? "holding"
+          : rawState;
+        const currentIdx = Math.max(0, STATES.indexOf(mappedState));
         const pct = Math.min(100, (gamStatus.threadStrength.score / 90) * 100);
         const r = 22; const circ = 2 * Math.PI * r;
         const dash = (pct / 100) * circ;
@@ -2371,7 +2376,7 @@ export default function Home() {
               {/* State label + dot meter */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold capitalize" style={{ color: "oklch(0.74 0.14 72)" }}>
-                  {gamStatus.threadStrength.state}
+                  {mappedState.charAt(0).toUpperCase() + mappedState.slice(1)}
                 </p>
                 <div className="flex items-center gap-1 mt-1.5">
                   {STATES.map((s, i) => (
