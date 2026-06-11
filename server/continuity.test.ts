@@ -261,13 +261,13 @@ describe("dailyPlan", () => {
     expect(Array.isArray(result)).toBe(true);
   });
 
-  it("saveTomorrowPlan returns success:false when no plan exists", async () => {
+  it("saveTomorrowPlan upserts and returns success:true even when no plan exists", async () => {
     const caller = appRouter.createCaller(makeCtx());
     const result = await caller.dailyPlan.saveTomorrowPlan({
       tasks: [{ id: "t1", title: "Write tests", energyLevel: "high", estimatedMinutes: 30 }],
     });
-    // getDailyPlan is mocked to return null, so success should be false
-    expect(result).toEqual({ success: false });
+    // saveTomorrowPlan now upserts (creates plan if missing) so it always returns success:true
+    expect(result).toEqual({ success: true });
   });
 });
 

@@ -109,7 +109,10 @@ IMPORTANT: The weekly primary project MUST appear in today's tasks unless capaci
       let carryoverContext = "";
       let tomorrowTasksFromYesterday: Array<{ id: string; title: string; projectId?: number | null; energyLevel?: string; estimatedMinutes?: number; notes?: string }> = [];
       if (recentPlans.length > 0) {
-        const yesterday = recentPlans[0];
+        // Skip today's plan (it has no tomorrowTasks yet) — find the most recent prior-day plan.
+        // recentPlans is ordered by date DESC, so recentPlans[0] may be today's plan if the user
+        // already had a morning check-in today (which creates today's plan before this mutation runs).
+        const yesterday = recentPlans.find((p) => p.date !== date) ?? recentPlans[0];
         if (yesterday) {
           const yesterdayTasks: any[] = (() => {
             try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
@@ -700,5 +703,30 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
   }),
   getHeatmapData: protectedProcedure.query(async ({ ctx }) => {
     return getHeatmapData(ctx.user.id);
+  }),
+
+  /**
+   * Returns the user's most recent evening check-in with full raw content.
+   * Used by the Evening Close review screen so users can read back what they wrote.
+   */
+  getLastEveningClose: protectedProcedure.query(async ({ ctx }) => {
+    const recent = await getRecentCheckIns(ctx.user.id, 30);
+    const lastEvening = recent.find((c) => c.type === "evening");
+    if (!lastEvening) return null;
+    let userInput: { whatMoved?: string; whatRemains?: string; whatLearned?: string; tomorrowFirst?: string } = {};
+    try { userInput = JSON.parse(lastEvening.userInput ?? "{}"); } catch { /* ignore */ }
+    let carryoverTasks: string[] = [];
+    try { carryoverTasks = JSON.parse(lastEvening.extractedNextSteps ?? "[]"); } catch { /* ignore */ }
+    return {
+      id: lastEvening.id,
+      date: lastEvening.date,
+      completedAt: lastEvening.completedAt,
+      whatMoved: userInput.whatMoved ?? "",
+      whatRemains: userInput.whatRemains ?? "",
+      whatLearned: userInput.whatLearned ?? "",
+      tomorrowFirst: userInput.tomorrowFirst ?? "",
+      wrenSummary: lastEvening.generatedResponse ?? "",
+      carryoverTasks,
+    };
   }),
 });

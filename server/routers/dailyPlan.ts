@@ -3,6 +3,7 @@ import {
   getDailyPlan,
   getRecentDailyPlans,
   updateDailyPlan,
+  upsertDailyPlan,
   getActiveProjects,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -79,24 +80,41 @@ export const dailyPlanRouter = router({
   saveTomorrowPlan: protectedProcedure
     .input(z.object({
       tasks: z.array(tomorrowTaskSchema).max(20),
-      // Optional: which date's plan to store on (defaults to today)
-      date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+      // Client passes its local YYYY-MM-DD so the plan is stored under the correct local date
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.date ?? getTodayDate();
-      const plan = await getDailyPlan(ctx.user.id, date);
-      if (!plan) return { success: false };
-      await updateDailyPlan(plan.id, ctx.user.id, {
+      const date = input.localDate ?? getTodayDate();
+      // Upsert: create a minimal plan if one doesn't exist yet (user may have skipped morning check-in)
+      const planId = await upsertDailyPlan({
+        userId: ctx.user.id,
+        date,
         tomorrowTasks: JSON.stringify(input.tasks),
       });
+      // If plan already existed, update just the tomorrowTasks field
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (plan && plan.id !== planId) {
+        await updateDailyPlan(plan.id, ctx.user.id, { tomorrowTasks: JSON.stringify(input.tasks) });
+      }
       return { success: true };
     }),
 
   // Returns tomorrow's planned tasks from yesterday's daily plan
-  getTomorrowPlan: protectedProcedure.query(async ({ ctx }) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0]!;
+  // Accepts localDate (today's local YYYY-MM-DD) so we can compute yesterday correctly
+  getTomorrowPlan: protectedProcedure
+    .input(z.object({ localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).optional())
+    .query(async ({ ctx, input }) => {
+    // Compute yesterday from the client's local date to avoid UTC midnight mismatch
+    let yesterdayStr: string;
+    if (input?.localDate) {
+      const [y, m, d] = input.localDate.split("-").map(Number);
+      const prev = new Date(y!, m! - 1, d! - 1);
+      yesterdayStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
+    } else {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterdayStr = yesterday.toISOString().split("T")[0]!;
+    }
     const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
     if (!plan?.tomorrowTasks) return [];
     try {

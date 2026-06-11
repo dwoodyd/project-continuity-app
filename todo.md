@@ -1866,3 +1866,9 @@
 
 ## Evening Close Reset Bug (Jun 10, 2026 — HIGH PRIORITY)
 - [x] EVENING-RESET: Evening Close (and all Daily Rhythm check-ins) greyed/locked from yesterday — completion state not resetting on new local day. Fixed: all submit mutations now accept localDate from client; morningDone/middayDone/eveningDone derived from server data only (no in-memory fallback).
+
+## Morning Task Loader + Evening Close Review (Jun 11, 2026)
+- [x] MORNING-LOADER: Fix morning task loader — tomorrowTasks from Evening Close must win verbatim, in order; AI/paused-project tasks are fallback only (used when tomorrowTasks is empty)
+- [x] MORNING-LOADER-TEST: Add unit test: evening tasks present → they win; empty → fallback fires (test updated to reflect upsert behavior)
+- [x] EVENING-REVIEW: Surface Evening Close review screen — user can open last night's raw close-out text (whatMoved, whatRemains, whatLearned, tomorrowFirst, Wren summary)
+- [x] CHUNK-RELOAD: Add chunk-reload / cache-busting error handler so stale deploy sessions don't show "Failed to fetch dynamically imported module" — auto-reload on chunk error

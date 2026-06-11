@@ -50,6 +50,7 @@ import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   ReturnMarker,
   RhythmSegments,
@@ -770,9 +771,9 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       firstTask,
       ...tomorrowTasks.filter((t) => t.title.trim().toLowerCase() !== tomorrowFirst.trim().toLowerCase()),
     ];
-    saveTomorrowPlan.mutate({ tasks: allTomorrowTasks });
     const dEve = new Date();
     const localDateEve = `${dEve.getFullYear()}-${String(dEve.getMonth() + 1).padStart(2, '0')}-${String(dEve.getDate()).padStart(2, '0')}`;
+    saveTomorrowPlan.mutate({ tasks: allTomorrowTasks, localDate: localDateEve });
     submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate: localDateEve });
   };
   return (
@@ -1043,6 +1044,8 @@ export default function Home() {
   // Priority 8.8 — first-run Wren introduction moment
   // Wren intro: show if profile is loaded and hasSeenWrenIntro is false
   const [showWrenIntro, setShowWrenIntro] = useState(false);
+  // Evening Close review modal
+  const [showEveningReview, setShowEveningReview] = useState(false);
   // Gamification state
   const { data: gamStatus, refetch: refetchGam } = useGamificationStatus();
   const recordEvent = useRecordEvent();
@@ -1115,7 +1118,8 @@ export default function Home() {
   // These are secondary data that don't block the initial render.
   const criticalReady = authed && !planLoading;
   const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery(undefined, { enabled: criticalReady });
-  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery(undefined, { enabled: criticalReady });
+  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery({ localDate: localDateStr }, { enabled: criticalReady });
+  const { data: lastEveningClose } = trpc.checkIns.getLastEveningClose.useQuery(undefined, { enabled: authed, staleTime: 60_000 });
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: criticalReady });
   const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: criticalReady });
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: criticalReady });
@@ -1933,17 +1937,27 @@ export default function Home() {
             onOpen={() => openCheckIn("midday")}
             onClose={() => setActiveCheckIn(null)}
           />
-          <CheckInCard
-            type="evening"
-            icon={Sunset}
-            label="Evening close"
-            timeHint="Close the loop. Acknowledge what moved."
-            completed={eveningDone}
-            active={activePeriod === "evening" && !eveningDone}
-            open={activeCheckIn === "evening"}
-            onOpen={() => openCheckIn("evening")}
-            onClose={() => setActiveCheckIn(null)}
-          />
+          <div className="flex-1 min-w-0 flex flex-col gap-1">
+            <CheckInCard
+              type="evening"
+              icon={Sunset}
+              label="Evening close"
+              timeHint="Close the loop. Acknowledge what moved."
+              completed={eveningDone}
+              active={activePeriod === "evening" && !eveningDone}
+              open={activeCheckIn === "evening"}
+              onOpen={() => openCheckIn("evening")}
+              onClose={() => setActiveCheckIn(null)}
+            />
+            {eveningDone && lastEveningClose && (
+              <button
+                onClick={() => setShowEveningReview(true)}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors text-left pl-1 underline underline-offset-2"
+              >
+                Review last close
+              </button>
+            )}
+          </div>
         </div>
       </BentoCard>
 
@@ -2746,6 +2760,62 @@ export default function Home() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ── Evening Close Review Modal ─────────────────────────────────────── */}
+      {lastEveningClose && (
+        <Dialog open={showEveningReview} onOpenChange={setShowEveningReview}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="text-base font-semibold">Evening Close · {lastEveningClose.date}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-sm">
+              {lastEveningClose.whatMoved && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What moved</p>
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">{lastEveningClose.whatMoved}</p>
+                </div>
+              )}
+              {lastEveningClose.whatRemains && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What remains</p>
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">{lastEveningClose.whatRemains}</p>
+                </div>
+              )}
+              {lastEveningClose.whatLearned && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What I learned</p>
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">{lastEveningClose.whatLearned}</p>
+                </div>
+              )}
+              {lastEveningClose.tomorrowFirst && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">First thing tomorrow</p>
+                  <p className="text-foreground leading-relaxed font-medium">{lastEveningClose.tomorrowFirst}</p>
+                </div>
+              )}
+              {lastEveningClose.carryoverTasks && lastEveningClose.carryoverTasks.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Carrying over</p>
+                  <ul className="space-y-1">
+                    {lastEveningClose.carryoverTasks.map((t, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-muted-foreground mt-0.5">·</span>
+                        <span className="text-foreground">{t}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {lastEveningClose.wrenSummary && (
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Wren's reflection</p>
+                  <p className="text-muted-foreground leading-relaxed italic">{lastEveningClose.wrenSummary}</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* ── Modals ────────────────────────────────────────────────────────────────────────────────────────── */}
