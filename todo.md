@@ -1863,3 +1863,6 @@
 - [x] MORNING-3: Tasks are checkable (local state); top task feeds Next Best Step / Single Focus Mode
 - [x] MORNING-4: Unfinished tasks roll into tomorrow's list automatically ("still waiting"), never deleted, never shamed
 - [x] CHECKIN-RESET: Fix Daily Rhythm check-in completion display — compare stored check-in date to today's local date (YYYY-MM-DD); if date differs, treat Morning/Midday/Evening as un-completed for display
+
+## Evening Close Reset Bug (Jun 10, 2026 — HIGH PRIORITY)
+- [x] EVENING-RESET: Evening Close (and all Daily Rhythm check-ins) greyed/locked from yesterday — completion state not resetting on new local day. Fixed: all submit mutations now accept localDate from client; morningDone/middayDone/eveningDone derived from server data only (no in-memory fallback).

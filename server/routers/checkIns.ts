@@ -61,10 +61,12 @@ export const checkInsRouter = router({
       emotionalState: z.enum(["focused", "anxious", "foggy", "energized", "drained"]).optional(),
       mentalLoad: z.enum(["light", "moderate", "heavy"]).optional(),
       workLocation: z.enum(["home", "coffee_shop", "library", "office", "other"]).optional(),
+      // Client passes its local YYYY-MM-DD to avoid UTC/local midnight mismatch
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = getTodayDate();
+      const date = input.localDate ?? getTodayDate();
       const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
         getUserProfile(ctx.user.id),
         getActiveProjects(ctx.user.id),
@@ -316,10 +318,11 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       nextMove: z.string().max(1000).optional(),
       energyLevel: z.enum(["high", "medium", "low"]).optional(),
       hungerLevel: z.enum(["full", "slightly_hungry", "hungry"]).optional(),
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = getTodayDate();
+      const date = input.localDate ?? getTodayDate();
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
       const toneMap = { gentle: "warm but honest", direct: "calm and direct", firm: "concise and firm" };
@@ -401,10 +404,11 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
       whatRemains: z.string().max(2000),
       whatLearned: z.string().max(2000),
       tomorrowFirst: z.string().max(1000),
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = getTodayDate();
+      const date = input.localDate ?? getTodayDate();
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
       const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };

@@ -506,7 +506,11 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
         </div>
       </div>
       <Button
-        onClick={() => submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation })}
+        onClick={() => {
+          const d = new Date();
+          const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation, localDate });
+        }}
         disabled={submit.isPending}
         className="w-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/25"
         size="sm"
@@ -631,7 +635,9 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
           if (interruptions.trim()) {
             classifyDistraction.mutate({ rawInput: interruptions, checkInType: "midday" });
           }
-          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel });
+          const d2 = new Date();
+          const localDate2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')}`;
+          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel, localDate: localDate2 });
         }}
         disabled={submit.isPending}
         className="w-full"
@@ -765,7 +771,9 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       ...tomorrowTasks.filter((t) => t.title.trim().toLowerCase() !== tomorrowFirst.trim().toLowerCase()),
     ];
     saveTomorrowPlan.mutate({ tasks: allTomorrowTasks });
-    submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst });
+    const dEve = new Date();
+    const localDateEve = `${dEve.getFullYear()}-${String(dEve.getMonth() + 1).padStart(2, '0')}-${String(dEve.getDate()).padStart(2, '0')}`;
+    submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate: localDateEve });
   };
   return (
     <div className="space-y-4">
@@ -1313,9 +1321,19 @@ export default function Home() {
   const completedTasks = tasks.filter((t: any) => t.done).length;
   const allTasksDone = tasks.length > 0 && completedTasks === tasks.length;
 
-  const morningDone = todayCheckIns?.some((c) => c.type === "morning") ?? completedCheckIns.has("morning");
-  const middayDone = todayCheckIns?.some((c) => c.type === "midday") ?? completedCheckIns.has("midday");
-  const eveningDone = todayCheckIns?.some((c) => c.type === "evening") ?? completedCheckIns.has("evening");
+  // Derive completion state from server data (today's local date check-ins).
+  // completedCheckIns is only used as an optimistic fallback WHILE the refetch is in-flight
+  // (i.e., todayCheckIns is still undefined/stale). Once the server responds, server data wins.
+  // This prevents yesterday's in-memory state from persisting into a new day.
+  const morningDone = todayCheckIns != null
+    ? todayCheckIns.some((c) => c.type === "morning")
+    : completedCheckIns.has("morning");
+  const middayDone = todayCheckIns != null
+    ? todayCheckIns.some((c) => c.type === "midday")
+    : completedCheckIns.has("midday");
+  const eveningDone = todayCheckIns != null
+    ? todayCheckIns.some((c) => c.type === "evening")
+    : completedCheckIns.has("evening");
 
   // Show notification permission prompt 2s after first morning check-in completes
   // 48h defer window stored in localStorage
