@@ -13,14 +13,18 @@ import "./index.css";
 // After a deploy, Vite renames hashed JS chunks. Open browser sessions that try
 // to lazy-load an old chunk get a "Failed to fetch dynamically imported module"
 // error. We catch it here and do a single hard-reload to pick up the new build.
-// A sessionStorage flag prevents infinite reload loops if the new build is also broken.
+// We use a per-pathname key so each route gets its own reload attempt — this
+// prevents a previous route's reload from blocking a later route's recovery.
 const handleChunkError = (msg: string) => {
   if (
     msg.includes("Failed to fetch dynamically imported module") ||
     msg.includes("Importing a module script failed") ||
-    msg.includes("error loading dynamically imported module")
+    msg.includes("error loading dynamically imported module") ||
+    msg.includes("Unable to preload CSS") ||
+    msg.includes("dynamically imported module")
   ) {
-    const key = "__chunk_reload_attempted";
+    // Key is scoped to the current pathname so each route gets one reload attempt.
+    const key = `__chunk_reload_${window.location.pathname}`;
     if (!sessionStorage.getItem(key)) {
       sessionStorage.setItem(key, "1");
       window.location.reload();

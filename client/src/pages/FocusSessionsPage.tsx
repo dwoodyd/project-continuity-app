@@ -26,6 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import UnstickModal from "@/components/UnstickModal";
 import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
+import WrenPopout from "@/components/WrenPopout";
 
 // ── CDN video URLs ────────────────────────────────────────────────────────────
 const WREN_VIDEOS = {
@@ -284,6 +285,7 @@ export default function FocusSessionsPage() {
   const [durationMinutes, setDurationMinutes] = useState<25 | 50 | 90>(25);
   const [hardStop, setHardStop] = useState<string>(""); // "HH:MM" local time
   const [showUnstickModal, setShowUnstickModal] = useState(false);
+  const [pipOpen, setPipOpen] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
   // ── Surface state ──────────────────────────────────────────────────────────────────
   const [surfaceVisible, setSurfaceVisible] = useState(false);
@@ -698,16 +700,32 @@ export default function FocusSessionsPage() {
           <span className="text-xs" style={{ color: "oklch(0.42 0.04 240)" }}>
             {phase === "active" ? `${formatTime(secondsLeft)} remaining` : phase === "intake" ? "Setting intention" : phase === "duration" ? "Choose duration" : "Closing"}
           </span>
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-            style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}
-          >
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Exit session
-          </button>
+          <div className="flex items-center gap-2">
+            {phase === "active" && (
+              <button
+                onClick={() => setPipOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                style={{ color: "oklch(0.72 0.14 72)", background: "oklch(0.13 0.04 72 / 0.4)", border: "1px solid oklch(0.35 0.10 72 / 0.5)" }}
+                title="Float Wren in a small window so you can work in other apps"
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <rect x="2" y="7" width="14" height="10" rx="1.5" />
+                  <path d="M16 11l4-4m0 0h-4m4 0v4" />
+                </svg>
+                Pop out Wren
+              </button>
+            )}
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+              style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}
+            >
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Exit session
+            </button>
+          </div>
         </div>
       )}
       {/* Header — dims during active session */}
@@ -1405,6 +1423,27 @@ export default function FocusSessionsPage() {
           entryMethod="manual"
         />
       )}
+
+      {/* Wren Focus Popout — Document PiP window (Chrome/Edge) or presence-only float (Safari/Firefox) */}
+      <WrenPopout
+        open={pipOpen}
+        onClose={() => setPipOpen(false)}
+        secondsLeft={secondsLeft}
+        durationMinutes={durationMinutes}
+        intention={intention}
+        wrenActivity={wrenActivity}
+        ambientSound={ambientSound}
+        ambientVolume={ambientVolume}
+        onSetAmbient={handleSetAmbient}
+        onSetVolume={handleSetVolume}
+        chatMessages={chatMessages}
+        chatInput={chatInput}
+        chatLoading={chatLoading}
+        onChatInputChange={setChatInput}
+        onSendChat={handleSendChat}
+        onStuck={() => setShowUnstickModal(true)}
+        onEndEarly={handleEndEarly}
+      />
 
       <style>{`
         @keyframes fadeIn {

@@ -1883,3 +1883,10 @@
 - [x] TASKS-EVIDENCE: Completing a task logs it to Evidence of Movement ("✓ [task title]")
 - [x] TASKS-WREN: Wren soft affirmation when tasks complete ("Three things moved today")
 - [x] TASKS-ROLLOVER: Unfinished tasks roll to tomorrow via push-to-tomorrow; "still waiting" label on carryovers
+
+## Wren Focus Popout + Chunk-Reload Fix (Jun 12, 2026)
+- [x] CHUNK-RELOAD-2: Fix stale-chunk auto-reload to cover lazy-loaded routes — now uses per-pathname key so each route gets its own reload attempt; also catches CSS preload failures
+- [x] POPOUT-A: Build WrenPopout component using Document Picture-in-Picture API (Chrome/Edge/Arc) — full session: Wren breathing, live timer, intention, ambient toggle (Silence/Rain/Café), Stuck button, collapsible Talk-to-Wren chat
+- [x] POPOUT-B: Presence-only fallback for Safari/Firefox — Wren, timer, intention, latest Wren line, "tap back to app to chat or mark Stuck" hint
+- [x] POPOUT-WIRE: Wire popout to FocusSessionsPage — shared state via context/ref so timer/chat/ambient survive the move; "Pop out Wren →" button in active session header; popout closes cleanly and returns to tab
+- [x] POPOUT-STYLES: Copy app styles (CSS variables, fonts) into PiP window document head so Wren and UI render correctly in the float
