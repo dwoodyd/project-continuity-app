@@ -2243,22 +2243,39 @@ export default function Home() {
                   {hiddenTaskCount} more task{hiddenTaskCount > 1 ? "s" : ""} held back — {capacityLevel === "low" ? "one thing today" : "focus on these first"}
                 </p>
               )}
-              {/* Add task input — inline, at the bottom of the list */}
+              {/* Add task input — full-width two-line layout */}
               {addingTask && (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary/40 bg-card">
-                  <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
-                  <input
-                    autoFocus
-                    value={newTaskTitle}
-                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleAddTask(); if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); } }}
-                    onBlur={() => { if (!newTaskTitle.trim()) { setAddingTask(false); setNewTaskTitle(""); } }}
-                    placeholder="What needs to happen today?"
-                    className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
-                    maxLength={300}
-                  />
-                  <button onClick={handleAddTask} className="text-xs text-primary shrink-0">Add</button>
-                  <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); }} className="text-xs text-muted-foreground/50 shrink-0">Cancel</button>
+                <div className="rounded-xl border border-primary/40 bg-card overflow-hidden">
+                  {/* Row 1: circle + full-width input */}
+                  <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
+                    <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
+                    <input
+                      autoFocus
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { handleAddTask(); }
+                        if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); }
+                      }}
+                      placeholder="What needs to happen today?"
+                      className="flex-1 min-w-0 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
+                      maxLength={300}
+                    />
+                  </div>
+                  {/* Row 2: hint left, actions right */}
+                  <div className="flex items-center justify-between px-3 pb-2.5">
+                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
+                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                      >Cancel</button>
+                      <button
+                        onClick={handleAddTask}
+                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                      >Add →</button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -2267,20 +2284,35 @@ export default function Home() {
           {!allTasksDone && tasks.length === 0 && (
             <div className="space-y-2">
               {addingTask ? (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary/40 bg-card">
-                  <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
-                  <input
-                    autoFocus
-                    value={newTaskTitle}
-                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") handleAddTask(); if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); } }}
-                    onBlur={() => { if (!newTaskTitle.trim()) { setAddingTask(false); setNewTaskTitle(""); } }}
-                    placeholder="What needs to happen today?"
-                    className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
-                    maxLength={300}
-                  />
-                  <button onClick={handleAddTask} className="text-xs text-primary shrink-0">Add</button>
-                  <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); }} className="text-xs text-muted-foreground/50 shrink-0">Cancel</button>
+                <div className="rounded-xl border border-primary/40 bg-card overflow-hidden">
+                  <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
+                    <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
+                    <input
+                      autoFocus
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { handleAddTask(); }
+                        if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); }
+                      }}
+                      placeholder="What needs to happen today?"
+                      className="flex-1 min-w-0 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
+                      maxLength={300}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-3 pb-2.5">
+                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
+                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                      >Cancel</button>
+                      <button
+                        onClick={handleAddTask}
+                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                      >Add →</button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <button
