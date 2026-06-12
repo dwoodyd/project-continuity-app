@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { getDb } from "../db";
+import { continuityEvents } from "../../drizzle/schema";
 import {
   createCheckIn,
   getDailyPlan,
@@ -572,6 +574,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
   completeTask: protectedProcedure
     .input(z.object({
       taskId: z.string().max(100),
+      taskTitle: z.string().max(300).optional(),
       date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -580,13 +583,129 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       if (!plan) return { success: false };
 
       const tasks = JSON.parse(plan.criticalTasks ?? "[]");
+      const task = tasks.find((t: any) => t.id === input.taskId);
       const updated = tasks.map((t: any) =>
         t.id === input.taskId ? { ...t, done: true } : t
       );
       await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(updated) });
 
+      // Log to Evidence of Movement
+      const label = input.taskTitle ?? task?.title ?? "Task";
+      const db = await getDb();
+      if (db) {
+        await db.insert(continuityEvents).values({
+          userId: ctx.user.id,
+          eventType: "task_completed",
+          label: `✓ ${label}`,
+          metadata: JSON.stringify({ taskId: input.taskId, date }),
+        });
+      }
+
       const allDone = updated.every((t: any) => t.done);
-      return { success: true, allTasksDone: allDone };
+      const completedCount = updated.filter((t: any) => t.done).length;
+      return { success: true, allTasksDone: allDone, completedCount, totalCount: updated.length };
+    }),
+
+  addTask: protectedProcedure
+    .input(z.object({
+      title: z.string().min(1).max(300),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      // Upsert plan so it always exists
+      let plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) {
+        await upsertDailyPlan({ userId: ctx.user.id, date, criticalTasks: "[]" });
+        plan = await getDailyPlan(ctx.user.id, date);
+      }
+      if (!plan) return { success: false };
+
+      const tasks = JSON.parse(plan.criticalTasks ?? "[]");
+      const newTask = {
+        id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: input.title.trim(),
+        done: false,
+        energyLevel: "medium" as const,
+        estimatedMinutes: null,
+        isUserAdded: true,
+      };
+      tasks.push(newTask);
+      await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(tasks) });
+      return { success: true, task: newTask };
+    }),
+
+  editTask: protectedProcedure
+    .input(z.object({
+      taskId: z.string().max(100),
+      title: z.string().min(1).max(300),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) return { success: false };
+
+      const tasks = JSON.parse(plan.criticalTasks ?? "[]");
+      const updated = tasks.map((t: any) =>
+        t.id === input.taskId ? { ...t, title: input.title.trim() } : t
+      );
+      await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(updated) });
+      return { success: true };
+    }),
+
+  removeTask: protectedProcedure
+    .input(z.object({
+      taskId: z.string().max(100),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) return { success: false };
+
+      const tasks = JSON.parse(plan.criticalTasks ?? "[]");
+      const filtered = tasks.filter((t: any) => t.id !== input.taskId);
+      await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(filtered) });
+      return { success: true };
+    }),
+
+  pushTaskToTomorrow: protectedProcedure
+    .input(z.object({
+      taskId: z.string().max(100),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) return { success: false };
+
+      const tasks = JSON.parse(plan.criticalTasks ?? "[]");
+      const task = tasks.find((t: any) => t.id === input.taskId);
+      if (!task) return { success: false };
+
+      // Remove from today
+      const todayFiltered = tasks.filter((t: any) => t.id !== input.taskId);
+      await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(todayFiltered) });
+
+      // Compute tomorrow's date
+      const [y, m, d] = date.split("-").map(Number);
+      const tomorrow = new Date(Date.UTC(y, m - 1, d + 1));
+      const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+
+      // Upsert tomorrow's plan and append task
+      let tomorrowPlan = await getDailyPlan(ctx.user.id, tomorrowStr);
+      if (!tomorrowPlan) {
+        await upsertDailyPlan({ userId: ctx.user.id, date: tomorrowStr, criticalTasks: "[]" });
+        tomorrowPlan = await getDailyPlan(ctx.user.id, tomorrowStr);
+      }
+      if (tomorrowPlan) {
+        const tomorrowTasks = JSON.parse(tomorrowPlan.criticalTasks ?? "[]");
+        tomorrowTasks.push({ ...task, done: false, carryoverCount: (task.carryoverCount ?? 0) + 1 });
+        await updateDailyPlan(tomorrowPlan.id, ctx.user.id, { criticalTasks: JSON.stringify(tomorrowTasks) });
+      }
+
+      return { success: true };
     }),
 
   uncompleteTask: protectedProcedure

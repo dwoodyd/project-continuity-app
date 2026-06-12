@@ -37,7 +37,18 @@ import {
   Pause,
   Heart,
   ToggleLeft,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  CalendarClock,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -104,47 +115,25 @@ const capacityConfig = {
 const TaskItem = React.memo(function TaskItem({
   task,
   onComplete,
+  onUncomplete,
   onUnstick,
+  onEdit,
+  onRemove,
+  onPushToTomorrow,
   isCarryover = false,
   pendingUndo = false,
 }: {
   task: any;
-  onComplete: (id: string) => void;
+  onComplete: (id: string, title: string) => void;
+  onUncomplete: (id: string) => void;
   onUnstick: (t: { id: string; title: string; projectId?: number | null }) => void;
+  onEdit: (id: string, currentTitle: string) => void;
+  onRemove: (id: string) => void;
+  onPushToTomorrow: (id: string) => void;
   isCarryover?: boolean;
   pendingUndo?: boolean;
 }) {
-  // Long-press state
-  const longPressTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [pressing, setPressing] = React.useState(false);
-  const [pressProgress, setPressProgress] = React.useState(0);
-  const pressInterval = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startPress = () => {
-    if (task.done) return;
-    setPressing(true);
-    setPressProgress(0);
-    let elapsed = 0;
-    pressInterval.current = setInterval(() => {
-      elapsed += 50;
-      setPressProgress(Math.min(elapsed / 500, 1));
-    }, 50);
-    longPressTimer.current = setTimeout(() => {
-      clearInterval(pressInterval.current!);
-      setPressing(false);
-      setPressProgress(0);
-      onComplete(task.id);
-    }, 500);
-  };
-
-  const cancelPress = () => {
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
-    if (pressInterval.current) clearInterval(pressInterval.current);
-    setPressing(false);
-    setPressProgress(0);
-  };
-
-  // Swipe-right state
+  // Swipe-right state (kept as secondary affordance)
   const swipeStart = React.useRef<number | null>(null);
   const [swipeOffset, setSwipeOffset] = React.useState(0);
   const SWIPE_THRESHOLD = 72;
@@ -159,22 +148,30 @@ const TaskItem = React.memo(function TaskItem({
     if (dx > 0) setSwipeOffset(Math.min(dx, SWIPE_THRESHOLD + 20));
   };
   const onTouchEnd = () => {
-    if (swipeOffset >= SWIPE_THRESHOLD) onComplete(task.id);
+    if (swipeOffset >= SWIPE_THRESHOLD) onComplete(task.id, task.title);
     setSwipeOffset(0);
     swipeStart.current = null;
+  };
+
+  const handleCircleClick = () => {
+    if (task.done) {
+      onUncomplete(task.id);
+    } else {
+      onComplete(task.id, task.title);
+    }
   };
 
   return (
     <div
       className={cn(
-        "relative flex items-start gap-3 p-3.5 rounded-xl border transition-all duration-150 group card-interactive overflow-hidden",
+        "relative flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200 group overflow-hidden",
         task.done
           ? pendingUndo
-            ? "bg-amber-50/30 dark:bg-amber-900/10 border-amber-300/40 dark:border-amber-700/40 opacity-70"
-            : "bg-foreground/[0.02] border-border opacity-50"
+            ? "bg-amber-50/30 dark:bg-amber-900/10 border-amber-300/40 dark:border-amber-700/40 opacity-60"
+            : "bg-foreground/[0.02] border-border/40 opacity-50"
           : isCarryover
-            ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40 shadow-sm"
-            : "bg-card border-border hover:border-foreground/20 card-shadow"
+            ? "bg-amber-50/40 dark:bg-amber-900/10 border-amber-200/80 dark:border-amber-800/40"
+            : "bg-card border-border hover:border-foreground/20"
       )}
       style={swipeOffset > 0 ? { transform: `translateX(${swipeOffset}px)` } : undefined}
       onTouchStart={onTouchStart}
@@ -190,61 +187,72 @@ const TaskItem = React.memo(function TaskItem({
           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
         </div>
       )}
-      {/* Long-press progress ring on the circle button */}
+      {/* Tap-to-complete circle — primary affordance */}
       <button
-        onPointerDown={startPress}
-        onPointerUp={cancelPress}
-        onPointerLeave={cancelPress}
+        onClick={handleCircleClick}
         className={cn(
-          "mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-150 flex items-center justify-center relative",
+          "shrink-0 w-5 h-5 rounded-full border-2 transition-all duration-150 flex items-center justify-center",
           task.done
             ? pendingUndo
               ? "bg-amber-400/20 border-amber-400/60"
-              : "bg-emerald-500/20 border-emerald-500/40"
-            : pressing
-              ? "border-primary bg-primary/10"
-              : "border-foreground/25 hover:border-foreground/50 hover:bg-foreground/5"
+              : "bg-emerald-500 border-emerald-500"
+            : "border-foreground/30 hover:border-emerald-500 hover:bg-emerald-500/10 active:scale-90"
         )}
-        style={pressing && pressProgress > 0 ? {
-          background: `conic-gradient(oklch(0.51 0.24 264) ${pressProgress * 360}deg, transparent 0deg)`,
-          borderColor: "oklch(0.51 0.24 264)"
-        } : undefined}
-        aria-label={task.done ? "Completed" : "Hold to complete"}
-        title={task.done ? "Completed" : "Hold to complete"}
+        aria-label={task.done ? "Mark incomplete" : "Mark complete"}
+        title={task.done ? "Tap to un-complete" : "Tap to complete"}
       >
-        {task.done && !pendingUndo && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
+        {task.done && !pendingUndo && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
         {task.done && pendingUndo && <RotateCcw className="w-2.5 h-2.5 text-amber-500" />}
       </button>
       <div className="flex-1 min-w-0">
         <p className={cn(
-          "text-base leading-snug tracking-[-0.005em]",
-          task.done && "line-through text-muted-foreground"
+          "text-sm leading-snug tracking-[-0.005em]",
+          task.done && "line-through text-muted-foreground/60"
         )}>
           {task.title}
         </p>
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          {isCarryover && !task.done && (
-            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">carried over</span>
-          )}
-          {task.energyTag && !task.done && (
-            <span className={cn(
-              "text-xs font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border",
-              task.energyTag === "high" ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800" :
-              task.energyTag === "low" ? "text-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800" :
-              "text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
-            )}>
-              {task.energyTag === "high" ? "⚡ high" : task.energyTag === "low" ? "🌙 low" : "📊 medium"}
-            </span>
-          )}
-        </div>
+        {(isCarryover || task.carryoverCount > 0) && !task.done && (
+          <span className="text-xs text-amber-600 dark:text-amber-400/70">still waiting</span>
+        )}
       </div>
+      {/* Context menu — edit / push to tomorrow / remove */}
       {!task.done && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/5 shrink-0"
+              aria-label="Task options"
+            >
+              <MoreHorizontal className="w-3.5 h-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuItem onClick={() => onEdit(task.id, task.title)}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onUnstick({ id: task.id, title: task.title, projectId: task.projectId })}>
+              <AlertTriangle className="w-3.5 h-3.5 mr-2" /> Get unstuck
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onPushToTomorrow(task.id)}>
+              <CalendarClock className="w-3.5 h-3.5 mr-2" /> Push to tomorrow
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onRemove(task.id)}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-3.5 h-3.5 mr-2" /> Remove
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      {task.done && pendingUndo && (
         <button
-          onClick={() => onUnstick({ id: task.id, title: task.title, projectId: task.projectId })}
-          className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-foreground/5 shrink-0"
-          title="Get unstuck"
+          onClick={() => onUncomplete(task.id)}
+          className="text-xs text-amber-500 hover:text-amber-400 shrink-0"
+          title="Undo"
         >
-          <AlertTriangle className="w-3.5 h-3.5" />
+          undo
         </button>
       )}
     </div>
@@ -1268,25 +1276,41 @@ export default function Home() {
   const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});  
 
   const completeTaskMutation = trpc.checkIns.completeTask.useMutation({
+    onSuccess: () => { refetchPlan(); refetchGam(); },
+  });
+  const uncompleteTaskMutation = trpc.checkIns.uncompleteTask.useMutation({
     onSuccess: () => refetchPlan(),
   });
-  const uncompleteTask = trpc.checkIns.uncompleteTask.useMutation({
+  const addTaskMutation = trpc.checkIns.addTask.useMutation({
     onSuccess: () => refetchPlan(),
+  });
+  const editTaskMutation = trpc.checkIns.editTask.useMutation({
+    onSuccess: () => refetchPlan(),
+  });
+  const removeTaskMutation = trpc.checkIns.removeTask.useMutation({
+    onSuccess: () => refetchPlan(),
+  });
+  const pushToTomorrowMutation = trpc.checkIns.pushTaskToTomorrow.useMutation({
+    onSuccess: () => { refetchPlan(); toast.success("Moved to tomorrow — still waiting."); },
   });
 
+  // Inline edit state
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingTaskTitle, setEditingTaskTitle] = useState("");
+  const [addingTask, setAddingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+
   // Wrap completeTask with a 5-second undo window
-  const completeTask = useCallback((taskId: string) => {
+  const completeTask = useCallback((taskId: string, taskTitle: string) => {
     haptic(60); // tactile confirmation
     dismissHoldHint(); // hide first-use hint after first completion
     // Optimistically mark done in the UI immediately
-    completeTaskMutation.mutate({ taskId });
-    // Record gamification event
-    recordEvent.mutate({ eventType: "task_completed", label: "Task completed" });
+    completeTaskMutation.mutate({ taskId, taskTitle, date: localDateStr });
     // Mark as pending-undo
     setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
     // Show undo toast
-    toast("Task marked complete", {
-      description: "Tap Undo if that was a mistake.",
+    toast("Done ✓", {
+      description: taskTitle.length > 50 ? taskTitle.slice(0, 50) + "…" : taskTitle,
       duration: 5000,
       action: {
         label: "Undo",
@@ -1294,7 +1318,7 @@ export default function Home() {
           clearTimeout(undoTimers.current[taskId]);
           delete undoTimers.current[taskId];
           setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
-          uncompleteTask.mutate({ taskId });
+          uncompleteTaskMutation.mutate({ taskId, date: localDateStr });
         },
       },
     });
@@ -1303,7 +1327,43 @@ export default function Home() {
       setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
       delete undoTimers.current[taskId];
     }, 5500);
-  }, [completeTaskMutation, uncompleteTask]);
+  }, [completeTaskMutation, uncompleteTaskMutation, localDateStr]);
+
+  const uncompleteTask = useCallback((taskId: string) => {
+    clearTimeout(undoTimers.current[taskId]);
+    delete undoTimers.current[taskId];
+    setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
+    uncompleteTaskMutation.mutate({ taskId, date: localDateStr });
+  }, [uncompleteTaskMutation, localDateStr]);
+
+  const handleAddTask = useCallback(() => {
+    const title = newTaskTitle.trim();
+    if (!title) { setAddingTask(false); return; }
+    addTaskMutation.mutate({ title, localDate: localDateStr });
+    setNewTaskTitle("");
+    setAddingTask(false);
+  }, [addTaskMutation, newTaskTitle, localDateStr]);
+
+  const handleEditTask = useCallback((id: string, currentTitle: string) => {
+    setEditingTaskId(id);
+    setEditingTaskTitle(currentTitle);
+  }, []);
+
+  const handleEditSave = useCallback(() => {
+    if (!editingTaskId) return;
+    const title = editingTaskTitle.trim();
+    if (title) editTaskMutation.mutate({ taskId: editingTaskId, title, localDate: localDateStr });
+    setEditingTaskId(null);
+    setEditingTaskTitle("");
+  }, [editTaskMutation, editingTaskId, editingTaskTitle, localDateStr]);
+
+  const handleRemoveTask = useCallback((id: string) => {
+    removeTaskMutation.mutate({ taskId: id, localDate: localDateStr });
+  }, [removeTaskMutation, localDateStr]);
+
+  const handlePushToTomorrow = useCallback((id: string) => {
+    pushToTomorrowMutation.mutate({ taskId: id, localDate: localDateStr });
+  }, [pushToTomorrowMutation, localDateStr]);
 
   const tasks: any[] = useMemo(() => {
     if (!todayPlan?.criticalTasks) return [];
@@ -2065,30 +2125,46 @@ export default function Home() {
       })()}
 
       {/* ── Today's Tasks ───────────────────────────────────────────────────── */}
-      {tasks.length > 0 && (
+      {(tasks.length > 0 || true) && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>
               Today's tasks
             </p>
-            <span className="text-sm text-muted-foreground">{completedTasks}/{visibleTasks.length}</span>
+            <div className="flex items-center gap-2">
+              {tasks.length > 0 && (
+                <span className="text-xs text-muted-foreground/60">
+                  {completedTasks > 0 ? `${completedTasks}/${tasks.length}` : `${tasks.length} task${tasks.length !== 1 ? 's' : ''}`}
+                </span>
+              )}
+              <button
+                onClick={() => setAddingTask(true)}
+                className="flex items-center gap-1 text-xs text-muted-foreground/60 hover:text-foreground/80 transition-colors"
+                title="Add a task"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add</span>
+              </button>
+            </div>
           </div>
-          {/* First-use hold hint */}
-          {showHoldHint && visibleTasks.some((t: any) => !t.done) && (
-            <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15 mb-1">
-              <p className="text-sm text-muted-foreground">Hold the circle to complete · Swipe right to complete</p>
-              <button onClick={dismissHoldHint} className="text-sm text-muted-foreground/50 hover:text-muted-foreground shrink-0">Got it</button>
+          {allTasksDone && (
+            <div className="p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-900/10">
+              <div className="flex items-start gap-3">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                    {completedTasks === 1 ? "One thing moved today." :
+                     completedTasks === 2 ? "Two things moved today." :
+                     `${completedTasks} things moved today.`}
+                  </p>
+                  <p className="text-xs text-emerald-600/60 dark:text-emerald-400/50 mt-0.5">
+                    That's the work. The rest is bonus.
+                  </p>
+                </div>
+              </div>
             </div>
           )}
-          {allTasksDone ? (
-            <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
-              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">All tasks complete.</p>
-              <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1">
-                That's the work. The rest is bonus.
-              </p>
-            </div>
-          ) : (
+          {!allTasksDone && tasks.length > 0 && (
             <div className="space-y-2" ref={taskListRef}
               onTouchMove={(e) => handleTouchMove(e, taskListRef)}
               onTouchEnd={() => handleTouchEnd(tasks)}
@@ -2128,12 +2204,31 @@ export default function Home() {
                     </div>
                   )}
                   <div className={cn(!task.done ? "pl-7 md:pl-0" : "")}>
+                  {editingTaskId === task.id ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary/40 bg-card">
+                      <input
+                        autoFocus
+                        value={editingTaskTitle}
+                        onChange={(e) => setEditingTaskTitle(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") handleEditSave(); if (e.key === "Escape") { setEditingTaskId(null); setEditingTaskTitle(""); } }}
+                        onBlur={handleEditSave}
+                        className="flex-1 bg-transparent text-sm outline-none text-foreground"
+                        maxLength={300}
+                      />
+                      <button onClick={handleEditSave} className="text-xs text-primary shrink-0">Save</button>
+                    </div>
+                  ) : (
                   <TaskItem
                     task={task}
-                    onComplete={(id) => completeTask(id)}
+                    onComplete={completeTask}
+                    onUncomplete={uncompleteTask}
                     onUnstick={(t) => setUnstickTask(t)}
+                    onEdit={handleEditTask}
+                    onRemove={handleRemoveTask}
+                    onPushToTomorrow={handlePushToTomorrow}
                     pendingUndo={pendingUndoTaskIds.has(task.id)}
                   />
+                  )}
                   </div>
                   {getCarryoverCount(task) >= 2 && (
                     <div className="absolute -top-1 -right-1 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 border border-amber-300 dark:border-amber-700">
@@ -2147,6 +2242,54 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground/50 text-center py-1.5">
                   {hiddenTaskCount} more task{hiddenTaskCount > 1 ? "s" : ""} held back — {capacityLevel === "low" ? "one thing today" : "focus on these first"}
                 </p>
+              )}
+              {/* Add task input — inline, at the bottom of the list */}
+              {addingTask && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary/40 bg-card">
+                  <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
+                  <input
+                    autoFocus
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleAddTask(); if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); } }}
+                    onBlur={() => { if (!newTaskTitle.trim()) { setAddingTask(false); setNewTaskTitle(""); } }}
+                    placeholder="What needs to happen today?"
+                    className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
+                    maxLength={300}
+                  />
+                  <button onClick={handleAddTask} className="text-xs text-primary shrink-0">Add</button>
+                  <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); }} className="text-xs text-muted-foreground/50 shrink-0">Cancel</button>
+                </div>
+              )}
+            </div>
+          )}
+          {/* Empty state — no tasks yet */}
+          {!allTasksDone && tasks.length === 0 && (
+            <div className="space-y-2">
+              {addingTask ? (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-primary/40 bg-card">
+                  <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
+                  <input
+                    autoFocus
+                    value={newTaskTitle}
+                    onChange={(e) => setNewTaskTitle(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleAddTask(); if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); } }}
+                    onBlur={() => { if (!newTaskTitle.trim()) { setAddingTask(false); setNewTaskTitle(""); } }}
+                    placeholder="What needs to happen today?"
+                    className="flex-1 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
+                    maxLength={300}
+                  />
+                  <button onClick={handleAddTask} className="text-xs text-primary shrink-0">Add</button>
+                  <button onClick={() => { setAddingTask(false); setNewTaskTitle(""); }} className="text-xs text-muted-foreground/50 shrink-0">Cancel</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setAddingTask(true)}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl border border-dashed border-foreground/15 text-muted-foreground/50 hover:text-muted-foreground/80 hover:border-foreground/25 transition-colors"
+                >
+                  <Plus className="w-4 h-4 shrink-0" />
+                  <span className="text-sm">Add a task for today</span>
+                </button>
               )}
             </div>
           )}

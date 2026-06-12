@@ -1872,3 +1872,14 @@
 - [x] MORNING-LOADER-TEST: Add unit test: evening tasks present → they win; empty → fallback fires (test updated to reflect upsert behavior)
 - [x] EVENING-REVIEW: Surface Evening Close review screen — user can open last night's raw close-out text (whatMoved, whatRemains, whatLearned, tomorrowFirst, Wren summary)
 - [x] CHUNK-RELOAD: Add chunk-reload / cache-busting error handler so stale deploy sessions don't show "Failed to fetch dynamically imported module" — auto-reload on chunk error
+
+## Today's Tasks — Live Day Workspace (Jun 12, 2026)
+- [x] TASKS-TAP: Single tap on circle completes task (fill+check+line-through+fade); tap again to un-complete
+- [x] TASKS-COUNT: Count display updates live (0/2 → 1/2), quiet progress read not a grade
+- [x] TASKS-ADD: "+ Add a task" input at bottom of card; new tasks checkable like the rest
+- [x] TASKS-EDIT: Tap task text to edit inline via context menu
+- [x] TASKS-REMOVE: Context menu to remove / push-to-tomorrow
+- [x] TASKS-REORDER: Drag handle to reorder tasks (existing, preserved)
+- [x] TASKS-EVIDENCE: Completing a task logs it to Evidence of Movement ("✓ [task title]")
+- [x] TASKS-WREN: Wren soft affirmation when tasks complete ("Three things moved today")
+- [x] TASKS-ROLLOVER: Unfinished tasks roll to tomorrow via push-to-tomorrow; "still waiting" label on carryovers
