@@ -1102,13 +1102,16 @@ export default function Home() {
   const authed = !!user;
 
   // ── Critical-path queries (fire immediately on auth) ─────────────────────────
-  const { data: todayPlan, isLoading: planLoading, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(undefined, { enabled: authed });
   // Pass the client's local YYYY-MM-DD so the server uses the user's actual calendar day,
   // not UTC (which can differ by up to ±14h from the user's local midnight).
   const localDateStr = useMemo(() => {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }, []);
+  const { data: todayPlan, isLoading: planLoading, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(
+    { localDate: localDateStr },
+    { enabled: authed }
+  );
   const { data: todayCheckIns, refetch: refetchCheckIns } = trpc.checkIns.getToday.useQuery(
     { localDate: localDateStr },
     { enabled: authed }
@@ -1450,9 +1453,16 @@ export default function Home() {
   };
 
   const capacityLevel: CapacityLevel = (todayPlan?.capacityLevel as CapacityLevel) ?? "partial";
-  // Capacity-based task limits: full=3, partial=2, low=1
+  // Capacity-based task limits apply only to AI-generated tasks.
+  // User-added tasks (isUserAdded: true) are always visible regardless of capacity.
   const taskLimit = capacityLevel === "full" ? 3 : capacityLevel === "partial" ? 2 : 1;
-  const visibleTasks = tasks.slice(0, taskLimit);
+  const visibleTasks = useMemo(() => {
+    const userAdded = tasks.filter((t: any) => t.isUserAdded);
+    const aiGenerated = tasks.filter((t: any) => !t.isUserAdded);
+    const visibleAi = aiGenerated.slice(0, Math.max(0, taskLimit - userAdded.length));
+    // Preserve original order: interleave by original index
+    return tasks.filter((t: any) => t.isUserAdded || visibleAi.some((a: any) => a.id === t.id));
+  }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const firstName = user?.name?.split(" ")[0] ?? "there";

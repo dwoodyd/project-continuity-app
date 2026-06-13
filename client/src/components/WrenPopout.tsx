@@ -376,16 +376,23 @@ function PiPSessionUI({
 // ── Main WrenPopout component ─────────────────────────────────────────────────
 export default function WrenPopout(props: WrenPopoutProps) {
   const { open, onClose, secondsLeft, intention, wrenActivity, chatMessages } = props;
-  const [pipWindow, setPipWindow] = useState<Window | null>(null);
+  // Use a ref for the PiP window so timer/prop updates don't trigger re-open or cleanup
+  const pipWindowRef = useRef<Window | null>(null);
   const [pipContainer, setPipContainer] = useState<HTMLElement | null>(null);
   const [useDocPiP, setUseDocPiP] = useState(false);
+  // Keep onClose stable in a ref so the pagehide listener always calls the latest version
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => { setUseDocPiP(supportsDocumentPiP()); }, []);
 
-  // Open / close Document PiP window
+  // Open PiP window ONCE when `open` becomes true.
+  // The window must survive tab switches, prop updates, and React re-renders.
+  // It is only closed by: (a) user clicks ×, (b) session ends (open=false).
   useEffect(() => {
     if (!open || !useDocPiP) return;
-    let win: Window | null = null;
+    // Already open — don't re-open on re-renders
+    if (pipWindowRef.current && !pipWindowRef.current.closed) return;
 
     const openPiP = async () => {
       try {
@@ -393,7 +400,7 @@ export default function WrenPopout(props: WrenPopoutProps) {
         const pip = await (window as any).documentPictureInPicture.requestWindow({
           width: 344, height: 600,
         });
-        win = pip;
+        pipWindowRef.current = pip;
 
         // Clone app stylesheets into PiP window
         Array.from(document.styleSheets).forEach((sheet) => {
@@ -422,11 +429,13 @@ export default function WrenPopout(props: WrenPopoutProps) {
         container.style.cssText = "width:100%;height:100%;";
         pip.document.body.appendChild(container);
 
-        setPipWindow(pip);
         setPipContainer(container);
 
+        // Only fire onClose when the user explicitly closes the PiP window
         pip.addEventListener("pagehide", () => {
-          setPipWindow(null); setPipContainer(null); onClose();
+          pipWindowRef.current = null;
+          setPipContainer(null);
+          onCloseRef.current();
         });
       } catch (err) {
         console.warn("[WrenPopout] Document PiP failed:", err);
@@ -435,18 +444,19 @@ export default function WrenPopout(props: WrenPopoutProps) {
     };
 
     openPiP();
-    return () => {
-      if (win && !win.closed) { try { win.close(); } catch { /* ignore */ } }
-      setPipWindow(null); setPipContainer(null);
-    };
+    // No cleanup function — the window must survive unmount/re-render cycles.
+    // Explicit close is handled by the effect below.
   }, [open, useDocPiP]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Close the PiP window when the session ends (open becomes false)
   useEffect(() => {
-    if (!open && pipWindow && !pipWindow.closed) {
-      try { pipWindow.close(); } catch { /* ignore */ }
-      setPipWindow(null); setPipContainer(null);
+    if (!open) {
+      const win = pipWindowRef.current;
+      if (win && !win.closed) { try { win.close(); } catch { /* ignore */ } }
+      pipWindowRef.current = null;
+      setPipContainer(null);
     }
-  }, [open, pipWindow]);
+  }, [open]);
 
   const latestWrenLine = chatMessages
     .filter((m) => m.role === "assistant").slice(-1)[0]?.content ?? "I'm right here. Keep going.";

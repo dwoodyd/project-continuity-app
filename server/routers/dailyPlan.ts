@@ -34,11 +34,13 @@ const taskSchema = z.object({
 });
 
 export const dailyPlanRouter = router({
-  getToday: protectedProcedure.query(async ({ ctx }) => {
-    const date = getTodayDate();
-    const plan = await getDailyPlan(ctx.user.id, date);
-    return plan ?? null;
-  }),
+  getToday: protectedProcedure
+    .input(z.object({ localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const date = input?.localDate ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      return plan ?? null;
+    }),
 
   getByDate: protectedProcedure
     .input(z.object({ date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format") }))
