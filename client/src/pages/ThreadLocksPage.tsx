@@ -5,6 +5,7 @@
  * Each row shows: timestamp, what-doing snippet, what-next, project (if any),
  * and a status badge (active / recalled / dismissed / expired).
  */
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Anchor, ChevronLeft, Clock, CheckCircle2, X, AlertCircle, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
@@ -44,8 +45,43 @@ function StatusBadge({ lock }: { lock: { recalledAt: number | null; dismissedAt:
   );
 }
 
+/** Inline delete confirmation — replaces native window.confirm() with on-brand copy. */
+function DeleteConfirm({ onConfirm, onCancel, isPending }: { onConfirm: () => void; onCancel: () => void; isPending: boolean }) {
+  return (
+    <div
+      className="flex items-center gap-2 px-4 py-3 rounded-b-xl"
+      style={{ background: "oklch(0.10 0.03 20 / 0.6)", borderTop: "1px solid oklch(0.28 0.05 20 / 0.4)" }}
+    >
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium" style={{ color: "oklch(0.80 0.06 30)" }}>
+          Let this one go?
+        </p>
+        <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.48 0.04 240)" }}>
+          This thread will be removed from your history.
+        </p>
+      </div>
+      <button
+        onClick={onCancel}
+        className="text-xs px-3 py-1.5 rounded-lg"
+        style={{ color: "oklch(0.50 0.04 240)" }}
+      >
+        Keep it
+      </button>
+      <button
+        onClick={onConfirm}
+        disabled={isPending}
+        className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+        style={{ background: "oklch(0.30 0.06 20)", color: "oklch(0.80 0.06 30)", border: "1px solid oklch(0.40 0.08 20 / 0.5)" }}
+      >
+        {isPending ? "Removing…" : "Yes, remove"}
+      </button>
+    </div>
+  );
+}
+
 export default function ThreadLocksPage() {
   const [, navigate] = useLocation();
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const { data: locks = [], isLoading } = trpc.threadLock.getHistory.useQuery(
     { limit: 50 },
@@ -60,7 +96,10 @@ export default function ThreadLocksPage() {
     onSuccess: () => utils.threadLock.getHistory.invalidate(),
   });
   const deleteMutation = trpc.threadLock.delete.useMutation({
-    onSuccess: () => utils.threadLock.getHistory.invalidate(),
+    onSuccess: () => {
+      setConfirmDeleteId(null);
+      utils.threadLock.getHistory.invalidate();
+    },
   });
 
   return (
@@ -116,13 +155,18 @@ export default function ThreadLocksPage() {
         <div className="space-y-3">
           {locks.map((lock) => {
             const isActive = !lock.recalledAt && !lock.dismissedAt && lock.createdAt >= Date.now() - 4 * 60 * 60 * 1000;
+            const isConfirming = confirmDeleteId === lock.id;
             return (
               <div
                 key={lock.id}
                 className="rounded-xl border overflow-hidden"
                 style={{
                   background: isActive ? "oklch(0.12 0.04 72 / 0.3)" : "oklch(0.12 0.02 240 / 0.5)",
-                  borderColor: isActive ? "oklch(0.74 0.14 72 / 0.25)" : "oklch(0.22 0.02 240)",
+                  borderColor: isConfirming
+                    ? "oklch(0.40 0.08 20 / 0.5)"
+                    : isActive
+                    ? "oklch(0.74 0.14 72 / 0.25)"
+                    : "oklch(0.22 0.02 240)",
                 }}
               >
                 {/* Top row */}
@@ -150,46 +194,52 @@ export default function ThreadLocksPage() {
                   )}
                 </div>
 
-                {/* Actions row — active locks get recall/dismiss; all locks get delete */}
-                <div
-                  className="flex items-center gap-2 px-4 py-2.5 border-t"
-                  style={{ borderColor: isActive ? "oklch(0.74 0.14 72 / 0.12)" : "oklch(0.20 0.02 240)" }}
-                >
-                  {isActive && (
-                    <>
-                      <button
-                        onClick={() => recallMutation.mutate({ id: lock.id })}
-                        disabled={recallMutation.isPending}
-                        className="flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all active:scale-95"
-                        style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                      >
-                        Pick it up →
-                      </button>
-                      <button
-                        onClick={() => dismissMutation.mutate({ id: lock.id })}
-                        className="text-xs px-3 py-1.5"
-                        style={{ color: "oklch(0.45 0.04 240)" }}
-                      >
-                        Dismiss
-                      </button>
-                    </>
-                  )}
-                  {!isActive && <span className="flex-1" />}
-                  <button
-                    onClick={() => {
-                      if (window.confirm("Delete this thread lock? This cannot be undone.")) {
-                        deleteMutation.mutate({ id: lock.id });
-                      }
-                    }}
-                    disabled={deleteMutation.isPending}
-                    className="flex items-center gap-1 text-[11px] px-2 py-1.5 rounded-lg transition-all active:scale-95"
-                    style={{ color: "oklch(0.42 0.06 20)", background: "oklch(0.14 0.02 20 / 0.4)" }}
-                    title="Delete this lock"
+                {/* Actions row — shown when not in delete-confirm mode */}
+                {!isConfirming && (
+                  <div
+                    className="flex items-center gap-2 px-4 py-2.5 border-t"
+                    style={{ borderColor: isActive ? "oklch(0.74 0.14 72 / 0.12)" : "oklch(0.20 0.02 240)" }}
                   >
-                    <Trash2 className="w-3 h-3" />
-                    Delete
-                  </button>
-                </div>
+                    {isActive && (
+                      <>
+                        <button
+                          onClick={() => recallMutation.mutate({ id: lock.id })}
+                          disabled={recallMutation.isPending}
+                          className="flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all active:scale-95"
+                          style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                        >
+                          Pick it up →
+                        </button>
+                        <button
+                          onClick={() => dismissMutation.mutate({ id: lock.id })}
+                          className="text-xs px-3 py-1.5"
+                          style={{ color: "oklch(0.45 0.04 240)" }}
+                        >
+                          Dismiss
+                        </button>
+                      </>
+                    )}
+                    {!isActive && <span className="flex-1" />}
+                    <button
+                      onClick={() => setConfirmDeleteId(lock.id)}
+                      className="flex items-center gap-1 text-[11px] px-2 py-1.5 rounded-lg transition-all active:scale-95"
+                      style={{ color: "oklch(0.42 0.06 20)", background: "oklch(0.14 0.02 20 / 0.4)" }}
+                      title="Delete this lock"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
+                )}
+
+                {/* Inline delete confirmation — replaces action row */}
+                {isConfirming && (
+                  <DeleteConfirm
+                    isPending={deleteMutation.isPending}
+                    onConfirm={() => deleteMutation.mutate({ id: lock.id })}
+                    onCancel={() => setConfirmDeleteId(null)}
+                  />
+                )}
               </div>
             );
           })}
