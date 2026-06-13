@@ -23,6 +23,7 @@ import {
   PenLine,
   Zap,
   BookOpen,
+  Anchor,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
@@ -45,7 +46,8 @@ const SECTIONS = [
       { href: "/clarity",  label: "Clarity Engine",     icon: Zap,           description: "Work through what's blocking you" },
       { href: "/vault",    label: "Knowledge Vault",    icon: BookOpen,      description: "Your captured thinking and sources" },
       { href: "/study",    label: "Single Focus Mode",  icon: ClipboardList, description: "One thing, no distractions" },
-      { href: "/focus",    label: "Focus Sessions",     icon: Users,         description: "Timed deep-work sessions" },
+      { href: "/focus",         label: "Focus Sessions",  icon: Users,   description: "Timed deep-work sessions" },
+      { href: "/thread-locks",  label: "Thread Locks",    icon: Anchor, description: "Context you saved before an interruption" },
     ],
   },
   {

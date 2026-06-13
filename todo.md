@@ -1901,3 +1901,29 @@
 - [x] POPOUT-XBROWSER-ROUTE: Create /focus-companion route and FocusCompanionPage with full Wren UI (same design as PiP Version A)
 - [x] POPOUT-XBROWSER-SYNC: BroadcastChannel for live state sync (timer, chat, ambient, intention) between main tab and companion window
 - [x] POPOUT-XBROWSER-WIRE: WrenPopout uses window.open() fallback on Safari/Firefox instead of fixed overlay
+
+## Feature: Thread Lock (Jun 13)
+
+### Phase 1 — Schema & Backend
+- [x] TL-SCHEMA: Add thread_locks table (id, userId, projectId nullable, whatDoing, whatNext, clipboardSnippet nullable, nextCalendarEvent nullable, pagePath nullable, recalledAt nullable, dismissedAt nullable, createdAt)
+- [x] TL-MIGRATION: Generate and apply migration SQL for thread_locks
+- [x] TL-DB: Add db helpers: createThreadLock, getActiveThreadLock (created within 4h, not recalled/dismissed), getThreadLockHistory, recallThreadLock, dismissThreadLock
+- [x] TL-ROUTER: Add threadLock tRPC router — capture mutation, getActive query, getHistory query, recall mutation, dismiss mutation
+
+### Phase 2 — Capture UI
+- [x] TL-MODAL: Build ThreadLockModal component — two prompts ("What are you in the middle of?" / "What were you about to do next?"), project picker (pre-selects active project), optional clipboard paste field, next calendar event auto-shown if available, saves in <10s
+- [x] TL-FAB: Add "Hold this thread" option to Quick Capture FAB alongside "Capture idea"
+- [x] TL-KEYBOARD: Add ⌘ Shift H (Mac) / Ctrl Shift H (Win) global keyboard shortcut to open ThreadLockModal from anywhere in the app
+
+### Phase 3 — Recall
+- [x] TL-BANNER: Add Thread Lock recall banner to Command Center — shows when active lock exists (created <4h ago, not recalled/dismissed); calm copy "You left a thread. Pick it up?"; shows what-doing snippet and project name
+- [x] TL-RECALL-CARD: Full recall card view — what you were doing, what you were about to do, project, timestamp, "Resume" CTA (navigates to project detail or last page), "Dismiss" option
+- [x] TL-ALERT-PRIORITY: Wire thread_lock alert type into alert-priority resolver in Home.tsx — priority above Start Here card when a recent lock exists
+
+### Phase 4 — History
+- [x] TL-HISTORY: Build ThreadLockHistoryPage or section — log of all captured locks with timestamps, project, what-doing snippet, status (recalled / dismissed / expired)
+- [x] TL-NAV: Add "Thread Locks" entry to AppLayout sidebar under DAILY section (or as sub-section of Focus Sessions)
+
+### Phase 5 — Tests & Delivery
+- [x] TL-TESTS: Write vitest tests for threadLock procedures (capture, getActive 4h window, recall, dismiss, history)
+- [x] TL-CHECKPOINT: TypeScript 0 errors, all tests passing, checkpoint saved

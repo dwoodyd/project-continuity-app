@@ -1134,6 +1134,11 @@ export default function Home() {
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: criticalReady });
   const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: criticalReady });
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: criticalReady });
+  const { data: activeThreadLock } = trpc.threadLock.getActive.useQuery(undefined, {
+    enabled: authed,
+    staleTime: 60_000,
+    refetchOnWindowFocus: true, // re-check when user returns to the tab
+  });
   const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: criticalReady });
   const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: criticalReady, staleTime: 60_000 });
   const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: criticalReady, staleTime: 5 * 60 * 1000 });
@@ -1143,6 +1148,18 @@ export default function Home() {
     enabled: criticalReady,
     staleTime: 30 * 60 * 1000,
   });
+  // Thread Lock — recall and dismiss mutations
+  const recallThreadLock = trpc.threadLock.recall.useMutation({
+    onSuccess: (_, vars) => {
+      utils.threadLock.getActive.invalidate();
+      // Navigate to the project if one was attached
+      if (activeThreadLock?.projectId) navigate(`/projects/${activeThreadLock.projectId}`);
+    },
+  });
+  const dismissThreadLock = trpc.threadLock.dismiss.useMutation({
+    onSuccess: () => utils.threadLock.getActive.invalidate(),
+  });
+
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),
@@ -1519,8 +1536,9 @@ export default function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groundModeActive, groundModeEnteredAt]);
 
-  type AlertType = "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "spiral_offer" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
+  type AlertType = "thread_lock" | "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "spiral_offer" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
   const topAlert: AlertType = (() => {
+    if (activeThreadLock) return "thread_lock";
     if (!morningDone && activePeriod === "morning") return "check_in_due";
     if (todayPlan && capacityLevel === "low") return "capacity_low";
     if (todayPlan && capacityLevel === "partial") return "capacity_partial";
@@ -1770,6 +1788,54 @@ export default function Home() {
       </div>
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
+      {topAlert === "thread_lock" && activeThreadLock && (
+        <div
+          className="rounded-xl border overflow-hidden"
+          style={{ background: "oklch(0.12 0.04 72 / 0.5)", borderColor: "oklch(0.74 0.14 72 / 0.30)" }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-2 px-4 pt-3.5 pb-2">
+            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>You left a thread</p>
+            <span className="ml-auto text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
+              {(() => {
+                const diffMin = Math.round((Date.now() - activeThreadLock.createdAt) / 60_000);
+                return diffMin < 60 ? `${diffMin}m ago` : `${Math.round(diffMin / 60)}h ago`;
+              })()}
+            </span>
+          </div>
+          {/* Body */}
+          <div className="px-4 pb-3 space-y-1.5">
+            <p className="text-sm leading-snug" style={{ color: "oklch(0.88 0.03 60)" }}>
+              {activeThreadLock.whatDoing}
+            </p>
+            <p className="text-xs leading-snug" style={{ color: "oklch(0.60 0.04 240)" }}>
+              Next: {activeThreadLock.whatNext}
+            </p>
+          </div>
+          {/* Actions */}
+          <div
+            className="flex items-center gap-2 px-4 py-3 border-t"
+            style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+          >
+            <button
+              onClick={() => recallThreadLock.mutate({ id: activeThreadLock.id })}
+              disabled={recallThreadLock.isPending}
+              className="flex-1 text-xs font-semibold py-2 rounded-lg transition-all active:scale-95"
+              style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+            >
+              Pick it up →
+            </button>
+            <button
+              onClick={() => dismissThreadLock.mutate({ id: activeThreadLock.id })}
+              className="text-xs px-3 py-2"
+              style={{ color: "oklch(0.45 0.04 240)" }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {topAlert === "check_in_due" && (
         <button
           onClick={() => openCheckIn("morning")}

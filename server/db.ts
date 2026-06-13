@@ -86,6 +86,9 @@ import {
   InsertSurfaceEvent,
   unstickInvocations,
   InsertUnstickInvocation,
+  threadLocks,
+  ThreadLock,
+  InsertThreadLock,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -865,6 +868,7 @@ export async function deleteAllUserData(userId: number): Promise<void> {
   await db.delete(decisions).where(eq(decisions.userId, userId));
   await db.delete(projectMemoryEvents).where(eq(projectMemoryEvents.userId, userId));
   await db.delete(focusSessions).where(eq(focusSessions.userId, userId));
+  await db.delete(threadLocks).where(eq(threadLocks.userId, userId));
   await db.delete(weeklyCompass).where(eq(weeklyCompass.userId, userId));
   await db.delete(reEntryCards).where(eq(reEntryCards.userId, userId));
   await db.delete(weeklyReviews).where(eq(weeklyReviews.userId, userId));
@@ -1674,4 +1678,62 @@ export async function getUnstickInvocationCount(userId: number): Promise<number>
     .from(unstickInvocations)
     .where(eq(unstickInvocations.userId, userId));
   return result[0]?.count ?? 0;
+}
+
+// ─── Thread Locks ─────────────────────────────────────────────────────────────
+export async function createThreadLock(data: Omit<InsertThreadLock, "id">): Promise<ThreadLock> {
+  const db = await getDb();
+  if (!db) throw new Error("Database unavailable");
+  const [result] = await db.insert(threadLocks).values(data);
+  const id = (result as { insertId: number }).insertId;
+  const rows = await db.select().from(threadLocks).where(eq(threadLocks.id, id));
+  return rows[0];
+}
+
+/** Returns the most recent lock created within the last 4 hours that has not been recalled or dismissed. */
+export async function getActiveThreadLock(userId: number): Promise<ThreadLock | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const fourHoursAgo = Date.now() - 4 * 60 * 60 * 1000;
+  const rows = await db.select().from(threadLocks)
+    .where(and(
+      eq(threadLocks.userId, userId),
+      sql`${threadLocks.createdAt} >= ${fourHoursAgo}`,
+      sql`${threadLocks.recalledAt} IS NULL`,
+      sql`${threadLocks.dismissedAt} IS NULL`,
+    ))
+    .orderBy(desc(threadLocks.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function getThreadLockHistory(userId: number, limit = 20): Promise<ThreadLock[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(threadLocks)
+    .where(eq(threadLocks.userId, userId))
+    .orderBy(desc(threadLocks.createdAt))
+    .limit(limit);
+}
+
+export async function recallThreadLock(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(threadLocks)
+    .set({ recalledAt: Date.now() })
+    .where(and(eq(threadLocks.id, id), eq(threadLocks.userId, userId)));
+}
+
+export async function dismissThreadLock(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(threadLocks)
+    .set({ dismissedAt: Date.now() })
+    .where(and(eq(threadLocks.id, id), eq(threadLocks.userId, userId)));
+}
+
+export async function deleteAllThreadLocks(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(threadLocks).where(eq(threadLocks.userId, userId));
 }

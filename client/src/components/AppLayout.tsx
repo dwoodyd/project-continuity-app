@@ -13,6 +13,7 @@ import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import { getLoginUrl } from "@/const";
 import { cn } from "@/lib/utils";
 import {
+  Anchor,
   Archive,
   BookOpen,
   Brain,
@@ -47,6 +48,7 @@ import AmnestyScreen from "./AmnestyScreen";
 import { FeedbackPanel } from "./FeedbackPanel";
 import AiConsentModal from "./AiConsentModal";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
+import ThreadLockModal from "./ThreadLockModal";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { CommandPaletteTrigger } from "./CommandPalette";
@@ -67,6 +69,7 @@ const ALL_NAV_ITEMS = [
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
   { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
   { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
+  { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },
   { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
@@ -150,6 +153,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [ideaOpen, setIdeaOpen] = useState(false);
+  const [threadLockOpen, setThreadLockOpen] = useState(false);
+  const [fabMenuOpen, setFabMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
   // browser session doesn't force the user through the re-entry screen again.
@@ -248,6 +253,19 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
   // AI consent: show once after onboarding + about-app, before any AI feature is used
+  // Global keyboard shortcut: ⌘⇧H / Ctrl+Shift+H → Thread Lock
+  useEffect(() => {
+    function handleGlobalKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "H") {
+        e.preventDefault();
+        setThreadLockOpen(true);
+        setFabMenuOpen(false);
+      }
+    }
+    document.addEventListener("keydown", handleGlobalKey);
+    return () => document.removeEventListener("keydown", handleGlobalKey);
+  }, []);
+
   const [aiConsentDismissed, setAiConsentDismissed] = useState(false);
   const showAiConsent =
     isAuthenticated &&
@@ -599,18 +617,49 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           {children}
         </main>
 
-        {/* FAB */}
-        <button
-          onClick={() => setIdeaOpen(true)}
-          className="fixed z-40 bottom-6 right-6 w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
-          style={{ background: "oklch(0.74 0.14 72)", boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.45), 0 0 0 2px var(--background)" }}
-          title="Quick Capture (Idea Sanctuary)"
-          aria-label="Capture an idea"
-        >
-          <Lightbulb className="w-5 h-5" />
-        </button>
+        {/* FAB — speed-dial with two capture options */}
+        <div className="fixed z-40 bottom-6 right-6 flex flex-col items-end gap-2">
+          {/* Speed-dial options */}
+          {fabMenuOpen && (
+            <>
+              <button
+                onClick={() => { setFabMenuOpen(false); setThreadLockOpen(true); }}
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+                style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+                title="Hold That Thread (⌘⇧H)"
+              >
+                <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                Hold That Thread
+              </button>
+              <button
+                onClick={() => { setFabMenuOpen(false); setIdeaOpen(true); }}
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+                style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+                title="Capture an idea"
+              >
+                <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                Capture Idea
+              </button>
+            </>
+          )}
+          {/* Main FAB button */}
+          <button
+            onClick={() => setFabMenuOpen((v) => !v)}
+            className="w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
+            style={{ background: "oklch(0.74 0.14 72)", boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.45), 0 0 0 2px var(--background)" }}
+            title="Quick Capture"
+            aria-label="Quick Capture"
+          >
+            {fabMenuOpen ? <X className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
+          </button>
+        </div>
+        {/* Close speed-dial on outside click */}
+        {fabMenuOpen && (
+          <div className="fixed inset-0 z-30" onClick={() => setFabMenuOpen(false)} aria-hidden />
+        )}
 
         <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
+        <ThreadLockModal open={threadLockOpen} onClose={() => setThreadLockOpen(false)} />
         <FeedbackPanel open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
         {showAmnesty && amnestyData && (
           <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
@@ -740,21 +789,47 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
       {/* More drawer removed — replaced by Hub tab (/hub) */}
 
-      {/* FAB */}
-      <button
-        onClick={() => setIdeaOpen(true)}
-        className="fixed z-40 w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg hover:bg-amber-300 active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+      {/* FAB — speed-dial with two capture options */}
+      <div
+        className="fixed z-40 flex flex-col items-end gap-2"
         style={{
           bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 12px)",
           right: "max(calc(50vw - 224px + 12px), 12px)",
         }}
-        title="Quick Capture (Idea Sanctuary)"
-        aria-label="Capture an idea"
       >
-        <Lightbulb className="w-5 h-5" />
-      </button>
+        {fabMenuOpen && (
+          <>
+            <button
+              onClick={() => { setFabMenuOpen(false); setThreadLockOpen(true); }}
+              className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+              style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+            >
+              <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              Hold That Thread
+            </button>
+            <button
+              onClick={() => { setFabMenuOpen(false); setIdeaOpen(true); }}
+              className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+              style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+            >
+              <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              Capture Idea
+            </button>
+          </>
+        )}
+        <button
+          onClick={() => setFabMenuOpen((v) => !v)}
+          className="w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+        >
+          {fabMenuOpen ? <X className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
+        </button>
+      </div>
+      {fabMenuOpen && (
+        <div className="fixed inset-0 z-30" onClick={() => setFabMenuOpen(false)} aria-hidden />
+      )}
 
       <IdeaSanctuaryModal open={ideaOpen} onClose={() => setIdeaOpen(false)} />
+      <ThreadLockModal open={threadLockOpen} onClose={() => setThreadLockOpen(false)} />
       <FeedbackPanel open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
       {showAmnesty && amnestyData && (
         <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />

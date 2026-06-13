@@ -309,6 +309,13 @@
       "when": 1780436688610,
       "tag": "0043_wandering_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1781386429884,
+      "tag": "0044_tranquil_drax",
+      "breakpoints": true
     }
   ]
 }

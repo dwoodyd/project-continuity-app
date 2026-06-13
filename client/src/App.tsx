@@ -51,6 +51,7 @@ const CoworkingPage       = lazy(() => import("./pages/CoworkingPage"));
 const FocusSessionsPage   = lazy(() => import("./pages/FocusSessionsPage"));
 const FocusCompanionPage  = lazy(() => import("./pages/FocusCompanionPage"));
 const HubPage             = lazy(() => import("./pages/HubPage"));
+const ThreadLocksPage     = lazy(() => import("./pages/ThreadLocksPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -117,6 +118,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/coworking" component={CoworkingPage} />
               <Route path="/focus" component={FocusSessionsPage} />
               <Route path="/hub" component={HubPage} />
+              <Route path="/thread-locks" component={ThreadLocksPage} />
               <Route path="/404" component={NotFound} />
               <Route component={NotFound} />
             </Switch>

@@ -955,3 +955,22 @@ export const unstickInvocations = mysqlTable("unstick_invocations", {
 });
 export type UnstickInvocation = typeof unstickInvocations.$inferSelect;
 export type InsertUnstickInvocation = typeof unstickInvocations.$inferInsert;
+
+// ─── Thread Locks ─────────────────────────────────────────────────────────────
+// One row per "Hold That Thread" capture. Stores mid-task context so the user
+// can return to exactly where they left off after an interruption.
+export const threadLocks = mysqlTable("thread_locks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  projectId: int("projectId").references(() => projects.id),
+  whatDoing: varchar("whatDoing", { length: 1000 }).notNull(),
+  whatNext: varchar("whatNext", { length: 1000 }).notNull(),
+  clipboardSnippet: text("clipboardSnippet"),
+  nextCalendarEvent: varchar("nextCalendarEvent", { length: 500 }),
+  pagePath: varchar("pagePath", { length: 500 }),
+  recalledAt: bigint("recalledAt", { mode: "number" }),
+  dismissedAt: bigint("dismissedAt", { mode: "number" }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type ThreadLock = typeof threadLocks.$inferSelect;
+export type InsertThreadLock = typeof threadLocks.$inferInsert;
