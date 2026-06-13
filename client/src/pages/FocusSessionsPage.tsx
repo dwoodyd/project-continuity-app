@@ -385,6 +385,41 @@ export default function FocusSessionsPage() {
     }
   }, [chatInput, chatLoading, chatMessages, durationMinutes, secondsLeft, intention, wrenChatMutation, resetChatInactivity]);
 
+  // ── Companion window chat relay ────────────────────────────────────────────
+  // WrenPopout dispatches "wren-companion-chat" when the companion window sends a
+  // SEND_CHAT message. We handle it here so the full chat pipeline (divergence
+  // detection, LLM call, state update) runs in the main tab.
+  useEffect(() => {
+    const handleCompanionChat = async (e: Event) => {
+      const { message } = (e as CustomEvent<{ message: string }>).detail;
+      if (!message || chatLoading) return;
+      setChatLoading(true);
+      resetChatInactivity();
+      checkDivergence(message);
+      const userMsg: ChatMsg = { role: "user", content: message, ts: Date.now() };
+      setChatMessages((prev) => [...prev, userMsg]);
+      try {
+        const elapsedMinutes = Math.floor((durationMinutes * 60 - secondsLeft) / 60);
+        const history = [...chatMessages, userMsg].slice(-12).map((m) => ({ role: m.role, content: m.content.slice(0, 400) }));
+        const { reply } = await wrenChatMutation.mutateAsync({
+          message,
+          intention: intention.trim() || undefined,
+          durationMinutes,
+          elapsedMinutes,
+          clientHour: new Date().getHours(),
+          chatHistory: history,
+        });
+        setChatMessages((prev) => [...prev, { role: "assistant", content: String(reply ?? "still here."), ts: Date.now() }]);
+      } catch {
+        setChatMessages((prev) => [...prev, { role: "assistant", content: "still here.", ts: Date.now() }]);
+      } finally {
+        setChatLoading(false);
+      }
+    };
+    window.addEventListener("wren-companion-chat", handleCompanionChat);
+    return () => window.removeEventListener("wren-companion-chat", handleCompanionChat);
+  }, [chatLoading, chatMessages, durationMinutes, secondsLeft, intention, wrenChatMutation, resetChatInactivity, checkDivergence]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Wren activity ─────────────────────────────────────────────────────────
   const [wrenActivity, setWrenActivity] = useState<WrenActivity>("lookingup");
   const wrenVideoRef = useRef<HTMLVideoElement>(null);

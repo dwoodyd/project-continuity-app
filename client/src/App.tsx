@@ -49,6 +49,7 @@ const InviteRedeemPage    = lazy(() => import("./pages/InviteRedeemPage"));
 const RedeemReferralPage  = lazy(() => import("./pages/RedeemReferralPage"));
 const CoworkingPage       = lazy(() => import("./pages/CoworkingPage"));
 const FocusSessionsPage   = lazy(() => import("./pages/FocusSessionsPage"));
+const FocusCompanionPage  = lazy(() => import("./pages/FocusCompanionPage"));
 const HubPage             = lazy(() => import("./pages/HubPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
@@ -81,6 +82,8 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
         <Route path="/intro">{() => null}</Route>
+        {/* /focus-companion is a standalone companion window opened via window.open() for Safari/Firefox */}
+        <Route path="/focus-companion" component={FocusCompanionPage} />
         {/* Standalone 404 for unauthenticated visitors — must come before the AppLayout catch-all
             so unknown routes show the branded 404 page instead of the sign-in card. */}
         <Route path="/404" component={NotFound} />

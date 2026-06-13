@@ -1896,3 +1896,8 @@
 - [x] UPDATE-POLL: useAppVersion hook — polls /api/version every 3 min + on visibilitychange/focus; compares to loaded hash
 - [x] UPDATE-TOAST: UpdatePrompt toast in Continuary voice — dismissible, shown once per new version, never forced mid-session
 - [x] UPDATE-SW: Wire SW updatefound → waiting → SKIP_WAITING flow (app already has a service worker)
+
+## Cross-Browser Wren Popout Fallback (Jun 12)
+- [x] POPOUT-XBROWSER-ROUTE: Create /focus-companion route and FocusCompanionPage with full Wren UI (same design as PiP Version A)
+- [x] POPOUT-XBROWSER-SYNC: BroadcastChannel for live state sync (timer, chat, ambient, intention) between main tab and companion window
+- [x] POPOUT-XBROWSER-WIRE: WrenPopout uses window.open() fallback on Safari/Firefox instead of fixed overlay

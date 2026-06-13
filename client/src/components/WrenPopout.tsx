@@ -1,19 +1,32 @@
 /**
- * WrenPopout — floating focus companion using Document Picture-in-Picture API
+ * WrenPopout — floating focus companion
  *
- * Version A (Chrome/Edge/Arc): Full interactive session in a Document PiP window.
- *   - Wren video = full-bleed top ~50% of window, object-fit cover, mix-blend screen, scrim.
- *   - Below: timer · intention · ambient · Stuck/End · collapsed chat bar.
- *   - Chat collapsed by default so Wren stays big; expanding shrinks Wren to slim top banner.
- *   - State lives in FocusSessionsPage so it never resets on move.
+ * Version A (Chrome/Edge/Arc): Document Picture-in-Picture API.
+ *   Full interactive session in a floating PiP window that stays above all other apps.
+ *   State lives in FocusSessionsPage; the PiP window is a React portal.
  *
- * Version B (Safari/Firefox fallback): Presence-only — Wren even larger (~60%), timer,
- *   intention, her latest line, "tap back to chat" hint. No inputs.
+ * Version B (Safari/Firefox): window.open('/focus-companion', ...) popup.
+ *   Opens FocusCompanionPage in a small resizable window.
+ *   State syncs live via BroadcastChannel("wren-focus-companion").
+ *   The companion window sends commands back (SEND_CHAT, SET_AMBIENT, etc.).
+ *
+ * BroadcastChannel protocol (main → companion):
+ *   { type: "STATE_UPDATE", payload: CompanionState }
+ *   { type: "SESSION_END" }
+ *   { type: "CHAT_REPLY", messages: ChatMsg[] }
+ *
+ * BroadcastChannel protocol (companion → main):
+ *   { type: "SEND_CHAT", message: string }
+ *   { type: "SET_AMBIENT", sound: string }
+ *   { type: "SET_VOLUME", volume: number }
+ *   { type: "STUCK" }
+ *   { type: "END_EARLY" }
+ *   { type: "READY" }
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 
-// ── CDN video URLs (same as FocusSessionsPage) ────────────────────────────────
+// ── CDN video URLs ─────────────────────────────────────────────────────────────
 const WREN_VIDEOS: Record<string, string> = {
   weaving:   "/manus-storage/wren-weaving_b532984b.mp4",
   reading:   "/manus-storage/wren-reading_bd6af9a6.mp4",
@@ -29,7 +42,7 @@ function formatTime(seconds: number) {
 
 type ChatMsg = { role: "user" | "assistant"; content: string; ts: number };
 
-interface WrenPopoutProps {
+export interface WrenPopoutProps {
   open: boolean;
   onClose: () => void;
   secondsLeft: number;
@@ -49,97 +62,22 @@ interface WrenPopoutProps {
   onEndEarly: () => void;
 }
 
-// ── Shared style tokens ───────────────────────────────────────────────────────
-const navy   = "#0C1322";
-const raise  = "#131C30";
-const ink    = "#E6E9EF";
-const soft   = "#A8B5C4";
-const mute   = "#7A8BA0";
-const gold   = "#D9A441";
-const gold2  = "#E6B964";
+// ── Shared style tokens ────────────────────────────────────────────────────────
+const navy    = "#0C1322";
+const raise   = "#131C30";
+const ink     = "#E6E9EF";
+const soft    = "#A8B5C4";
+const mute    = "#7A8BA0";
+const gold    = "#D9A441";
+const gold2   = "#E6B964";
 const emerald = "#3DA86A";
-const line   = "rgba(230,233,239,.10)";
-const line2  = "rgba(230,233,239,.20)";
-const mono   = "'DM Mono', monospace";
-const sans   = "'Inter', system-ui, sans-serif";
+const line    = "rgba(230,233,239,.10)";
+const line2   = "rgba(230,233,239,.20)";
+const mono    = "'DM Mono', monospace";
+const sans    = "'Inter', system-ui, sans-serif";
 
 function supportsDocumentPiP(): boolean {
   return typeof window !== "undefined" && "documentPictureInPicture" in window;
-}
-
-// ── Version B: presence-only float (Safari / Firefox) ────────────────────────
-function PresenceOnlyFloat({
-  secondsLeft, intention, wrenActivity, latestWrenLine, onClose,
-}: {
-  secondsLeft: number; intention: string; wrenActivity: string;
-  latestWrenLine: string; onClose: () => void;
-}) {
-  return (
-    <div style={{
-      position: "fixed", bottom: 24, right: 24, width: 300, zIndex: 9999,
-      background: `linear-gradient(180deg, ${raise}, ${navy})`,
-      border: `1px solid ${line2}`, borderRadius: 16,
-      boxShadow: "0 30px 70px -20px rgba(0,0,0,.85)",
-      overflow: "hidden", fontFamily: sans, fontWeight: 300,
-      WebkitFontSmoothing: "antialiased",
-    }}>
-      {/* read-only badge */}
-      <span style={{
-        position: "absolute", top: 8, right: 11, zIndex: 5,
-        fontFamily: mono, fontSize: 8, letterSpacing: ".08em", textTransform: "uppercase",
-        color: "rgba(255,255,255,.5)", border: "1px solid rgba(255,255,255,.2)",
-        borderRadius: 7, padding: "2px 6px",
-      }}>view only</span>
-      <button onClick={onClose} style={{
-        position: "absolute", top: 8, left: 11, zIndex: 6,
-        background: "none", border: "none", cursor: "pointer",
-        color: mute, fontSize: 16, lineHeight: 1, padding: "2px 4px",
-      }}>×</button>
-
-      {/* Wren stage — full-bleed top ~60% */}
-      <div style={{
-        position: "relative", width: "100%", height: 280, overflow: "hidden",
-        background: `radial-gradient(120% 90% at 50% 30%, rgba(217,164,65,.22), rgba(217,164,65,.04) 55%, transparent 72%)`,
-      }}>
-        <video
-          key={wrenActivity}
-          src={WREN_VIDEOS[wrenActivity] ?? WREN_VIDEOS.lookingup}
-          autoPlay loop muted playsInline
-          style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%",
-            objectFit: "cover", mixBlendMode: "screen",
-          }}
-        />
-        {/* bottom scrim */}
-        <div style={{
-          position: "absolute", left: 0, right: 0, bottom: 0, height: "46%",
-          background: `linear-gradient(to top, ${navy} 6%, rgba(12,19,34,.5) 50%, transparent)`,
-          zIndex: 2,
-        }} />
-      </div>
-
-      {/* Lower controls */}
-      <div style={{ padding: "10px 16px 16px", textAlign: "center" }}>
-        <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 30, letterSpacing: ".04em", color: ink }}>
-          {formatTime(secondsLeft)}
-        </div>
-        <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: mute, marginTop: 1 }}>
-          in session
-        </div>
-        {intention.trim() && (
-          <p style={{ fontStyle: "italic", fontSize: 12, color: soft, marginTop: 7, padding: "0 4px", lineHeight: 1.5 }}>
-            "{intention.trim()}"
-          </p>
-        )}
-        <p style={{ fontSize: 11, color: soft, fontStyle: "italic", marginTop: 9 }}>
-          "{latestWrenLine}" — Wren
-        </p>
-        <p style={{ fontFamily: mono, fontSize: 9.5, color: mute, marginTop: 11, paddingTop: 10, borderTop: `1px solid ${line}`, lineHeight: 1.8 }}>
-          ↩ tap back to the app to chat or mark Stuck
-        </p>
-      </div>
-    </div>
-  );
 }
 
 // ── Version A: full interactive session UI (rendered into PiP window) ─────────
@@ -160,7 +98,6 @@ function PiPSessionUI({
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onSendChat(); }
   }, [onSendChat]);
 
-  // When chat is open, Wren shrinks to a slim top banner (60px); otherwise full-bleed ~200px
   const wrenHeight = chatOpen ? 60 : 280;
 
   return (
@@ -191,7 +128,7 @@ function PiPSessionUI({
         }}>×</button>
       </div>
 
-      {/* Wren stage — full-bleed, shrinks when chat opens */}
+      {/* Wren stage */}
       <div style={{
         position: "relative", width: "100%", height: wrenHeight,
         overflow: "hidden", flexShrink: 0,
@@ -207,13 +144,11 @@ function PiPSessionUI({
             objectFit: "cover", mixBlendMode: "screen",
           }}
         />
-        {/* bottom scrim */}
         <div style={{
           position: "absolute", left: 0, right: 0, bottom: 0, height: "46%",
           background: `linear-gradient(to top, #0c1322 6%, rgba(12,19,34,.5) 50%, transparent)`,
           zIndex: 2,
         }} />
-        {/* Wren speech line — only when not in chat mode */}
         {!chatOpen && (() => {
           const lastLine = chatMessages.filter(m => m.role === "assistant").slice(-1)[0]?.content;
           return lastLine ? (
@@ -230,22 +165,17 @@ function PiPSessionUI({
 
       {/* Lower section */}
       <div style={{ padding: "10px 16px 0", textAlign: "center", flex: 1, display: "flex", flexDirection: "column" }}>
-        {/* Timer */}
         <div style={{ fontFamily: mono, fontWeight: 500, fontSize: 30, letterSpacing: ".04em", color: ink }}>
           {formatTime(secondsLeft)}
         </div>
         <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: mute, marginTop: 1 }}>
           in session
         </div>
-
-        {/* Intention */}
         {intention.trim() && (
           <p style={{ fontStyle: "italic", fontSize: 12, color: soft, marginTop: 7, padding: "0 4px", lineHeight: 1.5 }}>
             "{intention.trim()}"
           </p>
         )}
-
-        {/* Ambient sound */}
         <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 10 }}>
           {(["silence", "rain", "cafe"] as const).map((s) => (
             <button key={s} onClick={() => onSetAmbient(s)} style={{
@@ -268,8 +198,6 @@ function PiPSessionUI({
             />
           </div>
         )}
-
-        {/* Stuck / End early */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginTop: 10, fontSize: 11.5 }}>
           <button onClick={onStuck} style={{
             background: "none", border: "none", cursor: "pointer",
@@ -285,8 +213,6 @@ function PiPSessionUI({
             End early
           </button>
         </div>
-
-        {/* Talk to Wren — collapsed bar by default */}
         <div style={{ marginTop: 11, borderTop: `1px solid ${line}`, flex: 1, display: "flex", flexDirection: "column" }}>
           <button
             onClick={() => setChatOpen(c => !c)}
@@ -305,10 +231,8 @@ function PiPSessionUI({
               transition: "transform 0.2s", display: "inline-block", color: mute,
             }}>⌄</span>
           </button>
-
           {chatOpen && (
             <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingBottom: 14 }}>
-              {/* Thread */}
               <div style={{
                 display: "flex", flexDirection: "column", gap: 7,
                 padding: "2px 0 8px", maxHeight: 160, overflowY: "auto",
@@ -329,7 +253,6 @@ function PiPSessionUI({
                 ))}
                 <div ref={chatEndRef} />
               </div>
-              {/* Input */}
               <div style={{
                 display: "flex", alignItems: "center", gap: 8,
                 border: `1px solid rgba(230,233,239,.18)`,
@@ -373,25 +296,28 @@ function PiPSessionUI({
   );
 }
 
-// ── Main WrenPopout component ─────────────────────────────────────────────────
+// ── Main WrenPopout component ──────────────────────────────────────────────────
 export default function WrenPopout(props: WrenPopoutProps) {
-  const { open, onClose, secondsLeft, intention, wrenActivity, chatMessages } = props;
-  // Use a ref for the PiP window so timer/prop updates don't trigger re-open or cleanup
+  const {
+    open, onClose, secondsLeft, intention, wrenActivity,
+    ambientSound, ambientVolume, chatMessages, chatLoading,
+    onSetAmbient, onSetVolume, onSendChat, onStuck, onEndEarly,
+  } = props;
+
+  // ── Refs ─────────────────────────────────────────────────────────────────────
   const pipWindowRef = useRef<Window | null>(null);
+  const companionWindowRef = useRef<Window | null>(null);
+  const channelRef = useRef<BroadcastChannel | null>(null);
   const [pipContainer, setPipContainer] = useState<HTMLElement | null>(null);
   const [useDocPiP, setUseDocPiP] = useState(false);
-  // Keep onClose stable in a ref so the pagehide listener always calls the latest version
   const onCloseRef = useRef(onClose);
   useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => { setUseDocPiP(supportsDocumentPiP()); }, []);
 
-  // Open PiP window ONCE when `open` becomes true.
-  // The window must survive tab switches, prop updates, and React re-renders.
-  // It is only closed by: (a) user clicks ×, (b) session ends (open=false).
+  // ── Version A: Document PiP ───────────────────────────────────────────────────
   useEffect(() => {
     if (!open || !useDocPiP) return;
-    // Already open — don't re-open on re-renders
     if (pipWindowRef.current && !pipWindowRef.current.closed) return;
 
     const openPiP = async () => {
@@ -402,7 +328,6 @@ export default function WrenPopout(props: WrenPopoutProps) {
         });
         pipWindowRef.current = pip;
 
-        // Clone app stylesheets into PiP window
         Array.from(document.styleSheets).forEach((sheet) => {
           try {
             if (sheet.href) {
@@ -417,21 +342,17 @@ export default function WrenPopout(props: WrenPopoutProps) {
           } catch { /* cross-origin sheets — skip */ }
         });
 
-        // Google Fonts
         const fontLink = pip.document.createElement("link");
         fontLink.rel = "stylesheet";
         fontLink.href = "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap";
         pip.document.head.appendChild(fontLink);
-
         pip.document.body.style.cssText = "margin:0;padding:0;background:#0a1120;overflow:hidden;";
 
         const container = pip.document.createElement("div");
         container.style.cssText = "width:100%;height:100%;";
         pip.document.body.appendChild(container);
-
         setPipContainer(container);
 
-        // Only fire onClose when the user explicitly closes the PiP window
         pip.addEventListener("pagehide", () => {
           pipWindowRef.current = null;
           setPipContainer(null);
@@ -444,11 +365,9 @@ export default function WrenPopout(props: WrenPopoutProps) {
     };
 
     openPiP();
-    // No cleanup function — the window must survive unmount/re-render cycles.
-    // Explicit close is handled by the effect below.
   }, [open, useDocPiP]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Close the PiP window when the session ends (open becomes false)
+  // Close PiP when session ends
   useEffect(() => {
     if (!open) {
       const win = pipWindowRef.current;
@@ -458,23 +377,108 @@ export default function WrenPopout(props: WrenPopoutProps) {
     }
   }, [open]);
 
-  const latestWrenLine = chatMessages
-    .filter((m) => m.role === "assistant").slice(-1)[0]?.content ?? "I'm right here. Keep going.";
+  // ── Version B: window.open() companion window ─────────────────────────────────
+  // Open companion window when open=true and not using DocPiP
+  useEffect(() => {
+    if (!open || useDocPiP) return;
+    // Don't re-open if already open
+    if (companionWindowRef.current && !companionWindowRef.current.closed) return;
+
+    const w = window.open(
+      "/focus-companion",
+      "wren-companion",
+      "width=344,height=600,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no",
+    );
+    if (!w) {
+      console.warn("[WrenPopout] window.open() was blocked — popup blocker may be active.");
+      return;
+    }
+    companionWindowRef.current = w;
+
+    // Set up BroadcastChannel for state sync
+    const ch = new BroadcastChannel("wren-focus-companion");
+    channelRef.current = ch;
+
+    ch.onmessage = (e) => {
+      const msg = e.data;
+      if (msg.type === "READY") {
+        // Companion is ready — send current state immediately
+        ch.postMessage({
+          type: "STATE_UPDATE",
+          payload: {
+            secondsLeft, intention, wrenActivity,
+            ambientSound, ambientVolume,
+            chatMessages, chatLoading,
+            sessionActive: true,
+          },
+        });
+      } else if (msg.type === "SET_AMBIENT") {
+        onSetAmbient(msg.sound as "silence" | "rain" | "cafe");
+      } else if (msg.type === "SET_VOLUME") {
+        onSetVolume(msg.volume as number);
+      } else if (msg.type === "STUCK") {
+        onStuck();
+      } else if (msg.type === "END_EARLY") {
+        onEndEarly();
+      } else if (msg.type === "SEND_CHAT") {
+        // The companion wants to send a chat message — delegate to parent
+        // We fire a custom event so FocusSessionsPage can handle it
+        window.dispatchEvent(new CustomEvent("wren-companion-chat", { detail: { message: msg.message } }));
+      }
+    };
+
+    // Watch for companion window being closed by the user
+    const interval = setInterval(() => {
+      if (companionWindowRef.current?.closed) {
+        clearInterval(interval);
+        companionWindowRef.current = null;
+        ch.close();
+        channelRef.current = null;
+        onCloseRef.current();
+      }
+    }, 500);
+
+    return () => { clearInterval(interval); };
+  }, [open, useDocPiP]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Close companion window when session ends
+  useEffect(() => {
+    if (!open) {
+      channelRef.current?.postMessage({ type: "SESSION_END" });
+      const win = companionWindowRef.current;
+      if (win && !win.closed) {
+        // Give the companion a moment to show the "session complete" screen before closing
+        setTimeout(() => { try { win.close(); } catch { /* ignore */ } }, 1500);
+      }
+      companionWindowRef.current = null;
+      channelRef.current?.close();
+      channelRef.current = null;
+    }
+  }, [open]);
+
+  // Broadcast state updates to companion window whenever relevant state changes
+  useEffect(() => {
+    if (!open || useDocPiP || !channelRef.current) return;
+    channelRef.current.postMessage({
+      type: "STATE_UPDATE",
+      payload: {
+        secondsLeft, intention, wrenActivity,
+        ambientSound, ambientVolume,
+        chatMessages, chatLoading,
+        sessionActive: true,
+      },
+    });
+  }, [open, useDocPiP, secondsLeft, intention, wrenActivity, ambientSound, ambientVolume, chatMessages, chatLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null;
 
-  // Version B: presence-only float
-  if (!useDocPiP) {
-    return (
-      <PresenceOnlyFloat
-        secondsLeft={secondsLeft} intention={intention}
-        wrenActivity={wrenActivity} latestWrenLine={latestWrenLine}
-        onClose={onClose}
-      />
-    );
+  // Version A: Document PiP portal
+  if (useDocPiP) {
+    if (!pipContainer) return null;
+    return createPortal(<PiPSessionUI {...props} onClose={onClose} />, pipContainer);
   }
 
-  // Version A: Document PiP portal
-  if (!pipContainer) return null;
-  return createPortal(<PiPSessionUI {...props} onClose={onClose} />, pipContainer);
+  // Version B: companion window is open — render nothing in main tab
+  // (the companion window is a separate page at /focus-companion)
+  return null;
 }
