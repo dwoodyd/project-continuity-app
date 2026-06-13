@@ -167,11 +167,11 @@ function WovenArtifact({
 }: {
   sessions: ArtifactSession[];
   totalSegments: number;
-  size?: "full" | "thumb";
+  size?: "full" | "thumb" | "compact";
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const w = size === "thumb" ? 80 : 280;
-  const h = size === "thumb" ? 80 : 320;
+  const w = size === "thumb" ? 80 : size === "compact" ? 200 : 280;
+  const h = size === "thumb" ? 80 : size === "compact" ? 230 : 320;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -723,7 +723,7 @@ export default function FocusSessionsPage() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-[100svh] flex flex-col overflow-hidden"
       style={{ background: "oklch(0.10 0.02 240)", color: "oklch(0.92 0.03 60)" }}
     >
       {/* Persistent exit bar — always visible during any non-idle phase so users are never trapped */}
@@ -872,7 +872,7 @@ export default function FocusSessionsPage() {
         </div>
 
         {/* ── User workspace — right 50% ──────────────────────────────────── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-5 py-8 gap-0 overflow-y-auto">
+        <div className="flex-1 flex flex-col items-center justify-start px-5 py-6 gap-0 overflow-y-auto" style={{ paddingTop: 'clamp(1rem, 4vh, 3rem)' }}>
 
           {/* IDLE — welcome */}
           {phase === "idle" && (
@@ -1354,7 +1354,7 @@ export default function FocusSessionsPage() {
                 Each session adds a row to your focus record.
               </p>
               {artifactData && (
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-4">
                   <WovenArtifact
                     sessions={artifactData.sessions}
                     totalSegments={artifactData.totalSegments}
