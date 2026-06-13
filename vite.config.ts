@@ -154,6 +154,12 @@ const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(
 
 export default defineConfig({
   plugins,
+  define: {
+    // Inject the build hash at compile time so the frontend can compare against /api/version.
+    // In production, BUILD_HASH is set by the deploy pipeline (e.g. git short SHA).
+    // In dev it falls back to "dev" so the update prompt never fires.
+    "import.meta.env.VITE_BUILD_HASH": JSON.stringify(process.env.BUILD_HASH ?? "dev"),
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),

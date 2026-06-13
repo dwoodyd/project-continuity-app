@@ -258,6 +258,13 @@ async function startServer() {
     store: makeUpstashStore("rl:api:", apiWindowMs),
   });;
 
+  // Build version endpoint — lets clients detect new deploys proactively.
+  // BUILD_HASH is set by the deploy pipeline; falls back to "dev" in local dev.
+  app.get("/api/version", (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    res.json({ version: process.env.BUILD_HASH ?? "dev" });
+  });
+
   // PayPal webhook
   app.use("/api/paypal", paypalRouter);
   // OAuth callback under /api/oauth/callback

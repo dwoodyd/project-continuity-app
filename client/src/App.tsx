@@ -5,6 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AppLayout from "./components/AppLayout";
 import PWAInstallBanner from "./components/PWAInstallBanner";
+import { UpdatePrompt } from "./components/UpdatePrompt";
 import { AnimatedSplash } from "./components/AnimatedSplash";
 import { useState, lazy, Suspense } from "react";
 import { OnboardingPageWithCallback } from "./pages/OnboardingPage";
@@ -174,6 +175,7 @@ function App() {
           )}
           <Router onPreviewIntro={handlePreviewIntro} />
           <PWAInstallBanner />
+          <UpdatePrompt />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

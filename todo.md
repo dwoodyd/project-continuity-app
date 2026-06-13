@@ -1890,3 +1890,9 @@
 - [x] POPOUT-B: Presence-only fallback for Safari/Firefox — Wren, timer, intention, latest Wren line, "tap back to app to chat or mark Stuck" hint
 - [x] POPOUT-WIRE: Wire popout to FocusSessionsPage — shared state via context/ref so timer/chat/ambient survive the move; "Pop out Wren →" button in active session header; popout closes cleanly and returns to tab
 - [x] POPOUT-STYLES: Copy app styles (CSS variables, fonts) into PiP window document head so Wren and UI render correctly in the float
+
+## Proactive Update Prompt (Jun 12)
+- [x] UPDATE-VERSION: /api/version endpoint returning build hash; VITE_BUILD_HASH injected at build time via vite.config
+- [x] UPDATE-POLL: useAppVersion hook — polls /api/version every 3 min + on visibilitychange/focus; compares to loaded hash
+- [x] UPDATE-TOAST: UpdatePrompt toast in Continuary voice — dismissible, shown once per new version, never forced mid-session
+- [x] UPDATE-SW: Wire SW updatefound → waiting → SKIP_WAITING flow (app already has a service worker)
