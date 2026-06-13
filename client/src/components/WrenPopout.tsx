@@ -98,7 +98,7 @@ function PresenceOnlyFloat({
 
       {/* Wren stage — full-bleed top ~60% */}
       <div style={{
-        position: "relative", width: "100%", height: 188, overflow: "hidden",
+        position: "relative", width: "100%", height: 280, overflow: "hidden",
         background: `radial-gradient(120% 90% at 50% 30%, rgba(217,164,65,.22), rgba(217,164,65,.04) 55%, transparent 72%)`,
       }}>
         <video
@@ -161,7 +161,7 @@ function PiPSessionUI({
   }, [onSendChat]);
 
   // When chat is open, Wren shrinks to a slim top banner (60px); otherwise full-bleed ~200px
-  const wrenHeight = chatOpen ? 60 : 200;
+  const wrenHeight = chatOpen ? 60 : 280;
 
   return (
     <div style={{
@@ -391,7 +391,7 @@ export default function WrenPopout(props: WrenPopoutProps) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pip = await (window as any).documentPictureInPicture.requestWindow({
-          width: 344, height: 560,
+          width: 344, height: 600,
         });
         win = pip;
 
