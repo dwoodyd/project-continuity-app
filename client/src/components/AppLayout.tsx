@@ -253,10 +253,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
   // AI consent: show once after onboarding + about-app, before any AI feature is used
-  // Global keyboard shortcut: ⌘⇧H / Ctrl+Shift+H → Thread Lock
+  // Global keyboard shortcut: ⌘⇧L / Ctrl+Shift+L → Thread Lock
+  // (⌘⇧H is reserved in Safari as the "Home" shortcut, so we use L instead)
   useEffect(() => {
     function handleGlobalKey(e: KeyboardEvent) {
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "H") {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "L") {
         e.preventDefault();
         setThreadLockOpen(true);
         setFabMenuOpen(false);
@@ -626,7 +627,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 onClick={() => { setFabMenuOpen(false); setThreadLockOpen(true); }}
                 className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
-                title="Hold That Thread (⌘⇧H)"
+                title="Hold That Thread (⌘⇧L)"
               >
                 <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
                 Hold That Thread

@@ -6,6 +6,7 @@ import {
   getThreadLockHistory,
   recallThreadLock,
   dismissThreadLock,
+  deleteThreadLock,
 } from "../db";
 
 export const threadLockRouter = router({
@@ -60,6 +61,14 @@ export const threadLockRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       await dismissThreadLock(input.id, ctx.user.id);
+      return { ok: true };
+    }),
+
+  /** Hard-delete a single lock from history. */
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await deleteThreadLock(input.id, ctx.user.id);
       return { ok: true };
     }),
 });

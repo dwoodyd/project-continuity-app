@@ -1737,3 +1737,10 @@ export async function deleteAllThreadLocks(userId: number): Promise<void> {
   if (!db) return;
   await db.delete(threadLocks).where(eq(threadLocks.userId, userId));
 }
+
+/** Hard-delete a single thread lock by id, scoped to the user. */
+export async function deleteThreadLock(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(threadLocks).where(and(eq(threadLocks.id, id), eq(threadLocks.userId, userId)));
+}

@@ -276,7 +276,7 @@ export default function ThreadLockModal({ open, onClose }: ThreadLockModalProps)
             </Button>
           </div>
           <p className="text-[10px] text-center" style={{ color: "oklch(0.35 0.03 240)" }}>
-            ⌘⇧H from anywhere · ⌘↵ to save
+            ⌘⇧L from anywhere · ⌘↩ to save
           </p>
         </div>
       </DialogContent>

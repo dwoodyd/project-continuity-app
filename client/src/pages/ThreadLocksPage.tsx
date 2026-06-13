@@ -6,7 +6,7 @@
  * and a status badge (active / recalled / dismissed / expired).
  */
 import { trpc } from "@/lib/trpc";
-import { Anchor, ChevronLeft, Clock, CheckCircle2, X, AlertCircle } from "lucide-react";
+import { Anchor, ChevronLeft, Clock, CheckCircle2, X, AlertCircle, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -59,6 +59,9 @@ export default function ThreadLocksPage() {
   const dismissMutation = trpc.threadLock.dismiss.useMutation({
     onSuccess: () => utils.threadLock.getHistory.invalidate(),
   });
+  const deleteMutation = trpc.threadLock.delete.useMutation({
+    onSuccess: () => utils.threadLock.getHistory.invalidate(),
+  });
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -103,7 +106,7 @@ export default function ThreadLocksPage() {
           <Anchor className="w-8 h-8 mx-auto mb-3" style={{ color: "oklch(0.30 0.03 240)" }} />
           <p className="text-sm" style={{ color: "oklch(0.50 0.04 240)" }}>No threads locked yet.</p>
           <p className="text-xs mt-1" style={{ color: "oklch(0.38 0.03 240)" }}>
-            Use ⌘⇧H or the capture button to save your context before an interruption.
+            Use ⌘⇧L or the capture button to save your context before an interruption.
           </p>
         </div>
       )}
@@ -147,29 +150,46 @@ export default function ThreadLocksPage() {
                   )}
                 </div>
 
-                {/* Actions — only for active locks */}
-                {isActive && (
-                  <div
-                    className="flex items-center gap-2 px-4 py-2.5 border-t"
-                    style={{ borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
+                {/* Actions row — active locks get recall/dismiss; all locks get delete */}
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 border-t"
+                  style={{ borderColor: isActive ? "oklch(0.74 0.14 72 / 0.12)" : "oklch(0.20 0.02 240)" }}
+                >
+                  {isActive && (
+                    <>
+                      <button
+                        onClick={() => recallMutation.mutate({ id: lock.id })}
+                        disabled={recallMutation.isPending}
+                        className="flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all active:scale-95"
+                        style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                      >
+                        Pick it up →
+                      </button>
+                      <button
+                        onClick={() => dismissMutation.mutate({ id: lock.id })}
+                        className="text-xs px-3 py-1.5"
+                        style={{ color: "oklch(0.45 0.04 240)" }}
+                      >
+                        Dismiss
+                      </button>
+                    </>
+                  )}
+                  {!isActive && <span className="flex-1" />}
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Delete this thread lock? This cannot be undone.")) {
+                        deleteMutation.mutate({ id: lock.id });
+                      }
+                    }}
+                    disabled={deleteMutation.isPending}
+                    className="flex items-center gap-1 text-[11px] px-2 py-1.5 rounded-lg transition-all active:scale-95"
+                    style={{ color: "oklch(0.42 0.06 20)", background: "oklch(0.14 0.02 20 / 0.4)" }}
+                    title="Delete this lock"
                   >
-                    <button
-                      onClick={() => recallMutation.mutate({ id: lock.id })}
-                      disabled={recallMutation.isPending}
-                      className="flex-1 text-xs font-semibold py-1.5 rounded-lg transition-all active:scale-95"
-                      style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                    >
-                      Pick it up →
-                    </button>
-                    <button
-                      onClick={() => dismissMutation.mutate({ id: lock.id })}
-                      className="text-xs px-3 py-1.5"
-                      style={{ color: "oklch(0.45 0.04 240)" }}
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                )}
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </button>
+                </div>
               </div>
             );
           })}

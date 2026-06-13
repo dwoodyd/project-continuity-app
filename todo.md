@@ -1927,3 +1927,8 @@
 ### Phase 5 — Tests & Delivery
 - [x] TL-TESTS: Write vitest tests for threadLock procedures (capture, getActive 4h window, recall, dismiss, history)
 - [x] TL-CHECKPOINT: TypeScript 0 errors, all tests passing, checkpoint saved
+
+## Thread Lock Polish (Jun 13)
+- [x] TL-SHORTCUT-SAFARI: Change keyboard shortcut from ⌘⇧H (Safari-reserved "Home") to ⌘⇧L (safe on all browsers) in AppLayout
+- [x] TL-DELETE: Add delete action to ThreadLocksPage history rows (hard-delete from DB; only for non-active locks to prevent accidental loss of active thread)
+- [x] TL-DELETE-ROUTER: Add threadLock.delete procedure to server/routers/threadLock.ts
