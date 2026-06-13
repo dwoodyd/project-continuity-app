@@ -1293,13 +1293,22 @@ export default function Home() {
 
   // Undo state: tracks task IDs that were just completed but can still be undone
   const [pendingUndoTaskIds, setPendingUndoTaskIds] = useState<Set<string>>(new Set());
-  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});  
+  const undoTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  // Optimistic done overrides — applied immediately on click, cleared when server data arrives
+  const [optimisticDone, setOptimisticDone] = useState<Record<string, boolean>>({}); 
 
   const completeTaskMutation = trpc.checkIns.completeTask.useMutation({
-    onSuccess: () => { refetchPlan(); refetchGam(); },
+    onSuccess: (_data, variables) => {
+      // Server data is now authoritative — clear the optimistic override for this task
+      setOptimisticDone((prev) => { const n = { ...prev }; delete n[variables.taskId]; return n; });
+      refetchPlan(); refetchGam();
+    },
   });
   const uncompleteTaskMutation = trpc.checkIns.uncompleteTask.useMutation({
-    onSuccess: () => refetchPlan(),
+    onSuccess: (_data, variables) => {
+      setOptimisticDone((prev) => { const n = { ...prev }; delete n[variables.taskId]; return n; });
+      refetchPlan();
+    },
   });
   const addTaskMutation = trpc.checkIns.addTask.useMutation({
     onSuccess: () => refetchPlan(),
@@ -1324,7 +1333,8 @@ export default function Home() {
   const completeTask = useCallback((taskId: string, taskTitle: string) => {
     haptic(60); // tactile confirmation
     dismissHoldHint(); // hide first-use hint after first completion
-    // Optimistically mark done in the UI immediately
+    // Optimistically flip the circle immediately — no waiting for server
+    setOptimisticDone((prev) => ({ ...prev, [taskId]: true }));
     completeTaskMutation.mutate({ taskId, taskTitle, date: localDateStr });
     // Mark as pending-undo
     setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
@@ -1353,6 +1363,8 @@ export default function Home() {
     clearTimeout(undoTimers.current[taskId]);
     delete undoTimers.current[taskId];
     setPendingUndoTaskIds((prev) => { const s = new Set(prev); s.delete(taskId); return s; });
+    // Optimistically flip back immediately
+    setOptimisticDone((prev) => { const n = { ...prev }; delete n[taskId]; return n; });
     uncompleteTaskMutation.mutate({ taskId, date: localDateStr });
   }, [uncompleteTaskMutation, localDateStr]);
 
@@ -1387,8 +1399,14 @@ export default function Home() {
 
   const tasks: any[] = useMemo(() => {
     if (!todayPlan?.criticalTasks) return [];
-    try { return JSON.parse(todayPlan.criticalTasks); } catch { return []; }
-  }, [todayPlan?.criticalTasks]);
+    try {
+      const parsed: any[] = JSON.parse(todayPlan.criticalTasks);
+      // Apply optimistic done overrides so the circle flips on first click
+      return parsed.map((t) =>
+        t.id in optimisticDone ? { ...t, done: optimisticDone[t.id] } : t
+      );
+    } catch { return []; }
+  }, [todayPlan?.criticalTasks, optimisticDone]);
 
   // carryover tasks: stored in likelyDistractions field as a workaround until schema is extended
   const carryoverTasks: string[] = useMemo(() => {
