@@ -62,7 +62,8 @@ export default function WeeklyReviewPage() {
     },
   });
 
-  const { data: recentCheckIns } = trpc.checkIns.getRecent.useQuery();
+  // Use the 7-day window query so the stat card count matches the Wren letter exactly
+  const { data: recentCheckIns } = trpc.checkIns.getWeek.useQuery();
   const { data: projects } = trpc.projects.list.useQuery();
   const { data: focusStats } = trpc.focusSessions.getWeekStats.useQuery();
   const { data: focusSessions } = trpc.focusSessions.getWeekSessions.useQuery({ weekStart });

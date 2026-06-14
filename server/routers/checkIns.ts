@@ -54,6 +54,13 @@ export const checkInsRouter = router({
     return getRecentCheckIns(ctx.user.id, 14);
   }),
 
+  // Returns check-ins from the past 7 days — same window used by the Wren letter generator
+  getWeek: protectedProcedure.query(async ({ ctx }) => {
+    const all = await getRecentCheckIns(ctx.user.id, 50);
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return all.filter(c => new Date(c.createdAt).getTime() >= weekAgo);
+  }),
+
   submitMorning: protectedProcedure
     .input(z.object({
       capacityLevel: z.enum(["full", "partial", "low"]),

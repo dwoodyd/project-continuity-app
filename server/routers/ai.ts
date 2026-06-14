@@ -481,19 +481,32 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
     checkLLMRateLimit(ctx.user.id);
 
     // ── Gather real data ──────────────────────────────────────────────────────
-    const projects = await getActiveProjects(ctx.user.id);
-    const recentCheckIns = await getRecentCheckIns(ctx.user.id, 21);
-    const recentPlans = await getRecentDailyPlans(ctx.user.id, 7);
-    const recentSessions = await getRecentFocusSessions(ctx.user.id, 20);
-
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const weekAgoDate = new Date(weekAgo);
+
+    const projects = await getActiveProjects(ctx.user.id);
+    // Fetch enough check-ins to cover the week, then filter to the exact 7-day window
+    // so the count fed to the prompt matches the stat card exactly.
+    const allRecentCheckIns = await getRecentCheckIns(ctx.user.id, 50);
+    const weekCheckIns = allRecentCheckIns.filter(
+      c => new Date(c.createdAt).getTime() >= weekAgo
+    );
+    const recentPlansAll = await getRecentDailyPlans(ctx.user.id, 14);
+    const weekPlans = recentPlansAll.filter(
+      p => new Date(p.createdAt ?? p.date).getTime() >= weekAgo
+    );
+    const recentSessions = await getRecentFocusSessions(ctx.user.id, 50);
+
     const weekSessions = recentSessions.filter(s => new Date(s.startedAt).getTime() >= weekAgo);
     const totalFocusSeconds = weekSessions.reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
     const completedSessions = weekSessions.filter(s => s.wasCompleted === 1).length;
     const totalFocusMinutes = Math.round(totalFocusSeconds / 60);
 
-    const checkInCount = recentCheckIns.length;
-    const daysWithPlans = recentPlans.length;
+    // These counts now match the stat cards exactly
+    const checkInCount = weekCheckIns.length;
+    const daysWithPlans = weekPlans.length;
+    // Use week check-ins for pattern analysis
+    const recentCheckIns = weekCheckIns;
 
     // Distraction mentions — raw, not interpreted
     const distractionMentions = recentCheckIns
