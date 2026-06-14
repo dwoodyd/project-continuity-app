@@ -974,3 +974,15 @@ export const threadLocks = mysqlTable("thread_locks", {
 });
 export type ThreadLock = typeof threadLocks.$inferSelect;
 export type InsertThreadLock = typeof threadLocks.$inferInsert;
+
+// ─── Wren Letters (Weekly Review) ────────────────────────────────────────────
+export const wrenLetters = mysqlTable("wren_letters", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  weekKey: varchar("weekKey", { length: 20 }).notNull(), // e.g. "2026-W24"
+  letterText: text("letterText").notNull(),
+  compassSeed: text("compassSeed"), // optional Beat 4 nudge to carry into Weekly Compass
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type WrenLetter = typeof wrenLetters.$inferSelect;
+export type InsertWrenLetter = typeof wrenLetters.$inferInsert;

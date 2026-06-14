@@ -1932,3 +1932,21 @@
 - [x] TL-SHORTCUT-SAFARI: Change keyboard shortcut from ⌘⇧H (Safari-reserved "Home") to ⌘⇧L (safe on all browsers) in AppLayout
 - [x] TL-DELETE: Add delete action to ThreadLocksPage history rows (hard-delete from DB; only for non-active locks to prevent accidental loss of active thread)
 - [x] TL-DELETE-ROUTER: Add threadLock.delete procedure to server/routers/threadLock.ts
+
+## Weekly Review Wren Letter Fix (Jun 14, 2026)
+
+### Phase 1 — Audit
+- [x] WR-AUDIT: Read WeeklyReviewPage and ai.generateWeeklyReview router to confirm render/state bug
+
+### Phase 2 — Schema + Prompt
+- [x] WR-SCHEMA: Add wren_letters table (id, userId, weekKey, letterText, compassSeed nullable, createdAt) to persist one letter per week
+- [x] WR-MIGRATION: Generate and apply migration SQL for wren_letters
+- [x] WR-DB: Add getWrenLetter, saveWrenLetter helpers to db.ts
+- [x] WR-ROUTER: Add weeklyReview.getLetter and weeklyReview.saveLetter procedures; rework generateWeeklyReview prompt to four-beat Wren voice with guardrails (no shaming rest, real data only, honest about thin weeks)
+
+### Phase 3 — UI
+- [x] WR-UI: Rebuild Wren letter section in WeeklyReviewPage: invitation → reading → persisted letter states; bind response to view; persist per week; gentle error path; "Re-read" link; optional "Carry into Weekly Compass" CTA
+
+### Phase 4 — Tests + Delivery
+- [x] WR-TESTS: Write vitest tests for wren_letters db helpers and letter generation guardrails
+- [x] WR-CHECKPOINT: TypeScript 0 errors, all tests passing, checkpoint saved

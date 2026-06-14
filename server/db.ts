@@ -89,6 +89,8 @@ import {
   threadLocks,
   ThreadLock,
   InsertThreadLock,
+  wrenLetters,
+  WrenLetter,
 } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -869,6 +871,7 @@ export async function deleteAllUserData(userId: number): Promise<void> {
   await db.delete(projectMemoryEvents).where(eq(projectMemoryEvents.userId, userId));
   await db.delete(focusSessions).where(eq(focusSessions.userId, userId));
   await db.delete(threadLocks).where(eq(threadLocks.userId, userId));
+  await db.delete(wrenLetters).where(eq(wrenLetters.userId, userId));
   await db.delete(weeklyCompass).where(eq(weeklyCompass.userId, userId));
   await db.delete(reEntryCards).where(eq(reEntryCards.userId, userId));
   await db.delete(weeklyReviews).where(eq(weeklyReviews.userId, userId));
@@ -1743,4 +1746,41 @@ export async function deleteThreadLock(id: number, userId: number): Promise<void
   const db = await getDb();
   if (!db) return;
   await db.delete(threadLocks).where(and(eq(threadLocks.id, id), eq(threadLocks.userId, userId)));
+}
+
+// ─── Wren Letters ─────────────────────────────────────────────────────────────
+export async function getWrenLetter(userId: number, weekKey: string): Promise<WrenLetter | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(wrenLetters)
+    .where(and(eq(wrenLetters.userId, userId), eq(wrenLetters.weekKey, weekKey)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function saveWrenLetter(
+  userId: number,
+  weekKey: string,
+  letterText: string,
+  compassSeed?: string | null
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  // Upsert: delete existing for this week then insert fresh
+  await db.delete(wrenLetters).where(and(eq(wrenLetters.userId, userId), eq(wrenLetters.weekKey, weekKey)));
+  await db.insert(wrenLetters).values({
+    userId,
+    weekKey,
+    letterText,
+    compassSeed: compassSeed ?? null,
+    createdAt: Date.now(),
+  });
+}
+
+export async function deleteAllWrenLetters(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(wrenLetters).where(eq(wrenLetters.userId, userId));
 }

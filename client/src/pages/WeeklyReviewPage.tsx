@@ -7,13 +7,14 @@ import {
   Clock,
   Layers,
   Loader2,
+  RefreshCw,
   Sparkles,
   Timer,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { format, subDays, startOfWeek } from "date-fns";
+import { format, subDays, startOfWeek, getISOWeek, getYear } from "date-fns";
 import DistractionInsightsCard from "@/components/DistractionInsightsCard";
 import WrenPlayer from "@/components/WrenPlayer";
 import { WrenThinking } from "@/components/WrenThinking";
@@ -28,18 +29,35 @@ function formatDuration(seconds: number): string {
   return rem > 0 ? `${h}h ${rem}m` : `${h}h`;
 }
 
+/** ISO week key, e.g. "2026-W24" */
+function getWeekKey(date: Date): string {
+  const week = getISOWeek(date);
+  const year = getYear(date);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
 export default function WeeklyReviewPage() {
   const [generating, setGenerating] = useState(false);
-  const [review, setReview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }).getTime());
+  const weekKey = useMemo(() => getWeekKey(new Date()), []);
+
+  const utils = trpc.useUtils();
+
+  // ── Persistent letter for this week ────────────────────────────────────────
+  const { data: persistedLetter, isLoading: letterLoading } = trpc.ai.getWrenLetter.useQuery(
+    { weekKey },
+    { staleTime: 5 * 60 * 1000 }
+  );
 
   const generateReview = trpc.ai.generateWeeklyReview.useMutation({
-    onSuccess: (data) => {
-      setReview(data.review);
+    onSuccess: () => {
       setGenerating(false);
+      setError(null);
+      utils.ai.getWrenLetter.invalidate({ weekKey });
     },
     onError: () => {
-      toast.error("Failed to generate review.");
+      setError("Wren couldn't quite read this week — try again?");
       setGenerating(false);
     },
   });
@@ -50,19 +68,24 @@ export default function WeeklyReviewPage() {
   const { data: focusSessions } = trpc.focusSessions.getWeekSessions.useQuery({ weekStart });
 
   const activeProjects = projects?.filter((p) => p.status === "active") ?? [];
-  const completedProjects = projects?.filter((p) => p.status === "completed") ?? [];
   const checkInDays = recentCheckIns?.length ?? 0;
+
+  const handleGenerate = () => {
+    setGenerating(true);
+    setError(null);
+    generateReview.mutate({ weekKey });
+  };
+
+  const weekLabel = `${format(subDays(new Date(), 7), "MMM d")} – ${format(new Date(), "MMM d, yyyy")}`;
 
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
-      {/* Header with Wren */}
+      {/* Header */}
       <div className="flex items-center gap-4">
         <WrenPlayer clip="wrenLetter" size="md" />
         <div>
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {format(subDays(new Date(), 7), "MMM d")} – {format(new Date(), "MMM d, yyyy")}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">{weekLabel}</p>
         </div>
       </div>
 
@@ -93,52 +116,118 @@ export default function WeeklyReviewPage() {
         ))}
       </div>
 
-      {/* Generate AI Review */}
-      {generating && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <WrenThinking label="Reading your week…" size="lg" />
+      {/* Wren Letter section */}
+      {letterLoading ? (
+        <div className="flex items-center justify-center py-10">
+          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
         </div>
-      )}
-      {!review && !generating && (
-        <div className="relative overflow-hidden p-8 rounded-2xl text-center" style={{ background: "oklch(0.13 0.03 60)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
+      ) : generating ? (
+        /* Reading state */
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <WrenThinking label="Wren is reading your week…" size="lg" />
+          <p className="text-xs text-muted-foreground">This takes about 10 seconds.</p>
+        </div>
+      ) : persistedLetter ? (
+        /* Letter state — persisted */
+        <div
+          className="rounded-2xl overflow-hidden"
+          style={{
+            background: "linear-gradient(165deg, #15233c, #0c1626)",
+            border: "1px solid rgba(217,164,65,0.28)",
+          }}
+        >
+          {/* Letter header */}
+          <div className="px-6 pt-5 pb-3 border-b" style={{ borderColor: "rgba(217,164,65,0.12)" }}>
+            <p className="font-mono text-[11px] tracking-[0.08em] uppercase" style={{ color: "oklch(0.60 0.05 240)" }}>
+              Wren · your week, {weekLabel}
+            </p>
+          </div>
+
+          {/* Letter body */}
+          <div className="px-6 py-5 space-y-3">
+            {persistedLetter.letterText.split("\n\n").map((para, i) => (
+              <p
+                key={i}
+                className={cn(
+                  "text-[15px] leading-[1.75]",
+                  para.startsWith("—") ? "italic" : ""
+                )}
+                style={{ color: para.startsWith("—") ? "oklch(0.74 0.14 72)" : "#dfe5ee" }}
+              >
+                {para}
+              </p>
+            ))}
+          </div>
+
+          {/* Footer actions */}
+          <div className="px-6 pb-5 flex flex-wrap items-center gap-3">
+            {/* Carry into Compass — nudge the user to Weekly Compass page */}
+            {persistedLetter.compassSeed && (
+              <Button
+                size="sm"
+                onClick={() => toast.info("Head to Weekly Compass to carry this nudge into next week.")}
+                className="gap-1.5 text-amber-950 font-semibold border-0"
+                style={{ background: "oklch(0.74 0.14 72)" }}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                Carry into Weekly Compass
+              </Button>
+            )}
+            {/* Regenerate */}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleGenerate}
+              disabled={generating}
+              className="gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Re-read this week
+            </Button>
+          </div>
+        </div>
+      ) : error ? (
+        /* Error state */
+        <div
+          className="p-6 rounded-2xl text-center"
+          style={{ background: "oklch(0.13 0.03 60)", border: "1px solid rgba(210,154,154,0.25)" }}
+        >
+          <p className="text-sm mb-4" style={{ color: "oklch(0.72 0.10 20)" }}>{error}</p>
+          <Button
+            onClick={handleGenerate}
+            size="sm"
+            className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try again
+          </Button>
+        </div>
+      ) : (
+        /* Invitation state */
+        <div
+          className="relative overflow-hidden p-8 rounded-2xl text-center"
+          style={{ background: "oklch(0.13 0.03 60)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}
+        >
           <div className="relative">
             <div className="flex justify-center mb-4">
               <WrenPlayer clip="wrenLetter" size="lg" />
             </div>
-            <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.74 0.14 72)" }}>Ask Wren to read your week</p>
-            <p className="text-sm mb-5" style={{ color: "oklch(0.60 0.05 240)" }}>
-              Wren will read your past 7 days — check-ins, projects, patterns — and write you back.
+            <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.74 0.14 72)" }}>
+              Ask Wren to read your week
+            </p>
+            <p className="text-sm mb-5 max-w-sm mx-auto" style={{ color: "oklch(0.60 0.05 240)" }}>
+              Wren reads your past 7 days — check-ins, focus sessions, projects — and writes you back. One letter, four beats.
             </p>
             <Button
-              onClick={() => { setGenerating(true); generateReview.mutate(); }}
+              onClick={handleGenerate}
               disabled={generating}
               className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 shadow-lg shadow-black/20"
             >
               {generating
-                ? <><Loader2 className="w-4 h-4 animate-spin" />Analyzing...</>
+                ? <><Loader2 className="w-4 h-4 animate-spin" />Reading…</>
                 : <><Sparkles className="w-4 h-4" />Ask Wren to read your week</>}
             </Button>
           </div>
-        </div>
-      )}
-      {review && (
-        <div className="p-5 rounded-xl space-y-4" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <p className="text-xs font-medium text-primary uppercase tracking-wide">AI Weekly Review</p>
-          </div>
-          <div className="prose prose-sm dark:prose-invert max-w-none">
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{review}</p>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { setReview(null); setGenerating(true); generateReview.mutate(); }}
-            className="gap-1.5"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            Regenerate
-          </Button>
         </div>
       )}
 
@@ -227,7 +316,6 @@ export default function WeeklyReviewPage() {
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent check-ins</p>
           <div className="space-y-3">
             {recentCheckIns.slice(0, 10).map((checkIn) => {
-              // Parse structured JSON payloads stored per check-in type
               type CheckInFields = { label: string; value: string }[];
               let fields: CheckInFields = [];
               let isPlainText = false;
@@ -259,14 +347,12 @@ export default function WeeklyReviewPage() {
               const plainSummary = isPlainText && checkIn.userInput ? checkIn.userInput : null;
               return (
                 <div key={checkIn.id} className="p-4 rounded-xl border border-border bg-card space-y-2">
-                  {/* Header */}
                   <div className="flex items-center gap-2">
                     <div className={cn("w-2 h-2 rounded-full shrink-0", accentColor)} />
                     <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                       {typeLabel} · {format(new Date(checkIn.createdAt), "MMM d")}
                     </p>
                   </div>
-                  {/* Structured fields */}
                   {fields.length > 0 && (
                     <div className="space-y-1.5 pt-1">
                       {fields.map(f => (
@@ -277,11 +363,9 @@ export default function WeeklyReviewPage() {
                       ))}
                     </div>
                   )}
-                  {/* Plain-text fallback */}
                   {plainSummary && (
                     <p className="text-xs text-muted-foreground leading-relaxed pt-1">{plainSummary}</p>
                   )}
-                  {/* Empty state */}
                   {fields.length === 0 && !plainSummary && (
                     <p className="text-xs text-muted-foreground/40 italic">No details recorded.</p>
                   )}

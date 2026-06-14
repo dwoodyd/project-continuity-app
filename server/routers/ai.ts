@@ -15,6 +15,8 @@ import {
   updateIdeaCapture,
   updateProject,
   logUnstickInvocation,
+  getWrenLetter,
+  saveWrenLetter,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
@@ -464,51 +466,107 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
       return { transcript: result.text.trim() };
     }),
 
-  // ─── Weekly Review Generation ─────────────────────────────────────────────────
-  generateWeeklyReview: protectedProcedure.mutation(async ({ ctx }) => {
+  // ─── Weekly Review — get persisted Wren letter for this week ─────────────────
+  getWrenLetter: protectedProcedure
+    .input(z.object({ weekKey: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const letter = await getWrenLetter(ctx.user.id, input.weekKey);
+      return letter ?? null;
+    }),
+
+  // ─── Weekly Review — generate Wren's four-beat letter ─────────────────────────
+  generateWeeklyReview: protectedProcedure
+    .input(z.object({ weekKey: z.string() }))
+    .mutation(async ({ ctx, input }) => {
     checkLLMRateLimit(ctx.user.id);
+
+    // ── Gather real data ──────────────────────────────────────────────────────
     const projects = await getActiveProjects(ctx.user.id);
     const recentCheckIns = await getRecentCheckIns(ctx.user.id, 21);
     const recentPlans = await getRecentDailyPlans(ctx.user.id, 7);
+    const recentSessions = await getRecentFocusSessions(ctx.user.id, 20);
 
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const weekSessions = recentSessions.filter(s => new Date(s.startedAt).getTime() >= weekAgo);
+    const totalFocusSeconds = weekSessions.reduce((sum, s) => sum + (s.durationSeconds ?? 0), 0);
+    const completedSessions = weekSessions.filter(s => s.wasCompleted === 1).length;
+    const totalFocusMinutes = Math.round(totalFocusSeconds / 60);
+
+    const checkInCount = recentCheckIns.length;
+    const daysWithPlans = recentPlans.length;
+
+    // Distraction mentions — raw, not interpreted
     const distractionMentions = recentCheckIns
       .map(c => c.interruptionsNoted)
       .filter(Boolean)
-      .join(", ");
+      .slice(0, 5)
+      .join("; ");
 
+    // Morning interruptions pattern (time-of-day)
+    const morningCheckIns = recentCheckIns.filter(c => c.type === "morning");
+    const morningInterruptions = morningCheckIns
+      .map(c => c.interruptionsNoted)
+      .filter(Boolean)
+      .length;
+    const morningInterruptionRate = morningCheckIns.length > 0
+      ? Math.round((morningInterruptions / morningCheckIns.length) * 100)
+      : 0;
+
+    const activeProjectNames = projects.map(p => p.title).join(", ") || "none";
+    const isThinWeek = checkInCount <= 2 && weekSessions.length === 0;
+
+    // ── Prompt ────────────────────────────────────────────────────────────────
     const response = await invokeLLM({
       messages: [
         {
           role: "system",
-          content: "Generate a weekly review summary. Be grounded and informational. Never shame. Return JSON only.",
+          content: `You are Wren — a quiet, warm companion who writes a brief personal letter to the user at the end of each week.
+
+Your letter has exactly four beats:
+1. WHAT MOVED — name real progress warmly. Drawn from focus sessions, completed work, what they kept returning to. Specific, not flattering. If the week was thin, say so honestly and gently.
+2. WHAT WAS WAITING — name what paused or slipped, with zero shame. "Nothing was lost." Paused threads are allowed. Rest is allowed. Never "you failed to."
+3. ONE PATTERN — surface a single real observation from the data. Offer it as a noticing, not a scold. Only include if there is real data to support it.
+4. ONE SOFT NUDGE — a single invitation or question for next week. Never a quota or target. One thing to carry.
+
+Close with: the thread continues, nothing was lost.
+
+GUARDRAILS (non-negotiable):
+- Never frame rest, personal time, walks, family moments, or life events as distractions or failures.
+- Never use words: productivity, optimize, output, deliverable, win, streak, score, should have, failed.
+- If the week is thin (few check-ins, no sessions), say so honestly: "a quiet week — and that's okay."
+- Real data only. Never invent specifics you don't have.
+- Write in second person ("you"), warm and direct, not clinical.
+- Sign off as: — Wren
+- Return JSON only.`,
         },
         {
           role: "user",
-          content: `Active projects: ${projects.map(p => p.title).join(", ")}
-Recent check-in interruptions mentioned: "${distractionMentions.substring(0, 500)}"
-Number of days with plans this week: ${recentPlans.length}
+          content: `Here is ${ctx.user.name ?? "the user"}'s week:
 
-Generate a weekly review.
-Return JSON: { 
-  summary: string,
-  patternsSurfaced: string,
-  distractionInsight: string (if patterns found, otherwise empty string)
-}`,
+- Check-ins completed: ${checkInCount}
+- Days with a plan: ${daysWithPlans}
+- Focus sessions this week: ${weekSessions.length} (${completedSessions} completed)
+- Total deep focus time: ${totalFocusMinutes} minutes
+- Active projects: ${activeProjectNames}
+${distractionMentions ? `- Interruptions mentioned: ${distractionMentions.substring(0, 400)}` : "- No interruptions recorded"}
+${morningInterruptionRate > 50 ? `- Unplanned tasks appeared in ${morningInterruptionRate}% of morning check-ins` : ""}
+${isThinWeek ? "\n(This was a quiet week — be honest and gentle about that.)" : ""}
+
+Write Wren's letter. Return JSON: { letterText: string, compassSeed: string }`,
         },
       ],
       response_format: {
         type: "json_schema",
         json_schema: {
-          name: "weekly_review",
+          name: "wren_letter",
           strict: true,
           schema: {
             type: "object",
             properties: {
-              summary: { type: "string" },
-              patternsSurfaced: { type: "string" },
-              distractionInsight: { type: "string" },
+              letterText: { type: "string", description: "The full letter text, plain prose, no markdown headers" },
+              compassSeed: { type: "string", description: "Beat 4's nudge as a single short sentence to carry into next week's compass" },
             },
-            required: ["summary", "patternsSurfaced", "distractionInsight"],
+            required: ["letterText", "compassSeed"],
             additionalProperties: false,
           },
         },
@@ -516,6 +574,17 @@ Return JSON: {
     });
 
     const raw = (response.choices[0]?.message?.content as string) ?? "{}";
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as { letterText: string; compassSeed: string };
+
+    // Persist the letter for this week
+    await saveWrenLetter(ctx.user.id, input.weekKey, parsed.letterText, parsed.compassSeed);
+
+    return { letterText: parsed.letterText, compassSeed: parsed.compassSeed };
   }),
 });
+
+// ── Inline import for focus sessions (avoid circular dep) ─────────────────────
+async function getRecentFocusSessions(userId: number, limit: number) {
+  const { getRecentFocusSessions: fn } = await import("../db");
+  return fn(userId, limit);
+}
