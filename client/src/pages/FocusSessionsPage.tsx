@@ -145,6 +145,37 @@ function playChime() {
   } catch (_) { /* ignore if audio blocked */ }
 }
 
+/** Soft two-note chime played when Wren sends a chat reply */
+function playWrenReplyChime() {
+  try {
+    const ctx = new AudioContext();
+    // First note — gentle high tone
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.0, ctx.currentTime);
+    gain1.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.04);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.45);
+    // Second note — slightly lower, delayed
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(660, ctx.currentTime + 0.18);
+    gain2.gain.setValueAtTime(0.0, ctx.currentTime + 0.18);
+    gain2.gain.linearRampToValueAtTime(0.14, ctx.currentTime + 0.22);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.65);
+    osc2.start(ctx.currentTime + 0.18);
+    osc2.stop(ctx.currentTime + 0.65);
+  } catch (_) { /* ignore if audio blocked */ }
+}
+
 // ── Procedural woven artifact (canvas) ───────────────────────────────────────
 type ArtifactSession = {
   id: number;
@@ -378,8 +409,10 @@ export default function FocusSessionsPage() {
         chatHistory: history,
       });
       setChatMessages((prev) => [...prev, { role: "assistant", content: String(reply ?? "still here."), ts: Date.now() }]);
+      playWrenReplyChime();
     } catch {
       setChatMessages((prev) => [...prev, { role: "assistant", content: "still here.", ts: Date.now() }]);
+      playWrenReplyChime();
     } finally {
       setChatLoading(false);
     }
@@ -410,8 +443,10 @@ export default function FocusSessionsPage() {
           chatHistory: history,
         });
         setChatMessages((prev) => [...prev, { role: "assistant", content: String(reply ?? "still here."), ts: Date.now() }]);
+        playWrenReplyChime();
       } catch {
         setChatMessages((prev) => [...prev, { role: "assistant", content: "still here.", ts: Date.now() }]);
+        playWrenReplyChime();
       } finally {
         setChatLoading(false);
       }
@@ -721,26 +756,102 @@ export default function FocusSessionsPage() {
   const showPaywall = limitData && !limitData.canStart && !limitData.isPro;
 
   // ── Render ────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
       className="h-full flex flex-col overflow-hidden"
       style={{ background: "oklch(0.10 0.02 240)", color: "oklch(0.92 0.03 60)" }}
     >
-      {/* Persistent exit bar — always visible during any non-idle phase so users are never trapped */}
-      {phase !== "idle" && phase !== "reveal" && (
+
+      {/* ── NON-ACTIVE header: shown for all non-active phases ─────────────── */}
+      {phase !== "active" && (
+        <>
+          {/* Exit bar — visible during intake/duration/closure */}
+          {phase !== "idle" && phase !== "reveal" && (
+            <div
+              className="flex items-center justify-between px-4 py-2 border-b"
+              style={{ borderColor: "oklch(0.16 0.03 240)", background: "oklch(0.08 0.015 240)" }}
+            >
+              <span className="text-xs" style={{ color: "oklch(0.42 0.04 240)" }}>
+                {phase === "intake" ? "Setting intention" : phase === "duration" ? "Choose duration" : "Closing"}
+              </span>
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Exit session
+              </button>
+            </div>
+          )}
+          {/* Page header */}
+          <div
+            className="flex items-center justify-between px-6 py-4 border-b"
+            style={{ borderColor: "oklch(0.20 0.03 240)" }}
+          >
+            <div className="flex items-center gap-3">
+              {(phase === "idle" || phase === "reveal") && (
+                <button
+                  onClick={() => navigate("/")}
+                  className="flex items-center gap-1 text-xs rounded-lg px-2 py-1.5"
+                  style={{ color: "oklch(0.55 0.04 240)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.20 0.04 240)" }}
+                  aria-label="Back to Today"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                  Today
+                </button>
+              )}
+              <div>
+                <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>
+                  Focus Sessions
+                </h1>
+                <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>
+                  with Wren
+                </p>
+              </div>
+            </div>
+            {artifactData && artifactData.sessions.length > 0 && (
+              <div className="flex items-center gap-2">
+                <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
+                <div className="text-right">
+                  <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
+                    {artifactData.totalSegments} {artifactData.totalSegments === 1 ? "session" : "sessions"}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* ── ACTIVE phase: full-bleed 50/50 grid ──────────────────────────────── */}
+      {phase === "active" && (
         <div
-          className="flex items-center justify-between px-4 py-2 border-b"
-          style={{ borderColor: "oklch(0.16 0.03 240)", background: "oklch(0.08 0.015 240)" }}
+          className="flex-1 overflow-hidden"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gridTemplateRows: "1fr",
+          }}
         >
-          <span className="text-xs" style={{ color: "oklch(0.42 0.04 240)" }}>
-            {phase === "active" ? `${formatTime(secondsLeft)} remaining` : phase === "intake" ? "Setting intention" : phase === "duration" ? "Choose duration" : "Closing"}
-          </span>
-          <div className="flex items-center gap-2">
-            {phase === "active" && (
+          {/* Floating utility bar */}
+          <div
+            className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2"
+            style={{ background: "linear-gradient(to bottom, oklch(0.08 0.015 240 / 0.92), transparent)" }}
+          >
+            <span className="text-xs font-mono" style={{ color: "oklch(0.50 0.04 240)" }}>
+              {formatTime(secondsLeft)} remaining
+            </span>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setPipOpen(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ color: "oklch(0.72 0.14 72)", background: "oklch(0.13 0.04 72 / 0.4)", border: "1px solid oklch(0.35 0.10 72 / 0.5)" }}
+                style={{ color: "oklch(0.72 0.14 72)", background: "oklch(0.10 0.03 72 / 0.6)", border: "1px solid oklch(0.30 0.10 72 / 0.4)" }}
                 title="Float Wren in a small window so you can work in other apps"
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -749,345 +860,80 @@ export default function FocusSessionsPage() {
                 </svg>
                 Pop out Wren
               </button>
-            )}
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-              style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.04 240)" }}
-            >
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Exit session
-            </button>
-          </div>
-        </div>
-      )}
-      {/* Header — dims during active session */}
-      <div
-        className="flex items-center justify-between px-6 py-4 border-b transition-opacity duration-700"
-        style={{
-          borderColor: "oklch(0.20 0.03 240)",
-          opacity: phase === "active" ? 0.3 : 1,
-        }}
-      >
-        <div className="flex items-center gap-3">
-          {/* Back button — always visible in idle/reveal so users are never trapped */}
-          {(phase === "idle" || phase === "reveal") && (
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-1 text-xs rounded-lg px-2 py-1.5"
-              style={{ color: "oklch(0.55 0.04 240)", background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.20 0.04 240)" }}
-              aria-label="Back to Today"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Today
-            </button>
-          )}
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>
-              Focus Sessions
-            </h1>
-            <p className="text-xs mt-0.5" style={{ color: "oklch(0.55 0.04 240)" }}>
-              with Wren
-            </p>
-          </div>
-        </div>
-              {artifactData && artifactData.sessions.length > 0 && (
-          <div className="flex items-center gap-2">
-            <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
-            <div className="text-right">
-              <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
-                {artifactData.totalSegments} {artifactData.totalSegments === 1 ? "session" : "sessions"}
-              </p>
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
+                style={{ color: "oklch(0.68 0.06 60)", background: "oklch(0.10 0.02 240 / 0.7)", border: "1px solid oklch(0.22 0.04 240 / 0.5)" }}
+              >
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Exit session
+              </button>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Main two-column layout — Wren left 38%, controls right 62%, always side-by-side */}
-      <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
-
-        {/* ── Wren's panel — left 38%, full height ────────────────────────────────────────────────────────────────────── */}
-        <div
-          className="relative flex-shrink-0 flex flex-col items-center justify-end overflow-hidden"
-          style={{
-            width: "38%",
-            background: "oklch(0.07 0.02 240)",
-          }}
-        >
-          {/* Full-bleed Wren video — fills the entire left panel */}
-          <video
-            ref={wrenVideoRef}
-            src={WREN_VIDEOS[wrenActivity]}
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              objectPosition: "center bottom",
-              mixBlendMode: "screen",
-              filter: "brightness(1.15) saturate(1.3)",
-            }}
-          />
-
-          {/* Wren message bubble — floats over video */}
-          {wrenMessage && (
-            <div
-              className="absolute top-8 left-1/2 -translate-x-1/2 z-10 px-5 py-3 rounded-2xl text-sm text-center max-w-[260px]"
+          {/* LEFT — Wren full-bleed, object-cover, flush to all edges */}
+          <div className="relative overflow-hidden" style={{ background: "oklch(0.07 0.02 240)" }}>
+            <video
+              ref={wrenVideoRef}
+              src={WREN_VIDEOS[wrenActivity]}
+              autoPlay
+              loop
+              muted
+              playsInline
               style={{
-                background: "oklch(0.12 0.04 240 / 0.85)",
-                border: "1px solid oklch(0.35 0.08 65 / 0.6)",
-                color: "oklch(0.74 0.14 72)",
-                backdropFilter: "blur(8px)",
-                animation: "fadeIn 0.4s ease",
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center center",
+                mixBlendMode: "screen",
+                filter: "brightness(1.15) saturate(1.3)",
               }}
-            >
-              {wrenMessage}
-            </div>
-          )}
-
-          {/* Activity label — bottom of Wren panel */}
-          {phase === "active" && (
+            />
+            {/* Soft right-edge gradient scrim */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(90deg, transparent 55%, oklch(0.10 0.02 240 / 0.95))" }}
+            />
+            {/* Bottom gradient */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+              style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240 / 0.7), transparent)" }}
+            />
+            {/* Wren message bubble */}
+            {wrenMessage && (
+              <div
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 px-4 py-2.5 rounded-2xl text-sm text-center max-w-[220px]"
+                style={{
+                  background: "oklch(0.12 0.04 240 / 0.88)",
+                  border: "1px solid oklch(0.35 0.08 65 / 0.6)",
+                  color: "oklch(0.74 0.14 72)",
+                  backdropFilter: "blur(8px)",
+                  animation: "fadeIn 0.4s ease",
+                }}
+              >
+                {wrenMessage}
+              </div>
+            )}
+            {/* Activity label */}
             <p
-              className="relative z-10 mb-6 text-[11px] tracking-widest uppercase"
-              style={{ color: "oklch(0.45 0.04 240)" }}
+              className="absolute bottom-2 left-0 right-0 text-center z-10 text-[10px] tracking-widest uppercase"
+              style={{ color: "oklch(0.35 0.04 240)" }}
             >
               {wrenStatusLine}
             </p>
-          )}
+          </div>
 
-          {/* Subtle gradient at bottom to ground Wren */}
+          {/* RIGHT — timer + controls, vertically centered */}
           <div
-            className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
-            style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240), transparent)" }}
-          />
-        </div>
+            className="flex flex-col items-center justify-center px-6 overflow-y-auto"
+            style={{ paddingTop: 48 }}
+          >
+            <div className="w-full max-w-xs text-center">
 
-        {/* ── User workspace — right 50% ──────────────────────────────────── */}
-        <div className="flex-1 flex flex-col items-center justify-start px-5 py-6 gap-0 overflow-y-auto" style={{ paddingTop: 'clamp(1rem, 4vh, 3rem)' }}>
-
-          {/* IDLE — welcome */}
-          {phase === "idle" && (
-            <div className="text-center w-full">
-              <p
-                className="font-light leading-snug mb-2"
-                style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)", color: "oklch(0.74 0.14 72)" }}
-              >
-                Ready when you are.
-              </p>
-              <p className="text-xs mb-6 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
-                Wren sits with you while you work.
-              </p>
-              {showPaywall ? (
-                <div
-                  className="rounded-2xl p-5 text-center mb-4"
-                  style={{
-                    background: "oklch(0.12 0.03 240)",
-                    border: "1px solid oklch(0.22 0.05 240)",
-                  }}
-                >
-                  <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.78 0.10 65)" }}>
-                    Free session used this week
-                  </p>
-                  <p className="text-[11px] mb-4 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
-                    Pro unlocks unlimited sessions
-                  </p>
-                  <button
-                    onClick={() => navigate("/pro")}
-                    className="w-full py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-opacity hover:opacity-90"
-                    style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                  >
-                    Unlock Pro →
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setPhase("intake")}
-                  className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] mb-4"
-                  style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                >
-                  Begin session
-                </button>
-              )}
-
-              {/* Session history — compact list below CTA */}
-              {artifactData && artifactData.sessions.length > 0 && (
-                <div className="w-full mt-5">
-                  <p className="text-[10px] uppercase tracking-widest mb-2 text-left" style={{ color: "oklch(0.35 0.04 240)" }}>
-                    Recent sessions
-                  </p>
-                  <div className="flex flex-col gap-1.5">
-                    {artifactData.sessions.slice(-4).reverse().map((s) => (
-                      <div
-                        key={s.id}
-                        className="flex items-center gap-2 rounded-lg px-3 py-2"
-                        style={{ background: "oklch(0.11 0.02 240)", border: "1px solid oklch(0.17 0.03 240)" }}
-                      >
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
-                        />
-                        <span className="text-[11px] font-medium" style={{ color: "oklch(0.60 0.08 72)" }}>
-                          {s.durationMinutes ?? 25} min
-                        </span>
-                        <span className="text-[10px] flex-1" style={{ color: "oklch(0.45 0.04 240)" }}>
-                          {s.whatMoved === "progress" ? "progress" : s.whatMoved === "thinking" ? "thinking" : s.whatMoved === "stuck" ? "scattered" : "—"}
-                        </span>
-                        {s.completedAt && (
-                          <span className="text-[10px]" style={{ color: "oklch(0.32 0.03 240)" }}>
-                            {new Date(s.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {artifactData.sessions.length > 4 && (
-                      <p className="text-[10px] text-center mt-0.5" style={{ color: "oklch(0.30 0.03 240)" }}>
-                        +{artifactData.sessions.length - 4} earlier
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty state hint when no sessions yet */}
-              {(!artifactData || artifactData.sessions.length === 0) && (
-                <div className="mt-8 text-center max-w-xs">
-                  <p className="text-xs" style={{ color: "oklch(0.32 0.03 240)" }}>
-                    Each session weaves a row into your focus record. Start your first one above.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* INTAKE — intention */}
-          {phase === "intake" && (
-            <div className="w-full">
-              <p
-                className="font-light leading-snug mb-1 text-center"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
-              >
-                What are we working on?
-              </p>
-              <p className="text-[11px] text-center mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
-                Anything. Even “I don’t know yet.”
-              </p>
-              <textarea
-                value={intention}
-                onChange={(e) => setIntention(e.target.value)}
-                placeholder="Type your intention…"
-                rows={3}
-                maxLength={500}
-                className="w-full resize-none text-sm rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
-                style={{
-                  background: "oklch(0.12 0.02 240)",
-                  border: "1px solid oklch(0.22 0.04 240)",
-                  color: "oklch(0.88 0.04 60)",
-                  caretColor: "oklch(0.72 0.14 72)",
-                }}
-              />
-              <button
-                onClick={() => setPhase("duration")}
-                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
-                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-              >
-                {intention.trim() ? "Set intention →" : "Skip →"}
-              </button>
-            </div>
-          )}
-
-          {/* DURATION — pick */}
-          {phase === "duration" && (
-            <div className="w-full text-center">
-              <p
-                className="font-light leading-snug mb-1"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
-              >
-                How long?
-              </p>
-              {intention.trim() && (
-                <p className="text-[11px] mb-4 italic leading-relaxed" style={{ color: "oklch(0.45 0.04 240)" }}>
-                  “{intention.trim()}”
-                </p>
-              )}
-              {!intention.trim() && <div className="mb-4" />}
-              <div className="flex gap-2 justify-center mb-5">
-                {([25, 50, 90] as const).map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => setDurationMinutes(d)}
-                    className="flex-1 rounded-xl py-3 text-center transition-all active:scale-[0.97]"
-                    style={{
-                      background: durationMinutes === d ? "oklch(0.16 0.04 240)" : "oklch(0.11 0.02 240)",
-                      border: `1px solid ${durationMinutes === d ? "oklch(0.72 0.14 72)" : "oklch(0.20 0.04 240)"}`,
-                      opacity: durationMinutes === d ? 1 : 0.65,
-                    }}
-                  >
-                    <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.74 0.14 72)" }}>{d}</p>
-                    <p className="text-[10px] mt-1" style={{ color: "oklch(0.48 0.04 240)" }}>
-                      {d === 25 ? "quick" : d === 50 ? "full" : "deep"}
-                    </p>
-                  </button>
-                ))}
-              </div>
-              {/* Hard stop */}
-              <div className="flex items-center justify-center gap-2 mb-5">
-                <span className="text-[11px]" style={{ color: "oklch(0.42 0.04 240)" }}>Hard stop at</span>
-                <input
-                  type="time"
-                  value={hardStop}
-                  onChange={(e) => setHardStop(e.target.value)}
-                  className="text-[11px] rounded-lg px-2 py-1 outline-none"
-                  style={{
-                    background: "oklch(0.12 0.02 240)",
-                    border: "1px solid oklch(0.22 0.04 240)",
-                    color: hardStop ? "oklch(0.85 0.08 65)" : "oklch(0.38 0.03 240)",
-                    colorScheme: "dark",
-                  }}
-                />
-                {hardStop && (
-                  <button
-                    onClick={() => setHardStop("")}
-                    className="text-[10px] opacity-40 hover:opacity-70"
-                    style={{ color: "oklch(0.60 0.04 240)" }}
-                  >
-                    clear
-                  </button>
-                )}
-              </div>
-              <button
-                onClick={handleStartSession}
-                disabled={startMutation.isPending}
-                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
-                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-              >
-                {startMutation.isPending ? "Starting…" : "Begin →"}
-              </button>
-              <button
-                onClick={() => {
-                  setWrenActivity("lookingup");
-                  setWrenMessage("Take a breath. I'll be here.");
-                  setTimeout(() => setWrenMessage(null), 4000);
-                }}
-                className="text-[11px] mt-3 opacity-30 hover:opacity-60 transition-opacity underline underline-offset-2"
-                style={{ color: "oklch(0.70 0.04 240)" }}
-              >
-                Take a breath first
-              </button>
-            </div>
-          )}
-
-          {/* ACTIVE — timer */}
-          {phase === "active" && (
-            <div className="text-center w-full">
               {/* Progress ring */}
               <div className="relative mx-auto mb-3" style={{ width: 140, height: 140 }}>
                 <svg width="140" height="140" className="absolute inset-0 -rotate-90">
@@ -1115,7 +961,7 @@ export default function FocusSessionsPage() {
 
               {intention.trim() && (
                 <p className="text-[11px] italic mb-3 leading-relaxed" style={{ color: "oklch(0.50 0.04 240)" }}>
-                  “{intention.trim()}”
+                  "{intention.trim()}"
                 </p>
               )}
 
@@ -1188,7 +1034,7 @@ export default function FocusSessionsPage() {
                 </button>
               </div>
 
-              {/* Wren chat — refined */}
+              {/* Wren chat */}
               <div
                 className="w-full rounded-2xl overflow-hidden"
                 style={{ background: "oklch(0.11 0.02 240)", border: "1px solid oklch(0.18 0.03 240)" }}
@@ -1281,157 +1127,432 @@ export default function FocusSessionsPage() {
                   </>
                 )}
               </div>
+
             </div>
-          )}
+          </div>
+        </div>
+      )}
 
-          {/* CLOSURE — what moved */}
-          {phase === "closure" && (
-            <div className="w-full text-center">
-              <p
-                className="font-light leading-snug mb-5"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
-              >
-                What moved?
-              </p>
-              <div className="flex flex-col gap-2 mb-4">
-                {([
-                  { value: "progress", label: "Made progress", sub: "Productive session" },
-                  { value: "thinking", label: "Mostly thinking", sub: "Cognitive — equally valid" },
-                  { value: "stuck",    label: "Stuck or scattered", sub: "Showing up is the point" },
-                ] as const).map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setWhatMoved(opt.value)}
-                    className="rounded-xl px-4 py-3 text-left transition-all active:scale-[0.98]"
-                    style={{
-                      background: whatMoved === opt.value ? "oklch(0.15 0.04 240)" : "oklch(0.10 0.02 240)",
-                      border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.14 72)" : "oklch(0.18 0.03 240)"}`,
-                      opacity: whatMoved && whatMoved !== opt.value ? 0.55 : 1,
-                    }}
-                  >
-                    <p className="text-xs font-semibold" style={{ color: "oklch(0.88 0.06 65)" }}>{opt.label}</p>
-                    <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.45 0.04 240)" }}>{opt.sub}</p>
-                  </button>
-                ))}
-              </div>
+      {/* ── NON-ACTIVE content: Wren panel + phase blocks ────────────────────── */}
+      {phase !== "active" && (
+        <div className="flex flex-1 overflow-hidden">
 
-              <textarea
-                value={closingNote}
-                onChange={(e) => setClosingNote(e.target.value)}
-                placeholder="What I did / didn’t do / want to come back to (saves to Vault)"
-                rows={2}
-                maxLength={1000}
-                className="w-full resize-none text-[11px] rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
+          {/* LEFT — Wren video panel (hidden on reveal) */}
+          {phase !== "reveal" && (
+            <div
+              className="relative w-1/2 overflow-hidden"
+              style={{ background: "oklch(0.07 0.02 240)" }}
+            >
+              <video
+                ref={wrenVideoRef}
+                src={WREN_VIDEOS[wrenActivity]}
+                autoPlay
+                loop
+                muted
+                playsInline
                 style={{
-                  background: "oklch(0.11 0.02 240)",
-                  border: "1px solid oklch(0.20 0.04 240)",
-                  color: "oklch(0.85 0.04 60)",
-                  caretColor: "oklch(0.72 0.14 72)",
+                  position: "absolute",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center center",
+                  mixBlendMode: "screen",
+                  filter: "brightness(1.15) saturate(1.3)",
                 }}
               />
-
-              <button
-                onClick={handleComplete}
-                disabled={!whatMoved || completeMutation.isPending}
-                className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-30"
-                style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-              >
-                {completeMutation.isPending ? "Saving…" : "Finish session →"}
-              </button>
+              {wrenMessage && (
+                <div
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2.5 rounded-2xl text-sm text-center max-w-[220px]"
+                  style={{
+                    background: "oklch(0.12 0.04 240 / 0.88)",
+                    border: "1px solid oklch(0.35 0.08 65 / 0.6)",
+                    color: "oklch(0.74 0.14 72)",
+                    backdropFilter: "blur(8px)",
+                  }}
+                >
+                  {wrenMessage}
+                </div>
+              )}
+              <div
+                className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
+                style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240 / 0.7), transparent)" }}
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: "linear-gradient(90deg, transparent 55%, oklch(0.10 0.02 240 / 0.95))" }}
+              />
             </div>
           )}
 
-          {/* REVEAL — artifact grows */}
-          {phase === "reveal" && (
-            <div className="w-full text-center">
-              <p
-                className="font-light leading-snug mb-1"
-                style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
-              >
-                Session logged.
-              </p>
-              <p className="text-[11px] mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
-                Each session adds a row to your focus record.
-              </p>
-              {artifactData && (
-                <div className="flex justify-center mb-4">
-                  <WovenArtifact
-                    sessions={artifactData.sessions}
-                    totalSegments={artifactData.totalSegments}
-                    size="full"
-                  />
-                </div>
-              )}
-              <div className="mb-6 text-center">
-                <p className="text-xs" style={{ color: "oklch(0.50 0.04 240)" }}>
-                  {artifactData?.totalSegments ?? 0} sessions completed
-                </p>
-                <p className="text-[10px] mt-1" style={{ color: "oklch(0.38 0.03 240)" }}>
-                  Gold = progress &middot; Cream = thinking &middot; Navy = stuck
-                </p>
-              </div>
+          {/* RIGHT — phase controls */}
+          <div
+            className={cn(
+              "flex flex-col items-center justify-center px-6 overflow-y-auto",
+              phase === "reveal" ? "w-full" : "w-1/2"
+            )}
+          >
+            <div className="w-full max-w-xs">
 
-              {/* Time Sense calibration widget */}
-              {calibrationData && calibrationData.sampleCount >= 2 && (
-                <div
-                  className="mx-auto mb-6 rounded-xl px-5 py-4 text-left max-w-xs"
-                  style={{ background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.05 240)" }}
-                >
-                  <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.72 0.12 65)" }}>
-                    Your time sense
+              {/* IDLE */}
+              {phase === "idle" && (
+                <div className="text-center w-full">
+                  <p
+                    className="font-light leading-snug mb-2"
+                    style={{ fontSize: "clamp(1.1rem, 3.5vw, 1.35rem)", color: "oklch(0.74 0.14 72)" }}
+                  >
+                    Ready when you are.
                   </p>
-                  <p className="text-xs mb-1" style={{ color: "oklch(0.65 0.04 240)" }}>
-                    Across {calibrationData.sampleCount} sessions, you typically take{" "}
-                    <span style={{ color: "oklch(0.85 0.10 65)" }}>
-                      {calibrationData.avgMultiplier !== null
-                        ? calibrationData.avgMultiplier < 0.9
-                          ? "less time than you estimate"
-                          : calibrationData.avgMultiplier > 1.2
-                          ? `${Math.round(calibrationData.avgMultiplier * 100 - 100)}% longer than you estimate`
-                          : "about as long as you estimate"
-                        : "—"}
-                    </span>.
+                  <p className="text-xs mb-6 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
+                    Wren sits with you while you work.
                   </p>
-                  {calibrationData.recentMultiplier !== null && (
-                    <p className="text-[10px]" style={{ color: "oklch(0.42 0.04 240)" }}>
-                      Recent trend: {calibrationData.recentMultiplier.toFixed(1)}× your estimate
-                    </p>
+                  {showPaywall ? (
+                    <div
+                      className="rounded-2xl p-5 text-center mb-4"
+                      style={{
+                        background: "oklch(0.12 0.03 240)",
+                        border: "1px solid oklch(0.22 0.05 240)",
+                      }}
+                    >
+                      <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.78 0.10 65)" }}>
+                        Free session used this week
+                      </p>
+                      <p className="text-[11px] mb-4 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
+                        Pro unlocks unlimited sessions
+                      </p>
+                      <button
+                        onClick={() => navigate("/pro")}
+                        className="w-full py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-opacity hover:opacity-90"
+                        style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                      >
+                        Unlock Pro →
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setPhase("intake")}
+                      className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] mb-4"
+                      style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                    >
+                      Begin session
+                    </button>
+                  )}
+
+                  {artifactData && artifactData.sessions.length > 0 && (
+                    <div className="w-full mt-5">
+                      <p className="text-[10px] uppercase tracking-widest mb-2 text-left" style={{ color: "oklch(0.35 0.04 240)" }}>
+                        Recent sessions
+                      </p>
+                      <div className="flex flex-col gap-1.5">
+                        {artifactData.sessions.slice(-4).reverse().map((s) => (
+                          <div
+                            key={s.id}
+                            className="flex items-center gap-2 rounded-lg px-3 py-2"
+                            style={{ background: "oklch(0.11 0.02 240)", border: "1px solid oklch(0.17 0.03 240)" }}
+                          >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full shrink-0"
+                              style={{ background: WHAT_MOVED_COLORS[s.whatMoved ?? "thinking"] }}
+                            />
+                            <span className="text-[11px] font-medium" style={{ color: "oklch(0.60 0.08 72)" }}>
+                              {s.durationMinutes ?? 25} min
+                            </span>
+                            <span className="text-[10px] flex-1" style={{ color: "oklch(0.45 0.04 240)" }}>
+                              {s.whatMoved === "progress" ? "progress" : s.whatMoved === "thinking" ? "thinking" : s.whatMoved === "stuck" ? "scattered" : "—"}
+                            </span>
+                            {s.completedAt && (
+                              <span className="text-[10px]" style={{ color: "oklch(0.32 0.03 240)" }}>
+                                {new Date(s.completedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                        {artifactData.sessions.length > 4 && (
+                          <p className="text-[10px] text-center mt-0.5" style={{ color: "oklch(0.30 0.03 240)" }}>
+                            +{artifactData.sessions.length - 4} earlier
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {(!artifactData || artifactData.sessions.length === 0) && (
+                    <div className="mt-8 text-center max-w-xs">
+                      <p className="text-xs" style={{ color: "oklch(0.32 0.03 240)" }}>
+                        Each session weaves a row into your focus record. Start your first one above.
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
-              <div className="flex gap-3 justify-center">
-                <button
-                  onClick={() => {
-                    setPhase("intake");
-                    setWhatMoved(null);
-                    setClosingNote("");
-                    setIntention("");
-                    setSessionId(null);
-                  }}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all hover:opacity-80 active:scale-[0.97]"
-                  style={{
-                    background: "oklch(0.13 0.03 240)",
-                    border: "1px solid oklch(0.25 0.05 240)",
-                    color: "oklch(0.60 0.08 72)",
-                  }}
-                >
-                  Another round →
-                </button>
-                <button
-                  onClick={() => navigate("/")}
-                  className="flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
-                  style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                >
-                  Done
-                </button>
-              </div>
+
+              {/* INTAKE */}
+              {phase === "intake" && (
+                <div className="w-full">
+                  <p
+                    className="font-light leading-snug mb-1 text-center"
+                    style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
+                  >
+                    What are we working on?
+                  </p>
+                  <p className="text-[11px] text-center mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
+                    Anything. Even "I don't know yet."
+                  </p>
+                  <textarea
+                    value={intention}
+                    onChange={(e) => setIntention(e.target.value)}
+                    placeholder="Type your intention…"
+                    rows={3}
+                    maxLength={500}
+                    className="w-full resize-none text-sm rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
+                    style={{
+                      background: "oklch(0.12 0.02 240)",
+                      border: "1px solid oklch(0.22 0.04 240)",
+                      color: "oklch(0.88 0.04 60)",
+                      caretColor: "oklch(0.72 0.14 72)",
+                    }}
+                  />
+                  <button
+                    onClick={() => setPhase("duration")}
+                    className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
+                    style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                  >
+                    {intention.trim() ? "Set intention →" : "Skip →"}
+                  </button>
+                </div>
+              )}
+
+              {/* DURATION */}
+              {phase === "duration" && (
+                <div className="w-full text-center">
+                  <p
+                    className="font-light leading-snug mb-1"
+                    style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
+                  >
+                    How long?
+                  </p>
+                  {intention.trim() && (
+                    <p className="text-[11px] mb-4 italic leading-relaxed" style={{ color: "oklch(0.45 0.04 240)" }}>
+                      "{intention.trim()}"
+                    </p>
+                  )}
+                  {!intention.trim() && <div className="mb-4" />}
+                  <div className="flex gap-2 justify-center mb-5">
+                    {([25, 50, 90] as const).map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setDurationMinutes(d)}
+                        className="flex-1 rounded-xl py-3 text-center transition-all active:scale-[0.97]"
+                        style={{
+                          background: durationMinutes === d ? "oklch(0.16 0.04 240)" : "oklch(0.11 0.02 240)",
+                          border: `1px solid ${durationMinutes === d ? "oklch(0.72 0.14 72)" : "oklch(0.20 0.04 240)"}`,
+                          opacity: durationMinutes === d ? 1 : 0.65,
+                        }}
+                      >
+                        <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.74 0.14 72)" }}>{d}</p>
+                        <p className="text-[10px] mt-1" style={{ color: "oklch(0.48 0.04 240)" }}>
+                          {d === 25 ? "quick" : d === 50 ? "full" : "deep"}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                  {/* Hard stop */}
+                  <div className="flex items-center justify-center gap-2 mb-5">
+                    <span className="text-[11px]" style={{ color: "oklch(0.42 0.04 240)" }}>Hard stop at</span>
+                    <input
+                      type="time"
+                      value={hardStop}
+                      onChange={(e) => setHardStop(e.target.value)}
+                      className="text-[11px] rounded-lg px-2 py-1 outline-none"
+                      style={{
+                        background: "oklch(0.12 0.02 240)",
+                        border: "1px solid oklch(0.22 0.04 240)",
+                        color: hardStop ? "oklch(0.85 0.08 65)" : "oklch(0.38 0.03 240)",
+                        colorScheme: "dark",
+                      }}
+                    />
+                    {hardStop && (
+                      <button
+                        onClick={() => setHardStop("")}
+                        className="text-[10px] opacity-40 hover:opacity-70"
+                        style={{ color: "oklch(0.60 0.04 240)" }}
+                      >
+                        clear
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    onClick={handleStartSession}
+                    disabled={startMutation.isPending}
+                    className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-50"
+                    style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                  >
+                    {startMutation.isPending ? "Starting…" : "Begin →"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setWrenActivity("lookingup");
+                      setWrenMessage("Take a breath. I'll be here.");
+                      setTimeout(() => setWrenMessage(null), 4000);
+                    }}
+                    className="text-[11px] mt-3 opacity-30 hover:opacity-60 transition-opacity underline underline-offset-2"
+                    style={{ color: "oklch(0.70 0.04 240)" }}
+                  >
+                    Take a breath first
+                  </button>
+                </div>
+              )}
+
+              {/* CLOSURE */}
+              {phase === "closure" && (
+                <div className="w-full text-center">
+                  <p
+                    className="font-light leading-snug mb-5"
+                    style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
+                  >
+                    What moved?
+                  </p>
+                  <div className="flex flex-col gap-2 mb-4">
+                    {([
+                      { value: "progress", label: "Made progress", sub: "Productive session" },
+                      { value: "thinking", label: "Mostly thinking", sub: "Cognitive — equally valid" },
+                      { value: "stuck",    label: "Stuck or scattered", sub: "Showing up is the point" },
+                    ] as const).map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setWhatMoved(opt.value)}
+                        className="rounded-xl px-4 py-3 text-left transition-all active:scale-[0.98]"
+                        style={{
+                          background: whatMoved === opt.value ? "oklch(0.15 0.04 240)" : "oklch(0.10 0.02 240)",
+                          border: `1px solid ${whatMoved === opt.value ? "oklch(0.72 0.14 72)" : "oklch(0.18 0.03 240)"}`,
+                          opacity: whatMoved && whatMoved !== opt.value ? 0.55 : 1,
+                        }}
+                      >
+                        <p className="text-xs font-semibold" style={{ color: "oklch(0.88 0.06 65)" }}>{opt.label}</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: "oklch(0.45 0.04 240)" }}>{opt.sub}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <textarea
+                    value={closingNote}
+                    onChange={(e) => setClosingNote(e.target.value)}
+                    placeholder="What I did / didn't do / want to come back to (saves to Vault)"
+                    rows={2}
+                    maxLength={1000}
+                    className="w-full resize-none text-[11px] rounded-xl px-4 py-3 outline-none mb-4 leading-relaxed"
+                    style={{
+                      background: "oklch(0.11 0.02 240)",
+                      border: "1px solid oklch(0.20 0.04 240)",
+                      color: "oklch(0.85 0.04 60)",
+                      caretColor: "oklch(0.72 0.14 72)",
+                    }}
+                  />
+
+                  <button
+                    onClick={handleComplete}
+                    disabled={!whatMoved || completeMutation.isPending}
+                    className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97] disabled:opacity-30"
+                    style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                  >
+                    {completeMutation.isPending ? "Saving…" : "Finish session →"}
+                  </button>
+                </div>
+              )}
+
+              {/* REVEAL */}
+              {phase === "reveal" && (
+                <div className="w-full text-center">
+                  <p
+                    className="font-light leading-snug mb-1"
+                    style={{ fontSize: "clamp(1rem, 3vw, 1.2rem)", color: "oklch(0.74 0.14 72)" }}
+                  >
+                    Session logged.
+                  </p>
+                  <p className="text-[11px] mb-5" style={{ color: "oklch(0.42 0.04 240)" }}>
+                    Each session adds a row to your focus record.
+                  </p>
+                  {artifactData && (
+                    <div className="flex justify-center mb-4">
+                      <WovenArtifact
+                        sessions={artifactData.sessions}
+                        totalSegments={artifactData.totalSegments}
+                        size="full"
+                      />
+                    </div>
+                  )}
+                  <div className="mb-6 text-center">
+                    <p className="text-xs" style={{ color: "oklch(0.50 0.04 240)" }}>
+                      {artifactData?.totalSegments ?? 0} sessions completed
+                    </p>
+                    <p className="text-[10px] mt-1" style={{ color: "oklch(0.38 0.03 240)" }}>
+                      Gold = progress &middot; Cream = thinking &middot; Navy = stuck
+                    </p>
+                  </div>
+
+                  {calibrationData && calibrationData.sampleCount >= 2 && (
+                    <div
+                      className="mx-auto mb-6 rounded-xl px-5 py-4 text-left max-w-xs"
+                      style={{ background: "oklch(0.13 0.03 240)", border: "1px solid oklch(0.22 0.05 240)" }}
+                    >
+                      <p className="text-xs font-semibold mb-2" style={{ color: "oklch(0.72 0.12 65)" }}>
+                        Your time sense
+                      </p>
+                      <p className="text-xs mb-1" style={{ color: "oklch(0.65 0.04 240)" }}>
+                        Across {calibrationData.sampleCount} sessions, you typically take{" "}
+                        <span style={{ color: "oklch(0.85 0.10 65)" }}>
+                          {calibrationData.avgMultiplier !== null
+                            ? calibrationData.avgMultiplier < 0.9
+                              ? "less time than you estimate"
+                              : calibrationData.avgMultiplier > 1.2
+                              ? `${Math.round(calibrationData.avgMultiplier * 100 - 100)}% longer than you estimate`
+                              : "about as long as you estimate"
+                            : "—"}
+                        </span>.
+                      </p>
+                      {calibrationData.recentMultiplier !== null && (
+                        <p className="text-[10px]" style={{ color: "oklch(0.42 0.04 240)" }}>
+                          Recent trend: {calibrationData.recentMultiplier.toFixed(1)}× your estimate
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 justify-center">
+                    <button
+                      onClick={() => {
+                        setPhase("intake");
+                        setWhatMoved(null);
+                        setClosingNote("");
+                        setIntention("");
+                        setSessionId(null);
+                      }}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-medium transition-all hover:opacity-80 active:scale-[0.97]"
+                      style={{
+                        background: "oklch(0.13 0.03 240)",
+                        border: "1px solid oklch(0.25 0.05 240)",
+                        color: "oklch(0.60 0.08 72)",
+                      }}
+                    >
+                      Another round →
+                    </button>
+                    <button
+                      onClick={() => navigate("/")}
+                      className="flex-1 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all hover:opacity-90 active:scale-[0.97]"
+                      style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+
             </div>
-          )}
+          </div>
         </div>
+      )}
 
-      </div>
-
-      {/* Surface card — ambient check-in during active session */}
+      {/* Surface card */}
       {surfaceVisible && phase === "active" && (
         <SurfaceCard
           trigger={surfaceTrigger}
@@ -1446,7 +1567,7 @@ export default function FocusSessionsPage() {
         />
       )}
 
-      {/* Unstick modal — triggered from active session */}
+      {/* Unstick modal */}
       {showUnstickModal && (
         <UnstickModal
           task={{
@@ -1459,7 +1580,7 @@ export default function FocusSessionsPage() {
         />
       )}
 
-      {/* Wren Focus Popout — Document PiP window (Chrome/Edge) or presence-only float (Safari/Firefox) */}
+      {/* Wren Focus Popout */}
       <WrenPopout
         open={pipOpen}
         onClose={() => setPipOpen(false)}
