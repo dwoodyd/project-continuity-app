@@ -171,7 +171,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
-          <Toaster position="top-right" richColors />
+          <Toaster />
           {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           {showOnboarding && (
             <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#080a0f" }}>

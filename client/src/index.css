@@ -458,3 +458,50 @@ button:not([data-slot="button"]):not(:disabled):active {
     min-width: 44px;
   }
 }
+
+/* ── Sonner toast — Continuary palette ──────────────────────────────────────
+   Overrides sonner's default CSS variables so every toast inherits the
+   navy-gradient card, gold hairline, and Inter typography.                  */
+[data-sonner-toaster] {
+  --width: 360px;
+}
+[data-sonner-toast] {
+  --normal-bg: linear-gradient(160deg, #16223A, #101A2E);
+  --normal-border: rgba(217, 164, 65, 0.30);
+  --normal-text: #E6E9EF;
+  --success-bg: linear-gradient(160deg, #16223A, #101A2E);
+  --success-border: rgba(143, 203, 143, 0.35);
+  --success-text: #E6E9EF;
+  --error-bg: linear-gradient(160deg, #2a1616, #1a0e0e);
+  --error-border: rgba(210, 154, 154, 0.35);
+  --error-text: #E6E9EF;
+  --info-bg: linear-gradient(160deg, #16223A, #101A2E);
+  --info-border: rgba(217, 164, 65, 0.20);
+  --info-text: #E6E9EF;
+}
+.cy-toast-title {
+  font-weight: 500;
+  font-size: 13.5px;
+  color: #E6E9EF;
+  line-height: 1.35;
+}
+.cy-toast-desc {
+  color: #A8B5C4;
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.cy-toast-action {
+  font-family: 'DM Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #D9A441 !important;
+  background: transparent !important;
+  border: 1px solid rgba(217, 164, 65, 0.35) !important;
+  border-radius: 6px !important;
+  padding: 3px 10px !important;
+}
+.cy-toast-action:hover {
+  background: rgba(217, 164, 65, 0.10) !important;
+}

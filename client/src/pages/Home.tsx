@@ -361,7 +361,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
     onSuccess: (data) => {
-      toast.success("Morning plan set.");
+      toast.success("Your day is set.", { description: "Wren's watching your back." });
       // If clarity mode was suggested and state is anxious/foggy/drained, offer nudge
       if (data.clarityModeSuggestion) {
         setTimeout(() => {
@@ -377,7 +377,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       }
       onComplete();
     },
-    onError: () => toast.error("Something went wrong. Try again."),
+    onError: () => toast.error("Didn't save — try once more."),
   });
   return (
     <div className="space-y-5">
@@ -542,10 +542,10 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
-      toast.success(data.response ?? "Midday check-in complete.");
+      toast.success(data.response ?? "Midday check-in noted.");
       onComplete();
     },
-    onError: () => toast.error("Something went wrong. Try again."),
+    onError: () => toast.error("Didn't save — try once more."),
   });
   return (
     <div className="space-y-4">
@@ -637,7 +637,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
       <Button
         onClick={() => {
           if (!workedOn.trim() || wasOnPlan === null) {
-            toast.error("Fill in what you worked on and whether it was on plan.");
+            toast.error("Two things needed — what moved, and was it on plan.");
             return;
           }
           // Fire-and-forget distraction classification if interruptions were noted
@@ -736,17 +736,17 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
-      toast.success("Day closed. Tomorrow's brief is ready.");
+      toast.success("Day closed.", { description: "Tomorrow's brief is ready when you are." });
       onComplete();
     },
-    onError: () => toast.error("Something went wrong. Try again."),
+    onError: () => toast.error("Didn't save — try once more."),
   });
   const saveDecision = trpc.intelligence.saveDecision.useMutation();
   const extractDecisions = trpc.intelligence.extractDecisionsFromNotes.useMutation();
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const handleSubmit = async () => {
     if (!whatMoved.trim() || !tomorrowFirst.trim()) {
-      toast.error("Fill in what moved and what goes first tomorrow.");
+      toast.error("Two things needed — what moved, and what goes first tomorrow.");
       return;
     }
     // Save explicit decision if captured
@@ -925,7 +925,7 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
       const result = await generate.mutateAsync({ projectId });
       setCard(result);
     } catch {
-      toast.error("Couldn't generate re-entry card.");
+      toast.error("Couldn't build your re-entry card — try again.");
     } finally {
       setLoading(false);
     }
@@ -1082,7 +1082,7 @@ export default function Home() {
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        toast.success('Reminders enabled. We\'ll check in at the right moments.');
+        toast.success("Reminders on.", { description: "Wren will check in at the right moments." });
       }
     } catch {
       // browser may not support
@@ -1320,7 +1320,7 @@ export default function Home() {
     onSuccess: () => refetchPlan(),
   });
   const pushToTomorrowMutation = trpc.checkIns.pushTaskToTomorrow.useMutation({
-    onSuccess: () => { refetchPlan(); toast.success("Moved to tomorrow — still waiting."); },
+    onSuccess: () => { refetchPlan(); toast.success("Moved to tomorrow.", { description: "It'll be there when you're ready." }); },
   });
 
   // Inline edit state

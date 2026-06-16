@@ -59,10 +59,10 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
 
   const captureContext = trpc.projects.updateContextBreadcrumb.useMutation({
     onSuccess: () => {
-      toast.success("Context captured. Safe to step away.");
+      toast.success("Context captured.", { description: "Safe to step away." });
       onClose();
     },
-    onError: () => toast.error("Failed to capture context."),
+    onError: () => toast.error("Couldn't capture context — try again."),
   });
 
   const generateReturn = trpc.ai.generateReEntryCard.useMutation();
@@ -225,15 +225,15 @@ export default function ProjectDetailPage() {
   );
   const buildTimeline = trpc.intelligence.buildProjectTimeline.useMutation({
     onSuccess: (data) => {
-      toast.success(`Timeline synced — ${data.synced} events added.`);
+      toast.success("Timeline synced.", { description: `${data.synced} event${data.synced === 1 ? "" : "s"} added.` });
       refetchTimeline();
     },
-    onError: () => toast.error("Failed to sync timeline."),
+    onError: () => toast.error("Timeline sync failed — try again."),
   });
 
   const updateProject = trpc.projects.update.useMutation({
-    onSuccess: () => { toast.success("Updated."); refetch(); setEditingNext(false); },
-    onError: () => toast.error("Update failed."),
+    onSuccess: () => { toast.success("Saved."); refetch(); setEditingNext(false); },
+    onError: () => toast.error("Couldn't save — try again."),
   });
 
   if (!project) {
@@ -733,13 +733,13 @@ function WorkspaceFilesTab({ projectId }: { projectId: number }) {
   const { data: files, refetch } = trpc.workspace.listFiles.useQuery({ projectId });
 
   const uploadFile = trpc.workspace.uploadFile.useMutation({
-    onSuccess: () => { toast.success("File uploaded."); refetch(); },
-    onError: (e) => toast.error(e.message ?? "Upload failed."),
+    onSuccess: () => { toast.success("File added."); refetch(); },
+    onError: (e) => toast.error(e.message ?? "Couldn't upload — try again."),
   });
 
   const deleteFile = trpc.workspace.deleteFile.useMutation({
-    onSuccess: () => { toast.success("File deleted."); refetch(); },
-    onError: () => toast.error("Delete failed."),
+    onSuccess: () => { toast.success("File removed."); refetch(); },
+    onError: () => toast.error("Couldn't delete — try again."),
   });
 
   const [uploading, setUploading] = useState(false);
@@ -747,7 +747,7 @@ function WorkspaceFilesTab({ projectId }: { projectId: number }) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 16 * 1024 * 1024) { toast.error("File must be under 16 MB."); return; }
+    if (file.size > 16 * 1024 * 1024) { toast.error("File is too large.", { description: "Keep it under 16 MB." }); return; }
     setUploading(true);
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -828,17 +828,17 @@ function WorkspaceNotesTab({ projectId }: { projectId: number }) {
 
   const createNote = trpc.workspace.createNote.useMutation({
     onSuccess: () => { toast.success("Note saved."); refetch(); setEditingId(null); },
-    onError: () => toast.error("Failed to save note."),
+    onError: () => toast.error("Couldn't save the note — try again."),
   });
 
   const updateNote = trpc.workspace.updateNote.useMutation({
     onSuccess: () => { toast.success("Note updated."); refetch(); setEditingId(null); },
-    onError: () => toast.error("Failed to update note."),
+    onError: () => toast.error("Couldn't update the note — try again."),
   });
 
   const deleteNote = trpc.workspace.deleteNote.useMutation({
-    onSuccess: () => { toast.success("Note deleted."); refetch(); },
-    onError: () => toast.error("Delete failed."),
+    onSuccess: () => { toast.success("Note removed."); refetch(); },
+    onError: () => toast.error("Couldn't delete — try again."),
   });
 
   const pinNote = trpc.workspace.updateNote.useMutation({
@@ -858,7 +858,7 @@ function WorkspaceNotesTab({ projectId }: { projectId: number }) {
   }
 
   function saveNote() {
-    if (!draftContent.trim()) { toast.error("Note content is required."); return; }
+    if (!draftContent.trim()) { toast.error("Add some content before saving."); return; }
     if (editingId === "new") {
       createNote.mutate({ projectId, title: draftTitle || "Untitled note", content: draftContent });
     } else if (typeof editingId === "number") {
@@ -953,7 +953,7 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
 
   const sendMessage = trpc.workspace.sendMessage.useMutation({
     onSuccess: () => { refetch(); setInput(""); },
-    onError: (e) => toast.error(e.message ?? "Failed to send."),
+    onError: (e) => toast.error(e.message ?? "Couldn't send — try again."),
   });
 
   const clearChat = trpc.workspace.clearChat.useMutation({

@@ -166,7 +166,7 @@ export default function WeeklyReviewPage() {
             {persistedLetter.compassSeed && (
               <Button
                 size="sm"
-                onClick={() => toast.info("Head to Weekly Compass to carry this nudge into next week.")}
+                onClick={() => toast.info("Carry it forward.", { description: "Head to Weekly Compass to bring this nudge into next week." })}
                 className="gap-1.5 text-amber-950 font-semibold border-0"
                 style={{ background: "oklch(0.74 0.14 72)" }}
               >

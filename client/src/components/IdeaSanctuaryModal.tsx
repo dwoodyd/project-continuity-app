@@ -36,11 +36,11 @@ export default function IdeaSanctuaryModal({
 
   const addToScratchPad = trpc.scratchPad.create.useMutation({
     onSuccess: () => {
-      toast.success("Added to Scratch Pad");
+      toast.success("Idea captured.");
       setContent("");
       onClose();
     },
-    onError: () => toast.error("Could not save to Scratch Pad."),
+    onError: () => toast.error("Couldn't save — try again."),
   });
 
   const captureIdea = trpc.ai.captureIdea.useMutation({
@@ -59,7 +59,8 @@ export default function IdeaSanctuaryModal({
       // Fall back to offline queue
       if (content.trim()) {
         await queueOfflineIdea(content.trim());
-        toast.info("Saved offline. Will sync when connection returns.", {
+        toast.info("Saved for later.", {
+          description: "You're offline. It'll sync when you're back.",
           icon: <WifiOff className="w-4 h-4" />,
         });
         setSaved(true);
@@ -76,7 +77,7 @@ export default function IdeaSanctuaryModal({
     onSuccess: (data) => {
       setContent((prev) => (prev ? prev + "\n" + data.transcript : data.transcript));
     },
-    onError: () => toast.error("Transcription failed."),
+    onError: () => toast.error("Couldn't transcribe — try again."),
   });
 
   // Track online/offline status
@@ -110,7 +111,7 @@ export default function IdeaSanctuaryModal({
       }
       if (pending.length > 0) {
         await utils.ai.listIdeas.invalidate();
-        toast.success(`${pending.length} offline idea${pending.length > 1 ? "s" : ""} synced.`);
+        toast.success(`${pending.length} idea${pending.length > 1 ? "s" : ""} synced.`);
       }
     };
 
@@ -145,7 +146,8 @@ export default function IdeaSanctuaryModal({
 
     if (isOffline) {
       await queueOfflineIdea(content.trim());
-      toast.info("Saved offline. Will sync when connection returns.", {
+      toast.info("Saved for later.", {
+        description: "You're offline. It'll sync when you're back.",
         icon: <WifiOff className="w-4 h-4" />,
       });
       setSaved(true);
@@ -189,7 +191,7 @@ export default function IdeaSanctuaryModal({
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
     } catch {
-      toast.error("Microphone access denied.");
+      toast.error("Microphone access denied.", { description: "Check your browser settings and try again." });
     }
   };
 

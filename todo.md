@@ -1950,3 +1950,17 @@
 ### Phase 4 — Tests + Delivery
 - [x] WR-TESTS: Write vitest tests for wren_letters db helpers and letter generation guardrails
 - [x] WR-CHECKPOINT: TypeScript 0 errors, all tests passing, checkpoint saved
+
+## Toast Refinement (Jun 16, 2026)
+
+- [x] TOAST-SONNER: Fix sonner CSS not loading — remove next-themes from sonner.tsx wrapper, hardcode dark theme
+- [x] TOAST-THEME: Theme Toaster to Continuary navy-and-gold palette (CSS overrides in index.css)
+- [x] TOAST-COPY: Audit and refine toast copy across all feature pages to Wren's voice (calm, warm, specific — no "Success!" or "Error!")
+  - [x] Home.tsx — task done, plan generation, check-in toasts
+  - [x] FocusSessionsPage.tsx — session start/end/abandon toasts
+  - [x] FocusModePage.tsx — session complete, break over, stopping point saved, intention required
+  - [x] ProjectDetailPage.tsx — context captured, timeline sync, file add/remove, note save/update/delete, size validation, chat send error
+  - [x] IdeaSanctuaryModal.tsx — idea captured, offline save, transcription error, sync count, mic denied
+  - [x] ThreadLockModal.tsx — lock saved, clipboard empty, validation error
+  - [x] WeeklyReviewPage.tsx — carry forward nudge
+- [x] TOAST-CHECKPOINT: TypeScript 0 errors, 390 tests passing, checkpoint saved

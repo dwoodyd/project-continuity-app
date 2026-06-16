@@ -552,7 +552,7 @@ export default function FocusSessionsPage() {
   // ── Start session ─────────────────────────────────────────────────────────
   const handleStartSession = useCallback(async () => {
     if (!limitData?.canStart && !limitData?.isPro) {
-      toast.error("You've used your free session this week. Upgrade to Pro for unlimited sessions.");
+      toast.error("Free session used for this week.", { description: "Upgrade to Pro for unlimited sessions." });
       return;
     }
     try {
@@ -597,7 +597,7 @@ export default function FocusSessionsPage() {
       setWrenMessage(openingLine);
       setTimeout(() => setWrenMessage(null), 5000);
     } catch (e) {
-      toast.error("Couldn't start session. Please try again.");
+      toast.error("Couldn't start the session — try again.");
     }
   }, [limitData, intention, durationMinutes, startMutation, scheduleNextActivity]);
 
@@ -687,7 +687,7 @@ export default function FocusSessionsPage() {
       setWrenActivity("weaving");
       setPhase("reveal");
     } catch (e) {
-      toast.error("Couldn't save session. Please try again.");
+      toast.error("Session couldn't be saved — try again.");
     }
   }, [sessionId, whatMoved, closingNote, completeMutation, refetchArtifact]);
 

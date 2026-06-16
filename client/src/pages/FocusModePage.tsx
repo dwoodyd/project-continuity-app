@@ -80,10 +80,10 @@ export default function FocusModePage() {
               persistSession(true);
               setPhase("break");
               setTimeLeft(BREAK_MINUTES * 60);
-              toast.success("Focus session complete! Take a break.");
+              toast.success("Session complete.", { description: "Take a breath. You earned it." });
             } else if (phase === "break") {
               setPhase("complete");
-              toast.success("Break over. Ready for another round?");
+              toast.success("Break over.", { description: "Ready for another round?" });
             }
             return 0;
           }
@@ -131,7 +131,7 @@ export default function FocusModePage() {
 
   const startFocus = () => {
     if (!intention.trim()) {
-      toast.error("Set your intention first.");
+      toast.error("What are you working on? Set an intention first.");
       return;
     }
     playChime("focus_start");
@@ -442,10 +442,10 @@ export default function FocusModePage() {
                             });
                           }
                           await persistSession(false);
-                          toast.success("Stopping point saved. Pick up right where you left off.");
+                          toast.success("Stopping point saved.", { description: "Pick up right where you left off." });
                           navigate("/");
                         } catch {
-                          toast.error("Could not save. Try again.");
+                          toast.error("Couldn't save — try again.");
                         } finally {
                           setSavingStoppingPoint(false);
                         }
