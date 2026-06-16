@@ -189,6 +189,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     };
   }, [triggerSyncPulse]);
 
+  // ── Focus-mode sidebar auto-hide ─────────────────────────────────────────
+  // When the user is on /focus, the sidebar recedes so Wren gets the full left half.
+  // Moving the cursor to the left 8px edge reveals the sidebar as a floating overlay.
+  const isFocusRoute = location === "/focus" || location.startsWith("/focus?");
+  const [sidebarPeeking, setSidebarPeeking] = useState(false);
+
   // ── Desktop layout state ──────────────────────────────────────────────────
   const [isLargeScreen, setIsLargeScreen] = useState(() => window.innerWidth >= 768);
   const [userLayoutPref, setUserLayoutPref] = useState<"desktop" | "compact" | null>(() => {
@@ -436,10 +442,42 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     return (
       <IntroContext.Provider value={{ replayIntro: onPreviewIntro ?? (() => {}) }}>
       <div className="h-screen w-full flex overflow-hidden bg-background">
-        {/* Left Sidebar — full (w-60) at lg+, icon-only (w-14) at md */}
+        {/* Focus-mode left-edge hover zone — only rendered on /focus */}
+        {isFocusRoute && (
+          <div
+            className="fixed left-0 top-0 h-full z-50"
+            style={{ width: "8px" }}
+            onMouseEnter={() => setSidebarPeeking(true)}
+          />
+        )}
+
+        {/* Left Sidebar — auto-hides on /focus, reveals on left-edge hover */}
         <aside
           className="shrink-0 flex flex-col h-full overflow-y-auto w-14 lg:w-60"
-          style={{ background: "var(--sidebar)", borderRight: "1px solid oklch(1 0 0 / 0.06)" }}
+          style={{
+            background: "var(--sidebar)",
+            borderRight: "1px solid oklch(1 0 0 / 0.06)",
+            ...(isFocusRoute && !sidebarPeeking ? {
+              position: "fixed",
+              left: 0,
+              top: 0,
+              transform: "translateX(-100%)",
+              transition: "transform 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
+              zIndex: 49,
+              height: "100%",
+              boxShadow: "none",
+            } : isFocusRoute && sidebarPeeking ? {
+              position: "fixed",
+              left: 0,
+              top: 0,
+              transform: "translateX(0)",
+              transition: "transform 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
+              zIndex: 49,
+              height: "100%",
+              boxShadow: "4px 0 32px oklch(0 0 0 / 0.5)",
+            } : {}),
+          }}
+          onMouseLeave={() => isFocusRoute && setSidebarPeeking(false)}
         >
           {/* Brand header */}
           <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
@@ -613,8 +651,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </div>
         </aside>
 
-        {/* Main content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain bg-background">
+        {/* Main content — takes full width on /focus since sidebar is hidden */}
+        <main
+          className="overflow-y-auto overscroll-contain bg-background"
+          style={{ flex: 1, width: isFocusRoute ? "100%" : undefined }}
+        >
           {children}
         </main>
 
