@@ -653,8 +653,15 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
         {/* Main content — takes full width on /focus since sidebar is hidden */}
         <main
-          className="overflow-y-auto overscroll-contain bg-background"
-          style={{ flex: 1, width: isFocusRoute ? "100%" : undefined }}
+          className="bg-background"
+          style={{
+            flex: 1,
+            width: isFocusRoute ? "100%" : undefined,
+            overflowY: isFocusRoute ? "hidden" : "auto",
+            overscrollBehavior: "contain",
+            // On focus route the page itself manages its own h-[100svh] overflow-hidden
+            height: isFocusRoute ? "100%" : undefined,
+          }}
         >
           {children}
         </main>

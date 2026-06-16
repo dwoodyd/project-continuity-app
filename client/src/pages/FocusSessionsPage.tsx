@@ -723,7 +723,7 @@ export default function FocusSessionsPage() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
-      className="h-[100svh] flex flex-col overflow-hidden"
+      className="h-full flex flex-col overflow-hidden"
       style={{ background: "oklch(0.10 0.02 240)", color: "oklch(0.92 0.03 60)" }}
     >
       {/* Persistent exit bar — always visible during any non-idle phase so users are never trapped */}
@@ -831,8 +831,8 @@ export default function FocusSessionsPage() {
               inset: 0,
               width: "100%",
               height: "100%",
-              objectFit: "cover",
-              objectPosition: "center top",
+              objectFit: "contain",
+              objectPosition: "center bottom",
               mixBlendMode: "screen",
               filter: "brightness(1.15) saturate(1.3)",
             }}
