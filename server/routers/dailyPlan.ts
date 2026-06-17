@@ -133,6 +133,35 @@ export const dailyPlanRouter = router({
     }
   }),
 
+  // ── Add a single task to tomorrow's plan ────────────────────────────────────
+  // Called when the user adds a task after the day is closed (or any time).
+  // Appends to today's tomorrowTasks JSON array so it shows in tomorrow's handoff card.
+  addTomorrowTask: protectedProcedure
+    .input(z.object({
+      title: z.string().min(1).max(300),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      // Upsert plan so it always exists
+      let plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) {
+        await upsertDailyPlan({ userId: ctx.user.id, date, tomorrowTasks: "[]" });
+        plan = await getDailyPlan(ctx.user.id, date);
+      }
+      if (!plan) return { success: false };
+
+      const existing: Array<{ id: string; title: string; energyLevel?: string; estimatedMinutes?: number; notes?: string }> =
+        plan.tomorrowTasks ? JSON.parse(plan.tomorrowTasks) : [];
+      const newTask = {
+        id: `user-tmrw-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        title: input.title.trim(),
+      };
+      const updated = [...existing, newTask];
+      await updateDailyPlan(plan.id, ctx.user.id, { tomorrowTasks: JSON.stringify(updated) });
+      return { success: true, task: newTask };
+    }),
+
   // ── Next Best Step engine ──────────────────────────────────────────────────
   // Returns the single best task to do right now based on:
   // 1. High-energy tasks first in the morning (before noon)

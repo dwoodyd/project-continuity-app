@@ -662,22 +662,50 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
 // ─── Wren Handoff Card ────────────────────────────────────────────────────────
 // Shows the user's verbatim evening plan as an invitation, not a command.
 // Tasks are checkable (local optimistic state) and display energy/time metadata.
-function WrenHandoffCard({ tasks }: { tasks: Array<{ id?: string; title: string; energyLevel?: string; estimatedMinutes?: number; notes?: string }> }) {
+// Also allows adding new tasks that go straight into tomorrow's plan.
+function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id?: string; title: string; energyLevel?: string; estimatedMinutes?: number; notes?: string }>; localDate?: string }) {
   const [checkedIds, setCheckedIds] = React.useState<Set<string>>(new Set());
+  const [localTasks, setLocalTasks] = React.useState(initialTasks);
+  const [addingTask, setAddingTask] = React.useState(false);
+  const [newTitle, setNewTitle] = React.useState("");
+  const addTomorrowTask = trpc.dailyPlan.addTomorrowTask.useMutation({
+    onSuccess: (data) => {
+      if (data.success && data.task) {
+        setLocalTasks(prev => [...prev, data.task as { id?: string; title: string }]);
+        notify.saved("Added for tomorrow.", { description: "It'll be waiting in your handoff." });
+      }
+    },
+    onError: () => notify.error("Couldn't add — try again."),
+  });
+  const handleAdd = () => {
+    const title = newTitle.trim();
+    if (!title) { setAddingTask(false); return; }
+    addTomorrowTask.mutate({ title, ...(localDate ? { localDate } : {}) });
+    setNewTitle("");
+    setAddingTask(false);
+  };
   const toggle = (id: string) => setCheckedIds(prev => {
     const next = new Set(prev);
     if (next.has(id)) next.delete(id); else next.add(id);
     return next;
   });
-  const allDone = checkedIds.size >= tasks.length;
+  const allDone = localTasks.length > 0 && checkedIds.size >= localTasks.length;
   return (
     <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
       <div className="flex items-center gap-2 mb-3">
         <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }} />
         <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }}>Here's what you set up last night</p>
+        <button
+          onClick={() => setAddingTask(true)}
+          className="ml-auto flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-foreground/70 transition-colors"
+          title="Add to tomorrow"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Add</span>
+        </button>
       </div>
       <ul className="space-y-2">
-        {tasks.map((task, i) => {
+        {localTasks.map((task, i) => {
           const id = task.id ?? `handoff-${i}`;
           const done = checkedIds.has(id);
           return (
@@ -717,6 +745,47 @@ function WrenHandoffCard({ tasks }: { tasks: Array<{ id?: string; title: string;
           );
         })}
       </ul>
+      {/* Inline add input */}
+      {addingTask && (
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            autoFocus
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleAdd();
+              if (e.key === "Escape") { setAddingTask(false); setNewTitle(""); }
+            }}
+            placeholder="Add to tomorrow…"
+            className="flex-1 min-w-0 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40 border-b border-foreground/15 pb-0.5"
+            maxLength={300}
+          />
+          <button
+            onClick={handleAdd}
+            disabled={addTomorrowTask.isPending}
+            className="text-xs font-medium text-primary hover:text-primary/80 transition-colors shrink-0"
+          >
+            Add →
+          </button>
+          <button
+            onClick={() => { setAddingTask(false); setNewTitle(""); }}
+            className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors shrink-0"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+      {/* Empty state */}
+      {localTasks.length === 0 && !addingTask && (
+        <button
+          onClick={() => setAddingTask(true)}
+          className="w-full mt-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed text-muted-foreground/40 hover:text-muted-foreground/70 hover:border-foreground/20 transition-colors text-sm"
+          style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+        >
+          <Plus className="w-3.5 h-3.5 shrink-0" />
+          <span>Add something for tomorrow</span>
+        </button>
+      )}
       {allDone && (
         <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
       )}
@@ -2242,20 +2311,55 @@ export default function Home() {
             </div>
           </div>
           {allTasksDone && (
-            <div className="p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-900/10">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
-                    {completedTasks === 1 ? "One thing moved today." :
-                     completedTasks === 2 ? "Two things moved today." :
-                     `${completedTasks} things moved today.`}
-                  </p>
-                  <p className="text-xs text-emerald-600/60 dark:text-emerald-400/50 mt-0.5">
-                    That's the work. The rest is bonus.
-                  </p>
+            <div className="space-y-2">
+              <div className="p-4 rounded-xl border border-emerald-200/60 dark:border-emerald-800/40 bg-emerald-50/60 dark:bg-emerald-900/10">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                      {completedTasks === 1 ? "One thing moved today." :
+                       completedTasks === 2 ? "Two things moved today." :
+                       `${completedTasks} things moved today.`}
+                    </p>
+                    <p className="text-xs text-emerald-600/60 dark:text-emerald-400/50 mt-0.5">
+                      That's the work. The rest is bonus.
+                    </p>
+                  </div>
                 </div>
               </div>
+              {/* Allow adding more tasks even when all are done */}
+              {addingTask ? (
+                <div className="rounded-xl border border-primary/40 bg-card overflow-hidden">
+                  <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
+                    <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
+                    <input
+                      autoFocus
+                      value={newTaskTitle}
+                      onChange={(e) => setNewTaskTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { handleAddTask(); }
+                        if (e.key === "Escape") { setAddingTask(false); setNewTaskTitle(""); }
+                      }}
+                      placeholder="What needs to happen today?"
+                      className="flex-1 min-w-0 bg-transparent text-sm outline-none text-foreground placeholder:text-muted-foreground/40"
+                      maxLength={300}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between px-3 pb-2.5">
+                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
+                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                      >Cancel</button>
+                      <button
+                        onClick={handleAddTask}
+                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                      >Add →</button>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
           {!allTasksDone && tasks.length > 0 && (
@@ -2667,8 +2771,9 @@ export default function Home() {
       </BentoCard>
 
       {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
-      {tomorrowPlanTasks && tomorrowPlanTasks.length > 0 && (
-        <WrenHandoffCard tasks={tomorrowPlanTasks} />
+      {/* Show after evening close — even if empty, so user can always add to tomorrow */}
+      {eveningDone && (
+        <WrenHandoffCard tasks={tomorrowPlanTasks ?? []} localDate={localDateStr} />
       )}
 
       {/* ── Scratch Pad Widget ────────────────────────────────────────────────────────────────── */}
