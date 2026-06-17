@@ -954,7 +954,8 @@ function MoodWidget() {
       )}
       <div className="space-y-1.5">
         <p className="text-xs text-muted-foreground">{today ? `Today: ${today.score}/10` : "Log today's mood"}</p>
-        <div className="flex gap-1">
+        {/* Grid repeat(10,1fr) so squares always fill the card width — no fixed px */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(10, 1fr)", gap: 4, width: "100%" }}>
           {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
             <button
               key={n}
@@ -962,11 +963,12 @@ function MoodWidget() {
               onMouseLeave={() => setHoverScore(null)}
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); logMutation.mutate({ score: n }); }}
               style={{
-                flex: 1, height: 24, borderRadius: 4,
+                height: 24, borderRadius: 4,
                 background: (hoverScore !== null ? n <= hoverScore : today && n <= today.score)
                   ? phaseColor(hoverScore ?? today?.score ?? n)
                   : "rgba(255,255,255,0.07)",
                 border: "none", cursor: "pointer", transition: "background 0.1s",
+                minWidth: 0,
               }}
               title={`Score ${n}`}
             />
@@ -1678,7 +1680,7 @@ export default function Home() {
     {showWrenIntro && (
       <WrenIntroMoment onDone={() => setShowWrenIntro(false)} />
     )}
-    <div className="px-5 py-7 page-enter max-w-4xl mx-auto space-y-7">
+    <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto space-y-7 overflow-x-hidden">
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
       {showTrialBanner && (
         <div
@@ -1803,13 +1805,14 @@ export default function Home() {
           </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
+        <div className="flex items-center gap-2 flex-wrap justify-end min-w-0">
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (
             <button
               onClick={() => enterGroundMode("manual")}
               title="Enter Ground Mode — facts only, no warmth"
-              className="p-1.5 rounded-lg transition-colors"
+              className="p-1.5 rounded-lg transition-colors shrink-0"
               style={{ color: "oklch(0.45 0.04 240 / 0.70)", border: "1px solid oklch(0.35 0.04 240 / 0.30)" }}
             >
               <Anchor className="w-3.5 h-3.5" />
@@ -1818,7 +1821,7 @@ export default function Home() {
           {pendingIdeaCount > 0 && (
             <button
               onClick={() => navigate("/settings?tab=ideas")}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors shrink-0"
               title="Ideas waiting to be processed"
             >
               <Lightbulb className="w-3 h-3" />
@@ -1827,16 +1830,17 @@ export default function Home() {
           )}
           {todayPlan && (
             <div className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border",
+              "flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border shrink-0 min-w-0",
               capacityConfig[capacityLevel].bg,
               capacityConfig[capacityLevel].color
             )}>
               {(() => {
                 const cfg = capacityConfig[capacityLevel];
                 const Icon = cfg.icon;
-                return <Icon className="w-3.5 h-3.5" />;
+                return <Icon className="w-3.5 h-3.5 shrink-0" />;
               })()}
-              {capacityConfig[capacityLevel].label}
+              {/* Collapse label to icon-only below 380px */}
+              <span className="hidden xs:inline truncate max-w-[80px]">{capacityConfig[capacityLevel].label}</span>
             </div>
           )}
         </div>
@@ -2137,7 +2141,8 @@ export default function Home() {
           />
         )}
       >
-        <div className="flex gap-2">
+        {/* Segmented tabs: equal flex:1 + min-w-0 so they share card width on any screen */}
+        <div className="flex gap-2 w-full min-w-0">
           <CheckInCard
             type="morning"
             icon={Sun}
@@ -2289,7 +2294,7 @@ export default function Home() {
 
       {/* ── Today's Tasks ───────────────────────────────────────────────────── */}
       {(tasks.length > 0 || true) && (
-        <div>
+        <div className="break-inside-avoid mb-3">
           <div className="flex items-center justify-between mb-3">
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>
               Today's tasks

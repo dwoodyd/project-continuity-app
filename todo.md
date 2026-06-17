@@ -1987,3 +1987,17 @@
 
 ### Checkpoint
 - [x] CLEANUP-CHECKPOINT: TypeScript 0 errors, 390 tests passing, checkpoint saved
+
+## Handoff Bug + Mobile Layout Fixes (Jun 17, 2026)
+
+### Handoff Bug (post-close task routing)
+- [x] HANDOFF-ROUTE: addTask in checkIns.ts now routes to tomorrowTasks when evening check-in exists for today
+- [x] HANDOFF-MERGE: submitMorning now merges tomorrowTasks + unfinished criticalTasks (de-duped by title) instead of snapshot-reading tomorrowTasks only
+
+### Mobile Layout Fixes (6 issues)
+- [x] MOBILE-1: Header chip row — added flex-wrap + min-w-0 so capacity pill wraps on narrow screens
+- [x] MOBILE-2: Segmented tabs (Morning/Midday/Evening) — CheckInCard now has flex:1 min-w-0 so tabs share card width equally
+- [x] MOBILE-3: Mood bar — replaced flex gap with grid repeat(10,1fr) so squares always fill card width
+- [x] MOBILE-4: FAB collision — increased bottom offset to 52px(nav) + 16px gap + safe-area-inset-bottom
+- [x] MOBILE-5: Stray gold line — added break-inside-avoid mb-3 to Today's tasks wrapper so it never splits across masonry columns
+- [x] MOBILE-6: Gutters — outer page container uses px-4 sm:px-5 + overflow-x:hidden; mobile main region uses scrollbar-gutter:stable

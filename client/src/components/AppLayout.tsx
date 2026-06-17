@@ -785,7 +785,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"}>
+        <main className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 
@@ -843,11 +843,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       {/* More drawer removed — replaced by Hub tab (/hub) */}
 
       {/* FAB — speed-dial with two capture options */}
+      {/* bottom: nav-bar-height(52px) + safe-area + 16px gap so FAB never overlaps the nav */}
       <div
         className="fixed z-40 flex flex-col items-end gap-2"
         style={{
-          bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 12px)",
-          right: "max(calc(50vw - 224px + 12px), 12px)",
+          bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 16px)",
+          right: "max(calc(50vw - 224px + 16px), 16px)",
         }}
       >
         {fabMenuOpen && (

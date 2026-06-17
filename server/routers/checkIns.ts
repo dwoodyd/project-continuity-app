@@ -168,6 +168,8 @@ IMPORTANT: The weekly primary project MUST appear in today's tasks unless capaci
 
       // ── When the user pre-planned tasks last night, use them verbatim — no AI task generation ──
       // The AI only writes guidance text and time blocks. Tasks come from the user's own words.
+      // NOTE: hasPrePlannedTasks is used only for the prompt. The actual task list uses
+      // hasPrePlannedTasksMerged (computed below after the LLM call) which includes post-close additions.
       const hasPrePlannedTasks = tomorrowTasksFromYesterday.length > 0;
 
       // Prompt varies: if pre-planned tasks exist, ask AI for guidance + time blocks only (no criticalTasks).
@@ -247,18 +249,40 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
       const parsed = JSON.parse(raw);
 
+      // ── Build the task list ────────────────────────────────────────────────
+      // Safety-net merge: combine tomorrowTasks snapshot (set at Evening Close)
+      // with any tasks added to yesterday's criticalTasks AFTER the close
+      // (post-close additions that may have landed in the wrong bucket before
+      // the routing fix). De-dupe by title (case-insensitive) so nothing doubles.
+      const yesterday = recentPlans.find((p) => p.date !== date) ?? recentPlans[0];
+      let mergedPrePlanned = [...tomorrowTasksFromYesterday];
+      if (yesterday) {
+        const yesterdayTasks: any[] = (() => {
+          try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
+        })();
+        const unfinishedYesterday = yesterdayTasks.filter((t: any) => !t.done && t.isUserAdded);
+        const existingTitles = new Set(mergedPrePlanned.map((t) => t.title.trim().toLowerCase()));
+        for (const t of unfinishedYesterday) {
+          if (!existingTitles.has(t.title.trim().toLowerCase())) {
+            mergedPrePlanned.push({ id: t.id, title: t.title, energyLevel: t.energyLevel, estimatedMinutes: t.estimatedMinutes, notes: t.notes });
+            existingTitles.add(t.title.trim().toLowerCase());
+          }
+        }
+      }
+      const hasPrePlannedTasksMerged = mergedPrePlanned.length > 0;
+
       // Build the task list:
-      // If user pre-planned tasks last night — use those verbatim, respect capacity limits.
+      // If user pre-planned tasks last night (or has post-close additions) — use those verbatim, respect capacity limits.
       // If no pre-planned tasks — use AI-generated tasks as before.
       let tasksWithIds: any[];
-      if (hasPrePlannedTasks) {
+      if (hasPrePlannedTasksMerged) {
         // Capacity limits: full=3, partial=2, low=1
         const capacityLimit = input.capacityLevel === "full" ? 3 : input.capacityLevel === "partial" ? 2 : 1;
-        tasksWithIds = tomorrowTasksFromYesterday.slice(0, capacityLimit).map((pt, i) => ({
+        tasksWithIds = mergedPrePlanned.slice(0, capacityLimit).map((pt, i) => ({
           id: pt.id ?? `task-${Date.now()}-${i}`,
           title: pt.title,
           done: false,
-          projectId: pt.projectId ?? input.primaryProjectId ?? null,
+          projectId: (pt as any).projectId ?? input.primaryProjectId ?? null,
           carryoverCount: 0,
           energyLevel: pt.energyLevel,
           estimatedMinutes: pt.estimatedMinutes,
@@ -620,6 +644,14 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
     }))
     .mutation(async ({ ctx, input }) => {
       const date = input.localDate ?? getTodayDate();
+
+      // ── Routing: if the day is already closed, write to tomorrowTasks ────────
+      // The morning rollover reads tomorrowTasks (+ unfinished criticalTasks) to
+      // seed the next day. Writing post-close additions to criticalTasks means
+      // they land in a bucket the next morning never reads.
+      const todayCheckIns = await getCheckIns(ctx.user.id, date);
+      const dayIsClosed = todayCheckIns.some((c) => c.type === "evening");
+
       // Upsert plan so it always exists
       let plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) {
@@ -628,6 +660,20 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       }
       if (!plan) return { success: false };
 
+      if (dayIsClosed) {
+        // After evening close → append to tomorrowTasks so it crosses the date boundary
+        const existing: Array<{ id: string; title: string }> =
+          plan.tomorrowTasks ? JSON.parse(plan.tomorrowTasks) : [];
+        const newTask = {
+          id: `user-tmrw-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          title: input.title.trim(),
+        };
+        const updated = [...existing, newTask];
+        await updateDailyPlan(plan.id, ctx.user.id, { tomorrowTasks: JSON.stringify(updated) });
+        return { success: true, task: { ...newTask, done: false, isUserAdded: true, routedTo: "tomorrow" as const } };
+      }
+
+      // During the day → append to criticalTasks as before
       const tasks = JSON.parse(plan.criticalTasks ?? "[]");
       const newTask = {
         id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
