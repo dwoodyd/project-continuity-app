@@ -2001,3 +2001,10 @@
 - [x] MOBILE-4: FAB collision — increased bottom offset to 52px(nav) + 16px gap + safe-area-inset-bottom
 - [x] MOBILE-5: Stray gold line — added break-inside-avoid mb-3 to Today's tasks wrapper so it never splits across masonry columns
 - [x] MOBILE-6: Gutters — outer page container uses px-4 sm:px-5 + overflow-x:hidden; mobile main region uses scrollbar-gutter:stable
+
+## Task Inline Edit (Jun 17)
+- [ ] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index)
+- [ ] CLIENT: Inline edit on task row — double-click or pencil icon, input replaces text, Enter/blur saves
+- [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
+- [ ] TEST: Vitest for updateTask procedure
+- [ ] CHECKPOINT: TypeScript 0 errors, tests passing

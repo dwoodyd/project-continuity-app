@@ -668,6 +668,25 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
   const [localTasks, setLocalTasks] = React.useState(initialTasks);
   const [addingTask, setAddingTask] = React.useState(false);
   const [newTitle, setNewTitle] = React.useState("");
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = React.useState("");
+  const editTomorrowTask = trpc.dailyPlan.editTomorrowTask.useMutation({
+    onSuccess: () => notify.saved("Updated."),
+    onError: () => notify.error("Couldn't save — try again."),
+  });
+  const handleEditStart = (id: string, title: string) => {
+    setEditingId(id);
+    setEditingTitle(title);
+  };
+  const handleEditSave = (id: string) => {
+    const title = editingTitle.trim();
+    if (title && id) {
+      editTomorrowTask.mutate({ taskId: id, title, ...(localDate ? { localDate } : {}) });
+      setLocalTasks(prev => prev.map((t, i) => (t.id ?? `handoff-${i}`) === id ? { ...t, title } : t));
+    }
+    setEditingId(null);
+    setEditingTitle("");
+  };
   const addTomorrowTask = trpc.dailyPlan.addTomorrowTask.useMutation({
     onSuccess: (data) => {
       if (data.success && data.task) {
@@ -709,38 +728,71 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
           const id = task.id ?? `handoff-${i}`;
           const done = checkedIds.has(id);
           return (
-            <li key={id} className="flex items-start gap-2.5">
-              <button
-                onClick={() => toggle(id)}
-                className="mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
-                style={done
-                  ? { background: "oklch(0.74 0.14 72 / 0.25)", borderColor: "oklch(0.74 0.14 72 / 0.60)" }
-                  : { borderColor: "oklch(1 0 0 / 0.22)" }
-                }
-                aria-label={done ? "Mark incomplete" : "Mark complete"}
-              >
-                {done && <CheckCircle2 className="w-3 h-3" style={{ color: "oklch(0.74 0.14 72)" }} />}
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm leading-snug transition-opacity ${done ? "line-through opacity-40" : "text-foreground"}`}>{task.title}</p>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  {task.energyLevel && task.energyLevel !== 'any' && (
-                    <span className={`text-xs font-medium ${
-                      task.energyLevel === 'high' ? 'text-amber-500' : 'text-amber-400/70'
-                    }`}>
-                      {task.energyLevel === 'high' ? '⚡ high energy' : '🌙 low energy'}
-                    </span>
-                  )}
-                  {task.estimatedMinutes && (
-                    <span className="flex items-center gap-0.5 text-xs text-muted-foreground/50">
-                      <Clock className="w-2.5 h-2.5" />{task.estimatedMinutes}m
-                    </span>
-                  )}
-                  {task.notes && (
-                    <span className="text-xs text-muted-foreground/50 italic truncate max-w-[160px]">{task.notes}</span>
+            <li key={id} className="flex items-start gap-2.5 group/htask">
+              {editingId !== id && (
+                <button
+                  onClick={() => toggle(id)}
+                  className="mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
+                  style={done
+                    ? { background: "oklch(0.74 0.14 72 / 0.25)", borderColor: "oklch(0.74 0.14 72 / 0.60)" }
+                    : { borderColor: "oklch(1 0 0 / 0.22)" }
+                  }
+                  aria-label={done ? "Mark incomplete" : "Mark complete"}
+                >
+                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "oklch(0.74 0.14 72)" }} />}
+                </button>
+              )}
+              {editingId === id ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <input
+                    autoFocus
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleEditSave(id);
+                      if (e.key === "Escape") { setEditingId(null); setEditingTitle(""); }
+                    }}
+                    onBlur={() => handleEditSave(id)}
+                    className="flex-1 min-w-0 bg-transparent text-sm outline-none text-foreground border-b border-foreground/20 pb-0.5"
+                    maxLength={300}
+                  />
+                  <button onClick={() => handleEditSave(id)} className="text-xs font-medium text-primary shrink-0">Save</button>
+                  <button onClick={() => { setEditingId(null); setEditingTitle(""); }} className="text-xs text-muted-foreground/50 shrink-0">Cancel</button>
+                </div>
+              ) : (
+                <div className="flex-1 min-w-0 flex items-start gap-1">
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm leading-snug transition-opacity ${done ? "line-through opacity-40" : "text-foreground"}`}>{task.title}</p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {task.energyLevel && task.energyLevel !== 'any' && (
+                        <span className={`text-xs font-medium ${
+                          task.energyLevel === 'high' ? 'text-amber-500' : 'text-amber-400/70'
+                        }`}>
+                          {task.energyLevel === 'high' ? '⚡ high energy' : '🌙 low energy'}
+                        </span>
+                      )}
+                      {task.estimatedMinutes && (
+                        <span className="flex items-center gap-0.5 text-xs text-muted-foreground/50">
+                          <Clock className="w-2.5 h-2.5" />{task.estimatedMinutes}m
+                        </span>
+                      )}
+                      {task.notes && (
+                        <span className="text-xs text-muted-foreground/50 italic truncate max-w-[160px]">{task.notes}</span>
+                      )}
+                    </div>
+                  </div>
+                  {!done && (
+                    <button
+                      onClick={() => handleEditStart(id, task.title)}
+                      className="opacity-0 group-hover/htask:opacity-100 focus:opacity-100 transition-opacity p-0.5 rounded text-muted-foreground/40 hover:text-foreground/60 shrink-0 mt-0.5"
+                      aria-label="Edit task"
+                      title="Edit"
+                    >
+                      <Pencil className="w-3 h-3" />
+                    </button>
                   )}
                 </div>
-              </div>
+              )}
             </li>
           );
         })}

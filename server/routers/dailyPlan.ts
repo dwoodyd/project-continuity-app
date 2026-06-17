@@ -162,6 +162,27 @@ export const dailyPlanRouter = router({
       return { success: true, task: newTask };
     }),
 
+  // ── Edit a task in tomorrow's plan ──────────────────────────────────────────────────
+  // Updates the title of a task in today's tomorrowTasks JSON array by ID.
+  editTomorrowTask: protectedProcedure
+    .input(z.object({
+      taskId: z.string().max(100),
+      title: z.string().min(1).max(300),
+      localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const date = input.localDate ?? getTodayDate();
+      const plan = await getDailyPlan(ctx.user.id, date);
+      if (!plan) return { success: false };
+      const tasks: Array<{ id: string; title: string; [key: string]: unknown }> =
+        plan.tomorrowTasks ? JSON.parse(plan.tomorrowTasks) : [];
+      const updated = tasks.map((t) =>
+        t.id === input.taskId ? { ...t, title: input.title.trim() } : t
+      );
+      await updateDailyPlan(plan.id, ctx.user.id, { tomorrowTasks: JSON.stringify(updated) });
+      return { success: true };
+    }),
+
   // ── Next Best Step engine ──────────────────────────────────────────────────
   // Returns the single best task to do right now based on:
   // 1. High-energy tasks first in the morning (before noon)
