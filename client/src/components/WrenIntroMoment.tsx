@@ -133,7 +133,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
       }}>
         <video
           ref={videoRef}
-          src={WREN_CLIPS.dropsAndHovers}
+          src="/manus-storage/wren_blob_flying_fun_6ea24231.mp4"
           autoPlay
           loop
           muted
