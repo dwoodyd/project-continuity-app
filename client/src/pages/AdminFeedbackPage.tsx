@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Bug, Lightbulb, HelpCircle, MoreHorizontal, ArrowLeft, CheckCircle2, Circle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   bug:        { label: "Bug",      icon: <Bug className="w-3.5 h-3.5" />,            color: "text-red-400 bg-red-500/10 border-red-500/20" },
@@ -35,7 +35,7 @@ export default function AdminFeedbackPage() {
     },
     onError: (_err, _vars, ctx) => {
       utils.feedback.list.setData(undefined, ctx?.prev);
-      toast.error("Failed to update");
+      notify.error("Failed to update");
     },
     onSettled: () => utils.feedback.list.invalidate(),
   });

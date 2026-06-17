@@ -20,23 +20,24 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import UnstickModal from "@/components/UnstickModal";
 import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
 import WrenPopout from "@/components/WrenPopout";
+import WrenPlayer from "@/components/WrenPlayer";
 
-// ── CDN video URLs ────────────────────────────────────────────────────────────
-const WREN_VIDEOS = {
-  weaving:   "/manus-storage/wren-weaving_b532984b.mp4",
-  reading:   "/manus-storage/wren-reading_bd6af9a6.mp4",
-  writing:   "/manus-storage/wren-writing_8697130a.mov",
-  lookingup: "/manus-storage/wren-lookingup_f1735040.mp4",
-} as const;
-
-type WrenActivity = keyof typeof WREN_VIDEOS;
+// ── Focus activity clips ─────────────────────────────────────────────────────────────────────────────────
+type WrenActivity = "weaving" | "reading" | "writing" | "lookingup";
+// Activity → WrenClip mapping (writing maps to reading since .mov was removed)
+const ACTIVITY_CLIP: Record<WrenActivity, string> = {
+  weaving:   "weaving",
+  reading:   "reading",
+  writing:   "reading",   // .mov removed — reading has the same calm energy
+  lookingup: "lookingup",
+};
 
 // ── Ambient sound — procedural noise via Web Audio API ───────────────────────
 // Ambient sound CDN URLs (real recordings, royalty-free)
@@ -457,7 +458,6 @@ export default function FocusSessionsPage() {
 
   // ── Wren activity ─────────────────────────────────────────────────────────
   const [wrenActivity, setWrenActivity] = useState<WrenActivity>("lookingup");
-  const wrenVideoRef = useRef<HTMLVideoElement>(null);
   const activityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Ambient sound — persisted in localStorage ───────────────────────────────
@@ -519,15 +519,6 @@ export default function FocusSessionsPage() {
     }, delay);
   }, [scheduleNextStatus]); // eslint-disable-line react-hooks/exhaustive-deps);
 
-  // Switch Wren video when activity changes
-  useEffect(() => {
-    const video = wrenVideoRef.current;
-    if (!video) return;
-    video.src = WREN_VIDEOS[wrenActivity];
-    video.load();
-    video.play().catch(() => {});
-  }, [wrenActivity]);
-
   // ── Esc key — always provides an exit ────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -552,7 +543,7 @@ export default function FocusSessionsPage() {
   // ── Start session ─────────────────────────────────────────────────────────
   const handleStartSession = useCallback(async () => {
     if (!limitData?.canStart && !limitData?.isPro) {
-      toast.error("Free session used for this week.", { description: "Upgrade to Pro for unlimited sessions." });
+      notify.error("Free session used for this week.", { description: "Upgrade to Pro for unlimited sessions." });
       return;
     }
     try {
@@ -597,7 +588,7 @@ export default function FocusSessionsPage() {
       setWrenMessage(openingLine);
       setTimeout(() => setWrenMessage(null), 5000);
     } catch (e) {
-      toast.error("Couldn't start the session — try again.");
+      notify.error("Couldn't start the session — try again.");
     }
   }, [limitData, intention, durationMinutes, startMutation, scheduleNextActivity]);
 
@@ -687,7 +678,7 @@ export default function FocusSessionsPage() {
       setWrenActivity("weaving");
       setPhase("reveal");
     } catch (e) {
-      toast.error("Session couldn't be saved — try again.");
+      notify.error("Session couldn't be saved — try again.");
     }
   }, [sessionId, whatMoved, closingNote, completeMutation, refetchArtifact]);
 
@@ -875,23 +866,13 @@ export default function FocusSessionsPage() {
 
           {/* LEFT — Wren full-bleed, object-cover, flush to all edges */}
           <div className="relative overflow-hidden" style={{ background: "oklch(0.07 0.02 240)" }}>
-            <video
-              ref={wrenVideoRef}
-              src={WREN_VIDEOS[wrenActivity]}
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                objectPosition: "center center",
-                mixBlendMode: "screen",
-                filter: "brightness(1.15) saturate(1.3)",
-              }}
+            <WrenPlayer
+              key={wrenActivity}
+              clip={ACTIVITY_CLIP[wrenActivity] as any}
+              size="full"
+              objectFit="cover"
+              wrapperClassName="absolute inset-0"
+              className="brightness-[1.15] saturate-[1.3]"
             />
             {/* Soft right-edge gradient scrim */}
             <div
@@ -1143,23 +1124,13 @@ export default function FocusSessionsPage() {
               className="relative w-1/2 overflow-hidden"
               style={{ background: "oklch(0.07 0.02 240)" }}
             >
-              <video
-                ref={wrenVideoRef}
-                src={WREN_VIDEOS[wrenActivity]}
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  objectPosition: "center center",
-                  mixBlendMode: "screen",
-                  filter: "brightness(1.15) saturate(1.3)",
-                }}
+              <WrenPlayer
+                key={wrenActivity}
+                clip={ACTIVITY_CLIP[wrenActivity] as any}
+                size="full"
+                objectFit="cover"
+                wrapperClassName="absolute inset-0"
+                className="brightness-[1.15] saturate-[1.3]"
               />
               {wrenMessage && (
                 <div

@@ -43,7 +43,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { format, formatDistanceToNow } from "date-fns";
 import UnstickModal from "@/components/UnstickModal";
 import WrenPlayer from "@/components/WrenPlayer";
@@ -59,10 +59,10 @@ function ReEntryModal({ projectId, onClose }: { projectId: number; onClose: () =
 
   const captureContext = trpc.projects.updateContextBreadcrumb.useMutation({
     onSuccess: () => {
-      toast.success("Context captured.", { description: "Safe to step away." });
+      notify.saved("Context captured.", { description: "Safe to step away." });
       onClose();
     },
-    onError: () => toast.error("Couldn't capture context — try again."),
+    onError: () => notify.error("Couldn't capture context — try again."),
   });
 
   const generateReturn = trpc.ai.generateReEntryCard.useMutation();
@@ -225,15 +225,15 @@ export default function ProjectDetailPage() {
   );
   const buildTimeline = trpc.intelligence.buildProjectTimeline.useMutation({
     onSuccess: (data) => {
-      toast.success("Timeline synced.", { description: `${data.synced} event${data.synced === 1 ? "" : "s"} added.` });
+      notify.saved("Timeline synced.", { description: `${data.synced} event${data.synced === 1 ? "" : "s"} added.` });
       refetchTimeline();
     },
-    onError: () => toast.error("Timeline sync failed — try again."),
+    onError: () => notify.error("Timeline sync failed — try again."),
   });
 
   const updateProject = trpc.projects.update.useMutation({
-    onSuccess: () => { toast.success("Saved."); refetch(); setEditingNext(false); },
-    onError: () => toast.error("Couldn't save — try again."),
+    onSuccess: () => { notify.saved("Saved."); refetch(); setEditingNext(false); },
+    onError: () => notify.error("Couldn't save — try again."),
   });
 
   if (!project) {
@@ -733,13 +733,13 @@ function WorkspaceFilesTab({ projectId }: { projectId: number }) {
   const { data: files, refetch } = trpc.workspace.listFiles.useQuery({ projectId });
 
   const uploadFile = trpc.workspace.uploadFile.useMutation({
-    onSuccess: () => { toast.success("File added."); refetch(); },
-    onError: (e) => toast.error(e.message ?? "Couldn't upload — try again."),
+    onSuccess: () => { notify.saved("File added."); refetch(); },
+    onError: (e) => notify.error(e.message ?? "Couldn't upload — try again."),
   });
 
   const deleteFile = trpc.workspace.deleteFile.useMutation({
-    onSuccess: () => { toast.success("File removed."); refetch(); },
-    onError: () => toast.error("Couldn't delete — try again."),
+    onSuccess: () => { notify.saved("File removed."); refetch(); },
+    onError: () => notify.error("Couldn't delete — try again."),
   });
 
   const [uploading, setUploading] = useState(false);
@@ -747,7 +747,7 @@ function WorkspaceFilesTab({ projectId }: { projectId: number }) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 16 * 1024 * 1024) { toast.error("File is too large.", { description: "Keep it under 16 MB." }); return; }
+    if (file.size > 16 * 1024 * 1024) { notify.error("File is too large.", { description: "Keep it under 16 MB." }); return; }
     setUploading(true);
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -827,18 +827,18 @@ function WorkspaceNotesTab({ projectId }: { projectId: number }) {
   const [draftContent, setDraftContent] = useState("");
 
   const createNote = trpc.workspace.createNote.useMutation({
-    onSuccess: () => { toast.success("Note saved."); refetch(); setEditingId(null); },
-    onError: () => toast.error("Couldn't save the note — try again."),
+    onSuccess: () => { notify.saved("Note saved."); refetch(); setEditingId(null); },
+    onError: () => notify.error("Couldn't save the note — try again."),
   });
 
   const updateNote = trpc.workspace.updateNote.useMutation({
-    onSuccess: () => { toast.success("Note updated."); refetch(); setEditingId(null); },
-    onError: () => toast.error("Couldn't update the note — try again."),
+    onSuccess: () => { notify.saved("Note updated."); refetch(); setEditingId(null); },
+    onError: () => notify.error("Couldn't update the note — try again."),
   });
 
   const deleteNote = trpc.workspace.deleteNote.useMutation({
-    onSuccess: () => { toast.success("Note removed."); refetch(); },
-    onError: () => toast.error("Couldn't delete — try again."),
+    onSuccess: () => { notify.saved("Note removed."); refetch(); },
+    onError: () => notify.error("Couldn't delete — try again."),
   });
 
   const pinNote = trpc.workspace.updateNote.useMutation({
@@ -858,7 +858,7 @@ function WorkspaceNotesTab({ projectId }: { projectId: number }) {
   }
 
   function saveNote() {
-    if (!draftContent.trim()) { toast.error("Add some content before saving."); return; }
+    if (!draftContent.trim()) { notify.error("Add some content before saving."); return; }
     if (editingId === "new") {
       createNote.mutate({ projectId, title: draftTitle || "Untitled note", content: draftContent });
     } else if (typeof editingId === "number") {
@@ -953,11 +953,11 @@ function WorkspaceChatTab({ projectId, projectTitle }: { projectId: number; proj
 
   const sendMessage = trpc.workspace.sendMessage.useMutation({
     onSuccess: () => { refetch(); setInput(""); },
-    onError: (e) => toast.error(e.message ?? "Couldn't send — try again."),
+    onError: (e) => notify.error(e.message ?? "Couldn't send — try again."),
   });
 
   const clearChat = trpc.workspace.clearChat.useMutation({
-    onSuccess: () => { toast.success("Chat cleared."); refetch(); },
+    onSuccess: () => { notify.saved("Chat cleared."); refetch(); },
   });
 
   useEffect(() => {

@@ -12,7 +12,7 @@
  */
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Anchor, ChevronDown, Loader2, Clipboard, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,7 +75,7 @@ export default function ThreadLockModal({ open, onClose }: ThreadLockModalProps)
         handleClose();
       }, 1200);
     },
-    onError: () => toast.error("Couldn't lock the thread — try again."),
+    onError: () => notify.error("Couldn't lock the thread — try again."),
   });
 
   function handleClose() {
@@ -110,7 +110,7 @@ export default function ThreadLockModal({ open, onClose }: ThreadLockModalProps)
         setClipboardSnippet(text.slice(0, 2000));
         setShowClipboard(true);
       } else {
-        toast.info("Nothing in the clipboard.");
+        notify.info("Nothing in the clipboard.");
       }
     } catch {
       setShowClipboard(true); // let user type it manually
@@ -121,7 +121,7 @@ export default function ThreadLockModal({ open, onClose }: ThreadLockModalProps)
     const doing = whatDoing.trim();
     const next = whatNext.trim();
     if (!doing || !next) {
-      toast.error("Two things needed.", { description: "What are you doing, and what's next?" });
+      notify.error("Two things needed.", { description: "What are you doing, and what's next?" });
       return;
     }
     captureMutation.mutate({

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Lightbulb, Mic, MicOff, Send, Loader2, WifiOff, PenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,11 +36,11 @@ export default function IdeaSanctuaryModal({
 
   const addToScratchPad = trpc.scratchPad.create.useMutation({
     onSuccess: () => {
-      toast.success("Idea captured.");
+      notify.saved("Idea captured.");
       setContent("");
       onClose();
     },
-    onError: () => toast.error("Couldn't save — try again."),
+    onError: () => notify.error("Couldn't save — try again."),
   });
 
   const captureIdea = trpc.ai.captureIdea.useMutation({
@@ -59,7 +59,7 @@ export default function IdeaSanctuaryModal({
       // Fall back to offline queue
       if (content.trim()) {
         await queueOfflineIdea(content.trim());
-        toast.info("Saved for later.", {
+        notify.info("Saved for later.", {
           description: "You're offline. It'll sync when you're back.",
           icon: <WifiOff className="w-4 h-4" />,
         });
@@ -77,7 +77,7 @@ export default function IdeaSanctuaryModal({
     onSuccess: (data) => {
       setContent((prev) => (prev ? prev + "\n" + data.transcript : data.transcript));
     },
-    onError: () => toast.error("Couldn't transcribe — try again."),
+    onError: () => notify.error("Couldn't transcribe — try again."),
   });
 
   // Track online/offline status
@@ -111,7 +111,7 @@ export default function IdeaSanctuaryModal({
       }
       if (pending.length > 0) {
         await utils.ai.listIdeas.invalidate();
-        toast.success(`${pending.length} idea${pending.length > 1 ? "s" : ""} synced.`);
+        notify.saved(`${pending.length} idea${pending.length > 1 ? "s" : ""} synced.`);
       }
     };
 
@@ -146,7 +146,7 @@ export default function IdeaSanctuaryModal({
 
     if (isOffline) {
       await queueOfflineIdea(content.trim());
-      toast.info("Saved for later.", {
+      notify.info("Saved for later.", {
         description: "You're offline. It'll sync when you're back.",
         icon: <WifiOff className="w-4 h-4" />,
       });
@@ -191,7 +191,7 @@ export default function IdeaSanctuaryModal({
       mediaRecorderRef.current = recorder;
       setIsRecording(true);
     } catch {
-      toast.error("Microphone access denied.", { description: "Check your browser settings and try again." });
+      notify.error("Microphone access denied.", { description: "Check your browser settings and try again." });
     }
   };
 

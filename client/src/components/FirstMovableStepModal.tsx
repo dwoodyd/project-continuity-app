@@ -10,7 +10,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { FirstMovableStepCard } from "./FirstMovableStepCard";
 
 interface FirstMovableStepModalProps {
@@ -43,12 +43,12 @@ export function FirstMovableStepModal({
 
   const generate = trpc.threshold.generateFirstMovableStep.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => toast.error(err.message || "Could not generate a First Movable Step"),
+    onError: (err) => notify.error(err.message || "Could not generate a First Movable Step"),
   });
 
   function handleGenerate() {
     if (!avoidedTask.trim()) {
-      toast.error("Describe the task you are avoiding first");
+      notify.error("Describe the task you are avoiding first");
       return;
     }
     setResult(null);

@@ -33,7 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { formatDistanceToNow } from "date-fns";
 import WrenPlayer from "@/components/WrenPlayer";
 
@@ -64,8 +64,8 @@ function CreateProjectModal({ onClose, onCreated }: { onClose: () => void; onCre
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
 
   const create = trpc.projects.create.useMutation({
-    onSuccess: () => { toast.success("Project created."); onCreated(); onClose(); },
-    onError: () => toast.error("Failed to create project."),
+    onSuccess: () => { notify.saved("Project created."); onCreated(); onClose(); },
+    onError: () => notify.error("Failed to create project."),
   });
 
   return (

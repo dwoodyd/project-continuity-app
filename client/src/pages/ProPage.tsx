@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Check, X, ArrowLeft, Sparkles, Star, Crown, ChevronDown, ChevronUp } from "lucide-react";
 import { PageMeta } from "@/components/PageMeta";
 
@@ -101,12 +101,12 @@ export default function ProPage() {
   const handleUpgrade = async (planKey: PlanKey, tierLabel: string) => {
     if (!user) { window.open("https://continuary.app/#apply", "_blank"); return; }
     try {
-      toast(`Redirecting to PayPal…`, { description: `Opening secure checkout for ${tierLabel}.` });
+      notify.info(`Redirecting to PayPal…`, { description: `Opening secure checkout for ${tierLabel}.` });
       const { approvalUrl } = await createSub.mutateAsync({ origin: window.location.origin, planKey });
       sessionStorage.setItem("pendingPlanKey", planKey);
       window.open(approvalUrl, "_blank");
     } catch {
-      toast.error("Could not start checkout. Please try again.");
+      notify.error("Could not start checkout. Please try again.");
     }
   };
 
@@ -116,9 +116,9 @@ export default function ProPage() {
     try {
       await cancelSub.mutateAsync();
       await utils.paypal.status.invalidate();
-      toast("Subscription cancelled", { description: "Your access will remain until the period ends." });
+      notify.info("Subscription cancelled", { description: "Your access will remain until the period ends." });
     } catch {
-      toast.error("Could not cancel. Please try again.");
+      notify.error("Could not cancel. Please try again.");
     } finally { setCancelling(false); }
   };
 

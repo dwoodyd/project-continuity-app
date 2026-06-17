@@ -19,7 +19,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
 import { GlossaryTerm } from "@/components/TermTooltip";
 
@@ -96,10 +96,10 @@ export default function WeeklyCompassPage() {
 
   const generate = trpc.intelligence.generateWeeklyCompass.useMutation({
     onSuccess: () => {
-      toast.success("Weekly Compass generated.");
+      notify.saved("Weekly Compass generated.");
       refetch();
     },
-    onError: () => toast.error("Failed to generate compass. Try again."),
+    onError: () => notify.error("Failed to generate compass. Try again."),
   });
 
   const confirm = trpc.intelligence.confirmWeeklyCompass.useMutation({
@@ -108,7 +108,7 @@ export default function WeeklyCompassPage() {
       setShowReward(true);
       refetch();
     },
-    onError: () => toast.error("Failed to confirm compass."),
+    onError: () => notify.error("Failed to confirm compass."),
   });
 
   const [editPrimary, setEditPrimary] = useState<number | null | undefined>(undefined);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,7 +38,7 @@ export default function AdminApplicationsPage() {
 
   const approveMutation = trpc.applications.approve.useMutation({
     onSuccess: (data) => {
-      toast.success(
+      notify.saved(
         data.emailSent
           ? `Approved! Invite code ${data.code} sent via email.`
           : `Approved with code ${data.code} — but email failed to send. Copy the code manually.`,
@@ -48,35 +48,35 @@ export default function AdminApplicationsPage() {
       refetch();
     },
     onError: (err) => {
-      toast.error(`Approval failed: ${err.message}`);
+      notify.error(`Approval failed: ${err.message}`);
     },
   });
 
   const rejectMutation = trpc.applications.reject.useMutation({
     onSuccess: () => {
-      toast.success("Application rejected.");
+      notify.saved("Application rejected.");
       refetch();
     },
     onError: (err) => {
-      toast.error(`Rejection failed: ${err.message}`);
+      notify.error(`Rejection failed: ${err.message}`);
     },
   });
 
   const resendInviteMutation = trpc.applications.resendInvite.useMutation({
     onSuccess: () => {
-      toast.success("Invite email re-sent successfully.", { duration: 5000 });
+      notify.saved("Invite email re-sent successfully.", { duration: 5000 });
     },
     onError: (err) => {
-      toast.error(`Failed to resend invite: ${err.message}`, { duration: 8000 });
+      notify.error(`Failed to resend invite: ${err.message}`, { duration: 8000 });
     },
   });
 
   const resendReminderMutation = trpc.applications.resendTrialReminder.useMutation({
     onSuccess: () => {
-      toast.success("Trial reminder email sent.", { duration: 5000 });
+      notify.saved("Trial reminder email sent.", { duration: 5000 });
     },
     onError: (err) => {
-      toast.error(`Could not send reminder: ${err.message}`, { duration: 8000 });
+      notify.error(`Could not send reminder: ${err.message}`, { duration: 8000 });
     },
   });
 

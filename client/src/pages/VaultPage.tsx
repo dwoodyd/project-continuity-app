@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { format } from "date-fns";
 
 type SourceState = "inbox" | "mapped" | "parked" | "active" | "today" | "done" | "archived";
@@ -100,13 +100,13 @@ function AddItemModal({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const addPaste = trpc.vault.addPaste.useMutation({
-    onSuccess: () => { toast.success("Added to vault."); onAdded(); onClose(); },
-    onError: () => toast.error("Failed to add item."),
+    onSuccess: () => { notify.saved("Added to vault."); onAdded(); onClose(); },
+    onError: () => notify.error("Failed to add item."),
   });
 
   const addFile = trpc.vault.addFile.useMutation({
-    onSuccess: () => { toast.success("File uploaded to vault."); onAdded(); onClose(); },
-    onError: () => toast.error("Failed to upload file."),
+    onSuccess: () => { notify.saved("File uploaded to vault."); onAdded(); onClose(); },
+    onError: () => notify.error("Failed to upload file."),
   });
 
   const handlePasteFromClipboard = async () => {
@@ -115,12 +115,12 @@ function AddItemModal({
       if (text.trim()) {
         setContent(text);
         setMode("paste");
-        toast.success("Clipboard content loaded.");
+        notify.saved("Clipboard content loaded.");
       } else {
-        toast.info("Clipboard is empty.");
+        notify.info("Clipboard is empty.");
       }
     } catch {
-      toast.error("Could not read clipboard. Please paste manually.");
+      notify.error("Could not read clipboard. Please paste manually.");
     }
   };
 
@@ -276,7 +276,7 @@ const SourceItemCard = React.memo(function SourceItemCard({
   const [expanded, setExpanded] = useState(false);
   const updateState = trpc.vault.updateState.useMutation({
     onSuccess: onUpdate,
-    onError: () => toast.error("Failed to update."),
+    onError: () => notify.error("Failed to update."),
   });
 
   const tags: string[] = (() => { try { return JSON.parse(item.tags ?? "[]"); } catch { return []; } })();
@@ -440,12 +440,12 @@ export default function VaultPage() {
   const { data: graphData } = trpc.vault.getGraphData.useQuery(undefined, { enabled: filterState === "graph" });
   const graphItemUpdateState = trpc.vault.updateState.useMutation({
     onSuccess: () => { refetch(); },
-    onError: () => toast.error("Failed to update."),
+    onError: () => notify.error("Failed to update."),
   });
   const { data: allProjects } = trpc.projects.list.useQuery();
   const graphItemUpdateItem = trpc.vault.updateItem.useMutation({
     onSuccess: () => { refetch(); },
-    onError: () => toast.error("Failed to link project."),
+    onError: () => notify.error("Failed to link project."),
   });
 
   const { data: items, refetch } = trpc.vault.list.useQuery();
@@ -453,29 +453,29 @@ export default function VaultPage() {
   const { data: duplicateData } = trpc.vault.detectDuplicates.useQuery();
 
   const aiProcess = trpc.vault.aiProcess.useMutation({
-    onSuccess: () => { toast.success("AI processed — tags and summary added."); refetch(); },
-    onError: () => toast.error("AI processing failed."),
+    onSuccess: () => { notify.saved("AI processed — tags and summary added."); refetch(); },
+    onError: () => notify.error("AI processing failed."),
   });
 
   const markReviewed = trpc.vault.markReviewed.useMutation({
-    onSuccess: () => { toast.success("Marked as reviewed."); refetch(); refetchReview(); },
-    onError: () => toast.error("Failed to mark reviewed."),
+    onSuccess: () => { notify.saved("Marked as reviewed."); refetch(); refetchReview(); },
+    onError: () => notify.error("Failed to mark reviewed."),
   });
 
   const [bankruptcyOpen, setBankruptcyOpen] = useState(false);
   const inboxBankruptcy = trpc.vault.archiveBankruptcy.useMutation({
     onSuccess: (data: { archivedCount: number }) => {
-      toast.success(`Inbox cleared. ${data.archivedCount} items archived.`);
+      notify.saved(`Inbox cleared. ${data.archivedCount} items archived.`);
       setBankruptcyOpen(false);
       refetch();
     },
-    onError: () => toast.error("Inbox bankruptcy failed."),
+    onError: () => notify.error("Inbox bankruptcy failed."),
   });
 
   // One-tap clipboard capture — saves directly to Vault inbox without opening modal
   const captureClipboard = trpc.vault.captureClipboard.useMutation({
-    onSuccess: () => { toast.success("Saved to Vault inbox."); refetch(); },
-    onError: () => toast.error("Failed to save clipboard content."),
+    onSuccess: () => { notify.saved("Saved to Vault inbox."); refetch(); },
+    onError: () => notify.error("Failed to save clipboard content."),
   });
 
   const handleClipboardCapture = async () => {
@@ -485,13 +485,13 @@ export default function VaultPage() {
         // One-tap: save directly to inbox, no modal needed
         captureClipboard.mutate({ text });
       } else {
-        toast.info("Clipboard is empty.");
+        notify.info("Clipboard is empty.");
       }
     } catch {
       // Fallback: open modal without pre-filled content
       setClipboardContent(undefined);
       setAddOpen(true);
-      toast.info("Open the modal and paste your content manually.");
+      notify.info("Open the modal and paste your content manually.");
     }
   };
 
@@ -551,8 +551,8 @@ export default function VaultPage() {
                 a.download = `continuary-vault-${new Date().toISOString().slice(0,10)}.md`;
                 a.click();
                 URL.revokeObjectURL(url);
-                toast.success("Vault exported");
-              } catch { toast.error("Export failed"); }
+                notify.saved("Vault exported");
+              } catch { notify.error("Export failed"); }
             }}
           >
             <Download className="w-3.5 h-3.5" />

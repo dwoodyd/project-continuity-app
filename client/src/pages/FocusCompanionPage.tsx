@@ -23,7 +23,7 @@ const CHANNEL_NAME = "wren-focus-companion";
 const WREN_VIDEOS: Record<string, string> = {
   weaving:   "/manus-storage/wren-weaving_b532984b.mp4",
   reading:   "/manus-storage/wren-reading_bd6af9a6.mp4",
-  writing:   "/manus-storage/wren-writing_8697130a.mov",
+  writing:   "/manus-storage/wren-reading_bd6af9a6.mp4", // .mov normalized → reading clip
   lookingup: "/manus-storage/wren-lookingup_f1735040.mp4",
 };
 

@@ -13,7 +13,7 @@
 import { useRef, useState, useCallback } from "react";
 import { Mic, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -36,12 +36,12 @@ export function VoiceDictation({ onTranscript, context, className, disabled }: P
       if (text) {
         // Append with a space separator if the existing value doesn't end with whitespace
         onTranscript(text);
-        toast.success("Transcribed", { description: "Voice added to your notes." });
+        notify.saved("Transcribed", { description: "Voice added to your notes." });
       }
       setState("idle");
     },
     onError: (err) => {
-      toast.error("Transcription failed", { description: err.message });
+      notify.error("Transcription failed", { description: err.message });
       setState("idle");
     },
   });
@@ -68,7 +68,7 @@ export function VoiceDictation({ onTranscript, context, className, disabled }: P
       recorder.start(250); // collect chunks every 250ms
       setState("recording");
     } catch {
-      toast.error("Microphone access denied", {
+      notify.error("Microphone access denied", {
         description: "Allow microphone access in your browser to use voice input.",
       });
     }
@@ -91,13 +91,13 @@ export function VoiceDictation({ onTranscript, context, className, disabled }: P
       if (blob.size < 1000) {
         // Too short — likely just noise
         setState("idle");
-        toast.info("Recording too short", { description: "Hold the mic button while speaking." });
+        notify.info("Recording too short", { description: "Hold the mic button while speaking." });
         return;
       }
 
       if (blob.size > 16 * 1024 * 1024) {
         setState("idle");
-        toast.error("Recording too long", { description: "Keep recordings under 16 MB." });
+        notify.error("Recording too long", { description: "Keep recordings under 16 MB." });
         return;
       }
 

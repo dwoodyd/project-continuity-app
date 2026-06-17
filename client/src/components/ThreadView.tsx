@@ -7,6 +7,7 @@
 
 import React from "react";
 import { trpc } from "@/lib/trpc";
+import notify from "@/lib/notify";
 
 /** Map a numeric strength score to a non-judgmental named state */
 function strengthToState(score: number): "Gathering" | "Weaving" | "Holding" {
@@ -37,12 +38,10 @@ export function ThreadView() {
     if (!threadData || toastShown) return;
     const activeDays = threadData.filter((d) => d.morning || d.midday || d.evening).length;
     if (activeDays >= 3) {
-      import("sonner").then(({ toast }) => {
-        toast("Your thread is taking shape", {
+      notify.info("Your thread is taking shape", {
           description: "You've returned a few times — your continuity is building.",
           duration: 5000,
         });
-      });
       localStorage.setItem("thread_unlock_toast_shown", "1");
       setToastShown(true);
     }

@@ -18,7 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Copy, Download, Share2 } from "lucide-react";
 
 // ─── Brand CDN icon (white bird on navy) ─────────────────────────────────────
@@ -172,8 +172,8 @@ export function ShareEvidenceModal({
   const handleCopy = () => {
     navigator.clipboard
       .writeText(summaryLine)
-      .then(() => toast.success("Sentence copied to clipboard."))
-      .catch(() => toast.error("Copy failed — please try manually."));
+      .then(() => notify.saved("Sentence copied to clipboard."))
+      .catch(() => notify.error("Copy failed — please try manually."));
   };
 
   const handleDownload = () => {
@@ -182,13 +182,13 @@ export function ShareEvidenceModal({
     link.download = `continuary-evidence-${month}.png`;
     link.href = canvasRef.current.toDataURL("image/png");
     link.click();
-    toast.success("Image downloaded.");
+    notify.saved("Image downloaded.");
   };
 
   const handleShare = async () => {
     if (!canvasRef.current) return;
     canvasRef.current.toBlob(async (blob) => {
-      if (!blob) { toast.error("Could not generate image."); return; }
+      if (!blob) { notify.error("Could not generate image."); return; }
       const file = new File([blob], `continuary-evidence-${month}.png`, { type: "image/png" });
       if (navigator.share && navigator.canShare({ files: [file] })) {
         try {

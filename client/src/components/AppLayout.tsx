@@ -50,7 +50,7 @@ import AiConsentModal from "./AiConsentModal";
 import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import ThreadLockModal from "./ThreadLockModal";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { CommandPaletteTrigger } from "./CommandPalette";
 import WrenPlayer from "./WrenPlayer";
 import StreakMilestoneCelebration from "./StreakMilestoneCelebration";
@@ -225,7 +225,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         if (!localStorage.getItem(COMPACT_ONBOARDED_KEY)) {
           localStorage.setItem(COMPACT_ONBOARDED_KEY, "1");
           setTimeout(() => {
-            toast("Compact mode active", {
+            notify.info("Compact mode active", {
               description: "All features are still here. Tap the ⋯ More tab to access Evidence, Compass, Intelligence, and Settings.",
               duration: 7000,
             });
@@ -312,7 +312,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("auth_error");
     if (authError) {
-      toast.error(authError, { duration: 6000 });
+      notify.error(authError, { duration: 6000 });
       const url = new URL(window.location.href);
       url.searchParams.delete("auth_error");
       window.history.replaceState({}, "", url.toString());

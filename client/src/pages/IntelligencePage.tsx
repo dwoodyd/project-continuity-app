@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import {
   Brain,
   RefreshCw,
@@ -171,11 +171,11 @@ export default function IntelligencePage() {
   const scoreAllMutation = trpc.insights.scoreAllProjects.useMutation({
     onSuccess: () => {
       utils.insights.getHealthScores.invalidate();
-      toast.success("Health scores updated — all projects scored.");
+      notify.saved("Health scores updated — all projects scored.");
       setScoringLoading(false);
     },
     onError: () => {
-      toast.error("Scoring failed. Please try again.");
+      notify.error("Scoring failed. Please try again.");
       setScoringLoading(false);
     },
   });
@@ -183,11 +183,11 @@ export default function IntelligencePage() {
   const detectMutation = trpc.insights.detectPatterns.useMutation({
     onSuccess: (data) => {
       utils.insights.getPatternInsights.invalidate();
-      toast.success(`${data.count} pattern${data.count !== 1 ? "s" : ""} detected — insights refreshed.`);
+      notify.saved(`${data.count} pattern${data.count !== 1 ? "s" : ""} detected — insights refreshed.`);
       setPatternsLoading(false);
     },
     onError: () => {
-      toast.error("Pattern detection failed. Please try again.");
+      notify.error("Pattern detection failed. Please try again.");
       setPatternsLoading(false);
     },
   });

@@ -3,7 +3,7 @@ import { MessageSquare, Bug, Lightbulb, HelpCircle, Send, X } from "lucide-react
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export function FeedbackPanel({ open, onClose }: FeedbackPanelProps) {
 
   const submit = trpc.feedback.submit.useMutation({
     onSuccess: () => {
-      toast.success("Feedback sent — thank you!", {
+      notify.saved("Feedback sent — thank you!", {
         description: "We read every message and use it to improve Continuary.",
       });
       setMessage("");
@@ -35,7 +35,7 @@ export function FeedbackPanel({ open, onClose }: FeedbackPanelProps) {
       onClose();
     },
     onError: () => {
-      toast.error("Couldn't send feedback", {
+      notify.error("Couldn't send feedback", {
         description: "Please try again or email us directly.",
       });
     },

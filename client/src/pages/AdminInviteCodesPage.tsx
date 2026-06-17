@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Copy, Plus, Ticket, CheckCircle2, Clock, Layers, ClipboardList } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -41,20 +41,20 @@ export default function AdminInviteCodesPage() {
 
   const generate = trpc.invites.generate.useMutation({
     onSuccess: (newCode) => {
-      toast.success(`Code ${newCode.code} created`);
+      notify.saved(`Code ${newCode.code} created`);
       setLabel("");
       refetch();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => notify.error(err.message),
   });
 
   const bulkGenerate = trpc.invites.bulkGenerate.useMutation({
     onSuccess: (result) => {
-      toast.success(`${result.count} codes generated`);
+      notify.saved(`${result.count} codes generated`);
       setBulkPrefix("");
       refetch();
     },
-    onError: (err) => toast.error(err.message),
+    onError: (err) => notify.error(err.message),
   });
 
   const handleCopy = (code: string) => {
@@ -67,11 +67,11 @@ export default function AdminInviteCodesPage() {
   const handleCopyAll = () => {
     const unused = codes?.filter((c) => c.usedAt === null).map((c) => c.code) ?? [];
     if (unused.length === 0) {
-      toast.info("No unused codes to copy.");
+      notify.info("No unused codes to copy.");
       return;
     }
     navigator.clipboard.writeText(unused.join("\n")).then(() => {
-      toast.success(`${unused.length} codes copied to clipboard`);
+      notify.saved(`${unused.length} codes copied to clipboard`);
     });
   };
 

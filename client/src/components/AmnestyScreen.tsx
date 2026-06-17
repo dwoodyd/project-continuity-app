@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { ArrowRight, Layers, Archive, Check } from "lucide-react";
 
 interface AmnestyScreenProps {
@@ -77,9 +77,9 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
         contentClass: "idea",
       });
       setParkedIds((prev) => { const next = new Set(prev); next.add(project.id); return next; });
-      toast.success(`"${project.title}" parked to your Vault inbox.`);
+      notify.saved(`"${project.title}" parked to your Vault inbox.`);
     } catch {
-      toast.error("Could not park to Vault. Try again.");
+      notify.error("Could not park to Vault. Try again.");
     }
   };
 

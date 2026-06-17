@@ -7,7 +7,7 @@ import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { format } from "date-fns";
 import {
   Brain,
@@ -158,11 +158,11 @@ function NewSessionView({
 }) {
   const handleRun = () => {
     if (!selectedMode) {
-      toast.error("Please select a clarity mode first");
+      notify.error("Please select a clarity mode first");
       return;
     }
     if (brainDump.trim().length < 10) {
-      toast.error("Please share a bit more before we begin");
+      notify.error("Please share a bit more before we begin");
       return;
     }
     runSession.mutate({ mode: selectedMode, brainDump: brainDump.trim(), projectId: selectedProjectId });
@@ -419,9 +419,9 @@ function ResultView({
                 session.nextRightStep ? `Next right step: ${session.nextRightStep}` : null,
               ].filter(Boolean);
               navigator.clipboard.writeText(parts.join("\n\n")).then(() => {
-                toast.success("Session summary copied to clipboard.");
+                notify.saved("Session summary copied to clipboard.");
               }).catch(() => {
-                toast.error("Copy failed — please try again.");
+                notify.error("Copy failed — please try again.");
               });
             }}
           >
@@ -1181,13 +1181,13 @@ export default function ClarityEnginePage() {
     },
     onError: (err) => {
       if (err.message === 'FREE_LIMIT_REACHED') {
-        toast("Daily limit reached", {
+        notify.info("Daily limit reached", {
           description: "Free users get 2 Clarity Engine sessions/day. Upgrade to Pro for unlimited access.",
           action: { label: "Upgrade →", onClick: () => window.location.href = '/pro' },
           duration: 8000,
         });
       } else {
-        toast.error("Something went wrong. Please try again.");
+        notify.error("Something went wrong. Please try again.");
         console.error(err);
       }
     },
@@ -1200,12 +1200,12 @@ export default function ClarityEnginePage() {
     onSuccess: (result) => {
       if (result.projectUpdated && result.projectTitle) {
         setConvertPreviewData({ projectTitle: result.projectTitle, nextStep: result.content ?? "" });
-        toast.success(`Next step saved to "${result.projectTitle}"`, {
+        notify.saved(`Next step saved to "${result.projectTitle}"`, {
           description: "It will appear on your Command Center immediately.",
           duration: 5000,
         });
       } else {
-        toast.success(
+        notify.saved(
           `Added to ${CONVERT_OPTIONS.find((o) => o.id === result.convertedTo)?.label ?? "your plan"}`
         );
       }
@@ -1215,13 +1215,13 @@ export default function ClarityEnginePage() {
   });
   const saveToVault = trpc.vault.addPaste.useMutation({
     onSuccess: () => {
-      toast.success("Clarity Map saved to Knowledge Vault.", {
+      notify.saved("Clarity Map saved to Knowledge Vault.", {
         description: "Find it in the Vault inbox.",
         duration: 4000,
       });
       utils.vault.list.invalidate();
     },
-    onError: () => toast.error("Could not save to Vault. Please try again."),
+    onError: () => notify.error("Could not save to Vault. Please try again."),
   });
 
   return (

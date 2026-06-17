@@ -31,7 +31,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useIntro } from "@/contexts/IntroContext";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -181,10 +181,10 @@ function GoogleCalendarSection() {
   const { data: status, isLoading } = trpc.calendar.getStatus.useQuery();
   const disconnect = trpc.calendar.disconnect.useMutation({
     onSuccess: () => {
-      toast.success("Google Calendar disconnected.");
+      notify.saved("Google Calendar disconnected.");
       utils.calendar.getStatus.invalidate();
     },
-    onError: () => toast.error("Failed to disconnect."),
+    onError: () => notify.error("Failed to disconnect."),
   });
 
   const handleConnect = () => {
@@ -241,12 +241,12 @@ function WeeklyDigestCard() {
   const sendDigest = trpc.system.sendWeeklyDigest.useMutation({
     onSuccess: (data) => {
       if (data.success) {
-        toast.success("Digest sent! Check your notifications.");
+        notify.saved("Digest sent! Check your notifications.");
       } else {
-        toast.error("Could not send digest. Try again later.");
+        notify.error("Could not send digest. Try again later.");
       }
     },
-    onError: () => toast.error("Failed to send digest."),
+    onError: () => notify.error("Failed to send digest."),
   });
 
   return (
@@ -337,7 +337,7 @@ export default function SettingsPage() {
   const resolveIdea = trpc.ai.resolveIdea.useMutation({
     onSuccess: (_, vars) => {
       const actionLabels: Record<string, string> = { park: "Added to Vault.", promote: "Added to project.", future: "Saved as future idea.", discard: "Dismissed." };
-      toast.success(actionLabels[vars.action]);
+      notify.saved(actionLabels[vars.action]);
       // Haptic + gamification event for idea processing
       if (navigator.vibrate) navigator.vibrate(40);
       const label = vars.action === "park" ? "Idea moved to Vault"
@@ -347,12 +347,12 @@ export default function SettingsPage() {
       recordEvent.mutate({ eventType: "idea_processed", label });
       refetchIdeas();
     },
-    onError: () => toast.error("Failed to process idea."),
+    onError: () => notify.error("Failed to process idea."),
   });
 
   const updateSettings = trpc.settings.updateSettings.useMutation({
-    onSuccess: () => toast.success("Settings saved."),
-    onError: () => toast.error("Failed to save settings."),
+    onSuccess: () => notify.saved("Settings saved."),
+    onError: () => notify.error("Failed to save settings."),
   });
 
   // PWA install state
@@ -376,7 +376,7 @@ export default function SettingsPage() {
     if (deferredPrompt) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') toast.success('App installed! Check your home screen.');
+      if (outcome === 'accepted') notify.saved('App installed! Check your home screen.');
       setDeferredPrompt(null);
     } else {
       // Fallback: guide user manually
@@ -405,36 +405,36 @@ export default function SettingsPage() {
   );
   const generateInvite = trpc.invites.generate.useMutation({
     onSuccess: () => {
-      toast.success("Invite code generated.");
+      notify.saved("Invite code generated.");
       setInviteLabel("");
       refetchInvites();
     },
-    onError: (err) => toast.error(err.message ?? "Could not generate code."),
+    onError: (err) => notify.error(err.message ?? "Could not generate code."),
   });
 
   const revokeAiConsent = trpc.settings.revokeAiConsent.useMutation({
-    onSuccess: () => toast.success("AI consent revoked. The consent notice will reappear on next login."),
-    onError: () => toast.error("Failed to update AI consent."),
+    onSuccess: () => notify.saved("AI consent revoked. The consent notice will reappear on next login."),
+    onError: () => notify.error("Failed to update AI consent."),
   });
   const giveAiConsentSettings = trpc.settings.giveAiConsent.useMutation({
-    onSuccess: () => toast.success("AI features enabled."),
-    onError: () => toast.error("Failed to update AI consent."),
+    onSuccess: () => notify.saved("AI features enabled."),
+    onError: () => notify.error("Failed to update AI consent."),
   });
   const deleteAccount = trpc.settings.deleteAccount.useMutation({
     onSuccess: () => {
-      toast.success("Account deleted. Goodbye.");
+      notify.saved("Account deleted. Goodbye.");
       setTimeout(() => logout(), 1200);
     },
-    onError: (err) => toast.error(err.message ?? "Deletion failed. Please try again."),
+    onError: (err) => notify.error(err.message ?? "Deletion failed. Please try again."),
   });
   const submitFriction = trpc.friction.submit.useMutation({
     onSuccess: () => {
-      toast.success("Noted. Thank you.");
+      notify.saved("Noted. Thank you.");
       setFrictionNote("");
       setFrictionOpen(false);
       utils.friction.list.invalidate();
     },
-    onError: () => toast.error("Could not save note."),
+    onError: () => notify.error("Could not save note."),
   });
 
   const tabs = [
@@ -688,9 +688,9 @@ export default function SettingsPage() {
                     a.download = `continuary-export-${new Date().toISOString().slice(0, 10)}.json`;
                     a.click();
                     URL.revokeObjectURL(url);
-                    toast.success("Data exported successfully.");
+                    notify.saved("Data exported successfully.");
                   } catch {
-                    toast.error("Export failed. Please try again.");
+                    notify.error("Export failed. Please try again.");
                   }
                 }}
                 className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
@@ -819,7 +819,7 @@ export default function SettingsPage() {
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(code.code);
-                              toast.success("Copied to clipboard.");
+                              notify.saved("Copied to clipboard.");
                             }}
                             className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-lg hover:bg-muted"
                           >
@@ -1019,7 +1019,7 @@ export default function SettingsPage() {
                   className="w-full"
                   onClick={() => {
                     scheduleCheckInReminders(morningTime, middayTime, eveningTime);
-                    toast.success("Check-in reminders scheduled.");
+                    notify.saved("Check-in reminders scheduled.");
                   }}
                 >
                   Save notification times
@@ -1125,7 +1125,7 @@ export default function SettingsPage() {
                 <Play className="w-3 h-3" />
                 Replay intro
               </Button>
-              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { navigator.clipboard.writeText(window.location.origin + "/intro"); toast.success("Link copied"); }}>
+              <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { navigator.clipboard.writeText(window.location.origin + "/intro"); notify.saved("Link copied"); }}>
                 Copy share link
               </Button>
             </div>

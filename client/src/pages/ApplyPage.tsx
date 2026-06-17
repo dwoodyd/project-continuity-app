@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Link } from "wouter";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { PageMeta } from "@/components/PageMeta";
@@ -24,14 +24,14 @@ export default function ApplyPage() {
       setSubmitted(true);
     },
     onError: (err) => {
-      toast.error(err.message || "Something went wrong. Please try again.");
+      notify.error(err.message || "Something went wrong. Please try again.");
     },
   });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim() || !email.trim() || !relationship.trim()) {
-      toast.error("Please fill in all fields.");
+      notify.error("Please fill in all fields.");
       return;
     }
     submit.mutate({ name: name.trim(), email: email.trim(), relationship: relationship.trim() });

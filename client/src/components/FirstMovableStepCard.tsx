@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowRight, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 interface FirstMovableStepCardProps {
   id: number;
@@ -24,7 +24,7 @@ export function FirstMovableStepCard({
   const [showLighter, setShowLighter] = useState(false);
   const markUsed = trpc.threshold.markUsed.useMutation({
     onError: () => {
-      toast.error("Could not record session start");
+      notify.error("Could not record session start");
     },
   });
 

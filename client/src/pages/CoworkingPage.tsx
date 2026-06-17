@@ -15,7 +15,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import {
   Users,
   Clock,
@@ -166,7 +166,7 @@ export default function CoworkingPage() {
       setSessionId(data.sessionId);
       setElapsedSeconds(0);
     },
-    onError: () => toast.error("Couldn't join the room. Try again."),
+    onError: () => notify.error("Couldn't join the room. Try again."),
   });
 
   const leaveMutation = trpc.coworking.leaveSession.useMutation({
@@ -178,7 +178,7 @@ export default function CoworkingPage() {
       setParticipants([]);
       utils.coworking.myRecentSessions.invalidate();
     },
-    onError: () => toast.error("Couldn't end the session. Try again."),
+    onError: () => notify.error("Couldn't end the session. Try again."),
   });
 
   const updateStatusMutation = trpc.coworking.updateStatus.useMutation();

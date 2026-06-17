@@ -8,7 +8,7 @@ import { Plus, Trash2, GripVertical, Clock, ChevronDown, ChevronUp } from "lucid
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 type EnergyLevel = "high" | "low" | "any";
 
@@ -46,7 +46,7 @@ export function TomorrowPlanSection({ onChange, initialTasks = [], autoSave = fa
     onSuccess: () => setSaving(false),
     onError: () => {
       setSaving(false);
-      toast.error("Couldn't save tomorrow's plan. Try again.");
+      notify.error("Couldn't save tomorrow's plan. Try again.");
     },
   });
 

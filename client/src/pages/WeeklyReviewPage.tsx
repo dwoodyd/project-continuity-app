@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { format, subDays, startOfWeek, getISOWeek, getYear } from "date-fns";
 import DistractionInsightsCard from "@/components/DistractionInsightsCard";
 import WrenPlayer from "@/components/WrenPlayer";
@@ -166,7 +166,7 @@ export default function WeeklyReviewPage() {
             {persistedLetter.compassSeed && (
               <Button
                 size="sm"
-                onClick={() => toast.info("Carry it forward.", { description: "Head to Weekly Compass to bring this nudge into next week." })}
+                onClick={() => notify.info("Carry it forward.", { description: "Head to Weekly Compass to bring this nudge into next week." })}
                 className="gap-1.5 text-amber-950 font-semibold border-0"
                 style={{ background: "oklch(0.74 0.14 72)" }}
               >

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2, Download } from "lucide-react";
 import { Link } from "wouter";
 import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
@@ -231,10 +231,10 @@ export default function EvidenceLogPage() {
   const generateSummary = trpc.evidence.generateSummary.useMutation({
     onSuccess: () => {
       refetchSummaries();
-      toast.success("Evidence summary updated.");
+      notify.saved("Evidence summary updated.");
     },
     onError: () => {
-      toast.error("Could not generate summary. Try again in a moment.");
+      notify.error("Could not generate summary. Try again in a moment.");
     },
     onSettled: () => setIsGenerating(false),
   });
@@ -325,8 +325,8 @@ export default function EvidenceLogPage() {
                       a.download = `continuary-evidence-log-${new Date().toISOString().slice(0,10)}.md`;
                       a.click();
                       URL.revokeObjectURL(url);
-                      toast.success("Evidence Log exported");
-                    } catch { toast.error("Export failed"); }
+                      notify.saved("Evidence Log exported");
+                    } catch { notify.error("Export failed"); }
                   }}
                   size="sm"
                   variant="outline"

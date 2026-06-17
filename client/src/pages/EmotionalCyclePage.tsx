@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import WrenPlayer from "@/components/WrenPlayer";
 import { ArrowLeft, Info } from "lucide-react";
 import { useLocation } from "wouter";
@@ -190,12 +190,12 @@ export default function EmotionalCyclePage() {
   const cycleQuery = trpc.moodLogs.getCycleAnalysis.useQuery();
   const logMutation = trpc.moodLogs.logToday.useMutation({
     onSuccess: () => {
-      toast.success("Mood logged.");
+      notify.saved("Mood logged.");
       todayQuery.refetch();
       historyQuery.refetch();
       cycleQuery.refetch();
     },
-    onError: () => toast.error("Couldn't save — try again."),
+    onError: () => notify.error("Couldn't save — try again."),
   });
 
   // Pre-fill from today's existing log
@@ -214,7 +214,7 @@ export default function EmotionalCyclePage() {
   const alreadyLogged = !!todayQuery.data;
 
   const handleLog = () => {
-    if (!score) return toast.error("Pick a score first.");
+    if (!score) return notify.error("Pick a score first.");
     logMutation.mutate({ score, note: note.trim() || undefined });
   };
 

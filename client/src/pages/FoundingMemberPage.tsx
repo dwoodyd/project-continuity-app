@@ -14,7 +14,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Shield, Star, Clock, ArrowRight, Copy, Check, Gift, Lock, MessageCircle, Rocket, BadgeCheck } from "lucide-react";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -74,7 +74,7 @@ export default function FoundingMemberPage() {
     if (!referralCode) return;
     navigator.clipboard.writeText(referralCode).then(() => {
       setCopied(true);
-      toast.success("Referral code copied");
+      notify.saved("Referral code copied");
       setTimeout(() => setCopied(false), 2000);
     });
   }

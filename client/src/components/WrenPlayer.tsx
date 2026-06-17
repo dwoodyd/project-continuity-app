@@ -79,6 +79,12 @@ interface WrenPlayerProps {
   /** Extra wrapper className */
   wrapperClassName?: string;
   /**
+   * CSS object-fit for the video element.
+   * Defaults to "contain" (original behavior).
+   * Use "cover" for stage/full-bleed surfaces where Wren should fill her frame.
+   */
+  objectFit?: "contain" | "cover";
+  /**
    * Feathered / floating treatment — applies a radial CSS mask that fades
    * the video edges into the background, making Wren feel painted onto the
    * page rather than embedded in a container.
@@ -106,6 +112,7 @@ export default function WrenPlayer({
   feather = false,
   featherDirection = "radial",
   fallbackStill,
+  objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
   const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
@@ -151,7 +158,7 @@ export default function WrenPlayer({
         playsInline
         onEnded={onEnded}
         onCanPlay={() => setVideoReady(true)}
-        className={cn("w-full h-full object-contain relative", className)}
+        className={cn("w-full h-full relative", objectFit === "cover" ? "object-cover" : "object-contain", className)}
         style={{ mixBlendMode: "screen" }}
       />
     </div>

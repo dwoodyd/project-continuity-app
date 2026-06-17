@@ -1964,3 +1964,26 @@
   - [x] ThreadLockModal.tsx — lock saved, clipboard empty, validation error
   - [x] WeeklyReviewPage.tsx — carry forward nudge
 - [x] TOAST-CHECKPOINT: TypeScript 0 errors, 390 tests passing, checkpoint saved
+
+## Master Cleanup: Toast System + Wren Video System (Jun 16, 2026)
+
+### Part 1 — Toast System
+- [x] TOAST-CSS: Confirm sonner CSS loads — added @import "sonner/dist/styles.css" to index.css
+- [x] TOAST-NOTIFY: Added notify() wrapper (notify.saved / notify.info / notify.error) in client/src/lib/notify.ts
+- [x] TOAST-MIGRATE: Replaced all direct toast() calls with notify() across 40 files
+- [x] TOAST-VOICE: Applied updated voice table across all call sites
+- [x] TOAST-CONFIRM: ThreadLockModal uses inline confirm dialog (no native confirm())
+
+### Part 2 — Wren Video System
+- [x] WREN-COMPONENT: Extended WrenPlayer with objectFit prop (cover/contain) — no new component needed
+- [x] WREN-MOV: Normalized all .mov refs in wrenClips.ts (bouncingFunClean, wrenLetter, checkmark) to .mp4 equivalents
+- [x] WREN-MIGRATE: Replaced raw <video> blocks in FocusSessionsPage with WrenPlayer objectFit="cover"
+  - [x] Focus landing preview → WrenPlayer objectFit="cover"
+  - [x] Focus in-session → WrenPlayer objectFit="cover"
+  - [x] WrenPopout / FocusCompanionPage .mov writing clip → reading clip alias
+  - [x] wrenClips.ts: added weaving/reading/lookingup as named aliases
+  - [x] FocusSessionsPage: removed wrenVideoRef + manual video.src useEffect
+- [x] WREN-VERIFY: WrenPlayer objectFit="cover" used on all focus stage surfaces
+
+### Checkpoint
+- [x] CLEANUP-CHECKPOINT: TypeScript 0 errors, 390 tests passing, checkpoint saved

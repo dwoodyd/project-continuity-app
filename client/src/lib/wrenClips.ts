@@ -10,9 +10,9 @@ const BASE = "/manus-storage";
 export const WREN_CLIPS = {
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
-  bouncingFunClean:   `${BASE}/WrenBouncinghavingFun_dec95150.mov`,
+  bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
   /** Wren with glowing letter/document — Weekly Review and Evidence Log */
-  wrenLetter:         `${BASE}/WrenLetter_653dac1a.mov`,
+  wrenLetter:         `${BASE}/wren_letter_3a012f38.mp4`, // .mov normalized → existing mp4 letter clip
 
   // ── Onboarding ──────────────────────────────────────────────────────────────
   /** Wren glowing and floating — cinematic splash / intro */
@@ -79,8 +79,8 @@ export const WREN_CLIPS = {
   morphsHeart:        `${BASE}/wren_morphs_heart_9c861404.mp4`,
   /** Wren turns into heart (alternate) */
   turnsHeart:         `${BASE}/wren_turns_heart_a0b21e56.mp4`,
-  /** Wren checkmark — task/goal completed (new WrenCheckmark.mov upload) */
-  checkmark:          `${BASE}/WrenCheckmark_5fa19af2.mov`,
+  /** Wren checkmark — task/goal completed */
+  checkmark:          `${BASE}/wren_checkmark_37ecf545.mp4`, // .mov normalized → existing mp4 checkmark
   /** Wren checkmark legacy (original mp4) */
   checkmarkLegacy:    `${BASE}/wren_checkmark_37ecf545.mp4`,
   /** Wren barrel roll — energetic celebration */
@@ -127,6 +127,14 @@ export const WREN_CLIPS = {
   extra9:             `${BASE}/wren_untitled_9_6a2ee8e4.mp4`,
   /** Wren untitled 11 — extra clip C */
   extra11:            `${BASE}/wren_untitled_11_82cd59f1.mp4`,
+
+  // ── Focus session activity clips (used by FocusSessionsPage / WrenPopout / FocusCompanionPage)
+  /** Wren weaving — body-doubling focus activity */
+  weaving:            `/manus-storage/wren-weaving_b532984b.mp4`,
+  /** Wren reading — calm focus activity */
+  reading:            `/manus-storage/wren-reading_bd6af9a6.mp4`,
+  /** Wren looking up — mid-session check-in */
+  lookingup:          `/manus-storage/wren-lookingup_f1735040.mp4`,
 
   // ── Legacy aliases (backward compat — map to best new equivalent) ──────────
   floatingMemories:   `${BASE}/wren_glowing_hovers_6ea04f47.mp4`,

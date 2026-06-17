@@ -6,7 +6,7 @@ import { getLoginUrl } from "@/const";
 import { ArrowLeft, Gift, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 const STORAGE_KEY = "continuary_pending_referral";
 
@@ -47,7 +47,7 @@ export default function RedeemReferralPage() {
       setTimeout(() => navigate("/founding-member"), 2800);
     },
     onError: (err) => {
-      toast.error(err.message || "Invalid referral code. Please check and try again.", {
+      notify.error(err.message || "Invalid referral code. Please check and try again.", {
         duration: 6000,
       });
     },

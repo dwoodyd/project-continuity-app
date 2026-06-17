@@ -13,7 +13,7 @@
 import { useRef, useState, useCallback } from "react";
 import { Mic, MicOff, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { cn } from "@/lib/utils";
 
 type RecordingState = "idle" | "recording" | "processing";
@@ -44,15 +44,15 @@ export function VoiceDictationButton({
     onSuccess: (data) => {
       if (data.transcript) {
         onTranscript(data.transcript);
-        toast.success("Transcribed", { description: "Voice note added to field." });
+        notify.saved("Transcribed", { description: "Voice note added to field." });
       } else {
-        toast.info("Nothing heard", { description: "No speech detected — try again." });
+        notify.info("Nothing heard", { description: "No speech detected — try again." });
       }
       setState("idle");
       setSeconds(0);
     },
     onError: (err) => {
-      toast.error("Transcription failed", { description: err.message });
+      notify.error("Transcription failed", { description: err.message });
       setState("idle");
       setSeconds(0);
     },
@@ -83,12 +83,12 @@ export function VoiceDictationButton({
         err instanceof DOMException &&
         (err.name === "NotAllowedError" || err.name === "PermissionDeniedError");
       if (isDenied) {
-        toast.error("Microphone access denied", {
+        notify.error("Microphone access denied", {
           description:
             "Allow microphone access in your browser settings, then try again.",
         });
       } else {
-        toast.error("Microphone unavailable", {
+        notify.error("Microphone unavailable", {
           description: "Could not access your microphone. Check device settings.",
         });
       }
@@ -118,7 +118,7 @@ export function VoiceDictationButton({
       streamRef.current = null;
 
       if (chunksRef.current.length === 0) {
-        toast.info("No audio captured", { description: "Recording was too short." });
+        notify.info("No audio captured", { description: "Recording was too short." });
         setState("idle");
         setSeconds(0);
         return;
@@ -133,7 +133,7 @@ export function VoiceDictationButton({
       // Check size before encoding (~15 MB raw → ~20 MB base64)
       const sizeMB = blob.size / (1024 * 1024);
       if (sizeMB > 12) {
-        toast.error("Recording too long", {
+        notify.error("Recording too long", {
           description: `${sizeMB.toFixed(1)} MB — please keep recordings under ~90 seconds.`,
         });
         setState("idle");

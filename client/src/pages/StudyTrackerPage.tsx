@@ -13,7 +13,7 @@
 import { useState, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -60,13 +60,13 @@ function SetupScreen({ onDone }: { onDone: () => void }) {
       setConfirmed(true);
       setTimeout(onDone, 2500);
     },
-    onError: () => toast.error("Couldn't save your focus. Please try again."),
+    onError: () => notify.error("Couldn't save your focus. Please try again."),
   });
 
   const placeholderIdx = Math.floor(Date.now() / 5000) % PLACEHOLDER_TOPICS.length;
 
   const handleSubmit = () => {
-    if (!topic.trim()) { toast.error("Tell Wren what you're focusing on."); return; }
+    if (!topic.trim()) { notify.error("Tell Wren what you're focusing on."); return; }
     const finalDuration = showCustom ? (parseInt(customDuration) || 30) : duration;
     createMutation.mutate({ focusTopic: topic.trim(), durationDays: finalDuration, cadence, wrenPrompts });
   };
@@ -277,7 +277,7 @@ function SettingsPanel({
 
   const updateMutation = trpc.study.updateConfig.useMutation({
     onSuccess: () => { utils.study.getActiveConfig.invalidate(); onRefetch(); onClose(); },
-    onError: () => toast.error("Couldn't update. Please try again."),
+    onError: () => notify.error("Couldn't update. Please try again."),
   });
 
   const daysSinceStart = daysSince(config.startedAt);
@@ -466,8 +466,8 @@ function DayCard({
   const [saving, setSaving] = useState(false);
 
   const saveMutation = trpc.study.saveDayLog.useMutation({
-    onSuccess: () => { setSaving(false); onSaved(); toast.success("Saved."); },
-    onError: () => { setSaving(false); toast.error("Couldn't save. Try again."); },
+    onSuccess: () => { setSaving(false); onSaved(); notify.saved("Saved."); },
+    onError: () => { setSaving(false); notify.error("Couldn't save. Try again."); },
   });
 
   const handleSave = () => {

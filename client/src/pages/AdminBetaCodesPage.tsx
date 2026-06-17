@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { Copy, Download, RefreshCw } from "lucide-react";
 
 export default function AdminBetaCodesPage() {
@@ -17,7 +17,7 @@ export default function AdminBetaCodesPage() {
   const copyAll = () => {
     const unused = codes?.filter((c) => !c.usedBy).map((c) => c.code).join("\n") ?? "";
     navigator.clipboard.writeText(unused);
-    toast.success("Copied unused codes to clipboard");
+    notify.saved("Copied unused codes to clipboard");
   };
 
   const downloadCSV = () => {

@@ -12,7 +12,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { LogOut, Loader2 } from "lucide-react";
 import WrenPlayer from "@/components/WrenPlayer";
 
@@ -58,7 +58,7 @@ export default function InviteGatePage() {
       setTimeout(() => { window.location.href = dest; }, 1200);
     },
     onError: (err) => {
-      toast.error(err.message || "Invalid or already-used invite code.");
+      notify.error(err.message || "Invalid or already-used invite code.");
       setShake(true);
       setTimeout(() => setShake(false), 600);
     },

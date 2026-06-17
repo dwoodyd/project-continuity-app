@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import {
   Plus, Trash2, PenLine, Check, X, Pin, PinOff,
   BookOpen, Share2, CalendarPlus, Search, CheckSquare, Square,
@@ -286,7 +286,7 @@ export default function ScratchPadPage() {
       ]);
       return { prev };
     },
-    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not add note."); },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); notify.error("Could not add note."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
@@ -297,7 +297,7 @@ export default function ScratchPadPage() {
       utils.scratchPad.list.setData(undefined, (old = []) => old.map(n => n.id === input.id ? { ...n, content: input.content, updatedAt: new Date() } : n));
       return { prev };
     },
-    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not save."); },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); notify.error("Could not save."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
@@ -308,7 +308,7 @@ export default function ScratchPadPage() {
       utils.scratchPad.list.setData(undefined, (old = []) => old.filter(n => n.id !== input.id));
       return { prev };
     },
-    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not delete."); },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); notify.error("Could not delete."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
@@ -343,33 +343,33 @@ export default function ScratchPadPage() {
       utils.scratchPad.list.setData(undefined, (old = []) => old.filter(n => n.id !== input.id));
       return { prev };
     },
-    onSuccess: () => toast.success("Sent to Vault", { description: "Note removed from pad. Find it in Vault → Inbox." }),
-    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); toast.error("Could not send to Vault."); },
+    onSuccess: () => notify.saved("Sent to Vault", { description: "Note removed from pad. Find it in Vault → Inbox." }),
+    onError: (_e, _v, ctx) => { if (ctx?.prev) utils.scratchPad.list.setData(undefined, ctx.prev); notify.error("Could not send to Vault."); },
     onSettled: () => utils.scratchPad.list.invalidate(),
   });
 
   const shareToVault = trpc.scratchPad.shareToVault.useMutation({
-    onSuccess: () => toast.success("Shared to Vault", { description: "A copy was added to Vault → Inbox. Note stays in pad." }),
-    onError: () => toast.error("Could not share to Vault."),
+    onSuccess: () => notify.saved("Shared to Vault", { description: "A copy was added to Vault → Inbox. Note stays in pad." }),
+    onError: () => notify.error("Could not share to Vault."),
   });
 
   const addToTomorrow = trpc.scratchPad.addToTomorrowPlan.useMutation({
-    onSuccess: (data) => toast.success("Added to Tomorrow's Plan", { description: `${data.taskCount} task${data.taskCount !== 1 ? "s" : ""} planned.` }),
-    onError: () => toast.error("Could not add to Tomorrow's Plan."),
+    onSuccess: (data) => notify.saved("Added to Tomorrow's Plan", { description: `${data.taskCount} task${data.taskCount !== 1 ? "s" : ""} planned.` }),
+    onError: () => notify.error("Could not add to Tomorrow's Plan."),
   });
 
   // ── Bulk actions ───────────────────────────────────────────────────────────
   async function bulkDelete() {
     const ids = Array.from(selected);
     ids.forEach(id => remove.mutate({ id }));
-    toast.success(`${ids.length} note${ids.length !== 1 ? "s" : ""} deleted.`);
+    notify.saved(`${ids.length} note${ids.length !== 1 ? "s" : ""} deleted.`);
     exitSelectMode();
   }
 
   async function bulkSendToVault() {
     const toSend = (notes as Note[]).filter(n => selected.has(n.id));
     toSend.forEach(n => sendToVault.mutate({ id: n.id, content: n.content }));
-    toast.success(`${toSend.length} note${toSend.length !== 1 ? "s" : ""} sent to Vault.`);
+    notify.saved(`${toSend.length} note${toSend.length !== 1 ? "s" : ""} sent to Vault.`);
     exitSelectMode();
   }
 

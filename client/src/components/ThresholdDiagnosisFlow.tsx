@@ -10,7 +10,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { FirstMovableStepModal } from "./FirstMovableStepModal";
 
 interface ThresholdDiagnosisFlowProps {
@@ -76,7 +76,7 @@ export function ThresholdDiagnosisFlow({
       setResult(data);
       setStep(3);
     },
-    onError: (err) => toast.error(err.message || "Could not complete the diagnosis"),
+    onError: (err) => notify.error(err.message || "Could not complete the diagnosis"),
   });
 
   function handleNext() {
@@ -84,7 +84,7 @@ export function ThresholdDiagnosisFlow({
     if (!currentQ) return;
     const val = answers[currentQ.id as keyof typeof answers];
     if (!val.trim()) {
-      toast.error("Please answer this question before continuing");
+      notify.error("Please answer this question before continuing");
       return;
     }
     if (step < 2) {

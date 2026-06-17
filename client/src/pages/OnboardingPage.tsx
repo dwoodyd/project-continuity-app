@@ -21,7 +21,7 @@ import { getLoginUrl } from "@/const";
 import { ArrowRight, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 
 
@@ -1041,7 +1041,7 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
   const [projectNext, setProjectNext] = useState("");
 
   const completeOnboarding = trpc.settings.completeOnboarding.useMutation({
-    onError: () => toast.error("Something went wrong. Please try again."),
+    onError: () => notify.error("Something went wrong. Please try again."),
   });
   const createProject = trpc.projects.create.useMutation();
   const generateStartHere = trpc.intelligence.generateOnboardingStartHere.useMutation();

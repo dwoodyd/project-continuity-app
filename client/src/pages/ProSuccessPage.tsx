@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 
 export default function ProSuccessPage() {
   const [, navigate] = useLocation();
@@ -21,12 +21,12 @@ export default function ProSuccessPage() {
     confirm.mutateAsync({ subscriptionId, planKey }).then(async () => {
       await utils.paypal.status.invalidate();
       const isKeeper = planKey?.startsWith("keeper");
-      toast(isKeeper ? "Welcome to Keeper! ✦" : "Welcome to Pro! ✦", {
+      notify.info(isKeeper ? "Welcome to Keeper! ✦" : "Welcome to Pro! ✦", {
         description: "Your thread is fully supported.",
       });
       navigate("/pro");
     }).catch(() => {
-      toast.error("Could not confirm subscription. Please contact support.");
+      notify.error("Could not confirm subscription. Please contact support.");
       navigate("/pro");
     });
   }, [subscriptionId]);

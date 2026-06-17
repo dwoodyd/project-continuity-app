@@ -54,7 +54,7 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import notify from "@/lib/notify";
 import IdeaSanctuaryModal from "@/components/IdeaSanctuaryModal";
 import UnstickModal from "@/components/UnstickModal";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
@@ -361,11 +361,11 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
     onSuccess: (data) => {
-      toast.success("Your day is set.", { description: "Wren's watching your back." });
+      notify.saved("Your day is set.", { description: "Wren's watching your back." });
       // If clarity mode was suggested and state is anxious/foggy/drained, offer nudge
       if (data.clarityModeSuggestion) {
         setTimeout(() => {
-          toast(
+          notify.info(
             emotionalStateConfig[emotionalState!]?.clarityHint ?? "Clarity Engine is available.",
             {
               description: "A quick clarity session might help before you dive in.",
@@ -377,7 +377,7 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       }
       onComplete();
     },
-    onError: () => toast.error("Didn't save — try once more."),
+    onError: () => notify.error("Didn't save — try once more."),
   });
   return (
     <div className="space-y-5">
@@ -542,10 +542,10 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
-      toast.success(data.response ?? "Midday check-in noted.");
+      notify.saved(data.response ?? "Midday check-in noted.");
       onComplete();
     },
-    onError: () => toast.error("Didn't save — try once more."),
+    onError: () => notify.error("Didn't save — try once more."),
   });
   return (
     <div className="space-y-4">
@@ -637,7 +637,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
       <Button
         onClick={() => {
           if (!workedOn.trim() || wasOnPlan === null) {
-            toast.error("Two things needed — what moved, and was it on plan.");
+            notify.error("Two things needed — what moved, and was it on plan.");
             return;
           }
           // Fire-and-forget distraction classification if interruptions were noted
@@ -736,17 +736,17 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
-      toast.success("Day closed.", { description: "Tomorrow's brief is ready when you are." });
+      notify.saved("Day closed.", { description: "Tomorrow's brief is ready when you are." });
       onComplete();
     },
-    onError: () => toast.error("Didn't save — try once more."),
+    onError: () => notify.error("Didn't save — try once more."),
   });
   const saveDecision = trpc.intelligence.saveDecision.useMutation();
   const extractDecisions = trpc.intelligence.extractDecisionsFromNotes.useMutation();
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const handleSubmit = async () => {
     if (!whatMoved.trim() || !tomorrowFirst.trim()) {
-      toast.error("Two things needed — what moved, and what goes first tomorrow.");
+      notify.error("Two things needed — what moved, and what goes first tomorrow.");
       return;
     }
     // Save explicit decision if captured
@@ -925,7 +925,7 @@ function ReEntryCard({ projectId, projectTitle, onDismiss }: { projectId: number
       const result = await generate.mutateAsync({ projectId });
       setCard(result);
     } catch {
-      toast.error("Couldn't build your re-entry card — try again.");
+      notify.error("Couldn't build your re-entry card — try again.");
     } finally {
       setLoading(false);
     }
@@ -1082,7 +1082,7 @@ export default function Home() {
     try {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
-        toast.success("Reminders on.", { description: "Wren will check in at the right moments." });
+        notify.saved("Reminders on.", { description: "Wren will check in at the right moments." });
       }
     } catch {
       // browser may not support
@@ -1320,7 +1320,7 @@ export default function Home() {
     onSuccess: () => refetchPlan(),
   });
   const pushToTomorrowMutation = trpc.checkIns.pushTaskToTomorrow.useMutation({
-    onSuccess: () => { refetchPlan(); toast.success("Moved to tomorrow.", { description: "It'll be there when you're ready." }); },
+    onSuccess: () => { refetchPlan(); notify.saved("Moved to tomorrow.", { description: "It'll be there when you're ready." }); },
   });
 
   // Inline edit state
@@ -1339,7 +1339,7 @@ export default function Home() {
     // Mark as pending-undo
     setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
     // Show undo toast
-    toast("Done ✓", {
+    notify.info("Done ✓", {
       description: taskTitle.length > 50 ? taskTitle.slice(0, 50) + "…" : taskTitle,
       duration: 5000,
       action: {
@@ -1472,7 +1472,7 @@ export default function Home() {
     // After morning or evening check-in, gently surface unprocessed ideas when count > 3
     if ((type === "morning" || type === "evening") && pendingIdeaCount > 3) {
       setTimeout(() => {
-        toast(
+        notify.info(
           `${pendingIdeaCount} idea${pendingIdeaCount > 1 ? "s" : ""} waiting in your Sanctuary.`,
           {
             description: "Good moment to process them while you have a clear head.",
@@ -2496,7 +2496,7 @@ export default function Home() {
                       await updateProjectNextStep.mutateAsync({ id: topProject.id, nextStep: p.nextStep ?? "" });
                       setSavingStep(false);
                       setPickingStep(false);
-                      toast("Next step updated");
+                      notify.info("Next step updated");
                     }}
                     className={cn(
                       "w-full text-left p-2.5 rounded-lg border text-xs transition-all",
@@ -2523,7 +2523,7 @@ export default function Home() {
                         setSavingStep(false);
                         setCustomStep("");
                         setPickingStep(false);
-                        toast("Next step updated");
+                        notify.info("Next step updated");
                       }
                     }}
                   />
@@ -2536,7 +2536,7 @@ export default function Home() {
                         setSavingStep(false);
                         setCustomStep("");
                         setPickingStep(false);
-                        toast("Next step updated");
+                        notify.info("Next step updated");
                       }}
                       className="px-3 py-2 rounded-lg bg-primary text-white text-xs font-medium disabled:opacity-50"
                     >
