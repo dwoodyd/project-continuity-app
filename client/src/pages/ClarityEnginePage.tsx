@@ -1112,7 +1112,7 @@ const BRAIN_DUMP_STORAGE_KEY = "continuary-clarity-brain-dump";
 // -- Main page --
 export default function ClarityEnginePage() {
   const [view, setView] = useState<"new" | "result" | "history" | "patterns" | "weekly" | "threshold_history">("new");
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   // Pre-fill mode from ?mode= query param (e.g., from Command Center nudge)
   const [selectedMode, setSelectedMode] = useState<Mode | null>(() => {
     try {
@@ -1215,9 +1215,10 @@ export default function ClarityEnginePage() {
   });
   const saveToVault = trpc.vault.addPaste.useMutation({
     onSuccess: () => {
-      notify.saved("Clarity Map saved to Knowledge Vault.", {
-        description: "Find it in the Vault inbox.",
-        duration: 4000,
+      notify.saved("Saved to your Vault", {
+        description: "Your Clarity Map is waiting in the inbox.",
+        action: { label: "View in Vault", onClick: () => setLocation("/vault") },
+        duration: 5000,
       });
       utils.vault.list.invalidate();
     },

@@ -727,7 +727,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     >
       {/* Phone column */}
       <div className="w-full max-w-md h-full flex flex-col bg-background relative overflow-hidden shadow-2xl">
-        {/* Top header */}
+        {/* Top header — hidden during active focus sessions */}
+        {!isFocusRoute && (
         <header
           className="flex items-center justify-between px-4 shrink-0 z-30 border-b border-white/10 nav-glass"
           style={{
@@ -781,13 +782,15 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             </button>
           </div>
         </header>
+        )}
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto overscroll-contain pb-20">
+        <main className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"}>
           {children}
         </main>
 
-        {/* Bottom tab bar */}
+        {/* Bottom tab bar — hidden during focus sessions */}
+        {!isFocusRoute && (
         <nav
           className="shrink-0 z-30 nav-glass"
           style={{
@@ -834,6 +837,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             })}
           </div>
         </nav>
+        )}
       </div>
 
       {/* More drawer removed — replaced by Hub tab (/hub) */}
