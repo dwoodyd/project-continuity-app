@@ -21,7 +21,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, subtitle, action, className }: PageHeaderProps) {
   return (
-    <div className={cn("flex items-start justify-between gap-4 mb-6", className)}>
+    <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4 mb-6", className)}>
       <div className="min-w-0">
         <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
           {title}
@@ -31,7 +31,7 @@ export function PageHeader({ title, subtitle, action, className }: PageHeaderPro
         )}
       </div>
       {action && (
-        <div className="shrink-0 flex items-center gap-2">{action}</div>
+        <div className="flex flex-wrap items-center gap-2 sm:shrink-0">{action}</div>
       )}
     </div>
   );
