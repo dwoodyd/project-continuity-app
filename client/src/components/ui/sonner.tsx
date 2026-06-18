@@ -9,7 +9,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme="dark"
-      position="bottom-right"
+      position="top-center"
+      offset="20px"
+      mobileOffset={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
       gap={10}
       toastOptions={{
         style: {
