@@ -7,10 +7,7 @@ import {
   getActiveProjects,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
-
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0]!;
-}
+import { resolveDate, subtractDay } from "../utils/dateUtils";
 
 // Tomorrow task schema (lighter — no done flag, no carryover tracking)
 const tomorrowTaskSchema = z.object({
@@ -37,7 +34,7 @@ export const dailyPlanRouter = router({
   getToday: protectedProcedure
     .input(z.object({ localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional() }).optional())
     .query(async ({ ctx, input }) => {
-      const date = input?.localDate ?? getTodayDate();
+      const date = resolveDate(input?.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       return plan ?? null;
     }),
@@ -53,14 +50,15 @@ export const dailyPlanRouter = router({
     return getRecentDailyPlans(ctx.user.id, 7);
   }),
 
-  getTomorrowBrief: protectedProcedure.query(async ({ ctx }) => {
-    // Get yesterday's plan for the tomorrow brief
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split("T")[0]!;
-    const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
-    return plan?.tomorrowBrief ?? null;
-  }),
+  // Accepts localDate so yesterday is computed in the user's timezone, not UTC.
+  getTomorrowBrief: protectedProcedure
+    .input(z.object({ localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      const today = resolveDate(input?.localDate);
+      const yesterdayStr = subtractDay(today, 1);
+      const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
+      return plan?.tomorrowBrief ?? null;
+    }),
 
   updateTasks: protectedProcedure
     .input(z.object({
@@ -68,7 +66,7 @@ export const dailyPlanRouter = router({
       criticalTasks: z.array(taskSchema),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.date ?? getTodayDate();
+      const date = resolveDate(input.date);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
       await updateDailyPlan(plan.id, ctx.user.id, {
@@ -86,7 +84,7 @@ export const dailyPlanRouter = router({
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       // Upsert: create a minimal plan if one doesn't exist yet (user may have skipped morning check-in)
       const planId = await upsertDailyPlan({
         userId: ctx.user.id,
@@ -101,37 +99,28 @@ export const dailyPlanRouter = router({
       return { success: true };
     }),
 
-  // Returns tomorrow's planned tasks from yesterday's daily plan
-  // Accepts localDate (today's local YYYY-MM-DD) so we can compute yesterday correctly
+  // Returns tomorrow's planned tasks from yesterday's daily plan.
+  // Accepts localDate (today's local YYYY-MM-DD) so we can compute yesterday correctly.
   getTomorrowPlan: protectedProcedure
     .input(z.object({ localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).optional())
     .query(async ({ ctx, input }) => {
-    // Compute yesterday from the client's local date to avoid UTC midnight mismatch
-    let yesterdayStr: string;
-    if (input?.localDate) {
-      const [y, m, d] = input.localDate.split("-").map(Number);
-      const prev = new Date(y!, m! - 1, d! - 1);
-      yesterdayStr = `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}-${String(prev.getDate()).padStart(2, '0')}`;
-    } else {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterdayStr = yesterday.toISOString().split("T")[0]!;
-    }
-    const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
-    if (!plan?.tomorrowTasks) return [];
-    try {
-      return JSON.parse(plan.tomorrowTasks) as Array<{
-        id: string;
-        title: string;
-        projectId?: number | null;
-        energyLevel?: string;
-        estimatedMinutes?: number;
-        notes?: string;
-      }>;
-    } catch {
-      return [];
-    }
-  }),
+      const today = resolveDate(input?.localDate);
+      const yesterdayStr = subtractDay(today, 1);
+      const plan = await getDailyPlan(ctx.user.id, yesterdayStr);
+      if (!plan?.tomorrowTasks) return [];
+      try {
+        return JSON.parse(plan.tomorrowTasks) as Array<{
+          id: string;
+          title: string;
+          projectId?: number | null;
+          energyLevel?: string;
+          estimatedMinutes?: number;
+          notes?: string;
+        }>;
+      } catch {
+        return [];
+      }
+    }),
 
   // ── Add a single task to tomorrow's plan ────────────────────────────────────
   // Called when the user adds a task after the day is closed (or any time).
@@ -142,7 +131,7 @@ export const dailyPlanRouter = router({
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       // Upsert plan so it always exists
       let plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) {
@@ -171,7 +160,7 @@ export const dailyPlanRouter = router({
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
       const tasks: Array<{ id: string; title: string; [key: string]: unknown }> =
@@ -194,7 +183,7 @@ export const dailyPlanRouter = router({
       currentEnergyLevel: z.enum(["high", "low", "any"]).optional(),
     }))
     .query(async ({ ctx, input }) => {
-      const date = input.date ?? getTodayDate();
+      const date = resolveDate(input.date);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan?.criticalTasks) return null;
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { desc, eq, gte, and, sql } from "drizzle-orm";
 import { protectedProcedure, adminProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
+import { getServerLocalDate } from "../utils/dateUtils";
 import {
   continuityEvents,
   threadStrength,
@@ -63,7 +64,7 @@ async function checkAndAwardMilestones(userId: number, eventType: string): Promi
 
   if (eventType === "rhythm_evening") {
     // Check if all three rhythms completed today
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerLocalDate();
     const todayEvents = await db.select({ eventType: continuityEvents.eventType })
       .from(continuityEvents)
       .where(and(
@@ -207,7 +208,7 @@ export const gamificationRouter = router({
       .orderBy(desc(userMilestones.achievedAt));
 
     // Today's rhythm events
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getServerLocalDate();
     const todayEvents = await db.select({ eventType: continuityEvents.eventType })
       .from(continuityEvents)
       .where(and(

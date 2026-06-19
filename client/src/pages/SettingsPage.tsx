@@ -685,7 +685,7 @@ export default function SettingsPage() {
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement("a");
                     a.href = url;
-                    a.download = `continuary-export-${new Date().toISOString().slice(0, 10)}.json`;
+                    const dl = new Date(); const dlStr = `${dl.getFullYear()}-${String(dl.getMonth()+1).padStart(2,"0")}-${String(dl.getDate()).padStart(2,"0")}`; a.download = `continuary-export-${dlStr}.json`;
                     a.click();
                     URL.revokeObjectURL(url);
                     notify.saved("Data exported successfully.");

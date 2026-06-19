@@ -968,7 +968,11 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
 
 // ─── Mood Widget ────────────────────────────────────────────────────────────
 function MoodWidget() {
-  const todayQuery = trpc.moodLogs.getToday.useQuery();
+  const localDateStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+  const todayQuery = trpc.moodLogs.getToday.useQuery({ localDate: localDateStr });
   const cycleQuery = trpc.moodLogs.getCycleAnalysis.useQuery();
   const logMutation = trpc.moodLogs.logToday.useMutation({
     onSuccess: () => { todayQuery.refetch(); cycleQuery.refetch(); },
@@ -1156,7 +1160,7 @@ export default function Home() {
   // Product Hunt launch banner — shown only on VITE_PH_LAUNCH_DATE env var date
   const phLaunchDate = import.meta.env.VITE_PH_LAUNCH_DATE as string | undefined;
   const [phBannerDismissed, setPhBannerDismissed] = useState(() => localStorage.getItem("ph_banner_dismissed") === "1");
-  const showPhBanner = !phBannerDismissed && !!phLaunchDate && new Date().toISOString().slice(0, 10) === phLaunchDate;
+  const _phd = new Date(); const _todayStr = `${_phd.getFullYear()}-${String(_phd.getMonth()+1).padStart(2,"0")}-${String(_phd.getDate()).padStart(2,"0")}`; const showPhBanner = !phBannerDismissed && !!phLaunchDate && _todayStr === phLaunchDate;
   // Beta / trial banner — dismissable per session
   const { data: billingStatus } = trpc.paypal.status.useQuery();
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(() => sessionStorage.getItem("trial_banner_dismissed") === "1");
@@ -1251,7 +1255,7 @@ export default function Home() {
   // ── Deferred queries (fire only after critical path resolves) ─────────────────
   // These are secondary data that don't block the initial render.
   const criticalReady = authed && !planLoading;
-  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery(undefined, { enabled: criticalReady });
+  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery({ localDate: localDateStr }, { enabled: criticalReady });
   const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery({ localDate: localDateStr }, { enabled: criticalReady });
   const { data: lastEveningClose } = trpc.checkIns.getLastEveningClose.useQuery(undefined, { enabled: authed, staleTime: 60_000 });
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: criticalReady });

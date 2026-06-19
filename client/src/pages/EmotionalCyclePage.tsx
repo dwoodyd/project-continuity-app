@@ -185,7 +185,11 @@ export default function EmotionalCyclePage() {
   const [note, setNote] = useState("");
   const [showInfo, setShowInfo] = useState(false);
 
-  const todayQuery = trpc.moodLogs.getToday.useQuery();
+  const localDateStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+  const todayQuery = trpc.moodLogs.getToday.useQuery({ localDate: localDateStr });
   const historyQuery = trpc.moodLogs.getHistory.useQuery({ days: 90 });
   const cycleQuery = trpc.moodLogs.getCycleAnalysis.useQuery();
   const logMutation = trpc.moodLogs.logToday.useMutation({

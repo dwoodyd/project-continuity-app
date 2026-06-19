@@ -1,3 +1,4 @@
+import { resolveDate, getServerLocalDate } from "../utils/dateUtils";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
@@ -22,9 +23,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0]!;
-}
+// getTodayDate replaced by resolveDate from dateUtils
 
 export const aiRouter = router({
   // ─── Idea Sanctuary ─────────────────────────────────────────────────────────

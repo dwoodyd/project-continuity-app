@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
+import { getServerLocalDate, subtractDay } from "../utils/dateUtils";
 import { getDb } from "../db";
 import {
   studyDayLogs,
@@ -22,7 +23,7 @@ function wrenContinuityLine(
 ): string {
   if (entriesCount === 0) return "Day 1. Beginning is its own thing. — Wren";
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getServerLocalDate();
   const gapDays = lastEntryDate
     ? Math.floor((Date.now() - new Date(lastEntryDate).getTime()) / 86400000)
     : 0;
@@ -169,8 +170,8 @@ export const studyRouter = router({
           .where(eq(userFocusConfigs.id, input.focusConfigId))
           .limit(1);
         if (cfg) {
-          const today = new Date().toISOString().slice(0, 10);
-          const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          const today = getServerLocalDate();
+          const yesterday = subtractDay(today, 1);
           const newStreak =
             cfg.lastEntryDate === yesterday || cfg.lastEntryDate === today
               ? cfg.currentStreak + 1

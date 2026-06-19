@@ -241,6 +241,10 @@ export default function ScratchPadPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
+  const localDateStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
   const { data: notes = [], isLoading } = trpc.scratchPad.list.useQuery();
 
   // ── Filtering + sorting ────────────────────────────────────────────────────
@@ -489,7 +493,7 @@ export default function ScratchPadPage() {
               onTogglePin={(id, pinned) => togglePin.mutate({ id, pinned })}
               onSendToVault={(id, content) => sendToVault.mutate({ id, content })}
               onShareToVault={(id, content) => shareToVault.mutate({ id, content })}
-              onAddToTomorrow={content => addToTomorrow.mutate({ content })}
+              onAddToTomorrow={content => addToTomorrow.mutate({ content, localDate: localDateStr })}
               onSetColour={(id, colour) => setColour.mutate({ id, colour })}
               onToggleSelect={toggleSelect}
             />

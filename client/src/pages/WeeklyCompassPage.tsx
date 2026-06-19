@@ -15,7 +15,7 @@ import {
   Sparkles,
   Target,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -92,7 +92,11 @@ export default function WeeklyCompassPage() {
 
   const { data: compass, refetch, isLoading } = trpc.intelligence.getWeeklyCompass.useQuery();
   const { data: allProjects } = trpc.projects.list.useQuery();
-  const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery();
+  const localDateStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+  const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery({ localDate: localDateStr });
 
   const generate = trpc.intelligence.generateWeeklyCompass.useMutation({
     onSuccess: () => {

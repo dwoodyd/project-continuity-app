@@ -11,7 +11,7 @@ import {
   Play,
   RotateCcw,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTransitionSound } from "@/hooks/useTransitionSound";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -61,7 +61,11 @@ export default function FocusModePage() {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
-  const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery();
+  const localDateStr = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }, []);
+  const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery({ localDate: localDateStr });
   const { data: activeProjects } = trpc.projects.listActive.useQuery();
   const saveSession = trpc.focusSessions.save.useMutation();
   const updateBreadcrumb = trpc.projects.updateContextBreadcrumb.useMutation();

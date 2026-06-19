@@ -24,7 +24,7 @@ function formatMonth(month: string): string {
 }
 
 function isCurrentMonth(month: string): boolean {
-  return month === new Date().toISOString().slice(0, 7);
+  const _d = new Date(); return month === `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,"0")}`;
 }
 
 // ─── Streak Heatmap ───────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ function StreakHeatmap({ data }: { data: { date: string; sessionsCount: number }
   for (let i = 29; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const dateStr = d.toISOString().slice(0, 10);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     const found = data.find((x) => x.date === dateStr);
     days.push({ date: dateStr, count: found?.sessionsCount ?? 0 });
   }
@@ -322,7 +322,7 @@ export default function EvidenceLogPage() {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
-                      a.download = `continuary-evidence-log-${new Date().toISOString().slice(0,10)}.md`;
+                      const _ed = new Date(); a.download = `continuary-evidence-log-${_ed.getFullYear()}-${String(_ed.getMonth()+1).padStart(2,"0")}-${String(_ed.getDate()).padStart(2,"0")}.md`;
                       a.click();
                       URL.revokeObjectURL(url);
                       notify.saved("Evidence Log exported");

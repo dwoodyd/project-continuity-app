@@ -1,10 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { upsertMoodLog, getMoodHistory, getTodayMoodLog } from "../db";
-
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0]!;
-}
+import { resolveDate } from "../utils/dateUtils";
 
 // ─── Cycle analysis helpers ───────────────────────────────────────────────────
 // Finds local maxima (peaks) and minima (troughs) in a score series.
@@ -45,16 +42,25 @@ function predictNext(lastDate: string, cycleDays: number): string {
 export const moodLogsRouter = router({
   /** Upsert today's mood score (1–10) with an optional note */
   logToday: protectedProcedure
-    .input(z.object({ score: z.number().int().min(1).max(10), note: z.string().max(500).optional() }))
+    .input(z.object({
+      score: z.number().int().min(1).max(10),
+      note: z.string().max(500).optional(),
+      // Client passes its local YYYY-MM-DD to avoid UTC/local midnight mismatch
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
-      const today = getTodayDate();
+      const today = resolveDate(input.localDate);
       return upsertMoodLog(ctx.user.id, today, input.score, input.note);
     }),
 
   /** Get today's log (null if not yet logged) */
-  getToday: protectedProcedure.query(async ({ ctx }) => {
-    return getTodayMoodLog(ctx.user.id, getTodayDate());
-  }),
+  getToday: protectedProcedure
+    .input(z.object({
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    }).optional())
+    .query(async ({ ctx, input }) => {
+      return getTodayMoodLog(ctx.user.id, resolveDate(input?.localDate));
+    }),
 
   /** Get last N days of mood history */
   getHistory: protectedProcedure

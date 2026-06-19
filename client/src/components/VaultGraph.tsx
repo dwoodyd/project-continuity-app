@@ -112,7 +112,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
       URL.revokeObjectURL(url);
       const a = document.createElement("a");
       a.href = canvas.toDataURL("image/png");
-      a.download = `continuary-vault-graph-${new Date().toISOString().slice(0, 10)}.png`;
+      const dl = new Date(); const dlStr = `${dl.getFullYear()}-${String(dl.getMonth()+1).padStart(2,"0")}-${String(dl.getDate()).padStart(2,"0")}`; a.download = `continuary-vault-graph-${dlStr}.png`;
       a.click();
     };
     img.src = url;

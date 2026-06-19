@@ -33,10 +33,9 @@ import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
+import { resolveDate, addDay, getServerLocalDate } from "../utils/dateUtils";
 
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0]!;
-}
+// getTodayDate replaced by resolveDate from dateUtils
 
 export const checkInsRouter = router({
   getToday: protectedProcedure
@@ -46,7 +45,7 @@ export const checkInsRouter = router({
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }).optional())
     .query(async ({ ctx, input }) => {
-      const date = input?.localDate ?? getTodayDate();
+      const date = resolveDate(input?.localDate);
       return getCheckIns(ctx.user.id, date);
     }),
 
@@ -75,7 +74,7 @@ export const checkInsRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
         getUserProfile(ctx.user.id),
         getActiveProjects(ctx.user.id),
@@ -358,7 +357,7 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
       const toneMap = { gentle: "warm but honest", direct: "calm and direct", firm: "concise and firm" };
@@ -444,7 +443,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }))
     .mutation(async ({ ctx, input }) => {
       checkLLMRateLimit(ctx.user.id);
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
       const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
@@ -578,7 +577,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       const evidenceUserId = ctx.user.id;
       void (async () => {
         try {
-          const month = new Date().toISOString().slice(0, 7);
+          const month = getServerLocalDate().slice(0, 7);
           const stats = await computeStats(evidenceUserId, month);
           const summaryLine = stats.sessionsStarted > 0
             ? await generateIdentitySentence(month, stats, evidenceUserId)
@@ -609,7 +608,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.date ?? getTodayDate();
+      const date = resolveDate(input.date);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
 
@@ -643,7 +642,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
 
       // ── Routing: if the day is already closed, write to tomorrowTasks ────────
       // The morning rollover reads tomorrowTasks (+ unfinished criticalTasks) to
@@ -695,7 +694,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
 
@@ -713,7 +712,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
 
@@ -729,7 +728,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.localDate ?? getTodayDate();
+      const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
 
@@ -742,9 +741,9 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       await updateDailyPlan(plan.id, ctx.user.id, { criticalTasks: JSON.stringify(todayFiltered) });
 
       // Compute tomorrow's date
-      const [y, m, d] = date.split("-").map(Number);
-      const tomorrow = new Date(Date.UTC(y, m - 1, d + 1));
-      const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+      
+      
+      const tomorrowStr = addDay(date, 1);
 
       // Upsert tomorrow's plan and append task
       let tomorrowPlan = await getDailyPlan(ctx.user.id, tomorrowStr);
@@ -767,7 +766,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const date = input.date ?? getTodayDate();
+      const date = resolveDate(input.date);
       const plan = await getDailyPlan(ctx.user.id, date);
       if (!plan) return { success: false };
 

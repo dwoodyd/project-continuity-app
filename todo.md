@@ -2008,3 +2008,23 @@
 - [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
 - [ ] TEST: Vitest for updateTask procedure
 - [ ] CHECKPOINT: TypeScript 0 errors, tests passing
+
+## UTC Date Bug Fix (Jun 2026)
+
+- [x] Create `server/utils/dateUtils.ts` with `resolveDate`, `getServerLocalDate`, `addDay`, `subtractDay` helpers
+- [x] Create `client/src/lib/dateUtils.ts` with `getLocalDateStr`, `getYesterdayStr`, `getTomorrowStr` helpers
+- [x] Fix `server/routers/dailyPlan.ts` — replace all `getTodayDate()` with `resolveDate(input.localDate)` and accept `localDate` in all procedures
+- [x] Fix `server/routers/checkIns.ts` — replace `getTodayDate()` with `resolveDate(input.localDate)` throughout
+- [x] Fix `server/routers/moodLogs.ts` — add `localDate` to `getToday` and `logToday` inputs
+- [x] Fix `server/routers/scratchPad.ts` — add `localDate` to `addToTomorrowPlan` input
+- [x] Fix `server/routers/study.ts` — replace UTC `today`/`yesterday` with `getServerLocalDate()`/`subtractDay()`
+- [x] Fix `server/routers/gamification.ts` — replace UTC `today` with `getServerLocalDate()`
+- [x] Fix `client/src/pages/Home.tsx` — pass `localDate` to `getTomorrowBrief` and `MoodWidget`
+- [x] Fix `client/src/pages/EmotionalCyclePage.tsx` — pass `localDate` to `moodLogs.getToday` and `logToday`
+- [x] Fix `client/src/pages/FocusModePage.tsx` — pass `localDate` to `dailyPlan.getToday`
+- [x] Fix `client/src/pages/WeeklyCompassPage.tsx` — pass `localDate` to `dailyPlan.getToday`
+- [x] Fix `client/src/pages/ScratchPadPage.tsx` — pass `localDate` to `scratchPad.addToTomorrowPlan`
+- [x] Fix `client/src/pages/StudyTrackerPage.tsx` — use local date for `logDate`
+- [x] Fix `client/src/pages/EvidenceLogPage.tsx` — use local date for 30-day grid and `isCurrentMonth`
+- [x] Fix `client/src/components/VaultGraph.tsx` and `SettingsPage.tsx` — use local date for export filenames
+- [x] TypeScript: 0 errors; all 390 tests pass

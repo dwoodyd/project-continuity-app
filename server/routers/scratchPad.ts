@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
+import { resolveDate } from "../utils/dateUtils";
 import {
   getScratchNotes,
   createScratchNote,
@@ -87,11 +88,13 @@ export const scratchPadRouter = router({
     }),
 
   addToTomorrowPlan: protectedProcedure
-    .input(z.object({ content: z.string() }))
+    .input(z.object({
+      content: z.string(),
+      // Client passes its local YYYY-MM-DD to avoid UTC/local midnight mismatch
+      localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const dateStr = today.toISOString().slice(0, 10);
+      const dateStr = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, dateStr);
       const existing: Array<{ id: string; text: string; energy?: string; estimatedMinutes?: number }> =
         plan?.tomorrowTasks ? JSON.parse(plan.tomorrowTasks) : [];
