@@ -79,6 +79,57 @@ export default function PrivacyPage() {
           </div>
 
           <div>
+            <h2 className="text-base font-semibold mb-2">Google Calendar integration</h2>
+            <p className="mb-2">
+              Continuary offers an optional Google Calendar integration. If you choose to connect
+              your Google account, the following applies:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-foreground/80 mb-2">
+              <li>
+                <strong>Scope requested:</strong>{" "}
+                <code className="text-xs bg-muted px-1 py-0.5 rounded">https://www.googleapis.com/auth/calendar.readonly</code>{" "}
+                — read-only access to your calendar events. Continuary cannot create, edit, or
+                delete calendar events.
+              </li>
+              <li>
+                <strong>Data accessed:</strong> Event titles, start/end times, and descriptions
+                from your primary Google Calendar for the current week (up to 50 events).
+              </li>
+              <li>
+                <strong>How it is used:</strong> Calendar events are included as context in your
+                morning check-in and weekly planning AI prompts so Continuary can account for
+                your schedule when generating guidance. Event data is not stored permanently —
+                it is fetched fresh each time and processed in memory only.
+              </li>
+              <li>
+                <strong>Tokens:</strong> OAuth access and refresh tokens are stored encrypted
+                in our database (US region) solely to maintain your connection. They are never
+                shared with third parties.
+              </li>
+              <li>
+                <strong>Disconnect at any time:</strong> Go to Settings → Integrations →
+                Disconnect Google Calendar. This immediately deletes your stored tokens and
+                removes calendar access.
+              </li>
+            </ul>
+            <p className="text-foreground/70 text-xs">
+              Continuary's use of Google Calendar data complies with the{" "}
+              <a
+                href="https://developers.google.com/terms/api-services-user-data-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-foreground"
+              >
+                Google API Services User Data Policy
+              </a>
+              , including the Limited Use requirements. We do not use Google Calendar data for
+              advertising, do not transfer it to third parties except as necessary to provide
+              the in-app features described above, and do not allow humans to read your calendar
+              data unless you explicitly share it with us for support purposes.
+            </p>
+          </div>
+
+          <div>
             <h2 className="text-base font-semibold mb-2">Data storage and security</h2>
             <p>
               Your data is stored in a managed MySQL database hosted on TiDB Cloud (US region).
