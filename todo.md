@@ -2041,3 +2041,8 @@
 - [x] Add Ideas nav item (Sparkles icon) to AppLayout between Scratch Pad and Study
 - [x] Add /ideas route to App.tsx
 - [x] Add Refresh Data section to SettingsPage (Settings > Preferences tab)
+
+## Morning Check-in Overwrites Task List Fix (Jun 19 2026)
+- [x] Fix submitMorning to be additive-only: read today's existing criticalTasks first, merge carry-ins, never replace
+- [x] AI suggestions only used as seed on truly empty first-time morning (tagged isAiSuggested=true)
+- [x] Restore user's real 5-item task list from tomorrowTasks into criticalTasks (removed 2 fabricated AI tasks)

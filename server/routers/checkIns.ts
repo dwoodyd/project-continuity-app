@@ -248,37 +248,46 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const raw = (response.choices[0]?.message?.content as string) ?? "{}";
       const parsed = JSON.parse(raw);
 
-      // ── Build the task list ────────────────────────────────────────────────
-      // Safety-net merge: combine tomorrowTasks snapshot (set at Evening Close)
-      // with any tasks added to yesterday's criticalTasks AFTER the close
-      // (post-close additions that may have landed in the wrong bucket before
-      // the routing fix). De-dupe by title (case-insensitive) so nothing doubles.
+      // ── Build the task list (ADDITIVE-ONLY — the running list is sacred) ────
+      //
+      // Priority order:
+      //   1. Today's existing criticalTasks (already on screen — NEVER overwrite)
+      //   2. Yesterday's tomorrowTasks (pre-planned last night) — merge in any new ones
+      //   3. Yesterday's unfinished criticalTasks (post-close additions) — merge in any new ones
+      //   4. AI suggestions — ONLY if the user has zero tasks at all (first-time morning)
+      //      and even then they are tagged isAiSuggested=true so the user can dismiss them.
+      //
+      // De-dupe by title (case-insensitive) throughout.
+
+      // Step 1: read today's existing plan (may already have tasks from a prior morning run or manual adds)
+      const todayPlan = recentPlans.find((p) => p.date === date);
+      const existingTodayTasks: any[] = (() => {
+        try { return JSON.parse(todayPlan?.criticalTasks ?? "[]"); } catch { return []; }
+      })();
+
+      // Step 2 & 3: build the carry-in set from yesterday
       const yesterday = recentPlans.find((p) => p.date !== date) ?? recentPlans[0];
-      let mergedPrePlanned = [...tomorrowTasksFromYesterday];
+      let carryInTasks: Array<{ id?: string; title: string; projectId?: number | null; energyLevel?: string; estimatedMinutes?: number; notes?: string }> = [...tomorrowTasksFromYesterday];
       if (yesterday) {
         const yesterdayTasks: any[] = (() => {
           try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
         })();
         const unfinishedYesterday = yesterdayTasks.filter((t: any) => !t.done && t.isUserAdded);
-        const existingTitles = new Set(mergedPrePlanned.map((t) => t.title.trim().toLowerCase()));
+        const carryInTitles = new Set(carryInTasks.map((t) => t.title.trim().toLowerCase()));
         for (const t of unfinishedYesterday) {
-          if (!existingTitles.has(t.title.trim().toLowerCase())) {
-            mergedPrePlanned.push({ id: t.id, title: t.title, energyLevel: t.energyLevel, estimatedMinutes: t.estimatedMinutes, notes: t.notes });
-            existingTitles.add(t.title.trim().toLowerCase());
+          if (!carryInTitles.has(t.title.trim().toLowerCase())) {
+            carryInTasks.push({ id: t.id, title: t.title, energyLevel: t.energyLevel, estimatedMinutes: t.estimatedMinutes, notes: t.notes });
+            carryInTitles.add(t.title.trim().toLowerCase());
           }
         }
       }
-      const hasPrePlannedTasksMerged = mergedPrePlanned.length > 0;
 
-      // Build the task list:
-      // If user pre-planned tasks last night (or has post-close additions) — use those verbatim.
-      // criticalTasks is a permanent running list — NEVER truncate by capacity.
-      // If no pre-planned tasks — use AI-generated tasks as before.
-      let tasksWithIds: any[];
-      if (hasPrePlannedTasksMerged) {
-        // Carry ALL pre-planned tasks forward — never drop any.
-        tasksWithIds = mergedPrePlanned.map((pt, i) => ({
-          id: pt.id ?? `task-${Date.now()}-${i}`,
+      // Step 4: merge carry-in into existing today tasks (additive, no replacements)
+      const existingTitles = new Set(existingTodayTasks.map((t: any) => t.title.trim().toLowerCase()));
+      const newCarryIns = carryInTasks
+        .filter((t) => !existingTitles.has(t.title.trim().toLowerCase()))
+        .map((pt, i) => ({
+          id: (pt as any).id ?? `task-${Date.now()}-carry-${i}`,
           title: pt.title,
           done: false,
           projectId: (pt as any).projectId ?? input.primaryProjectId ?? null,
@@ -286,15 +295,24 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
           energyLevel: pt.energyLevel,
           estimatedMinutes: pt.estimatedMinutes,
           notes: pt.notes,
+          isUserAdded: true,
         }));
+
+      let tasksWithIds: any[];
+      if (existingTodayTasks.length > 0 || newCarryIns.length > 0) {
+        // User already has tasks today (or we're carrying in from yesterday) — preserve everything, append new carry-ins
+        tasksWithIds = [...existingTodayTasks, ...newCarryIns];
       } else {
-        // AI-generated tasks — assign IDs and project IDs
+        // Truly empty slate (first morning check-in, no prior tasks anywhere) —
+        // use AI suggestions but tag them so the user can dismiss them.
+        // criticalTasks is still a permanent running list — these are just the seed.
         tasksWithIds = parsed.criticalTasks.map((t: any, i: number) => ({
           ...t,
           id: `task-${Date.now()}-${i}`,
           done: false,
           projectId: t.projectId ?? input.primaryProjectId ?? null,
           carryoverCount: t.carryoverCount ?? 0,
+          isAiSuggested: true,
         }));
       }
 
