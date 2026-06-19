@@ -14,6 +14,7 @@ import {
   getRecentDailyPlans,
   getUserProfile,
   updateIdeaCapture,
+  deleteIdeaCapture,
   updateProject,
   logUnstickInvocation,
   getWrenLetter,
@@ -101,6 +102,13 @@ Return JSON: { parsedIntent: string (1 sentence), suggestedProject: string|null 
   listIdeas: protectedProcedure.query(async ({ ctx }) => {
     return getIdeaCaptures(ctx.user.id);
   }),
+
+  deleteIdea: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await deleteIdeaCapture(input.id, ctx.user.id);
+      return { success: true };
+    }),
 
   resolveIdea: protectedProcedure
     .input(z.object({

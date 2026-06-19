@@ -2028,3 +2028,16 @@
 - [x] Fix `client/src/pages/EvidenceLogPage.tsx` — use local date for 30-day grid and `isCurrentMonth`
 - [x] Fix `client/src/components/VaultGraph.tsx` and `SettingsPage.tsx` — use local date for export filenames
 - [x] TypeScript: 0 errors; all 390 tests pass
+
+## Critical Persistence + Surfacing Spec (Jun 19 2026 - re-applied after hibernation loss)
+- [x] Fix check-in gate: use completedAt != null instead of row existence for morning/midday/evening
+- [x] Evening row 870001 (2026-06-19, completedAt=null) now correctly shows as open/resumable
+- [x] Remove capacity cap from submitMorning carry-forward (all uncompleted tasks carry over, never truncated)
+- [x] Fix getLastEveningClose to also return tomorrowActivities from the daily plan
+- [x] Fix Evening Close summary dialog to display tomorrowActivities
+- [x] Backfill June 19 criticalTasks with user's 5-item tomorrowTasks list
+- [x] Add deleteIdea procedure to ai.ts + deleteIdeaCapture helper to db.ts
+- [x] Create IdeasPage (/ideas) with list, add-to-tasks, add-to-scratch, delete actions
+- [x] Add Ideas nav item (Sparkles icon) to AppLayout between Scratch Pad and Study
+- [x] Add /ideas route to App.tsx
+- [x] Add Refresh Data section to SettingsPage (Settings > Preferences tab)

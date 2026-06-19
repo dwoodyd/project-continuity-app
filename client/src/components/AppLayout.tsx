@@ -39,6 +39,7 @@ import {
   Star,
   ClipboardList,
   Users,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
@@ -67,6 +68,7 @@ const ALL_NAV_ITEMS = [
   { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
   { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
+  { href: "/ideas",        label: "Ideas",           icon: Sparkles,      section: "primary" },
   { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
   { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
   { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },

@@ -41,6 +41,7 @@ const AboutAppPage        = lazy(() => import("./pages/AboutAppPage"));
 const ProPage             = lazy(() => import("./pages/ProPage"));
 const ProSuccessPage      = lazy(() => import("./pages/ProSuccessPage"));
 const ScratchPadPage      = lazy(() => import("./pages/ScratchPadPage"));
+const IdeasPage           = lazy(() => import("./pages/IdeasPage"));
 const TourPage            = lazy(() => import("./pages/TourPage"));
 const EmotionalCyclePage  = lazy(() => import("./pages/EmotionalCyclePage"));
 const FoundingMemberPage  = lazy(() => import("./pages/FoundingMemberPage"));
@@ -113,6 +114,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/pro/success" component={ProSuccessPage} />
               <Route path="/pro/cancel" component={ProPage} />
               <Route path="/scratch" component={ScratchPadPage} />
+              <Route path="/ideas" component={IdeasPage} />
               <Route path="/emotional-cycle" component={EmotionalCyclePage} />
               <Route path="/founding-member" component={FoundingMemberPage} />
               <Route path="/coworking" component={CoworkingPage} />

@@ -378,6 +378,11 @@ export async function updateIdeaCapture(id: number, userId: number, updates: Par
   await db.update(ideaCaptures).set(updates)
     .where(and(eq(ideaCaptures.id, id), eq(ideaCaptures.userId, userId)));
 }
+export async function deleteIdeaCapture(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(ideaCaptures).where(and(eq(ideaCaptures.id, id), eq(ideaCaptures.userId, userId)));
+}
 
 // ─── Weekly Reviews ───────────────────────────────────────────────────────────
 export async function getWeeklyReview(userId: number, weekStartDate: string): Promise<WeeklyReview | undefined> {

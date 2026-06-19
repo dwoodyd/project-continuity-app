@@ -25,6 +25,7 @@ import {
   Crown,
   CreditCard,
   Star,
+  RefreshCw,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -1116,6 +1117,20 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Refresh Data */}
+          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
+            <p className="text-sm font-semibold text-foreground">Refresh Data</p>
+            <p className="text-xs text-muted-foreground">Force a fresh reload of all app data. Use this if something looks stale or out of sync.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1.5"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="w-3 h-3" />
+              Reload app
+            </Button>
+          </div>
           {/* About / Replay Intro */}
           <div className="p-5 rounded-xl bg-card border border-border space-y-3">
             <p className="text-sm font-semibold text-foreground">About Continuary</p>

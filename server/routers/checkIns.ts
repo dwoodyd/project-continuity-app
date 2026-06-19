@@ -271,13 +271,13 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const hasPrePlannedTasksMerged = mergedPrePlanned.length > 0;
 
       // Build the task list:
-      // If user pre-planned tasks last night (or has post-close additions) — use those verbatim, respect capacity limits.
+      // If user pre-planned tasks last night (or has post-close additions) — use those verbatim.
+      // criticalTasks is a permanent running list — NEVER truncate by capacity.
       // If no pre-planned tasks — use AI-generated tasks as before.
       let tasksWithIds: any[];
       if (hasPrePlannedTasksMerged) {
-        // Capacity limits: full=3, partial=2, low=1
-        const capacityLimit = input.capacityLevel === "full" ? 3 : input.capacityLevel === "partial" ? 2 : 1;
-        tasksWithIds = mergedPrePlanned.slice(0, capacityLimit).map((pt, i) => ({
+        // Carry ALL pre-planned tasks forward — never drop any.
+        tasksWithIds = mergedPrePlanned.map((pt, i) => ({
           id: pt.id ?? `task-${Date.now()}-${i}`,
           title: pt.title,
           done: false,
@@ -888,6 +888,15 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
     try { userInput = JSON.parse(lastEvening.userInput ?? "{}"); } catch { /* ignore */ }
     let carryoverTasks: string[] = [];
     try { carryoverTasks = JSON.parse(lastEvening.extractedNextSteps ?? "[]"); } catch { /* ignore */ }
+    // Also fetch tomorrowTasks from the daily plan for that date — these are the user's own planned activities
+    const plan = await getDailyPlan(ctx.user.id, lastEvening.date);
+    let tomorrowActivities: Array<{ id: string; title: string }> = [];
+    if (plan?.tomorrowTasks) {
+      try {
+        const parsed = JSON.parse(plan.tomorrowTasks);
+        if (Array.isArray(parsed)) tomorrowActivities = parsed;
+      } catch { /* ignore */ }
+    }
     return {
       id: lastEvening.id,
       date: lastEvening.date,
@@ -898,6 +907,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       tomorrowFirst: userInput.tomorrowFirst ?? "",
       wrenSummary: lastEvening.generatedResponse ?? "",
       carryoverTasks,
+      tomorrowActivities,
     };
   }),
 });

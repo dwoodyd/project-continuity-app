@@ -1554,14 +1554,15 @@ export default function Home() {
   // completedCheckIns is only used as an optimistic fallback WHILE the refetch is in-flight
   // (i.e., todayCheckIns is still undefined/stale). Once the server responds, server data wins.
   // This prevents yesterday's in-memory state from persisting into a new day.
+  // Gate on completedAt != null, NOT row existence — a row with completedAt=null is a draft/reset
   const morningDone = todayCheckIns != null
-    ? todayCheckIns.some((c) => c.type === "morning")
+    ? todayCheckIns.some((c) => c.type === "morning" && c.completedAt != null)
     : completedCheckIns.has("morning");
   const middayDone = todayCheckIns != null
-    ? todayCheckIns.some((c) => c.type === "midday")
+    ? todayCheckIns.some((c) => c.type === "midday" && c.completedAt != null)
     : completedCheckIns.has("midday");
   const eveningDone = todayCheckIns != null
-    ? todayCheckIns.some((c) => c.type === "evening")
+    ? todayCheckIns.some((c) => c.type === "evening" && c.completedAt != null)
     : completedCheckIns.has("evening");
 
   // Show notification permission prompt 2s after first morning check-in completes
@@ -3227,6 +3228,19 @@ export default function Home() {
                 <div>
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">First thing tomorrow</p>
                   <p className="text-foreground leading-relaxed font-medium">{lastEveningClose.tomorrowFirst}</p>
+                </div>
+              )}
+              {lastEveningClose.tomorrowActivities && lastEveningClose.tomorrowActivities.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Planned for tomorrow</p>
+                  <ul className="space-y-1">
+                    {lastEveningClose.tomorrowActivities.map((t: { id: string; title: string }, i: number) => (
+                      <li key={t.id ?? i} className="flex items-start gap-2">
+                        <span className="text-muted-foreground mt-0.5">·</span>
+                        <span className="text-foreground">{t.title}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
               {lastEveningClose.carryoverTasks && lastEveningClose.carryoverTasks.length > 0 && (
