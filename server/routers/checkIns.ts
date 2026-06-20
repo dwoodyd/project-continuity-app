@@ -272,7 +272,10 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
         const yesterdayTasks: any[] = (() => {
           try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
         })();
-        const unfinishedYesterday = yesterdayTasks.filter((t: any) => !t.done && t.isUserAdded);
+        // Carry ALL unfinished tasks — not just isUserAdded ones.
+        // isUserAdded is a display hint only; filtering on it here caused tasks
+        // restored via SQL (or AI-seeded tasks the user kept) to silently vanish.
+        const unfinishedYesterday = yesterdayTasks.filter((t: any) => !t.done);
         const carryInTitles = new Set(carryInTasks.map((t) => t.title.trim().toLowerCase()));
         for (const t of unfinishedYesterday) {
           if (!carryInTitles.has(t.title.trim().toLowerCase())) {
