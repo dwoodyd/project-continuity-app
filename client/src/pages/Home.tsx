@@ -1455,6 +1455,15 @@ export default function Home() {
   const [editingTaskTitle, setEditingTaskTitle] = useState("");
   const [addingTask, setAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const newTaskInputRef = useRef<HTMLInputElement>(null);
+  // On mobile, autoFocus is blocked by browser policy unless triggered by a direct
+  // user gesture. Use a ref + rAF to programmatically focus after the element mounts.
+  useEffect(() => {
+    if (addingTask) {
+      const raf = requestAnimationFrame(() => { newTaskInputRef.current?.focus(); });
+      return () => cancelAnimationFrame(raf);
+    }
+  }, [addingTask]);
 
   // Wrap completeTask with a 5-second undo window
   const completeTask = useCallback((taskId: string, taskTitle: string) => {
@@ -2395,7 +2404,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
                     <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
                     <input
-                      autoFocus
+                      ref={newTaskInputRef}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -2408,15 +2417,16 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between px-3 pb-2.5">
-                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none hidden sm:inline">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none sm:hidden">Tap Add when done</span>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
-                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                        className="text-sm py-1 px-2 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
                       >Cancel</button>
                       <button
                         onClick={handleAddTask}
-                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                        className="text-sm py-1 px-3 font-medium text-primary hover:text-primary/80 transition-colors"
                       >Add →</button>
                     </div>
                   </div>
@@ -2510,7 +2520,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
                     <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
                     <input
-                      autoFocus
+                      ref={newTaskInputRef}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -2524,15 +2534,16 @@ export default function Home() {
                   </div>
                   {/* Row 2: hint left, actions right */}
                   <div className="flex items-center justify-between px-3 pb-2.5">
-                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none hidden sm:inline">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none sm:hidden">Tap Add when done</span>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
-                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                        className="text-sm py-1 px-2 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
                       >Cancel</button>
                       <button
                         onClick={handleAddTask}
-                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                        className="text-sm py-1 px-3 font-medium text-primary hover:text-primary/80 transition-colors"
                       >Add →</button>
                     </div>
                   </div>
@@ -2548,7 +2559,7 @@ export default function Home() {
                   <div className="flex items-center gap-3 px-3 pt-2.5 pb-1">
                     <div className="shrink-0 w-5 h-5 rounded-full border-2 border-foreground/20" />
                     <input
-                      autoFocus
+                      ref={newTaskInputRef}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       onKeyDown={(e) => {
@@ -2561,15 +2572,16 @@ export default function Home() {
                     />
                   </div>
                   <div className="flex items-center justify-between px-3 pb-2.5">
-                    <span className="text-xs text-muted-foreground/35 select-none">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none hidden sm:inline">↵ to add · esc to cancel</span>
+                    <span className="text-xs text-muted-foreground/35 select-none sm:hidden">Tap Add when done</span>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => { setAddingTask(false); setNewTaskTitle(""); }}
-                        className="text-xs text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
+                        className="text-sm py-1 px-2 text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors"
                       >Cancel</button>
                       <button
                         onClick={handleAddTask}
-                        className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                        className="text-sm py-1 px-3 font-medium text-primary hover:text-primary/80 transition-colors"
                       >Add →</button>
                     </div>
                   </div>

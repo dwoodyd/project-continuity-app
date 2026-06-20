@@ -212,9 +212,9 @@ async function processUserNotifications(userId: number): Promise<void> {
 
   // Get today's check-ins to suppress if already done
   const todayCheckIns = await getCheckIns(userId, dateStr);
-  const hasMorning = todayCheckIns.some((c: { type: string }) => c.type === "morning");
-  const hasMidday = todayCheckIns.some((c: { type: string }) => c.type === "midday");
-  const hasEvening = todayCheckIns.some((c: { type: string }) => c.type === "evening");
+  const hasMorning = todayCheckIns.some((c: { type: string; completedAt?: Date | null }) => c.type === "morning" && c.completedAt != null);
+  const hasMidday = todayCheckIns.some((c: { type: string; completedAt?: Date | null }) => c.type === "midday" && c.completedAt != null);
+  const hasEvening = todayCheckIns.some((c: { type: string; completedAt?: Date | null }) => c.type === "evening" && c.completedAt != null);
 
   const SUPPRESSION_WINDOW_MS = 23 * 60 * 60 * 1000; // 23 hours
 

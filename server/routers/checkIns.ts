@@ -667,7 +667,9 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       // seed the next day. Writing post-close additions to criticalTasks means
       // they land in a bucket the next morning never reads.
       const todayCheckIns = await getCheckIns(ctx.user.id, date);
-      const dayIsClosed = todayCheckIns.some((c) => c.type === "evening");
+      // A day is only truly closed when the evening check-in row has completedAt set.
+      // An evening row with completedAt = null is a draft/reset — treat as open.
+      const dayIsClosed = todayCheckIns.some((c) => c.type === "evening" && c.completedAt != null);
 
       // Upsert plan so it always exists
       let plan = await getDailyPlan(ctx.user.id, date);
