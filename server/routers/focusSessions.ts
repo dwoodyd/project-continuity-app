@@ -64,7 +64,7 @@ You may NOT:
 }
 
 // Thread units per duration
-const THREAD_UNITS: Record<number, number> = { 25: 1, 50: 2, 90: 3 };
+const THREAD_UNITS: Record<number, number> = { 10: 1, 30: 1, 60: 2, 90: 3 };
 
 // Compute the start of the current week (Monday 00:00 UTC)
 function getWeekStart(): Date {
@@ -110,7 +110,7 @@ export const focusSessionsRouter = router({
     .input(z.object({
       intention: z.string().max(500).optional(),
       projectId: z.number().optional(),
-      durationMinutes: z.union([z.literal(25), z.literal(50), z.literal(90)]),
+      durationMinutes: z.union([z.literal(10), z.literal(30), z.literal(60), z.literal(90)]),
       hardStop: z.number().optional(), // UTC ms — user's next hard commitment
     }))
     .mutation(async ({ ctx, input }) => {
@@ -224,8 +224,8 @@ export const focusSessionsRouter = router({
 
       // Bump Thread Strength
       try {
-        const durationMinutes = session.durationMinutes ?? 25;
-        const weight = durationMinutes >= 90 ? 2 : durationMinutes >= 50 ? 1.5 : 1;
+        const durationMinutes = session.durationMinutes ?? 30;
+        const weight = durationMinutes >= 90 ? 2 : durationMinutes >= 60 ? 1.5 : 1;
         const existing = await db.select().from(threadStrength).where(eq(threadStrength.userId, ctx.user.id));
         if (existing.length > 0) {
           const current = existing[0];
@@ -305,7 +305,7 @@ export const focusSessionsRouter = router({
     .input(z.object({
       message: z.string().min(1).max(1000),
       intention: z.string().max(500).optional(),
-      durationMinutes: z.union([z.literal(25), z.literal(50), z.literal(90)]).optional(),
+      durationMinutes: z.union([z.literal(10), z.literal(30), z.literal(60), z.literal(90)]).optional(),
       elapsedMinutes: z.number().min(0).max(200).optional(),
       clientHour: z.number().min(0).max(23).optional(), // user's local hour
       chatHistory: z.array(z.object({

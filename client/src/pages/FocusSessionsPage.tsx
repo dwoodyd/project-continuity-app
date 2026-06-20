@@ -314,7 +314,7 @@ export default function FocusSessionsPage() {
   // ── Session state ─────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<SessionPhase>("idle");
   const [intention, setIntention] = useState("");
-  const [durationMinutes, setDurationMinutes] = useState<25 | 50 | 90>(25);
+  const [durationMinutes, setDurationMinutes] = useState<10 | 30 | 60 | 90>(10);
   const [hardStop, setHardStop] = useState<string>(""); // "HH:MM" local time
   const [showUnstickModal, setShowUnstickModal] = useState(false);
   const [pipOpen, setPipOpen] = useState(false);
@@ -369,8 +369,9 @@ export default function FocusSessionsPage() {
       }, delayMs);
       checkInTimersRef.current.push(t);
     };
-    if (durationMin === 50) addCheckIn(27 * 60 * 1000);
-    if (durationMin === 90) { addCheckIn(30 * 60 * 1000); addCheckIn(70 * 60 * 1000); }
+    if (durationMin === 30) addCheckIn(15 * 60 * 1000);
+    if (durationMin === 60) addCheckIn(30 * 60 * 1000);
+    if (durationMin === 90) { addCheckIn(30 * 60 * 1000); addCheckIn(60 * 60 * 1000); }
   }, []);
   // ── Divergence detection — show Surface card if user seems off-task ─────────
   const DIVERGENCE_KEYWORDS = [
@@ -1309,7 +1310,7 @@ export default function FocusSessionsPage() {
                   )}
                   {!intention.trim() && <div className="mb-4" />}
                   <div className="flex gap-2 justify-center mb-5">
-                    {([25, 50, 90] as const).map((d) => (
+                    {([10, 30, 60, 90] as const).map((d) => (
                       <button
                         key={d}
                         onClick={() => setDurationMinutes(d)}
@@ -1322,7 +1323,7 @@ export default function FocusSessionsPage() {
                       >
                         <p className="text-xl font-bold leading-none" style={{ color: "oklch(0.74 0.14 72)" }}>{d}</p>
                         <p className="text-[10px] mt-1" style={{ color: "oklch(0.48 0.04 240)" }}>
-                          {d === 25 ? "quick" : d === 50 ? "full" : "deep"}
+                          {d === 10 ? "quick" : d === 30 ? "sprint" : d === 60 ? "full" : "deep"}
                         </p>
                       </button>
                     ))}

@@ -22,8 +22,13 @@ import WrenPlayer from "@/components/WrenPlayer";
 
 type FocusPhase = "setup" | "active" | "break" | "complete";
 
-const FOCUS_MINUTES = 25;
 const BREAK_MINUTES = 5;
+const DURATION_OPTIONS = [
+  { value: 10 as const, label: "quick" },
+  { value: 30 as const, label: "sprint" },
+  { value: 60 as const, label: "full" },
+  { value: 90 as const, label: "deep" },
+];
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -44,7 +49,8 @@ export default function FocusModePage() {
   const [, navigate] = useLocation();
   const [phase, setPhase] = useState<FocusPhase>("setup");
   const [intention, setIntention] = useState("");
-  const [timeLeft, setTimeLeft] = useState(FOCUS_MINUTES * 60);
+  const [focusMinutes, setFocusMinutes] = useState<10 | 30 | 60 | 90>(30);
+  const [timeLeft, setTimeLeft] = useState(30 * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [driftWarning, setDriftWarning] = useState(false);
@@ -140,7 +146,7 @@ export default function FocusModePage() {
     }
     playChime("focus_start");
     setPhase("active");
-    setTimeLeft(FOCUS_MINUTES * 60);
+    setTimeLeft(focusMinutes * 60);
     setIsRunning(true);
     setSessionStart(new Date());
     setSessionSaved(false);
@@ -153,7 +159,7 @@ export default function FocusModePage() {
   const reset = () => {
     setIsRunning(false);
     setPhase("setup");
-    setTimeLeft(FOCUS_MINUTES * 60);
+    setTimeLeft(focusMinutes * 60);
     setDriftWarning(false);
     setDriftCount(0);
     setSessionStart(null);
@@ -173,7 +179,7 @@ export default function FocusModePage() {
   };
 
   const progress = phase === "active"
-    ? 1 - timeLeft / (FOCUS_MINUTES * 60)
+    ? 1 - timeLeft / (focusMinutes * 60)
     : phase === "break"
     ? 1 - timeLeft / (BREAK_MINUTES * 60)
     : 0;
@@ -234,7 +240,7 @@ export default function FocusModePage() {
               </div>
               <h1 className="text-2xl font-semibold text-foreground">Single Focus Mode</h1>
               <p className="text-sm text-muted-foreground mt-2">
-                One task. One intention. {FOCUS_MINUTES} minutes.
+                One task. One intention.
               </p>
             </div>
 
@@ -318,9 +324,27 @@ export default function FocusModePage() {
               </div>
             )}
 
+            {/* Duration picker */}
+            <div className="flex gap-2">
+              {DURATION_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setFocusMinutes(value)}
+                  className={cn(
+                    "flex-1 rounded-xl py-2.5 text-center border transition-all",
+                    focusMinutes === value
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground hover:border-foreground/20"
+                  )}
+                >
+                  <p className="text-lg font-bold leading-none">{value}</p>
+                  <p className="text-[10px] mt-0.5 opacity-70">{label}</p>
+                </button>
+              ))}
+            </div>
             <Button onClick={startFocus} className="w-full gap-2" size="lg">
               <Play className="w-4 h-4" />
-              Start {FOCUS_MINUTES}-minute session
+              Start {focusMinutes}-minute session
             </Button>
           </div>
         )}
