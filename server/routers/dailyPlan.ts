@@ -35,7 +35,65 @@ export const dailyPlanRouter = router({
     .input(z.object({ localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional() }).optional())
     .query(async ({ ctx, input }) => {
       const date = resolveDate(input?.localDate);
-      const plan = await getDailyPlan(ctx.user.id, date);
+      let plan = await getDailyPlan(ctx.user.id, date);
+
+      // ── Auto-carry: surface yesterday's thread immediately, no check-in required ──
+      // If today has no criticalTasks yet, pull from yesterday's tomorrowTasks +
+      // unfinished criticalTasks and write them now so they're visible on first open.
+      const todayTasks: any[] = (() => {
+        try { return JSON.parse(plan?.criticalTasks ?? "[]"); } catch { return []; }
+      })();
+
+      if (todayTasks.length === 0) {
+        const yesterdayStr = subtractDay(date, 1);
+        const yesterday = await getDailyPlan(ctx.user.id, yesterdayStr);
+        if (yesterday) {
+          const tomorrowTasks: any[] = (() => {
+            try { return JSON.parse(yesterday.tomorrowTasks ?? "[]"); } catch { return []; }
+          })();
+          const yesterdayCritical: any[] = (() => {
+            try { return JSON.parse(yesterday.criticalTasks ?? "[]"); } catch { return []; }
+          })();
+          const unfinished = yesterdayCritical.filter((t: any) => !t.done);
+
+          // Merge: tomorrowTasks first, then any unfinished that aren't already included
+          const seen = new Set<string>();
+          const carried: any[] = [];
+          for (const t of tomorrowTasks) {
+            const key = t.title.trim().toLowerCase();
+            if (!seen.has(key)) {
+              seen.add(key);
+              carried.push({
+                id: t.id ?? `carry-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                title: t.title,
+                done: false,
+                projectId: t.projectId ?? null,
+                energyLevel: t.energyLevel,
+                carryoverCount: 0,
+                isUserAdded: true,
+              });
+            }
+          }
+          for (const t of unfinished) {
+            const key = t.title.trim().toLowerCase();
+            if (!seen.has(key)) {
+              seen.add(key);
+              carried.push({
+                ...t,
+                done: false,
+                carryoverCount: (t.carryoverCount ?? 0) + 1,
+                isUserAdded: true,
+              });
+            }
+          }
+
+          if (carried.length > 0) {
+            const planId = await upsertDailyPlan({ userId: ctx.user.id, date, criticalTasks: JSON.stringify(carried) });
+            plan = await getDailyPlan(ctx.user.id, date);
+          }
+        }
+      }
+
       return plan ?? null;
     }),
 
