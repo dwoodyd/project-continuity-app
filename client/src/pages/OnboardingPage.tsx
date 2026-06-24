@@ -239,7 +239,8 @@ function Fade({ visible, delay = 0, children, style }: {
     <div style={{
       opacity: visible ? 1 : 0,
       transform: visible ? "translateY(0)" : "translateY(16px)",
-      pointerEvents: visible ? "auto" : "none",
+      // Always allow pointer events — removing the none guard so buttons are
+      // never blocked by the entrance animation regardless of timing.
       transition: visible
         ? `opacity 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 0.55s cubic-bezier(0.16,1,0.3,1) ${delay}ms`
         : "none",
