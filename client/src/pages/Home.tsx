@@ -350,7 +350,7 @@ const workLocationConfig: Record<WorkLocation, { label: string; emoji: string }>
   other:       { label: "Other",        emoji: "📍" },
 };
 
-function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
+function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: () => void; localDate?: string }) {
   const [capacity, setCapacity] = useState<CapacityLevel>("partial");
   const [notes, setNotes] = useState("");
   const [primaryId, setPrimaryId] = useState<number | undefined>();
@@ -517,7 +517,8 @@ function MorningCheckIn({ onComplete }: { onComplete: () => void }) {
       <Button
         onClick={() => {
           const d = new Date();
-          const localDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          const computedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          const localDate = localDateProp ?? computedDate;
           submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation, localDate });
         }}
         disabled={submit.isPending}
@@ -2289,7 +2290,7 @@ export default function Home() {
               <ChevronUp className="w-4 h-4" />
             </button>
           </div>
-          {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} />}
+          {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} localDate={localDateStr} />}
           {activeCheckIn === "midday" && <MiddayCheckIn onComplete={() => handleCheckInComplete("midday")} />}
           {activeCheckIn === "evening" && <EveningCheckIn onComplete={() => handleCheckInComplete("evening")} />}
         </div>
