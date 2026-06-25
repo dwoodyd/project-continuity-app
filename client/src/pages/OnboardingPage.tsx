@@ -76,12 +76,16 @@ function SmoothLoopVideo({ src, style }: {
   crossfadeDuration?: number; // kept for API compatibility, unused
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
+    setFailed(false);
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = 0;
     v.play().catch(() => {});
   }, [src]);
+  // If video fails to load, hide it gracefully — the dark background and text remain visible
+  if (failed) return null;
   return (
     <video
       ref={videoRef}
@@ -91,6 +95,7 @@ function SmoothLoopVideo({ src, style }: {
       muted
       playsInline
       preload="auto"
+      onError={() => setFailed(true)}
       style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
         objectFit: "cover", objectPosition: "center",
@@ -107,6 +112,12 @@ function OnceVideo({ src, style, onEnded }: {
   style?: React.CSSProperties;
   onEnded?: () => void;
 }) {
+  const [failed, setFailed] = useState(false);
+  // If video fails, fire onEnded immediately so the flow isn't blocked
+  useEffect(() => {
+    if (failed && onEnded) onEnded();
+  }, [failed, onEnded]);
+  if (failed) return null;
   return (
     <video
       src={src}
@@ -115,6 +126,7 @@ function OnceVideo({ src, style, onEnded }: {
       playsInline
       preload="auto"
       onEnded={onEnded}
+      onError={() => setFailed(true)}
       style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
         objectFit: "cover", objectPosition: "center",
@@ -583,17 +595,43 @@ function WrenIntroSequence({ active, onDone }: { active: boolean; onDone: () => 
   );
 }
 
+// ─── Persistent Skip button (shown on all setup screens) ────────────────────
+function SkipAllButton({ onSkip }: { onSkip: () => void }) {
+  return (
+    <button
+      onClick={onSkip}
+      style={{
+        position: "fixed",
+        top: `max(calc(env(safe-area-inset-top, 0px) + 1rem), 1.5rem)`,
+        right: "1.5rem",
+        zIndex: 9999,
+        color: "rgba(255,255,255,0.35)",
+        fontSize: "0.75rem",
+        letterSpacing: "0.1em",
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "0.5rem",
+        fontFamily: "inherit",
+      }}
+    >
+      SKIP
+    </button>
+  );
+}
+
 // ─── SCREEN 1: Name + Work Style ─────────────────────────────────────────────
-function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
+function StepName({ name, setName, workStyle, setWorkStyle, onNext, onSkipAll }: {
   name: string; setName: (v: string) => void;
   workStyle: WorkStyle; setWorkStyle: (v: WorkStyle) => void;
-  onNext: () => void;
+  onNext: () => void; onSkipAll: () => void;
 }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
   return (
     <VideoStage>
+      <SkipAllButton onSkip={onSkipAll} />
        {/* Wren peeking — she's watching you type */}
       <SmoothLoopVideo src={WREN_CLIPS.peeking} />
       <GradientOverlays top={false} />
@@ -664,12 +702,13 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext }: {
 }
 
 // ─── SCREEN 2: Tone interstitial ──────────────────────────────────────────────
-function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => void }) {
+function StepToneInterstitial({ name, onNext, onSkipAll }: { name: string; onNext: () => void; onSkipAll: () => void }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVisible(true), 300); return () => clearTimeout(t); }, []);
 
   return (
     <VideoStage>
+      <SkipAllButton onSkip={onSkipAll} />
       <SmoothLoopVideo src={WREN_CLIPS.winksRipple} />
       <GradientOverlays />
 
@@ -700,15 +739,16 @@ function StepToneInterstitial({ name, onNext }: { name: string; onNext: () => vo
 }
 
 // ─── SCREEN 3: Tone selection ─────────────────────────────────────────────────
-function StepTone({ tone, setTone, onNext, onBack }: {
+function StepTone({ tone, setTone, onNext, onBack, onSkipAll }: {
   tone: TonePref | ""; setTone: (v: TonePref) => void;
-  onNext: () => void; onBack: () => void;
+  onNext: () => void; onBack: () => void; onSkipAll: () => void;
 }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
   return (
     <VideoStage>
+      <SkipAllButton onSkip={onSkipAll} />
       <SmoothLoopVideo src={WREN_CLIPS.closesEyes} />
       <GradientOverlays top={false} />
 
@@ -763,15 +803,16 @@ function StepTone({ tone, setTone, onNext, onBack }: {
 }
 
 // ─── SCREEN 4: Focus hours ────────────────────────────────────────────────────
-function StepFocus({ focusHour, setFocusHour, onNext, onBack }: {
+function StepFocus({ focusHour, setFocusHour, onNext, onBack, onSkipAll }: {
   focusHour: FocusHour | ""; setFocusHour: (v: FocusHour) => void;
-  onNext: () => void; onBack: () => void;
+  onNext: () => void; onBack: () => void; onSkipAll: () => void;
 }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVisible(true), 80); return () => clearTimeout(t); }, []);
 
   return (
     <VideoStage>
+      <SkipAllButton onSkip={onSkipAll} />
       <SmoothLoopVideo src={WREN_CLIPS.bouncingFun} />
       <GradientOverlays top={false} />
 
@@ -931,11 +972,12 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
 }
 
 // ─── SCREEN 6: Focus Sessions intro ─────────────────────────────────────────
-function StepFocusSessions({ onNext }: { onNext: () => void }) {
+function StepFocusSessions({ onNext, onSkipAll }: { onNext: () => void; onSkipAll: () => void }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => { const t = setTimeout(() => setVisible(true), 300); return () => clearTimeout(t); }, []);
   return (
     <VideoStage>
+      <SkipAllButton onSkip={onSkipAll} />
       <SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers} />
       <GradientOverlays />
       <LowerThird>
@@ -1162,16 +1204,20 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
         {step === 0 && <WrenIntroSequence active={step === 0} onDone={() => goForward(1)} />}
         {step === 1 && (
           <StepName name={name} setName={setName} workStyle={workStyle}
-            setWorkStyle={setWorkStyle} onNext={() => goForward(2)} />
+            setWorkStyle={setWorkStyle} onNext={() => goForward(2)}
+            onSkipAll={() => finishOnboarding(true)} />
         )}
-        {step === 2 && <StepToneInterstitial name={name} onNext={() => goForward(3)} />}
+        {step === 2 && <StepToneInterstitial name={name} onNext={() => goForward(3)}
+            onSkipAll={() => finishOnboarding(true)} />}
         {step === 3 && (
           <StepTone tone={tone} setTone={setTone}
-            onNext={() => goForward(4)} onBack={() => goBack(1)} />
+            onNext={() => goForward(4)} onBack={() => goBack(1)}
+            onSkipAll={() => finishOnboarding(true)} />
         )}
         {step === 4 && (
           <StepFocus focusHour={focusHour} setFocusHour={setFocusHour}
-            onNext={() => goForward(5)} onBack={() => goBack(3)} />
+            onNext={() => goForward(5)} onBack={() => goBack(3)}
+            onSkipAll={() => finishOnboarding(true)} />
         )}
         {step === 5 && (
           <StepProject
@@ -1184,8 +1230,9 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
             loading={isPending}
           />
         )}
-        {step === 6 && <StepFocusSessions onNext={() => goForward(7)} />}
-        {step === 7 && <DoneScreen name={name} onDone={onDone ?? (() => {})} />}
+        {step === 6 && <StepFocusSessions onNext={() => goForward(7)}
+            onSkipAll={() => finishOnboarding(true)} />}
+        {step === 7 && <DoneScreen name={name} onDone={onDone ?? (() => { window.location.replace("/"); })} />}
       </FadeToBlackTransition>
     </div>
   );

@@ -17,24 +17,24 @@ export const WREN_CLIPS = {
   // ── Onboarding ──────────────────────────────────────────────────────────────
   /** Wren glowing and floating — cinematic splash / intro */
   luminousFloats:     `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
-  /** Wren drops from above and hovers — alternate intro */
-  dropsAndHovers:     `${BASE}/wren_drops_and_hovers_fe4c3cf4.mp4`,
-  /** Wren peeking from the edge — name input background */
-  peeking:            `${BASE}/wren_peeking_9a813da0.mp4`,
-  /** Wren winks with a jiggly ripple — tone interstitial reaction */
-  winksRipple:        `${BASE}/wren_winks_ripple_44f66820.mp4`,
-  /** Wren closes eyes in concentration — tone selection / thoughtful */
-  closesEyes:         `${BASE}/wren_closes_eyes_ce01aa87.mp4`,
+  /** Wren drops from above and hovers — alternate intro (permanent static asset) */
+  dropsAndHovers:     `/manus-storage/wren_drops_and_hovers_fe4c3cf4_f586589a.mp4`,
+  /** Wren peeking from the edge — name input background (permanent static asset) */
+  peeking:            `/manus-storage/wren_peeking_9a813da0_b6d5c634.mp4`,
+  /** Wren winks with a jiggly ripple — tone interstitial reaction (permanent static asset) */
+  winksRipple:        `/manus-storage/wren_winks_ripple_44f66820_e99c470c.mp4`,
+  /** Wren closes eyes in concentration — tone selection / thoughtful (permanent static asset) */
+  closesEyes:         `/manus-storage/wren_closes_eyes_ce01aa87_b860edba.mp4`,
   /** Wren hovers with energy thread — focus hours step */
   hoversThread:       `${BASE}/wren_hovers_thread_29c4964a.mp4`,
-  /** Wren perched on a digital document — project setup step */
-  perchedDoc:         `${BASE}/wren_perched_doc_463f72f2.mp4`,
-  /** Wren flies at camera for a hug — done/celebration screen */
-  fliesHug:           `${BASE}/wren_flies_hug_af727f9c.mp4`,
+  /** Wren perched on a digital document — project setup step (permanent static asset) */
+  perchedDoc:         `/manus-storage/wren_perched_doc_463f72f2_f5b7f8af.mp4`,
+  /** Wren flies at camera for a hug — done/celebration screen (permanent static asset) */
+  fliesHug:           `/manus-storage/wren_flies_hug_af727f9c_5f7efdf8.mp4`,
 
   // ── Home & Dashboard ────────────────────────────────────────────────────────
-  /** Wren's main corner wave — ambient home dashboard widget */
-  mainCornerWave:     `${BASE}/wren_main_corner_wave_b211fe78.mp4`,
+  /** Wren's main corner wave — ambient home dashboard widget (permanent static asset) */
+  mainCornerWave:     `/manus-storage/wren_main_corner_wave_b211fe78_a4cf1dad.mp4`,
   /** Wren corner wave (alternate) */
   cornerWave:         `${BASE}/wren_corner_wave_0d698f99.mp4`,
   /** Wren taps screen and points down — CTA/prompt widget */
@@ -73,8 +73,8 @@ export const WREN_CLIPS = {
   cartwheels:         `${BASE}/wren_cartwheels_feefa3ef.mp4`,
   /** Wren happy split in two — big milestone / level up */
   happySplit:         `${BASE}/wren_happy_split_65367046.mp4`,
-  /** Wren bouncing having fun — emotional cycle high period (original, has watermark) */
-  bouncingFun:        `${BASE}/wren_bouncing_fun_52e9a11d.mp4`,
+  /** Wren bouncing having fun — emotional cycle high period (permanent static asset) */
+  bouncingFun:        `/manus-storage/wren_bouncing_fun_52e9a11d_9106eeb8.mp4`,
   /** Wren morphs into golden heart — love/appreciation moment */
   morphsHeart:        `${BASE}/wren_morphs_heart_9c861404.mp4`,
   /** Wren turns into heart (alternate) */
