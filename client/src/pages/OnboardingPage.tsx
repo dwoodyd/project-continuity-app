@@ -312,7 +312,6 @@ function ProgressBar({ value }: { value: number }) {
 
 // ─── Fade-to-black transition wrapper ────────────────────────────────────────
 function FadeToBlackTransition({ stepKey, children }: { stepKey: number; children: React.ReactNode }) {
-  const [displayed, setDisplayed] = useState(children);
   const [overlay, setOverlay] = useState(0); // 0=transparent, 1=black, fading back to 0
   const prevKey = useRef(stepKey);
 
@@ -320,13 +319,15 @@ function FadeToBlackTransition({ stepKey, children }: { stepKey: number; childre
     if (stepKey === prevKey.current) return;
     prevKey.current = stepKey;
     setOverlay(1);
-    const t1 = setTimeout(() => { setDisplayed(children); setOverlay(0); }, 280);
+    // Fade back to transparent after the black flash — children are always live
+    const t1 = setTimeout(() => setOverlay(0), 280);
     return () => clearTimeout(t1);
-  }, [stepKey, children]);
+  }, [stepKey]);
 
   return (
     <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column" }}>
-      {displayed}
+      {/* Always render live children so React state updates (workStyle, name, etc.) flow through */}
+      {children}
       <div style={{
         position: "fixed", inset: 0, zIndex: 99, pointerEvents: "none",
         background: "#000",
