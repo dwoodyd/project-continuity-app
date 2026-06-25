@@ -1694,7 +1694,7 @@ export default function Home() {
   type AlertType = "thread_lock" | "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "spiral_offer" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
   const topAlert: AlertType = (() => {
     if (activeThreadLock) return "thread_lock";
-    if (!morningDone && activePeriod === "morning") return "check_in_due";
+    if (!morningDone) return "check_in_due";
     if (todayPlan && capacityLevel === "low") return "capacity_low";
     if (todayPlan && capacityLevel === "partial") return "capacity_partial";
     if (hasBlockedProject) return "blocker";
@@ -2219,7 +2219,7 @@ export default function Home() {
             label="Morning check-in"
             timeHint="Set capacity + focus"
             completed={morningDone}
-            active={activePeriod === "morning" && !morningDone}
+            active={!morningDone}
             open={activeCheckIn === "morning"}
             onOpen={() => openCheckIn("morning")}
             onClose={() => setActiveCheckIn(null)}
@@ -2230,7 +2230,7 @@ export default function Home() {
             label="Midday pulse"
             timeHint="Alignment pulse — on plan?"
             completed={middayDone}
-            active={activePeriod === "midday" && morningDone && !middayDone}
+            active={morningDone && !middayDone}
             open={activeCheckIn === "midday"}
             onOpen={() => openCheckIn("midday")}
             onClose={() => setActiveCheckIn(null)}
@@ -2242,7 +2242,7 @@ export default function Home() {
               label="Evening close"
               timeHint="Close the loop. Acknowledge what moved."
               completed={eveningDone}
-              active={activePeriod === "evening" && !eveningDone}
+              active={!eveningDone}
               open={activeCheckIn === "evening"}
               onOpen={() => openCheckIn("evening")}
               onClose={() => setActiveCheckIn(null)}
