@@ -994,7 +994,7 @@ function StepFocusSessions({ onNext, onSkipAll }: { onNext: () => void; onSkipAl
         </Fade>
         <Fade visible={visible} delay={240} style={{ marginBottom: "1.75rem" }}>
           <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Set your intention. Choose 25, 50, or 90 minutes. Wren stays present the whole time —
+            Set your intention. Choose 10, 30, 60, or 90 minutes. Wren stays present the whole time —
             weaving quietly, checking in at the halfway point, and helping you close out with a next step.
             Your first session is always free.
           </p>
