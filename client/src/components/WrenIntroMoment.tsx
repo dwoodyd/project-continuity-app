@@ -62,11 +62,36 @@ function Fade({ visible, delay = 0, children, style }: {
   );
 }
 
+// Derive time-of-day context once at module evaluation time
+function getTimeOfDay(): "morning" | "afternoon" | "evening" | "night" {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "morning";
+  if (h >= 12 && h < 17) return "afternoon";
+  if (h >= 17 && h < 22) return "evening";
+  return "night";
+}
+
+const TIME_OF_DAY = getTimeOfDay();
+
+const CLOSING_LINE: Record<typeof TIME_OF_DAY, string> = {
+  morning: "Let's start with one small thing.",
+  afternoon: "Let's pick up where you left off.",
+  evening: "Let's close the day with intention.",
+  night: "Let's wind down and hold the thread for tomorrow.",
+};
+
+const CTA_LABEL: Record<typeof TIME_OF_DAY, string> = {
+  morning: "Start with a morning check-in",
+  afternoon: "Start with a midday check-in",
+  evening: "Start with an evening close",
+  night: "Start with an evening close",
+};
+
 const LINES = [
   { text: "Hi. I'm Wren.", size: "clamp(2rem, 7vw, 3rem)", weight: 300 },
   { text: "I'll hold the thread of your work — even when life pulls you away.", size: "clamp(1.1rem, 3.5vw, 1.5rem)", weight: 300 },
   { text: "When you come back, I'll meet you where you left off.", size: "clamp(1.1rem, 3.5vw, 1.5rem)", weight: 300 },
-  { text: "Let's start with one small thing.", size: "clamp(1.1rem, 3.5vw, 1.5rem)", weight: 400 },
+  { text: CLOSING_LINE[TIME_OF_DAY], size: "clamp(1.1rem, 3.5vw, 1.5rem)", weight: 400 },
 ];
 
 interface WrenIntroMomentProps {
@@ -248,7 +273,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
                 fontFamily: "inherit",
               }}
             >
-              Start with a morning check-in <ArrowRight style={{ width: "1rem", height: "1rem" }} />
+              {CTA_LABEL[TIME_OF_DAY]} <ArrowRight style={{ width: "1rem", height: "1rem" }} />
             </button>
           </Fade>
         )}

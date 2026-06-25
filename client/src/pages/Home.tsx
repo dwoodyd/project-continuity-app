@@ -1995,18 +1995,22 @@ export default function Home() {
       )}
       {topAlert === "check_in_due" && (
         <button
-          onClick={() => openCheckIn("morning")}
+          onClick={() => openCheckIn(activePeriod)}
           className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
           style={{ borderColor: "oklch(0.74 0.14 72 / 0.28)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <Sun className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Morning check-in ready</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>
+                {activePeriod === "morning" ? "Morning check-in ready" : activePeriod === "midday" ? "Midday check-in ready" : "Evening close ready"}
+              </p>
             </div>
             <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }} />
           </div>
-          <p className="text-sm text-foreground">Set your capacity and focus for today.</p>
+          <p className="text-sm text-foreground">
+            {activePeriod === "morning" ? "Set your capacity and focus for today." : activePeriod === "midday" ? "Check in on your energy and adjust your plan." : "Reflect on the day and set tomorrow's thread."}
+          </p>
         </button>
       )}
       {topAlert === "capacity_low" && (
