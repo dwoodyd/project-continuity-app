@@ -440,7 +440,6 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: "profile" as const, label: "Your profile", icon: User },
-    { id: "ideas" as const, label: "Idea Sanctuary", icon: Lightbulb },
     { id: "preferences" as const, label: "How you work", icon: Settings },
     { id: "subscription" as const, label: "Subscription", icon: CreditCard },
   ];
@@ -472,11 +471,7 @@ export default function SettingsPage() {
           >
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{label}</span>
-            {id === "ideas" && unresolvedIdeas.length > 0 && (
-              <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] flex items-center justify-center font-bold">
-                {unresolvedIdeas.length}
-              </span>
-            )}
+
           </button>
         ))}
       </div>
@@ -843,89 +838,18 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ── Idea Sanctuary Tab ───────────────────────────────────────────────── */}
+      {/* Idea Sanctuary tab removed — the sidebar Ideas page (/ideas) is the canonical home */}
       {activeTab === "ideas" && (
-        <div className="space-y-5">
-          {/* Header stats */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">Idea Sanctuary</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {unresolvedIdeas.length} waiting to be processed · {processedIdeas.length} resolved
-              </p>
-            </div>
-            {unresolvedIdeas.length > 0 && (
-              <Badge className="bg-amber-500 hover:bg-amber-500 text-white text-xs">
-                {unresolvedIdeas.length} pending
-              </Badge>
-            )}
-          </div>
-
-          {/* Empty state */}
-          {unresolvedIdeas.length === 0 && processedIdeas.length === 0 && (
-            <div className="p-8 rounded-xl border border-dashed border-border text-center">
-              <Lightbulb className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm font-medium text-foreground mb-1">No ideas captured yet.</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Use the lightbulb button (bottom-right) anywhere in the app to park ideas without losing focus.
-                They'll appear here for processing.
-              </p>
-            </div>
-          )}
-
-          {/* All clear state */}
-          {unresolvedIdeas.length === 0 && processedIdeas.length > 0 && (
-            <div className="p-5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 text-center">
-              <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">Processing queue is clear.</p>
-              <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-1">
-                All captured ideas have been processed.
-              </p>
-            </div>
-          )}
-
-          {/* Processing queue */}
-          {unresolvedIdeas.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Processing queue</p>
-                <p className="text-xs text-muted-foreground/60">Each idea needs one decision: Vault, Project, or Dismiss</p>
-              </div>
-              <div className="space-y-3">
-                {unresolvedIdeas.map((idea) => (
-                  <IdeaProcessingCard
-                    key={idea.id}
-                    idea={idea}
-                    projects={projects ?? []}
-                    onResolve={(action, projectId) => resolveIdea.mutate({ id: idea.id, action, projectId })}
-                    isPending={resolveIdea.isPending}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Processed ideas archive */}
-          {processedIdeas.length > 0 && (
-            <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Processed</p>
-              <div className="space-y-2">
-                {processedIdeas.slice(0, 8).map((idea) => (
-                  <div key={idea.id} className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20 opacity-60">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground line-through truncate">{idea.rawContent}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
-                        Processed · {format(new Date(idea.resolvedAt ?? idea.updatedAt), "MMM d")}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="p-8 rounded-xl border border-dashed border-border text-center space-y-3">
+          <Lightbulb className="w-8 h-8 text-muted-foreground mx-auto" />
+          <p className="text-sm font-medium text-foreground">Ideas have moved</p>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mx-auto">
+            Your captured ideas now live in the <strong>Ideas</strong> page in the sidebar — where you can add to tasks, scratch, or dismiss them.
+          </p>
         </div>
       )}
+
+
 
       {/* ── Preferences Tab ──────────────────────────────────────────────────── */}
       {activeTab === "preferences" && (

@@ -581,7 +581,7 @@ export default function VaultPage() {
           )}
           <Button onClick={() => { setClipboardContent(undefined); setAddOpen(true); }} size="sm" className="gap-1.5 shrink-0">
             <Plus className="w-4 h-4" />
-            Add source
+            <span className="hidden sm:inline">Add source</span>
           </Button>
         </div>
         }
