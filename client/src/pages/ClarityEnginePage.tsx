@@ -806,6 +806,24 @@ function HistoryView({
 }
 
 // ── Pattern Analysis view ─────────────────────────────────────────────────────
+// Brief concept summaries for client-side display (mirrors server CHAPTER_CONCEPTS)
+const CLIENT_CHAPTER_CONCEPTS: Record<string, string> = {
+  intro:       "the idea that you already have permission — you don't need to earn the right to start",
+  ch1:         "the real problem not being laziness, but the weight of starting itself",
+  ch2:         "why standard productivity advice breaks down at the moment of beginning",
+  ch3:         "what resistance might actually be protecting — and why that matters",
+  ch4:         "giving yourself permission before performance, not after",
+  ch5:         "the threshold moment — that specific instant before action where everything stalls",
+  ch6:         "finding the first movable step when everything feels immovable",
+  ch7:         "lowering friction so starting becomes the path of least resistance",
+  ch8:         "what to do when the timer ends and the session is over",
+  ch9:         "the different kinds of stuck and how to recognize which one you're in",
+  ch10:        "creative block, shame, and the practice of returning without judgment",
+  ch11:        "building a practice you can actually return to — not a perfect one",
+  ch12:        "knowing when this method is not enough and what to do then",
+  conclusion:  "starting small and returning often as the whole practice",
+};
+
 function PatternsView({
   patterns,
   patternsLoading,
@@ -815,6 +833,11 @@ function PatternsView({
   patternsLoading: boolean;
   setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
 }) {
+  const { data: rbData } = trpc.readingBridge.get.useQuery(undefined, { staleTime: 10 * 60 * 1000 });
+  const chapterKey = rbData?.finished ? "conclusion" : (rbData?.chapter ?? null);
+  const chapterTitle = chapterKey ? rbData?.chapters?.find((c: any) => c.key === chapterKey)?.title ?? null : null;
+  const chapterConcept = chapterKey ? CLIENT_CHAPTER_CONCEPTS[chapterKey] ?? null : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -886,6 +909,22 @@ function PatternsView({
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Encouraging pattern</p>
             <p className="text-foreground leading-relaxed">{patterns.encouragingPattern}</p>
           </div>
+
+          {/* Reading Bridge chapter reference — only shown when chapter is set */}
+          {chapterKey && chapterConcept && (
+            <div
+              className="flex items-start gap-3 px-4 py-3 rounded-xl"
+              style={{
+                background: "oklch(0.74 0.14 72 / 0.06)",
+                border: "1px solid oklch(0.74 0.14 72 / 0.15)",
+              }}
+            >
+              <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <p className="text-sm text-foreground/80 leading-snug">
+                {chapterTitle ? <><span className="font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>{chapterTitle.split(":")[0]}</span> of <span className="italic">Permission to Start</span> speaks directly to this — {chapterConcept}.</> : <><span className="italic">Permission to Start</span> speaks directly to this — {chapterConcept}.</>}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>

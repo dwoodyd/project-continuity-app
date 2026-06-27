@@ -1276,6 +1276,24 @@ export default function Home() {
     enabled: criticalReady,
     staleTime: 30 * 60 * 1000,
   });
+  // Reading Bridge first-time prompt
+  const { data: rbData } = trpc.readingBridge.get.useQuery(undefined, { enabled: !!user, staleTime: 10 * 60 * 1000 });
+  const setRbChapter = trpc.readingBridge.set.useMutation();
+  const [rbPromptDismissed, setRbPromptDismissed] = useState(() => localStorage.getItem("rb_prompt_dismissed") === "1");
+  const showRbPrompt = !rbPromptDismissed &&
+    !!rbData &&
+    !rbData.chapter &&
+    !rbData.finished &&
+    !rbData.dismissed &&
+    (focusTodayStats?.lifetimeSessions ?? 0) >= 3;
+  const dismissRbPrompt = (notReading = false) => {
+    setRbPromptDismissed(true);
+    localStorage.setItem("rb_prompt_dismissed", "1");
+    if (notReading) {
+      setRbChapter.mutate({ dismissed: true });
+    }
+  };
+
   // Thread Lock — recall and dismiss mutations
   const recallThreadLock = trpc.threadLock.recall.useMutation({
     onSuccess: (_, vars) => {
@@ -2122,6 +2140,47 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
+        </div>
+      )}
+
+      {/* ── Reading Bridge first-time prompt ─────────────────────────────── */}
+      {showRbPrompt && (
+        <div
+          className="flex items-start justify-between gap-4 px-4 py-3.5 rounded-xl"
+          style={{
+            background: "oklch(0.74 0.14 72 / 0.06)",
+            border: "1px solid oklch(0.74 0.14 72 / 0.18)",
+          }}
+        >
+          <div className="flex items-start gap-3 min-w-0">
+            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
+            <div className="min-w-0">
+              <p className="text-sm text-foreground/90 leading-snug">
+                Reading <span className="italic">Permission to Start</span>? Tell Wren where you are and she'll keep it in mind.
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <button
+                  onClick={() => { dismissRbPrompt(false); navigate("/reading-bridge"); }}
+                  className="text-xs font-medium px-3 py-1 rounded-md"
+                  style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}
+                >
+                  Set my chapter
+                </button>
+                <button
+                  onClick={() => dismissRbPrompt(true)}
+                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                >
+                  Not reading it
+                </button>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={() => dismissRbPrompt(false)}
+            className="flex-shrink-0 text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-0.5"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
