@@ -32,6 +32,7 @@ import { applicationsRouter } from "./routers/applications";
 import { coworkingRouter } from "./routers/coworking";
 import { groundModeRouter } from "./routers/groundMode";
 import { threadLockRouter } from "./routers/threadLock";
+import { readingBridgeRouter } from "./routers/readingBridge";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -112,6 +113,7 @@ export const appRouter = router({
   coworking: coworkingRouter,
   groundMode: groundModeRouter,
   threadLock: threadLockRouter,
+  readingBridge: readingBridgeRouter,
 });
 
 export type AppRouter = typeof appRouter;

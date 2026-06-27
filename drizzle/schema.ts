@@ -107,6 +107,13 @@ export const userProfiles = mysqlTable("user_profiles", {
   primaryDistraction: varchar("primaryDistraction", { length: 255 }),
   onboardingAbVariant: varchar("onboardingAbVariant", { length: 1 }),
   hasSeenWrenIntro: boolean("hasSeenWrenIntro").default(false),
+  // ── Reading Bridge ──────────────────────────────────────────────────────────
+  /** Current chapter key the user is reading in "Permission to Start" */
+  readingBridgeChapter: varchar("readingBridgeChapter", { length: 64 }),
+  /** True when user has finished the entire book */
+  readingBridgeFinished: boolean("readingBridgeFinished").default(false),
+  /** True when user dismissed the first-time prompt with "Not reading it" */
+  readingBridgeDismissed: boolean("readingBridgeDismissed").default(false),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

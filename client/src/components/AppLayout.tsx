@@ -72,6 +72,7 @@ const ALL_NAV_ITEMS = [
   { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
   { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
   { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },
+  { href: "/reading-bridge", label: "Reading Bridge", icon: BookOpen,      section: "secondary" },
   { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
   { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
   { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },

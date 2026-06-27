@@ -23,6 +23,7 @@ import {
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
+import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
 
 // getTodayDate replaced by resolveDate from dateUtils
 
@@ -487,6 +488,20 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
     .mutation(async ({ ctx, input }) => {
     checkLLMRateLimit(ctx.user.id);
 
+    // ── Reading Bridge context ─────────────────────────────────────────────────
+    const userProfile = await getUserProfile(ctx.user.id);
+    let readingBridgeContext = "";
+    if (userProfile?.readingBridgeFinished) {
+      readingBridgeContext = `\n\nREADING BRIDGE: The user has finished reading "Permission to Start". You may gently weave in a concept from the book if it fits the week's pattern — the threshold moment, permission before performance, returning without judgment. Only if it fits naturally.`;
+    } else if (userProfile?.readingBridgeChapter) {
+      const chapterKey = userProfile.readingBridgeChapter;
+      const concept = CHAPTER_CONCEPTS[chapterKey] ?? "";
+      const chapter = PERMISSION_TO_START_CHAPTERS.find(c => c.key === chapterKey);
+      if (concept && chapter) {
+        readingBridgeContext = `\n\nREADING BRIDGE: The user is currently reading "${chapter.title}" in "Permission to Start" — a chapter about ${concept}. If the week's patterns touch on this theme, you may gently reference it. Only if it fits naturally.`;
+      }
+    }
+
     // ── Gather real data ──────────────────────────────────────────────────────
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const weekAgoDate = new Date(weekAgo);
@@ -540,7 +555,7 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
       messages: [
         {
           role: "system",
-          content: `You are Wren — a quiet, warm companion who writes a brief personal letter to the user at the end of each week.
+          content: `You are Wren — a quiet, warm companion who writes a brief personal letter to the user at the end of each week.${readingBridgeContext}
 
 Your letter has exactly four beats:
 1. WHAT MOVED — name real progress warmly. Drawn from focus sessions, completed work, what they kept returning to. Specific, not flattering. If the week was thin, say so honestly and gently.

@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { assertProjectOwnedBy, createProjectMemoryEvent, getDb, logSurfaceEvent as logSurfaceEventDb, getEstimationCalibration } from "../db";
+import { assertProjectOwnedBy, createProjectMemoryEvent, getDb, logSurfaceEvent as logSurfaceEventDb, getEstimationCalibration, getUserProfile } from "../db";
+import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
 import { focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
@@ -316,6 +317,25 @@ export const focusSessionsRouter = router({
     .mutation(async ({ ctx, input }) => {
       const hour = input.clientHour ?? new Date().getHours();
       const { vibe } = getWrenVibe(hour);
+
+      // ── Reading Bridge context (quiet, non-intrusive) ─────────────────────
+      const profile = await getUserProfile(ctx.user.id);
+      let readingBridgeBlock = "";
+      if (profile?.readingBridgeChapter || profile?.readingBridgeFinished) {
+        if (profile.readingBridgeFinished) {
+          readingBridgeBlock = `\n\nREADING BRIDGE (optional context — use only when naturally relevant):
+The user has finished reading "Permission to Start" by DeWayne Owens. You may gently reference any concept from the book if it naturally fits what they're experiencing — the threshold moment, permission before performance, the first movable step, returning without judgment. Never force it. Never mention the book by name unless they bring it up first.`;
+        } else {
+          const chapterKey = profile.readingBridgeChapter!;
+          const concept = CHAPTER_CONCEPTS[chapterKey] ?? "";
+          const chapter = PERMISSION_TO_START_CHAPTERS.find(c => c.key === chapterKey);
+          if (concept && chapter) {
+            readingBridgeBlock = `\n\nREADING BRIDGE (optional context — use only when naturally relevant):
+The user is currently reading "${chapter.title}" in "Permission to Start". This chapter is about ${concept}. If what they're experiencing in this session touches on that theme, you may gently reference it — but only if it fits naturally. Never force it. Never mention the book by name unless they bring it up first.`;
+          }
+        }
+      }
+
       const systemPrompt = buildWrenSystemPrompt({
         intention: input.intention ?? "",
         durationMinutes: input.durationMinutes ?? 50,
@@ -331,7 +351,7 @@ export const focusSessionsRouter = router({
 
       const response = await invokeLLM({
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: systemPrompt + readingBridgeBlock },
           ...history,
           { role: "user", content: input.message },
         ],
