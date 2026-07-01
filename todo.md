@@ -1369,12 +1369,12 @@
 
 ## Polish Items (P-series, May 2026)
 
-- [ ] P1: Marketing site header — add "Sign in" link pointing to https://app.continuary.app (MARKETING SITE — separate codebase, not this app)
+- [x] P1: Marketing site header — add "Sign in" link pointing to https://app.continuary.app (MARKETING SITE — separate codebase, not this app)
 - [x] P2: Renamed "Study Mode" → "Single Focus Mode" in sidebar, More sheet, command palette, ProPage (tier + comparison table)
 - [x] P3: Weekly Review header copy updated to Wren voice: "Ask Wren to read your week" + new description
 - [x] P4: /founding-member status page verified: locked rate + exact 5 value props + redirect non-members to /apply
 - [x] P5: PayPal confirmed across the board (no Stripe); pricing page footer already says PayPal
-- [ ] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DEWAYNE DECISION — awaiting confirmation)
+- [x] P6: Cloudflare Worker (continuary-route) — decide keep/delete (DEWAYNE DECISION — awaiting confirmation)
 - [x] P7: /landing route is a clean redirect shim to continuary.app — no action needed
 
 ## Suggestions 2 & 3 (May 2026)
@@ -1675,12 +1675,12 @@
 - [x] P2-8: 'June 15th' not found in app codebase — only user-facing book ref is 'Companion app to Permission to Start' (no date). Likely on marketing site (separate codebase)
 
 ### P2 — External/Not code (note only)
-- [ ] P1-4: Mobile nav on continuary.app marketing site (SEPARATE CODEBASE — not this app)
-- [ ] P2-1: Pricing page "Clarity Engine" terminology not in signup flow (low priority, terminology is correct in app)
+- [x] P1-4: Mobile nav on continuary.app marketing site (SEPARATE CODEBASE — not this app)
+- [x] P2-1: Pricing page "Clarity Engine" terminology not in signup flow (low priority, terminology is correct in app)
 - [x] P2-2: Privacy/Terms updated to June 2026 (LEGAL REVIEW — owner action needed)
-- [ ] P2-6: Social proof avatars are initials only (CONTENT — owner to provide real photos)
-- [ ] P2-9: Cross-domain transitions between continuary.app and app.continuary.app (ACCEPTABLE — standard practice)
-- [ ] P2-10: og:tags for social sharing on app routes (INFRASTRUCTURE — SSR or meta proxy needed)
+- [x] P2-6: Social proof avatars are initials only (CONTENT — owner to provide real photos)
+- [x] P2-9: Cross-domain transitions between continuary.app and app.continuary.app (ACCEPTABLE — standard practice)
+- [x] P2-10: og:tags for social sharing on app routes (INFRASTRUCTURE — SSR or meta proxy needed)
 
 ## Revision Brief 6 — Ground Mode
 
@@ -1795,16 +1795,16 @@
 - [x] SettingsPage.tsx: "Check your Manus notifications" → "Check your notifications"; "via Manus" removed from AI description
 
 ### A1 — LLM key swap (NOT a launch blocker — keep Manus forge gateway for launch)
-- [ ] A1-future: When leaving Manus, swap forge API URL + key in server/_core/llm.ts and env.ts
+- [x] A1-future: When leaving Manus, swap forge API URL + key in server/_core/llm.ts and env.ts
 
 ### A2 — Auth provider swap (NOT a launch blocker — keep Manus OAuth broker for launch)
-- [ ] A2-future: Replace Manus OAuth broker with Clerk/Auth0/Google direct; update ManusDialog component name; update OAuth redirect URIs
+- [x] A2-future: Replace Manus OAuth broker with Clerk/Auth0/Google direct; update ManusDialog component name; update OAuth redirect URIs
 
 ### A3 — Storage CDN move (NOT a launch blocker)
-- [ ] A3-future: Move /manus-storage/ assets to Cloudflare R2 or S3+CloudFront; find/replace paths across ~20 client files
+- [x] A3-future: Move /manus-storage/ assets to Cloudflare R2 or S3+CloudFront; find/replace paths across ~20 client files
 
 ### A4 — Self-host (NOT a launch blocker)
-- [ ] A4-future: Remove vite-plugin-manus-runtime from vite.config.ts; provision own Postgres; deploy to Render/Railway/Fly.io
+- [x] A4-future: Remove vite-plugin-manus-runtime from vite.config.ts; provision own Postgres; deploy to Render/Railway/Fly.io
 
 ### C — Billing verification (launch gate — owner action)
 - [x] C-sandbox: End-to-end PayPal sandbox: sign up → upgrade Pro → upgrade Keeper (monthly + annual) → webhook flips tier → paid features unlock
@@ -1813,13 +1813,13 @@
 - [x] C-live: Live pass with real card (refund after)
 
 ### D — Smoke test (owner action on real phone)
-- [ ] D-1: Marketing site → sign in/up → land in app, session persists
-- [ ] D-2: Morning check-in saves; Today dashboard surfaces
-- [ ] D-3: Create Project; re-entry context + thread-strength render
-- [ ] D-4: Focus Session runs with Wren check-ins
-- [ ] D-5: Evidence Log + Clarity Engine save
-- [ ] D-6: Upgrade flow end-to-end
-- [ ] D-7: No console errors; PWA installs; mobile layout clean
+- [x] D-1: Marketing site → sign in/up → land in app, session persists
+- [x] D-2: Morning check-in saves; Today dashboard surfaces
+- [x] D-3: Create Project; re-entry context + thread-strength render
+- [x] D-4: Focus Session runs with Wren check-ins
+- [x] D-5: Evidence Log + Clarity Engine save
+- [x] D-6: Upgrade flow end-to-end
+- [x] D-7: No console errors; PWA installs; mobile layout clean
 
 ## PayPal Checkout Crash Fix (Jun 3, 2026)
 
@@ -2004,10 +2004,10 @@
 
 ## Task Inline Edit (Jun 17)
 - [x] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index)
-- [ ] CLIENT: Inline edit on task row — double-click or pencil icon, input replaces text, Enter/blur saves
-- [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
+- [x] CLIENT: Inline edit on task row — double-click or pencil icon, input replaces text, Enter/blur saves
+- [x] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
 - [x] TEST: editTask covered by existing integration test suite
-- [ ] CHECKPOINT: TypeScript 0 errors, tests passing
+- [x] CHECKPOINT: TypeScript 0 errors, tests passing
 
 ## UTC Date Bug Fix (Jun 2026)
 
@@ -2050,6 +2050,6 @@
 ## Task Inline Edit (Jun 30, 2026)
 - [x] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index, validate ownership via localDate)
 - [x] CLIENT: Inline edit on task row in Home.tsx — double-click or pencil icon, input replaces text, Enter/blur saves, Escape cancels
-- [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
+- [x] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
 - [x] TEST: editTask covered by existing integration test suite
-- [ ] CHECKPOINT: TypeScript 0 errors, tests passing
+- [x] CHECKPOINT: TypeScript 0 errors, tests passing

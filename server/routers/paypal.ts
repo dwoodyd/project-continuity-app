@@ -45,6 +45,7 @@ export const paypalRouter = router({
         "keeper_founding_monthly", "keeper_founding_annual",
         "pro_retail_monthly", "pro_retail_annual",
         "keeper_retail_monthly", "keeper_retail_annual",
+        "test_pro_monthly", // REMOVE AFTER LIVE TEST
       ] as const).default("pro_founding_monthly"),
     }))
     .mutation(async ({ ctx, input }) => {

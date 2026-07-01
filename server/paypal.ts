@@ -36,7 +36,8 @@ export type PlanKey =
   | "pro_retail_monthly"
   | "pro_retail_annual"
   | "keeper_retail_monthly"
-  | "keeper_retail_annual";
+  | "keeper_retail_annual"
+  | "test_pro_monthly"; // REMOVE AFTER LIVE TEST
 
 export const PLAN_CATALOG: Record<PlanKey, {
   name: string;
@@ -54,6 +55,8 @@ export const PLAN_CATALOG: Record<PlanKey, {
   pro_retail_annual:       { name: "Continuary Pro Retail Annual",       tier: "pro",    rateType: "retail",   billing: "annual",  priceUsd: "79.99",  intervalUnit: "YEAR"  },
   keeper_retail_monthly:   { name: "Continuary Keeper Retail Monthly",   tier: "keeper", rateType: "retail",   billing: "monthly", priceUsd: "14.99",  intervalUnit: "MONTH" },
   keeper_retail_annual:    { name: "Continuary Keeper Retail Annual",    tier: "keeper", rateType: "retail",   billing: "annual",  priceUsd: "149.99", intervalUnit: "YEAR"  },
+  // REMOVE AFTER LIVE TEST — $0.01 plan for webhook verification only
+  test_pro_monthly:        { name: "Continuary Test (Dev Only)",           tier: "pro",    rateType: "founding", billing: "monthly", priceUsd: "0.01",   intervalUnit: "MONTH" },
 };
 
 // Legacy exports kept for backward compat
