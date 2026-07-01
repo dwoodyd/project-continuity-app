@@ -217,7 +217,7 @@ export const groundModeRouter = router({
 
       messages.push({ role: "user", content: input.message });
 
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const response = await invokeLLM({ messages });
       const text = (response.choices[0]?.message?.content as string) ?? "";
 

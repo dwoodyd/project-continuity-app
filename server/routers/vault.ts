@@ -193,7 +193,7 @@ export const vaultRouter = router({
   aiProcess: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const item = await getSourceItemById(input.id, ctx.user.id);
       if (!item) throw new TRPCError({ code: "NOT_FOUND" });
       const content = item.rawContent ?? item.cleanContent ?? "";

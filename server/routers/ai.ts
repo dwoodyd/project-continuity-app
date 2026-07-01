@@ -35,7 +35,7 @@ export const aiRouter = router({
       capturedDuringTask: z.boolean().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       // Derive a short title from the first line or first 60 chars
       const firstLine = input.content.split("\n")[0]?.trim() ?? "";
       const title = firstLine.length > 0
@@ -146,7 +146,7 @@ Return JSON: { parsedIntent: string (1 sentence), suggestedProject: string|null 
   generateReEntryCard: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const project = await getProjectById(input.projectId, ctx.user.id);
       if (!project) return null;
 
@@ -242,7 +242,7 @@ Return JSON: { stoppingPoint, unresolvedDecision, whatWasRuledOut, nextPhysicalA
       entryMethod: z.enum(["manual", "resolver_offer"]).default("manual"),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const project = input.projectId ? await getProjectById(input.projectId, ctx.user.id) : null;
 
       const systemPrompt = `You are an executive-function support system helping someone who is stuck.
@@ -320,7 +320,7 @@ Rules:
   checkGoodEnough: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const project = await getProjectById(input.projectId, ctx.user.id);
       if (!project?.goodEnoughThreshold) return null;
 
@@ -401,7 +401,7 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
       })
     )
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
 
       const { ENV } = await import("../_core/env");
       if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
@@ -486,7 +486,7 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
   generateWeeklyReview: protectedProcedure
     .input(z.object({ weekKey: z.string() }))
     .mutation(async ({ ctx, input }) => {
-    checkLLMRateLimit(ctx.user.id);
+    await checkLLMRateLimit(ctx.user.id);
 
     // ── Reading Bridge context ─────────────────────────────────────────────────
     const userProfile = await getUserProfile(ctx.user.id);

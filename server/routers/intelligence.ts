@@ -49,7 +49,7 @@ export const intelligenceRouter = router({
       projectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const hour = new Date().getHours();
       const timeOfDay: "morning" | "afternoon" | "evening" =
         hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
@@ -143,7 +143,7 @@ Return JSON only: { category: string, confidence: "high"|"medium"|"low" }`,
       projectId: z.number().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       if (!input.notes.trim()) return { decisions: [] };
       try {
         const response = await invokeLLM({
@@ -293,7 +293,7 @@ Return JSON: { decisions: string[] }`,
   }),
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
-    checkLLMRateLimit(ctx.user.id);
+    await checkLLMRateLimit(ctx.user.id);
     const [activeProjects, recentSessions, recentPlans, profile, calendarEvents] = await Promise.all([
       getActiveProjects(ctx.user.id),
       getRecentFocusSessions(ctx.user.id, 20),
@@ -419,7 +419,7 @@ Return JSON: {
   generateReEntryCard: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const [project, sessions, checkIns] = await Promise.all([
         getProjectById(input.projectId, ctx.user.id),
         getFocusSessionsByProject(ctx.user.id, input.projectId, 5),
@@ -580,7 +580,7 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
       workStyle: z.string().max(500).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const { projectId, projectTitle, whyItMatters, userNextStep, tonePreference, workStyle } = input;
       // If the user already gave a concrete next step (>10 chars), use it directly
       if (userNextStep && userNextStep.trim().length > 10) {

@@ -49,7 +49,7 @@ export const voiceRouter = router({
       const { url } = await storagePut(fileKey, buffer, mime);
 
       const { checkLLMRateLimit } = await import("../_core/rateLimiter");
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const { transcribeAudio } = await import("../_core/voiceTranscription");
       const result = await transcribeAudio({
         audioUrl: url,

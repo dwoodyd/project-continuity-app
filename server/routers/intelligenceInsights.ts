@@ -57,7 +57,7 @@ export const intelligenceInsightsRouter = router({
   // ── Mutation: score all active projects (1 LLM call total) ─────────────────
   scoreAllProjects: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.user.id;
-    checkLLMRateLimit(userId);
+    await checkLLMRateLimit(userId);
     const allProjects = await getActiveProjects(userId);
     if (allProjects.length === 0) return { scores: [] };
 
@@ -173,7 +173,7 @@ Return ONLY a JSON array, no explanation.`;
   // ── Mutation: detect cross-project patterns (1 LLM call) ───────────────────
   detectPatterns: protectedProcedure.mutation(async ({ ctx }) => {
     const userId = ctx.user.id;
-    checkLLMRateLimit(userId);
+    await checkLLMRateLimit(userId);
 
     // Gather signals from the last 30 days
     const [projects, checkIns, distractions, decisions, sessions] = await Promise.all([

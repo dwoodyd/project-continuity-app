@@ -204,6 +204,30 @@ async function startServer() {
     })
   );
 
+  // ── Permissions-Policy header ─────────────────────────────────────────────────
+  // Explicitly disable browser features that Continuary never uses.
+  // This prevents malicious scripts or injected iframes from accessing
+  // the camera, microphone, geolocation, or payment APIs.
+  // The microphone is intentionally allowed for voice dictation (Vault/Clarity Brain Dump).
+  app.use((_req, res, next) => {
+    res.setHeader(
+      "Permissions-Policy",
+      [
+        "camera=()",           // Never used — disable entirely
+        "geolocation=()",      // Never used — disable entirely
+        "payment=()",          // PayPal JS SDK handles its own popup; no Payment Request API
+        "usb=()",              // Never used
+        "magnetometer=()",     // Never used
+        "accelerometer=()",    // Never used
+        "gyroscope=()",        // Never used
+        "display-capture=()",  // Never used
+        "fullscreen=(self)",   // Allowed for focus session fullscreen
+        "microphone=(self)",   // Required for voice dictation (Vault / Clarity Brain Dump)
+      ].join(", ")
+    );
+    next();
+  });
+
   // ── Response compression ──────────────────────────────────────────────────────
   // Gzip/Brotli compress all responses >1KB — reduces bandwidth by ~70% for JSON.
   app.use(compression());
@@ -236,27 +260,34 @@ async function startServer() {
   //
   // Strict limit on the OAuth callback: 10 requests per 15 minutes per IP.
   // Uses Upstash Redis store when env vars are set (horizontal-scaling safe); falls back to in-memory.
+  // NOTE: validate.xForwardedForHeader is NOT disabled — with trust proxy: 1, express-rate-limit
+  // correctly reads the real client IP from X-Forwarded-For set by the Manus load balancer.
   const oauthWindowMs = 15 * 60 * 1000;
   const oauthLimiter = rateLimit({
     windowMs: oauthWindowMs,
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    validate: { xForwardedForHeader: false },
     message: { error: "Too many login attempts. Please wait 15 minutes and try again." },
     store: makeUpstashStore("rl:oauth:", oauthWindowMs),
   });
-  // Broader limit on the tRPC API: 300 requests per minute per IP.
+  // tRPC API: 60 requests per minute per IP.
+  // This is generous for normal interactive use (a page load triggers ~5-10 queries)
+  // but blocks scrapers, credential stuffing, and runaway clients.
+  // The per-user LLM rate limiter (checkLLMRateLimit) provides a tighter second layer
+  // specifically on AI-backed endpoints (10 LLM calls/60s per authenticated user).
   const apiWindowMs = 60 * 1000;
   const apiLimiter = rateLimit({
     windowMs: apiWindowMs,
-    max: 300,
+    max: 60,
     standardHeaders: true,
     legacyHeaders: false,
-    validate: { xForwardedForHeader: false },
     message: { error: "Too many requests. Please slow down." },
     store: makeUpstashStore("rl:api:", apiWindowMs),
-  });;
+    // Skip the rate limit for the /api/version health-check endpoint so monitoring
+    // probes don't consume quota and accidentally trigger 429s for real users.
+    skip: (req) => req.path === "/version",
+  });
 
   // Build version endpoint — lets clients detect new deploys proactively.
   // BUILD_HASH is set by the deploy pipeline; falls back to "dev" in local dev.

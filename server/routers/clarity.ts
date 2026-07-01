@@ -47,7 +47,7 @@ export const clarityRouter = router({
       })
     )
      .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
@@ -332,7 +332,7 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
   // ── Analyze patterns across clarity sessions ──────────────────────────────
   analyzePatterns: protectedProcedure
     .query(async ({ ctx }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const db = await getDb();
       if (!db) return null;
       const sessions = await db

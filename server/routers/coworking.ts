@@ -52,7 +52,7 @@ export const coworkingRouter = {
 
       if (input.generateNextStep && session.workingOn) {
         try {
-          checkLLMRateLimit(ctx.user.id);
+          await checkLLMRateLimit(ctx.user.id);
           const activeProjects = await getActiveProjects(ctx.user.id);
           const projectContext = session.projectId
             ? activeProjects.find((p) => p.id === session.projectId)?.title ?? ""

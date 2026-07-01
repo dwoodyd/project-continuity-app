@@ -174,7 +174,7 @@ export const evidenceRouter = router({
   generateSummary: protectedProcedure
     .input(z.object({ month: z.string().regex(/^\d{4}-\d{2}$/).optional() }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const month = input.month ?? currentMonth();
       const stats = await computeStats(ctx.user.id, month);
 

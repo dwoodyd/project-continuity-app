@@ -73,7 +73,7 @@ export const checkInsRouter = router({
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
       const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
         getUserProfile(ctx.user.id),
@@ -377,7 +377,7 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
@@ -463,7 +463,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
       const plan = await getDailyPlan(ctx.user.id, date);
       const profile = await getUserProfile(ctx.user.id);
