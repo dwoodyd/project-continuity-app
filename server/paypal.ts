@@ -211,17 +211,105 @@ export async function cancelSubscription(subscriptionId: string, userId: number)
   await db2.update(users).set({ isPro: false, paypalSubscriptionId: null, billingStatus: "free_tier_founding_rate_waiting" }).where(eq(users.id, userId));
 }
 
+// ─── PayPal webhook signature verification ───────────────────────────────────
+// Uses PayPal's postback method: sends the event + headers back to PayPal's
+// verify-webhook-signature endpoint to confirm authenticity.
+async function verifyPayPalWebhookSignature(
+  headers: Record<string, string | string[] | undefined>,
+  rawBody: string,
+  webhookId: string,
+): Promise<boolean> {
+  const transmissionId = headers["paypal-transmission-id"];
+  const transmissionTime = headers["paypal-transmission-time"];
+  const certUrl = headers["paypal-cert-url"];
+  const authAlgo = headers["paypal-auth-algo"];
+  const transmissionSig = headers["paypal-transmission-sig"];
+
+  if (!transmissionId || !transmissionTime || !certUrl || !authAlgo || !transmissionSig) {
+    console.warn("[PayPal webhook] Missing required signature headers");
+    return false;
+  }
+
+  // Validate cert URL is from PayPal to prevent SSRF
+  const certUrlStr = Array.isArray(certUrl) ? certUrl[0] : certUrl;
+  if (!certUrlStr || !certUrlStr.startsWith("https://api.paypal.com/") && !certUrlStr.startsWith("https://api.sandbox.paypal.com/")) {
+    console.warn("[PayPal webhook] Suspicious cert URL:", certUrlStr);
+    return false;
+  }
+
+  try {
+    const token = await getAccessToken();
+    const verifyPayload = {
+      transmission_id: Array.isArray(transmissionId) ? transmissionId[0] : transmissionId,
+      transmission_time: Array.isArray(transmissionTime) ? transmissionTime[0] : transmissionTime,
+      cert_url: certUrlStr,
+      auth_algo: Array.isArray(authAlgo) ? authAlgo[0] : authAlgo,
+      transmission_sig: Array.isArray(transmissionSig) ? transmissionSig[0] : transmissionSig,
+      webhook_id: webhookId,
+      webhook_event: JSON.parse(rawBody),
+    };
+
+    const response = await paypalFetch(
+      `${PAYPAL_BASE}/v1/notifications/verify-webhook-signature`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(verifyPayload),
+      },
+      8_000,
+    );
+
+    if (!response.ok) {
+      console.warn("[PayPal webhook] Verification API returned", response.status);
+      return false;
+    }
+
+    const result = await response.json() as { verification_status?: string };
+    return result.verification_status === "SUCCESS";
+  } catch (err) {
+    console.error("[PayPal webhook] Signature verification error:", err instanceof Error ? err.message : String(err));
+    return false;
+  }
+}
+
 // ─── Webhook router (mounted at /api/paypal) ──────────────────────────────────
 export const paypalRouter = express.Router();
 
-paypalRouter.post("/webhook", express.json(), async (req, res) => {
-  const event = req.body as {
-    event_type: string;
-    resource: { id: string; custom_id: string; status: string };
-  };
+paypalRouter.post("/webhook", express.text({ type: "application/json" }), async (req, res) => {
+  const rawBody = req.body as string;
+  let event: { event_type: string; resource: { id: string; custom_id: string; status: string }; id?: string };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    console.warn("[PayPal webhook] Invalid JSON body");
+    return res.status(400).json({ error: "Invalid JSON" });
+  }
+
+  // ── Signature verification ────────────────────────────────────────────────
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  if (!webhookId) {
+    // PAYPAL_WEBHOOK_ID not configured — log and reject to avoid silent bypass
+    console.error("[PayPal webhook] PAYPAL_WEBHOOK_ID env var not set — rejecting webhook");
+    return res.status(500).json({ error: "Webhook not configured" });
+  }
+
+  const isValid = await verifyPayPalWebhookSignature(
+    req.headers as Record<string, string | string[] | undefined>,
+    rawBody,
+    webhookId,
+  );
+
+  if (!isValid) {
+    console.warn("[PayPal webhook] Signature verification FAILED — rejecting event");
+    return res.status(401).json({ error: "Invalid webhook signature" });
+  }
+
   try {
     // Idempotency: skip duplicate webhook deliveries
-    const eventId = (req.body as { id?: string }).id;
+    const eventId = event.id;
     if (eventId) {
       const db = await getDb();
       if (db) {

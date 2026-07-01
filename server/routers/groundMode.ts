@@ -16,6 +16,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb } from "../db";
 import { groundSessions, appConfig, checkIns } from "../../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
@@ -216,6 +217,7 @@ export const groundModeRouter = router({
 
       messages.push({ role: "user", content: input.message });
 
+      checkLLMRateLimit(ctx.user.id);
       const response = await invokeLLM({ messages });
       const text = (response.choices[0]?.message?.content as string) ?? "";
 

@@ -300,6 +300,8 @@ export const studyRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Wren-generated prompts require Pro." });
       }
       const { invokeLLM } = await import("../_core/llm");
+      const { checkLLMRateLimit } = await import("../_core/rateLimiter");
+      checkLLMRateLimit(ctx.user.id);
       const prevContext =
         input.previousEntries && input.previousEntries.length > 0
           ? `Previous entries:\n${input.previousEntries.join("\n")}`

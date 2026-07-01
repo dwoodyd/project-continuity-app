@@ -5,6 +5,7 @@ import { fileTypeFromBuffer } from "file-type";
 import { protectedProcedure, router } from "../_core/trpc";
 import { storagePut } from "../storage";
 import { invokeLLM } from "../_core/llm";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb } from "../db";
 import {
   projectFiles,
@@ -288,6 +289,7 @@ When appropriate, suggest concrete next steps, help break down tasks, or identif
         })),
       ];
 
+      checkLLMRateLimit(ctx.user.id);
       const response = await invokeLLM({ messages: messages as any });
       const rawContent = response.choices[0]?.message?.content;
       const assistantContent: string = typeof rawContent === "string" ? rawContent : (rawContent ? JSON.stringify(rawContent) : "I'm not sure how to respond to that.");

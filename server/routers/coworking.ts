@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../_core/trpc";
+import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import {
   getCoworkingRooms,
@@ -51,6 +52,7 @@ export const coworkingRouter = {
 
       if (input.generateNextStep && session.workingOn) {
         try {
+          checkLLMRateLimit(ctx.user.id);
           const activeProjects = await getActiveProjects(ctx.user.id);
           const projectContext = session.projectId
             ? activeProjects.find((p) => p.id === session.projectId)?.title ?? ""

@@ -48,6 +48,8 @@ export const voiceRouter = router({
       const fileKey = `voice-dictation/${ctx.user.id}/${Date.now().toString(36)}.${ext}`;
       const { url } = await storagePut(fileKey, buffer, mime);
 
+      const { checkLLMRateLimit } = await import("../_core/rateLimiter");
+      checkLLMRateLimit(ctx.user.id);
       const { transcribeAudio } = await import("../_core/voiceTranscription");
       const result = await transcribeAudio({
         audioUrl: url,
