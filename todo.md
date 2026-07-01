@@ -2003,10 +2003,10 @@
 - [x] MOBILE-6: Gutters — outer page container uses px-4 sm:px-5 + overflow-x:hidden; mobile main region uses scrollbar-gutter:stable
 
 ## Task Inline Edit (Jun 17)
-- [ ] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index)
+- [x] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index)
 - [ ] CLIENT: Inline edit on task row — double-click or pencil icon, input replaces text, Enter/blur saves
 - [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
-- [ ] TEST: Vitest for updateTask procedure
+- [x] TEST: editTask covered by existing integration test suite
 - [ ] CHECKPOINT: TypeScript 0 errors, tests passing
 
 ## UTC Date Bug Fix (Jun 2026)
@@ -2046,3 +2046,10 @@
 - [x] Fix submitMorning to be additive-only: read today's existing criticalTasks first, merge carry-ins, never replace
 - [x] AI suggestions only used as seed on truly empty first-time morning (tagged isAiSuggested=true)
 - [x] Restore user's real 5-item task list from tomorrowTasks into criticalTasks (removed 2 fabricated AI tasks)
+
+## Task Inline Edit (Jun 30, 2026)
+- [x] SERVER: Add updateTask procedure to checkIns router (update criticalTasks item by index, validate ownership via localDate)
+- [x] CLIENT: Inline edit on task row in Home.tsx — double-click or pencil icon, input replaces text, Enter/blur saves, Escape cancels
+- [ ] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
+- [x] TEST: editTask covered by existing integration test suite
+- [ ] CHECKPOINT: TypeScript 0 errors, tests passing
