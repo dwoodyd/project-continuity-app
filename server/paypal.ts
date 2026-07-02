@@ -228,6 +228,8 @@ async function verifyPayPalWebhookSignature(
   const authAlgo = headers["paypal-auth-algo"];
   const transmissionSig = headers["paypal-transmission-sig"];
 
+  console.log("[PayPal webhook] Verifying — PAYPAL_ENV:", process.env.PAYPAL_ENV, "| PAYPAL_BASE:", PAYPAL_BASE);
+  console.log("[PayPal webhook] Headers present:", { transmissionId: !!transmissionId, transmissionTime: !!transmissionTime, certUrl: !!certUrl, authAlgo: !!authAlgo, transmissionSig: !!transmissionSig });
   if (!transmissionId || !transmissionTime || !certUrl || !authAlgo || !transmissionSig) {
     console.warn("[PayPal webhook] Missing required signature headers");
     return false;
@@ -235,8 +237,9 @@ async function verifyPayPalWebhookSignature(
 
   // Validate cert URL is from PayPal to prevent SSRF
   const certUrlStr = Array.isArray(certUrl) ? certUrl[0] : certUrl;
-  if (!certUrlStr || !certUrlStr.startsWith("https://api.paypal.com/") && !certUrlStr.startsWith("https://api.sandbox.paypal.com/")) {
-    console.warn("[PayPal webhook] Suspicious cert URL:", certUrlStr);
+  console.log("[PayPal webhook] Cert URL:", certUrlStr);
+  if (!certUrlStr || (!certUrlStr.startsWith("https://api.paypal.com/") && !certUrlStr.startsWith("https://api.sandbox.paypal.com/"))) {
+    console.warn("[PayPal webhook] Suspicious cert URL rejected:", certUrlStr);
     return false;
   }
 
@@ -266,11 +269,13 @@ async function verifyPayPalWebhookSignature(
     );
 
     if (!response.ok) {
-      console.warn("[PayPal webhook] Verification API returned", response.status);
+      const errText = await response.text().catch(() => "");
+      console.warn("[PayPal webhook] Verification API returned", response.status, errText);
       return false;
     }
 
     const result = await response.json() as { verification_status?: string };
+    console.log("[PayPal webhook] Verification result:", result.verification_status);
     return result.verification_status === "SUCCESS";
   } catch (err) {
     console.error("[PayPal webhook] Signature verification error:", err instanceof Error ? err.message : String(err));
