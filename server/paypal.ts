@@ -36,8 +36,7 @@ export type PlanKey =
   | "pro_retail_monthly"
   | "pro_retail_annual"
   | "keeper_retail_monthly"
-  | "keeper_retail_annual"
-  | "test_pro_monthly"; // REMOVE AFTER LIVE TEST
+  | "keeper_retail_annual";
 
 export const PLAN_CATALOG: Record<PlanKey, {
   name: string;
@@ -55,8 +54,6 @@ export const PLAN_CATALOG: Record<PlanKey, {
   pro_retail_annual:       { name: "Continuary Pro Retail Annual",       tier: "pro",    rateType: "retail",   billing: "annual",  priceUsd: "79.99",  intervalUnit: "YEAR"  },
   keeper_retail_monthly:   { name: "Continuary Keeper Retail Monthly",   tier: "keeper", rateType: "retail",   billing: "monthly", priceUsd: "14.99",  intervalUnit: "MONTH" },
   keeper_retail_annual:    { name: "Continuary Keeper Retail Annual",    tier: "keeper", rateType: "retail",   billing: "annual",  priceUsd: "149.99", intervalUnit: "YEAR"  },
-  // REMOVE AFTER LIVE TEST — $0.01 plan for webhook verification only
-  test_pro_monthly:        { name: "Continuary Test (Dev Only)",           tier: "pro",    rateType: "founding", billing: "monthly", priceUsd: "0.01",   intervalUnit: "MONTH" },
 };
 
 // Legacy exports kept for backward compat
@@ -179,6 +176,35 @@ export async function createSubscriptionLink(
   const approvalLink = subBody.links.find((l) => l.rel === "approve");
   if (!approvalLink) throw new Error("No approval link in PayPal response");
   return approvalLink.href;
+}
+
+// ─── Verify a subscription with PayPal, then activate (server-trusted path) ────
+// SECURITY: never trust a client-supplied subscriptionId/planKey. Fetch the
+// subscription from PayPal, confirm it is ACTIVE/APPROVED, and confirm its
+// custom_id (`${userId}:${planKey}`, set at creation time) matches THIS user.
+// The planKey is derived from PayPal's custom_id, not from client input.
+export async function verifyAndActivateSubscription(subscriptionId: string, userId: number) {
+  const token = await getAccessToken();
+  const res = await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    throw new Error(`PayPal subscription lookup failed (${res.status})`);
+  }
+  const sub = await res.json() as { status?: string; custom_id?: string };
+  const status = sub.status ?? "";
+  if (status !== "ACTIVE" && status !== "APPROVED") {
+    throw new Error(`Subscription not active (status: ${status || "unknown"})`);
+  }
+  const [customUserIdStr, customPlanKeyStr] = (sub.custom_id ?? "").split(":");
+  if (parseInt(customUserIdStr ?? "") !== userId) {
+    throw new Error("Subscription does not belong to this user");
+  }
+  const planKey = (customPlanKeyStr && customPlanKeyStr in PLAN_CATALOG)
+    ? customPlanKeyStr as PlanKey
+    : undefined;
+  await activateSubscription(subscriptionId, userId, planKey);
+  return { planKey };
 }
 
 // ─── Activate subscription after user returns ─────────────────────────────────

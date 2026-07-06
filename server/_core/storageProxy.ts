@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { ENV } from "./env";
+import { sdk } from "./sdk";
 
 /**
  * Storage proxy — serves Manus private storage files to the browser.
@@ -10,6 +11,12 @@ import { ENV } from "./env";
  * By fetching server-side and piping the response, we avoid this entirely.
  *
  * Supports HTTP Range requests so browsers can seek/scrub videos.
+ *
+ * SECURITY: keys that start with "vault/" are private user files.
+ * The request must carry a valid session cookie and the userId embedded
+ * in the key must match the authenticated user. Public app assets
+ * (Wren SVG/webp/mp4, etc.) have no vault/ prefix and are served
+ * without authentication so unauthenticated users see the landing page.
  */
 export function registerStorageProxy(app: Express) {
   app.get("/manus-storage/*", async (req: any, res) => {
@@ -18,6 +25,25 @@ export function registerStorageProxy(app: Express) {
       res.status(400).send("Missing storage key");
       return;
     }
+
+    // SECURITY: vault files are private — require auth and verify ownership.
+    // Public app assets (Wren SVG/webp/mp4, etc.) have no vault/ prefix and
+    // are served freely so unauthenticated users see the landing page correctly.
+    if (key.startsWith("vault/")) {
+      try {
+        const user = await sdk.authenticateRequest(req);
+        // Key format: vault/{userId}/...
+        const keyUserId = parseInt(key.split("/")[1] ?? "", 10);
+        if (!keyUserId || keyUserId !== user.id) {
+          res.status(403).send("Forbidden");
+          return;
+        }
+      } catch {
+        res.status(401).send("Unauthorized");
+        return;
+      }
+    }
+
     if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
       res.status(500).send("Storage proxy not configured");
       return;
@@ -63,10 +89,18 @@ export function registerStorageProxy(app: Express) {
       const contentRange = fileResp.headers.get("content-range");
       const acceptRanges = fileResp.headers.get("accept-ranges");
 
+      const isVaultFile = key.startsWith("vault/");
+
       res.status(fileResp.status); // 200 or 206
       res.set("Content-Type", contentType);
-      res.set("Cache-Control", "public, max-age=3600");
-      res.set("Access-Control-Allow-Origin", "*");
+      // Vault files are private: no public caching, no cross-origin access.
+      // Public assets (Wren media) can be cached publicly.
+      if (isVaultFile) {
+        res.set("Cache-Control", "private, max-age=3600");
+      } else {
+        res.set("Cache-Control", "public, max-age=3600");
+        res.set("Access-Control-Allow-Origin", "*");
+      }
       if (contentLength) res.set("Content-Length", contentLength);
       if (contentRange) res.set("Content-Range", contentRange);
       if (acceptRanges) res.set("Accept-Ranges", acceptRanges);

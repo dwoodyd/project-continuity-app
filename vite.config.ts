@@ -150,7 +150,12 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+// SECURITY/PERF: the Manus dev-instrumentation and JSX source-location plugins
+// leak source structure and bloat the bundle. Only load them outside production.
+const isProd = process.env.NODE_ENV === "production";
+const plugins = isProd
+  ? [react(), tailwindcss()]
+  : [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
 
 export default defineConfig({
   plugins,

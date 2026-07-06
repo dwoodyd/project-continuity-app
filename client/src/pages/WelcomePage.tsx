@@ -31,6 +31,8 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { trpc } from "@/lib/trpc";
+import { subscribePush } from "@/lib/pushSubscribe";
 
 // ── Brand logo ────────────────────────────────────────────────────────────────
 const BRAND_LOGO_DARK = "/logo-navy.svg";
@@ -341,27 +343,18 @@ export default function WelcomePage() {
   );
   const [notifLoading, setNotifLoading] = useState(false);
 
+  const registerPush = trpc.notifications.registerPush.useMutation();
   const handleNotifOptIn = useCallback(async () => {
     if (typeof window === "undefined" || !("Notification" in window)) return;
     setNotifLoading(true);
     try {
-      const result = await Notification.requestPermission();
-      setNotifPermission(result);
-      if (result === "granted") {
-        try {
-          const reg = await navigator.serviceWorker.ready;
-          const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-          if (vapidKey) {
-            await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey });
-          }
-        } catch {
-          // SW not ready yet — permission saved, subscription registered on next login
-        }
-      }
+      const result = await subscribePush(registerPush);
+      if (result === "granted") setNotifPermission("granted");
+      else if (result === "denied") setNotifPermission("denied");
     } finally {
       setNotifLoading(false);
     }
-  }, []);
+  }, [registerPush]);
 
   const ctaButton = isAuthenticated ? (
     <Link href="/">

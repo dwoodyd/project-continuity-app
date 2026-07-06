@@ -12,8 +12,7 @@ type PlanKey =
   | "pro_founding_monthly" | "pro_founding_annual"
   | "keeper_founding_monthly" | "keeper_founding_annual"
   | "pro_retail_monthly" | "pro_retail_annual"
-  | "keeper_retail_monthly" | "keeper_retail_annual"
-  | "test_pro_monthly"; // REMOVE AFTER LIVE TEST
+  | "keeper_retail_monthly" | "keeper_retail_annual";
 
 const PRICING = {
   pro: {
@@ -458,20 +457,6 @@ export default function ProPage() {
           )}
         </div>
 
-        {/* REMOVE AFTER LIVE TEST — hidden $0.01 test plan button, admin only */}
-        {user?.role === "admin" && (
-          <div className="border border-dashed border-white/10 rounded-xl p-4 mb-6 text-center">
-            <p className="text-xs text-white/30 mb-2">🔧 Dev only — $0.01 live webhook test</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleUpgrade("test_pro_monthly" as PlanKey, "Test ($0.01)")}
-              className="text-white/40 border-white/15 hover:text-amber-400 hover:border-amber-400/40 bg-transparent text-xs"
-            >
-              Subscribe $0.01/mo (test)
-            </Button>
-          </div>
-        )}
 
         {/* Footer */}
         <div className="border-t border-white/8 pt-8 pb-8 space-y-4 text-center">

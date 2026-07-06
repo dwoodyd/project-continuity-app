@@ -12,6 +12,8 @@
  */
 
 import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { subscribePush } from "@/lib/pushSubscribe";
 
 interface Props {
   onAllow: () => void;
@@ -26,27 +28,14 @@ const NUDGE_EXAMPLES = [
 
 export function PushPermissionInterstitial({ onAllow, onDismiss }: Props) {
   const [loading, setLoading] = useState(false);
+  const registerPush = trpc.notifications.registerPush.useMutation();
 
   async function handleAllow() {
     setLoading(true);
     try {
-      const result = await Notification.requestPermission();
-      if (result === "granted") {
-        try {
-          const reg = await navigator.serviceWorker.ready;
-          const vapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
-          if (vapidKey) {
-            await reg.pushManager.subscribe({
-              userVisibleOnly: true,
-              applicationServerKey: vapidKey,
-            });
-          }
-        } catch {
-          // SW not ready — permission saved, subscription on next session
-        }
-      }
+      await subscribePush(registerPush);
     } catch {
-      // Permission request failed silently
+      // Errors handled inside subscribePush — proceed regardless
     } finally {
       setLoading(false);
       onAllow();

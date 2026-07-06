@@ -8,6 +8,7 @@
  *  4. disconnectCalendar(userId) → delete stored tokens
  */
 
+import { createHmac, timingSafeEqual } from "crypto";
 import { getDb } from "./db";
 import { googleCalendarTokens } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -40,14 +41,39 @@ function getClientSecret() {
   return process.env.GOOGLE_CLIENT_SECRET ?? "";
 }
 
-// ── State encoding ────────────────────────────────────────────────────────────
-// We encode userId + origin in the OAuth state param so the callback can
-// identify the user without a session lookup.
+// ── State encoding (HMAC-signed) ─────────────────────────────────────────────
+// The state param carries userId + origin signed with JWT_SECRET so an
+// attacker cannot forge a callback that links an arbitrary user's calendar.
+// Format: base64url(JSON payload) + "." + base64url(HMAC-SHA256 signature)
+function getStateSecret(): string {
+  const secret = process.env.JWT_SECRET ?? "";
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET must be at least 32 characters for calendar state signing");
+  }
+  return secret;
+}
 export function encodeState(userId: number, origin: string): string {
-  return Buffer.from(JSON.stringify({ userId, origin })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({ userId, origin })).toString("base64url");
+  const sig = createHmac("sha256", getStateSecret())
+    .update(payload)
+    .digest("base64url");
+  return `${payload}.${sig}`;
 }
 export function decodeState(state: string): { userId: number; origin: string } {
-  return JSON.parse(Buffer.from(state, "base64url").toString("utf8"));
+  const dotIdx = state.lastIndexOf(".");
+  if (dotIdx === -1) throw new Error("Invalid calendar state: missing signature");
+  const payload = state.slice(0, dotIdx);
+  const sig = state.slice(dotIdx + 1);
+  const expectedSig = createHmac("sha256", getStateSecret())
+    .update(payload)
+    .digest("base64url");
+  // Constant-time comparison to prevent timing attacks
+  const sigBuf = Buffer.from(sig, "base64url");
+  const expectedBuf = Buffer.from(expectedSig, "base64url");
+  if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) {
+    throw new Error("Invalid calendar state: signature mismatch");
+  }
+  return JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
 }
 
 // ── OAuth URL builder ─────────────────────────────────────────────────────────

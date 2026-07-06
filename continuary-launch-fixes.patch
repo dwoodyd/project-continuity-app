@@ -1,0 +1,203 @@
+diff --git a/client/src/pages/ProSuccessPage.tsx b/client/src/pages/ProSuccessPage.tsx
+index 35908a3..dda7396 100644
+--- a/client/src/pages/ProSuccessPage.tsx
++++ b/client/src/pages/ProSuccessPage.tsx
+@@ -15,10 +15,11 @@ export default function ProSuccessPage() {
+   useEffect(() => {
+     if (!subscriptionId || ran.current) return;
+     ran.current = true;
+-    // Retrieve the planKey stored before PayPal redirect so tier/rateType are set correctly
++    // planKey is used only for the local welcome message; the server derives the
++    // real entitlement from PayPal's verified custom_id, not from this value.
+     const planKey = sessionStorage.getItem("pendingPlanKey") ?? undefined;
+     sessionStorage.removeItem("pendingPlanKey");
+-    confirm.mutateAsync({ subscriptionId, planKey }).then(async () => {
++    confirm.mutateAsync({ subscriptionId }).then(async () => {
+       await utils.paypal.status.invalidate();
+       const isKeeper = planKey?.startsWith("keeper");
+       notify.info(isKeeper ? "Welcome to Keeper! ✦" : "Welcome to Pro! ✦", {
+diff --git a/server/_core/sdk.ts b/server/_core/sdk.ts
+index 77b67b9..3e7a2eb 100644
+--- a/server/_core/sdk.ts
++++ b/server/_core/sdk.ts
+@@ -166,6 +166,13 @@ class SDKServer {
+ 
+   private getSessionSecret() {
+     const secret = ENV.cookieSecret;
++    // SECURITY: fail closed. An empty/weak JWT secret means tokens can be forged.
++    // Never sign or verify sessions with a missing or trivially short key.
++    if (!secret || secret.length < 32) {
++      throw new Error(
++        "JWT_SECRET is missing or too short (need >= 32 chars). Refusing to sign/verify sessions."
++      );
++    }
+     return new TextEncoder().encode(secret);
+   }
+ 
+diff --git a/server/coworking-ws.ts b/server/coworking-ws.ts
+index b94f418..9f4a4f5 100644
+--- a/server/coworking-ws.ts
++++ b/server/coworking-ws.ts
+@@ -6,6 +6,7 @@
+ import { WebSocketServer, WebSocket } from "ws";
+ import type { IncomingMessage } from "http";
+ import type { Server } from "http";
++import { sdk } from "./_core/sdk";
+ 
+ export type ParticipantStatus = "working" | "stuck" | "done";
+ 
+@@ -50,10 +51,23 @@ function getRoomSnapshot(slug: string) {
+ export function initCoworkingWS(server: Server) {
+   const wss = new WebSocketServer({ server, path: "/ws/coworking" });
+ 
+-  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
++  wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
+     let currentRoomSlug: string | null = null;
+     let currentUserId: number | null = null;
+ 
++    // SECURITY: authenticate the socket from the session cookie on the upgrade
++    // request. Identity is derived server-side; the client cannot supply it.
++    let authUserId: number;
++    let authName: string;
++    try {
++      const u = await sdk.authenticateRequest(req as unknown as Parameters<typeof sdk.authenticateRequest>[0]);
++      authUserId = u.id;
++      authName = u.name ?? "";
++    } catch {
++      ws.close(4401, "Unauthorized");
++      return;
++    }
++
+     ws.on("message", (raw: Buffer | string) => {
+       let msg: Record<string, unknown>;
+       try {
+@@ -65,13 +79,14 @@ export function initCoworkingWS(server: Server) {
+       const type = msg.type as string;
+ 
+       if (type === "join") {
+-        const { roomSlug, userId, name, workingOn, status } = msg as {
++        const { roomSlug, workingOn, status } = msg as {
+           roomSlug: string;
+-          userId: number;
+-          name: string;
+           workingOn: string;
+           status: ParticipantStatus;
+         };
++        // SECURITY: never trust client-supplied identity — use the authenticated session.
++        const userId = authUserId;
++        const name = authName;
+ 
+         // Leave previous room if any
+         if (currentRoomSlug && currentUserId !== null) {
+diff --git a/server/paypal.ts b/server/paypal.ts
+index 4d0b24e..577d751 100644
+--- a/server/paypal.ts
++++ b/server/paypal.ts
+@@ -181,6 +181,35 @@ export async function createSubscriptionLink(
+   return approvalLink.href;
+ }
+ 
++// ─── Verify a subscription with PayPal, then activate (server-trusted path) ────
++// SECURITY: never trust a client-supplied subscriptionId/planKey. Fetch the
++// subscription from PayPal, confirm it is ACTIVE/APPROVED, and confirm its
++// custom_id (`${userId}:${planKey}`, set at creation time) matches THIS user.
++// The planKey is derived from PayPal's custom_id, not from client input.
++export async function verifyAndActivateSubscription(subscriptionId: string, userId: number) {
++  const token = await getAccessToken();
++  const res = await paypalFetch(`${PAYPAL_BASE}/v1/billing/subscriptions/${subscriptionId}`, {
++    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
++  });
++  if (!res.ok) {
++    throw new Error(`PayPal subscription lookup failed (${res.status})`);
++  }
++  const sub = await res.json() as { status?: string; custom_id?: string };
++  const status = sub.status ?? "";
++  if (status !== "ACTIVE" && status !== "APPROVED") {
++    throw new Error(`Subscription not active (status: ${status || "unknown"})`);
++  }
++  const [customUserIdStr, customPlanKeyStr] = (sub.custom_id ?? "").split(":");
++  if (parseInt(customUserIdStr ?? "") !== userId) {
++    throw new Error("Subscription does not belong to this user");
++  }
++  const planKey = (customPlanKeyStr && customPlanKeyStr in PLAN_CATALOG)
++    ? customPlanKeyStr as PlanKey
++    : undefined;
++  await activateSubscription(subscriptionId, userId, planKey);
++  return { planKey };
++}
++
+ // ─── Activate subscription after user returns ─────────────────────────────────
+ export async function activateSubscription(subscriptionId: string, userId: number, planKey?: PlanKey) {
+   const db = await getDb();
+diff --git a/server/routers/paypal.ts b/server/routers/paypal.ts
+index 3231b97..72b46c2 100644
+--- a/server/routers/paypal.ts
++++ b/server/routers/paypal.ts
+@@ -1,6 +1,7 @@
+ import { z } from "zod";
++import { TRPCError } from "@trpc/server";
+ import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
+-import { createSubscriptionLink, activateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
++import { createSubscriptionLink, verifyAndActivateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
+ 
+ export const paypalRouter = router({
+   // Public diagnostics — returns only boolean presence checks, never actual key values
+@@ -45,10 +46,14 @@ export const paypalRouter = router({
+         "keeper_founding_monthly", "keeper_founding_annual",
+         "pro_retail_monthly", "pro_retail_annual",
+         "keeper_retail_monthly", "keeper_retail_annual",
+-        "test_pro_monthly", // REMOVE AFTER LIVE TEST
++        "test_pro_monthly", // admin-only; enforced below
+       ] as const).default("pro_founding_monthly"),
+     }))
+     .mutation(async ({ ctx, input }) => {
++      // SECURITY: the $0.01 test plan must never be purchasable by regular users.
++      if (input.planKey === "test_pro_monthly" && ctx.user.role !== "admin") {
++        throw new TRPCError({ code: "FORBIDDEN", message: "Not available." });
++      }
+       const returnUrl = `${input.origin}/pro/success`;
+       const cancelUrl = `${input.origin}/pro/cancel`;
+       const approvalUrl = await createSubscriptionLink(ctx.user.id, input.planKey as PlanKey, returnUrl, cancelUrl);
+@@ -57,10 +62,21 @@ export const paypalRouter = router({
+ 
+   // Called after PayPal redirects back with subscription_id
+   confirmSubscription: protectedProcedure
+-    .input(z.object({ subscriptionId: z.string(), planKey: z.string().optional() }))
++    // NOTE: planKey is intentionally IGNORED — it is derived server-side from the
++    // subscription's PayPal custom_id. Entitlement is only granted after PayPal
++    // confirms the subscription is ACTIVE and belongs to this user.
++    .input(z.object({ subscriptionId: z.string() }))
+     .mutation(async ({ ctx, input }) => {
+-      const planKey = (input.planKey && input.planKey in PLAN_CATALOG) ? input.planKey as PlanKey : undefined;
+-      await activateSubscription(input.subscriptionId, ctx.user.id, planKey);
++      try {
++        await verifyAndActivateSubscription(input.subscriptionId, ctx.user.id);
++      } catch (err) {
++        // Do NOT leak PayPal internals to the client.
++        console.error("[paypal.confirmSubscription] verification failed:", err);
++        throw new TRPCError({
++          code: "BAD_REQUEST",
++          message: "We couldn't verify that subscription. If you were charged, it will activate automatically within a minute.",
++        });
++      }
+       return { success: true };
+     }),
+ 
+diff --git a/vite.config.ts b/vite.config.ts
+index 5f6beed..e400dae 100644
+--- a/vite.config.ts
++++ b/vite.config.ts
+@@ -150,7 +150,12 @@ function vitePluginManusDebugCollector(): Plugin {
+   };
+ }
+ 
+-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
++// SECURITY/PERF: the Manus dev-instrumentation and JSX source-location plugins
++// leak source structure and bloat the bundle. Only load them outside production.
++const isProd = process.env.NODE_ENV === "production";
++const plugins = isProd
++  ? [react(), tailwindcss()]
++  : [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+ 
+ export default defineConfig({
+   plugins,

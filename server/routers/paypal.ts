@@ -1,10 +1,11 @@
 import { z } from "zod";
-import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
-import { createSubscriptionLink, activateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
+import { TRPCError } from "@trpc/server";
+import { protectedProcedure, adminProcedure, router } from "../_core/trpc";
+import { createSubscriptionLink, verifyAndActivateSubscription, cancelSubscription, PRO_PLAN_PRICE_USD, PRO_PLAN_NAME, PLAN_CATALOG, type PlanKey } from "../paypal";
 
 export const paypalRouter = router({
-  // Public diagnostics — returns only boolean presence checks, never actual key values
-  diagnostics: publicProcedure.query(() => ({
+  // Admin-only diagnostics — returns only boolean presence checks, never actual key values
+  diagnostics: adminProcedure.query(() => ({
     hasClientId: !!process.env.PAYPAL_CLIENT_ID,
     hasClientSecret: !!process.env.PAYPAL_CLIENT_SECRET,
     hasPlanId: !!process.env.PAYPAL_PLAN_ID,
@@ -45,7 +46,6 @@ export const paypalRouter = router({
         "keeper_founding_monthly", "keeper_founding_annual",
         "pro_retail_monthly", "pro_retail_annual",
         "keeper_retail_monthly", "keeper_retail_annual",
-        "test_pro_monthly", // REMOVE AFTER LIVE TEST
       ] as const).default("pro_founding_monthly"),
     }))
     .mutation(async ({ ctx, input }) => {
@@ -57,10 +57,21 @@ export const paypalRouter = router({
 
   // Called after PayPal redirects back with subscription_id
   confirmSubscription: protectedProcedure
-    .input(z.object({ subscriptionId: z.string(), planKey: z.string().optional() }))
+    // NOTE: planKey is intentionally IGNORED — it is derived server-side from the
+    // subscription's PayPal custom_id. Entitlement is only granted after PayPal
+    // confirms the subscription is ACTIVE and belongs to this user.
+    .input(z.object({ subscriptionId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const planKey = (input.planKey && input.planKey in PLAN_CATALOG) ? input.planKey as PlanKey : undefined;
-      await activateSubscription(input.subscriptionId, ctx.user.id, planKey);
+      try {
+        await verifyAndActivateSubscription(input.subscriptionId, ctx.user.id);
+      } catch (err) {
+        // Do NOT leak PayPal internals to the client.
+        console.error("[paypal.confirmSubscription] verification failed:", err);
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "We couldn't verify that subscription. If you were charged, it will activate automatically within a minute.",
+        });
+      }
       return { success: true };
     }),
 

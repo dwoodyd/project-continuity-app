@@ -15,10 +15,11 @@ export default function ProSuccessPage() {
   useEffect(() => {
     if (!subscriptionId || ran.current) return;
     ran.current = true;
-    // Retrieve the planKey stored before PayPal redirect so tier/rateType are set correctly
+    // planKey is used only for the local welcome message; the server derives the
+    // real entitlement from PayPal's verified custom_id, not from this value.
     const planKey = sessionStorage.getItem("pendingPlanKey") ?? undefined;
     sessionStorage.removeItem("pendingPlanKey");
-    confirm.mutateAsync({ subscriptionId, planKey }).then(async () => {
+    confirm.mutateAsync({ subscriptionId }).then(async () => {
       await utils.paypal.status.invalidate();
       const isKeeper = planKey?.startsWith("keeper");
       notify.info(isKeeper ? "Welcome to Keeper! ✦" : "Welcome to Pro! ✦", {

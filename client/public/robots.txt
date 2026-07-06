@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /pricing
+Disallow: /api/
+Disallow: /pro/success
+Disallow: /pro/cancel
+Disallow: /onboarding
+Disallow: /settings
+
+Sitemap: https://app.continuary.app/sitemap.xml

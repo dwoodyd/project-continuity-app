@@ -138,42 +138,47 @@ beforeEach(() => {
 // =============================================================================
 
 describe("LLM rate limiter — sliding window enforcement", () => {
-  it("allows up to 10 calls within the window without throwing", () => {
+  it("allows up to 10 calls within the window without throwing", async () => {
     // Use a unique userId per test to avoid cross-test state bleed
     const userId = `rate-test-allow-${Date.now()}`;
-    expect(() => {
-      for (let i = 0; i < 10; i++) checkLLMRateLimit(userId);
-    }).not.toThrow();
+    for (let i = 0; i < 10; i++) await checkLLMRateLimit(userId);
+    // No throw expected — if we get here, all 10 calls succeeded
   });
 
-  it("throws TOO_MANY_REQUESTS on the 11th call within the window", () => {
+  it("throws TOO_MANY_REQUESTS on the 11th call within the window", async () => {
     const userId = `rate-test-block-${Date.now()}`;
     // Exhaust the 10-call allowance
-    for (let i = 0; i < 10; i++) checkLLMRateLimit(userId);
+    for (let i = 0; i < 10; i++) await checkLLMRateLimit(userId);
     // 11th call must throw
-    expect(() => checkLLMRateLimit(userId)).toThrow();
+    let threw = false;
+    let thrownCode: string | undefined;
     try {
-      checkLLMRateLimit(userId);
+      await checkLLMRateLimit(userId);
     } catch (err: unknown) {
-      expect((err as { code: string }).code).toBe("TOO_MANY_REQUESTS");
+      threw = true;
+      thrownCode = (err as { code: string }).code;
     }
+    expect(threw).toBe(true);
+    expect(thrownCode).toBe("TOO_MANY_REQUESTS");
   });
 
-  it("different users have independent rate-limit buckets", () => {
+  it("different users have independent rate-limit buckets", async () => {
     const userA = `rate-test-a-${Date.now()}`;
     const userB = `rate-test-b-${Date.now()}`;
     // Exhaust user A
-    for (let i = 0; i < 10; i++) checkLLMRateLimit(userA);
-    expect(() => checkLLMRateLimit(userA)).toThrow();
+    for (let i = 0; i < 10; i++) await checkLLMRateLimit(userA);
+    let userAThrew = false;
+    try { await checkLLMRateLimit(userA); } catch { userAThrew = true; }
+    expect(userAThrew).toBe(true);
     // User B is unaffected
-    expect(() => checkLLMRateLimit(userB)).not.toThrow();
+    await expect(checkLLMRateLimit(userB)).resolves.toBeUndefined();
   });
 
-  it("rate limit error message is user-friendly and non-technical", () => {
+  it("rate limit error message is user-friendly and non-technical", async () => {
     const userId = `rate-test-msg-${Date.now()}`;
-    for (let i = 0; i < 10; i++) checkLLMRateLimit(userId);
+    for (let i = 0; i < 10; i++) await checkLLMRateLimit(userId);
     try {
-      checkLLMRateLimit(userId);
+      await checkLLMRateLimit(userId);
     } catch (err: unknown) {
       const message = (err as { message: string }).message;
       // Should mention the limit and suggest waiting — not expose internal details
@@ -183,27 +188,22 @@ describe("LLM rate limiter — sliding window enforcement", () => {
   });
 
   it("tRPC vault.aiProcess propagates TOO_MANY_REQUESTS from rate limiter", async () => {
-    // Exhaust the real rate limiter for userId=1
-    const userId = 1;
     const rateLimiterModule = await import("./_core/rateLimiter");
     const uniqueId = `trpc-rate-test-${Date.now()}`;
-    for (let i = 0; i < 10; i++) rateLimiterModule.checkLLMRateLimit(uniqueId);
+    // Exhaust the 10-call allowance
+    for (let i = 0; i < 10; i++) await rateLimiterModule.checkLLMRateLimit(uniqueId);
 
-    // Now mock checkLLMRateLimit to throw for this specific test
-    const { TRPCError } = await import("@trpc/server");
-    vi.doMock("./_core/rateLimiter", () => ({
-      checkLLMRateLimit: vi.fn().mockImplementation(() => {
-        throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Rate limit exceeded" });
-      }),
-    }));
-
-    // Direct unit test of the rate limiter — the tRPC layer passes it through unchanged
+    // 11th call must throw TOO_MANY_REQUESTS
+    let threw = false;
+    let thrownCode: string | undefined;
     try {
-      rateLimiterModule.checkLLMRateLimit(uniqueId);
-      // If we get here, the 11th call didn't throw — that's a failure
+      await rateLimiterModule.checkLLMRateLimit(uniqueId);
     } catch (err: unknown) {
-      expect((err as { code: string }).code).toBe("TOO_MANY_REQUESTS");
+      threw = true;
+      thrownCode = (err as { code: string }).code;
     }
+    expect(threw).toBe(true);
+    expect(thrownCode).toBe("TOO_MANY_REQUESTS");
   });
 });
 

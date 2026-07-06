@@ -6,6 +6,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import type { IncomingMessage } from "http";
 import type { Server } from "http";
+import { sdk } from "./_core/sdk";
 
 export type ParticipantStatus = "working" | "stuck" | "done";
 
@@ -50,9 +51,22 @@ function getRoomSnapshot(slug: string) {
 export function initCoworkingWS(server: Server) {
   const wss = new WebSocketServer({ server, path: "/ws/coworking" });
 
-  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+  wss.on("connection", async (ws: WebSocket, req: IncomingMessage) => {
     let currentRoomSlug: string | null = null;
     let currentUserId: number | null = null;
+
+    // SECURITY: authenticate the socket from the session cookie on the upgrade
+    // request. Identity is derived server-side; the client cannot supply it.
+    let authUserId: number;
+    let authName: string;
+    try {
+      const u = await sdk.authenticateRequest(req as unknown as Parameters<typeof sdk.authenticateRequest>[0]);
+      authUserId = u.id;
+      authName = u.name ?? "";
+    } catch {
+      ws.close(4401, "Unauthorized");
+      return;
+    }
 
     ws.on("message", (raw: Buffer | string) => {
       let msg: Record<string, unknown>;
@@ -65,13 +79,14 @@ export function initCoworkingWS(server: Server) {
       const type = msg.type as string;
 
       if (type === "join") {
-        const { roomSlug, userId, name, workingOn, status } = msg as {
+        const { roomSlug, workingOn, status } = msg as {
           roomSlug: string;
-          userId: number;
-          name: string;
           workingOn: string;
           status: ParticipantStatus;
         };
+        // SECURITY: never trust client-supplied identity — use the authenticated session.
+        const userId = authUserId;
+        const name = authName;
 
         // Leave previous room if any
         if (currentRoomSlug && currentUserId !== null) {
