@@ -23,6 +23,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    // DRAFT — update date and changes before shipping
+    version: "2.0",
+    date: "2026-07-07",
+    title: "What's coming in 2.0",
+    summary: "A draft placeholder for the next major release. Update this entry as features ship.",
+    changes: [
+      { category: "new", text: "[Draft] Changelog page — public release notes at /changelog" },
+      { category: "new", text: "[Draft] Global error alerting — owner is paged immediately on any server error" },
+    ],
+  },
+  {
     version: "1.9",
     date: "2026-07-07",
     title: "Security hardening & pre-launch polish",

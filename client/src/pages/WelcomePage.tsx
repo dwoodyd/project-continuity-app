@@ -792,6 +792,12 @@ export default function WelcomePage() {
             <p className="text-xs text-muted-foreground/50">Built for non-linear minds.</p>
             <div className="flex items-center justify-end gap-3">
               <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Founding member pricing</Link>
+              <Link href="/changelog" className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
+                Changelog
+                {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />
+                )}
+              </Link>
               <a href="https://www.soulengineer.online" target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Soul Engineer ecosystem</a>
             </div>
           </div>

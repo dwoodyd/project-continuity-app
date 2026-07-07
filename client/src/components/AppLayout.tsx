@@ -424,7 +424,17 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             {" · "}
             <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms</a>
             {" · "}
-            <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Changelog</a>
+            <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
+              Changelog
+              {/* Amber dot: visible for 3 days after the latest entry date */}
+              {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
+                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  title="What's new"
+                />
+              )}
+            </a>
           </p>
         </div>
       </div>
@@ -653,6 +663,21 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <span className="hidden lg:block">Sign out</span>
               </button>
             </div>
+            {/* Changelog micro-link with "What's new" dot */}
+            <a
+              href="/changelog"
+              className="hidden lg:flex items-center gap-1.5 px-1 py-1 text-[10px] transition-colors"
+              style={{ color: "oklch(1 0 0 / 0.22)" }}
+            >
+              Changelog
+              {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
+                <span
+                  className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
+                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  title="What's new"
+                />
+              )}
+            </a>
           </div>
         </aside>
 

@@ -2058,3 +2058,8 @@
 
 - [x] /changelog page: static data file with release entries, public route, SEO meta, link in nav/footer
 - [x] Global 5xx error alert: Express error-handling middleware calls notifyOwner on unhandled server errors
+
+## Post-launch additions batch 2 (Jul 7, 2026)
+- [x] "What's new" dot badge on Changelog sidebar link — visible for 3 days after latest entry date
+- [x] v2.0 draft changelog entry in changelog.ts
+- [x] /changelog link in landing page footer
