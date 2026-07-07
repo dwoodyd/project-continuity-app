@@ -21,6 +21,7 @@ import { startTrialReminderCron } from "../trialReminder";
 import { getUserByOpenId } from "../db";
 import { ENV } from "./env";
 import { registerCalendarRoutes } from "../calendarRoutes";
+import { notifyOwner } from "./notification";
 import { sdk } from "./sdk";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -389,6 +390,47 @@ async function startServer() {
   } else {
     serveStatic(app);
   }
+
+  // ── Global 5xx error alert ────────────────────────────────────────────────
+  // Must be registered AFTER all routes and Vite/static middleware so Express
+  // recognises it as an error-handling middleware (4-arg signature).
+  // Fires notifyOwner for every unhandled server error so the owner is paged
+  // immediately. The alert is fire-and-forget — we never delay the error
+  // response to the client while waiting for the notification.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  app.use((err: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const method = req.method;
+    const path = req.path;
+    const status = (err as unknown as { status?: number; statusCode?: number }).status
+      ?? (err as unknown as { statusCode?: number }).statusCode
+      ?? 500;
+
+    // Log every error regardless of status
+    console.error(`[Error] ${method} ${path} \u2192 ${status}:`, err?.message ?? err);
+
+    // Only page the owner for genuine 5xx errors (not 4xx client mistakes)
+    if (status >= 500) {
+      const title = `\uD83D\uDEA8 Server Error \u2014 ${method} ${path}`;
+      const content = [
+        `Status: ${status}`,
+        `Route: ${method} ${path}`,
+        `Error: ${err?.message ?? String(err)}`,
+        err?.stack ? `\nStack (first 800 chars):\n${err.stack.slice(0, 800)}` : "",
+      ].filter(Boolean).join("\n");
+
+      // Fire-and-forget \u2014 do not await, never block the response
+      notifyOwner({ title, content }).catch((notifyErr) => {
+        console.warn("[Error] notifyOwner failed:", notifyErr?.message);
+      });
+    }
+
+    // Respond to the client
+    if (!res.headersSent) {
+      res.status(status).json({
+        error: ENV.isProduction ? "Internal server error" : (err?.message ?? "Internal server error"),
+      });
+    }
+  });
 
   const preferredPort = parseInt(process.env.PORT || "3000");
   const port = await findAvailablePort(preferredPort);

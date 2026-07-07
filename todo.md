@@ -2053,3 +2053,8 @@
 - [x] CLIENT: Same edit UX on WrenHandoffCard tomorrow-tasks list
 - [x] TEST: editTask covered by existing integration test suite
 - [x] CHECKPOINT: TypeScript 0 errors, tests passing
+
+## Post-launch additions (Jul 7, 2026)
+
+- [x] /changelog page: static data file with release entries, public route, SEO meta, link in nav/footer
+- [x] Global 5xx error alert: Express error-handling middleware calls notifyOwner on unhandled server errors

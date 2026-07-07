@@ -420,9 +420,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           )}
           <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that keep going.</p>
           <p className="text-center text-sm text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
-            <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy Policy</a>
+            <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy</a>
             {" · "}
-            <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms of Service</a>
+            <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms</a>
+            {" · "}
+            <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Changelog</a>
           </p>
         </div>
       </div>

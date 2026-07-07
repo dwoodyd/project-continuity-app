@@ -54,6 +54,7 @@ const FocusCompanionPage  = lazy(() => import("./pages/FocusCompanionPage"));
 const HubPage             = lazy(() => import("./pages/HubPage"));
 const ThreadLocksPage     = lazy(() => import("./pages/ThreadLocksPage"));
 const ReadingBridgePage   = lazy(() => import("./pages/ReadingBridgePage"));
+const ChangelogPage       = lazy(() => import("./pages/ChangelogPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -75,6 +76,8 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/admin/study" component={StudyTrackerPage} />
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
+        <Route path="/changelog" component={ChangelogPage} />
+        <Route path="/release-notes">{() => { if (typeof window !== "undefined") window.location.replace("/changelog"); return null; }}</Route>
         <Route path="/invite-gate" component={InviteGatePage} />
         {/* /about-app is a legacy route — the canonical About page is /welcome (WelcomePage).
             Redirect here so old links don't 404 and future builders aren't confused. */}
