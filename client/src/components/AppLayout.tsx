@@ -426,6 +426,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             {" · "}
             <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
               Changelog
+              {/* Last updated date — always visible */}
+              <span className="text-[9px]" style={{ color: "oklch(0.48 0.016 240)" }}>Jul 7</span>
               {/* Amber dot: visible for 3 days after the latest entry date */}
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
@@ -663,13 +665,16 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <span className="hidden lg:block">Sign out</span>
               </button>
             </div>
-            {/* Changelog micro-link with "What's new" dot */}
+            {/* Changelog micro-link with last-updated date + "What's new" dot */}
             <a
               href="/changelog"
               className="hidden lg:flex items-center gap-1.5 px-1 py-1 text-[10px] transition-colors"
               style={{ color: "oklch(1 0 0 / 0.22)" }}
             >
               Changelog
+              {/* Last updated date — always visible */}
+              <span style={{ color: "oklch(1 0 0 / 0.18)" }}>· Jul 7</span>
+              {/* Amber dot: visible for 3 days after the latest entry date */}
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
