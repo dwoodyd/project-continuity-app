@@ -26,6 +26,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1024.0
         version: 3.1024.0
+      '@deepgram/sdk':
+        specifier: ^5.7.0
+        version: 5.7.0
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.64.0(react@19.2.1))
@@ -621,6 +624,10 @@ packages:
 
   '@date-fns/tz@1.4.1':
     resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
+
+  '@deepgram/sdk@5.7.0':
+    resolution: {integrity: sha512-A0uIaLukO+8JXUuT+iDE5ts8PCmdLCxDajawghFHLDEnFvA8dYYecCFxqFaTWgjJcJil0CtgIHKzm23E4RVqOA==}
+    engines: {node: '>=18.0.0'}
 
   '@drizzle-team/brocli@0.10.2':
     resolution: {integrity: sha512-z33Il7l5dKjUgGULTqBsQBQwckHh5AbIuxhdsIxDDiZAzBOrZO6q9ogcWC65kU382AfynTfgNumVcNIjuIua6w==}
@@ -5184,6 +5191,13 @@ snapshots:
   '@chevrotain/utils@12.0.0': {}
 
   '@date-fns/tz@1.4.1': {}
+
+  '@deepgram/sdk@5.7.0':
+    dependencies:
+      ws: 8.20.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@drizzle-team/brocli@0.10.2': {}
 

@@ -2063,3 +2063,17 @@
 - [x] "What's new" dot badge on Changelog sidebar link — visible for 3 days after latest entry date
 - [x] v2.0 draft changelog entry in changelog.ts
 - [x] /changelog link in landing page footer
+
+## Capture & Sort feature (Jul 29, 2026)
+- [ ] DB schema: captures, capture_atoms, open_loops, sort_corrections tables
+- [ ] capture-stub package implementing @soul/capture interface
+- [ ] tRPC routers: capture, transcribe, loops
+- [ ] Capture screen (9.1): voice + text, disclosure, all states
+- [ ] Sort result screen (9.2): atom groups, reclassify, route, feelings section
+- [ ] Open Loops screen (9.3): flat list, close, snooze
+- [ ] Capture History screen (9.4): recent 20, no search
+- [ ] Unstick entry point from empty state
+- [ ] Time Sense duration feed from capture
+- [ ] Surface tagging for captures during hyperfocus
+- [ ] Ground Mode offer on repeated open loop (3x in 48h)
+- [ ] Tests: feelings never persist, routing, deletion, Deepgram key absence

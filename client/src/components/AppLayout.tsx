@@ -40,6 +40,8 @@ import {
   ClipboardList,
   Users,
   Sparkles,
+  Mic,
+  Repeat,
 } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { Link, useLocation } from "wouter";
@@ -70,6 +72,8 @@ const ALL_NAV_ITEMS = [
   { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
   { href: "/ideas",        label: "Ideas",           icon: Sparkles,      section: "primary" },
   { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
+  { href: "/capture",     label: "Capture",         icon: Mic,           section: "primary" },
+  { href: "/loops",       label: "Open Loops",      icon: Repeat,        section: "primary" },
   { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
   { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },
   { href: "/reading-bridge", label: "Reading Bridge", icon: BookOpen,      section: "secondary" },
@@ -259,6 +263,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     staleTime: 60_000,
   });
   const scratchCount = scratchNotes?.length ?? 0;
+  const { data: loopsCountData } = trpc.loops.count.useQuery(undefined, {
+    enabled: isAuthenticated,
+    staleTime: 60_000,
+  });
+  const loopsCount = loopsCountData?.count ?? 0;
 
   const showAmnesty = isAuthenticated && !amnestyDismissed && amnestyData?.needsAmnesty === true;
   // AI consent: show once after onboarding + about-app, before any AI feature is used
@@ -534,6 +543,9 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   {href === "/scratch" && scratchCount > 0 && !active && (
                     <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
                   )}
+                  {href === "/loops" && loopsCount > 0 && !active && (
+                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
+                  )}
                   {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
                 </Link>
               );
@@ -716,6 +728,15 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 Hold That Thread
               </button>
               <button
+                onClick={() => { setFabMenuOpen(false); navigate("/capture"); }}
+                className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+                style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+                title="Voice or text capture"
+              >
+                <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                Capture
+              </button>
+              <button
                 onClick={() => { setFabMenuOpen(false); setIdeaOpen(true); }}
                 className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
@@ -895,6 +916,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             >
               <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
               Hold That Thread
+            </button>
+            <button
+              onClick={() => { setFabMenuOpen(false); navigate("/capture"); }}
+              className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
+              style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
+            >
+              <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              Capture
             </button>
             <button
               onClick={() => { setFabMenuOpen(false); setIdeaOpen(true); }}

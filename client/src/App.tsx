@@ -55,6 +55,10 @@ const HubPage             = lazy(() => import("./pages/HubPage"));
 const ThreadLocksPage     = lazy(() => import("./pages/ThreadLocksPage"));
 const ReadingBridgePage   = lazy(() => import("./pages/ReadingBridgePage"));
 const ChangelogPage       = lazy(() => import("./pages/ChangelogPage"));
+const CapturePage         = lazy(() => import("./pages/CapturePage"));
+const SortResultPage      = lazy(() => import("./pages/SortResultPage"));
+const OpenLoopsPage       = lazy(() => import("./pages/OpenLoopsPage"));
+const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -126,6 +130,10 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/hub" component={HubPage} />
               <Route path="/thread-locks" component={ThreadLocksPage} />
               <Route path="/reading-bridge" component={ReadingBridgePage} />
+              <Route path="/capture/history" component={CaptureHistoryPage} />
+              <Route path="/capture/:id/sort" component={SortResultPage} />
+              <Route path="/capture" component={CapturePage} />
+              <Route path="/loops" component={OpenLoopsPage} />
               <Route path="/404" component={NotFound} />
               <Route component={NotFound} />
             </Switch>

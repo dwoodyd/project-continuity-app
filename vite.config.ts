@@ -170,6 +170,7 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@soul/capture": path.resolve(import.meta.dirname, "packages", "capture-stub", "src", "index.ts"),
     },
   },
   envDir: path.resolve(import.meta.dirname),

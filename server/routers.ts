@@ -33,6 +33,9 @@ import { coworkingRouter } from "./routers/coworking";
 import { groundModeRouter } from "./routers/groundMode";
 import { threadLockRouter } from "./routers/threadLock";
 import { readingBridgeRouter } from "./routers/readingBridge";
+import { captureRouter } from "./routers/capture";
+import { transcribeRouter } from "./routers/transcribe";
+import { loopsRouter } from "./routers/loops";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -114,6 +117,9 @@ export const appRouter = router({
   groundMode: groundModeRouter,
   threadLock: threadLockRouter,
   readingBridge: readingBridgeRouter,
+  capture: captureRouter,
+  transcribe: transcribeRouter,
+  loops: loopsRouter,
 });
 
 export type AppRouter = typeof appRouter;

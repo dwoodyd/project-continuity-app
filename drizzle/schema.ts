@@ -1,6 +1,7 @@
 import {
   bigint,
   boolean,
+  float,
   index,
   int,
   json,
@@ -8,6 +9,7 @@ import {
   mysqlTable,
   text,
   timestamp,
+  tinyint,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -993,3 +995,65 @@ export const wrenLetters = mysqlTable("wren_letters", {
 });
 export type WrenLetter = typeof wrenLetters.$inferSelect;
 export type InsertWrenLetter = typeof wrenLetters.$inferInsert;
+
+// ─── Capture & Sort ───────────────────────────────────────────────────────────
+// Voice and text captures. Transcripts are stored server-readable because Sort,
+// Unstick, and Time Sense all compute over them.
+export const captures = mysqlTable("captures", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  mode: mysqlEnum("mode", ["voice", "text"]).notNull(),
+  durationS: int("durationS"),
+  audioKey: varchar("audioKey", { length: 1000 }),
+  transcript: text("transcript").notNull(),
+  processingState: mysqlEnum("processingState", ["raw", "sorted"]).notNull().default("raw"),
+  duringFocusSessionId: int("duringFocusSessionId"),
+  groundModeOfferedAt: bigint("groundModeOfferedAt", { mode: "number" }),
+  deletedAt: bigint("deletedAt", { mode: "number" }),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type Capture = typeof captures.$inferSelect;
+export type InsertCapture = typeof captures.$inferInsert;
+
+// Thought units extracted from a capture by Sort.
+// feeling atoms are NEVER written here — returned in API response only, then discarded.
+export const captureAtoms = mysqlTable("capture_atoms", {
+  id: int("id").autoincrement().primaryKey(),
+  captureId: int("captureId").notNull().references(() => captures.id),
+  userId: int("userId").notNull().references(() => users.id),
+  kind: mysqlEnum("kind", ["fact", "task", "open_loop", "question", "insight"]).notNull(),
+  text: text("text").notNull(),
+  salience: float("salience").notNull().default(0.5),
+  userCorrected: tinyint("userCorrected").notNull().default(0),
+  routedTo: mysqlEnum("routedTo", ["unstick", "loops"]),
+  routedTargetId: int("routedTargetId"),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type CaptureAtom = typeof captureAtoms.$inferSelect;
+export type InsertCaptureAtom = typeof captureAtoms.$inferInsert;
+
+// Open Loops ledger.
+export const openLoops = mysqlTable("open_loops", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  atomId: int("atomId"),
+  text: text("text").notNull(),
+  status: mysqlEnum("status", ["open", "closed"]).notNull().default("open"),
+  openedAt: bigint("openedAt", { mode: "number" }).notNull(),
+  closedAt: bigint("closedAt", { mode: "number" }),
+  resurfaceAt: bigint("resurfaceAt", { mode: "number" }),
+});
+export type OpenLoop = typeof openLoops.$inferSelect;
+export type InsertOpenLoop = typeof openLoops.$inferInsert;
+
+// User corrections to Sort classifications.
+export const sortCorrections = mysqlTable("sort_corrections", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  text: text("text").notNull(),
+  fromKind: mysqlEnum("fromKind", ["feeling", "fact", "task", "open_loop", "question", "insight"]).notNull(),
+  toKind: mysqlEnum("toKind", ["feeling", "fact", "task", "open_loop", "question", "insight"]).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type SortCorrection = typeof sortCorrections.$inferSelect;
+export type InsertSortCorrection = typeof sortCorrections.$inferInsert;
