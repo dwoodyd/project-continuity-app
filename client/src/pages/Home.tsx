@@ -41,6 +41,7 @@ import {
   Pencil,
   Trash2,
   CalendarClock,
+  Mic,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -2651,13 +2652,22 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={() => setAddingTask(true)}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl border border-dashed border-foreground/15 text-muted-foreground/50 hover:text-muted-foreground/80 hover:border-foreground/25 transition-colors"
-                >
-                  <Plus className="w-4 h-4 shrink-0" />
-                  <span className="text-sm">Add a task for today</span>
-                </button>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setAddingTask(true)}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl border border-dashed border-foreground/15 text-muted-foreground/50 hover:text-muted-foreground/80 hover:border-foreground/25 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 shrink-0" />
+                    <span className="text-sm">Add a task for today</span>
+                  </button>
+                  <button
+                    onClick={() => navigate("/capture")}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-dashed border-foreground/10 text-muted-foreground/35 hover:text-muted-foreground/60 hover:border-foreground/20 transition-colors"
+                  >
+                    <Mic className="w-4 h-4 shrink-0" />
+                    <span className="text-sm">Nothing blocking you? Capture a thought</span>
+                  </button>
+                </div>
               )}
             </div>
           )}
