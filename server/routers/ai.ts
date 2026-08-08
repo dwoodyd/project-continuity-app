@@ -24,6 +24,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
+import { checkCrisisRisk, logCrisisFlag } from "../crisisSafety";
 
 // getTodayDate replaced by resolveDate from dateUtils
 
@@ -616,6 +617,24 @@ Write Wren's letter. Return JSON: { letterText: string, compassSeed: string }`,
 
     return { letterText: parsed.letterText, compassSeed: parsed.compassSeed };
   }),
+});
+
+export const crisisRouter = router({
+  /** Two-stage crisis check. Returns "none" | "elevated" | "acute". Always free — no tier gate. */
+  check: protectedProcedure
+    .input(
+      z.object({
+        text: z.string().min(1).max(5000),
+        surface: z.string().max(64),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const risk = await checkCrisisRisk(input.text);
+      if (risk !== "none") {
+        void logCrisisFlag(ctx.user.id, risk, input.surface);
+      }
+      return { risk };
+    }),
 });
 
 // ── Inline import for focus sessions (avoid circular dep) ─────────────────────

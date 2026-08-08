@@ -72,8 +72,11 @@ export default function AiConsentModal({ onAccept, onDecline }: AiConsentModalPr
           </p>
           <p className="text-xs text-muted-foreground/70 border-t border-border pt-3">
             <strong className="text-muted-foreground">EU / GDPR:</strong> The lawful basis for this processing is your explicit
-            consent under GDPR Article 6(1)(a). You may withdraw consent at any time in Settings → AI Data &amp; Privacy
+            consent under GDPR Article 6(1)(a). You may withdraw consent at any time in Settings → AI Data &amp; Privacy
             without affecting the lawfulness of prior processing.
+          </p>
+          <p className="text-xs text-muted-foreground/60 border-t border-border pt-3">
+            <strong className="text-muted-foreground">Important:</strong> Wren is a companion, not a clinician. She doesn't diagnose, treat, or replace professional mental health support. If you're in crisis, please contact a crisis line.
           </p>
         </div>
 

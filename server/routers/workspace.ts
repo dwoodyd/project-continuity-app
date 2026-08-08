@@ -14,6 +14,7 @@ import {
   projects,
 } from "../../drizzle/schema";
 import { getProjectById } from "../db";
+import { getWrenToneDirective } from "../wrenTone";
 
 // ─── Allowed file types for project workspace uploads ─────────────────────────
 const ALLOWED_MIMES = new Set([
@@ -267,6 +268,7 @@ export const workspaceRouter = router({
         ? `\n\nProject notes:\n${notes.map(n => `### ${n.title}\n${n.content}`).join("\n\n")}`
         : "";
 
+      const toneDirective = await getWrenToneDirective(ctx.user.id);
       const systemPrompt = `You are a focused project assistant for "${project.title}". 
 Your job is to help the user think through, plan, and make progress on this specific project.
 
@@ -279,7 +281,7 @@ Project context:
 - Blockers: ${project.blockers ?? "None noted"}${notesContext}
 
 Be concise, practical, and action-oriented. Help the user move forward, not just think about it. 
-When appropriate, suggest concrete next steps, help break down tasks, or identify blockers.`;
+When appropriate, suggest concrete next steps, help break down tasks, or identify blockers.${toneDirective ? `\n\n${toneDirective}` : ""}`;
 
       const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
         { role: "system", content: systemPrompt },

@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
+import { CrisisSupportCard } from "@/components/CrisisSupportCard";
+import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import notify from "@/lib/notify";
 import WrenPlayer from "@/components/WrenPlayer";
 import { ArrowLeft, Info } from "lucide-react";
@@ -217,9 +219,15 @@ export default function EmotionalCyclePage() {
   const cycle = cycleQuery.data;
   const alreadyLogged = !!todayQuery.data;
 
+  const { crisisLevel, checkAndMaybeFlag, dismissCrisis } = useCrisisCheck("mood_log");
+
   const handleLog = () => {
     if (!score) return notify.error("Pick a score first.");
-    logMutation.mutate({ score, note: note.trim() || undefined });
+    logMutation.mutate({ score, note: note.trim() || undefined }, {
+      onSuccess: () => {
+        if (note.trim()) void checkAndMaybeFlag(note);
+      },
+    });
   };
 
   return (
@@ -342,6 +350,9 @@ export default function EmotionalCyclePage() {
           >
             {logMutation.isPending ? "Saving…" : alreadyLogged ? "Update log" : "Log this moment"}
           </button>
+          {crisisLevel && (
+            <CrisisSupportCard level={crisisLevel} onDismiss={dismissCrisis} className="mt-2" />
+          )}
         </div>
 
         {/* History list — last 14 entries */}

@@ -16,6 +16,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { checkCrisisRisk, logCrisisFlag } from "../crisisSafety";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { getDb } from "../db";
 import { groundSessions, appConfig, checkIns } from "../../drizzle/schema";
@@ -196,12 +197,10 @@ export const groundModeRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       // ── Crisis override (hard exclusion — enforced in code, not just prompt) ──
-      if (detectCrisis(input.message)) {
-        return {
-          response:
-            "I want to make sure you're okay. What you're describing sounds serious. Please reach out to a crisis line — in the US, you can text or call 988 (Suicide and Crisis Lifeline) any time. If you're outside the US, visit findahelpline.com for local resources. You don't have to figure this out alone right now.",
-          crisisBreak: true,
-        };
+      const crisisRisk = await checkCrisisRisk(input.message);
+      if (crisisRisk !== "none") {
+        void logCrisisFlag(ctx.user.id, crisisRisk, "ground_mode");
+        return { response: null, crisisBreak: true, crisisRisk };
       }
 
       const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [

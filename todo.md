@@ -2081,3 +2081,30 @@
 ## @soul/capture swap + Unstick CTA (Jul 30, 2026)
 - [x] SWAP.md: write step-by-step @soul/capture swap instructions
 - [x] Unstick empty state: add "Nothing blocking you? Capture a thought" CTA linking to /capture
+
+## Wren Enhancements (Aug 8, 2026)
+### Feature 3 — Crisis Safety Path (P0, ship before paid ads)
+- [ ] crisis_flags DB table (userId, riskLevel, surfaceId, surfaceName, flaggedAt — no verbatim content)
+- [ ] server/crisisSafety.ts: CRISIS_RESOURCES config constant, keyword prefilter, LLM classifier
+- [ ] CrisisSupportCard component: warm, dismissible, elevated/acute variants, always free
+- [ ] Wire crisis detection to: Ground Mode chat, checkIns submitMorning/submitMidday/submitEvening, moodLogs upsert, Wren chat (ai router), Capture create
+- [ ] Tests: ordinary "overwhelmed" does NOT trigger, acute expression triggers on free account
+
+### Feature 1 — Wren Tone Dials
+- [ ] DB migration: add 5 Wren tone columns to user_profiles
+- [ ] settings.getWrenTone + settings.updateWrenTone tRPC procedures
+- [ ] buildWrenToneDirective() helper injected into all Wren system prompts
+- [ ] Settings UI card: 4 sliders + mode selector + live preview line + Preview button
+- [ ] Tests: defaults reproduce existing voice, client-supplied tone values ignored
+
+### Feature 2 — What Wren Remembers
+- [ ] intelligence.getMemorySnapshot procedure (5 sections, user-scoped)
+- [ ] intelligence.forgetMemoryItem mutation (scoped delete)
+- [ ] settings.pauseWrenMemory toggle (DB column + procedure)
+- [ ] WhatWrenRemembers.tsx page with section cards + Forget actions + pause toggle
+- [ ] Link from Settings and from Wren surface ("See what Wren remembers →")
+- [ ] Tests: no cross-user leak, forget removes item, pause stops new capture
+
+### Privacy/Honesty Copy
+- [ ] "Wren is a companion, not a clinician" in Ground Mode, Wren chat, and emotional support contexts
+- [ ] Privacy commitment copy on landing page + in-app (what we do/don't do with emotional data)

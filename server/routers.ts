@@ -5,7 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { projectsRouter } from "./routers/projects";
 import { vaultRouter } from "./routers/vault";
 import { checkInsRouter } from "./routers/checkIns";
-import { aiRouter } from "./routers/ai";
+import { aiRouter, crisisRouter } from "./routers/ai";
 import { settingsRouter } from "./routers/settings";
 import { dailyPlanRouter } from "./routers/dailyPlan";
 import { focusSessionsRouter } from "./routers/focusSessions";
@@ -120,6 +120,7 @@ export const appRouter = router({
   capture: captureRouter,
   transcribe: transcribeRouter,
   loops: loopsRouter,
+  crisis: crisisRouter,
 });
 
 export type AppRouter = typeof appRouter;

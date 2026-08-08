@@ -116,6 +116,20 @@ export const userProfiles = mysqlTable("user_profiles", {
   readingBridgeFinished: boolean("readingBridgeFinished").default(false),
   /** True when user dismissed the first-time prompt with "Not reading it" */
   readingBridgeDismissed: boolean("readingBridgeDismissed").default(false),
+  // ── Wren Tone Dials ─────────────────────────────────────────────────────────
+  /** 0=gentle, 100=direct */
+  wrenGentleDirect: int("wrenGentleDirect").default(50).notNull(),
+  /** 0=brief, 100=thorough */
+  wrenBriefThorough: int("wrenBriefThorough").default(50).notNull(),
+  /** 0=calm, 100=energizing */
+  wrenCalmEnergizing: int("wrenCalmEnergizing").default(50).notNull(),
+  /** 0=follows, 100=challenges */
+  wrenFollowsChallenges: int("wrenFollowsChallenges").default(50).notNull(),
+  /** Wren's default opening mode */
+  wrenDefaultMode: mysqlEnum("wrenDefaultMode", ["doing", "reflecting", "grounding"]).default("reflecting").notNull(),
+  // ── Wren Memory ─────────────────────────────────────────────────────────────
+  /** When true, Wren stops capturing new memory items */
+  wrenMemoryPaused: boolean("wrenMemoryPaused").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -1057,3 +1071,19 @@ export const sortCorrections = mysqlTable("sort_corrections", {
 });
 export type SortCorrection = typeof sortCorrections.$inferSelect;
 export type InsertSortCorrection = typeof sortCorrections.$inferInsert;
+
+// ─── Crisis Flags ─────────────────────────────────────────────────────────────
+// Audit log for crisis detection events. Stores NO verbatim user content.
+// Access-controlled: only owner/admin can query; never surfaced in analytics.
+export const crisisFlags = mysqlTable("crisis_flags", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  /** Risk level determined by the two-stage classifier */
+  riskLevel: mysqlEnum("riskLevel", ["elevated", "acute"]).notNull(),
+  /** Surface where the flag was triggered (e.g. "ground_mode", "check_in", "capture") */
+  surfaceName: varchar("surfaceName", { length: 64 }).notNull(),
+  /** Timestamp of the flag — no verbatim content stored */
+  flaggedAt: bigint("flaggedAt", { mode: "number" }).notNull(),
+});
+export type CrisisFlag = typeof crisisFlags.$inferSelect;
+export type InsertCrisisFlag = typeof crisisFlags.$inferInsert;

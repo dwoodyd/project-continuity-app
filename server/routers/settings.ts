@@ -3,6 +3,7 @@ import {
   getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData,
   getProjects, getSourceItems, getRecentCheckIns, getRecentDailyPlans,
   getIdeaCaptures, getRecentFocusSessions, updateUserName,
+  getRecentDecisions, getMoodHistory,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -11,7 +12,6 @@ export const settingsRouter = router({
   getProfile: protectedProcedure.query(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) return existing;
-    // Auto-create a default profile so tRPC never returns undefined
     await upsertUserProfile({ userId: ctx.user.id });
     return (await getUserProfile(ctx.user.id)) ?? {
       id: 0,
@@ -64,7 +64,6 @@ export const settingsRouter = router({
       preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      // Save the user's preferred name to the users table so it's used everywhere
       if (input.name?.trim()) {
         await updateUserName(ctx.user.id, input.name.trim());
       }
@@ -89,10 +88,7 @@ export const settingsRouter = router({
     }),
 
   deleteAccount: protectedProcedure
-    .input(z.object({
-      // Require the user to type "DELETE" as a confirmation safeguard
-      confirmation: z.literal("DELETE"),
-    }))
+    .input(z.object({ confirmation: z.literal("DELETE") }))
     .mutation(async ({ ctx }) => {
       try {
         await deleteAllUserData(ctx.user.id);
@@ -147,6 +143,7 @@ export const settingsRouter = router({
       }
       return { success: true };
     }),
+
   markWrenIntroSeen: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) {
@@ -156,6 +153,7 @@ export const settingsRouter = router({
     }
     return { success: true };
   }),
+
   markAboutSeen: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) {
@@ -165,6 +163,7 @@ export const settingsRouter = router({
     }
     return { success: true };
   }),
+
   // ── App Store 5.1.2(i): AI data transparency consent ─────────────────────────
   giveAiConsent: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
@@ -175,6 +174,7 @@ export const settingsRouter = router({
     }
     return { success: true };
   }),
+
   revokeAiConsent: protectedProcedure.mutation(async ({ ctx }) => {
     const existing = await getUserProfile(ctx.user.id);
     if (existing) {
@@ -184,6 +184,83 @@ export const settingsRouter = router({
     }
     return { success: true };
   }),
+
+  // ── What Wren Remembers ───────────────────────────────────────────────────────
+  getMemorySnapshot: protectedProcedure.query(async ({ ctx }) => {
+    const uid = ctx.user.id;
+    const [profile, checkIns, decisions, moodLogs] = await Promise.all([
+      getUserProfile(uid),
+      getRecentCheckIns(uid, 5),
+      getRecentDecisions(uid, 10),
+      getMoodHistory(uid, 7),
+    ]);
+    return {
+      workStyle: profile?.workStyle ?? null,
+      workTypes: profile?.workTypes ? JSON.parse(profile.workTypes) as string[] : [],
+      distractionPatterns: profile?.distractionPatterns ? JSON.parse(profile.distractionPatterns) as string[] : [],
+      focusHoursStart: profile?.focusHoursStart ?? null,
+      focusHoursEnd: profile?.focusHoursEnd ?? null,
+      preferredFocusHours: profile?.preferredFocusHours ?? null,
+      readingBridgeChapter: profile?.readingBridgeChapter ?? null,
+      recentCheckInNotes: checkIns
+        .filter(c => !!c.userInput)
+        .slice(0, 5)
+        .map(c => ({ date: c.date, note: c.userInput ?? "" })),
+      recentDecisions: decisions.slice(0, 10).map(d => ({ id: d.id, content: d.content, date: d.date?.toISOString().slice(0, 10) ?? "" })),
+      recentMoodLogs: moodLogs.slice(0, 7).map(m => ({ date: m.date, score: m.score, note: m.note ?? null })),
+    };
+  }),
+
+  // ── Wren Tone Dials ───────────────────────────────────────────────────────────
+  getWrenTone: protectedProcedure.query(async ({ ctx }) => {
+    const profile = await getUserProfile(ctx.user.id);
+    return {
+      wrenGentleDirect: profile?.wrenGentleDirect ?? 50,
+      wrenBriefThorough: profile?.wrenBriefThorough ?? 50,
+      wrenCalmEnergizing: profile?.wrenCalmEnergizing ?? 50,
+      wrenFollowsChallenges: profile?.wrenFollowsChallenges ?? 50,
+      wrenDefaultMode: (profile?.wrenDefaultMode ?? "reflecting") as "doing" | "reflecting" | "grounding",
+    };
+  }),
+
+  updateWrenTone: protectedProcedure
+    .input(
+      z.object({
+        wrenGentleDirect: z.number().int().min(0).max(100),
+        wrenBriefThorough: z.number().int().min(0).max(100),
+        wrenCalmEnergizing: z.number().int().min(0).max(100),
+        wrenFollowsChallenges: z.number().int().min(0).max(100),
+        wrenDefaultMode: z.enum(["doing", "reflecting", "grounding"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getUserProfile(ctx.user.id);
+      if (existing) {
+        await updateUserProfile(ctx.user.id, input as any);
+      } else {
+        await upsertUserProfile({ userId: ctx.user.id, ...input } as any);
+      }
+      return { success: true };
+    }),
+
+  // ── Wren Memory Pause ─────────────────────────────────────────────────────────
+  getWrenMemoryPaused: protectedProcedure.query(async ({ ctx }) => {
+    const profile = await getUserProfile(ctx.user.id);
+    return { paused: profile?.wrenMemoryPaused ?? false };
+  }),
+
+  setWrenMemoryPaused: protectedProcedure
+    .input(z.object({ paused: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getUserProfile(ctx.user.id);
+      if (existing) {
+        await updateUserProfile(ctx.user.id, { wrenMemoryPaused: input.paused } as any);
+      } else {
+        await upsertUserProfile({ userId: ctx.user.id, wrenMemoryPaused: input.paused } as any);
+      }
+      return { success: true };
+    }),
+
   // ── Data export (GDPR Art. 20 portability) ────────────────────────────────────
   exportData: protectedProcedure.query(async ({ ctx }) => {
     const uid = ctx.user.id;

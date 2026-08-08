@@ -416,6 +416,9 @@ export default function WelcomePage() {
               And when you're ready to work, she's there — reading, writing, weaving — while you do.
               She is not an assistant. She is a companion.
             </p>
+            <p className="text-[10px] text-center mt-2 max-w-xs mx-auto" style={{ color: "oklch(0.45 0.03 240)" }}>
+              Wren is a companion, not a clinician. She doesn't diagnose, treat, or replace professional support.
+            </p>
           </div>
 
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">

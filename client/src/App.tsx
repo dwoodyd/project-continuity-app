@@ -59,6 +59,7 @@ const CapturePage         = lazy(() => import("./pages/CapturePage"));
 const SortResultPage      = lazy(() => import("./pages/SortResultPage"));
 const OpenLoopsPage       = lazy(() => import("./pages/OpenLoopsPage"));
 const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
+const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -81,6 +82,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/privacy" component={PrivacyPage} />
         <Route path="/terms" component={TermsPage} />
         <Route path="/changelog" component={ChangelogPage} />
+        <Route path="/wren/memory" component={WhatWrenRemembersPage} />
         <Route path="/release-notes">{() => { if (typeof window !== "undefined") window.location.replace("/changelog"); return null; }}</Route>
         <Route path="/invite-gate" component={InviteGatePage} />
         {/* /about-app is a legacy route — the canonical About page is /welcome (WelcomePage).

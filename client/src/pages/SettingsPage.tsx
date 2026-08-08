@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import { buildWrenToneDirective } from "@/lib/wrenToneClient";
 import {
   Bell,
   Calendar,
@@ -28,6 +29,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -277,6 +279,127 @@ function WeeklyDigestCard() {
   );
 }
 
+// ─── Wren Tone Card ───────────────────────────────────────────────────────────
+function WrenToneCard() {
+  const utils = trpc.useUtils();
+  const { data: tone, isLoading } = trpc.settings.getWrenTone.useQuery();
+  const updateTone = trpc.settings.updateWrenTone.useMutation({
+    onSuccess: () => {
+      utils.settings.getWrenTone.invalidate();
+      notify.saved("Wren's tone updated.");
+    },
+    onError: () => notify.error("Couldn't save — try again."),
+  });
+
+  const [local, setLocal] = useState<{
+    wrenGentleDirect: number;
+    wrenBriefThorough: number;
+    wrenCalmEnergizing: number;
+    wrenFollowsChallenges: number;
+    wrenDefaultMode: "doing" | "reflecting" | "grounding";
+  } | null>(null);
+
+  useEffect(() => {
+    if (tone && !local) {
+      setLocal({
+        wrenGentleDirect: tone.wrenGentleDirect,
+        wrenBriefThorough: tone.wrenBriefThorough,
+        wrenCalmEnergizing: tone.wrenCalmEnergizing,
+        wrenFollowsChallenges: tone.wrenFollowsChallenges,
+        wrenDefaultMode: tone.wrenDefaultMode,
+      });
+    }
+  }, [tone, local]);
+
+  const current = local ?? {
+    wrenGentleDirect: 50,
+    wrenBriefThorough: 50,
+    wrenCalmEnergizing: 50,
+    wrenFollowsChallenges: 50,
+    wrenDefaultMode: "reflecting" as const,
+  };
+
+  const preview = buildWrenToneDirective(current);
+
+  const handleSave = useCallback(() => {
+    if (!local) return;
+    updateTone.mutate(local);
+  }, [local, updateTone]);
+
+  const dials: { key: keyof typeof current; left: string; right: string }[] = [
+    { key: "wrenGentleDirect", left: "Gentle", right: "Direct" },
+    { key: "wrenBriefThorough", left: "Brief", right: "Thorough" },
+    { key: "wrenCalmEnergizing", left: "Calm", right: "Energizing" },
+    { key: "wrenFollowsChallenges", left: "Follows your lead", right: "Nudges forward" },
+  ];
+
+  if (isLoading) return null;
+
+  return (
+    <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+      <div>
+        <p className="text-sm font-semibold text-foreground">Wren's Voice</p>
+        <p className="text-xs text-muted-foreground mt-0.5">Adjust how Wren communicates with you. Defaults feel right for most people.</p>
+      </div>
+
+      {/* Mode selector */}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-2">Default mode</p>
+        <div className="grid grid-cols-3 gap-2">
+          {(["doing", "reflecting", "grounding"] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => setLocal(prev => prev ? { ...prev, wrenDefaultMode: m } : null)}
+              className={cn(
+                "py-2 px-3 rounded-lg border text-xs font-medium transition-all capitalize",
+                current.wrenDefaultMode === m
+                  ? "border-foreground/30 bg-foreground/5 text-foreground"
+                  : "border-border text-muted-foreground hover:border-foreground/20"
+              )}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Sliders */}
+      <div className="space-y-3">
+        {dials.map(({ key, left, right }) => (
+          <div key={key}>
+            <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+              <span>{left}</span>
+              <span>{right}</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={current[key] as number}
+              onChange={(e) => setLocal(prev => prev ? { ...prev, [key]: Number(e.target.value) } : null)}
+              className="w-full h-1.5 rounded-full accent-amber-500 cursor-pointer"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Live preview */}
+      <div className="rounded-lg px-3 py-2.5 text-xs text-muted-foreground italic" style={{ background: "oklch(0.16 0.01 240 / 0.6)", border: "1px solid oklch(0.30 0.02 240 / 0.4)" }}>
+        {preview}
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={updateTone.isPending}
+        className="w-full py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+      >
+        {updateTone.isPending ? "Saving…" : "Save Wren's voice"}
+      </button>
+    </div>
+  );
+}
+
 // ─── Settings Page ────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { user, logout } = useAuth();
@@ -453,7 +576,15 @@ export default function SettingsPage() {
       {/* Header */}
       <div>
         <h1 className="font-brand text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">You &amp; Wren</h1>
-        <p className="text-sm text-muted-foreground mt-1">What Wren knows about you, and how you work together.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          What Wren knows about you, and how you work together.{" "}
+          <button
+            onClick={() => navigate("/wren/memory")}
+            className="text-amber-500 hover:text-amber-400 underline underline-offset-2 transition-colors"
+          >
+            See what Wren remembers →
+          </button>
+        </p>
       </div>
 
       {/* Tabs */}
@@ -1009,6 +1140,9 @@ export default function SettingsPage() {
               ))}
             </div>
           </div>
+
+          {/* Wren Tone Dials */}
+          <WrenToneCard />
 
           {/* Google Calendar Integration */}
           <div id="calendar" className="p-5 rounded-xl bg-card border border-border space-y-3">

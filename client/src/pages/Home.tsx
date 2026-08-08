@@ -78,6 +78,8 @@ import WrenPlayer from "@/components/WrenPlayer";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
+import { CrisisSupportCard } from "@/components/CrisisSupportCard";
+import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import { BentoCard } from "@/components/BentoCard";
 import { useTransitionSound } from "@/hooks/useTransitionSound";
 
@@ -359,10 +361,12 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
   const [mentalLoad, setMentalLoad] = useState<MentalLoad | undefined>();
   const [workLocation, setWorkLocation] = useState<WorkLocation | undefined>();
   const [, navigate] = useLocation();
+  const { crisisLevel: morningCrisisLevel, checkAndMaybeFlag: checkMorningCrisis, dismissCrisis: dismissMorningCrisis } = useCrisisCheck("check_in_morning");
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
     onSuccess: (data) => {
       notify.saved("Your day is set.", { description: "Wren's watching your back." });
+      if (notes.trim()) void checkMorningCrisis(notes);
       // If clarity mode was suggested and state is anxious/foggy/drained, offer nudge
       if (data.clarityModeSuggestion) {
         setTimeout(() => {
@@ -527,9 +531,12 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
         size="sm"
       >
         {submit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-        Set today's plan
-      </Button>
-    </div>
+      Set today's plan
+    </Button>
+    {morningCrisisLevel && (
+      <CrisisSupportCard level={morningCrisisLevel} onDismiss={dismissMorningCrisis} className="mt-2" />
+    )}
+  </div>
   );
 }
 
@@ -856,10 +863,13 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
   const [tomorrowTasks, setTomorrowTasks] = useState<TomorrowTask[]>([]);
   const [decision, setDecision] = useState("");
   const [showDecision, setShowDecision] = useState(false);
+  const { crisisLevel: eveningCrisisLevel, checkAndMaybeFlag: checkEveningCrisis, dismissCrisis: dismissEveningCrisis } = useCrisisCheck("check_in_evening");
   const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
       notify.saved("Day closed.", { description: "Tomorrow's brief is ready when you are." });
+      const combined = [whatMoved, whatRemains, whatLearned].filter(Boolean).join(" ");
+      if (combined.trim()) void checkEveningCrisis(combined);
       onComplete();
     },
     onError: () => notify.error("Didn't save — try once more."),
@@ -962,9 +972,12 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       </div>
       <Button onClick={handleSubmit} disabled={submit.isPending || saveDecision.isPending} className="w-full" size="sm">
         {submit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-        Close the day
-      </Button>
-    </div>
+      Close the day
+    </Button>
+    {eveningCrisisLevel && (
+      <CrisisSupportCard level={eveningCrisisLevel} onDismiss={dismissEveningCrisis} className="mt-2" />
+    )}
+  </div>
   );
 }
 

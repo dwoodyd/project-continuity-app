@@ -10,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
 import { createRecorder, type Recorder } from "@soul/capture";
+import { CrisisSupportCard } from "@/components/CrisisSupportCard";
+import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 
 
 type Mode = "idle" | "voice" | "text";
@@ -26,6 +28,7 @@ export default function CapturePage() {
   const [textInput, setTextInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [captureId, setCaptureId] = useState<number | null>(null);
+  const { crisisLevel, checkAndMaybeFlag, dismissCrisis } = useCrisisCheck("capture");
   const recorderRef = useRef<Recorder | null>(null);
   const chunksRef = useRef<{ blob: Blob; index: number }[]>([]);
   const startTimeRef = useRef<number>(0);
@@ -50,6 +53,8 @@ export default function CapturePage() {
         transcript: text,
       });
       await utils.capture.recent.invalidate();
+      // Fire-and-forget crisis check before navigating
+      void checkAndMaybeFlag(text);
       navigate(`/capture/${result.id}/sort`);
     } catch {
       setError("Couldn't save your capture. Please try again.");
@@ -218,6 +223,9 @@ export default function CapturePage() {
           <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
+      )}
+      {crisisLevel && (
+        <CrisisSupportCard level={crisisLevel} onDismiss={dismissCrisis} />
       )}
 
       {/* Mode selector */}
