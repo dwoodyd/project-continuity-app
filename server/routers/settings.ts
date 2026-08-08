@@ -3,7 +3,7 @@ import {
   getUserProfile, updateUserProfile, upsertUserProfile, deleteAllUserData,
   getProjects, getSourceItems, getRecentCheckIns, getRecentDailyPlans,
   getIdeaCaptures, getRecentFocusSessions, updateUserName,
-  getRecentDecisions, getMoodHistory,
+  getRecentDecisions, getMoodHistory, deleteDecision,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
@@ -210,6 +210,18 @@ export const settingsRouter = router({
       recentMoodLogs: moodLogs.slice(0, 7).map(m => ({ date: m.date, score: m.score, note: m.note ?? null })),
     };
   }),
+
+  forgetMemoryItem: protectedProcedure
+    .input(z.object({
+      type: z.enum(["decision"]),
+      id: z.number().int().positive(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (input.type === "decision") {
+        await deleteDecision(input.id, ctx.user.id);
+      }
+      return { success: true };
+    }),
 
   // ── Wren Tone Dials ───────────────────────────────────────────────────────────
   getWrenTone: protectedProcedure.query(async ({ ctx }) => {

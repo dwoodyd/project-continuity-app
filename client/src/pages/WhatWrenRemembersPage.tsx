@@ -31,6 +31,13 @@ export default function WhatWrenRemembersPage() {
 
   const { data: snapshot, isLoading } = trpc.settings.getMemorySnapshot.useQuery();
   const { data: pauseData } = trpc.settings.getWrenMemoryPaused.useQuery();
+  const forgetItem = trpc.settings.forgetMemoryItem.useMutation({
+    onSuccess: () => {
+      utils.settings.getMemorySnapshot.invalidate();
+      notify.saved("Forgotten. Wren won't reference this anymore.");
+    },
+    onError: () => notify.error("Couldn't forget — try again."),
+  });
   const setPaused = trpc.settings.setWrenMemoryPaused.useMutation({
     onSuccess: () => {
       utils.settings.getWrenMemoryPaused.invalidate();
@@ -170,9 +177,20 @@ export default function WhatWrenRemembersPage() {
                 {showDecisions && (
                   <div className="divide-y divide-border">
                     {snapshot.recentDecisions.map((d: { id: number; content: string; date: string }) => (
-                      <div key={d.id} className="px-4 py-3" style={{ background: "var(--card)" }}>
-                        <p className="text-sm text-foreground">{d.content}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{d.date}</p>
+                      <div key={d.id} className="px-4 py-3 flex items-start gap-3" style={{ background: "var(--card)" }}>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-foreground">{d.content}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{d.date}</p>
+                        </div>
+                        <button
+                          onClick={() => forgetItem.mutate({ type: "decision", id: d.id })}
+                          disabled={forgetItem.isPending}
+                          className="shrink-0 text-xs text-muted-foreground/50 hover:text-destructive transition-colors flex items-center gap-1 pt-0.5"
+                          title="Forget this"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>Forget</span>
+                        </button>
                       </div>
                     ))}
                   </div>

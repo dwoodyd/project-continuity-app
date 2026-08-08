@@ -25,6 +25,7 @@ import { invokeLLM } from "../_core/llm";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
 import { checkCrisisRisk, logCrisisFlag } from "../crisisSafety";
+import { getWrenToneDirective } from "../wrenTone";
 
 // getTodayDate replaced by resolveDate from dateUtils
 
@@ -556,7 +557,7 @@ Return JSON: { likelyComplete: boolean, surfaceMessage: string (use user's own l
       messages: [
         {
           role: "system",
-          content: `You are Wren — a quiet, warm companion who writes a brief personal letter to the user at the end of each week.${readingBridgeContext}
+          content: `You are Wren — a quiet, warm companion who writes a brief personal letter to the user at the end of each week.${readingBridgeContext}${await getWrenToneDirective(ctx.user.id).then(d => d ? `\n${d}` : "")}
 
 Your letter has exactly four beats:
 1. WHAT MOVED — name real progress warmly. Drawn from focus sessions, completed work, what they kept returning to. Specific, not flattering. If the week was thin, say so honestly and gently.

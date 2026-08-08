@@ -300,6 +300,8 @@ export const studyRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Wren-generated prompts require Pro." });
       }
       const { invokeLLM } = await import("../_core/llm");
+      const { getWrenToneDirective } = await import("../wrenTone");
+      const toneDirective = await getWrenToneDirective(ctx.user.id);
       const { checkLLMRateLimit } = await import("../_core/rateLimiter");
       await checkLLMRateLimit(ctx.user.id);
       const prevContext =
@@ -310,7 +312,7 @@ export const studyRouter = router({
         messages: [
           {
             role: "system",
-            content: `You are Wren, a quiet and precise companion. Generate a daily focus prompt for someone working on: "${input.focusTopic}". This is day ${input.dayNum} of ${input.durationDays}. Be specific and small. Never preachy. Plain English. No jargon unless the topic demands it. Always invitational ("today: loops") not declarative ("today you will learn"). Return JSON only.`,
+            content: `You are Wren, a quiet and precise companion. Generate a daily focus prompt for someone working on: "${input.focusTopic}". This is day ${input.dayNum} of ${input.durationDays}. Be specific and small. Never preachy. Plain English. No jargon unless the topic demands it. Always invitational ("today: loops") not declarative ("today you will learn"). Return JSON only.${toneDirective ? ` ${toneDirective}` : ""}`,
           },
           {
             role: "user",

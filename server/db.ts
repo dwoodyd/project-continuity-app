@@ -714,6 +714,12 @@ export async function getRecentDecisions(userId: number, limit = 10): Promise<De
     .limit(limit);
 }
 
+export async function deleteDecision(id: number, userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(decisions).where(and(eq(decisions.id, id), eq(decisions.userId, userId)));
+}
+
 // ── Push Subscriptions ────────────────────────────────────────────────────────
 export async function upsertPushSubscription(data: {
   userId: number;

@@ -326,6 +326,23 @@ function WrenToneCard() {
     updateTone.mutate(local);
   }, [local, updateTone]);
 
+  const [previewResponse, setPreviewResponse] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+
+  const handlePreview = useCallback(async () => {
+    if (!local) return;
+    setPreviewLoading(true);
+    setPreviewResponse(null);
+    try {
+      const directive = buildWrenToneDirective(local);
+      setPreviewResponse(directive
+        ? `With these settings, Wren's replies will be: ${directive}`
+        : "Wren will use her default voice — warm, calm, and grounded.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }, [local]);
+
   const dials: { key: keyof typeof current; left: string; right: string }[] = [
     { key: "wrenGentleDirect", left: "Gentle", right: "Direct" },
     { key: "wrenBriefThorough", left: "Brief", right: "Thorough" },
@@ -389,13 +406,30 @@ function WrenToneCard() {
         {preview}
       </div>
 
-      <button
-        onClick={handleSave}
-        disabled={updateTone.isPending}
-        className="w-full py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
-      >
-        {updateTone.isPending ? "Saving…" : "Save Wren's voice"}
-      </button>
+      {/* Preview response */}
+      {previewResponse && (
+        <div className="rounded-lg px-3 py-2.5 text-xs space-y-1" style={{ background: "oklch(0.72 0.10 65 / 0.08)", border: "1px solid oklch(0.72 0.10 65 / 0.2)" }}>
+          <p className="font-medium text-amber-500/80">Preview</p>
+          <p className="text-muted-foreground">{previewResponse}</p>
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          onClick={handlePreview}
+          disabled={previewLoading}
+          className="flex-1 py-2 rounded-lg text-sm font-medium transition-colors bg-muted hover:bg-muted/80 text-muted-foreground border border-border"
+        >
+          {previewLoading ? "Previewing…" : "Preview"}
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={updateTone.isPending}
+          className="flex-1 py-2 rounded-lg text-sm font-medium transition-colors bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+        >
+          {updateTone.isPending ? "Saving…" : "Save Wren's voice"}
+        </button>
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../_core/trpc";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
+import { getWrenToneDirective } from "../wrenTone";
 import {
   getCoworkingRooms,
   createCoworkingSession,
@@ -61,7 +62,7 @@ export const coworkingRouter = {
             messages: [
               {
                 role: "system",
-                content: `You are Wren, a calm continuity assistant. You help people with ADHD pick up exactly where they left off. Be brief — one sentence only.`,
+                content: `You are Wren, a calm continuity assistant. You help people with ADHD pick up exactly where they left off. Be brief — one sentence only.${await getWrenToneDirective(ctx.user.id).then(d => d ? ` ${d}` : "")}`,
               },
               {
                 role: "user",
