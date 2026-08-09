@@ -90,6 +90,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         <Route path="/about-app">{() => { if (typeof window !== "undefined") window.location.replace("/welcome"); return null; }}</Route>
         <Route path="/landing" component={LandingPage} />
         <Route path="/tour" component={TourPage} />
+        {/* /pricing is a public marketing page — must be outside AppLayout so Googlebot and
+            logged-out visitors see real pricing content, not the sign-in card. */}
+        <Route path="/pricing" component={ProPage} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
@@ -120,7 +123,6 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/admin/applications" component={AdminApplicationsPage} />
               <Route path="/settings" component={SettingsPage} />
               <Route path="/pro" component={ProPage} />
-              <Route path="/pricing" component={ProPage} />
               <Route path="/pro/success" component={ProSuccessPage} />
               <Route path="/pro/cancel" component={ProPage} />
               <Route path="/scratch" component={ScratchPadPage} />
