@@ -93,7 +93,7 @@ export default function ApplyPage() {
     <>
       <PageMeta
         title="Apply for Founding Access"
-        description="Continuary is in closed beta. Apply for one of 100 founding member slots — a quiet companion built for non-linear minds."
+        description="Lock a founding rate for life. Apply for 1 of 100 slots in Continuary's closed beta — the quiet companion for minds that lose the thread."
         path="/apply"
       />
     <div

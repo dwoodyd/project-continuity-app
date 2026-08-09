@@ -54,6 +54,49 @@
     <meta name="twitter:image:alt" content="Continuary — Finally, a system that keeps up with you." />
 
     <!-- Anti-flash theme: apply saved theme class synchronously before first paint -->
+
+    <!-- Structured data: WebApplication schema for machine-readable app context -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Continuary",
+      "url": "https://app.continuary.app/",
+      "description": "A structured daily workspace for ADHD, focus struggles, and non-linear thinkers. Collect evidence of your identity as someone who keeps going.",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web, iOS, Android",
+      "browserRequirements": "Requires JavaScript. Works best in Chrome, Safari, Firefox, Edge.",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "Free",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Free tier — always available, no credit card required."
+        },
+        {
+          "@type": "Offer",
+          "name": "Pro (Founding Rate)",
+          "price": "4.99",
+          "priceCurrency": "USD",
+          "description": "Pro founding rate — locked for life. Limited to 100 founding members."
+        },
+        {
+          "@type": "Offer",
+          "name": "Keeper (Founding Rate)",
+          "price": "9.99",
+          "priceCurrency": "USD",
+          "description": "Keeper founding rate — locked for life. Includes all Pro features plus vault and advanced AI."
+        }
+      ],
+      "creator": {
+        "@type": "Organization",
+        "name": "Continuary",
+        "url": "https://app.continuary.app/"
+      }
+    }
+    </script>
+
     <script>
       (function(){
         try{
