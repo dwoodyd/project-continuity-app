@@ -459,10 +459,52 @@ export default function ProPage() {
           <p className="text-white/18 text-xs max-w-sm mx-auto leading-relaxed">
             Continuary is built by one person, for people who work differently. Your subscription directly funds continued development.
             <br /><br />
-            Secure checkout via PayPal · Cancel anytime · No hidden fees
-          </p>
-          <p className="text-white/20 text-xs">
-            Continuary works alongside{" "}
+          Secure checkout via PayPal · Cancel anytime · No hidden fees
+        </p>
+        {/* FAQ section */}
+        <div className="max-w-2xl mx-auto w-full text-left space-y-2 pt-4 pb-2">
+          <h2 className="text-base font-semibold text-white/70 mb-4 text-center">Common questions</h2>
+          {[
+            {
+              q: "What happens after the founding slots fill?",
+              a: "Once all 100 founding slots are claimed, pricing moves to retail rates ($7.99/mo Pro, $14.99/mo Keeper). Founding members keep their rate locked for as long as they stay subscribed — it never increases.",
+            },
+            {
+              q: "Can I cancel anytime?",
+              a: "Yes. Cancel from Settings at any time — no penalty, no questions. You keep access until the end of your current billing period.",
+            },
+            {
+              q: "Is there a free tier?",
+              a: "Yes. Core daily tools — check-ins, Today dashboard, projects, Scratch Pad, Evidence Log, and Emotional Cycle — are always free. Pro and Keeper unlock Wren AI, voice capture, vault storage, and advanced features.",
+            },
+            {
+              q: "What's the difference between Pro and Keeper?",
+              a: "Pro gives you Wren AI, voice dictation, the full Clarity Engine, and weekly review letters. Keeper adds the file vault, advanced co-working tools, and the Weekly Compass deep-dive. Both tiers include everything in Free.",
+            },
+            {
+              q: "Is Continuary a therapy app?",
+              a: "No. Wren is a productivity companion, not a clinician. Continuary helps you build structure and continuity — it's not a substitute for therapy, medication, or professional mental health support.",
+            },
+            {
+              q: "Does it work on mobile?",
+              a: "Yes. Continuary is a progressive web app (PWA) — install it from your browser on iOS or Android for a native-feeling experience with offline support and push notifications.",
+            },
+          ].map(({ q, a }) => (
+            <details
+              key={q}
+              className="group border-b border-white/10 py-3"
+            >
+              <summary className="flex items-center justify-between cursor-pointer list-none text-sm font-medium text-white/75 hover:text-white transition-colors">
+                {q}
+                <ChevronDown className="w-4 h-4 text-white/30 group-open:rotate-180 transition-transform flex-shrink-0 ml-3" />
+              </summary>
+              <p className="mt-2 text-sm text-white/50 leading-relaxed">{a}</p>
+            </details>
+          ))}
+        </div>
+
+        <p className="text-white/20 text-xs">
+          Continuary works alongside{" "}
             <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
               className="text-white/40 hover:text-amber-400 transition-colors underline underline-offset-2">
               Permission to Start
