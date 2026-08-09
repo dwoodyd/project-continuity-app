@@ -4,6 +4,7 @@
  * as the signature differentiators from the book "Permission to Start".
  */
 import { Link } from "wouter";
+import { PageMeta } from "@/components/PageMeta";
 import WrenPlayer from "@/components/WrenPlayer";
 import {
   ArrowRight,
@@ -379,6 +380,11 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <PageMeta
+        title="Continuary — Built for Minds That Work Differently"
+        description="A structured daily workspace for ADHD, focus struggles, and non-linear thinkers. Collect evidence of your identity as someone who keeps going."
+        path="/welcome"
+      />
       <style>{`
         .welcome-fade {
           opacity: 0;
