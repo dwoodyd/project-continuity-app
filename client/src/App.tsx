@@ -93,6 +93,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         {/* /pricing is a public marketing page — must be outside AppLayout so Googlebot and
             logged-out visitors see real pricing content, not the sign-in card. */}
         <Route path="/pricing" component={ProPage} />
+        {/* /welcome is the public marketing/about page — outside AppLayout so logged-out visitors
+            and Googlebot see the full page instead of the sign-in card. */}
+        <Route path="/welcome" component={WelcomePage} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
@@ -111,7 +114,6 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/projects/:id" component={ProjectDetailPage} />
               <Route path="/weekly" component={WeeklyReviewPage} />
               <Route path="/compass" component={WeeklyCompassPage} />
-              <Route path="/welcome" component={WelcomePage} />
               <Route path="/intelligence" component={IntelligencePage} />
               <Route path="/clarity" component={ClarityEnginePage} />
               <Route path="/evidence" component={EvidenceLogPage} />

@@ -441,9 +441,16 @@ export default function WelcomePage() {
                 Continuary is a structured daily workspace that collects evidence of your identity as someone who keeps going — even when starting feels impossible.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
-                {ctaButton}
-              </div>
+            <div className="flex flex-col sm:flex-row items-center lg:items-start justify-center lg:justify-start gap-3">
+              {ctaButton}
+              <a
+                href="/pricing"
+                className="text-sm font-medium transition-colors hover:opacity-80"
+                style={{ color: "oklch(0.72 0.14 72 / 0.8)" }}
+              >
+                See pricing →
+              </a>
+            </div>
 
               <div className="flex items-center gap-4 mt-8 justify-center lg:justify-start">
                 <div className="flex -space-x-2">
@@ -794,7 +801,7 @@ export default function WelcomePage() {
           <div className="text-right space-y-1">
             <p className="text-xs text-muted-foreground/50">Built for non-linear minds.</p>
             <div className="flex items-center justify-end gap-3">
-              <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Founding member pricing</Link>
+              <Link href="/pricing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
               <Link href="/changelog" className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1">
                 Changelog
                 {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (

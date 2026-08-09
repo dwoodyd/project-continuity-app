@@ -414,7 +414,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-              <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← See what's inside</a>
+            <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← See what's inside</a>
+            <a href="/pricing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-1">See pricing →</a>
             </div>
           </div>
           {onPreviewIntro && (
