@@ -36,6 +36,7 @@ import { readingBridgeRouter } from "./routers/readingBridge";
 import { captureRouter } from "./routers/capture";
 import { transcribeRouter } from "./routers/transcribe";
 import { loopsRouter } from "./routers/loops";
+import { foundingRouter } from "./routers/founding";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -121,6 +122,7 @@ export const appRouter = router({
   transcribe: transcribeRouter,
   loops: loopsRouter,
   crisis: crisisRouter,
+  founding: foundingRouter,
 });
 
 export type AppRouter = typeof appRouter;

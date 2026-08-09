@@ -85,6 +85,10 @@ export default function ProPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
   const { data: status, isLoading } = trpc.paypal.status.useQuery(undefined, { enabled: !!user });
+  const { data: slots, error: slotsError } = trpc.founding.slots.useQuery(undefined, {
+    staleTime: 40_000,
+    retry: false,
+  });
   const createSub = trpc.paypal.createSubscription.useMutation();
   const cancelSub = trpc.paypal.cancelSubscription.useMutation();
   const utils = trpc.useUtils();
@@ -221,7 +225,16 @@ export default function ProPage() {
               </div>
               <h1 className="font-brand text-3xl text-white mb-3">Start free. Go deeper when you're ready.</h1>
               <p className="text-white/50 text-sm leading-relaxed max-w-sm mx-auto">
-                Founding rates are locked for life. 100 slots total — reviewed personally.
+                Founding rates are locked for life.{" "}
+                {slotsError || slots === undefined ? (
+                  <span>100 slots total — reviewed personally.</span>
+                ) : slots.remaining === 0 ? (
+                  <span className="text-amber-400 font-semibold">Founding seats are full — join the waitlist.</span>
+                ) : slots.remaining <= 5 ? (
+                  <span className="text-amber-400 font-semibold">Only {slots.remaining} founding {slots.remaining === 1 ? "seat" : "seats"} left.</span>
+                ) : (
+                  <span>{slots.remaining} of 100 founding seats left.</span>
+                )}
               </p>
             </>
           )}

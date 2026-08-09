@@ -2108,3 +2108,4 @@
 ### Privacy/Honesty Copy
 - [x] "Wren is a companion, not a clinician" in Ground Mode, Wren chat, and emotional support contexts
 - [x] Privacy commitment copy on landing page + in-app (what we do/don't do with emotional data)
+- [x] Live founding slots counter: countFoundingSeatsClaimed in db.ts, foundingRouter with 45s cache, /pricing counter with loading/normal/low/full states

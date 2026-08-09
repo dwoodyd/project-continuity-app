@@ -1795,3 +1795,15 @@ export async function deleteAllWrenLetters(userId: number): Promise<void> {
   if (!db) return;
   await db.delete(wrenLetters).where(eq(wrenLetters.userId, userId));
 }
+
+// ─── Founding Slots ───────────────────────────────────────────────────────────
+/** Count founding seats claimed — users where isFoundingMember = true. */
+export async function countFoundingSeatsClaimed(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(users)
+    .where(eq(users.isFoundingMember, true));
+  return Number(rows[0]?.n ?? 0);
+}
