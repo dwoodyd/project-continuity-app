@@ -158,8 +158,8 @@ export default function ProPage() {
   return (
     <>
       <PageMeta
-        title="Pricing"
-        description="Continuary starts free. Founding member rates are locked for life — $4.99/mo for Pro, $9.99/mo for Keeper. 100 slots total."
+        title="Continuary Pricing — Free, Pro & Keeper Plans"
+        description="Founding rates locked for life: Pro $4.99/mo, Keeper $9.99/mo. Free tier always available. 100 founding slots — reviewed personally."
         path="/pricing"
       />
     <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
@@ -190,7 +190,7 @@ export default function ProPage() {
         {/* Non-founding member banner */}
         {!isFoundingMember && (
           <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between gap-3">
-            <p className="text-xs text-white/60">Continuary is currently invite-only.</p>
+            <p className="text-xs text-white/60">Continuary is currently invite-only. No account needed to see pricing.</p>
             <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
               className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
               Apply for a slot →
@@ -283,39 +283,37 @@ export default function ProPage() {
             )}
           </div>
 
-          {/* Pro */}
-          {(() => {
-            const p = PRICING.pro;
-            const monthly = isFoundingMember ? p.foundingMonthly : p.retailMonthly;
-            const annual = isFoundingMember ? p.foundingAnnual : p.retailAnnual;
-            const annualEquiv = isFoundingMember ? p.foundingAnnualEquiv : "6.67";
-            const displayPrice = billing === "annual" ? annual : monthly;
-            const retailStrike = billing === "annual" ? p.retailAnnual : p.retailMonthly;
-            const cta = getCtaLabel("pro");
-            return (
-              <div className="relative rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 flex flex-col gap-3">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-white text-sm">Pro</span>
-                    {isFoundingMember && (
-                      <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/25">Founding Rate</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-white/45">Your daily thread, always on.</p>
+        {/* Pro */}
+        {(() => {
+          const p = PRICING.pro;
+          // Always lead with founding price — it's the active offer during beta
+          const monthly = p.foundingMonthly;
+          const annual = p.foundingAnnual;
+          const annualEquiv = p.foundingAnnualEquiv;
+          const displayPrice = billing === "annual" ? annual : monthly;
+          const retailStrike = billing === "annual" ? p.retailAnnual : p.retailMonthly; // always shown
+          const cta = getCtaLabel("pro");
+          return (
+            <div className="relative rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 flex flex-col gap-3">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-white text-sm">Pro</span>
+                  <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/25">Founding Rate</Badge>
                 </div>
-                <div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-white">${displayPrice}</span>
-                    <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                    {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
-                  </div>
-                  {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
-                  )}
-                  {isFoundingMember && (
-                    <p className="text-[10px] text-amber-400/70 mt-0.5">Retail: ${p.retailMonthly}/mo · ${p.retailAnnual}/yr</p>
-                  )}
+                <p className="text-xs text-white/45">Your daily thread, always on.</p>
+              </div>
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-white">${displayPrice}</span>
+                  <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
+                  <span className="text-xs text-white/30 line-through ml-1">${retailStrike}</span>
+                  <span className="text-[10px] text-white/25 ml-0.5">at launch</span>
                 </div>
+                {billing === "annual" && (
+                  <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
+                )}
+                <p className="text-[10px] text-amber-400/60 mt-0.5">Founding rate — locked for life</p>
+              </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
                     "Everything in Free — unlimited",
@@ -348,39 +346,37 @@ export default function ProPage() {
             );
           })()}
 
-          {/* Keeper */}
-          {(() => {
-            const k = PRICING.keeper;
-            const monthly = isFoundingMember ? k.foundingMonthly : k.retailMonthly;
-            const annual = isFoundingMember ? k.foundingAnnual : k.retailAnnual;
-            const annualEquiv = isFoundingMember ? k.foundingAnnualEquiv : "12.50";
-            const displayPrice = billing === "annual" ? annual : monthly;
-            const retailStrike = billing === "annual" ? k.retailAnnual : k.retailMonthly;
-            const cta = getCtaLabel("keeper");
-            return (
-              <div className="relative rounded-2xl border border-violet-500/40 bg-violet-500/5 p-5 flex flex-col gap-3">
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-white text-sm">Keeper</span>
-                    {isFoundingMember && (
-                      <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-300 border-violet-500/25">Founding Rate</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-white/45">For those who go deeper.</p>
+        {/* Keeper */}
+        {(() => {
+          const k = PRICING.keeper;
+          // Always lead with founding price — it's the active offer during beta
+          const monthly = k.foundingMonthly;
+          const annual = k.foundingAnnual;
+          const annualEquiv = k.foundingAnnualEquiv;
+          const displayPrice = billing === "annual" ? annual : monthly;
+          const retailStrike = billing === "annual" ? k.retailAnnual : k.retailMonthly; // always shown
+          const cta = getCtaLabel("keeper");
+          return (
+            <div className="relative rounded-2xl border border-violet-500/40 bg-violet-500/5 p-5 flex flex-col gap-3">
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-white text-sm">Keeper</span>
+                  <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-300 border-violet-500/25">Founding Rate</Badge>
                 </div>
-                <div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-bold text-white">${displayPrice}</span>
-                    <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                    {isFoundingMember && <span className="text-xs text-white/25 line-through ml-1">${retailStrike}</span>}
-                  </div>
-                  {billing === "annual" && (
-                    <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
-                  )}
-                  {isFoundingMember && (
-                    <p className="text-[10px] text-violet-400/70 mt-0.5">Retail: ${k.retailMonthly}/mo · ${k.retailAnnual}/yr</p>
-                  )}
+                <p className="text-xs text-white/45">For those who go deeper.</p>
+              </div>
+              <div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-bold text-white">${displayPrice}</span>
+                  <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
+                  <span className="text-xs text-white/30 line-through ml-1">${retailStrike}</span>
+                  <span className="text-[10px] text-white/25 ml-0.5">at launch</span>
                 </div>
+                {billing === "annual" && (
+                  <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
+                )}
+                <p className="text-[10px] text-violet-400/60 mt-0.5">Founding rate — locked for life</p>
+              </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
                     "Everything in Pro",
