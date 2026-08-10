@@ -194,11 +194,22 @@ export default function ProPage() {
         {/* Non-founding member banner */}
         {!isFoundingMember && (
           <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between gap-3">
-            <p className="text-xs text-white/60">Continuary is currently invite-only. No account needed to see pricing.</p>
-            <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-              className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
-              Apply for a slot →
-            </a>
+            <p className="text-xs text-white/60">
+              {slots?.remaining === 0
+                ? "Founding seats are full. Join the waitlist and we'll reach out when one opens."
+                : "Continuary is currently invite-only. No account needed to see pricing."}
+            </p>
+            {slots?.remaining === 0 ? (
+              <a href="/waitlist"
+                className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
+                Join the waitlist →
+              </a>
+            ) : (
+              <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
+                className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
+                Apply for a slot →
+              </a>
+            )}
           </div>
         )}
 

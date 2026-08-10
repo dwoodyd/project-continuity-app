@@ -2109,3 +2109,11 @@
 - [x] "Wren is a companion, not a clinician" in Ground Mode, Wren chat, and emotional support contexts
 - [x] Privacy commitment copy on landing page + in-app (what we do/don't do with emotional data)
 - [x] Live founding slots counter: countFoundingSeatsClaimed in db.ts, foundingRouter with 45s cache, /pricing counter with loading/normal/low/full states
+
+## Waitlist + Public Slots (Aug 9)
+- [x] Task A: WaitlistPage.tsx (public, mirrors ApplyPage styling)
+- [x] Task A: Register /waitlist route outside AppLayout
+- [x] Task A: /pricing full-state CTA → /waitlist when remaining === 0
+- [x] Task B: Extract foundingSlots.ts shared cache module
+- [x] Task B: Update founding.ts to use getFoundingSlots()
+- [x] Task B: Add /api/public/founding-slots REST endpoint with CORS

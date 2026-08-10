@@ -60,6 +60,7 @@ const SortResultPage      = lazy(() => import("./pages/SortResultPage"));
 const OpenLoopsPage       = lazy(() => import("./pages/OpenLoopsPage"));
 const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
 const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage"));
+const WaitlistPage        = lazy(() => import("./pages/WaitlistPage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -96,7 +97,9 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         {/* /welcome is the public marketing/about page — outside AppLayout so logged-out visitors
             and Googlebot see the full page instead of the sign-in card. */}
         <Route path="/welcome" component={WelcomePage} />
-        <Route path="/apply" component={ApplyPage} />
+  <Route path="/apply" component={ApplyPage} />
+        {/* /waitlist is public — shown when founding slots are full */}
+        <Route path="/waitlist" component={WaitlistPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
         <Route path="/intro">{() => null}</Route>

@@ -297,6 +297,19 @@ async function startServer() {
     res.json({ version: process.env.BUILD_HASH ?? "dev" });
   });
 
+  // Public founding-slots endpoint — aggregate count only, no PII.
+  // CORS * is safe: non-sensitive, no cookies. Used by continuary.app marketing site.
+  app.get("/api/public/founding-slots", async (_req, res) => {
+    res.set("Access-Control-Allow-Origin", "*");
+    res.set("Cache-Control", "public, max-age=45");
+    try {
+      const { getFoundingSlots } = await import("../foundingSlots");
+      res.json(await getFoundingSlots());
+    } catch {
+      res.json({ total: 100, claimed: null, remaining: null });
+    }
+  });
+
   // PayPal webhook
   app.use("/api/paypal", paypalRouter);
   // OAuth callback under /api/oauth/callback
