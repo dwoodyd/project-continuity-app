@@ -166,19 +166,12 @@ class SDKServer {
 
   private getSessionSecret() {
     const secret = ENV.cookieSecret;
-    // SECURITY NOTE: Ideally this should throw when secret is missing/short.
-    // Temporarily relaxed to a warning because the Manus platform is injecting
-    // JWT_SECRET as a short/empty value in production (platform-level bug).
-    // TODO: restore the throw once platform confirms correct secret injection.
+    // SECURITY: fail closed. An empty/weak JWT secret means tokens can be forged.
+    // Never sign or verify sessions with a missing or trivially short key.
     if (!secret || secret.length < 32) {
-      console.warn(
-        "[Auth] WARNING: JWT_SECRET is missing or too short (need >= 32 chars). " +
-        "Sessions may be insecure. Contact Manus support to fix secret injection."
+      throw new Error(
+        "JWT_SECRET is missing or too short (need >= 32 chars). Refusing to sign/verify sessions."
       );
-      // Fall back to a hardcoded dev-only secret so the app stays functional.
-      // This is NOT safe for production — resolve the platform injection issue ASAP.
-      const fallback = "continuary-temp-fallback-secret-dev-only-32x";
-      return new TextEncoder().encode(secret || fallback);
     }
     return new TextEncoder().encode(secret);
   }
