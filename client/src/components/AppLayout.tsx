@@ -194,7 +194,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     const matchingPath = Object.keys(INTERNAL_PAGE_TITLES)
       .filter((path) => path !== "/" && location.startsWith(path))
       .sort((a, b) => b.length - a.length)[0];
-    document.title = `${exact ?? (matchingPath ? INTERNAL_PAGE_TITLES[matchingPath] : "Continuary")} · Continuary`;
+    const title = exact ?? (matchingPath ? INTERNAL_PAGE_TITLES[matchingPath] : "Continuary");
+    document.title = title.includes("Continuary") ? title : `${title} · Continuary`;
   }, [location]);
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [threadLockOpen, setThreadLockOpen] = useState(false);

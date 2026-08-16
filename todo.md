@@ -2132,3 +2132,9 @@
 - [x] Audit 5: Prioritize hero dashboard queries, defer below-the-fold requests, and preserve optimistic check-in, capture, and mood-log feedback.
 - [x] Audit 6: Add page-specific browser titles to internal application views.
 - [x] Quality: Add Vitest coverage for persisted dashboard layout normalization and ordering.
+
+## UX Closure + Revenue Readiness (Aug 16, 2026)
+- [x] Add accessible names to the four remaining unlabeled dashboard button controls.
+- [x] Prevent the internal browser-tab title helper from appending the Continuary brand twice.
+- [x] Verify production PAYPAL_WEBHOOK_ID configuration and webhook activation path without changing payment behavior.
+- [x] Document and complete code-side validation for the real-device offline Capture queue test.

@@ -965,7 +965,7 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
           onClick={() => setShowDecision(!showDecision)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <BookOpen className="w-3.5 h-3.5" />
+          <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
           {showDecision ? "Hide" : "Log a decision made today"} <span className="opacity-50">(optional)</span>
         </button>
         {showDecision && (
@@ -1053,6 +1053,7 @@ function MoodWidget() {
                 minWidth: 0,
               }}
               title={`Score ${n}`}
+              aria-label={`Log mood score ${n} out of 10`}
             />
           ))}
         </div>
@@ -2113,8 +2114,9 @@ export default function Home() {
               onClick={() => navigate("/settings?tab=ideas")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors shrink-0"
               title="Ideas waiting to be processed"
+              aria-label={`${pendingIdeaCount} idea${pendingIdeaCount === 1 ? "" : "s"} waiting to be processed`}
             >
-              <Lightbulb className="w-3 h-3" />
+              <Lightbulb className="w-3 h-3" aria-hidden="true" />
               {pendingIdeaCount}
             </button>
           )}
@@ -2376,8 +2378,9 @@ export default function Home() {
           <button
             onClick={() => dismissRbPrompt(false)}
             className="flex-shrink-0 text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-0.5"
+            aria-label="Dismiss Reading Bridge invitation"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -2543,8 +2546,8 @@ export default function Home() {
             <h3 className="text-sm font-semibold text-foreground capitalize">
               {activeCheckIn} check-in
             </h3>
-            <button onClick={() => setActiveCheckIn(null)} className="text-muted-foreground hover:text-foreground p-1">
-              <ChevronUp className="w-4 h-4" />
+            <button onClick={() => setActiveCheckIn(null)} aria-label={`Collapse ${activeCheckIn} check-in`} className="text-muted-foreground hover:text-foreground p-1">
+              <ChevronUp className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
           {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} localDate={localDateStr} />}
