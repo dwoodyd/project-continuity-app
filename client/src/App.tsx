@@ -190,14 +190,17 @@ function App() {
 
   // /intro forces the flow for cold-traffic sharing links (e.g. bio, Product Hunt)
   const isIntroRoute = typeof window !== "undefined" && window.location.pathname === "/intro";
-  const showOnboarding = splashDone && ((!onboardingDone && isFirstSession) || previewMode || isIntroRoute);
+  const isHomeGate = typeof window !== "undefined" && window.location.pathname === "/";
+  const canStartEntryFlow = splashDone || !isHomeGate;
+  const showOnboarding = (isHomeGate || isIntroRoute) && canStartEntryFlow && ((!onboardingDone && isFirstSession) || previewMode || isIntroRoute);
 
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
+          <a href="#main-content" className="skip-link">Skip to main content</a>
           <Toaster />
-          {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
+          {!splashDone && isHomeGate && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           {showOnboarding && (
             <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#080a0f" }}>
               <OnboardingPageWithCallback onDone={handleOnboardingDone} />

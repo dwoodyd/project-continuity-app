@@ -13,7 +13,7 @@ const BASE_URL = "https://app.continuary.app";
 const DEFAULT_IMAGE = "https://continuary.app/og-card.png";
 
 export function PageMeta({ title, description, path, image }: PageMetaProps) {
-  const fullTitle = title === "Continuary" ? title : `${title} — Continuary`;
+  const fullTitle = title.includes("Continuary") ? title : `${title} — Continuary`;
   const url = path ? `${BASE_URL}${path}` : BASE_URL;
   const ogImage = image ?? DEFAULT_IMAGE;
 

@@ -53,8 +53,6 @@
     <meta name="twitter:image" content="https://app.continuary.app/manus-storage/og-card_d230073e.jpg" />
     <meta name="twitter:image:alt" content="Continuary — Finally, a system that keeps up with you." />
 
-    <!-- Anti-flash theme: apply saved theme class synchronously before first paint -->
-
     <!-- Structured data: WebApplication schema for machine-readable app context -->
 
     <!-- FAQPage schema for AI crawler discovery (Bing, Perplexity, ChatGPT RAG) -->
@@ -156,16 +154,6 @@
     }
     </script>
 
-    <script>
-      (function(){
-        try{
-          var t=localStorage.getItem('theme');
-          // Default to dark for new users (app default)
-          if(t==='dark'||!t) document.documentElement.classList.add('dark');
-        }catch(e){}
-      })();
-    </script>
-
     <!-- Fonts: Space Grotesk (headings) + Inter (UI/body) + DM Mono (timestamps/log/accents) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -175,21 +163,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Analytics: only injected when both env vars are set at build time -->
-    <script>
-      (function(){
-        var ep = "%VITE_ANALYTICS_ENDPOINT%";
-        var id = "%VITE_ANALYTICS_WEBSITE_ID%";
-        // Vite leaves the literal placeholder string when the var is undefined.
-        // Guard: skip injection if either value is still a raw placeholder.
-        if (!ep || ep.indexOf('%') === 0 || !id || id.indexOf('%') === 0) return;
-        var s = document.createElement('script');
-        s.defer = true;
-        s.src = ep + '/umami';
-        s.setAttribute('data-website-id', id);
-        document.body.appendChild(s);
-      })();
-    </script>
   </body>
 
 </html>

@@ -487,6 +487,24 @@ button:not([data-slot="button"]):not(:disabled):active {
   }
 }
 
+/* Skip link remains visually quiet until a keyboard user asks for it. */
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -5rem;
+  z-index: 10000;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  background: oklch(0.74 0.14 72);
+  color: oklch(0.16 0.04 240);
+  font-weight: 700;
+  transition: top 120ms ease;
+}
+.skip-link:focus { top: 1rem; }
+
 /* ── Sonner toast — Continuary palette ──────────────────────────────────────
    Overrides sonner's default CSS variables so every toast inherits the
    navy-gradient card, gold hairline, and Inter typography.                  */
@@ -533,3 +551,11 @@ button:not([data-slot="button"]):not(:disabled):active {
 .cy-toast-action:hover {
   background: rgba(217, 164, 65, 0.10) !important;
 }
+
+/* ── Public Welcome page entrance treatment (CSP-safe static CSS) ─────────── */
+.welcome-fade {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.welcome-fade.is-visible { opacity: 1; transform: translateY(0); }

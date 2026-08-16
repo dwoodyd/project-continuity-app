@@ -166,14 +166,14 @@ export default function ProPage() {
         description="Founding rates locked for life: Pro $4.99/mo, Keeper $9.99/mo. Free tier always available. 100 founding slots — reviewed personally."
         path="/pricing"
       />
-    <div className="min-h-screen bg-[#0a0a0f] text-white" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
+    <main id="main-content" className="min-h-screen bg-[#0a0a0f] text-white" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-[#0a0a0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/")} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors">
-          <ArrowLeft size={18} className="text-white/60" />
+      <header className="sticky top-0 z-10 bg-[#0a0a0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate("/")} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" aria-label="Back to Continuary home">
+          <ArrowLeft size={18} className="text-white/60" aria-hidden="true" />
         </button>
         <div className="flex-1">
-          <h1 className="text-sm font-semibold text-white">Pricing</h1>
+          <p className="text-sm font-semibold text-white">Pricing</p>
           <p className="text-xs text-white/40">Simple, honest. No dark patterns.</p>
         </div>
         {isFoundingMember && (
@@ -188,25 +188,25 @@ export default function ProPage() {
             <span className="text-xs text-amber-400 font-medium">Pro active</span>
           </div>
         )}
-      </div>
+      </header>
 
       <div className="max-w-2xl mx-auto px-4 pt-8">
         {/* Non-founding member banner */}
         {!isFoundingMember && (
-          <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex items-center justify-between gap-3">
-            <p className="text-xs text-white/60">
+          <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-white/70">
               {slots?.remaining === 0
                 ? "Founding seats are full. Join the waitlist and we'll reach out when one opens."
                 : "Continuary is currently invite-only. No account needed to see pricing."}
             </p>
             {slots?.remaining === 0 ? (
               <a href="/waitlist"
-                className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-amber-400 font-semibold hover:text-amber-300 transition-colors">
                 Join the waitlist →
               </a>
             ) : (
               <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-                className="text-xs text-amber-400 font-semibold whitespace-nowrap hover:text-amber-300 transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-amber-400 font-semibold hover:text-amber-300 transition-colors">
                 Apply for a slot →
               </a>
             )}
@@ -547,7 +547,7 @@ export default function ProPage() {
           </div>
         </div>
       </div>
-    </div>
+      </main>
     </>
   );
 }

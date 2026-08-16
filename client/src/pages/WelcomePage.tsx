@@ -379,28 +379,12 @@ export default function WelcomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <main id="main-content" className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PageMeta
         title="Continuary — Built for Minds That Work Differently"
         description="A structured daily workspace for ADHD, focus struggles, and non-linear thinkers. Collect evidence of your identity as someone who keeps going."
         path="/welcome"
       />
-      <style>{`
-        .welcome-fade {
-          opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .welcome-fade.is-visible { opacity: 1; transform: translateY(0); }
-        @keyframes animate-fade-slide-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-slide-up { animation: animate-fade-slide-up 0.8s cubic-bezier(0.16,1,0.3,1) both; }
-        .animate-delay-100 { animation-delay: 100ms; }
-        .animate-delay-200 { animation-delay: 200ms; }
-      `}</style>
-
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden bg-background"
@@ -422,7 +406,7 @@ export default function WelcomePage() {
               And when you're ready to work, she's there — reading, writing, weaving — while you do.
               She is not an assistant. She is a companion.
             </p>
-            <p className="text-[10px] text-center mt-2 max-w-xs mx-auto" style={{ color: "oklch(0.45 0.03 240)" }}>
+            <p className="text-xs text-center mt-2 max-w-xs mx-auto" style={{ color: "oklch(0.55 0.03 240)" }}>
               Wren is a companion, not a clinician. She doesn't diagnose, treat, or replace professional support.
             </p>
           </div>
@@ -819,6 +803,6 @@ export default function WelcomePage() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }

@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { PageMeta } from "@/components/PageMeta";
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <main id="main-content" className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Privacy Policy"
         description="How Continuary collects, uses, and protects your data. Your thoughts stay yours."
@@ -191,6 +191,6 @@ export default function PrivacyPage() {
 
         </section>
       </div>
-    </div>
+    </main>
   );
 }

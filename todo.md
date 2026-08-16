@@ -2138,3 +2138,14 @@
 - [x] Prevent the internal browser-tab title helper from appending the Continuary brand twice.
 - [x] Verify production PAYPAL_WEBHOOK_ID configuration and webhook activation path without changing payment behavior.
 - [x] Document and complete code-side validation for the real-device offline Capture queue test.
+
+## Attached Audit Review (Aug 16, 2026)
+- [x] Review continuary-audit.html, verify its findings against the current application, and prepare any required follow-up scope.
+
+## Approved Public-Surface Audit Remediation (Aug 16, 2026)
+- [x] Replace the global timed boot splash with fast, route-aware, gesture-dismissible readiness behavior and remove timer-created audio.
+- [x] Gate the PWA install prompt by engagement and exclude /pricing.
+- [x] Make public inline styling CSP-safe and harden PageMeta against duplicated Continuary title suffixes.
+- [x] Fix /pricing mobile CTA overflow, single-H1 hierarchy, back-button label, and public-page semantic landmarks.
+- [x] Raise public-surface text and touch-target floors while preserving visual hierarchy.
+- [x] Add automated public-surface regression coverage for boot timing, CSP console errors, and mobile overflow.
