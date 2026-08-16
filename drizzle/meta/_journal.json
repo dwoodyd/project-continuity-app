@@ -344,6 +344,13 @@
       "when": 1786223732039,
       "tag": "0048_stiff_morph",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "5",
+      "when": 1786904597201,
+      "tag": "0049_massive_the_hand",
+      "breakpoints": true
     }
   ]
 }

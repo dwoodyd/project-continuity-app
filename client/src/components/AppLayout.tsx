@@ -65,29 +65,59 @@ const BRAND_LOGO_SIGNIN = "/logo-navy.svg";
 
 // ── All nav items ────────────────────────────────────────────────────────────
 const ALL_NAV_ITEMS = [
-  { href: "/",             label: "Today",           icon: Brain,         section: "primary" },
-  { href: "/projects",     label: "Projects",        icon: Archive,       section: "primary" },
-  { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
-  { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
-  { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
-  { href: "/ideas",        label: "Ideas",           icon: Sparkles,      section: "primary" },
-  { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
-  { href: "/capture",     label: "Capture",         icon: Mic,           section: "primary" },
-  { href: "/loops",       label: "Open Loops",      icon: Repeat,        section: "primary" },
-  { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
-  { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },
-  { href: "/reading-bridge", label: "Reading Bridge", icon: BookOpen,      section: "secondary" },
-  { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
-  { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
-  { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
-  { href: "/weekly",       label: "Weekly Review",   icon: Archive,       section: "secondary" },
-  { href: "/intelligence", label: "Intelligence",    icon: Lightbulb,     section: "secondary" },
-  { href: "/settings",     label: "You & Wren",      icon: Settings,      section: "secondary" },
-  { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
-  { href: "/tour",         label: "Take the Tour",   icon: GraduationCap, section: "secondary" },
-  { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
-  { href: "/founding-member", label: "Founding Member", icon: Star,          section: "secondary" },
+  { href: "/",                label: "Today",             icon: Brain,         group: "today" },
+  { href: "/capture",         label: "Capture",           icon: Mic,           group: "today" },
+  { href: "/study",           label: "Single Focus Mode", icon: ClipboardList, group: "today" },
+  { href: "/focus",           label: "Focus Sessions",    icon: Users,         group: "today" },
+  { href: "/projects",        label: "Projects",          icon: Archive,       group: "work" },
+  { href: "/loops",           label: "Open Loops",        icon: Repeat,        group: "work" },
+  { href: "/ideas",           label: "Ideas",             icon: Sparkles,      group: "work" },
+  { href: "/thread-locks",    label: "Thread Locks",      icon: Anchor,        group: "work" },
+  { href: "/clarity",         label: "Clarity Engine",    icon: Zap,           group: "reflect" },
+  { href: "/compass",         label: "Weekly Compass",    icon: Compass,       group: "reflect" },
+  { href: "/emotional-cycle", label: "Emotional Cycle",   icon: BarChart2,     group: "reflect" },
+  { href: "/evidence",        label: "Evidence Log",      icon: ScrollText,    group: "reflect" },
+  { href: "/reading-bridge",  label: "Reading Bridge",    icon: BookOpen,      group: "reflect" },
+  { href: "/vault",           label: "Knowledge Vault",   icon: BookOpen,      group: "vault" },
+  { href: "/scratch",         label: "Scratch Pad",       icon: PenLine,       group: "vault" },
+  { href: "/weekly",          label: "Weekly Review",     icon: Archive,       group: "more" },
+  { href: "/intelligence",    label: "Intelligence",      icon: Lightbulb,     group: "more" },
+  { href: "/settings",        label: "You & Wren",        icon: Settings,      group: "more" },
+  { href: "/welcome",         label: "About",             icon: Home,          group: "more" },
+  { href: "/tour",            label: "Take the Tour",     icon: GraduationCap, group: "more" },
+  { href: "/pro",             label: "Pricing",           icon: Ticket,        group: "more" },
+  { href: "/founding-member", label: "Founding Member",   icon: Star,          group: "more" },
 ] as const;
+
+const NAV_GROUPS = [
+  { key: "today", label: "Today" },
+  { key: "work", label: "Work" },
+  { key: "reflect", label: "Reflect" },
+  { key: "vault", label: "Vault" },
+  { key: "more", label: "More" },
+] as const;
+
+const INTERNAL_PAGE_TITLES: Record<string, string> = {
+  "/": "Today",
+  "/capture": "Capture",
+  "/projects": "Projects",
+  "/loops": "Open Loops",
+  "/ideas": "Ideas",
+  "/thread-locks": "Thread Locks",
+  "/study": "Single Focus Mode",
+  "/focus": "Focus Sessions",
+  "/clarity": "Clarity Engine",
+  "/compass": "Weekly Compass",
+  "/weekly": "Weekly Review",
+  "/emotional-cycle": "Emotional Cycle",
+  "/evidence": "Evidence Log",
+  "/reading-bridge": "Reading Bridge",
+  "/vault": "Knowledge Vault",
+  "/scratch": "Scratch Pad",
+  "/intelligence": "Intelligence",
+  "/settings": "Settings",
+  "/pro": "Membership",
+};
 
 // ── Mobile bottom-tab items (5 visible + Hub) ────────────────────────────────
 const PRIMARY_TABS = [
@@ -159,10 +189,24 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const [, navigate] = useLocation();
   const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    const exact = INTERNAL_PAGE_TITLES[location];
+    const matchingPath = Object.keys(INTERNAL_PAGE_TITLES)
+      .filter((path) => path !== "/" && location.startsWith(path))
+      .sort((a, b) => b.length - a.length)[0];
+    document.title = `${exact ?? (matchingPath ? INTERNAL_PAGE_TITLES[matchingPath] : "Continuary")} · Continuary`;
+  }, [location]);
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [threadLockOpen, setThreadLockOpen] = useState(false);
   const [fabMenuOpen, setFabMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [navExpanded, setNavExpanded] = useState<Record<string, boolean>>({
+    today: true,
+    work: true,
+    reflect: true,
+    vault: true,
+    more: false,
+  });
   // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
   // browser session doesn't force the user through the re-entry screen again.
   const [amnestyDismissed, setAmnestyDismissed] = useState<boolean>(() => {
@@ -253,6 +297,13 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
+
+  // Keep persisted accessibility preferences active across every authenticated route.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.fontSize = profile?.fontSizePreference ?? "medium";
+    root.dataset.reducedVisualNoise = profile?.reducedVisualNoise ? "true" : "false";
+  }, [profile?.fontSizePreference, profile?.reducedVisualNoise]);
   const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 10,
@@ -523,52 +574,53 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <div className="hidden lg:block px-2 pt-2 pb-1">
             <CommandPaletteTrigger />
           </div>
-          {/* Nav */}
-          <nav className="flex-1 px-1 lg:px-2 py-3 space-y-0.5">
-            <p className="hidden lg:block px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Daily</p>
-            {ALL_NAV_ITEMS.filter(i => i.section === "primary").map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
+          {/* Grouped navigation keeps the first scan calm; ⌘K still reaches every destination. */}
+          <nav className="flex-1 px-1 lg:px-2 py-3 space-y-2" aria-label="Primary navigation">
+            {NAV_GROUPS.map((group) => {
+              const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
+              const hasActiveItem = items.some((item) => isActive(item.href));
+              const expanded = navExpanded[group.key] || hasActiveItem;
               return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
-                  style={active
-                    ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
-                    : { color: "oklch(1 0 0 / 0.48)" }
-                  }
-                >
-                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span className="hidden lg:block">{label}</span>
-                  {href === "/scratch" && scratchCount > 0 && !active && (
-                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
-                  )}
-                  {href === "/loops" && loopsCount > 0 && !active && (
-                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
-                  )}
-                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
-                </Link>
-              );
-            })}
-            <p className="hidden lg:block px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
-            {ALL_NAV_ITEMS.filter(i => i.section === "secondary").map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
-                  style={active
-                    ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
-                    : { color: "oklch(1 0 0 / 0.48)" }
-                  }
-                >
-                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span className="hidden lg:block">{label}</span>
-                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
-                </Link>
+                <section key={group.key} className="space-y-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setNavExpanded((current) => ({ ...current, [group.key]: !expanded }))}
+                    className="hidden lg:flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-left hover:text-white/70 transition-colors"
+                    style={{ color: "oklch(1 0 0 / 0.32)" }}
+                    aria-expanded={expanded}
+                    aria-controls={`nav-group-${group.key}`}
+                  >
+                    {group.label}
+                    <ChevronRight className={cn("w-3 h-3 transition-transform", expanded && "rotate-90")} aria-hidden="true" />
+                  </button>
+                  <div id={`nav-group-${group.key}`} className={cn(!expanded && "hidden lg:hidden")}>
+                    {items.map(({ href, label, icon: Icon }) => {
+                      const active = isActive(href);
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          title={label}
+                          className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                          style={active
+                            ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
+                            : { color: "oklch(1 0 0 / 0.58)" }
+                          }
+                        >
+                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.42)" }} />
+                          <span className="hidden lg:block">{label}</span>
+                          {href === "/scratch" && scratchCount > 0 && !active && (
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
+                          )}
+                          {href === "/loops" && loopsCount > 0 && !active && (
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
+                          )}
+                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "oklch(0.74 0.14 72)" }} />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
               );
             })}
 
@@ -665,16 +717,16 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             )}
             {/* Footer action buttons — icon-only at md, icon+label at lg */}
             <div className="flex flex-col lg:flex-row items-center gap-1 px-0.5 lg:px-1">
-              <button onClick={toggleTheme} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
-                {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" /> : <Moon className="w-3.5 h-3.5 shrink-0" />}
+              <button onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
+                {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> : <Moon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                 <span className="hidden lg:block">{theme === "dark" ? "Light" : "Dark"}</span>
               </button>
-              <button onClick={toggleLayoutMode} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
-                <PanelLeft className="w-3.5 h-3.5 shrink-0" />
+              <button onClick={toggleLayoutMode} aria-label="Switch to compact view" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
+                <PanelLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Compact</span>
               </button>
-              <button onClick={() => logout()} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
-                <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <button onClick={() => logout()} aria-label="Sign out" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
+                <LogOut className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Sign out</span>
               </button>
             </div>

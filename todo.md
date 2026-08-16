@@ -2117,3 +2117,18 @@
 - [x] Task B: Extract foundingSlots.ts shared cache module
 - [x] Task B: Update founding.ts to use getFoundingSlots()
 - [x] Task B: Add /api/public/founding-slots REST endpoint with CORS
+
+## UX Audit + UX Build Briefs (Aug 10, 2026)
+- [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
+- [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
+- [x] B4: Add persisted larger-text and reduced-visual-noise preferences to user profiles, settings procedures, and Settings UI.
+- [x] A1: Implement a calm dashboard core: greeting, one next action, and Daily Rhythm first; secondary modules lower; opt-in modules collapsed by default.
+- [x] A2: Add user-scoped persisted dashboardLayout JSON preference, get/update tRPC procedures, and a Customize UI for module visibility and ordering.
+- [x] A3: Replace flat sidebar navigation with collapsible Today, Work, Reflect, and Vault groups while preserving all command-palette destinations.
+- [x] A4: Add just-one-thing mode: one action, one step, explicit exit, and integrations with Overwhelm, Ground Mode, and Doing Mode.
+- [x] B1: Add meaningful accessible names to actionable dashboard and icon-only controls, plus decorative-icon semantics in primary dashboard and shell surfaces.
+- [x] Audit 3: Ensure first-run onboarding finishes on one concrete win and extend Wren-style empty-state invitations.
+- [x] Audit 4: Add durable offline Capture queueing and automatic reconnect sync for text and voice captures.
+- [x] Audit 5: Prioritize hero dashboard queries, defer below-the-fold requests, and preserve optimistic check-in, capture, and mood-log feedback.
+- [x] Audit 6: Add page-specific browser titles to internal application views.
+- [x] Quality: Add Vitest coverage for persisted dashboard layout normalization and ordering.

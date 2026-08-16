@@ -90,7 +90,7 @@
   --secondary-foreground: oklch(0.35 0.04 240);
 
   --muted: oklch(0.94 0.006 240);
-  --muted-foreground: oklch(0.52 0.018 240);
+  --muted-foreground: oklch(0.45 0.018 240);
 
   --accent: oklch(0.94 0.008 240);
   --accent-foreground: oklch(0.72 0.14 72);
@@ -155,7 +155,7 @@
   --secondary-foreground: oklch(0.78 0.010 240);
 
   --muted: oklch(0.175 0.030 245);
-  --muted-foreground: oklch(0.54 0.016 240);
+  --muted-foreground: oklch(0.68 0.016 240);
 
   --accent: oklch(0.195 0.036 245);
   --accent-foreground: oklch(0.74 0.14 72);
@@ -234,13 +234,40 @@
     -webkit-tap-highlight-color: transparent;
   }
   :focus-visible {
-    outline: 2px solid oklch(0.74 0.14 72 / 0.65);
-    outline-offset: 2px;
+    outline: 3px solid oklch(0.74 0.14 72 / 0.92);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px oklch(0.74 0.14 72 / 0.22);
   }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+}
+
+/* Respect OS-level motion preferences across every route and component. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* User-controlled accessibility presentation preferences. */
+html[data-font-size="small"] { font-size: 16px; }
+html[data-font-size="medium"] { font-size: 17px; }
+html[data-font-size="large"] { font-size: 19px; }
+
+html[data-reduced-visual-noise="true"] .glow-accent,
+html[data-reduced-visual-noise="true"] .card-shadow,
+html[data-reduced-visual-noise="true"] [class*="shadow-"] {
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html[data-reduced-visual-noise="true"] [style*="linear-gradient"] {
+  background-image: none !important;
 }
 
 /* Higher specificity (0,2,0) beats Tailwind's .flex (0,1,0) — works in all layers */

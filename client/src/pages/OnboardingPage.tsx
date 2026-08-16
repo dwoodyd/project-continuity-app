@@ -1045,12 +1045,12 @@ function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
         </Fade>
         <Fade visible={visible} delay={280} style={{ marginBottom: "2rem" }}>
           <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
-            Your space is ready. Wren will be with you every step of the way — tracking what matters, noticing your patterns, and keeping you moving.
+            Your space is ready. Start with one small thing; Wren will keep the rest warm until you are ready.
           </p>
         </Fade>
         <Fade visible={visible} delay={440}>
           <CTAButton onClick={onDone}>
-            Let's begin <ArrowRight className="w-4 h-4" />
+            Start with one thing <ArrowRight className="w-4 h-4" />
           </CTAButton>
         </Fade>
         <Fade visible={visible} delay={580}>

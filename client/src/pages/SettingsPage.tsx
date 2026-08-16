@@ -1036,18 +1036,66 @@ export default function SettingsPage() {
                   </div>
                   <button
                     onClick={() => updateSettings.mutate({ [key]: !(settings as any)?.[key] })}
+                    aria-label={`${(settings as any)?.[key] !== false ? "Disable" : "Enable"} ${label}`}
+                    aria-pressed={(settings as any)?.[key] !== false}
                     className={cn(
                       "w-10 h-6 rounded-full transition-colors relative shrink-0",
                       (settings as any)?.[key] !== false ? "bg-foreground" : "bg-muted-foreground/30"
                     )}
                   >
-                    <span className={cn(
+                    <span aria-hidden="true" className={cn(
                       "absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform",
                       (settings as any)?.[key] !== false ? "translate-x-4" : "translate-x-0.5"
                     )} />
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Visual comfort</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Make the app easier to read or quieter to look at. These choices save to your account.</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { key: "reducedVisualNoise", label: "Reduced visual noise", desc: "Soften accents and flatten decorative gradients." },
+              ].map(({ key, label, desc }) => {
+                const enabled = Boolean((settings as any)?.[key]);
+                return (
+                  <div key={key} className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{label}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => updateSettings.mutate({ [key]: !enabled })}
+                      aria-label={`${enabled ? "Disable" : "Enable"} ${label}`}
+                      aria-pressed={enabled}
+                      className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", enabled ? "bg-foreground" : "bg-muted-foreground/30")}
+                    >
+                      <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform", enabled ? "translate-x-4" : "translate-x-0.5")} />
+                    </button>
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Larger text</p>
+                  <p className="text-xs text-muted-foreground">Increase reading size across Continuary.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateSettings.mutate({ fontSizePreference: settings?.fontSizePreference === "large" ? "medium" : "large" })}
+                  aria-label={`${settings?.fontSizePreference === "large" ? "Disable" : "Enable"} larger text`}
+                  aria-pressed={settings?.fontSizePreference === "large"}
+                  className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", settings?.fontSizePreference === "large" ? "bg-foreground" : "bg-muted-foreground/30")}
+                >
+                  <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform", settings?.fontSizePreference === "large" ? "translate-x-4" : "translate-x-0.5")} />
+                </button>
+              </div>
             </div>
           </div>
 

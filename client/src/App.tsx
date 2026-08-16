@@ -179,6 +179,7 @@ function App() {
     // Using sessionStorage so it fires once per session even if the profile
     // query hasn't resolved yet when Home mounts.
     sessionStorage.setItem("justCompletedOnboarding", "1");
+    sessionStorage.setItem("startWithOneThing", "1");
     setOnboardingDone(true);
     setPreviewMode(false);
   }

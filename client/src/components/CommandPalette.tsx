@@ -33,6 +33,14 @@ import {
   FolderKanban,
   PenLine,
   ScrollText,
+  Mic,
+  Repeat,
+  Anchor,
+  Heart,
+  Users,
+  Lightbulb,
+  GraduationCap,
+  Ticket,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
@@ -44,17 +52,26 @@ interface CommandPaletteProps {
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: "Today", path: "/", group: "Navigate", shortcut: "G H" },
-  { icon: Archive, label: "Knowledge Vault", path: "/vault", group: "Navigate", shortcut: "G V" },
-  { icon: FolderOpen, label: "Projects", path: "/projects", group: "Navigate", shortcut: "G P" },
-  { icon: Calendar, label: "Weekly Review", path: "/weekly", group: "Navigate", shortcut: "G W" },
-  { icon: Compass, label: "Weekly Compass", path: "/compass", group: "Navigate", shortcut: "G C" },
-  { icon: Brain, label: "Clarity Engine", path: "/clarity", group: "Navigate", shortcut: "G L" },
-  { icon: BookOpen, label: "Evidence Log", path: "/evidence", group: "Navigate", shortcut: "G E" },
-  { icon: BarChart2, label: "Intelligence", path: "/intelligence", group: "Navigate", shortcut: "G I" },
-  { icon: Settings, label: "Settings", path: "/settings", group: "Navigate" },
-  { icon: Star, label: "Continuary Pro", path: "/pro", group: "Navigate" },
+  { icon: Mic, label: "Capture", path: "/capture", group: "Navigate" },
   { icon: ClipboardList, label: "Single Focus Mode", path: "/study", group: "Navigate" },
+  { icon: Users, label: "Focus Sessions", path: "/focus", group: "Navigate" },
+  { icon: FolderOpen, label: "Projects", path: "/projects", group: "Navigate", shortcut: "G P" },
+  { icon: Repeat, label: "Open Loops", path: "/loops", group: "Navigate" },
+  { icon: Sparkles, label: "Ideas", path: "/ideas", group: "Navigate" },
+  { icon: Anchor, label: "Thread Locks", path: "/thread-locks", group: "Navigate" },
+  { icon: Brain, label: "Clarity Engine", path: "/clarity", group: "Navigate", shortcut: "G L" },
+  { icon: Compass, label: "Weekly Compass", path: "/compass", group: "Navigate", shortcut: "G C" },
+  { icon: Heart, label: "Emotional Cycle", path: "/emotional-cycle", group: "Navigate" },
+  { icon: ScrollText, label: "Evidence Log", path: "/evidence", group: "Navigate", shortcut: "G E" },
+  { icon: BookOpen, label: "Reading Bridge", path: "/reading-bridge", group: "Navigate" },
+  { icon: Archive, label: "Knowledge Vault", path: "/vault", group: "Navigate", shortcut: "G V" },
   { icon: PenLine, label: "Scratch Pad", path: "/scratch", group: "Navigate" },
+  { icon: Calendar, label: "Weekly Review", path: "/weekly", group: "Navigate", shortcut: "G W" },
+  { icon: Lightbulb, label: "Intelligence", path: "/intelligence", group: "Navigate", shortcut: "G I" },
+  { icon: Settings, label: "Settings", path: "/settings", group: "Navigate" },
+  { icon: GraduationCap, label: "Take the Tour", path: "/tour", group: "Navigate" },
+  { icon: Ticket, label: "Pricing", path: "/pro", group: "Navigate" },
+  { icon: Star, label: "Founding Member", path: "/founding-member", group: "Navigate" },
 ];
 
 const QUICK_ACTIONS = [

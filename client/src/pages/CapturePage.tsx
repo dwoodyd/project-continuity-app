@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
+import notify from "@/lib/notify";
 import { createRecorder, type Recorder } from "@soul/capture";
 import { CrisisSupportCard } from "@/components/CrisisSupportCard";
 import { useCrisisCheck } from "@/hooks/useCrisisCheck";
+import { PageMeta } from "@/components/PageMeta";
+import { getOfflineCaptureQueue, queueOfflineCapture, removeOfflineCapture } from "@/lib/offlineCaptureQueue";
 
 
 type Mode = "idle" | "voice" | "text";
@@ -28,6 +31,8 @@ export default function CapturePage() {
   const [textInput, setTextInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [captureId, setCaptureId] = useState<number | null>(null);
+  const [offlineVoiceRecording, setOfflineVoiceRecording] = useState(false);
+  const [queuedCaptureCount, setQueuedCaptureCount] = useState(0);
   const { crisisLevel, checkAndMaybeFlag, dismissCrisis } = useCrisisCheck("capture");
   const recorderRef = useRef<Recorder | null>(null);
   const chunksRef = useRef<{ blob: Blob; index: number }[]>([]);
@@ -41,10 +46,68 @@ export default function CapturePage() {
   const transcribe = trpc.transcribe.transcribe.useMutation();
   const utils = trpc.useUtils();
 
+  const refreshQueuedCaptureCount = useCallback(async () => {
+    try {
+      const queue = await getOfflineCaptureQueue();
+      setQueuedCaptureCount(queue.length);
+    } catch {
+      // IndexedDB may be unavailable in a private browser context; capture remains online-only there.
+    }
+  }, []);
+
+  const syncOfflineCaptures = useCallback(async () => {
+    if (!navigator.onLine) return;
+    const queue = await getOfflineCaptureQueue();
+    let synced = 0;
+    for (const draft of queue) {
+      try {
+        if (draft.mode === "text" && draft.transcript) {
+          await createCapture.mutateAsync({ mode: "text", transcript: draft.transcript });
+        }
+        if (draft.mode === "voice" && draft.audioBlob) {
+          const placeholder = await createCapture.mutateAsync({ mode: "voice", transcript: "__pending__" });
+          const upload = await uploadChunk.mutateAsync({
+            captureId: placeholder.id,
+            chunkIndex: 999,
+            base64: await blobToBase64(draft.audioBlob),
+            mimeType: draft.mimeType || "audio/webm",
+          });
+          const { transcript } = await transcribe.mutateAsync({ audioUrl: upload.url, durationHint: draft.durationS ?? 0 });
+          await createCapture.mutateAsync({ mode: "voice", transcript, durationS: draft.durationS, audioKey: upload.url });
+        }
+        await removeOfflineCapture(draft.id);
+        synced += 1;
+      } catch {
+        break;
+      }
+    }
+    if (synced) {
+      await utils.capture.recent.invalidate();
+      notify.saved(`${synced} saved capture${synced === 1 ? "" : "s"} synced.`);
+    }
+    await refreshQueuedCaptureCount();
+  }, [createCapture, refreshQueuedCaptureCount, transcribe, uploadChunk, utils]);
+
+  useEffect(() => {
+    void refreshQueuedCaptureCount();
+    void syncOfflineCaptures();
+    const handleOnline = () => { void syncOfflineCaptures(); };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, [refreshQueuedCaptureCount, syncOfflineCaptures]);
+
   // ── Text submit ─────────────────────────────────────────────────────────────
   const handleTextSubmit = useCallback(async () => {
     const text = textInput.trim();
     if (!text) return;
+    if (!navigator.onLine) {
+      await queueOfflineCapture({ mode: "text", transcript: text });
+      setTextInput("");
+      setMode("idle");
+      await refreshQueuedCaptureCount();
+      notify.info("Saved on this device.", { description: "Continuary will sort it when you are back online." });
+      return;
+    }
     setRecordState("creating");
     setError(null);
     try {
@@ -60,7 +123,7 @@ export default function CapturePage() {
       setError("Couldn't save your capture. Please try again.");
       setRecordState("idle");
     }
-  }, [textInput, createCapture, navigate, utils]);
+  }, [textInput, createCapture, navigate, utils, checkAndMaybeFlag, refreshQueuedCaptureCount]);
 
   // ── Voice recording ─────────────────────────────────────────────────────────
   const startRecording = useCallback(async () => {
@@ -69,6 +132,26 @@ export default function CapturePage() {
     setSilenceCountdown(null);
     chunksRef.current = [];
     startTimeRef.current = Date.now();
+
+    if (!navigator.onLine) {
+      setOfflineVoiceRecording(true);
+      setRecordState("recording");
+      setMode("voice");
+      const recorder = createRecorder({
+        onChunk: (blob, index) => { chunksRef.current.push({ blob, index }); },
+        onCaption: (text, isFinal) => { if (!isFinal) setCaption(text); },
+        onSilenceCountdown: (seconds) => setSilenceCountdown(seconds),
+      });
+      recorderRef.current = recorder;
+      try {
+        await recorder.start();
+      } catch {
+        setError("Couldn't access your microphone. Please try again.");
+        setRecordState("idle");
+        setMode("idle");
+      }
+      return;
+    }
 
     // Create a placeholder capture to get an ID for chunk uploads
     let id: number;
@@ -139,13 +222,22 @@ export default function CapturePage() {
     }
 
     const id = captureId;
+    const durationS = Math.round((Date.now() - startTimeRef.current) / 1000);
+    if (offlineVoiceRecording) {
+      const combinedBlob = new Blob(blobs, { type: blobs[0]?.type || "audio/webm" });
+      await queueOfflineCapture({ mode: "voice", audioBlob: combinedBlob, mimeType: combinedBlob.type, durationS });
+      setOfflineVoiceRecording(false);
+      setRecordState("idle");
+      setMode("idle");
+      await refreshQueuedCaptureCount();
+      notify.info("Recording saved on this device.", { description: "Continuary will transcribe it when you are back online." });
+      return;
+    }
     if (!id) {
       setError("Recording lost. Please try again.");
       setRecordState("idle");
       return;
     }
-
-    const durationS = Math.round((Date.now() - startTimeRef.current) / 1000);
 
     // Upload any remaining chunks that weren't uploaded during recording
     setRecordState("uploading");
@@ -188,7 +280,7 @@ export default function CapturePage() {
       setError(err?.message ?? "Transcription failed. Please try again.");
       setRecordState("idle");
     }
-  }, [captureId, uploadChunk, transcribe, createCapture, navigate, utils]);
+  }, [captureId, offlineVoiceRecording, uploadChunk, transcribe, createCapture, navigate, utils, refreshQueuedCaptureCount]);
 
   // Auto-stop on silence
   useEffect(() => {
@@ -201,6 +293,7 @@ export default function CapturePage() {
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)] max-w-lg mx-auto px-4 py-8 gap-6">
+      <PageMeta title="Capture · Continuary" description="Capture a thought before it disappears. Continuary will help you sort it when you are ready." path="/capture" />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-foreground">Capture</h1>
@@ -215,6 +308,14 @@ export default function CapturePage() {
         <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
         <span>{DISCLOSURE}</span>
       </div>
+
+      {(!navigator.onLine || queuedCaptureCount > 0) && (
+        <div className="rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs text-muted-foreground" role="status">
+          {!navigator.onLine
+            ? "You are offline. Capture is still safe here and will sync when you reconnect."
+            : `${queuedCaptureCount} saved capture${queuedCaptureCount === 1 ? " is" : "s are"} waiting to sync.`}
+        </div>
+      )}
 
       {/* Error */}
       {error && (
