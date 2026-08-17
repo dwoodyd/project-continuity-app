@@ -76,9 +76,9 @@ const PRICING_TABLE: PricingRow[] = [
 ];
 
 function Cell({ value }: { value: string | boolean }) {
-  if (value === true) return <Check className="w-4 h-4 text-amber-400 mx-auto" />;
-  if (value === false) return <X className="w-4 h-4 text-white/15 mx-auto" />;
-  return <span className="text-xs text-white/60 text-center block">{value as string}</span>;
+  if (value === true) return <Check className="w-4 h-4 text-[#C8452B] mx-auto" />;
+  if (value === false) return <X className="w-4 h-4 text-[#6B6F68] mx-auto" />;
+  return <span className="text-xs text-[#6B6F68] text-center block">{value as string}</span>;
 }
 
 export default function ProPage() {
@@ -154,8 +154,8 @@ export default function ProPage() {
   };
 
   if (isLoading && user) return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-amber-400/40 border-t-amber-400 rounded-full animate-spin" />
+    <div className="min-h-screen bg-[#F4F5F2] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-[#C9CCC5] border-t-[#C8452B] rounded-full animate-spin" />
     </div>
   );
 
@@ -166,26 +166,26 @@ export default function ProPage() {
         description="Founding rates locked for life: Pro $4.99/mo, Keeper $9.99/mo. Free tier always available. 100 founding slots — reviewed personally."
         path="/pricing"
       />
-    <main id="main-content" className="min-h-screen bg-[#0a0a0f] text-white" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
+    <main id="main-content" className="min-h-screen bg-[#F4F5F2] text-[#2A2D28]" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#0a0a0f]/90 backdrop-blur-sm border-b border-white/5 px-4 py-3 flex items-center gap-3">
-        <button onClick={() => navigate("/")} className="p-1.5 rounded-lg hover:bg-white/10 transition-colors" aria-label="Back to Continuary home">
-          <ArrowLeft size={18} className="text-white/60" aria-hidden="true" />
+      <header className="sticky top-0 z-10 bg-[#F4F5F2] border-b border-[#D3D6D0] px-4 py-3 flex items-center gap-3">
+        <button onClick={() => navigate("/")} className="min-h-11 min-w-11 p-1.5 hover:bg-[#E6E8E3] transition-colors" aria-label="Back to Continuary home">
+          <ArrowLeft size={18} className="text-[#6B6F68]" aria-hidden="true" />
         </button>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-white">Pricing</p>
-          <p className="text-xs text-white/40">Simple, honest. No dark patterns.</p>
+          <p className="text-sm font-semibold text-[#2A2D28]">Pricing</p>
+          <p className="text-xs text-[#6B6F68]">Simple, honest. No dark patterns.</p>
         </div>
         {isFoundingMember && (
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-            <Crown size={12} className="text-amber-400" />
-            <span className="text-xs text-amber-400 font-semibold tracking-wide">FOUNDING MEMBER</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 border border-[#C8452B]/30 bg-[#F8E5DF]">
+            <Crown size={12} className="text-[#C8452B]" />
+            <span className="text-xs text-[#C8452B] font-semibold tracking-wide">FOUNDING MEMBER</span>
           </div>
         )}
         {!isFoundingMember && isPro && (
           <div className="flex items-center gap-1.5">
-            <Star size={14} className="text-amber-400" />
-            <span className="text-xs text-amber-400 font-medium">Pro active</span>
+            <Star size={14} className="text-[#C8452B]" />
+            <span className="text-xs text-[#C8452B] font-medium">Pro active</span>
           </div>
         )}
       </header>
@@ -193,20 +193,20 @@ export default function ProPage() {
       <div className="max-w-2xl mx-auto px-4 pt-8">
         {/* Non-founding member banner */}
         {!isFoundingMember && (
-          <div className="mb-6 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-white/70">
+          <div className="mb-6 px-4 py-3 rounded-xl border border-[#C8452B]/30 bg-[#F8E5DF] flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-xs text-[#6B6F68]">
               {slots?.remaining === 0
                 ? "Founding seats are full. Join the waitlist and we'll reach out when one opens."
                 : "Continuary is currently invite-only. No account needed to see pricing."}
             </p>
             {slots?.remaining === 0 ? (
               <a href="/waitlist"
-                className="inline-flex min-h-11 items-center text-xs text-amber-400 font-semibold hover:text-amber-300 transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-[#C8452B] font-semibold hover:text-[#C8452B] transition-colors">
                 Join the waitlist →
               </a>
             ) : (
               <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center text-xs text-amber-400 font-semibold hover:text-amber-300 transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-[#C8452B] font-semibold hover:text-[#C8452B] transition-colors">
                 Apply for a slot →
               </a>
             )}
@@ -217,13 +217,13 @@ export default function ProPage() {
         <div className="text-center mb-8">
           {isFoundingMember ? (
             <>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/20 text-amber-400 text-xs font-semibold tracking-wide mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C8452B]/30 text-[#C8452B] text-xs font-semibold tracking-wide mb-4">
                 <Crown className="w-3 h-3" /> Your founding rate is locked for life
               </div>
-              <h1 className="font-brand text-3xl text-white mb-3">
+              <h1 className="font-brand text-3xl text-[#2A2D28] mb-3">
                 {isActive ? "Your thread is fully supported." : "Lock in your founding rate whenever you're ready."}
               </h1>
-              <p className="text-white/50 text-sm leading-relaxed max-w-sm mx-auto">
+              <p className="text-[#6B6F68] text-sm leading-relaxed max-w-sm mx-auto">
                 {isActive
                   ? "Founding rate. Locked for life. Thank you for being here."
                   : "No card required during beta. Your founding rate is reserved — it never increases even as retail pricing rises."}
@@ -231,18 +231,18 @@ export default function ProPage() {
             </>
           ) : (
             <>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/20 text-amber-400 text-xs font-semibold tracking-wide mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C8452B]/30 text-[#C8452B] text-xs font-semibold tracking-wide mb-4">
                 <Sparkles className="w-3 h-3" /> Founding rates available now
               </div>
-              <h1 className="font-brand text-3xl text-white mb-3">Start free. Go deeper when you're ready.</h1>
-              <p className="text-white/50 text-sm leading-relaxed max-w-sm mx-auto">
+              <h1 className="font-brand text-3xl text-[#2A2D28] mb-3">Start free. Go deeper when you're ready.</h1>
+              <p className="text-[#6B6F68] text-sm leading-relaxed max-w-sm mx-auto">
                 Founding rates are locked for life.{" "}
                 {slotsError || slots === undefined ? (
                   <span>100 slots total — reviewed personally.</span>
                 ) : slots.remaining === 0 ? (
-                  <span className="text-amber-400 font-semibold">Founding seats are full — join the waitlist.</span>
+                  <span className="text-[#C8452B] font-semibold">Founding seats are full — join the waitlist.</span>
                 ) : slots.remaining <= 5 ? (
-                  <span className="text-amber-400 font-semibold">Only {slots.remaining} founding {slots.remaining === 1 ? "seat" : "seats"} left.</span>
+                  <span className="text-[#C8452B] font-semibold">Only {slots.remaining} founding {slots.remaining === 1 ? "seat" : "seats"} left.</span>
                 ) : (
                   <span>{slots.remaining} of 100 founding seats left.</span>
                 )}
@@ -251,17 +251,23 @@ export default function ProPage() {
           )}
         </div>
 
+        <aside className="mb-8 border-y border-[#D3D6D0] py-4 text-center" aria-label="Your data and exports">
+          <p className="text-sm leading-6 text-[#6B6F68]">
+            Your words remain yours. <span className="font-semibold text-[#2A2D28]">Export as Markdown any time—on every plan, including Free.</span>
+          </p>
+        </aside>
+
         {/* Billing toggle */}
         <div className="flex justify-center mb-8">
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/8">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#E6E8E3] border border-[#D3D6D0]">
             <button onClick={() => setBilling("monthly")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${billing === "monthly" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}>
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${billing === "monthly" ? "bg-[#E6E8E3] text-[#2A2D28]" : "text-[#6B6F68] hover:text-[#6B6F68]"}`}>
               Monthly
             </button>
             <button onClick={() => setBilling("annual")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${billing === "annual" ? "bg-white/10 text-white" : "text-white/35 hover:text-white/60"}`}>
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${billing === "annual" ? "bg-[#E6E8E3] text-[#2A2D28]" : "text-[#6B6F68] hover:text-[#6B6F68]"}`}>
               Annual
-              <span className="text-emerald-400 text-[10px] font-bold bg-emerald-400/10 px-1.5 py-0.5 rounded-full">SAVE ~33%</span>
+              <span className="text-emerald-400 text-xs font-bold bg-emerald-400/10 px-1.5 py-0.5 rounded-full">SAVE ~33%</span>
             </button>
           </div>
         </div>
@@ -269,14 +275,14 @@ export default function ProPage() {
         {/* Tier cards */}
         <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-3">
           {/* Free */}
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 flex flex-col gap-3">
+          <div className="rounded-2xl border border-[#D3D6D0] bg-[#E6E8E3] p-5 flex flex-col gap-3">
             <div>
-              <span className="font-semibold text-white text-sm">Free</span>
-              <p className="text-xs text-white/45 mt-0.5">Start building continuity.</p>
+              <span className="font-semibold text-[#2A2D28] text-sm">Free</span>
+              <p className="text-xs text-[#6B6F68] mt-0.5">Start building continuity.</p>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-white">$0</span>
-              <span className="text-sm text-white/35">forever</span>
+              <span className="text-2xl font-bold text-[#2A2D28]">$0</span>
+              <span className="text-sm text-[#6B6F68]">forever</span>
             </div>
             <ul className="space-y-1.5 flex-1">
               {[
@@ -285,22 +291,23 @@ export default function ProPage() {
                 "Knowledge Vault & Scratch Pad",
                 "Evidence Log & Emotional Cycle",
                 "Weekly Compass & Review",
+                "Markdown export — always free",
                 "Clarity Engine (basic)",
                 "Single Focus Mode (1 active, 60 days)",
                 "Focus Sessions (1 / week, chat with Wren)",
                 "Thread Strength & Threshold Diagnosis",
               ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-xs text-white/60">
-                  <Check size={11} className="text-white/30 mt-0.5 shrink-0" />{f}
+                <li key={f} className="flex items-start gap-2 text-xs text-[#6B6F68]">
+                  <Check size={11} className="text-[#6B6F68] mt-0.5 shrink-0" />{f}
                 </li>
               ))}
             </ul>
             {user ? (
-              <Button variant="outline" size="sm" className="w-full bg-transparent border-white/15 text-white/50" onClick={() => navigate("/")}>
+              <Button variant="outline" size="sm" className="w-full bg-transparent border-[#D3D6D0] text-[#6B6F68]" onClick={() => navigate("/")}>
                 Continue free
               </Button>
             ) : (
-              <Button variant="outline" size="sm" className="w-full bg-transparent border-white/15 text-white/50"
+              <Button variant="outline" size="sm" className="w-full bg-transparent border-[#D3D6D0] text-[#6B6F68]"
                 onClick={() => window.open("https://continuary.app", "_blank")}>
                 Start free
               </Button>
@@ -318,25 +325,25 @@ export default function ProPage() {
           const retailStrike = billing === "annual" ? p.retailAnnual : p.retailMonthly; // always shown
           const cta = getCtaLabel("pro");
           return (
-            <div className="relative rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 flex flex-col gap-3">
+            <div className="relative rounded-2xl border border-[#C8452B]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-white text-sm">Pro</span>
-                  <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-300 border-amber-500/25">Founding Rate</Badge>
+                  <span className="font-semibold text-[#2A2D28] text-sm">Pro</span>
+                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#C8452B] border-[#C8452B]/30">Founding Rate</Badge>
                 </div>
-                <p className="text-xs text-white/45">Your daily thread, always on.</p>
+                <p className="text-xs text-[#6B6F68]">Your daily thread, always on.</p>
               </div>
               <div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-white">${displayPrice}</span>
-                  <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                  <span className="text-xs text-white/30 line-through ml-1">${retailStrike}</span>
-                  <span className="text-[10px] text-white/25 ml-0.5">at launch</span>
+                  <span className="text-2xl font-bold text-[#2A2D28]">${displayPrice}</span>
+                  <span className="text-sm text-[#6B6F68]">/ {billing === "annual" ? "yr" : "mo"}</span>
+                  <span className="text-xs text-[#6B6F68] line-through ml-1">${retailStrike}</span>
+                  <span className="text-xs text-[#6B6F68] ml-0.5">at launch</span>
                 </div>
                 {billing === "annual" && (
                   <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                 )}
-                <p className="text-[10px] text-amber-400/60 mt-0.5">Founding rate — locked for life</p>
+                <p className="text-xs text-[#C8452B]/60 mt-0.5">Founding rate — locked for life</p>
               </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
@@ -346,24 +353,23 @@ export default function ProPage() {
                     "Single Focus Mode: 2 focuses, Wren prompts, 365-day max",
                     "Deep Intelligence reports",
                     "Priority support — direct founder access",
-                    "Markdown / Obsidian export",
                   ].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-white/65">
-                      <Check size={11} className="text-amber-400 mt-0.5 shrink-0" />{f}
+                    <li key={f} className="flex items-start gap-2 text-xs text-[#6B6F68]">
+                      <Check size={11} className="text-[#C8452B] mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="space-y-1.5">
                   <Button
                     size="sm"
-                    className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-amber-500 hover:bg-amber-400 text-black"}`}
+                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#C8452B] hover:bg-[#AB3823] text-white"}`}
                     onClick={() => !cta.disabled && handleUpgrade(getPlanKey("pro"), "Pro")}
                     disabled={cta.disabled || createSub.isPending}
                   >
                     {createSub.isPending ? "Opening PayPal…" : cta.label}
                   </Button>
                   {cta.sublabel && (
-                    <p className="text-[10px] text-white/35 text-center leading-relaxed">{cta.sublabel}</p>
+                    <p className="text-xs text-[#6B6F68] text-center leading-relaxed">{cta.sublabel}</p>
                   )}
                 </div>
               </div>
@@ -381,25 +387,25 @@ export default function ProPage() {
           const retailStrike = billing === "annual" ? k.retailAnnual : k.retailMonthly; // always shown
           const cta = getCtaLabel("keeper");
           return (
-            <div className="relative rounded-2xl border border-violet-500/40 bg-violet-500/5 p-5 flex flex-col gap-3">
+            <div className="relative rounded-2xl border border-[#C8452B]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-white text-sm">Keeper</span>
-                  <Badge variant="outline" className="text-[10px] bg-violet-500/10 text-violet-300 border-violet-500/25">Founding Rate</Badge>
+                  <span className="font-semibold text-[#2A2D28] text-sm">Keeper</span>
+                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#C8452B] border-[#C8452B]/30">Founding Rate</Badge>
                 </div>
-                <p className="text-xs text-white/45">For those who go deeper.</p>
+                <p className="text-xs text-[#6B6F68]">For those who go deeper.</p>
               </div>
               <div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-white">${displayPrice}</span>
-                  <span className="text-sm text-white/35">/ {billing === "annual" ? "yr" : "mo"}</span>
-                  <span className="text-xs text-white/30 line-through ml-1">${retailStrike}</span>
-                  <span className="text-[10px] text-white/25 ml-0.5">at launch</span>
+                  <span className="text-2xl font-bold text-[#2A2D28]">${displayPrice}</span>
+                  <span className="text-sm text-[#6B6F68]">/ {billing === "annual" ? "yr" : "mo"}</span>
+                  <span className="text-xs text-[#6B6F68] line-through ml-1">${retailStrike}</span>
+                  <span className="text-xs text-[#6B6F68] ml-0.5">at launch</span>
                 </div>
                 {billing === "annual" && (
                   <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                 )}
-                <p className="text-[10px] text-violet-400/60 mt-0.5">Founding rate — locked for life</p>
+                <p className="text-xs text-[#C8452B]/60 mt-0.5">Founding rate — locked for life</p>
               </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
@@ -409,22 +415,22 @@ export default function ProPage() {
                     "Studios — priority access (Phase 2)",
                     "Monthly office hours with founder",
                   ].map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-white/65">
-                      <Check size={11} className="text-violet-400 mt-0.5 shrink-0" />{f}
+                    <li key={f} className="flex items-start gap-2 text-xs text-[#6B6F68]">
+                      <Check size={11} className="text-[#C8452B] mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="space-y-1.5">
                   <Button
                     size="sm"
-                    className={`w-full font-semibold ${cta.disabled ? "bg-white/10 text-white/40 cursor-default" : "bg-violet-500 hover:bg-violet-400 text-white"}`}
+                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#C8452B] hover:bg-[#AB3823] text-white"}`}
                     onClick={() => !cta.disabled && handleUpgrade(getPlanKey("keeper"), "Keeper")}
                     disabled={cta.disabled || createSub.isPending}
                   >
                     {createSub.isPending ? "Opening PayPal…" : cta.label}
                   </Button>
                   {cta.sublabel && (
-                    <p className="text-[10px] text-white/35 text-center leading-relaxed">{cta.sublabel}</p>
+                    <p className="text-xs text-[#6B6F68] text-center leading-relaxed">{cta.sublabel}</p>
                   )}
                 </div>
               </div>
@@ -435,11 +441,11 @@ export default function ProPage() {
         {/* Cancel option */}
         {isActive && (
           <div className="text-center mb-8 space-y-2">
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-[#6B6F68]">
               Active since {status?.proSince ? new Date(status.proSince).toLocaleDateString() : "—"}
             </p>
             <Button variant="outline" size="sm" onClick={handleCancel} disabled={cancelling}
-              className="text-white/40 border-white/15 hover:text-red-400 hover:border-red-400/40 bg-transparent">
+              className="text-[#6B6F68] border-[#D3D6D0] hover:text-red-400 hover:border-red-400/40 bg-transparent">
               {cancelling ? "Cancelling…" : "Cancel subscription"}
             </Button>
           </div>
@@ -449,24 +455,24 @@ export default function ProPage() {
         <div className="mb-8">
           <button
             onClick={() => setShowTable(!showTable)}
-            className="w-full text-center text-xs text-white/35 hover:text-white/60 transition-colors py-3 border border-white/8 rounded-xl flex items-center justify-center gap-1.5"
+            className="w-full text-center text-xs text-[#6B6F68] hover:text-[#6B6F68] transition-colors py-3 border border-[#D3D6D0] rounded-xl flex items-center justify-center gap-1.5"
           >
             {showTable ? "Hide full feature comparison" : "Show full feature comparison"}
             {showTable ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
           </button>
           {showTable && (
-            <div className="mt-4 rounded-2xl border border-white/8 overflow-x-auto">
+            <div className="mt-4 rounded-2xl border border-[#D3D6D0] overflow-x-auto">
               <div className="min-w-[420px]">
-                <div className="grid grid-cols-[1fr_auto_auto_auto] bg-white/[0.03]">
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25">Feature</div>
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-white/25 text-center w-20">Free</div>
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-amber-400 text-center w-20">Pro</div>
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-violet-400 text-center w-20">Keeper</div>
+                <div className="grid grid-cols-[1fr_auto_auto_auto] bg-[#E6E8E3]">
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#6B6F68]">Feature</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#6B6F68] text-center w-20">Free</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#C8452B] text-center w-20">Pro</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#C8452B] text-center w-20">Keeper</div>
                 </div>
                 {PRICING_TABLE.map((row, i) => (
-                  <div key={row.feature} className="grid grid-cols-[1fr_auto_auto_auto] border-t border-white/[0.05]"
+                  <div key={row.feature} className="grid grid-cols-[1fr_auto_auto_auto] border-t border-[#D3D6D0]"
                     style={{ background: i % 2 === 0 ? "transparent" : "oklch(1 0 0 / 0.012)" }}>
-                    <div className="px-4 py-2.5 text-xs text-white/60">{row.feature}</div>
+                    <div className="px-4 py-2.5 text-xs text-[#6B6F68]">{row.feature}</div>
                     <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.free} /></div>
                     <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.pro} /></div>
                     <div className="px-4 py-2.5 text-center w-20 flex items-center justify-center"><Cell value={row.keeper} /></div>
@@ -479,15 +485,15 @@ export default function ProPage() {
 
 
         {/* Footer */}
-        <div className="border-t border-white/8 pt-8 pb-8 space-y-4 text-center">
-          <p className="text-white/18 text-xs max-w-sm mx-auto leading-relaxed">
+        <div className="border-t border-[#D3D6D0] pt-8 pb-8 space-y-4 text-center">
+          <p className="text-[#6B6F68] text-xs max-w-sm mx-auto leading-relaxed">
             Continuary is built by one person, for people who work differently. Your subscription directly funds continued development.
             <br /><br />
           Secure checkout via PayPal · Cancel anytime · No hidden fees
         </p>
         {/* FAQ section */}
         <div className="max-w-2xl mx-auto w-full text-left space-y-2 pt-4 pb-2">
-          <h2 className="text-base font-semibold text-white/70 mb-4 text-center">Common questions</h2>
+          <h2 className="text-base font-semibold text-[#6B6F68] mb-4 text-center">Common questions</h2>
           {[
             {
               q: "What happens after the founding slots fill?",
@@ -516,32 +522,32 @@ export default function ProPage() {
           ].map(({ q, a }) => (
             <details
               key={q}
-              className="group border-b border-white/10 py-3"
+              className="group border-b border-[#D3D6D0] py-3"
             >
-              <summary className="flex items-center justify-between cursor-pointer list-none text-sm font-medium text-white/75 hover:text-white transition-colors">
+              <summary className="flex items-center justify-between cursor-pointer list-none text-sm font-medium text-[#6B6F68] hover:text-[#2A2D28] transition-colors">
                 {q}
-                <ChevronDown className="w-4 h-4 text-white/30 group-open:rotate-180 transition-transform flex-shrink-0 ml-3" />
+                <ChevronDown className="w-4 h-4 text-[#6B6F68] group-open:rotate-180 transition-transform flex-shrink-0 ml-3" />
               </summary>
-              <p className="mt-2 text-sm text-white/50 leading-relaxed">{a}</p>
+              <p className="mt-2 text-sm text-[#6B6F68] leading-relaxed">{a}</p>
             </details>
           ))}
         </div>
 
-        <p className="text-white/20 text-xs">
+        <p className="text-[#6B6F68] text-xs">
           Continuary works alongside{" "}
             <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
-              className="text-white/40 hover:text-amber-400 transition-colors underline underline-offset-2">
+              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
               Permission to Start
             </a>
             , the Companion Book.
           </p>
           <div className="flex items-center justify-center gap-6">
             <a href="https://www.soulengineer.online" target="_blank" rel="noopener noreferrer"
-              className="text-xs text-white/25 hover:text-white/50 transition-colors">
+              className="text-xs text-[#6B6F68] hover:text-[#6B6F68] transition-colors">
               An app from Soul Engineer →
             </a>
             <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-              className="text-xs text-white/25 hover:text-amber-400 transition-colors">
+              className="text-xs text-[#6B6F68] hover:text-[#C8452B] transition-colors">
               Apply for founding member access →
             </a>
           </div>

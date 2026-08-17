@@ -312,14 +312,14 @@ function CheckInCard({
       style={completed
         ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
         : highlighted
-          ? { background: "oklch(0.74 0.14 72 / 0.14)", borderColor: "oklch(0.74 0.14 72 / 0.40)", boxShadow: "0 0 0 1px oklch(0.74 0.14 72 / 0.20), 0 4px 16px oklch(0.74 0.14 72 / 0.12)" }
+          ? { background: "oklch(0.56 0.18 28 / 0.14)", borderColor: "oklch(0.56 0.18 28 / 0.40)", boxShadow: "0 0 0 1px oklch(0.56 0.18 28 / 0.20), 0 4px 16px oklch(0.56 0.18 28 / 0.12)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
       }
     >
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.74 0.14 72)" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "#C8452B" : "oklch(0.55 0.01 270)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
@@ -332,7 +332,7 @@ function CheckInCard({
           <ChevronUp className="ml-auto w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.88 0.16 65 / 0.70)" }} />
         )}
         {!open && active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.74 0.14 72)" }} />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#C8452B" }} />
         )}
       </div>
       <p
@@ -730,10 +730,10 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
   });
   const allDone = localTasks.length > 0 && checkedIds.size >= localTasks.length;
   return (
-    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
+    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.56 0.18 28 / 0.20)" }}>
       <div className="flex items-center gap-2 mb-3">
-        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }} />
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }}>Here's what you set up last night</p>
+        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }} />
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }}>Here's what you set up last night</p>
         <button
           onClick={() => setAddingTask(true)}
           className="ml-auto flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-foreground/70 transition-colors"
@@ -754,12 +754,12 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
                   onClick={() => toggle(id)}
                   className="mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={done
-                    ? { background: "oklch(0.74 0.14 72 / 0.25)", borderColor: "oklch(0.74 0.14 72 / 0.60)" }
+                    ? { background: "oklch(0.56 0.18 28 / 0.25)", borderColor: "oklch(0.56 0.18 28 / 0.60)" }
                     : { borderColor: "oklch(1 0 0 / 0.22)" }
                   }
                   aria-label={done ? "Mark incomplete" : "Mark complete"}
                 >
-                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "oklch(0.74 0.14 72)" }} />}
+                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "#C8452B" }} />}
                 </button>
               )}
               {editingId === id ? (
@@ -852,14 +852,14 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
         <button
           onClick={() => setAddingTask(true)}
           className="w-full mt-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed text-muted-foreground/40 hover:text-muted-foreground/70 hover:border-foreground/20 transition-colors text-sm"
-          style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+          style={{ borderColor: "oklch(0.56 0.18 28 / 0.15)" }}
         >
           <Plus className="w-3.5 h-3.5 shrink-0" />
           <span>Add something for tomorrow</span>
         </button>
       )}
       {allDone && (
-        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
+        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
       )}
     </div>
   );
@@ -1010,7 +1010,7 @@ function MoodWidget() {
 
   function phaseColor(score: number) {
     if (score >= 7) return "oklch(0.75 0.18 145)";
-    if (score >= 4) return "oklch(0.74 0.14 72)";
+    if (score >= 4) return "#C8452B";
     return "oklch(0.65 0.18 30)";
   }
 
@@ -1382,6 +1382,17 @@ export default function Home() {
   const dismissThreadLock = trpc.threadLock.dismiss.useMutation({
     onSuccess: () => utils.threadLock.getActive.invalidate(),
   });
+
+  const [returningAfterGap, setReturningAfterGap] = useState(false);
+  useEffect(() => {
+    const key = "continuary-last-dashboard-visit";
+    const previous = Number(window.localStorage.getItem(key) || 0);
+    setReturningAfterGap(previous > 0 && Date.now() - previous >= 6 * 60 * 60 * 1000);
+    window.localStorage.setItem(key, String(Date.now()));
+  }, []);
+  const latestScratchNote = scratchNotes?.[0];
+  const lastWrittenLine = latestScratchNote?.content.split("\n").find((line: string) => line.trim())?.trim();
+  const showReturnBrief = returningAfterGap && Boolean(activeThreadLock || lastWrittenLine);
 
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
@@ -1963,6 +1974,30 @@ export default function Home() {
       </DialogContent>
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
+      {showReturnBrief && (
+        <section className="border border-[#D3D6D0] bg-[#E6E8E3] p-5 text-[#2A2D28] sm:p-6" aria-labelledby="return-brief-title">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B6F68]">Return brief · {format(now, "EEEE, MMMM d")}</p>
+          <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
+          {lastWrittenLine && (
+            <p className="mt-4 border-l-2 border-[#AEB2AB] pl-3 text-base leading-7" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
+              “{lastWrittenLine}”
+            </p>
+          )}
+          {activeThreadLock && (
+            <p className="mt-4 text-sm leading-6 text-[#6B6F68]">
+              You were working on <span className="font-medium text-[#2A2D28]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
+            </p>
+          )}
+          <button
+            onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
+            disabled={recallThreadLock.isPending}
+            className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#C8452B] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]"
+          >
+            Continue
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </section>
+      )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
       {showTrialBanner && (
         <div
@@ -2069,7 +2104,7 @@ export default function Home() {
           <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" fallbackStill="luminousIdle" />
           <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
-            {greeting}, <span style={{ color: "oklch(0.74 0.14 72)" }}>{firstName}</span>.
+            {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
@@ -2078,7 +2113,7 @@ export default function Home() {
             {streakData && streakData.streak >= 2 && (
               <span
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
+                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "#C8452B", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
                 title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
               >
                 🔥 {streakData.streak}d
@@ -2150,7 +2185,7 @@ export default function Home() {
             openCheckIn(target);
           }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: "oklch(0.74 0.14 72 / 0.12)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.22)" }}
+          style={{ background: "oklch(0.56 0.18 28 / 0.12)", color: "#C8452B", border: "1px solid oklch(0.56 0.18 28 / 0.22)" }}
         >
           {topAlert === "thread_lock" ? <Anchor className="w-3.5 h-3.5" aria-hidden="true" /> : <Sun className="w-3.5 h-3.5" aria-hidden="true" />}
           {topAlert === "thread_lock" ? "Pick up your thread" : !morningDone ? "Start morning check-in" : !middayDone ? "Start midday pulse" : "Start evening close"}
@@ -2164,15 +2199,15 @@ export default function Home() {
       </div>
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
-      {topAlert === "thread_lock" && activeThreadLock && (
+      {!showReturnBrief && topAlert === "thread_lock" && activeThreadLock && (
         <div
           className="rounded-xl border overflow-hidden"
-          style={{ background: "oklch(0.12 0.04 72 / 0.5)", borderColor: "oklch(0.74 0.14 72 / 0.30)" }}
+          style={{ background: "oklch(0.12 0.04 72 / 0.5)", borderColor: "oklch(0.56 0.18 28 / 0.30)" }}
         >
           {/* Header */}
           <div className="flex items-center gap-2 px-4 pt-3.5 pb-2">
-            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>You left a thread</p>
+            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#C8452B" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>You left a thread</p>
             <span className="ml-auto text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
               {(() => {
                 const diffMin = Math.round((Date.now() - activeThreadLock.createdAt) / 60_000);
@@ -2192,13 +2227,13 @@ export default function Home() {
           {/* Actions */}
           <div
             className="flex items-center gap-2 px-4 py-3 border-t"
-            style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+            style={{ borderColor: "oklch(0.56 0.18 28 / 0.15)" }}
           >
             <button
               onClick={() => recallThreadLock.mutate({ id: activeThreadLock.id })}
               disabled={recallThreadLock.isPending}
               className="flex-1 text-xs font-semibold py-2 rounded-lg transition-all active:scale-95"
-              style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+              style={{ background: "#C8452B", color: "oklch(0.10 0.02 240)" }}
             >
               Pick it up →
             </button>
@@ -2216,16 +2251,16 @@ export default function Home() {
         <button
           onClick={() => openCheckIn(activePeriod)}
           className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
-          style={{ borderColor: "oklch(0.74 0.14 72 / 0.28)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}
+          style={{ borderColor: "oklch(0.56 0.18 28 / 0.28)", background: "linear-gradient(135deg, oklch(0.56 0.18 28 / 0.08) 0%, oklch(0.56 0.18 28 / 0.03) 100%)" }}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <Sun className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>
                 {activePeriod === "morning" ? "Morning check-in ready" : activePeriod === "midday" ? "Midday check-in ready" : "Evening close ready"}
               </p>
             </div>
-            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }} />
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.6)" }} />
           </div>
           <p className="text-sm text-foreground">
             {activePeriod === "morning" ? "Set your capacity and focus for today." : activePeriod === "midday" ? "Check in on your energy and adjust your plan." : "Reflect on the day and set tomorrow's thread."}
@@ -2296,15 +2331,15 @@ export default function Home() {
         </div>
       )}
       {topAlert === "weekly_review" && (
-        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.74 0.14 72 / 0.06)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
+        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.56 0.18 28 / 0.06)", borderColor: "oklch(0.56 0.18 28 / 0.20)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
-              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72)" }}>Weekly review is ready for this week.</p>
+              <BarChart2 className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+              <p className="text-xs" style={{ color: "#C8452B" }}>Weekly review is ready for this week.</p>
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-xs font-medium hover:underline" style={{ color: "oklch(0.74 0.14 72)" }}
+              className="text-xs font-medium hover:underline" style={{ color: "#C8452B" }}
             >Open</button>
           </div>
         </div>
@@ -2334,10 +2369,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.18)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -2348,12 +2383,12 @@ export default function Home() {
         <div
           className="flex items-start justify-between gap-4 px-4 py-3.5 rounded-xl"
           style={{
-            background: "oklch(0.74 0.14 72 / 0.06)",
-            border: "1px solid oklch(0.74 0.14 72 / 0.18)",
+            background: "oklch(0.56 0.18 28 / 0.06)",
+            border: "1px solid oklch(0.56 0.18 28 / 0.18)",
           }}
         >
           <div className="flex items-start gap-3 min-w-0">
-            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
+            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#C8452B" }} />
             <div className="min-w-0">
               <p className="text-sm text-foreground/90 leading-snug">
                 Reading <span className="italic">Permission to Start</span>? Tell Wren where you are and she'll keep it in mind.
@@ -2362,7 +2397,7 @@ export default function Home() {
                 <button
                   onClick={() => { dismissRbPrompt(false); navigate("/reading-bridge"); }}
                   className="text-xs font-medium px-3 py-1 rounded-md"
-                  style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "oklch(0.56 0.18 28 / 0.18)", color: "#C8452B" }}
                 >
                   Set my chapter
                 </button>
@@ -2431,25 +2466,25 @@ export default function Home() {
         return (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
-            style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.14)" }}
+            style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.14)" }}
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex gap-1">
                 {steps.map((s, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "oklch(0.74 0.14 72)" : "oklch(0.74 0.14 72 / 0.25)" }} />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "#C8452B" : "oklch(0.56 0.18 28 / 0.25)" }} />
                 ))}
               </div>
-              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72 / 0.75)" }}>
+              <p className="text-xs" style={{ color: "oklch(0.56 0.18 28 / 0.75)" }}>
                 Getting started · {doneCount}/{steps.length}
                 {doneCount < steps.length && (
-                  <span style={{ color: "oklch(0.74 0.14 72 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
+                  <span style={{ color: "oklch(0.56 0.18 28 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
                 )}
               </p>
             </div>
             <button
               onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} window.location.reload(); }}
               className="shrink-0 transition-opacity"
-              style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}
+              style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}
               aria-label="Dismiss"
             >
               <X className="w-3.5 h-3.5" />
@@ -2532,7 +2567,7 @@ export default function Home() {
               <WrenPlayer clip="cartwheels" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
-                style={{ color: "oklch(0.74 0.14 72)" }}
+                style={{ color: "#C8452B" }}
               >
                 {wrenCelebration.message}
               </p>
@@ -2627,7 +2662,7 @@ export default function Home() {
       {isModuleVisible("tasks") && (tasks.length > 0 || true) && (
         <div className="break-inside-avoid mb-3" style={{ order: presentationOrder("tasks", dashboardLayout) }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>
               Today's tasks
             </p>
             <div className="flex items-center gap-2">
@@ -2920,12 +2955,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border space-y-3" style={{ order: presentationOrder("first_step", dashboardLayout), borderColor: "oklch(0.74 0.14 72 / 0.25)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ order: presentationOrder("first_step", dashboardLayout), borderColor: "oklch(0.56 0.18 28 / 0.25)", background: "linear-gradient(135deg, oklch(0.56 0.18 28 / 0.08) 0%, oklch(0.56 0.18 28 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-primary-foreground" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
                 className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -3091,7 +3126,7 @@ export default function Home() {
             {/* Subtle warm glow behind Wren */}
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.12) 0%, transparent 65%)" }}
+              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.56 0.18 28 / 0.12) 0%, transparent 65%)" }}
             />
             {/* Wren fills the card — mix-blend-mode:screen removes the dark bg */}
             <WrenPlayer
@@ -3130,10 +3165,10 @@ export default function Home() {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ order: presentationOrder("scratch_pad", dashboardLayout), background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.10)" }}>
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ order: presentationOrder("scratch_pad", dashboardLayout), background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
-              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Scratch Pad</p>
+              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Scratch Pad</p>
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
@@ -3176,7 +3211,7 @@ export default function Home() {
               <svg width={52} height={52} viewBox="0 0 52 52" className="-rotate-90 shrink-0">
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5} stroke="oklch(1 0 0 / 0.07)" />
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5}
-                  stroke="oklch(0.74 0.14 72 / 0.70)"
+                  stroke="oklch(0.56 0.18 28 / 0.70)"
                   strokeDasharray={`${dash} ${circ}`}
                   strokeLinecap="round"
                   style={{ transition: "stroke-dasharray 1.2s ease" }}
@@ -3184,7 +3219,7 @@ export default function Home() {
               </svg>
               {/* State label + dot meter */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold capitalize" style={{ color: "oklch(0.74 0.14 72)" }}>
+                <p className="text-sm font-semibold capitalize" style={{ color: "#C8452B" }}>
                   {mappedState.charAt(0).toUpperCase() + mappedState.slice(1)}
                 </p>
                 <div className="flex items-center gap-1 mt-1.5">
@@ -3196,8 +3231,8 @@ export default function Home() {
                         width: i === currentIdx ? 8 : 5,
                         height: i === currentIdx ? 8 : 5,
                         background: i <= currentIdx
-                          ? "oklch(0.74 0.14 72)"
-                          : "oklch(0.74 0.14 72 / 0.18)",
+                          ? "#C8452B"
+                          : "oklch(0.56 0.18 28 / 0.18)",
                       }}
                     />
                   ))}
@@ -3210,7 +3245,7 @@ export default function Home() {
             <button
               onClick={() => setReEntryOpen(true)}
               className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
-              style={{ background: "oklch(0.74 0.14 72 / 0.08)", color: "oklch(0.74 0.14 72 / 0.65)" }}
+              style={{ background: "oklch(0.56 0.18 28 / 0.08)", color: "oklch(0.56 0.18 28 / 0.65)" }}
             >
               ↺ Pick up the thread
             </button>
@@ -3223,9 +3258,9 @@ export default function Home() {
         <a
           href="/focus"
           className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90 break-inside-avoid mb-3"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Focus sessions today</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Focus sessions today</p>
           <p className="text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>
             {focusTodayStats.todaySessions} session{focusTodayStats.todaySessions !== 1 ? "s" : ""} · {focusTodayStats.todayMinutes} min
             {focusArtifact && focusArtifact.totalSegments > 0 && ` · ${focusArtifact.totalSegments} woven total`}
@@ -3261,14 +3296,14 @@ export default function Home() {
                   onClick={() => navigate(`/projects/${p.id}`)}
                   className="w-full flex items-start gap-2.5 text-left group"
                 >
-                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.35)" }} />
+                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.35)" }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/80 truncate group-hover:text-foreground transition-colors">{p.title}</p>
                     {p.nextStep && (
                       <p className="text-xs text-muted-foreground/50 truncate mt-0.5">re-entry: {p.nextStep}</p>
                     )}
                   </div>
-                  <span className="text-xs shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}>
+                  <span className="text-xs shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}>
                     paused
                   </span>
                 </button>
@@ -3300,8 +3335,8 @@ export default function Home() {
           m === 'stalled' ? 'holding' : 'gathering';
         const stateColor = (m: string): string =>
           m === 'rising' ? 'oklch(0.65 0.12 150)' :
-          m === 'fading' || m === 'stalled' ? 'oklch(0.74 0.14 72 / 0.70)' :
-          'oklch(0.74 0.14 72 / 0.40)';
+          m === 'fading' || m === 'stalled' ? 'oklch(0.56 0.18 28 / 0.70)' :
+          'oklch(0.56 0.18 28 / 0.40)';
         const stateFill = (m: string): number =>
           m === 'rising' ? 0.75 : m === 'fading' ? 0.45 : m === 'stalled' ? 0.25 : 0.55;
         return (
@@ -3461,7 +3496,7 @@ export default function Home() {
 
       {/* ── Notification Permission Prompt ─────────────────────────────────── */}
       {showNotifPrompt && (
-        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
+        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.56 0.18 28 / 0.05)", border: "1px solid oklch(0.56 0.18 28 / 0.18)" }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Bell className="w-5 h-5 text-primary" />

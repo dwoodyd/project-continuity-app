@@ -494,7 +494,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "#C8452B" }}
                   title="What's new"
                 />
               )}
@@ -604,19 +604,19 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                           title={label}
                           className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                           style={active
-                            ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
+                            ? { background: "oklch(0.56 0.18 28 / 0.14)", color: "#C8452B", fontWeight: 500 }
                             : { color: "oklch(1 0 0 / 0.58)" }
                           }
                         >
-                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.42)" }} />
+                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "#C8452B" : "oklch(1 0 0 / 0.42)" }} />
                           <span className="hidden lg:block">{label}</span>
                           {href === "/scratch" && scratchCount > 0 && !active && (
-                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.56 0.18 28 / 0.18)", color: "#C8452B" }}>{scratchCount}</span>
                           )}
                           {href === "/loops" && loopsCount > 0 && !active && (
                             <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
                           )}
-                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "oklch(0.74 0.14 72)" }} />}
+                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "#C8452B" }} />}
                         </Link>
                       );
                     })}
@@ -707,8 +707,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             </div>
             {user && (
               <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.18)" }}>
-                  <span className="text-xs font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.18)" }}>
+                  <span className="text-xs font-semibold" style={{ color: "#C8452B" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="hidden lg:block min-w-0 flex-1">
                   <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
@@ -744,7 +744,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "#C8452B" }}
                   title="What's new"
                 />
               )}
@@ -779,7 +779,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Hold That Thread (⌘⇧L)"
               >
-                <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Hold That Thread
               </button>
               <button
@@ -788,7 +788,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Voice or text capture"
               >
-                <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Capture
               </button>
               <button
@@ -797,7 +797,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Capture an idea"
               >
-                <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Capture Idea
               </button>
             </>
@@ -806,7 +806,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <button
             onClick={() => setFabMenuOpen((v) => !v)}
             className="w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
-            style={{ background: "oklch(0.74 0.14 72)", boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.45), 0 0 0 2px var(--background)" }}
+            style={{ background: "#C8452B", boxShadow: "0 4px 20px oklch(0.56 0.18 28 / 0.45), 0 0 0 2px var(--background)" }}
             title="Quick Capture"
             aria-label="Quick Capture"
           >
@@ -920,20 +920,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     else navigate(href);
                   }}
                   className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
-                  style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.35)" }}
+                  style={{ color: active ? "#C8452B" : "oklch(1 0 0 / 0.35)" }}
                 >
                   {/* Active pill background */}
                   {active && (
                     <span
                       className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-xl"
-                      style={{ background: "oklch(0.74 0.14 72 / 0.14)" }}
+                      style={{ background: "oklch(0.56 0.18 28 / 0.14)" }}
                     />
                   )}
                   {/* Top accent line */}
                   {active && (
                     <span
                       className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
-                      style={{ background: "oklch(0.74 0.14 72)" }}
+                      style={{ background: "#C8452B" }}
                     />
                   )}
                   <Icon className="w-[18px] h-[18px] relative z-10" />
@@ -969,7 +969,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Hold That Thread
             </button>
             <button
@@ -977,7 +977,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Capture
             </button>
             <button
@@ -985,14 +985,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Capture Idea
             </button>
           </>
         )}
         <button
           onClick={() => setFabMenuOpen((v) => !v)}
-          className="w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+          className="w-12 h-12 rounded-md bg-primary text-primary-foreground shadow-sm active:translate-y-px transition-all flex items-center justify-center ring-2 ring-background"
         >
           {fabMenuOpen ? <X className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
         </button>

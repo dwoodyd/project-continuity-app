@@ -7,6 +7,11 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import "@fontsource/archivo/400.css";
+import "@fontsource/archivo/600.css";
+import "@fontsource/archivo/700.css";
+import "@fontsource/courier-prime/400.css";
+import "@fontsource/courier-prime/700.css";
 import "./index.css";
 
 function initializeAnalytics() {

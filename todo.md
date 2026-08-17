@@ -2149,3 +2149,12 @@
 - [x] Fix /pricing mobile CTA overflow, single-H1 hierarchy, back-button label, and public-page semantic landmarks.
 - [x] Raise public-surface text and touch-target floors while preserving visual hierarchy.
 - [x] Add automated public-surface regression coverage for boot timing, CSP console errors, and mobile overflow.
+
+## Studio Wall Direction (Aug 16, 2026)
+- [x] Review the linked Studio Wall build instructions and implement every Continuary requirement exactly as specified.
+- [x] Add a no-account, book-code path that lets a cold reader complete one exercise and saves progress locally until sign-up.
+- [x] Make the Return Brief the default first screen after a gap, with last writing, open thread, and one Continue action.
+- [x] Ensure each new writing entry is pre-seeded with its date and a starter prompt rather than a blank page.
+- [x] Apply the Studio Wall visual system: #F4F5F2 paper, graphite/pencil text, red-pen next action only, Archivo interface type, and a typewriter face for user writing.
+- [x] Replace long/fading motion with 120–160ms mechanical card-pinning interactions and remove legacy navy/amber/serif treatments.
+- [x] Make free export explicit on the public pricing page and preserve 12px text, 4.5:1 contrast, and 44px tap-target floors.

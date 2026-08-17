@@ -255,7 +255,7 @@ function EvidenceCard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 72)" }}>Evidence Log</p>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 72)" }}>Evidence Log</p>
           <p className="text-xs text-muted-foreground mt-0.5">March 2025</p>
         </div>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 72 / 0.15)" }}>
@@ -306,7 +306,7 @@ function ThresholdCard() {
         </div>
         <div>
           <p className="text-xs font-bold text-foreground">Threshold Diagnosis</p>
-          <p className="text-[10px] text-muted-foreground">What's at the door?</p>
+          <p className="text-xs text-muted-foreground">What's at the door?</p>
         </div>
       </div>
 
@@ -325,7 +325,7 @@ function ThresholdCard() {
 
       <div className="mt-4 rounded-xl p-3 flex items-center gap-2" style={{ background: "oklch(0.72 0.14 72 / 0.12)", border: "1px solid oklch(0.72 0.14 72 / 0.25)" }}>
         <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.72 0.14 72)" }} />
-        <p className="text-[10px] font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
+        <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
           Named. Now you can begin.
         </p>
       </div>
@@ -602,7 +602,7 @@ export default function WelcomePage() {
                     >
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{step}</span>
+                    <span className="text-xs font-bold tracking-widest text-muted-foreground">{step}</span>
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">{title}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
