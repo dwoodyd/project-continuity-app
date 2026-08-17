@@ -79,6 +79,11 @@ interface WrenPlayerProps {
   /** Extra wrapper className */
   wrapperClassName?: string;
   /**
+   * Wren's source lighting is authored against a dark field. Keep that stage
+   * in either app theme so her glow reads as deliberate, not washed out.
+   */
+  stage?: boolean;
+  /**
    * CSS object-fit for the video element.
    * Defaults to "contain" (original behavior).
    * Use "cover" for stage/full-bleed surfaces where Wren should fill her frame.
@@ -109,6 +114,7 @@ export default function WrenPlayer({
   muted = true,
   className,
   wrapperClassName,
+  stage = true,
   feather = false,
   featherDirection = "radial",
   fallbackStill,
@@ -137,16 +143,20 @@ export default function WrenPlayer({
 
   return (
     <div
-      className={cn("flex items-center justify-center relative", SIZE_CLASSES[size], wrapperClassName)}
-      style={maskStyle}
+      className={cn(
+        "flex items-center justify-center relative overflow-visible",
+        stage && "wren-dark-stage p-2",
+        SIZE_CLASSES[size],
+        wrapperClassName,
+      )}
     >
       {/* Static fallback shown while video loads — hidden once video is ready */}
       {fallbackStill && !videoReady && (
         <img
           src={WREN_STILLS[fallbackStill]}
           alt="Wren"
-          className="absolute inset-0 w-full h-full object-contain"
-          style={{ mixBlendMode: "screen" }}
+          className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] object-contain"
+          style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
       <video
@@ -158,8 +168,13 @@ export default function WrenPlayer({
         playsInline
         onEnded={onEnded}
         onCanPlay={() => setVideoReady(true)}
-        className={cn("w-full h-full relative", objectFit === "cover" ? "object-cover" : "object-contain", className)}
-        style={{ mixBlendMode: "screen" }}
+        className={cn(
+          stage ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)]" : "w-full h-full",
+          "relative",
+          objectFit === "cover" ? "object-cover" : "object-contain",
+          className,
+        )}
+        style={{ ...maskStyle, mixBlendMode: "screen" }}
       />
     </div>
   );

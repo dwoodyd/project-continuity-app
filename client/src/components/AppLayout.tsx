@@ -415,7 +415,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
               <img src="/logo-navy.svg" alt="Continuary" className="w-20 h-20 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
-                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
+                <span className="text-2xl font-semibold tracking-wide text-foreground" style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>Continuary</span>
                 <p className="text-sm text-muted-foreground tracking-widest uppercase">Your Memory Companion</p>
               </div>
             </div>
@@ -466,8 +466,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-            <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← See what's inside</a>
-            <a href="/pricing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-1">See pricing →</a>
+            <a href="/welcome" className="block text-center text-xs text-muted-foreground hover:text-foreground transition-colors mt-2">← See what's inside</a>
+            <a href="/pricing" className="block text-center text-xs text-muted-foreground hover:text-foreground transition-colors mt-1">See pricing →</a>
             </div>
           </div>
           {onPreviewIntro && (
@@ -562,7 +562,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
               <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
-              <span className="hidden lg:block text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
+              <span className="hidden lg:block text-sm font-semibold truncate tracking-wide text-sidebar-foreground">Continuary</span>
             </Link>
             {streak > 0 && (
               <span className="hidden lg:flex ml-auto shrink-0 items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.14 72)" }} title={`${streak}-day streak`}>

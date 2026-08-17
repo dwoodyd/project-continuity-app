@@ -2161,3 +2161,9 @@
 
 ## Permanent Theme Requirement (Aug 16, 2026)
 - [x] Restore and retain a user-selectable light and dark mode in every future Continuary build; both modes must be intentionally designed, persisted, and accessible.
+
+## Cross-Theme Contrast + Wren Stage Remediation (Aug 17, 2026)
+- [x] Repair confirmed unreadable light-mode brand, link, and pricing badge styles; raise shared text contrast floors in both themes.
+- [x] Remove route-specific hard-locked theme classes so the persisted user choice governs every public and authenticated route.
+- [x] Add an intentional dark Wren stage with protected object-fit containment and no wing clipping in both modes.
+- [x] Add regression coverage for theme consistency and contrast-safe critical public copy.

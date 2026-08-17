@@ -20,4 +20,21 @@ describe("permanent dual-theme contract", () => {
     expect(css).toContain("--background: #161815");
     expect(css).toContain("--primary: #E05A43");
   });
+
+  it("does not route public discovery outside the persisted app theme", () => {
+    expect(source("client/src/pages/LandingPage.tsx")).toContain("return <WelcomePage />");
+    const appLayout = source("client/src/components/AppLayout.tsx");
+    expect(appLayout).toContain('href="/welcome"');
+    expect(appLayout).not.toContain('oklch(0.93 0.008 264)');
+    expect(appLayout).not.toContain("text-muted-foreground/40 hover:text-muted-foreground/70");
+  });
+
+  it("keeps critical public badges and Wren stages contrast-safe", () => {
+    const pricing = source("client/src/pages/ProPage.tsx");
+    expect(pricing).toContain("bg-[#DDE0DA]");
+    expect(pricing).not.toContain("text-emerald-400 text-xs font-bold bg-emerald-400/10");
+    const wren = source("client/src/components/WrenPlayer.tsx");
+    expect(wren).toContain("stage = true");
+    expect(wren).toContain("wren-dark-stage p-2");
+  });
 });

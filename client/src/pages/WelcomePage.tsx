@@ -379,7 +379,7 @@ export default function WelcomePage() {
   );
 
   return (
-    <main id="main-content" className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <main id="main-content" className="public-theme-surface min-h-screen bg-background text-foreground overflow-x-hidden">
       <PageMeta
         title="Continuary — Built for Minds That Work Differently"
         description="A structured daily workspace for ADHD, focus struggles, and non-linear thinkers. Collect evidence of your identity as someone who keeps going."

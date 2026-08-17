@@ -166,7 +166,7 @@ export default function ProPage() {
         description="Founding rates locked for life: Pro $4.99/mo, Keeper $9.99/mo. Free tier always available. 100 founding slots — reviewed personally."
         path="/pricing"
       />
-    <main id="main-content" className="min-h-screen bg-[#F4F5F2] text-[#2A2D28]" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
+    <main id="main-content" className="public-theme-surface min-h-screen bg-[#F4F5F2] text-[#2A2D28]" style={{ paddingBottom: "max(env(safe-area-inset-bottom,0px),2rem)" }}>
       {/* Header */}
       <header className="sticky top-0 z-10 bg-[#F4F5F2] border-b border-[#D3D6D0] px-4 py-3 flex items-center gap-3">
         <button onClick={() => navigate("/")} className="min-h-11 min-w-11 p-1.5 hover:bg-[#E6E8E3] transition-colors" aria-label="Back to Continuary home">
@@ -267,7 +267,7 @@ export default function ProPage() {
             <button onClick={() => setBilling("annual")}
               className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${billing === "annual" ? "bg-[#E6E8E3] text-[#2A2D28]" : "text-[#6B6F68] hover:text-[#6B6F68]"}`}>
               Annual
-              <span className="text-emerald-400 text-xs font-bold bg-emerald-400/10 px-1.5 py-0.5 rounded-full">SAVE ~33%</span>
+              <span className="text-[#2A2D28] text-xs font-bold bg-[#DDE0DA] border border-[#C9CCC5] px-1.5 py-0.5 rounded-full">SAVE ~33%</span>
             </button>
           </div>
         </div>
