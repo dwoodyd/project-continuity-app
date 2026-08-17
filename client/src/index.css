@@ -113,64 +113,61 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   Continuary — Dark Mode
-   Deep navy #0C1322 ground, gold #D9A441 accent, cool slate text #E6E9EF
-   Brief: cool architectural workspace — distinct from warm Soul Engineer
+   Continuary — Studio Wall Dark Mode
+   Dark graphite drafting table, chalk paper, and the same red-pen next action.
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
-  /* ── Primary: gold #D9A441 ── */
-  --primary: oklch(0.74 0.14 72);            /* #D9A441 gold accent */
-  --primary-foreground: oklch(0.10 0.03 72);
+  --primary: #E05A43;
+  --primary-foreground: #FFFFFF;
 
-  /* ── Brand gold ── */
-  --brand: oklch(0.74 0.14 72);
-  --brand-foreground: oklch(0.10 0.03 72);
-  --brand-muted: oklch(0.17 0.05 72);
+  --brand: #E05A43;
+  --brand-foreground: #FFFFFF;
+  --brand-muted: #412620;
 
   /* ── Semantic tokens ── */
-  --amber: oklch(0.74 0.14 72);
-  --amber-foreground: oklch(0.10 0.03 72);
+  --amber: #E05A43;
+  --amber-foreground: #FFFFFF;
   --emerald: oklch(0.68 0.17 155);
   --emerald-foreground: oklch(0.10 0.02 155);
 
-  /* ── Page surfaces: deep navy #0C1322 / #131C30 ── */
-  --background: oklch(0.105 0.028 245);      /* #0C1322 navy ground */
-  --foreground: oklch(0.93 0.006 240);       /* #E6E9EF cool slate text */
+  /* ── Graphite drafting-table surfaces ── */
+  --background: #161815;
+  --foreground: #E8E9E4;
 
-  --card: oklch(0.135 0.030 245);            /* #131C30 raised cards */
-  --card-foreground: oklch(0.93 0.006 240);
+  --card: #20221F;
+  --card-foreground: #E8E9E4;
 
-  --popover: oklch(0.155 0.032 245);         /* slightly lighter for popovers */
-  --popover-foreground: oklch(0.93 0.006 240);
+  --popover: #282B27;
+  --popover-foreground: #E8E9E4;
 
-  --secondary: oklch(0.195 0.036 245);       /* #233048 slate panels */
-  --secondary-foreground: oklch(0.78 0.010 240);
+  --secondary: #2B2E2A;
+  --secondary-foreground: #D1D4CD;
 
-  --muted: oklch(0.175 0.030 245);
-  --muted-foreground: oklch(0.68 0.016 240);
+  --muted: #262925;
+  --muted-foreground: #B6BAB1;
 
-  --accent: oklch(0.195 0.036 245);
-  --accent-foreground: oklch(0.74 0.14 72);
+  --accent: #2B2E2A;
+  --accent-foreground: #E8E9E4;
 
   --destructive: oklch(0.60 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.215 0.030 245);
-  --input: oklch(0.215 0.030 245);
-  --ring: oklch(0.74 0.14 72);
+  --border: #3A3D38;
+  --input: #3A3D38;
+  --ring: #E05A43;
 
-  /* ── Sidebar: darkest navy layer ── */
-  --sidebar: oklch(0.075 0.020 245);
-  --sidebar-foreground: oklch(0.82 0.010 240);
-  --sidebar-primary: oklch(0.74 0.14 72);
-  --sidebar-primary-foreground: oklch(0.10 0.03 72);
-  --sidebar-accent: oklch(0.135 0.028 245);
-  --sidebar-accent-foreground: oklch(0.82 0.010 240);
-  --sidebar-border: oklch(0.165 0.026 245);
-  --sidebar-ring: oklch(0.74 0.14 72);
+  /* ── Sidebar: graphite rail ── */
+  --sidebar: #111310;
+  --sidebar-foreground: #D1D4CD;
+  --sidebar-primary: #E05A43;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #20221F;
+  --sidebar-accent-foreground: #E8E9E4;
+  --sidebar-border: #30332F;
+  --sidebar-ring: #E05A43;
 
   /* ── Charts ── */
-  --chart-1: oklch(0.74 0.14 72);
+  --chart-1: #E05A43;
   --chart-2: oklch(0.68 0.17 155);
   --chart-3: oklch(0.62 0.20 22);
   --chart-4: oklch(0.68 0.20 270);
@@ -184,7 +181,7 @@
   }
   html {
     font-size: 17px;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Archivo', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -193,23 +190,23 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Archivo', system-ui, -apple-system, sans-serif;
     line-height: 1.7;
   }
-  /* Brand heading — Space Grotesk for greetings, section titles, display moments */
+  /* Studio Wall interface headings */
   .font-brand {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     font-style: normal;
   }
-  /* Accent weight — Space Grotesk semibold for emphasis (replaces italic serif) */
+  /* Accent weight — Archivo semibold for emphasis */
   .font-brand-italic {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Archivo', system-ui, sans-serif;
     font-style: normal;
     font-weight: 600;
   }
-  /* Mono accent — DM Mono for timestamps, Thread Strength, Evidence Log, Focus timer */
+  /* Typewriter detail — timestamps, writing, and evidence */
   .font-log {
-    font-family: 'DM Mono', 'Fira Mono', 'Courier New', monospace;
+    font-family: 'Courier Prime', 'Courier New', monospace;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),

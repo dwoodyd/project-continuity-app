@@ -2158,3 +2158,6 @@
 - [x] Apply the Studio Wall visual system: #F4F5F2 paper, graphite/pencil text, red-pen next action only, Archivo interface type, and a typewriter face for user writing.
 - [x] Replace long/fading motion with 120–160ms mechanical card-pinning interactions and remove legacy navy/amber/serif treatments.
 - [x] Make free export explicit on the public pricing page and preserve 12px text, 4.5:1 contrast, and 44px tap-target floors.
+
+## Permanent Theme Requirement (Aug 16, 2026)
+- [x] Restore and retain a user-selectable light and dark mode in every future Continuary build; both modes must be intentionally designed, persisted, and accessible.
