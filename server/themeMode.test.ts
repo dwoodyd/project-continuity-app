@@ -6,7 +6,7 @@ const source = (relativePath: string) => readFileSync(join(process.cwd(), relati
 
 describe("permanent dual-theme contract", () => {
   it("enables persisted theme switching at the application root", () => {
-    expect(source("client/src/App.tsx")).toContain('<ThemeProvider defaultTheme="light" switchable>');
+    expect(source("client/src/App.tsx")).toContain('<ThemeProvider defaultTheme="dark" switchable>');
     const context = source("client/src/contexts/ThemeContext.tsx");
     expect(context).toContain('localStorage.getItem("theme")');
     expect(context).toContain('localStorage.setItem("theme", theme)');
@@ -17,8 +17,8 @@ describe("permanent dual-theme contract", () => {
     const css = source("client/src/index.css");
     expect(css).toContain("--background: #F4F5F2");
     expect(css).toContain(".dark {");
-    expect(css).toContain("--background: #161815");
-    expect(css).toContain("--primary: #E05A43");
+    expect(css).toContain("--background: #080F26");
+    expect(css).toContain("--primary: #E8A030");
   });
 
   it("does not route public discovery outside the persisted app theme", () => {
@@ -36,5 +36,15 @@ describe("permanent dual-theme contract", () => {
     const wren = source("client/src/components/WrenPlayer.tsx");
     expect(wren).toContain("stage = true");
     expect(wren).toContain("wren-dark-stage p-2");
+  });
+
+  it("maps existing Wren assets to the product moments they were commissioned for", () => {
+    const home = source("client/src/pages/Home.tsx");
+    expect(home).toContain('clip="tuggingThread"');
+    expect(home).toContain('clip="blobJournal"');
+    const focus = source("client/src/pages/FocusSessionsPage.tsx");
+    expect(focus).toContain('clip="cornerWave"');
+    const memory = source("client/src/pages/WhatWrenRemembersPage.tsx");
+    expect(memory).toContain('clip="memoryOrb"');
   });
 });

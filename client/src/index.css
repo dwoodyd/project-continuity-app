@@ -113,61 +113,61 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   Continuary — Studio Wall Dark Mode
-   Dark graphite drafting table, chalk paper, and the same red-pen next action.
+   Continuary — Warm Interior Dark Mode
+   Home is warm navy and amber; Studio Wall stays the deliberate light option.
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
-  --primary: #E05A43;
-  --primary-foreground: #FFFFFF;
+  --primary: #E8A030;
+  --primary-foreground: #080F26;
 
-  --brand: #E05A43;
-  --brand-foreground: #FFFFFF;
-  --brand-muted: #412620;
+  --brand: #E8A030;
+  --brand-foreground: #080F26;
+  --brand-muted: #322914;
 
   /* ── Semantic tokens ── */
-  --amber: #E05A43;
-  --amber-foreground: #FFFFFF;
+  --amber: #E8A030;
+  --amber-foreground: #080F26;
   --emerald: oklch(0.68 0.17 155);
   --emerald-foreground: oklch(0.10 0.02 155);
 
-  /* ── Graphite drafting-table surfaces ── */
-  --background: #161815;
-  --foreground: #E8E9E4;
+  /* ── Warm navy interior surfaces ── */
+  --background: #080F26;
+  --foreground: #F5EEE2;
 
-  --card: #20221F;
-  --card-foreground: #E8E9E4;
+  --card: #111B37;
+  --card-foreground: #F5EEE2;
 
-  --popover: #282B27;
-  --popover-foreground: #E8E9E4;
+  --popover: #172342;
+  --popover-foreground: #F5EEE2;
 
-  --secondary: #2B2E2A;
-  --secondary-foreground: #D1D4CD;
+  --secondary: #1C294A;
+  --secondary-foreground: #E8DCC9;
 
-  --muted: #262925;
-  --muted-foreground: #B6BAB1;
+  --muted: #14203E;
+  --muted-foreground: #C7BEAF;
 
-  --accent: #2B2E2A;
-  --accent-foreground: #E8E9E4;
+  --accent: #1C294A;
+  --accent-foreground: #F5EEE2;
 
   --destructive: oklch(0.60 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: #3A3D38;
-  --input: #3A3D38;
-  --ring: #E05A43;
+  --border: #304366;
+  --input: #304366;
+  --ring: #E8A030;
 
-  /* ── Sidebar: graphite rail ── */
-  --sidebar: #111310;
-  --sidebar-foreground: #D1D4CD;
-  --sidebar-primary: #E05A43;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #20221F;
-  --sidebar-accent-foreground: #E8E9E4;
-  --sidebar-border: #30332F;
-  --sidebar-ring: #E05A43;
+  /* ── Sidebar: deep navy rail ── */
+  --sidebar: #060B1B;
+  --sidebar-foreground: #E8DCC9;
+  --sidebar-primary: #E8A030;
+  --sidebar-primary-foreground: #080F26;
+  --sidebar-accent: #111B37;
+  --sidebar-accent-foreground: #F5EEE2;
+  --sidebar-border: #233557;
+  --sidebar-ring: #E8A030;
 
   /* ── Charts ── */
-  --chart-1: #E05A43;
+  --chart-1: #E8A030;
   --chart-2: oklch(0.68 0.17 155);
   --chart-3: oklch(0.62 0.20 22);
   --chart-4: oklch(0.68 0.20 270);

@@ -2167,3 +2167,8 @@
 - [x] Remove route-specific hard-locked theme classes so the persisted user choice governs every public and authenticated route.
 - [x] Add an intentional dark Wren stage with protected object-fit containment and no wing clipping in both modes.
 - [x] Add regression coverage for theme consistency and contrast-safe critical public copy.
+
+## Warm Interior + Wren Product Moments (Aug 17, 2026)
+- [x] Make warm navy and amber the intentional dark interior theme while retaining Studio Wall as the complete light option.
+- [x] Wire existing Wren assets to return-after-gap, check-in completion, focus-session, and memory/review moments.
+- [ ] Audit both themes and document any authenticated product-flow testing that requires a test account.

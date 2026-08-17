@@ -865,16 +865,17 @@ export default function FocusSessionsPage() {
             </div>
           </div>
 
-          {/* LEFT — Wren full-bleed, object-cover, flush to all edges */}
+          {/* LEFT — Wren works alongside, rather than watches over, the session. */}
           <div className="relative overflow-hidden" style={{ background: "oklch(0.07 0.02 240)" }}>
+            <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 72% 22%, oklch(0.55 0.14 65 / 0.16), transparent 42%)" }} />
             <WrenPlayer
-              key={wrenActivity}
-              clip={ACTIVITY_CLIP[wrenActivity] as any}
-              size="full"
-              objectFit="cover"
-              wrapperClassName="absolute inset-0"
-              className="brightness-[1.15] saturate-[1.3]"
+              clip="cornerWave"
+              size="sm"
+              wrapperClassName="absolute top-4 right-4 z-10"
             />
+            <p className="absolute left-6 top-7 max-w-[13rem] text-sm leading-6" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
+              Wren is working alongside you.
+            </p>
             {/* Soft right-edge gradient scrim */}
             <div
               className="absolute inset-0 pointer-events-none"

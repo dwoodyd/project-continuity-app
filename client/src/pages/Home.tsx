@@ -339,6 +339,9 @@ function CheckInCard({
         className="text-xs leading-tight pl-0.5 truncate w-full"
         style={{ color: highlighted ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
       >{timeHint}</p>
+      {completed && (
+        <WrenPlayer clip="blobJournal" size="xs" loop wrapperClassName="mt-1 self-end" />
+      )}
     </button>
   );
 }
@@ -1975,19 +1978,24 @@ export default function Home() {
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
-        <section className="border border-[#D3D6D0] bg-[#E6E8E3] p-5 text-[#2A2D28] sm:p-6" aria-labelledby="return-brief-title">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B6F68]">Return brief · {format(now, "EEEE, MMMM d")}</p>
-          <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
-          {lastWrittenLine && (
-            <p className="mt-4 border-l-2 border-[#AEB2AB] pl-3 text-base leading-7" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
-              “{lastWrittenLine}”
-            </p>
-          )}
-          {activeThreadLock && (
-            <p className="mt-4 text-sm leading-6 text-[#6B6F68]">
-              You were working on <span className="font-medium text-[#2A2D28]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
-            </p>
-          )}
+        <section className="return-brief border border-[#D3D6D0] bg-[#E6E8E3] p-5 text-[#2A2D28] sm:p-6" aria-labelledby="return-brief-title">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B6F68]">Return brief · {format(now, "EEEE, MMMM d")}</p>
+              <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
+              {lastWrittenLine && (
+                <p className="mt-4 border-l-2 border-[#AEB2AB] pl-3 text-base leading-7" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
+                  “{lastWrittenLine}”
+                </p>
+              )}
+              {activeThreadLock && (
+                <p className="mt-4 text-sm leading-6 text-[#6B6F68]">
+                  You were working on <span className="font-medium text-[#2A2D28]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
+                </p>
+              )}
+            </div>
+            <WrenPlayer clip="tuggingThread" size="md" wrapperClassName="hidden shrink-0 sm:flex" />
+          </div>
           <button
             onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
             disabled={recallThreadLock.isPending}
