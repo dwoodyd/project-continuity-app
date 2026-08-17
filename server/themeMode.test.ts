@@ -17,8 +17,9 @@ describe("permanent dual-theme contract", () => {
     const css = source("client/src/index.css");
     expect(css).toContain("--background: #F4F5F2");
     expect(css).toContain(".dark {");
-    expect(css).toContain("--background: #080F26");
+    expect(css).toContain("--background: #161815");
     expect(css).toContain("--primary: #E8A030");
+    expect(css).toContain("--accent-tint-text: #F3BF68");
   });
 
   it("does not route public discovery outside the persisted app theme", () => {
@@ -36,6 +37,8 @@ describe("permanent dual-theme contract", () => {
     const wren = source("client/src/components/WrenPlayer.tsx");
     expect(wren).toContain("stage = true");
     expect(wren).toContain("wren-dark-stage p-2");
+    expect(source("client/src/index.css")).toContain(".wren-dark-stage {");
+    expect(source("client/src/index.css")).toContain("background: #161815");
   });
 
   it("maps existing Wren assets to the product moments they were commissioned for", () => {
@@ -55,5 +58,13 @@ describe("permanent dual-theme contract", () => {
     expect(appLayout).toContain("background:'#C8452B'");
     expect(appLayout).not.toContain('["JK","AM","TR","SL","OB"]');
     expect(appLayout).not.toContain("memberCountData?.count ?? 47");
+  });
+
+  it("uses a lighter accent step when accent-tinted surfaces carry text", () => {
+    const home = source("client/src/pages/Home.tsx");
+    const appLayout = source("client/src/components/AppLayout.tsx");
+    expect(home).toContain('color: "var(--accent-tint-text)"');
+    expect(appLayout).toContain('active ? "var(--accent-tint-text)"');
+    expect(home).not.toContain('style={{ background: "oklch(0.56 0.18 28 / 0.08)", color: "oklch(0.56 0.18 28 / 0.65)" }}');
   });
 });

@@ -312,14 +312,14 @@ function CheckInCard({
       style={completed
         ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
         : highlighted
-          ? { background: "oklch(0.56 0.18 28 / 0.14)", borderColor: "oklch(0.56 0.18 28 / 0.40)", boxShadow: "0 0 0 1px oklch(0.56 0.18 28 / 0.20), 0 4px 16px oklch(0.56 0.18 28 / 0.12)" }
+          ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", boxShadow: "0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 4px 16px color-mix(in srgb, var(--primary) 12%, transparent)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
       }
     >
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "#C8452B" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "var(--accent-tint-text)" : "oklch(0.55 0.01 270)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
@@ -332,7 +332,7 @@ function CheckInCard({
           <ChevronUp className="ml-auto w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.88 0.16 65 / 0.70)" }} />
         )}
         {!open && active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#C8452B" }} />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent-tint-text)" }} />
         )}
       </div>
       <p
@@ -2193,7 +2193,7 @@ export default function Home() {
             openCheckIn(target);
           }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: "oklch(0.56 0.18 28 / 0.12)", color: "#C8452B", border: "1px solid oklch(0.56 0.18 28 / 0.22)" }}
+          style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--accent-tint-text)", border: "1px solid color-mix(in srgb, var(--primary) 22%, transparent)" }}
         >
           {topAlert === "thread_lock" ? <Anchor className="w-3.5 h-3.5" aria-hidden="true" /> : <Sun className="w-3.5 h-3.5" aria-hidden="true" />}
           {topAlert === "thread_lock" ? "Pick up your thread" : !morningDone ? "Start morning check-in" : !middayDone ? "Start midday pulse" : "Start evening close"}
@@ -2210,12 +2210,12 @@ export default function Home() {
       {!showReturnBrief && topAlert === "thread_lock" && activeThreadLock && (
         <div
           className="rounded-xl border overflow-hidden"
-          style={{ background: "oklch(0.12 0.04 72 / 0.5)", borderColor: "oklch(0.56 0.18 28 / 0.30)" }}
+          style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--border))" }}
         >
           {/* Header */}
           <div className="flex items-center gap-2 px-4 pt-3.5 pb-2">
-            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#C8452B" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>You left a thread</p>
+            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--accent-tint-text)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>You left a thread</p>
             <span className="ml-auto text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
               {(() => {
                 const diffMin = Math.round((Date.now() - activeThreadLock.createdAt) / 60_000);
@@ -2241,7 +2241,7 @@ export default function Home() {
               onClick={() => recallThreadLock.mutate({ id: activeThreadLock.id })}
               disabled={recallThreadLock.isPending}
               className="flex-1 text-xs font-semibold py-2 rounded-lg transition-all active:scale-95"
-              style={{ background: "#C8452B", color: "oklch(0.10 0.02 240)" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               Pick it up →
             </button>
@@ -2259,16 +2259,16 @@ export default function Home() {
         <button
           onClick={() => openCheckIn(activePeriod)}
           className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
-          style={{ borderColor: "oklch(0.56 0.18 28 / 0.28)", background: "linear-gradient(135deg, oklch(0.56 0.18 28 / 0.08) 0%, oklch(0.56 0.18 28 / 0.03) 100%)" }}
+          style={{ borderColor: "color-mix(in srgb, var(--primary) 28%, var(--border))", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent) 0%, color-mix(in srgb, var(--primary) 3%, transparent) 100%)" }}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <Sun className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>
+              <Sun className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>
                 {activePeriod === "morning" ? "Morning check-in ready" : activePeriod === "midday" ? "Midday check-in ready" : "Evening close ready"}
               </p>
             </div>
-            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.6)" }} />
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "var(--accent-tint-text)" }} />
           </div>
           <p className="text-sm text-foreground">
             {activePeriod === "morning" ? "Set your capacity and focus for today." : activePeriod === "midday" ? "Check in on your energy and adjust your plan." : "Reflect on the day and set tomorrow's thread."}
@@ -2339,15 +2339,15 @@ export default function Home() {
         </div>
       )}
       {topAlert === "weekly_review" && (
-        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.56 0.18 28 / 0.06)", borderColor: "oklch(0.56 0.18 28 / 0.20)" }}>
+        <div className="p-3 rounded-xl border" style={{ background: "color-mix(in srgb, var(--primary) 6%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
-              <p className="text-xs" style={{ color: "#C8452B" }}>Weekly review is ready for this week.</p>
+              <BarChart2 className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+              <p className="text-xs" style={{ color: "var(--accent-tint-text)" }}>Weekly review is ready for this week.</p>
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-xs font-medium hover:underline" style={{ color: "#C8452B" }}
+              className="text-xs font-medium hover:underline" style={{ color: "var(--accent-tint-text)" }}
             >Open</button>
           </div>
         </div>
@@ -2377,10 +2377,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.18)" }}>
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "color-mix(in srgb, var(--primary) 6%, transparent)", border: "1px solid color-mix(in srgb, var(--primary) 18%, transparent)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -2391,12 +2391,12 @@ export default function Home() {
         <div
           className="flex items-start justify-between gap-4 px-4 py-3.5 rounded-xl"
           style={{
-            background: "oklch(0.56 0.18 28 / 0.06)",
-            border: "1px solid oklch(0.56 0.18 28 / 0.18)",
+            background: "color-mix(in srgb, var(--primary) 6%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--primary) 18%, transparent)",
           }}
         >
           <div className="flex items-start gap-3 min-w-0">
-            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "#C8452B" }} />
+            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "var(--accent-tint-text)" }} />
             <div className="min-w-0">
               <p className="text-sm text-foreground/90 leading-snug">
                 Reading <span className="italic">Permission to Start</span>? Tell Wren where you are and she'll keep it in mind.
@@ -2405,7 +2405,7 @@ export default function Home() {
                 <button
                   onClick={() => { dismissRbPrompt(false); navigate("/reading-bridge"); }}
                   className="text-xs font-medium px-3 py-1 rounded-md"
-                  style={{ background: "oklch(0.56 0.18 28 / 0.18)", color: "#C8452B" }}
+                  style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-tint-text)" }}
                 >
                   Set my chapter
                 </button>
@@ -3227,7 +3227,7 @@ export default function Home() {
               </svg>
               {/* State label + dot meter */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold capitalize" style={{ color: "#C8452B" }}>
+                <p className="text-sm font-semibold capitalize" style={{ color: "var(--accent-tint-text)" }}>
                   {mappedState.charAt(0).toUpperCase() + mappedState.slice(1)}
                 </p>
                 <div className="flex items-center gap-1 mt-1.5">
@@ -3239,7 +3239,7 @@ export default function Home() {
                         width: i === currentIdx ? 8 : 5,
                         height: i === currentIdx ? 8 : 5,
                         background: i <= currentIdx
-                          ? "#C8452B"
+                          ? "var(--accent-tint-text)"
                           : "oklch(0.56 0.18 28 / 0.18)",
                       }}
                     />
@@ -3253,7 +3253,7 @@ export default function Home() {
             <button
               onClick={() => setReEntryOpen(true)}
               className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
-              style={{ background: "oklch(0.56 0.18 28 / 0.08)", color: "oklch(0.56 0.18 28 / 0.65)" }}
+              style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", color: "var(--accent-tint-text)" }}
             >
               ↺ Pick up the thread
             </button>

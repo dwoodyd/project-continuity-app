@@ -891,20 +891,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     else navigate(href);
                   }}
                   className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
-                  style={{ color: active ? "#C8452B" : "oklch(1 0 0 / 0.35)" }}
+                  style={{ color: active ? "var(--accent-tint-text)" : "oklch(1 0 0 / 0.35)" }}
                 >
                   {/* Active pill background */}
                   {active && (
                     <span
                       className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-xl"
-                      style={{ background: "oklch(0.56 0.18 28 / 0.14)" }}
+                      style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)" }}
                     />
                   )}
                   {/* Top accent line */}
                   {active && (
                     <span
                       className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
-                      style={{ background: "#C8452B" }}
+                      style={{ background: "var(--accent-tint-text)" }}
                     />
                   )}
                   <Icon className="w-[18px] h-[18px] relative z-10" />

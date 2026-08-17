@@ -66,6 +66,7 @@
   --brand: #C8452B;
   --brand-foreground: #FFFFFF;
   --brand-muted: #F8E5DF;
+  --accent-tint-text: #A73A25;
 
   /* ── Semantic tokens ── */
   --amber: #C8452B;
@@ -114,56 +115,57 @@
 
 /* ══════════════════════════════════════════════════════════════════════════════
    Continuary — Warm Interior Dark Mode
-   Home is warm navy and amber; Studio Wall stays the deliberate light option.
+   Home is warm near-black and amber; Studio Wall stays the deliberate light option.
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
   --primary: #E8A030;
-  --primary-foreground: #080F26;
+  --primary-foreground: #161815;
 
   --brand: #E8A030;
-  --brand-foreground: #080F26;
+  --brand-foreground: #161815;
   --brand-muted: #322914;
+  --accent-tint-text: #F3BF68;
 
   /* ── Semantic tokens ── */
   --amber: #E8A030;
-  --amber-foreground: #080F26;
+  --amber-foreground: #161815;
   --emerald: oklch(0.68 0.17 155);
   --emerald-foreground: oklch(0.10 0.02 155);
 
-  /* ── Warm navy interior surfaces ── */
-  --background: #080F26;
+  /* ── Warm near-black interior surfaces ── */
+  --background: #161815;
   --foreground: #F5EEE2;
 
-  --card: #111B37;
+  --card: #20221F;
   --card-foreground: #F5EEE2;
 
-  --popover: #172342;
+  --popover: #282B27;
   --popover-foreground: #F5EEE2;
 
-  --secondary: #1C294A;
+  --secondary: #2B2E2A;
   --secondary-foreground: #E8DCC9;
 
-  --muted: #14203E;
+  --muted: #262925;
   --muted-foreground: #C7BEAF;
 
-  --accent: #1C294A;
+  --accent: #2B2E2A;
   --accent-foreground: #F5EEE2;
 
   --destructive: oklch(0.60 0.22 22);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: #304366;
-  --input: #304366;
+  --border: #3A3D38;
+  --input: #3A3D38;
   --ring: #E8A030;
 
-  /* ── Sidebar: deep navy rail ── */
-  --sidebar: #060B1B;
+  /* ── Sidebar: warm near-black rail ── */
+  --sidebar: #111310;
   --sidebar-foreground: #E8DCC9;
   --sidebar-primary: #E8A030;
-  --sidebar-primary-foreground: #080F26;
-  --sidebar-accent: #111B37;
+  --sidebar-primary-foreground: #161815;
+  --sidebar-accent: #20221F;
   --sidebar-accent-foreground: #F5EEE2;
-  --sidebar-border: #233557;
+  --sidebar-border: #30332F;
   --sidebar-ring: #E8A030;
 
   /* ── Charts ── */
@@ -209,13 +211,13 @@
     font-family: 'Courier Prime', 'Courier New', monospace;
   }
 
-  /* Wren's artwork is lit for a dark field. This stays intentional in both
-     Studio Wall modes and gives the contained media breathing room for wings. */
+  /* Wren's artwork is lit for this single shared dark field. It gives the
+     contained media breathing room without creating a navy seam in the app. */
   .wren-dark-stage {
-    background: #0C1322;
+    background: #161815;
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 0.75rem;
-    box-shadow: inset 0 0 2.75rem rgba(82, 117, 176, 0.18);
+    box-shadow: inset 0 0 2.75rem rgba(232, 160, 48, 0.12);
   }
 
   /* Public routes use semantic values rather than URL-specific paper or navy.

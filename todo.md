@@ -2173,3 +2173,7 @@
 - [x] Wire existing Wren assets to return-after-gap, check-in completion, focus-session, and memory/review moments.
 - [x] Audit both themes and document any authenticated product-flow testing that requires a test account.
 - [x] Keep the unauthenticated sign-in doorway intentionally quiet and light without altering the persisted authenticated theme, and remove unsupported social-proof UI.
+
+## Unified Dark Ground + Accent-Tint Hierarchy (Aug 17, 2026)
+- [x] Use warm near-black #161815 as the single dark ground across marketing, authenticated app, and Wren stages; remove navy seams.
+- [x] Replace accent text on accent-tinted interior surfaces with a lighter, contrast-safe accent step and add regression coverage for the hierarchy.
