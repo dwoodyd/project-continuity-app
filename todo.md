@@ -2171,4 +2171,5 @@
 ## Warm Interior + Wren Product Moments (Aug 17, 2026)
 - [x] Make warm navy and amber the intentional dark interior theme while retaining Studio Wall as the complete light option.
 - [x] Wire existing Wren assets to return-after-gap, check-in completion, focus-session, and memory/review moments.
-- [ ] Audit both themes and document any authenticated product-flow testing that requires a test account.
+- [x] Audit both themes and document any authenticated product-flow testing that requires a test account.
+- [x] Keep the unauthenticated sign-in doorway intentionally quiet and light without altering the persisted authenticated theme, and remove unsupported social-proof UI.

@@ -47,4 +47,13 @@ describe("permanent dual-theme contract", () => {
     const memory = source("client/src/pages/WhatWrenRemembersPage.tsx");
     expect(memory).toContain('clip="memoryOrb"');
   });
+
+  it("keeps the sign-in doorway quiet, light, and free of fabricated social proof", () => {
+    const appLayout = source("client/src/components/AppLayout.tsx");
+    expect(appLayout).toContain("background:'#F4F5F2'");
+    expect(appLayout).toContain("background:'#E6E8E3'");
+    expect(appLayout).toContain("background:'#C8452B'");
+    expect(appLayout).not.toContain('["JK","AM","TR","SL","OB"]');
+    expect(appLayout).not.toContain("memberCountData?.count ?? 47");
+  });
 });

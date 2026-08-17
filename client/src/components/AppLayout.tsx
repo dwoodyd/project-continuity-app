@@ -409,51 +409,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // Show sign-in card for any unauthenticated route — wait for auth to resolve first
   if (!authLoading && !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem'}}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem',background:'#F4F5F2',color:'#2A2D28'}}>
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
               <img src="/logo-navy.svg" alt="Continuary" className="w-20 h-20 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
-                <span className="text-2xl font-semibold tracking-wide text-foreground" style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>Continuary</span>
-                <p className="text-sm text-muted-foreground tracking-widest uppercase">Your Memory Companion</p>
+                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Archivo', system-ui, sans-serif", color:'#2A2D28' }}>Continuary</span>
+                <p className="text-sm tracking-widest uppercase" style={{ color:'#6B6F68' }}>Your Memory Companion</p>
               </div>
             </div>
-            <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
-              <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
+            <div className="w-full rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200" style={{ background:'#E6E8E3', border:'1px solid #D3D6D0' }}>
+              <p className="text-sm text-center mb-5 leading-relaxed" style={{ color:'#6B6F68' }}>
                 Continuary keeps your thread. Pick up exactly where you left off.
               </p>
-              {/* Social proof — avatar stack + member count */}
-              <div className="flex items-center justify-center gap-3 mb-5" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.75rem',marginBottom:'1.25rem'}}>
-                <div style={{display:'flex',marginLeft:'0'}}>
-                  {["JK","AM","TR","SL","OB"].map((initials, i) => (
-                    <div
-                      key={initials}
-                      style={{
-                        display:'flex',
-                        alignItems:'center',
-                        justifyContent:'center',
-                        width:28,
-                        height:28,
-                        borderRadius:'50%',
-                        border:'2px solid var(--card)',
-                        background:["#4F6BED","#7C5CBF","#2D9CDB","#27AE60","#E2704A"][i],
-                        fontSize:9,
-                        fontWeight:700,
-                        color:'#fff',
-                        marginLeft: i === 0 ? 0 : -8,
-                        zIndex: 5 - i,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {initials}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">{memberCountData?.count ?? 47} builders</span> in early access
-                </p>
-              </div>
               <a
                 href={getLoginUrl()}
                 onClick={() => {
@@ -461,32 +430,34 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     localStorage.setItem("continuary_return_path", location);
                   }
                 }}
-                className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
+                style={{ background:'#C8452B', color:'#FFFFFF', boxShadow:'0 4px 12px rgb(200 69 43 / 0.20)' }}
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-            <a href="/welcome" className="block text-center text-xs text-muted-foreground hover:text-foreground transition-colors mt-2">← See what's inside</a>
-            <a href="/pricing" className="block text-center text-xs text-muted-foreground hover:text-foreground transition-colors mt-1">See pricing →</a>
+            <a href="/welcome" className="block text-center text-xs transition-colors mt-2 hover:opacity-75" style={{ color:'#4B4F48' }}>← See what's inside</a>
+            <a href="/pricing" className="block text-center text-xs transition-colors mt-1 hover:opacity-75" style={{ color:'#4B4F48' }}>See pricing →</a>
             </div>
           </div>
           {onPreviewIntro && (
             <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
               <button
                 onClick={onPreviewIntro}
-                className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
+                className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75"
+                style={{ color:'#6B6F68' }}
               >
                 ✦ Take the tour
               </button>
             </div>
           )}
-          <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that keep going.</p>
-          <p className="text-center text-sm text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
-            <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy</a>
+          <p className="text-center text-sm mt-4 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>Built for minds that keep going.</p>
+          <p className="text-center text-sm mt-3 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>
+            <a href="/privacy" className="hover:opacity-75 underline underline-offset-2 transition-colors">Privacy</a>
             {" · "}
-            <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms</a>
+            <a href="/terms" className="hover:opacity-75 underline underline-offset-2 transition-colors">Terms</a>
             {" · "}
-            <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
+            <a href="/changelog" className="hover:opacity-75 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
               Changelog
               {/* Last updated date — always visible */}
               <span className="text-[9px]" style={{ color: "oklch(0.48 0.016 240)" }}>Jul 7</span>
