@@ -2193,3 +2193,7 @@
 - [x] Stage hero-scale Wren on the Dashboard return moment, onboarding, and Welcome/About without modifying Focus body-doubling surfaces.
 - [x] Remove incidental Wren cameos from minor dashboard, project-detail, and tour surfaces while retaining functional small Wren placements.
 - [x] Verify mobile and reduced-motion behavior, confirm protected Focus source files remain unchanged, and add regression coverage.
+
+## Emotional Cycle Phase Card Layout (Aug 18, 2026)
+- [x] Correct the phase-card layout so Wren media cannot overlap the phase heading, description, or dates at desktop and responsive widths.
+- [x] Add regression coverage for the media containment and phase-copy layout contract.
