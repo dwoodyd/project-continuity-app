@@ -60,7 +60,11 @@ export const settingsRouter = router({
       distractionPatterns: z.array(z.string().max(200)),
       focusHoursStart: z.string().max(10),
       focusHoursEnd: z.string().max(10),
-      tonePreference: z.enum(["gentle", "direct", "firm"]),
+      wrenGentleDirect: z.number().int().min(0).max(100),
+      wrenBriefThorough: z.number().int().min(0).max(100),
+      wrenCalmEnergizing: z.number().int().min(0).max(100),
+      wrenFollowsChallenges: z.number().int().min(0).max(100),
+      wrenDefaultMode: z.enum(["doing", "reflecting", "grounding"]),
       timezone: z.string().max(50).optional(),
       workStyle: z.string().max(500).optional(),
       preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
@@ -74,7 +78,11 @@ export const settingsRouter = router({
         distractionPatterns: JSON.stringify(input.distractionPatterns),
         focusHoursStart: input.focusHoursStart,
         focusHoursEnd: input.focusHoursEnd,
-        tonePreference: input.tonePreference,
+        wrenGentleDirect: input.wrenGentleDirect,
+        wrenBriefThorough: input.wrenBriefThorough,
+        wrenCalmEnergizing: input.wrenCalmEnergizing,
+        wrenFollowsChallenges: input.wrenFollowsChallenges,
+        wrenDefaultMode: input.wrenDefaultMode,
         timezone: input.timezone ?? "America/New_York",
         onboardingCompleted: true,
       };
@@ -106,7 +114,6 @@ export const settingsRouter = router({
 
   updateSettings: protectedProcedure
     .input(z.object({
-      tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
       focusHoursStart: z.string().max(10).optional(),
       focusHoursEnd: z.string().max(10).optional(),
       morningCheckInTime: z.string().max(10).optional(),

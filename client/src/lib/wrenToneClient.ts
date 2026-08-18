@@ -11,6 +11,33 @@ export interface WrenTone {
   wrenDefaultMode: "doing" | "reflecting" | "grounding";
 }
 
+export type WrenTonePreset = "gentle" | "direct" | "firm";
+
+/** Quick presets write the same dial system used by every Wren surface. */
+export const WREN_TONE_PRESETS: Record<WrenTonePreset, WrenTone> = {
+  gentle: {
+    wrenGentleDirect: 20,
+    wrenBriefThorough: 50,
+    wrenCalmEnergizing: 30,
+    wrenFollowsChallenges: 20,
+    wrenDefaultMode: "reflecting",
+  },
+  direct: {
+    wrenGentleDirect: 50,
+    wrenBriefThorough: 50,
+    wrenCalmEnergizing: 50,
+    wrenFollowsChallenges: 50,
+    wrenDefaultMode: "doing",
+  },
+  firm: {
+    wrenGentleDirect: 80,
+    wrenBriefThorough: 30,
+    wrenCalmEnergizing: 50,
+    wrenFollowsChallenges: 80,
+    wrenDefaultMode: "doing",
+  },
+};
+
 export function buildWrenToneDirective(tone: WrenTone): string {
   const { wrenGentleDirect: gd, wrenBriefThorough: bt, wrenCalmEnergizing: ce, wrenFollowsChallenges: fc, wrenDefaultMode: mode } = tone;
   const hasCustomisation =

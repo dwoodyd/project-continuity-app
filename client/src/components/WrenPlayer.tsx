@@ -59,11 +59,11 @@ export const WREN_CLIPS = {
 export type WrenClip = WrenClipKey | keyof typeof LEGACY_CLIPS;
 
 const SIZE_CLASSES: Record<string, string> = {
-  xs:    "w-16 h-16",
-  sm:    "w-24 h-24",
-  md:    "w-36 h-36",
-  lg:    "w-52 h-52",
-  xl:    "w-72 h-72",
+  xs:    "w-20 h-20",
+  sm:    "w-28 h-28",
+  md:    "w-44 h-44",
+  lg:    "w-60 h-60",
+  xl:    "w-80 h-80",
   "2xl": "w-96 h-96",
   full:  "w-full h-full",
 };

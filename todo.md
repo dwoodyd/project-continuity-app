@@ -2177,3 +2177,10 @@
 ## Unified Dark Ground + Accent-Tint Hierarchy (Aug 17, 2026)
 - [x] Use warm near-black #161815 as the single dark ground across marketing, authenticated app, and Wren stages; remove navy seams.
 - [x] Replace accent text on accent-tinted interior surfaces with a lighter, contrast-safe accent step and add regression coverage for the hierarchy.
+
+## Strengthen Wren: Presence, Voice, Discoverability (Aug 17, 2026)
+- [x] Increase boxed Wren size presets while retaining contained, unclipped layouts in narrow companion surfaces.
+- [x] Make Wren’s tone dials the sole voice source of truth; derive quick-preset buckets for check-ins and intelligence flows.
+- [x] Rework Gentle/Direct/Firm as dial-writing quick presets in Settings and onboarding, keeping the legacy field only for compatibility.
+- [x] Make Wren tone controls directly reachable from the You & Wren settings section and support deep links to the preference card.
+- [x] Add regression coverage for Wren tone consistency, preset mapping, size changes, and tone-control discoverability.

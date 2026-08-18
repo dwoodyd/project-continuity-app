@@ -19,6 +19,8 @@ export interface WrenTone {
   wrenDefaultMode: "doing" | "reflecting" | "grounding";
 }
 
+export type WrenToneBucket = "gentle" | "direct" | "firm";
+
 const DEFAULT_TONE: WrenTone = {
   wrenGentleDirect: 50,
   wrenBriefThorough: 50,
@@ -42,6 +44,21 @@ export async function getWrenToneForUser(userId: number): Promise<WrenTone> {
   } catch {
     return DEFAULT_TONE;
   }
+}
+
+/**
+ * Classify the stored dial state for concise prompt consumers that need a
+ * gentle/direct/firm bucket. The dials remain the source of truth.
+ */
+export function getWrenToneBucketFromTone(tone: WrenTone): WrenToneBucket {
+  if (tone.wrenGentleDirect >= 67 || tone.wrenFollowsChallenges >= 75) return "firm";
+  if (tone.wrenGentleDirect <= 33) return "gentle";
+  return "direct";
+}
+
+/** Load a user's dial-derived quick-preset bucket. Never throws. */
+export async function getWrenToneBucket(userId: number): Promise<WrenToneBucket> {
+  return getWrenToneBucketFromTone(await getWrenToneForUser(userId));
 }
 
 /**

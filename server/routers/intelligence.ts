@@ -11,6 +11,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
+import { getWrenToneBucket } from "../wrenTone";
 import {
   createDistractionEvent,
   getDistractionWeeklyAggregates,
@@ -294,16 +295,16 @@ Return JSON: { decisions: string[] }`,
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
     await checkLLMRateLimit(ctx.user.id);
-    const [activeProjects, recentSessions, recentPlans, profile, calendarEvents] = await Promise.all([
+    const [activeProjects, recentSessions, recentPlans, calendarEvents, toneBucket] = await Promise.all([
       getActiveProjects(ctx.user.id),
       getRecentFocusSessions(ctx.user.id, 20),
       getRecentDailyPlans(ctx.user.id, 7),
-      getUserProfile(ctx.user.id),
       getWeekEvents(ctx.user.id).catch(() => null),
+      getWrenToneBucket(ctx.user.id),
     ]);
 
     const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
-    const tone = toneMap[profile?.tonePreference ?? "direct"];
+    const tone = toneMap[toneBucket];
 
     // Build context for AI
     const projectSummaries = activeProjects.slice(0, 8).map((p) => {
@@ -576,12 +577,11 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
       projectTitle: z.string().max(500, "Project title must be under 500 characters"),
       whyItMatters: z.string().max(2000).optional(),
       userNextStep: z.string().max(2000).optional(),
-      tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
       workStyle: z.string().max(500).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
-      const { projectId, projectTitle, whyItMatters, userNextStep, tonePreference, workStyle } = input;
+      const { projectId, projectTitle, whyItMatters, userNextStep, workStyle } = input;
       // If the user already gave a concrete next step (>10 chars), use it directly
       if (userNextStep && userNextStep.trim().length > 10) {
         return { nextStep: userNextStep.trim() };
@@ -591,7 +591,7 @@ Return JSON: { nextPhysicalAction: string, whatWasRuledOut: string|null, openThr
         direct: "calm and factual",
         firm: "concise and direct",
       };
-      const tone = toneMap[tonePreference ?? "gentle"] ?? "calm and clear";
+      const tone = toneMap[await getWrenToneBucket(ctx.user.id)] ?? "calm and clear";
       try {
         const response = await invokeLLM({
           messages: [

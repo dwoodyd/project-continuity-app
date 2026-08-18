@@ -157,7 +157,14 @@ function WrenSidebarPresence() {
       <div style={{ WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)" }}>
         <WrenPlayer clip="mainCornerWave" size="xs" loop autoPlay />
       </div>
-      <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
+      <a
+        href="/settings?tab=preferences#wren-tone"
+        className="text-[10px] tracking-wide hover:opacity-90 transition-opacity"
+        style={{ color: "oklch(1 0 0 / 0.40)" }}
+        aria-label="Tune how Wren talks"
+      >
+        Wren is here with you <span style={{ color: "var(--accent-tint-text)" }}>· Tune her voice →</span>
+      </a>
       {showTooltip && (
         <div
           className="absolute bottom-full left-2 mb-2 z-50"

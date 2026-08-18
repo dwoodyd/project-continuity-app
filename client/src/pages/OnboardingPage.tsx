@@ -23,6 +23,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import notify from "@/lib/notify";
 import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
+import { WREN_TONE_PRESETS } from "@/lib/wrenToneClient";
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -1127,7 +1128,7 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
         distractionPatterns: [],
         focusHoursStart: focusStartMap[(focusHour || "morning") as FocusHour],
         focusHoursEnd: focusEndMap[(focusHour || "morning") as FocusHour],
-        tonePreference: (tone || "gentle") as TonePref,
+        ...WREN_TONE_PRESETS[(tone || "gentle") as TonePref],
       });
       await utils.auth.me.invalidate();
       await utils.settings.getProfile.invalidate();
@@ -1138,7 +1139,6 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
             projectTitle,
             whyItMatters: projectWhy || undefined,
             userNextStep: projectNext || undefined,
-            tonePreference: (tone || "gentle") as TonePref,
             workStyle: workStyle || undefined,
           });
           const seedNotes = projectNext?.trim() || result.nextStep?.trim()

@@ -34,6 +34,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import { resolveDate, addDay, getServerLocalDate } from "../utils/dateUtils";
+import { getWrenToneBucket } from "../wrenTone";
 
 // getTodayDate replaced by resolveDate from dateUtils
 
@@ -75,12 +76,13 @@ export const checkInsRouter = router({
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
-      const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans] = await Promise.all([
+      const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans, toneBucket] = await Promise.all([
         getUserProfile(ctx.user.id),
         getActiveProjects(ctx.user.id),
         getLatestWeeklyCompass(ctx.user.id),
         getRecentDecisions(ctx.user.id, 5),
         getRecentDailyPlans(ctx.user.id, 3),
+        getWrenToneBucket(ctx.user.id),
       ]);
 
       const toneMap = {
@@ -88,7 +90,7 @@ export const checkInsRouter = router({
         direct: "calm and direct",
         firm: "concise and firm",
       };
-      const tone = toneMap[profile?.tonePreference ?? "direct"];
+      const tone = toneMap[toneBucket];
 
       // ── Weekly Compass context ─────────────────────────────────────────────
       let compassContext = "";
@@ -379,10 +381,12 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
-      const plan = await getDailyPlan(ctx.user.id, date);
-      const profile = await getUserProfile(ctx.user.id);
+      const [plan, toneBucket] = await Promise.all([
+        getDailyPlan(ctx.user.id, date),
+        getWrenToneBucket(ctx.user.id),
+      ]);
       const toneMap = { gentle: "warm but honest", direct: "calm and direct", firm: "concise and firm" };
-      const tone = toneMap[profile?.tonePreference ?? "direct"];
+      const tone = toneMap[toneBucket];
 
       const planContext = plan ? `Today's plan had tasks: ${plan.criticalTasks}` : "No morning plan was set.";
 
@@ -465,10 +469,12 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
-      const plan = await getDailyPlan(ctx.user.id, date);
-      const profile = await getUserProfile(ctx.user.id);
+      const [plan, toneBucket] = await Promise.all([
+        getDailyPlan(ctx.user.id, date),
+        getWrenToneBucket(ctx.user.id),
+      ]);
       const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
-      const tone = toneMap[profile?.tonePreference ?? "direct"];
+      const tone = toneMap[toneBucket];
 
       const response = await invokeLLM({
         messages: [
