@@ -10,7 +10,7 @@
  * All clips use mix-blend-mode: screen to remove black backgrounds.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WREN_CLIPS as NEW_CLIPS, WREN_STILLS, type WrenClipKey } from "@/lib/wrenClips";
 
@@ -59,12 +59,14 @@ export const WREN_CLIPS = {
 export type WrenClip = WrenClipKey | keyof typeof LEGACY_CLIPS;
 
 const SIZE_CLASSES: Record<string, string> = {
-  xs:    "w-20 h-20",
-  sm:    "w-28 h-28",
-  md:    "w-44 h-44",
-  lg:    "w-60 h-60",
-  xl:    "w-80 h-80",
+  xs:    "w-16 h-16",
+  sm:    "w-24 h-24",
+  md:    "w-36 h-36",
+  lg:    "w-52 h-52",
+  xl:    "w-72 h-72",
   "2xl": "w-96 h-96",
+  hero:  "w-[clamp(240px,32vw,440px)] h-[clamp(240px,32vw,440px)]",
+  heroLg:"w-[clamp(300px,42vw,560px)] h-[clamp(300px,42vw,560px)]",
   full:  "w-full h-full",
 };
 
@@ -123,6 +125,17 @@ export default function WrenPlayer({
 }: WrenPlayerProps) {
   const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
   const [videoReady, setVideoReady] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(media.matches);
+    updatePreference();
+    media.addEventListener("change", updatePreference);
+    return () => media.removeEventListener("change", updatePreference);
+  }, []);
 
   const maskStyle: React.CSSProperties = feather
     ? {
@@ -151,7 +164,7 @@ export default function WrenPlayer({
       )}
     >
       {/* Static fallback shown while video loads — hidden once video is ready */}
-      {fallbackStill && !videoReady && (
+      {fallbackStill && (!videoReady || prefersReducedMotion) && (
         <img
           src={WREN_STILLS[fallbackStill]}
           alt="Wren"
@@ -159,23 +172,25 @@ export default function WrenPlayer({
           style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
-      <video
-        key={src}
-        src={src}
-        autoPlay={autoPlay}
-        loop={loop}
-        muted={muted}
-        playsInline
-        onEnded={onEnded}
-        onCanPlay={() => setVideoReady(true)}
-        className={cn(
-          stage ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)]" : "w-full h-full",
-          "relative",
-          objectFit === "cover" ? "object-cover" : "object-contain",
-          className,
-        )}
-        style={{ ...maskStyle, mixBlendMode: "screen" }}
-      />
+      {!prefersReducedMotion && (
+        <video
+          key={src}
+          src={src}
+          autoPlay={autoPlay}
+          loop={loop}
+          muted={muted}
+          playsInline
+          onEnded={onEnded}
+          onCanPlay={() => setVideoReady(true)}
+          className={cn(
+            stage ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)]" : "w-full h-full",
+            "relative",
+            objectFit === "cover" ? "object-cover" : "object-contain",
+            className,
+          )}
+          style={{ ...maskStyle, mixBlendMode: "screen" }}
+        />
+      )}
     </div>
   );
 }

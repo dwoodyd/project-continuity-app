@@ -1979,8 +1979,8 @@ export default function Home() {
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
         <section className="return-brief border border-[#D3D6D0] bg-[#E6E8E3] p-5 text-[#2A2D28] sm:p-6" aria-labelledby="return-brief-title">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0 flex-1">
+          <div className="grid items-center gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <div className="order-2 min-w-0 lg:order-1">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B6F68]">Return brief · {format(now, "EEEE, MMMM d")}</p>
               <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
               {lastWrittenLine && (
@@ -1994,7 +1994,9 @@ export default function Home() {
                 </p>
               )}
             </div>
-            <WrenPlayer clip="tuggingThread" size="md" wrapperClassName="hidden shrink-0 sm:flex" />
+            <div className="order-1 flex min-w-0 justify-center lg:order-2 lg:justify-end" aria-label="Wren is holding your thread">
+              <WrenPlayer clip="tuggingThread" size="hero" fallbackStill="siliconeTugging" wrapperClassName="shrink-0" />
+            </div>
           </div>
           <button
             onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
@@ -2109,7 +2111,6 @@ export default function Home() {
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between" style={{ order: -10 }}>
         <div className="flex items-center gap-3">
-          <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" fallbackStill="luminousIdle" />
           <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
             {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.

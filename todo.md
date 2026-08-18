@@ -2184,3 +2184,12 @@
 - [x] Rework Gentle/Direct/Firm as dial-writing quick presets in Settings and onboarding, keeping the legacy field only for compatibility.
 - [x] Make Wren tone controls directly reachable from the You & Wren settings section and support deep links to the preference card.
 - [x] Add regression coverage for Wren tone consistency, preset mapping, size changes, and tone-control discoverability.
+
+## Supplied Artifact Reconciliation (Aug 17, 2026)
+- [x] Review the supplied Continuary artifact against the current build and implement any remaining applicable requirements.
+
+## Wren Hero Presence (Aug 17, 2026)
+- [x] Add responsive hero and heroLg Wren size tiers while retaining the existing functional size tiers.
+- [x] Stage hero-scale Wren on the Dashboard return moment, onboarding, and Welcome/About without modifying Focus body-doubling surfaces.
+- [x] Remove incidental Wren cameos from minor dashboard, project-detail, and tour surfaces while retaining functional small Wren placements.
+- [x] Verify mobile and reduced-motion behavior, confirm protected Focus source files remain unchanged, and add regression coverage.

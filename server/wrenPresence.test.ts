@@ -5,14 +5,48 @@ import { resolve } from "node:path";
 const source = (relativePath: string) => readFileSync(resolve(process.cwd(), relativePath), "utf8");
 
 describe("Wren presence and coherent voice", () => {
-  it("uses the strengthened boxed-video size scale", () => {
+  it("keeps functional video sizes compact and adds responsive hero tiers", () => {
     const player = source("client/src/components/WrenPlayer.tsx");
-    expect(player).toContain('xs:    "w-20 h-20"');
-    expect(player).toContain('sm:    "w-28 h-28"');
-    expect(player).toContain('md:    "w-44 h-44"');
-    expect(player).toContain('lg:    "w-60 h-60"');
-    expect(player).toContain('xl:    "w-80 h-80"');
+    expect(player).toContain('xs:    "w-16 h-16"');
+    expect(player).toContain('sm:    "w-24 h-24"');
+    expect(player).toContain('md:    "w-36 h-36"');
+    expect(player).toContain('lg:    "w-52 h-52"');
+    expect(player).toContain('xl:    "w-72 h-72"');
     expect(player).toContain('"2xl": "w-96 h-96"');
+    expect(player).toContain('hero:  "w-[clamp(240px,32vw,440px)] h-[clamp(240px,32vw,440px)]"');
+    expect(player).toContain('heroLg:"w-[clamp(300px,42vw,560px)] h-[clamp(300px,42vw,560px)]"');
+    expect(player).toContain('window.matchMedia("(prefers-reduced-motion: reduce)")');
+    expect(player).toContain('fallbackStill && (!videoReady || prefersReducedMotion)');
+    expect(player).toContain('{!prefersReducedMotion && (');
+  });
+
+  it("stages hero Wren only at the selected return and introduction moments", () => {
+    const home = source("client/src/pages/Home.tsx");
+    const welcome = source("client/src/pages/WelcomePage.tsx");
+    const about = source("client/src/pages/AboutAppPage.tsx");
+    const onboarding = source("client/src/pages/OnboardingPage.tsx");
+    expect(home).toContain('<WrenPlayer clip="tuggingThread" size="hero"');
+    expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero"');
+    expect(about).toContain('<WrenPlayer clip="popsHead" size="hero"');
+    expect(onboarding).toContain('<SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers}');
+  });
+
+  it("removes incidental cameos without changing Focus body-doubling surfaces", () => {
+    const home = source("client/src/pages/Home.tsx");
+    const project = source("client/src/pages/ProjectDetailPage.tsx");
+    const tour = source("client/src/pages/TourPage.tsx");
+    const focus = source("client/src/pages/FocusSessionsPage.tsx");
+    const companion = source("client/src/pages/FocusCompanionPage.tsx");
+    const popout = source("client/src/components/WrenPopout.tsx");
+    expect(home).not.toContain('<WrenPlayer clip="popsHead" size="sm"');
+    expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
+    expect(tour).not.toContain("<WrenPlayer");
+    expect(focus).toContain("cornerWave");
+    expect(companion).toContain("weaving");
+    expect(popout).toContain("weaving");
+    expect(focus).not.toContain('size="hero"');
+    expect(companion).not.toContain('size="hero"');
+    expect(popout).not.toContain('size="hero"');
   });
 
   it("uses the dial-derived bucket in legacy concise prompt consumers", () => {
