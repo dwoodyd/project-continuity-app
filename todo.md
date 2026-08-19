@@ -2205,3 +2205,7 @@
 ## Restore Wren Video Presence (Aug 19, 2026)
 - [x] Restore approved ambient and full-bleed Wren video treatments that were removed by the prior scarcity-focused pass.
 - [x] Preserve readable text layering and contained informational-card media while validating restored Wren video behavior.
+
+## Replay Intro and Tour Access (Aug 19, 2026)
+- [x] Repair the Replay Intro action and verify the attached onboarding introduction route and video sequence remain available.
+- [x] Provide a clear, working in-app Tour entry point and add regression coverage for both routes.

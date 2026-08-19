@@ -184,10 +184,18 @@ function App() {
     sessionStorage.setItem("startWithOneThing", "1");
     setOnboardingDone(true);
     setPreviewMode(false);
+    if (typeof window !== "undefined" && window.location.pathname === "/intro") {
+      window.history.replaceState({}, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
   }
 
   function handlePreviewIntro() {
     setPreviewMode(true);
+    if (typeof window !== "undefined" && window.location.pathname !== "/intro") {
+      window.history.pushState({}, "", "/intro");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
   }
 
   // /intro forces the flow for cold-traffic sharing links (e.g. bio, Product Hunt)

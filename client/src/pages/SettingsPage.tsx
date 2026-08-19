@@ -1316,6 +1316,9 @@ export default function SettingsPage() {
                 <Play className="w-3 h-3" />
                 Replay intro
               </Button>
+              <Button variant="outline" size="sm" onClick={() => window.location.assign("/tour")} className="text-xs gap-1.5">
+                Take the tour
+              </Button>
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { navigator.clipboard.writeText(window.location.origin + "/intro"); notify.saved("Link copied"); }}>
                 Copy share link
               </Button>
