@@ -334,8 +334,17 @@ export default function AboutAppPage() {
                 background: "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.72 0.14 72 / 0.12) 0%, transparent 70%)",
               }}
             />
-            <div className="relative z-10 p-6 text-center sm:p-8 sm:text-left">
-              <div>
+            <div className="relative z-10 flex flex-col items-center gap-0 p-6 text-center sm:flex-row sm:gap-6 sm:p-8 sm:text-left">
+              <div
+                className="mb-4 h-[200px] w-[200px] shrink-0 overflow-hidden rounded-[1.25rem] sm:mb-0"
+                style={{
+                  boxShadow: "0 8px 40px oklch(0.72 0.14 72 / 0.25)",
+                  border: "1px solid oklch(0.72 0.14 72 / 0.2)",
+                }}
+              >
+                <WrenPlayer clip="luminousFloats" size="full" loop autoPlay feather featherDirection="radial" />
+              </div>
+              <div className="flex-1">
                 <div
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-3"
                   style={{ background: "oklch(0.72 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)" }}
@@ -369,6 +378,12 @@ export default function AboutAppPage() {
                   className={`rounded-xl border ${accentBorder} p-4 flex gap-3`}
                   style={{ background: "oklch(0.14 0.03 264 / 0.8)" }}
                 >
+                  <div
+                    className="h-16 w-16 shrink-0 overflow-hidden rounded-xl"
+                    style={{ border: "1px solid oklch(0.72 0.14 72 / 0.15)" }}
+                  >
+                    <WrenPlayer clip={clip} size="full" loop autoPlay />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-1">
                       <Icon className={`w-3.5 h-3.5 ${accent} shrink-0`} />
@@ -393,8 +408,14 @@ export default function AboutAppPage() {
               Where you'll find her
             </p>
             <div className="space-y-4">
-              {WREN_APPEARANCES.map(({ location, desc }) => (
+              {WREN_APPEARANCES.map(({ location, desc, clip }) => (
                 <div key={location} className="flex items-center gap-4">
+                  <div
+                    className="h-12 w-12 shrink-0 overflow-hidden rounded-[0.625rem]"
+                    style={{ border: "1px solid oklch(0.72 0.14 72 / 0.15)" }}
+                  >
+                    <WrenPlayer clip={clip} size="full" loop autoPlay />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground mb-0.5">{location}</p>
                     <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>

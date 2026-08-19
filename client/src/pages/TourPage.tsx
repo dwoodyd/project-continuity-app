@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
-import { type WrenClip } from "@/components/WrenPlayer";
+import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 import { PageMeta } from "@/components/PageMeta";
 
 type Step =
@@ -229,6 +229,7 @@ export default function TourPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.92)", borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
         <div className="flex items-center gap-2.5">
+          <WrenPlayer clip="popsHead" size="xs" />
           <span className="font-brand text-lg tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>Continuary</span>
         </div>
         <div className="flex items-center gap-4">
@@ -265,6 +266,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
+              <WrenPlayer clip="luminousFloats" size="xl" feather featherDirection="radial" />
               <div className="space-y-4">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Welcome to Continuary</p>
                 <h1 className="text-4xl md:text-5xl leading-tight font-brand">
@@ -384,6 +386,7 @@ export default function TourPage() {
                 <div className="space-y-4">
                   <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
                     <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
+                      <WrenPlayer clip="closesEyes" size="xs" />
                       <span>Wren responds</span>
                     </div>
                     <p className="leading-relaxed whitespace-pre-line" style={{ color: "oklch(0.85 0.04 240)" }}>{MORNING_DEMO}</p>
@@ -418,6 +421,7 @@ export default function TourPage() {
               ) : (
                 <div className="rounded-xl p-6 space-y-3" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.2)" }}>
                   <div className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
+                    <WrenPlayer clip="closesEyes" size="xs" />
                     <span>Wren responds</span>
                   </div>
                   <p className="leading-relaxed whitespace-pre-line" style={{ color: "oklch(0.85 0.04 240)" }}>{EVENING_DEMO}</p>
@@ -730,6 +734,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
+              <WrenPlayer clip="hoveringArchway" size="xl" feather featherDirection="bottom" />
               <div className="space-y-3">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
@@ -790,6 +795,7 @@ function Fade({ children }: { children: React.ReactNode }) {
 function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
   return (
     <div className="flex items-start gap-5">
+      <WrenPlayer clip={wren} size="sm" />
       <div className="space-y-1">
         <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>

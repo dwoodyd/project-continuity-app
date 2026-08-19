@@ -31,16 +31,27 @@ describe("Wren presence and coherent voice", () => {
     expect(onboarding).toContain('<SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers}');
   });
 
-  it("removes incidental cameos without changing Focus body-doubling surfaces", () => {
+  it("restores ambient video presence without changing Focus body-doubling surfaces", () => {
     const home = source("client/src/pages/Home.tsx");
     const project = source("client/src/pages/ProjectDetailPage.tsx");
     const tour = source("client/src/pages/TourPage.tsx");
+    const about = source("client/src/pages/AboutAppPage.tsx");
+    const vault = source("client/src/pages/VaultPage.tsx");
+    const clarity = source("client/src/pages/ClarityEnginePage.tsx");
+    const scratch = source("client/src/pages/ScratchPadPage.tsx");
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     const companion = source("client/src/pages/FocusCompanionPage.tsx");
     const popout = source("client/src/components/WrenPopout.tsx");
-    expect(home).not.toContain('<WrenPlayer clip="popsHead" size="sm"');
+    expect(home).toContain('clip="popsHead"');
+    expect(home).toContain('wrapperClassName="shrink-0 overflow-hidden rounded-xl w-20 h-20 sm:w-24 sm:h-24"');
     expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
-    expect(tour).not.toContain("<WrenPlayer");
+    expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl"');
+    expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl"');
+    expect(tour).toContain('<WrenPlayer clip={wren} size="sm"');
+    expect(about).toContain('<WrenPlayer clip="luminousFloats" size="full"');
+    expect(vault).toContain('<WrenPlayer clip="hoversJournal" size="full"');
+    expect(clarity).toContain('<WrenPlayer clip="perchedDoc" size="full"');
+    expect(scratch).toContain('<WrenPlayer clip="bouncingFunClean" size="full"');
     expect(focus).toContain("cornerWave");
     expect(companion).toContain("weaving");
     expect(popout).toContain("weaving");

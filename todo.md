@@ -2197,3 +2197,11 @@
 ## Emotional Cycle Phase Card Layout (Aug 18, 2026)
 - [x] Correct the phase-card layout so Wren media cannot overlap the phase heading, description, or dates at desktop and responsive widths.
 - [x] Add regression coverage for the media containment and phase-copy layout contract.
+
+## Dashboard Greeting Wren Companion (Aug 18, 2026)
+- [x] Restore a compact, contained Wren video beside the Dashboard greeting without changing the Return Brief hero treatment.
+- [x] Add regression coverage for the greeting companion’s responsive containment.
+
+## Restore Wren Video Presence (Aug 19, 2026)
+- [x] Restore approved ambient and full-bleed Wren video treatments that were removed by the prior scarcity-focused pass.
+- [x] Preserve readable text layering and contained informational-card media while validating restored Wren video behavior.
