@@ -1747,6 +1747,7 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -2112,7 +2113,7 @@ export default function Home() {
       <div className="flex items-start justify-between" style={{ order: -10 }}>
         <div className="flex items-center gap-3">
           <WrenPlayer
-            clip="popsHead"
+            clip={greetingWrenClip}
             size="sm"
             fallbackStill="luminousIdle"
             wrapperClassName="shrink-0 overflow-hidden rounded-xl w-20 h-20 sm:w-24 sm:h-24"

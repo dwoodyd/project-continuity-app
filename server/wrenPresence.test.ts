@@ -42,7 +42,8 @@ describe("Wren presence and coherent voice", () => {
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     const companion = source("client/src/pages/FocusCompanionPage.tsx");
     const popout = source("client/src/components/WrenPopout.tsx");
-    expect(home).toContain('clip="popsHead"');
+    expect(home).toContain('const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
+    expect(home).toContain('clip={greetingWrenClip}');
     expect(home).toContain('wrapperClassName="shrink-0 overflow-hidden rounded-xl w-20 h-20 sm:w-24 sm:h-24"');
     expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
     expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl"');

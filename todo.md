@@ -2209,3 +2209,7 @@
 ## Replay Intro and Tour Access (Aug 19, 2026)
 - [x] Repair the Replay Intro action and verify the attached onboarding introduction route and video sequence remain available.
 - [x] Provide a clear, working in-app Tour entry point and add regression coverage for both routes.
+
+## Time-of-Day Dashboard Wren Rotation (Aug 19, 2026)
+- [x] Restore distinct morning, afternoon, and evening Wren clips beside the Dashboard greeting while preserving responsive containment.
+- [x] Add regression coverage for the hour-to-clip mapping and greeting companion layout.
