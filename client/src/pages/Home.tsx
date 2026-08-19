@@ -1979,30 +1979,38 @@ export default function Home() {
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
-        <section className="return-brief border border-[#D3D6D0] bg-[#E6E8E3] p-5 text-[#2A2D28] sm:p-6" aria-labelledby="return-brief-title">
-          <div className="grid items-center gap-5 sm:gap-7 lg:grid-cols-[minmax(0,1fr)_auto]">
-            <div className="order-2 min-w-0 lg:order-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#6B6F68]">Return brief · {format(now, "EEEE, MMMM d")}</p>
+        <section className="return-brief relative isolate overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:p-8" aria-labelledby="return-brief-title">
+          <div className="absolute inset-y-0 right-0 w-full pointer-events-none" aria-hidden="true">
+            <WrenPlayer
+              clip="tuggingThread"
+              size="full"
+              stage={false}
+              objectFit="cover"
+              feather
+              featherDirection="bottom"
+              fallbackStill="siliconeTugging"
+              wrapperClassName="absolute inset-0 scale-110 origin-bottom-right opacity-55 sm:opacity-90"
+            />
+          </div>
+          <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ background: "linear-gradient(90deg, #161815 0%, rgba(22,24,21,0.94) 38%, rgba(22,24,21,0.42) 70%, rgba(22,24,21,0.10) 100%)" }} />
+          <div className="relative z-10 max-w-xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E8A030]">Return brief · {format(now, "EEEE, MMMM d")}</p>
               <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
               {lastWrittenLine && (
-                <p className="mt-4 border-l-2 border-[#AEB2AB] pl-3 text-base leading-7" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
+                <p className="mt-4 border-l-2 border-[#E8A030]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
                   “{lastWrittenLine}”
                 </p>
               )}
               {activeThreadLock && (
-                <p className="mt-4 text-sm leading-6 text-[#6B6F68]">
-                  You were working on <span className="font-medium text-[#2A2D28]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
+                <p className="mt-4 text-sm leading-6 text-[#D4D7D0]">
+                  You were working on <span className="font-medium text-[#F5EEE2]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
                 </p>
               )}
-            </div>
-            <div className="order-1 flex min-w-0 justify-center lg:order-2 lg:justify-end" aria-label="Wren is holding your thread">
-              <WrenPlayer clip="tuggingThread" size="hero" fallbackStill="siliconeTugging" wrapperClassName="shrink-0" />
-            </div>
           </div>
           <button
             onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
             disabled={recallThreadLock.isPending}
-            className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#C8452B] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]"
+            className="relative z-10 mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
           >
             Continue
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -2115,8 +2123,10 @@ export default function Home() {
           <WrenPlayer
             clip={greetingWrenClip}
             size="sm"
+            stage={false}
+            feather
             fallbackStill="luminousIdle"
-            wrapperClassName="shrink-0 overflow-hidden rounded-xl w-20 h-20 sm:w-24 sm:h-24"
+            wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"
           />
           <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
@@ -3138,7 +3148,7 @@ export default function Home() {
         const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
         const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
         return (
-          <BentoCard noPadding className="wren-ambient-card break-inside-avoid mb-3" style={{ order: 100, height: 220, position: "relative", overflow: "hidden" }}>
+          <section className="wren-ambient-card relative isolate h-[220px] overflow-hidden bg-[#161815] break-inside-avoid mb-3" style={{ order: 100 }}>
             {/* Subtle warm glow behind Wren */}
             <div
               className="absolute inset-0 pointer-events-none"
@@ -3148,12 +3158,14 @@ export default function Home() {
             <WrenPlayer
               clip={wrenClip}
               size="full"
+              stage={false}
               loop
               autoPlay
               muted
+              objectFit="cover"
               feather
               featherDirection="bottom"
-              wrapperClassName="absolute inset-0"
+              wrapperClassName="absolute inset-0 opacity-90"
             />
             {/* Tagline pinned to bottom */}
             <div className="absolute bottom-0 left-0 right-0 pb-3 text-center px-4 z-10"
@@ -3161,7 +3173,7 @@ export default function Home() {
             >
               <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>{wrenTagline}</p>
             </div>
-          </BentoCard>
+          </section>
         );
       })()}
 

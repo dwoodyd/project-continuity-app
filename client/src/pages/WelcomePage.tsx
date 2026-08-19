@@ -395,7 +395,7 @@ export default function WelcomePage() {
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="order-1 flex flex-col items-center text-center animate-fade-slide-up">
-              <WrenPlayer clip="popsHead" size="hero" fallbackStill="siliconeWatching" wrapperClassName="shrink-0" />
+              <WrenPlayer clip="popsHead" size="hero" stage={false} feather fallbackStill="siliconeWatching" wrapperClassName="shrink-0" />
               <p className="mt-3 text-xs font-medium" style={{ color: "oklch(0.72 0.10 65 / 0.8)" }}>Wren — your Continuary companion</p>
               <p className="mt-2 max-w-sm text-xs leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
                 She remembers your thread and returns without rebuke. A companion, not a clinician.

@@ -2213,3 +2213,8 @@
 ## Time-of-Day Dashboard Wren Rotation (Aug 19, 2026)
 - [x] Restore distinct morning, afternoon, and evening Wren clips beside the Dashboard greeting while preserving responsive containment.
 - [x] Add regression coverage for the hour-to-clip mapping and greeting companion layout.
+
+## Immersive Wren Scene Restoration (Aug 19, 2026)
+- [x] Review the attached in-app introduction and continuary.app as reference experiences for Wren’s full-bleed scene treatment.
+- [x] Replace selected boxed Wren media treatments with full-bleed, text-safe scene integrations that foreground the character over the container.
+- [x] Preserve functional content layouts, motion preferences, and regression coverage for immersive Wren placements.

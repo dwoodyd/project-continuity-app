@@ -20,14 +20,17 @@ describe("Wren presence and coherent voice", () => {
     expect(player).toContain('{!prefersReducedMotion && (');
   });
 
-  it("stages hero Wren only at the selected return and introduction moments", () => {
+  it("uses full-bleed, text-safe Wren scenes at the selected return and introduction moments", () => {
     const home = source("client/src/pages/Home.tsx");
     const welcome = source("client/src/pages/WelcomePage.tsx");
     const about = source("client/src/pages/AboutAppPage.tsx");
     const onboarding = source("client/src/pages/OnboardingPage.tsx");
-    expect(home).toContain('<WrenPlayer clip="tuggingThread" size="hero"');
-    expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero"');
-    expect(about).toContain('<WrenPlayer clip="popsHead" size="hero"');
+    expect(home).toContain('clip="tuggingThread"');
+    expect(home).toContain('stage={false}');
+    expect(home).toContain('objectFit="cover"');
+    expect(home).toContain('linear-gradient(90deg, #161815');
+    expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
+    expect(about).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
     expect(onboarding).toContain('<SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers}');
   });
 
@@ -44,12 +47,15 @@ describe("Wren presence and coherent voice", () => {
     const popout = source("client/src/components/WrenPopout.tsx");
     expect(home).toContain('const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
     expect(home).toContain('clip={greetingWrenClip}');
-    expect(home).toContain('wrapperClassName="shrink-0 overflow-hidden rounded-xl w-20 h-20 sm:w-24 sm:h-24"');
+    expect(home).toContain('stage={false}');
+    expect(home).toContain('wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"');
     expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
-    expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl"');
-    expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl"');
-    expect(tour).toContain('<WrenPlayer clip={wren} size="sm"');
-    expect(about).toContain('<WrenPlayer clip="luminousFloats" size="full"');
+    expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
+    expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
+    expect(tour).toContain('<WrenPlayer clip={wren} size="sm" stage={false} feather');
+    expect(about).toContain('clip="luminousFloats"');
+    expect(about).toContain('stage={false}');
+    expect(about).not.toContain('WrenPlayer clip={clip} size="full"');
     expect(vault).toContain('<WrenPlayer clip="hoversJournal" size="full"');
     expect(clarity).toContain('<WrenPlayer clip="perchedDoc" size="full"');
     expect(scratch).toContain('<WrenPlayer clip="bouncingFunClean" size="full"');
