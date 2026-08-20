@@ -2254,3 +2254,8 @@
 ## Today Return Brief Live Visibility Repair (Aug 20, 2026)
 - [x] Diagnose why the live Today dashboard does not display the Return Brief review scene when requested.
 - [x] Repair the reliable access path and add regression coverage for the live dashboard review experience.
+
+## Today Return Brief Edge-Bleed and Readability (Aug 20, 2026)
+- [x] Remove visible Return Brief framing and extend the Wren field edge-to-edge across the available app content region.
+- [x] Strengthen the text-safe overlay so title, supporting copy, thread note, and actions remain readable without covering Wren’s face.
+- [x] Add regression coverage for the unframed edge-bleed and readable overlay contract.

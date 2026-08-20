@@ -1981,14 +1981,15 @@ export default function Home() {
         <p className="text-xs text-muted-foreground">Changes save automatically to your account.</p>
       </DialogContent>
     </Dialog>
-    <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
+    <div className={`px-4 sm:px-5 py-7 page-enter flex flex-col gap-7 overflow-x-hidden ${showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"}`}>
       {showReturnBrief && (
         <IntroWrenScene
           src={WREN_CLIPS.tuggingThread}
           eyebrow={`Return brief · ${format(now, "EEEE, MMMM d")}`}
           title="A week away. You returned anyway. That’s not small."
           body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
-          className="break-inside-avoid"
+          className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
+          variant="return"
         >
           {lastWrittenLine && (
             <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>

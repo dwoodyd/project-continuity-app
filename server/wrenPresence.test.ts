@@ -32,9 +32,13 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain('new URLSearchParams(window.location.search).get("return-brief") === "1"');
     expect(home).toContain("Preview return brief");
     expect(home).toContain("Close preview");
+    expect(home).toContain('variant="return"');
+    expect(home).toContain('showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"');
     expect(scene).toContain("video.play().catch(() => {})");
     expect(scene).toContain("absolute inset-0 h-full w-full object-cover mix-blend-screen");
-    expect(scene).not.toContain("rounded");
+    expect(scene).toContain('variant?: "standard" | "return"');
+    expect(scene).toContain("border-0 rounded-none");
+    expect(scene).toContain("bg-[linear-gradient(90deg,rgba(22,24,21,0.98)");
     expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
     expect(about).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
     expect(onboarding).toContain('<SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers}');
