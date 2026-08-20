@@ -2224,3 +2224,9 @@
 - [x] Rebuild Return Brief as a 45/55 full-bleed golden-thread scene and remove the compact Wren greeting avatar.
 - [x] Verify no selected Wren surface adds a border or radius, and confirm lighter accent text remains on accent-tinted active navigation, thread, and check-in surfaces.
 - [x] Add regression coverage for the environmental scene contract and responsive field composition.
+
+## Coherent Return Brief and Greeting Restoration (Aug 20, 2026)
+- [x] Restore the morning, afternoon, and evening Dashboard greeting rotation and retain it alongside the new Return Brief.
+- [x] Rebuild Return Brief as a portrait 3:4 golden-thread Wren field at 55–60% of the visual share, with the return copy in its negative space.
+- [x] Verify Wren clip and poster weights against a 500KB per-asset delivery budget, with a poster fallback for the Return Brief.
+- [x] Add regression coverage for portrait field geometry, greeting preservation, poster fallback, and media-size safeguards.

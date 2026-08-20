@@ -26,10 +26,14 @@ describe("Wren presence and coherent voice", () => {
     const about = source("client/src/pages/AboutAppPage.tsx");
     const onboarding = source("client/src/pages/OnboardingPage.tsx");
     const styles = source("client/src/index.css");
-    expect(home).toContain('clip="tuggingThread"');
+    expect(home).toContain('clip="returnPortrait"');
     expect(home).toContain('className="wren-field"');
     expect(home).toContain('objectFit="cover"');
     expect(home).toContain('sm:max-w-[45%]');
+    expect(home).toContain('sm:min-h-[clamp(500px,62vh,700px)]');
+    expect(home).toContain('fallbackStill="returnPortraitPoster"');
+    expect(home).toContain('poster="/manus-storage/wren-return-poster_6e19a8f4.webp"');
+    expect(home).toContain("A week away. You returned anyway. That&apos;s not small.");
     expect(styles).toContain('.wren-field');
     expect(styles).toContain('inset: 0 0 0 45%');
     expect(styles).toContain('border: 0;');
@@ -51,8 +55,9 @@ describe("Wren presence and coherent voice", () => {
     const companion = source("client/src/pages/FocusCompanionPage.tsx");
     const popout = source("client/src/components/WrenPopout.tsx");
     expect(home).toContain('const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
-    expect(home).not.toContain('greetingWrenClip');
-    expect(home).not.toContain('wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"');
+    expect(home).toContain('const greetingWrenClip = hour < 12 ? "greetingMorning" : hour < 17 ? "greetingAfternoon" : "greetingEvening"');
+    expect(home).toContain('clip={greetingWrenClip}');
+    expect(home).toContain('wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"');
     expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
     expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
     expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
@@ -91,5 +96,17 @@ describe("Wren presence and coherent voice", () => {
     expect(settings).toContain("openWrenTone");
     expect(clientTone).toContain("export const WREN_TONE_PRESETS");
     expect(sidebar).toContain('/settings?tab=preferences#wren-tone');
+  });
+
+  it("keeps above-the-fold Wren media portrait-oriented, poster-backed, and below the delivery budget", () => {
+    const clips = source("client/src/lib/wrenClips.ts");
+    const player = source("client/src/components/WrenPlayer.tsx");
+    expect(clips).toContain("export const WREN_LIGHTWEIGHT_MEDIA");
+    expect(clips).toContain("returnPortrait: { bytes: 144434, width: 360, height: 480, posterBytes: 8378 }");
+    expect(clips).toContain("greetingMorning: { bytes: 105824, width: 360, height: 480 }");
+    expect(clips).toContain("greetingAfternoon: { bytes: 149026, width: 360, height: 480 }");
+    expect(clips).toContain("greetingEvening: { bytes: 69798, width: 360, height: 480 }");
+    expect(player).toContain("poster?: string");
+    expect(player).toContain("poster={poster}");
   });
 });

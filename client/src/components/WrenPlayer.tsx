@@ -105,6 +105,8 @@ interface WrenPlayerProps {
   featherDirection?: "radial" | "bottom" | "top-bottom";
   /** Static PNG fallback shown while video loads */
   fallbackStill?: keyof typeof WREN_STILLS;
+  /** Optional first-frame poster used by the browser while the video buffers. */
+  poster?: string;
   onEnded?: () => void;
 }
 
@@ -120,6 +122,7 @@ export default function WrenPlayer({
   feather = false,
   featherDirection = "radial",
   fallbackStill,
+  poster,
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
@@ -176,6 +179,7 @@ export default function WrenPlayer({
         <video
           key={src}
           src={src}
+          poster={poster}
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}

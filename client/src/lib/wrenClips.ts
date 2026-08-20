@@ -6,8 +6,25 @@
 
 const BASE = "/manus-storage";
 
+/**
+ * Delivery contract for Wren media used above the fold. These optimized assets
+ * are deliberately kept below 500KB each to avoid blocking the product shell.
+ */
+export const WREN_LIGHTWEIGHT_MEDIA = {
+  returnPortrait: { bytes: 144434, width: 360, height: 480, posterBytes: 8378 },
+  greetingMorning: { bytes: 105824, width: 360, height: 480 },
+  greetingAfternoon: { bytes: 149026, width: 360, height: 480 },
+  greetingEvening: { bytes: 69798, width: 360, height: 480 },
+} as const;
+
 // ─── Video clips ─────────────────────────────────────────────────────────────
 export const WREN_CLIPS = {
+  /** Lightweight portrait golden-thread scene for the Dashboard Return Brief (144KB). */
+  returnPortrait:      `/manus-storage/wren-return-portrait_c50441dc.mp4`,
+  /** Lightweight portrait Dashboard greeting clips (70–149KB). */
+  greetingMorning:     `/manus-storage/wren-greeting-morning_0ebef445.mp4`,
+  greetingAfternoon:   `/manus-storage/wren-greeting-afternoon_b761f504.mp4`,
+  greetingEvening:     `/manus-storage/wren-greeting-evening_265ac204.mp4`,
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
   bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
@@ -156,6 +173,8 @@ export type WrenClipKey = keyof typeof WREN_CLIPS;
 
 // ─── Still images ─────────────────────────────────────────────────────────────
 export const WREN_STILLS = {
+  /** Lightweight 3:4 Return Brief poster fallback (8KB). */
+  returnPortraitPoster:`/manus-storage/wren-return-poster_6e19a8f4.webp`,
   // Luminous series (glowing, transparent-friendly)
   luminousFront:      `${BASE}/wren_luminous_front_8c475599.png`,
   luminousIdle:       `${BASE}/wren_luminous_idle_511550a0.png`,

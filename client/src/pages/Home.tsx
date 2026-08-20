@@ -1747,6 +1747,7 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greetingWrenClip = hour < 12 ? "greetingMorning" : hour < 17 ? "greetingAfternoon" : "greetingEvening";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -1978,19 +1979,20 @@ export default function Home() {
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
-        <section className="return-brief relative isolate min-h-[320px] overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:min-h-[360px] sm:p-8" aria-labelledby="return-brief-title">
+        <section className="return-brief relative isolate min-h-[440px] overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:min-h-[clamp(500px,62vh,700px)] sm:p-8" aria-labelledby="return-brief-title">
           <div className="wren-field" aria-hidden="true">
             <WrenPlayer
-              clip="tuggingThread"
+              clip="returnPortrait"
               size="full"
               objectFit="cover"
-              fallbackStill="siliconeTugging"
+              fallbackStill="returnPortraitPoster"
+              poster="/manus-storage/wren-return-poster_6e19a8f4.webp"
               wrapperClassName="h-full w-full scale-110 origin-bottom-right"
             />
           </div>
-          <div className="relative z-10 w-full max-w-xl sm:max-w-[45%]">
+          <div className="relative z-10 flex min-h-[400px] w-full max-w-xl flex-col justify-center sm:min-h-[clamp(436px,58vh,636px)] sm:max-w-[45%]">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E8A030]">Return brief · {format(now, "EEEE, MMMM d")}</p>
-              <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
+              <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">A week away. You returned anyway. That&apos;s not small.</h2>
               {lastWrittenLine && (
                 <p className="mt-4 border-l-2 border-[#E8A030]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
                   “{lastWrittenLine}”
@@ -2114,7 +2116,16 @@ export default function Home() {
       )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between" style={{ order: -10 }}>
-        <div>
+        <div className="flex items-center gap-3">
+          <WrenPlayer
+            clip={greetingWrenClip}
+            size="sm"
+            stage={false}
+            feather
+            fallbackStill="luminousIdle"
+            wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"
+          />
+          <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
             {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
           </h1>
@@ -2131,6 +2142,7 @@ export default function Home() {
                 🔥 {streakData.streak}d
               </span>
             )}
+          </div>
           </div>
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}

@@ -44,7 +44,9 @@ describe("permanent dual-theme contract", () => {
 
   it("maps existing Wren assets to the product moments they were commissioned for", () => {
     const home = source("client/src/pages/Home.tsx");
-    expect(home).toContain('clip="tuggingThread"');
+    const clips = source("client/src/lib/wrenClips.ts");
+    expect(home).toContain('clip="returnPortrait"');
+    expect(clips).toContain('returnPortrait:      `/manus-storage/wren-return-portrait_c50441dc.mp4`');
     expect(home).toContain('clip="blobJournal"');
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     expect(focus).toContain('clip="cornerWave"');
