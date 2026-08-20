@@ -2230,3 +2230,8 @@
 - [x] Rebuild Return Brief as a portrait 3:4 golden-thread Wren field at 55–60% of the visual share, with the return copy in its negative space.
 - [x] Verify Wren clip and poster weights against a 500KB per-asset delivery budget, with a poster fallback for the Return Brief.
 - [x] Add regression coverage for portrait field geometry, greeting preservation, poster fallback, and media-size safeguards.
+
+## Intentional Wren Placement and Focus Lock (Aug 20, 2026)
+- [x] Preserve Focus Sessions, its components, styling, copy, and Wren treatment unchanged; ask before any future shared-code impact.
+- [x] Remove decorative Wren thumbnails from Project cards and the Emotional Cycle status card without changing their information layouts.
+- [x] Verify Wren remains only in composition-critical emotional moments and add regression coverage for Focus isolation and thumbnail removal.

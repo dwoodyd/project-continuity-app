@@ -45,7 +45,8 @@ describe("Wren presence and coherent voice", () => {
 
   it("restores ambient video presence without changing Focus body-doubling surfaces", () => {
     const home = source("client/src/pages/Home.tsx");
-    const project = source("client/src/pages/ProjectDetailPage.tsx");
+    const projects = source("client/src/pages/ProjectsPage.tsx");
+    const cycle = source("client/src/pages/EmotionalCyclePage.tsx");
     const tour = source("client/src/pages/TourPage.tsx");
     const about = source("client/src/pages/AboutAppPage.tsx");
     const vault = source("client/src/pages/VaultPage.tsx");
@@ -58,7 +59,9 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain('const greetingWrenClip = hour < 12 ? "greetingMorning" : hour < 17 ? "greetingAfternoon" : "greetingEvening"');
     expect(home).toContain('clip={greetingWrenClip}');
     expect(home).toContain('wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"');
-    expect(project).toContain('<WrenPlayer clip="popsHead" size="xs"');
+    expect(projects).not.toContain("WrenPlayer");
+    expect(cycle).not.toContain("WrenPlayer");
+    expect(cycle).toContain("{/* Cycle analysis */}");
     expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
     expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
     expect(tour).toContain('<WrenPlayer clip={wren} size="sm" stage={false} feather');

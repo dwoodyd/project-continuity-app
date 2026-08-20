@@ -3,7 +3,6 @@ import { trpc } from "@/lib/trpc";
 import { CrisisSupportCard } from "@/components/CrisisSupportCard";
 import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import notify from "@/lib/notify";
-import WrenPlayer from "@/components/WrenPlayer";
 import { ArrowLeft, Info } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -257,19 +256,9 @@ export default function EmotionalCyclePage() {
           </div>
         )}
 
-        {/* Wren + cycle analysis */}
-        <div className="rounded-2xl p-4 grid grid-cols-[96px_minmax(0,1fr)] sm:grid-cols-[128px_minmax(0,1fr)] gap-4 items-start" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="shrink-0 overflow-hidden rounded-xl w-24 h-24 sm:w-28 sm:h-28">
-            <WrenPlayer
-              clip={cycle?.currentPhase === "high" ? "bouncingFunClean" : cycle?.currentPhase === "low" ? "inflates" : "holdingOrb"}
-              size="full"
-              loop
-              autoPlay
-              feather
-              featherDirection="radial"
-            />
-          </div>
-          <div className="flex-1 min-w-0 space-y-2">
+        {/* Cycle analysis */}
+        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="min-w-0 space-y-2">
             {cycle?.hasEnoughData ? (
               <>
                 <div className="flex items-center gap-2 flex-wrap">

@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/select";
 import notify from "@/lib/notify";
 import { formatDistanceToNow } from "date-fns";
-import WrenPlayer from "@/components/WrenPlayer";
 
 type ProjectStatus = "idea" | "mapped" | "active" | "paused" | "completed" | "archived";
 
@@ -222,11 +221,7 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
           )}
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          {isStale ? (
-            <WrenPlayer clip="inflates" size="xs" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-muted-foreground mt-0.5 group-hover:translate-x-0.5 transition-transform" />
-          )}
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-0.5 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
       {isStale && (
