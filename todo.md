@@ -2296,3 +2296,7 @@
 - [x] Make a clearly observable rendered correction to Evidence and Today video framing/edge treatment without changing Focus Sessions.
 - [ ] Visually verify the corrected result in a signed-in live session after publishing.
 - [x] Apply the user-approved source-driven Evidence and Today video-surface correction while preserving the protected Today greeting geometry and Focus Sessions.
+
+## Evidence Hero Right-Edge Seam (Aug 20, 2026)
+- [x] Extend the Evidence Log hero scene to the full desktop app-content boundary so no dark strip remains at the right edge.
+- [x] Add regression coverage and verify Focus Sessions remains unchanged.
