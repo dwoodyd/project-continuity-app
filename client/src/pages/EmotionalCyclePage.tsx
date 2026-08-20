@@ -152,9 +152,9 @@ function ScorePicker({ value, onChange }: { value: number | null; onChange: (v: 
             borderRadius: "0.6rem",
             fontSize: "0.9rem",
             fontWeight: value === n ? 700 : 400,
-            border: value === n ? `2px solid ${phaseColor(n)}` : "1px solid rgba(255,255,255,0.1)",
-            background: value === n ? `${phaseColor(n)}22` : "rgba(255,255,255,0.04)",
-            color: value === n ? phaseColor(n) : "rgba(255,255,255,0.55)",
+            border: value === n ? `2px solid ${phaseColor(n)}` : "1px solid var(--border)",
+            background: value === n ? `color-mix(in srgb, ${phaseColor(n)} 16%, var(--card))` : "var(--card)",
+            color: value === n ? phaseColor(n) : "var(--foreground)",
             cursor: "pointer",
             transition: "all 0.15s ease",
           }}
@@ -286,7 +286,7 @@ export default function EmotionalCyclePage() {
                 )}
               </>
             ) : (
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <p className="text-sm text-muted-foreground">
                 {cycle?.message ?? "Log your mood each evening to reveal your emotional rhythm."}
               </p>
             )}
@@ -331,8 +331,8 @@ export default function EmotionalCyclePage() {
             disabled={!score || logMutation.isPending}
             className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
             style={{
-              background: score ? "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))" : "rgba(255,255,255,0.06)",
-              color: score ? "white" : "rgba(255,255,255,0.3)",
+              background: score ? "var(--primary)" : "var(--muted)",
+              color: score ? "var(--primary-foreground)" : "var(--muted-foreground)",
               cursor: score ? "pointer" : "not-allowed",
               boxShadow: score ? "0 4px 20px oklch(0.74 0.14 72 / 0.35)" : "none",
             }}
@@ -358,7 +358,7 @@ export default function EmotionalCyclePage() {
                         key={i}
                         style={{
                           width: 10, height: 10, borderRadius: 2,
-                          background: i < entry.score ? phaseColor(entry.score) : "rgba(255,255,255,0.07)",
+                          background: i < entry.score ? phaseColor(entry.score) : "var(--muted)",
                         }}
                       />
                     ))}
@@ -373,7 +373,7 @@ export default function EmotionalCyclePage() {
         )}
 
         {/* Hersey attribution */}
-        <p className="text-center text-xs pb-6" style={{ color: "rgba(255,255,255,0.2)" }}>
+        <p className="text-center text-xs pb-6 text-muted-foreground/70">
           Based on emotional cycle research by Prof. Rex Hersey, University of Pennsylvania, and Prof. Edward R. Dewey, Foundation for the Study of Cycles.
         </p>
       </div>

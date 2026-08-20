@@ -2242,7 +2242,7 @@ export default function Home() {
           <div className="flex items-center gap-2 px-4 pt-3.5 pb-2">
             <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--accent-tint-text)" }} />
             <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>You left a thread</p>
-            <span className="ml-auto text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
+            <span className="ml-auto text-[10px] text-muted-foreground">
               {(() => {
                 const diffMin = Math.round((Date.now() - activeThreadLock.createdAt) / 60_000);
                 return diffMin < 60 ? `${diffMin}m ago` : `${Math.round(diffMin / 60)}h ago`;
@@ -2251,17 +2251,17 @@ export default function Home() {
           </div>
           {/* Body */}
           <div className="px-4 pb-3 space-y-1.5">
-            <p className="text-sm leading-snug" style={{ color: "oklch(0.88 0.03 60)" }}>
+            <p className="text-sm leading-snug text-foreground">
               {activeThreadLock.whatDoing}
             </p>
-            <p className="text-xs leading-snug" style={{ color: "oklch(0.60 0.04 240)" }}>
+            <p className="text-xs leading-snug text-muted-foreground">
               Next: {activeThreadLock.whatNext}
             </p>
           </div>
           {/* Actions */}
           <div
             className="flex items-center gap-2 px-4 py-3 border-t"
-            style={{ borderColor: "oklch(0.56 0.18 28 / 0.15)" }}
+            style={{ borderColor: "color-mix(in srgb, var(--primary) 18%, var(--border))" }}
           >
             <button
               onClick={() => recallThreadLock.mutate({ id: activeThreadLock.id })}

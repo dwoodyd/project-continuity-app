@@ -10,6 +10,7 @@ describe("full app review remediation", () => {
     const home = source("client/src/pages/Home.tsx");
     const settings = source("client/src/pages/SettingsPage.tsx");
     const cycle = source("client/src/pages/EmotionalCyclePage.tsx");
+    const ideas = source("client/src/pages/IdeasPage.tsx");
     expect(layout).toContain('background: "var(--brand-muted)"');
     expect(layout).toContain('color: "var(--sidebar-foreground)"');
     expect(layout).toContain('color: "var(--muted-foreground)"');
@@ -18,6 +19,12 @@ describe("full app review remediation", () => {
     expect(home).toContain('highlighted ? "var(--accent-tint-text)"');
     expect(settings).toContain('enabled ? "bg-primary shadow-');
     expect(cycle).toContain('rounded-2xl p-4 bg-card border border-border');
+    expect(cycle).toContain('background: value === n ? `color-mix(in srgb, ${phaseColor(n)} 16%, var(--card))` : "var(--card)"');
+    expect(cycle).toContain('color: value === n ? phaseColor(n) : "var(--foreground)"');
+    expect(home).toContain('className="text-sm leading-snug text-foreground"');
+    expect(home).toContain('className="text-xs leading-snug text-muted-foreground"');
+    expect(ideas).toContain('className="rounded-xl p-4 border border-border bg-card text-card-foreground shadow-sm"');
+    expect(ideas).toContain('text-foreground/80 hover:text-foreground hover:bg-muted');
   });
 
   it("keeps user-facing copy free of internal phrasing and stale assertions", () => {

@@ -112,8 +112,7 @@ export default function IdeasPage() {
           {ideas.map((idea) => (
             <div
               key={idea.id}
-              className="rounded-xl p-4 border border-border"
-              style={{ background: "oklch(0.14 0.025 65 / 0.6)" }}
+              className="rounded-xl p-4 border border-border bg-card text-card-foreground shadow-sm"
             >
               {idea.parsedIntent && (
                 <p className="text-sm font-medium text-foreground mb-1 leading-snug">
@@ -123,14 +122,14 @@ export default function IdeasPage() {
               <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-4">
                 {idea.rawContent}
               </p>
-              <p className="text-[10px] text-muted-foreground/50 mt-2">
+              <p className="text-[10px] text-muted-foreground/75 mt-2">
                 {new Date(idea.createdAt).toLocaleString()}
               </p>
               <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/50">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                  className="h-7 text-xs gap-1.5 text-foreground/80 hover:text-foreground hover:bg-muted"
                   onClick={() => handleAddToTasks(idea)}
                   disabled={addToTasksMutation.isPending}
                 >
@@ -140,7 +139,7 @@ export default function IdeasPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                  className="h-7 text-xs gap-1.5 text-foreground/80 hover:text-foreground hover:bg-muted"
                   onClick={() => handleAddToScratch(idea)}
                   disabled={addToScratchMutation.isPending}
                 >
@@ -151,7 +150,7 @@ export default function IdeasPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-7 text-xs gap-1.5 ${confirmDelete === idea.id ? "text-red-400 hover:text-red-300" : "text-muted-foreground hover:text-foreground"}`}
+                  className={`h-7 text-xs gap-1.5 ${confirmDelete === idea.id ? "text-red-700 dark:text-red-400 hover:bg-red-500/10" : "text-foreground/80 hover:text-foreground hover:bg-muted"}`}
                   onClick={() => handleDelete(idea.id)}
                   disabled={deleteMutation.isPending}
                 >

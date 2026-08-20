@@ -2274,3 +2274,9 @@
 - [x] Restore Wren’s morning, afternoon, and evening rotating video in the Today greeting corner.
 - [x] Permanently protect the Today greeting corner and all Focus Sessions layout, copy, components, styling, media treatment, and dependencies from future changes unless the user explicitly overrides the lock.
 - [x] Add regression coverage enforcing both protected surfaces and verify Focus Sessions source remains unchanged.
+
+## Final Studio Wall Contrast Pass (Aug 20, 2026)
+- [x] Give Today re-entry/status banners semantic Studio Wall surfaces and readable secondary copy.
+- [x] Give Ideas cards, note text, timestamps, and actions semantic Studio Wall contrast without changing dark mode behavior.
+- [x] Correct Emotional Cycle mood-score buttons and phase/time labels for clear light-mode contrast.
+- [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.
