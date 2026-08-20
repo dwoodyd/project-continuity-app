@@ -7,7 +7,7 @@ const source = readFileSync(resolve(process.cwd(), "client/src/pages/EmotionalCy
 describe("Emotional Cycle analysis layout", () => {
   it("keeps the phase analysis free of decorative Wren media", () => {
     expect(source).toContain('{/* Cycle analysis */}');
-    expect(source).toContain('className="rounded-2xl p-4"');
+    expect(source).toContain('className="rounded-2xl p-4 bg-card border border-border"');
     expect(source).not.toContain("WrenPlayer");
     expect(source).not.toContain('grid grid-cols-[96px_minmax(0,1fr)]');
   });

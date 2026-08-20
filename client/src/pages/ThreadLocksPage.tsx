@@ -219,7 +219,6 @@ export default function ThreadLocksPage() {
                         </button>
                       </>
                     )}
-                    {!isActive && <span className="flex-1" />}
                     <button
                       onClick={() => setConfirmDeleteId(lock.id)}
                       className="flex items-center gap-1 text-[11px] px-2 py-1.5 rounded-lg transition-all active:scale-95"

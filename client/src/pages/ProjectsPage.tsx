@@ -196,9 +196,9 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
             <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
             <span className={cn("text-xs font-medium", cfg.color)}>{cfg.label}</span>
             {healthScore !== undefined && (
-              <span className="flex items-center gap-1 ml-1">
+              <span className="flex items-center gap-1 ml-1" title="Project health score out of 100">
                 <HealthDot score={healthScore} />
-                <span className="text-xs text-muted-foreground/60">{healthScore}</span>
+                <span className="text-xs text-muted-foreground/70">Health {healthScore}</span>
               </span>
             )}
             <span className={cn("text-xs font-medium ml-auto", priorityCfg)}>{project.priorityLevel}</span>

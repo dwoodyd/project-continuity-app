@@ -1103,11 +1103,12 @@ export default function SettingsPage() {
                     aria-pressed={(settings as any)?.[key] !== false}
                     className={cn(
                       "w-10 h-6 rounded-full transition-colors relative shrink-0",
-                      (settings as any)?.[key] !== false ? "bg-foreground" : "bg-muted-foreground/30"
+                      (settings as any)?.[key] !== false ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35"
                     )}
                   >
                     <span aria-hidden="true" className={cn(
-                      "absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform",
+                      "absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform",
+                      (settings as any)?.[key] !== false ? "bg-primary-foreground" : "bg-card",
                       (settings as any)?.[key] !== false ? "translate-x-4" : "translate-x-0.5"
                     )} />
                   </button>
@@ -1137,9 +1138,9 @@ export default function SettingsPage() {
                       onClick={() => updateSettings.mutate({ [key]: !enabled })}
                       aria-label={`${enabled ? "Disable" : "Enable"} ${label}`}
                       aria-pressed={enabled}
-                      className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", enabled ? "bg-foreground" : "bg-muted-foreground/30")}
+                      className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", enabled ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35")}
                     >
-                      <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform", enabled ? "translate-x-4" : "translate-x-0.5")} />
+                      <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform", enabled ? "translate-x-4 bg-primary-foreground" : "translate-x-0.5 bg-card")} />
                     </button>
                   </div>
                 );
@@ -1154,9 +1155,9 @@ export default function SettingsPage() {
                   onClick={() => updateSettings.mutate({ fontSizePreference: settings?.fontSizePreference === "large" ? "medium" : "large" })}
                   aria-label={`${settings?.fontSizePreference === "large" ? "Disable" : "Enable"} larger text`}
                   aria-pressed={settings?.fontSizePreference === "large"}
-                  className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", settings?.fontSizePreference === "large" ? "bg-foreground" : "bg-muted-foreground/30")}
+                  className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", settings?.fontSizePreference === "large" ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35")}
                 >
-                  <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform", settings?.fontSizePreference === "large" ? "translate-x-4" : "translate-x-0.5")} />
+                  <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform", settings?.fontSizePreference === "large" ? "translate-x-4 bg-primary-foreground" : "translate-x-0.5 bg-card")} />
                 </button>
               </div>
             </div>

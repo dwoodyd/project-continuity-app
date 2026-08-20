@@ -8,12 +8,16 @@ describe("full app review remediation", () => {
   it("uses semantic sidebar and Daily Rhythm colors in both themes", () => {
     const layout = source("client/src/components/AppLayout.tsx");
     const home = source("client/src/pages/Home.tsx");
+    const settings = source("client/src/pages/SettingsPage.tsx");
+    const cycle = source("client/src/pages/EmotionalCyclePage.tsx");
     expect(layout).toContain('background: "var(--brand-muted)"');
     expect(layout).toContain('color: "var(--sidebar-foreground)"');
     expect(layout).toContain('color: "var(--muted-foreground)"');
     expect(home).toContain('background: "var(--muted)"');
     expect(home).toContain('color: completed ? "var(--muted-foreground)"');
     expect(home).toContain('highlighted ? "var(--accent-tint-text)"');
+    expect(settings).toContain('enabled ? "bg-primary shadow-');
+    expect(cycle).toContain('rounded-2xl p-4 bg-card border border-border');
   });
 
   it("keeps user-facing copy free of internal phrasing and stale assertions", () => {
@@ -40,8 +44,14 @@ describe("full app review remediation", () => {
 
   it("retains Evidence Log's hero as its only update source", () => {
     const evidence = source("client/src/pages/EvidenceLogPage.tsx");
+    const clarity = source("client/src/pages/ClarityEnginePage.tsx");
+    const projects = source("client/src/pages/ProjectsPage.tsx");
+    const threadLocks = source("client/src/pages/ThreadLocksPage.tsx");
     expect(evidence).toContain('title="This is your record. Every entry is proof."');
     expect(evidence).toContain("the immersive hero already owns the page title and update action");
     expect(evidence).not.toContain("<PageHeader");
+    expect(clarity).toContain("Choose the kind of support that would make the next step feel clearer.");
+    expect(projects).toContain("Health {healthScore}");
+    expect(threadLocks).not.toContain('{!isActive && <span className="flex-1" />}');
   });
 });

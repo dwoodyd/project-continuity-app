@@ -171,14 +171,9 @@ function NewSessionView({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-brand font-medium text-foreground mb-2">
-          Clarity Engine
-        </h1>
-        <p className="text-muted-foreground">
-          Unload what's in your head. The engine will help you find what's
-          actually happening, what you feel, what you need, and your next right
-          step.
+      <div className="max-w-2xl">
+        <p className="text-sm text-muted-foreground">
+          Choose the kind of support that would make the next step feel clearer.
         </p>
       </div>
 

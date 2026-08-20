@@ -249,15 +249,15 @@ export default function EmotionalCyclePage() {
 
         {/* Info panel */}
         {showInfo && (
-          <div className="rounded-xl p-4 text-sm leading-relaxed space-y-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>
-            <p><strong style={{ color: "rgba(255,255,255,0.85)" }}>What is this?</strong> Research by Professor Rex Hersey (University of Pennsylvania) found that human emotional cycles average about 5 weeks — from a peak of elation down to a trough of worry and back up again.</p>
+          <div className="rounded-xl p-4 text-sm leading-relaxed space-y-2 bg-card border border-border text-muted-foreground">
+            <p><strong className="text-foreground">What is this?</strong> Research by Professor Rex Hersey (University of Pennsylvania) found that human emotional cycles average about 5 weeks — from a peak of elation down to a trough of worry and back up again.</p>
             <p>By logging your mood daily, you'll start to see your personal rhythm. After a few months you can predict your next high and low with surprising accuracy — and plan your work accordingly.</p>
-            <p><strong style={{ color: "rgba(255,255,255,0.85)" }}>Scale:</strong> 1 = deep worry / 10 = peak elation. 4–6 is neutral territory.</p>
+            <p><strong className="text-foreground">Scale:</strong> 1 = deep worry / 10 = peak elation. 4–6 is neutral territory.</p>
           </div>
         )}
 
         {/* Cycle analysis */}
-        <div className="rounded-2xl p-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-4 bg-card border border-border">
           <div className="min-w-0 space-y-2">
             {cycle?.hasEnoughData ? (
               <>
@@ -294,7 +294,7 @@ export default function EmotionalCyclePage() {
         </div>
 
         {/* Chart */}
-        <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-4 space-y-3 bg-card border border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Your Cycle — Last 90 Days</h2>
             <span className="text-xs text-muted-foreground">{history.length} entries</span>
@@ -303,7 +303,7 @@ export default function EmotionalCyclePage() {
         </div>
 
         {/* Today's log */}
-        <div className="rounded-2xl p-4 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-4 space-y-4 bg-card border border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
               {alreadyLogged ? "Update today's mood" : "Log today's mood"}
@@ -346,7 +346,7 @@ export default function EmotionalCyclePage() {
 
         {/* History list — last 14 entries */}
         {history.length > 0 && (
-          <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="rounded-2xl p-4 space-y-3 bg-card border border-border">
             <h2 className="text-sm font-semibold text-foreground">Recent Entries</h2>
             <div className="space-y-2">
               {[...history].reverse().slice(0, 14).map(entry => (
