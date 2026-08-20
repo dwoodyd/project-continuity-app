@@ -30,6 +30,8 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain("src={WREN_CLIPS.tuggingThread}");
     expect(home).toContain("A week away. You returned anyway. That’s not small.");
     expect(home).toContain('new URLSearchParams(window.location.search).get("return-brief") === "1"');
+    expect(home).toContain("Preview return brief");
+    expect(home).toContain("Close preview");
     expect(scene).toContain("video.play().catch(() => {})");
     expect(scene).toContain("absolute inset-0 h-full w-full object-cover mix-blend-screen");
     expect(scene).not.toContain("rounded");

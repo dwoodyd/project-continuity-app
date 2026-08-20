@@ -1389,7 +1389,9 @@ export default function Home() {
   });
 
   const [returningAfterGap, setReturningAfterGap] = useState(false);
-  const reviewReturnBrief = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("return-brief") === "1";
+  const [reviewReturnBrief, setReviewReturnBrief] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("return-brief") === "1",
+  );
   useEffect(() => {
     const key = "continuary-last-dashboard-visit";
     const previous = Number(window.localStorage.getItem(key) || 0);
@@ -2001,6 +2003,14 @@ export default function Home() {
             Continue
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </button>
+          {reviewReturnBrief && (
+            <button
+              onClick={() => setReviewReturnBrief(false)}
+              className="mt-4 block text-xs text-[#F5EEE2]/65 underline underline-offset-4 hover:text-[#F5EEE2]"
+            >
+              Close preview
+            </button>
+          )}
         </IntroWrenScene>
       )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
@@ -2198,6 +2208,14 @@ export default function Home() {
         >
           Need just one thing?
         </button>
+        {!showReturnBrief && (
+          <button
+            onClick={() => setReviewReturnBrief(true)}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+          >
+            Preview return brief
+          </button>
+        )}
       </div>
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}

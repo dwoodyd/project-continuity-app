@@ -2250,3 +2250,7 @@
 ## Today Return Brief Review Access (Aug 20, 2026)
 - [x] Make the new Today Return Brief available for review without permanently changing its normal re-entry trigger.
 - [x] Validate the review path and add regression coverage before continuing any other Wren visual work.
+
+## Today Return Brief Live Visibility Repair (Aug 20, 2026)
+- [x] Diagnose why the live Today dashboard does not display the Return Brief review scene when requested.
+- [x] Repair the reliable access path and add regression coverage for the live dashboard review experience.
