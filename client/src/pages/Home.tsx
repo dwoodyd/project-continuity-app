@@ -79,6 +79,8 @@ import {
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
 import WrenPlayer from "@/components/WrenPlayer";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
@@ -1747,7 +1749,6 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const greetingWrenClip = hour < 12 ? "greetingMorning" : hour < 17 ? "greetingAfternoon" : "greetingEvening";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -1979,40 +1980,27 @@ export default function Home() {
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
-        <section className="return-brief relative isolate min-h-[440px] overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:min-h-[clamp(500px,62vh,700px)] sm:p-8" aria-labelledby="return-brief-title">
-          <div className="wren-field" aria-hidden="true">
-            <WrenPlayer
-              clip="returnPortrait"
-              size="full"
-              objectFit="cover"
-              fallbackStill="returnPortraitPoster"
-              poster="/manus-storage/wren-return-poster_6e19a8f4.webp"
-              wrapperClassName="h-full w-full scale-110 origin-bottom-right"
-            />
-          </div>
-          <div className="relative z-10 flex min-h-[400px] w-full max-w-xl flex-col justify-center sm:min-h-[clamp(436px,58vh,636px)] sm:max-w-[45%]">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E8A030]">Return brief · {format(now, "EEEE, MMMM d")}</p>
-              <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">A week away. You returned anyway. That&apos;s not small.</h2>
-              {lastWrittenLine && (
-                <p className="mt-4 border-l-2 border-[#E8A030]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
-                  “{lastWrittenLine}”
-                </p>
-              )}
-              {activeThreadLock && (
-                <p className="mt-4 text-sm leading-6 text-[#D4D7D0]">
-                  You were working on <span className="font-medium text-[#F5EEE2]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
-                </p>
-              )}
-            <button
+        <IntroWrenScene
+          src={WREN_CLIPS.tuggingThread}
+          eyebrow={`Return brief · ${format(now, "EEEE, MMMM d")}`}
+          title="A week away. You returned anyway. That’s not small."
+          body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
+          className="break-inside-avoid"
+        >
+          {lastWrittenLine && (
+            <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
+              “{lastWrittenLine}”
+            </p>
+          )}
+          <button
             onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
             disabled={recallThreadLock.isPending}
             className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
           >
             Continue
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </div>
-        </section>
+          </button>
+        </IntroWrenScene>
       )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
       {showTrialBanner && (
@@ -2116,16 +2104,7 @@ export default function Home() {
       )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between" style={{ order: -10 }}>
-        <div className="flex items-center gap-3">
-          <WrenPlayer
-            clip={greetingWrenClip}
-            size="sm"
-            stage={false}
-            feather
-            fallbackStill="luminousIdle"
-            wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"
-          />
-          <div>
+        <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
             {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
           </h1>
@@ -2142,7 +2121,6 @@ export default function Home() {
                 🔥 {streakData.streak}d
               </span>
             )}
-          </div>
           </div>
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
@@ -3137,43 +3115,6 @@ export default function Home() {
           />
         );
       })()}
-
-
-
-      {/* ── Wren Ambient Presence (time-of-day) ─────────────────────────── */}
-      {optInExpanded && (() => {
-        const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
-        const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
-        return (
-          <section className="wren-ambient-card relative isolate h-[220px] overflow-hidden bg-[#161815] break-inside-avoid mb-3" style={{ order: 100 }}>
-            {/* Subtle warm glow behind Wren */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.56 0.18 28 / 0.12) 0%, transparent 65%)" }}
-            />
-            {/* Wren fills the card — mix-blend-mode:screen removes the dark bg */}
-            <WrenPlayer
-              clip={wrenClip}
-              size="full"
-              stage={false}
-              loop
-              autoPlay
-              muted
-              objectFit="cover"
-              feather
-              featherDirection="bottom"
-              wrapperClassName="absolute inset-0 opacity-90"
-            />
-            {/* Tagline pinned to bottom */}
-            <div className="absolute bottom-0 left-0 right-0 pb-3 text-center px-4 z-10"
-              style={{ background: "linear-gradient(to top, oklch(0.10 0.022 240 / 0.85) 0%, transparent 100%)" }}
-            >
-              <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>{wrenTagline}</p>
-            </div>
-          </section>
-        );
-      })()}
-
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
       {optInExpanded && isModuleVisible("emotional_cycle") && <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3" style={{ order: presentationOrder("emotional_cycle", dashboardLayout) }}>
         <MoodWidget />

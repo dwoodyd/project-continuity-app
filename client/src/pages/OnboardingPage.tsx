@@ -113,7 +113,11 @@ function OnceVideo({ src, style, onEnded }: {
   style?: React.CSSProperties;
   onEnded?: () => void;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    videoRef.current?.play().catch(() => {});
+  }, [src]);
   // If video fails, fire onEnded immediately so the flow isn't blocked
   useEffect(() => {
     if (failed && onEnded) onEnded();
@@ -121,6 +125,7 @@ function OnceVideo({ src, style, onEnded }: {
   if (failed) return null;
   return (
     <video
+      ref={videoRef}
       src={src}
       autoPlay
       muted
@@ -238,7 +243,7 @@ function WordReveal({ text, active, delay = 0 }: { text: string; active: boolean
           transform: vis[i] ? "translateY(0)" : "translateY(12px)",
           transition: "opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1)",
           marginRight: "0.28em",
-        }}>{w}</span>
+        }}>{w}{i < words.length - 1 ? "\u00A0" : ""}</span>
       ))}
     </span>
   );

@@ -680,9 +680,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           {/* Sidebar footer */}
           <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
             {/* Wren resting — hidden in icon-only mode */}
-            <div className="hidden lg:block">
-              <WrenSidebarPresence />
-            </div>
+            {location === "/focus" && (
+              <div className="hidden lg:block">
+                <WrenSidebarPresence />
+              </div>
+            )}
             {user && (
               <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.18)" }}>

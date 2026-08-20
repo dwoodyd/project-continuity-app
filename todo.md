@@ -2235,3 +2235,10 @@
 - [x] Preserve Focus Sessions, its components, styling, copy, and Wren treatment unchanged; ask before any future shared-code impact.
 - [x] Remove decorative Wren thumbnails from Project cards and the Emotional Cycle status card without changing their information layouts.
 - [x] Verify Wren remains only in composition-critical emotional moments and add regression coverage for Focus isolation and thumbnail removal.
+
+## Intro-Scale Wren Scenes and Playback (Aug 20, 2026)
+- [x] Preserve Focus Sessions and its dependencies unchanged while reusing the Intro scene treatment elsewhere.
+- [x] Reuse the full-bleed Intro composition on Evidence Log, Today return state, and Weekly Compass with the specified Wren clips and route-specific copy.
+- [x] Remove Today’s 102px Wren tile and the shared corner-wave from all non-Focus routes only; preserve the Focus Sessions corner-wave exactly as-is.
+- [x] Add explicit guarded video playback only inside Intro-derived scenes and fix word-split headline spacing in the Intro scene; do not modify the shared Wren player used by Focus Sessions.
+- [x] Add regression coverage for target scene composition, playback, headline spacing, Wren placement removal, and Focus isolation.

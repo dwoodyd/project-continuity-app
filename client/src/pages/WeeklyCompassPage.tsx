@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
-import WrenPlayer from "@/components/WrenPlayer";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -227,23 +228,18 @@ export default function WeeklyCompassPage() {
 
       {/* Empty state */}
       {!isLoading && !compass && (
-        <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
-          <div className="relative">
-            <div className="flex justify-center mb-2" style={{ WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)" }}>
-              <WrenPlayer clip="memoryOrb" size="xl" loop autoPlay />
-            </div>
-            <p className="text-base font-semibold text-white mb-2">No compass set for this week.</p>
-            <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto">
-              Generate your weekly compass to get AI-powered recommendations on where to focus your energy.
-            </p>
-            <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 shadow-lg shadow-black/20">
-              {generate.isPending
-                ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
-                : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
-            </Button>
-          </div>
-        </div>
+        <IntroWrenScene
+          src={WREN_CLIPS.memoryOrb}
+          eyebrow="Weekly Compass"
+          title="One clear direction for the week."
+          body="Gather the threads that matter, then let the rest wait."
+        >
+          <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]">
+            {generate.isPending
+              ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
+              : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
+          </Button>
+        </IntroWrenScene>
       )}
 
       {/* Compass content */}
