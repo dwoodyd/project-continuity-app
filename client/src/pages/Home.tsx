@@ -312,7 +312,7 @@ function CheckInCard({
       disabled={completed}
       className="flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden"
       style={completed
-        ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
+        ? { background: "var(--muted)", borderColor: "var(--border)", opacity: 0.82 }
         : highlighted
           ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", boxShadow: "0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 4px 16px color-mix(in srgb, var(--primary) 12%, transparent)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
@@ -321,11 +321,11 @@ function CheckInCard({
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "var(--accent-tint-text)" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "var(--muted-foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--muted-foreground)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.92 0.10 65)" : "oklch(0.65 0.01 270)" }}
+          style={{ color: completed ? "var(--muted-foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--foreground)" }}
         >
           {label}
         </span>
@@ -339,7 +339,7 @@ function CheckInCard({
       </div>
       <p
         className="text-xs leading-tight pl-0.5 truncate w-full"
-        style={{ color: highlighted ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
+          style={{ color: highlighted ? "var(--foreground)" : "var(--muted-foreground)" }}
       >{timeHint}</p>
       {completed && (
         <WrenPlayer clip="blobJournal" size="xs" loop wrapperClassName="mt-1 self-end" />
@@ -1991,9 +1991,9 @@ export default function Home() {
           className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
           variant="return"
         >
-          {lastWrittenLine && (
-            <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-base leading-7 text-[#F5EEE2]" style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}>
-              “{lastWrittenLine}”
+          {lastWrittenLine && !activeThreadLock && (
+            <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-sm leading-6 text-[#FFF8EC]/90">
+              You left yourself a note. It is waiting in Scratch Pad when you are ready—one small next step is enough.
             </p>
           )}
           <button

@@ -537,7 +537,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           onMouseLeave={() => isFocusRoute && setSidebarPeeking(false)}
         >
           {/* Brand header */}
-          <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
+          <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
               <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
               <span className="hidden lg:block text-sm font-semibold truncate tracking-wide text-sidebar-foreground">Continuary</span>
@@ -564,8 +564,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   <button
                     type="button"
                     onClick={() => setNavExpanded((current) => ({ ...current, [group.key]: !expanded }))}
-                    className="hidden lg:flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-left hover:text-white/70 transition-colors"
-                    style={{ color: "oklch(1 0 0 / 0.32)" }}
+                    className="hidden lg:flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-left transition-colors"
+                    style={{ color: "var(--muted-foreground)" }}
                     aria-expanded={expanded}
                     aria-controls={`nav-group-${group.key}`}
                   >
@@ -582,19 +582,19 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                           title={label}
                           className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
                           style={active
-                            ? { background: "oklch(0.56 0.18 28 / 0.14)", color: "#C8452B", fontWeight: 500 }
-                            : { color: "oklch(1 0 0 / 0.58)" }
+                            ? { background: "var(--brand-muted)", color: "var(--accent-tint-text)", fontWeight: 600 }
+                            : { color: "var(--sidebar-foreground)" }
                           }
                         >
-                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "#C8452B" : "oklch(1 0 0 / 0.42)" }} />
+                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "var(--accent-tint-text)" : "var(--muted-foreground)" }} />
                           <span className="hidden lg:block">{label}</span>
                           {href === "/scratch" && scratchCount > 0 && !active && (
-                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.56 0.18 28 / 0.18)", color: "#C8452B" }}>{scratchCount}</span>
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "var(--brand-muted)", color: "var(--accent-tint-text)" }}>{scratchCount}</span>
                           )}
                           {href === "/loops" && loopsCount > 0 && !active && (
                             <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
                           )}
-                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "#C8452B" }} />}
+                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "var(--accent-tint-text)" }} />}
                         </Link>
                       );
                     })}
@@ -608,9 +608,9 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               onClick={() => setFeedbackOpen(true)}
               title="Send Feedback"
               className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full text-left"
-              style={{ color: "oklch(1 0 0 / 0.48)" }}
+              style={{ color: "var(--sidebar-foreground)" }}
             >
-              <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "oklch(1 0 0 / 0.32)" }} />
+              <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "var(--muted-foreground)" }} />
               <span className="hidden lg:block">Send Feedback</span>
             </button>
 
@@ -678,7 +678,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </nav>
 
           {/* Sidebar footer */}
-          <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
+          <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
             {/* Wren resting — hidden in icon-only mode */}
             {location === "/focus" && (
               <div className="hidden lg:block">
@@ -688,25 +688,25 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             {user && (
               <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
                 <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.18)" }}>
-                  <span className="text-xs font-semibold" style={{ color: "#C8452B" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
+                  <span className="text-xs font-semibold" style={{ color: "var(--accent-tint-text)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="hidden lg:block min-w-0 flex-1">
-                  <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
+                  <p className="text-xs font-medium truncate" style={{ color: "var(--sidebar-foreground)" }}>{user.name ?? "User"}</p>
                   {user.role === "admin" && <p className="text-[10px] font-medium" style={{ color: "oklch(0.80 0.17 65 / 0.65)" }}>Admin</p>}
                 </div>
               </div>
             )}
             {/* Footer action buttons — icon-only at md, icon+label at lg */}
             <div className="flex flex-col lg:flex-row items-center gap-1 px-0.5 lg:px-1">
-              <button onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
+              <button onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
                 {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> : <Moon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                 <span className="hidden lg:block">{theme === "dark" ? "Light" : "Dark"}</span>
               </button>
-              <button onClick={toggleLayoutMode} aria-label="Switch to compact view" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
+              <button onClick={toggleLayoutMode} aria-label="Switch to compact view" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title="Switch to compact view">
                 <PanelLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Compact</span>
               </button>
-              <button onClick={() => logout()} aria-label="Sign out" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
+              <button onClick={() => logout()} aria-label="Sign out" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title="Sign out">
                 <LogOut className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Sign out</span>
               </button>
@@ -715,11 +715,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <a
               href="/changelog"
               className="hidden lg:flex items-center gap-1.5 px-1 py-1 text-[10px] transition-colors"
-              style={{ color: "oklch(1 0 0 / 0.22)" }}
+              style={{ color: "var(--muted-foreground)" }}
             >
               Changelog
               {/* Last updated date — always visible */}
-              <span style={{ color: "oklch(1 0 0 / 0.18)" }}>· Jul 7</span>
+              <span style={{ color: "var(--muted-foreground)" }}>· Jul 7</span>
               {/* Amber dot: visible for 3 days after the latest entry date */}
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span

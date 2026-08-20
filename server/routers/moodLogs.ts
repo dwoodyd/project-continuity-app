@@ -31,10 +31,14 @@ function avgCycleLength(points: { date: string }[]): number | null {
   return Math.round(gaps.reduce((s, g) => s + g, 0) / gaps.length);
 }
 
-// Given cycle length and last peak date, predict the next peak.
+// Given cycle length and last peak date, advance to the next future occurrence.
 function predictNext(lastDate: string, cycleDays: number): string {
-  const d = new Date(lastDate);
-  d.setDate(d.getDate() + cycleDays);
+  const d = new Date(`${lastDate}T12:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  do {
+    d.setDate(d.getDate() + cycleDays);
+  } while (d < today);
   return d.toISOString().split("T")[0]!;
 }
 

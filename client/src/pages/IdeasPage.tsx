@@ -50,6 +50,10 @@ export default function IdeasPage() {
 
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
+  const userFacingIntent = (intent: string) => intent
+    .replace(/^the user wants to\s*/i, "You want to ")
+    .replace(/^the user\s+/i, "You ");
+
   function handleAddToTasks(idea: { id: number; rawContent: string; parsedIntent?: string | null }) {
     const currentTasks: Array<{ id: string; title: string; done: boolean; projectId: null; energyLevel: "any" }> =
       todayPlan?.criticalTasks ? JSON.parse(todayPlan.criticalTasks as string) : [];
@@ -113,7 +117,7 @@ export default function IdeasPage() {
             >
               {idea.parsedIntent && (
                 <p className="text-sm font-medium text-foreground mb-1 leading-snug">
-                  {idea.parsedIntent}
+                  {userFacingIntent(idea.parsedIntent)}
                 </p>
               )}
               <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-4">

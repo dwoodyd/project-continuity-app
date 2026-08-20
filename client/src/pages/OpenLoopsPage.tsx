@@ -135,7 +135,7 @@ export default function OpenLoopsPage() {
           <Inbox className="w-10 h-10 text-muted-foreground opacity-40" />
           <p className="text-sm text-muted-foreground">No open loops right now.</p>
           <p className="text-xs text-muted-foreground opacity-60">
-            Loops appear here when you capture an open_loop thought and route it.
+            Loops appear here when you capture an open loop thought and route it.
           </p>
           <a href="/capture" className="text-xs font-medium text-primary underline underline-offset-4 hover:text-primary/80">
             Nothing to hold right now? Capture a thought with Wren →

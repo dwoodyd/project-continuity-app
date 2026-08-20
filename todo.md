@@ -2259,3 +2259,13 @@
 - [x] Remove visible Return Brief framing and extend the Wren field edge-to-edge across the available app content region.
 - [x] Strengthen the text-safe overlay so title, supporting copy, thread note, and actions remain readable without covering Wren’s face.
 - [x] Add regression coverage for the unframed edge-bleed and readable overlay contract.
+
+## Full App Review Remediation (Aug 20, 2026)
+- [ ] Complete light-mode contrast remediation for sidebar navigation, Daily Rhythm, return/close cards, labels, badges, and settings controls; preserve dark mode and Focus Sessions.
+- [x] Replace system phrasing in Ideas and Open Loops; route Weekly Compass guidance through Wren’s warm dial-derived voice.
+- [x] Prevent stale Emotional Cycle predictions and stale Weekly Compass project assertions from reaching the user.
+- [ ] Replace raw Scratch Pad Return Brief content with a crafted re-entry summary; consolidate duplicate Clarity/Evidence header/CTA treatments.
+- [ ] Standardize selected page headers and address named polish items: Project status label, Thread Lock spacing, humanized timestamps, and balanced empty-state layouts.
+- [ ] Add regression coverage and verify Focus Sessions remains unchanged throughout the review remediation.
+- [x] Correct sidebar and Daily Rhythm light-mode contrast, replace raw Return Brief note content, and consolidate the Evidence Log duplicate hero/header treatment.
+- [x] Add focused regression coverage for light navigation, user voice, stale data, re-entry content, and Evidence hierarchy; verify Focus Sessions source remains unchanged.
