@@ -2309,3 +2309,10 @@
 - [x] Select an appropriate unwatermarked licensed Wren asset for the Evidence Log hero; do not crop or conceal the visible Veo watermark.
 - [x] Replace the Evidence hero source while retaining the full main-pane composition and readable copy.
 - [x] Add regression coverage and verify Focus Sessions remains unchanged.
+
+## Final Light-Mode and Mobile Readability Pass (Aug 20, 2026)
+- [x] Give Today’s re-entry/status banner an explicit Studio Wall light variant rather than the remaining muddy brown surface.
+- [x] Add mobile bottom clearance so floating capture controls cannot cover cards, chevrons, or destructive actions.
+- [x] Raise Daily Rhythm phase-label and secondary metadata contrast in Studio Wall.
+- [x] Make all admin-area text, controls, and metadata legible in light mode.
+- [x] Add regression coverage and verify protected Today Wren and Focus Sessions surfaces remain unchanged.

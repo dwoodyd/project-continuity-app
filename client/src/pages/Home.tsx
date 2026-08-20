@@ -326,7 +326,7 @@ function CheckInCard({
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
-          style={{ color: completed ? "var(--muted-foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--foreground)" }}
+          style={{ color: completed ? "var(--foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--foreground)" }}
         >
           {label}
         </span>
@@ -340,7 +340,7 @@ function CheckInCard({
       </div>
       <p
         className="text-xs leading-tight pl-0.5 truncate w-full"
-          style={{ color: highlighted ? "var(--foreground)" : "var(--muted-foreground)" }}
+          style={{ color: highlighted ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 74%, var(--muted-foreground))" }}
       >{timeHint}</p>
       {completed && (
         <WrenPlayer clip="blobJournal" size="xs" loop wrapperClassName="mt-1 self-end" />
@@ -2332,26 +2332,26 @@ export default function Home() {
       {topAlert === "spiral_offer" && (
         <div
           className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.22 0.02 240 / 0.60)", borderColor: "oklch(0.45 0.04 240 / 0.50)" }}
+          style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--primary) 26%, var(--border))" }}
         >
           <div className="flex items-start gap-3">
-            <Anchor className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "oklch(0.72 0.06 240)" }} />
+            <Anchor className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--accent-tint-text)" }} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium mb-0.5" style={{ color: "oklch(0.88 0.04 240)" }}>Ground Mode available</p>
-              <p className="text-xs leading-relaxed" style={{ color: "oklch(0.65 0.03 240)" }}>
+              <p className="text-sm font-medium mb-0.5 text-foreground">Ground Mode available</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 Your recent notes have some spiral signals. Ground Mode strips the AI back to facts only — no warmth, no framing, just what's observable and one next action.
               </p>
               <div className="flex items-center gap-3 mt-2.5">
                 <button
                   onClick={() => enterGroundMode("contextual_offer")}
                   className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                  style={{ background: "oklch(0.35 0.04 240 / 0.70)", color: "oklch(0.90 0.04 240)", border: "1px solid oklch(0.50 0.04 240 / 0.40)" }}
+                  style={{ background: "var(--primary)", color: "var(--primary-foreground)", border: "1px solid color-mix(in srgb, var(--primary) 72%, var(--border))" }}
                 >
                   Enter Ground Mode
                 </button>
                 <button
                   onClick={() => setGroundModeCrisisBreak(true)}
-                  className="text-xs" style={{ color: "oklch(0.55 0.03 240)" }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Not now
                 </button>

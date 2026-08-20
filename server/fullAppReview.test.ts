@@ -14,9 +14,14 @@ describe("full app review remediation", () => {
     expect(layout).toContain('background: "var(--brand-muted)"');
     expect(layout).toContain('color: "var(--sidebar-foreground)"');
     expect(layout).toContain('color: "var(--muted-foreground)"');
+    expect(layout).toContain('className={isFocusRoute ? "bg-background" : "bg-background pb-28 sm:pb-8"}');
+    expect(layout).toContain('bottom-4 right-4 sm:bottom-6 sm:right-6');
     expect(home).toContain('background: "var(--muted)"');
-    expect(home).toContain('color: completed ? "var(--muted-foreground)"');
+    expect(home).toContain('color: completed ? "var(--foreground)"');
+    expect(home).toContain('color-mix(in srgb, var(--foreground) 74%, var(--muted-foreground))');
     expect(home).toContain('highlighted ? "var(--accent-tint-text)"');
+    expect(home).toContain('topAlert === "spiral_offer"');
+    expect(home).toContain('background: "var(--card)"');
     expect(settings).toContain('enabled ? "bg-primary shadow-');
     expect(cycle).toContain('rounded-2xl p-4 bg-card border border-border');
     expect(cycle).toContain('background: value === n ? `color-mix(in srgb, ${phaseColor(n)} 16%, var(--card))` : "var(--card)"');
@@ -25,6 +30,10 @@ describe("full app review remediation", () => {
     expect(home).toContain('className="text-xs leading-snug text-muted-foreground"');
     expect(ideas).toContain('className="rounded-xl p-4 border border-border bg-card text-card-foreground shadow-sm"');
     expect(ideas).toContain('text-foreground/80 hover:text-foreground hover:bg-muted');
+
+    const adminApplications = source("client/src/pages/AdminApplicationsPage.tsx");
+    expect(adminApplications).toContain('background: "var(--muted)", color: "var(--muted-foreground)", border: "1px solid var(--border)"');
+    expect(adminApplications).toContain('background: "var(--primary)", color: "var(--primary-foreground)"');
   });
 
   it("keeps user-facing copy free of internal phrasing and stale assertions", () => {

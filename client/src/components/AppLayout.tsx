@@ -735,7 +735,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         {/* Main content — takes full width on /focus since sidebar is hidden */}
         <main
           id="main-content"
-          className="bg-background"
+          className={isFocusRoute ? "bg-background" : "bg-background pb-28 sm:pb-8"}
           style={{
             flex: 1,
             width: isFocusRoute ? "100%" : undefined,
@@ -749,7 +749,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         </main>
 
         {/* FAB — speed-dial with two capture options */}
-        <div className="fixed z-40 bottom-6 right-6 flex flex-col items-end gap-2">
+        <div className="fixed z-40 bottom-4 right-4 sm:bottom-6 sm:right-6 flex flex-col items-end gap-2">
           {/* Speed-dial options */}
           {fabMenuOpen && (
             <>
