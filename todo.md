@@ -2285,3 +2285,8 @@
 - [x] Remove visible borders and corner framing from non-Today immersive Wren hero videos.
 - [x] Extend each hero video to fade or bleed across its available content region while retaining a readable text-safe overlay.
 - [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.
+
+## Evidence and Today Video Surface Refinement (Aug 20, 2026)
+- [x] Refine Evidence Log’s full-bleed hero so it is visually seamless across its available app-content region.
+- [x] Remove residual visual framing from the protected Today greeting rotation without moving, enlarging, or changing its time-of-day behavior.
+- [x] Add regression coverage and verify Focus Sessions and the locked Today greeting geometry remain unchanged.

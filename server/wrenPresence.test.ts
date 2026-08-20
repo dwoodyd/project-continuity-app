@@ -67,12 +67,15 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain('const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
     expect(home).toContain('data-testid="today-greeting-wren"');
     expect(home).toContain('h-[102px] w-[102px]');
+    expect(home).toContain('className="h-[102px] w-[102px] shrink-0 overflow-hidden bg-transparent"');
+    expect(home).toContain('stage={false}');
     expect(home).not.toContain("wren-ambient-card");
     expect(projects).not.toContain("WrenPlayer");
     expect(cycle).not.toContain("WrenPlayer");
     expect(cycle).toContain("{/* Cycle analysis */}");
     expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
     expect(evidence).toContain("bleed");
+    expect(evidence).toContain('variant="return"');
     expect(compass).toContain("src={WREN_CLIPS.memoryOrb}");
     expect(compass).toContain("bleed");
     expect(appLayout).toContain('{location === "/focus" && (');

@@ -2139,7 +2139,7 @@ export default function Home() {
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
         <div className="flex items-center gap-2 flex-wrap justify-end min-w-0">
           <div
-            className="h-[102px] w-[102px] shrink-0 overflow-hidden rounded-xl border border-border bg-card"
+            className="h-[102px] w-[102px] shrink-0 overflow-hidden bg-transparent"
             data-testid="today-greeting-wren"
             aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
           >
@@ -2147,6 +2147,7 @@ export default function Home() {
               clip={greetingWrenClip}
               size="full"
               loop
+              stage={false}
               wrapperClassName="h-full w-full [&>video]:h-full [&>video]:w-full [&>video]:object-cover"
             />
           </div>
