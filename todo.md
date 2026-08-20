@@ -2280,3 +2280,8 @@
 - [x] Give Ideas cards, note text, timestamps, and actions semantic Studio Wall contrast without changing dark mode behavior.
 - [x] Correct Emotional Cycle mood-score buttons and phase/time labels for clear light-mode contrast.
 - [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.
+
+## Non-Today Wren Hero Edge-Bleed (Aug 20, 2026)
+- [x] Remove visible borders and corner framing from non-Today immersive Wren hero videos.
+- [x] Extend each hero video to fade or bleed across its available content region while retaining a readable text-safe overlay.
+- [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.

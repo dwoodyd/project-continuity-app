@@ -1269,6 +1269,7 @@ export default function ClarityEnginePage() {
         eyebrow="Clarity Engine"
         title="You do not have to untangle it alone."
         body="Put down what is loudest. We will find the signal together."
+        bleed
       >
         <Button
           onClick={() => document.getElementById("clarity-mode")?.scrollIntoView({ behavior: "smooth", block: "start" })}

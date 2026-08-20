@@ -238,6 +238,7 @@ export default function WeeklyCompassPage() {
           eyebrow="Weekly Compass"
           title="One clear direction for the week."
           body="Gather the threads that matter, then let the rest wait."
+          bleed
         >
           <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]">
             {generate.isPending

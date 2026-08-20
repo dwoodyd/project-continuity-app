@@ -259,6 +259,7 @@ export default function EvidenceLogPage() {
         eyebrow="Evidence Log"
         title="This is your record. Every entry is proof."
         body="The record holds what you did when the rest of your mind tries to lose it."
+        bleed
       >
         <Button
           onClick={handleGenerateCurrent}

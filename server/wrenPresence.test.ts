@@ -37,6 +37,9 @@ describe("Wren presence and coherent voice", () => {
     expect(scene).toContain("video.play().catch(() => {})");
     expect(scene).toContain("absolute inset-0 h-full w-full object-cover mix-blend-screen");
     expect(scene).toContain('variant?: "standard" | "return"');
+    expect(scene).toContain('bleed?: boolean');
+    expect(scene).toContain('data-wren-scene={bleed ? "edge-bleed" : "contained"}');
+    expect(scene).toContain('w-[calc(100%+2.5rem)] -mx-5');
     expect(scene).toContain("border-0 rounded-none");
     expect(scene).toContain("bg-[linear-gradient(90deg,rgba(22,24,21,0.98)");
     expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
@@ -69,7 +72,9 @@ describe("Wren presence and coherent voice", () => {
     expect(cycle).not.toContain("WrenPlayer");
     expect(cycle).toContain("{/* Cycle analysis */}");
     expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
+    expect(evidence).toContain("bleed");
     expect(compass).toContain("src={WREN_CLIPS.memoryOrb}");
+    expect(compass).toContain("bleed");
     expect(appLayout).toContain('{location === "/focus" && (');
     expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
     expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
@@ -80,6 +85,7 @@ describe("Wren presence and coherent voice", () => {
     expect(vault).toContain('<WrenPlayer clip="hoversJournal" size="full"');
     expect(clarity).toContain("src={WREN_CLIPS.perchedDoc}");
     expect(clarity).toContain("You do not have to untangle it alone.");
+    expect(clarity).toContain("bleed");
     expect(scratch).toContain('<WrenPlayer clip="bouncingFunClean" size="full"');
     expect(focus).toContain("cornerWave");
     expect(companion).toContain("weaving");
