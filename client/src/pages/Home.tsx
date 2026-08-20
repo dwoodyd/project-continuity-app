@@ -1747,7 +1747,6 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -1979,21 +1978,17 @@ export default function Home() {
     </Dialog>
     <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto flex flex-col gap-7 overflow-x-hidden">
       {showReturnBrief && (
-        <section className="return-brief relative isolate overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:p-8" aria-labelledby="return-brief-title">
-          <div className="absolute inset-y-0 right-0 w-full pointer-events-none" aria-hidden="true">
+        <section className="return-brief relative isolate min-h-[320px] overflow-hidden bg-[#161815] p-5 text-[#F5EEE2] sm:min-h-[360px] sm:p-8" aria-labelledby="return-brief-title">
+          <div className="wren-field" aria-hidden="true">
             <WrenPlayer
               clip="tuggingThread"
               size="full"
-              stage={false}
               objectFit="cover"
-              feather
-              featherDirection="bottom"
               fallbackStill="siliconeTugging"
-              wrapperClassName="absolute inset-0 scale-110 origin-bottom-right opacity-55 sm:opacity-90"
+              wrapperClassName="h-full w-full scale-110 origin-bottom-right"
             />
           </div>
-          <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ background: "linear-gradient(90deg, #161815 0%, rgba(22,24,21,0.94) 38%, rgba(22,24,21,0.42) 70%, rgba(22,24,21,0.10) 100%)" }} />
-          <div className="relative z-10 max-w-xl">
+          <div className="relative z-10 w-full max-w-xl sm:max-w-[45%]">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#E8A030]">Return brief · {format(now, "EEEE, MMMM d")}</p>
               <h2 id="return-brief-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">The thread is still here.</h2>
               {lastWrittenLine && (
@@ -2006,15 +2001,15 @@ export default function Home() {
                   You were working on <span className="font-medium text-[#F5EEE2]">{activeThreadLock.whatDoing}</span>. Next: {activeThreadLock.whatNext}
                 </p>
               )}
-          </div>
-          <button
+            <button
             onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
             disabled={recallThreadLock.isPending}
-            className="relative z-10 mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
+            className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
           >
             Continue
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
-          </button>
+            </button>
+          </div>
         </section>
       )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
@@ -2119,16 +2114,7 @@ export default function Home() {
       )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between" style={{ order: -10 }}>
-        <div className="flex items-center gap-3">
-          <WrenPlayer
-            clip={greetingWrenClip}
-            size="sm"
-            stage={false}
-            feather
-            fallbackStill="luminousIdle"
-            wrapperClassName="shrink-0 w-20 h-20 sm:w-24 sm:h-24"
-          />
-          <div>
+        <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
             {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
           </h1>
@@ -2145,7 +2131,6 @@ export default function Home() {
                 🔥 {streakData.streak}d
               </span>
             )}
-          </div>
           </div>
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}

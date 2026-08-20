@@ -59,6 +59,7 @@
 ══════════════════════════════════════════════════════════════════════════════ */
 :root {
   --radius: 0.25rem;
+  --ground: #161815;
 
   /* ── Red pen: reserved for the most important next action ── */
   --primary: #C8452B;
@@ -118,6 +119,7 @@
    Home is warm near-black and amber; Studio Wall stays the deliberate light option.
 ══════════════════════════════════════════════════════════════════════════════ */
 .dark {
+  --ground: #161815;
   --primary: #E8A030;
   --primary-foreground: #161815;
 
@@ -211,13 +213,38 @@
     font-family: 'Courier Prime', 'Courier New', monospace;
   }
 
-  /* Wren's artwork is lit for this single shared dark field. It gives the
-     contained media breathing room without creating a navy seam in the app. */
+  /* Wren is environmental media, never a bordered video tile. */
   .wren-dark-stage {
-    background: #161815;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: 0.75rem;
-    box-shadow: inset 0 0 2.75rem rgba(232, 160, 48, 0.12);
+    background: var(--ground);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .wren-field {
+    position: absolute;
+    inset: 0 0 0 45%;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: var(--ground);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 18%);
+    mask-image: linear-gradient(90deg, transparent 0%, #000 18%);
+  }
+
+  .wren-field video,
+  .wren-field img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 640px) {
+    .wren-field {
+      inset: 45% 0 0 0;
+      -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 20%);
+      mask-image: linear-gradient(180deg, transparent 0%, #000 20%);
+    }
   }
 
   /* Public routes use semantic values rather than URL-specific paper or navy.

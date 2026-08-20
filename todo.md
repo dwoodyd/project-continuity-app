@@ -2218,3 +2218,9 @@
 - [x] Review the attached in-app introduction and continuary.app as reference experiences for Wren’s full-bleed scene treatment.
 - [x] Replace selected boxed Wren media treatments with full-bleed, text-safe scene integrations that foreground the character over the container.
 - [x] Preserve functional content layouts, motion preferences, and regression coverage for immersive Wren placements.
+
+## Environmental Wren Field Treatment (Aug 19, 2026)
+- [x] Add a shared unframed Wren field pattern with edge-bleed video, a left-side text-safe zone, and warm near-black continuity.
+- [x] Rebuild Return Brief as a 45/55 full-bleed golden-thread scene and remove the compact Wren greeting avatar.
+- [x] Verify no selected Wren surface adds a border or radius, and confirm lighter accent text remains on accent-tinted active navigation, thread, and check-in surfaces.
+- [x] Add regression coverage for the environmental scene contract and responsive field composition.

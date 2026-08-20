@@ -158,7 +158,7 @@ export default function WrenPlayer({
     <div
       className={cn(
         "flex items-center justify-center relative overflow-visible",
-        stage && "wren-dark-stage p-2",
+        stage && "wren-dark-stage",
         SIZE_CLASSES[size],
         wrapperClassName,
       )}
@@ -168,7 +168,7 @@ export default function WrenPlayer({
         <img
           src={WREN_STILLS[fallbackStill]}
           alt="Wren"
-          className="absolute inset-2 w-[calc(100%-1rem)] h-[calc(100%-1rem)] object-contain"
+          className="absolute inset-0 w-full h-full object-contain"
           style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
@@ -183,7 +183,7 @@ export default function WrenPlayer({
           onEnded={onEnded}
           onCanPlay={() => setVideoReady(true)}
           className={cn(
-            stage ? "w-[calc(100%-1rem)] h-[calc(100%-1rem)]" : "w-full h-full",
+            "w-full h-full",
             "relative",
             objectFit === "cover" ? "object-cover" : "object-contain",
             className,

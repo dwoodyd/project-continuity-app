@@ -36,9 +36,10 @@ describe("permanent dual-theme contract", () => {
     expect(pricing).not.toContain("text-emerald-400 text-xs font-bold bg-emerald-400/10");
     const wren = source("client/src/components/WrenPlayer.tsx");
     expect(wren).toContain("stage = true");
-    expect(wren).toContain("wren-dark-stage p-2");
+    expect(wren).toContain('stage && "wren-dark-stage"');
     expect(source("client/src/index.css")).toContain(".wren-dark-stage {");
-    expect(source("client/src/index.css")).toContain("background: #161815");
+    expect(source("client/src/index.css")).toContain("background: var(--ground)");
+    expect(source("client/src/index.css")).toContain("--ground: #161815");
   });
 
   it("maps existing Wren assets to the product moments they were commissioned for", () => {
