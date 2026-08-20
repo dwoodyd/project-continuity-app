@@ -79,6 +79,7 @@ import {
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
 import WrenPlayer from "@/components/WrenPlayer";
+import { TodayGreetingWren } from "@/components/TodayGreetingWren";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
 import { WREN_CLIPS } from "@/lib/wrenClips";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
@@ -2143,13 +2144,7 @@ export default function Home() {
             data-testid="today-greeting-wren"
             aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
           >
-            <WrenPlayer
-              clip={greetingWrenClip}
-              size="full"
-              loop
-              stage={false}
-              wrapperClassName="h-full w-full [&>video]:h-full [&>video]:w-full [&>video]:object-cover"
-            />
+            <TodayGreetingWren clip={greetingWrenClip} />
           </div>
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (

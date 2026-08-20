@@ -64,11 +64,14 @@ describe("Wren presence and coherent voice", () => {
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     const companion = source("client/src/pages/FocusCompanionPage.tsx");
     const popout = source("client/src/components/WrenPopout.tsx");
+    const todayGreeting = source("client/src/components/TodayGreetingWren.tsx");
     expect(home).toContain('const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
     expect(home).toContain('data-testid="today-greeting-wren"');
     expect(home).toContain('h-[102px] w-[102px]');
     expect(home).toContain('className="h-[102px] w-[102px] shrink-0 overflow-hidden bg-transparent"');
-    expect(home).toContain('stage={false}');
+    expect(home).toContain('<TodayGreetingWren clip={greetingWrenClip} />');
+    expect(todayGreeting).toContain('video.play().catch(() => {})');
+    expect(todayGreeting).toContain('radial-gradient(ellipse 76% 82%');
     expect(home).not.toContain("wren-ambient-card");
     expect(projects).not.toContain("WrenPlayer");
     expect(cycle).not.toContain("WrenPlayer");
@@ -76,6 +79,7 @@ describe("Wren presence and coherent voice", () => {
     expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
     expect(evidence).toContain("bleed");
     expect(evidence).toContain('variant="return"');
+    expect(evidence).toContain('className="min-h-[min(84vh,860px)]"');
     expect(compass).toContain("src={WREN_CLIPS.memoryOrb}");
     expect(compass).toContain("bleed");
     expect(appLayout).toContain('{location === "/focus" && (');

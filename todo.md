@@ -2290,3 +2290,9 @@
 - [x] Refine Evidence Log’s full-bleed hero so it is visually seamless across its available app-content region.
 - [x] Remove residual visual framing from the protected Today greeting rotation without moving, enlarging, or changing its time-of-day behavior.
 - [x] Add regression coverage and verify Focus Sessions and the locked Today greeting geometry remain unchanged.
+
+## Rendered Evidence and Today Video Verification (Aug 20, 2026)
+- [x] Inspect the actual rendered Evidence and Today routes to identify why the intended video refinements are not visibly apparent.
+- [x] Make a clearly observable rendered correction to Evidence and Today video framing/edge treatment without changing Focus Sessions.
+- [ ] Visually verify the corrected result in a signed-in live session after publishing.
+- [x] Apply the user-approved source-driven Evidence and Today video-surface correction while preserving the protected Today greeting geometry and Focus Sessions.

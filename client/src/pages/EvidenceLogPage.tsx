@@ -261,6 +261,7 @@ export default function EvidenceLogPage() {
         body="The record holds what you did when the rest of your mind tries to lose it."
         bleed
         variant="return"
+        className="min-h-[min(84vh,860px)]"
       >
         <Button
           onClick={handleGenerateCurrent}
