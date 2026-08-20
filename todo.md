@@ -2300,3 +2300,7 @@
 ## Evidence Hero Right-Edge Seam (Aug 20, 2026)
 - [x] Extend the Evidence Log hero scene to the full desktop app-content boundary so no dark strip remains at the right edge.
 - [x] Add regression coverage and verify Focus Sessions remains unchanged.
+
+## Evidence Hero Parent Width Cap (Aug 20, 2026)
+- [x] Remove the actual Evidence hero parent-layout width cap confirmed by the signed-in screenshot so the scene fills the full main pane.
+- [x] Verify the right-side black column is absent in the signed-in live route and Focus Sessions remains unchanged.

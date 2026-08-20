@@ -495,6 +495,18 @@ video {
   mix-blend-mode: screen;
 }
 
+/* Evidence’s Wren scene must reach the true desktop main-pane boundary.
+   The fixed sidebar is 15rem at lg+, so this explicit responsive width avoids
+   parent utility caps that previously left a visible black column on the right. */
+@media (min-width: 1024px) {
+  .evidence-main-pane {
+    width: calc(100vw - 15rem) !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+}
+
 /* ── Frosted glass nav (compact header + bottom tab bar) ────────────────────
    Applies a subtle backdrop blur so content scrolling behind the nav feels
    layered and premium. The sidebar CSS variable already provides the base

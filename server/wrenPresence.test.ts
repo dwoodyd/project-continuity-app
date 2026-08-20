@@ -79,7 +79,9 @@ describe("Wren presence and coherent voice", () => {
     expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
     expect(evidence).toContain("bleed");
     expect(evidence).toContain('variant="return"');
-    expect(evidence).toContain('className="min-h-[min(84vh,860px)] lg:w-[calc(100vw-15rem)] lg:max-w-none"');
+    expect(evidence).toContain('className="evidence-main-pane min-h-[min(84vh,860px)]"');
+    expect(source("client/src/index.css")).toContain(".evidence-main-pane");
+    expect(source("client/src/index.css")).toContain("width: calc(100vw - 15rem) !important");
     expect(compass).toContain("src={WREN_CLIPS.memoryOrb}");
     expect(compass).toContain("bleed");
     expect(appLayout).toContain('{location === "/focus" && (');
