@@ -2294,7 +2294,7 @@
 ## Rendered Evidence and Today Video Verification (Aug 20, 2026)
 - [x] Inspect the actual rendered Evidence and Today routes to identify why the intended video refinements are not visibly apparent.
 - [x] Make a clearly observable rendered correction to Evidence and Today video framing/edge treatment without changing Focus Sessions.
-- [ ] Visually verify the corrected result in a signed-in live session after publishing.
+- [x] Visually verify the corrected result in a signed-in live session after publishing.
 - [x] Apply the user-approved source-driven Evidence and Today video-surface correction while preserving the protected Today greeting geometry and Focus Sessions.
 
 ## Evidence Hero Right-Edge Seam (Aug 20, 2026)
