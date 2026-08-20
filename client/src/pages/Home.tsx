@@ -1752,6 +1752,7 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -2137,6 +2138,18 @@ export default function Home() {
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
         <div className="flex items-center gap-2 flex-wrap justify-end min-w-0">
+          <div
+            className="h-[102px] w-[102px] shrink-0 overflow-hidden rounded-xl border border-border bg-card"
+            data-testid="today-greeting-wren"
+            aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
+          >
+            <WrenPlayer
+              clip={greetingWrenClip}
+              size="full"
+              loop
+              wrapperClassName="h-full w-full [&>video]:h-full [&>video]:w-full [&>video]:object-cover"
+            />
+          </div>
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (
             <button

@@ -61,7 +61,9 @@ describe("Wren presence and coherent voice", () => {
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     const companion = source("client/src/pages/FocusCompanionPage.tsx");
     const popout = source("client/src/components/WrenPopout.tsx");
-    expect(home).not.toContain("greetingWrenClip");
+    expect(home).toContain('const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes"');
+    expect(home).toContain('data-testid="today-greeting-wren"');
+    expect(home).toContain('h-[102px] w-[102px]');
     expect(home).not.toContain("wren-ambient-card");
     expect(projects).not.toContain("WrenPlayer");
     expect(cycle).not.toContain("WrenPlayer");

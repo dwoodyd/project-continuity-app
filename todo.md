@@ -2269,3 +2269,8 @@
 - [x] Add regression coverage and verify Focus Sessions remains unchanged throughout the review remediation.
 - [x] Correct sidebar and Daily Rhythm light-mode contrast, replace raw Return Brief note content, and consolidate the Evidence Log duplicate hero/header treatment.
 - [x] Add focused regression coverage for light navigation, user voice, stale data, re-entry content, and Evidence hierarchy; verify Focus Sessions source remains unchanged.
+
+## Non-Negotiable Wren Placement Lock (Aug 20, 2026)
+- [x] Restore Wren’s morning, afternoon, and evening rotating video in the Today greeting corner.
+- [x] Permanently protect the Today greeting corner and all Focus Sessions layout, copy, components, styling, media treatment, and dependencies from future changes unless the user explicitly overrides the lock.
+- [x] Add regression coverage enforcing both protected surfaces and verify Focus Sessions source remains unchanged.
