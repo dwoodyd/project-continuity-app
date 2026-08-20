@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 
 type IntroWrenSceneProps = {
   src: string;
+  poster?: string;
   eyebrow: string;
   title: string;
   body: string;
@@ -16,7 +17,7 @@ type IntroWrenSceneProps = {
  * milestone routes. It does not use the shared WrenPlayer so Focus Sessions
  * and its playback path remain unchanged.
  */
-export function IntroWrenScene({ src, eyebrow, title, body, children, className = "", variant = "standard", bleed = false }: IntroWrenSceneProps) {
+export function IntroWrenScene({ src, poster, eyebrow, title, body, children, className = "", variant = "standard", bleed = false }: IntroWrenSceneProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const isReturnScene = variant === "return";
 
@@ -34,6 +35,7 @@ export function IntroWrenScene({ src, eyebrow, title, body, children, className 
       <video
         ref={videoRef}
         src={src}
+        poster={poster}
         autoPlay
         loop
         muted

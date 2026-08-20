@@ -76,7 +76,8 @@ describe("Wren presence and coherent voice", () => {
     expect(projects).not.toContain("WrenPlayer");
     expect(cycle).not.toContain("WrenPlayer");
     expect(cycle).toContain("{/* Cycle analysis */}");
-    expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
+    expect(evidence).toContain("src={WREN_CLIPS.evidenceClean}");
+    expect(evidence).toContain("poster={WREN_STILLS.evidenceCleanPoster}");
     expect(evidence).toContain("bleed");
     expect(evidence).toContain('variant="return"');
     expect(evidence).toContain('className="evidence-main-pane min-h-[min(84vh,860px)]"');
@@ -131,6 +132,8 @@ describe("Wren presence and coherent voice", () => {
     const player = source("client/src/components/WrenPlayer.tsx");
     expect(clips).toContain("export const WREN_LIGHTWEIGHT_MEDIA");
     expect(clips).toContain("returnPortrait: { bytes: 144434, width: 360, height: 480, posterBytes: 8378 }");
+    expect(clips).toContain("evidenceClean: { bytes: 476918, width: 480, height: 270, posterBytes: 5309 }");
+    expect(clips).toContain("evidenceClean:       `/manus-storage/wren-evidence-clean_449464d9.mp4`");
     expect(clips).toContain("greetingMorning: { bytes: 105824, width: 360, height: 480 }");
     expect(clips).toContain("greetingAfternoon: { bytes: 149026, width: 360, height: 480 }");
     expect(clips).toContain("greetingEvening: { bytes: 69798, width: 360, height: 480 }");

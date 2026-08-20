@@ -48,7 +48,8 @@ describe("permanent dual-theme contract", () => {
     const clips = source("client/src/lib/wrenClips.ts");
     expect(home).toContain("src={WREN_CLIPS.tuggingThread}");
     expect(clips).toContain('tuggingThread:      `${BASE}/wren_tugging_thread_7bf624a9.mp4`');
-    expect(evidence).toContain("src={WREN_CLIPS.blobJournal}");
+    expect(evidence).toContain("src={WREN_CLIPS.evidenceClean}");
+    expect(evidence).toContain("poster={WREN_STILLS.evidenceCleanPoster}");
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     expect(focus).toContain('clip="cornerWave"');
     const memory = source("client/src/pages/WhatWrenRemembersPage.tsx");

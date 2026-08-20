@@ -2304,3 +2304,8 @@
 ## Evidence Hero Parent Width Cap (Aug 20, 2026)
 - [x] Remove the actual Evidence hero parent-layout width cap confirmed by the signed-in screenshot so the scene fills the full main pane.
 - [x] Verify the right-side black column is absent in the signed-in live route and Focus Sessions remains unchanged.
+
+## Evidence Hero Asset Replacement (Aug 20, 2026)
+- [x] Select an appropriate unwatermarked licensed Wren asset for the Evidence Log hero; do not crop or conceal the visible Veo watermark.
+- [x] Replace the Evidence hero source while retaining the full main-pane composition and readable copy.
+- [x] Add regression coverage and verify Focus Sessions remains unchanged.

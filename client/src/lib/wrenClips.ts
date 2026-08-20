@@ -15,6 +15,7 @@ export const WREN_LIGHTWEIGHT_MEDIA = {
   greetingMorning: { bytes: 105824, width: 360, height: 480 },
   greetingAfternoon: { bytes: 149026, width: 360, height: 480 },
   greetingEvening: { bytes: 69798, width: 360, height: 480 },
+  evidenceClean: { bytes: 476918, width: 480, height: 270, posterBytes: 5309 },
 } as const;
 
 // ─── Video clips ─────────────────────────────────────────────────────────────
@@ -25,6 +26,8 @@ export const WREN_CLIPS = {
   greetingMorning:     `/manus-storage/wren-greeting-morning_0ebef445.mp4`,
   greetingAfternoon:   `/manus-storage/wren-greeting-afternoon_b761f504.mp4`,
   greetingEvening:     `/manus-storage/wren-greeting-evening_265ac204.mp4`,
+  /** Verified unwatermarked lightweight Evidence Log hero (466KB). */
+  evidenceClean:       `/manus-storage/wren-evidence-clean_449464d9.mp4`,
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
   bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
@@ -175,6 +178,8 @@ export type WrenClipKey = keyof typeof WREN_CLIPS;
 export const WREN_STILLS = {
   /** Lightweight 3:4 Return Brief poster fallback (8KB). */
   returnPortraitPoster:`/manus-storage/wren-return-poster_6e19a8f4.webp`,
+  /** Verified unwatermarked Evidence Log hero poster fallback (5KB). */
+  evidenceCleanPoster:`/manus-storage/wren-evidence-clean-poster_8d09620d.jpg`,
   // Luminous series (glowing, transparent-friendly)
   luminousFront:      `${BASE}/wren_luminous_front_8c475599.png`,
   luminousIdle:       `${BASE}/wren_luminous_idle_511550a0.png`,
