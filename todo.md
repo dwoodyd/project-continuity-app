@@ -2242,3 +2242,11 @@
 - [x] Remove Today’s 102px Wren tile and the shared corner-wave from all non-Focus routes only; preserve the Focus Sessions corner-wave exactly as-is.
 - [x] Add explicit guarded video playback only inside Intro-derived scenes and fix word-split headline spacing in the Intro scene; do not modify the shared Wren player used by Focus Sessions.
 - [x] Add regression coverage for target scene composition, playback, headline spacing, Wren placement removal, and Focus isolation.
+
+## Final Intentional Wren Scene (Aug 20, 2026)
+- [x] Select one additional emotionally central non-Focus route for a single Intro-scale Wren composition.
+- [x] Implement the scene without adding Wren elsewhere, preserve Focus Sessions unchanged, and add regression coverage.
+
+## Today Return Brief Review Access (Aug 20, 2026)
+- [x] Make the new Today Return Brief available for review without permanently changing its normal re-entry trigger.
+- [x] Validate the review path and add regression coverage before continuing any other Wren visual work.

@@ -1389,6 +1389,7 @@ export default function Home() {
   });
 
   const [returningAfterGap, setReturningAfterGap] = useState(false);
+  const reviewReturnBrief = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("return-brief") === "1";
   useEffect(() => {
     const key = "continuary-last-dashboard-visit";
     const previous = Number(window.localStorage.getItem(key) || 0);
@@ -1397,7 +1398,7 @@ export default function Home() {
   }, []);
   const latestScratchNote = scratchNotes?.[0];
   const lastWrittenLine = latestScratchNote?.content.split("\n").find((line: string) => line.trim())?.trim();
-  const showReturnBrief = returningAfterGap && Boolean(activeThreadLock || lastWrittenLine);
+  const showReturnBrief = reviewReturnBrief || (returningAfterGap && Boolean(activeThreadLock || lastWrittenLine));
 
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({

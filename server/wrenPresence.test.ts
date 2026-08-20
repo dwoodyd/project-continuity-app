@@ -29,6 +29,7 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain("<IntroWrenScene");
     expect(home).toContain("src={WREN_CLIPS.tuggingThread}");
     expect(home).toContain("A week away. You returned anyway. That’s not small.");
+    expect(home).toContain('new URLSearchParams(window.location.search).get("return-brief") === "1"');
     expect(scene).toContain("video.play().catch(() => {})");
     expect(scene).toContain("absolute inset-0 h-full w-full object-cover mix-blend-screen");
     expect(scene).not.toContain("rounded");
@@ -69,7 +70,8 @@ describe("Wren presence and coherent voice", () => {
     expect(about).toContain('stage={false}');
     expect(about).not.toContain('WrenPlayer clip={clip} size="full"');
     expect(vault).toContain('<WrenPlayer clip="hoversJournal" size="full"');
-    expect(clarity).toContain('<WrenPlayer clip="perchedDoc" size="full"');
+    expect(clarity).toContain("src={WREN_CLIPS.perchedDoc}");
+    expect(clarity).toContain("You do not have to untangle it alone.");
     expect(scratch).toContain('<WrenPlayer clip="bouncingFunClean" size="full"');
     expect(focus).toContain("cornerWave");
     expect(companion).toContain("weaving");

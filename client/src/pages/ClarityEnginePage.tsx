@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
-import WrenPlayer from "@/components/WrenPlayer";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Button } from "@/components/ui/button";
@@ -182,7 +183,7 @@ function NewSessionView({
       </div>
 
       {/* Mode selector */}
-      <div>
+      <div id="clarity-mode">
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           What kind of clarity do you need?
         </p>
@@ -787,9 +788,7 @@ function HistoryView({
         </div>
       ) : (
         <div className="flex flex-col items-center py-10 text-muted-foreground">
-          <div className="mb-4" style={{width: 'min(160px, 50vw)', aspectRatio: '1/1', borderRadius: '1rem', overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)'}}>
-            <WrenPlayer clip="perchedDoc" size="full" loop autoPlay />
-          </div>
+          <Brain className="mb-4 h-10 w-10 text-muted-foreground/40" aria-hidden="true" />
           <p className="text-sm font-medium text-foreground mb-1">No clarity sessions yet.</p>
           <p className="text-xs mb-4" style={{color: 'rgba(255,255,255,0.4)'}}>Start a session to clear the noise and find the signal.</p>
           <Button
@@ -1268,6 +1267,21 @@ export default function ClarityEnginePage() {
     <>
     {runSession.isPending && (
       <WrenThinking label="Wren is thinking…" size="lg" fullscreen />
+    )}
+    {view === "new" && (
+      <IntroWrenScene
+        src={WREN_CLIPS.perchedDoc}
+        eyebrow="Clarity Engine"
+        title="You do not have to untangle it alone."
+        body="Put down what is loudest. We will find the signal together."
+      >
+        <Button
+          onClick={() => document.getElementById("clarity-mode")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          className="bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]"
+        >
+          Begin with what feels tangled <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </IntroWrenScene>
     )}
     <div className="px-5 py-7 max-w-4xl mx-auto">
       {view === "new" && (
