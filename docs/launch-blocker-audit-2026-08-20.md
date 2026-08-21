@@ -18,6 +18,16 @@ The authenticated owner session renders `/signin` as an in-app 404 route, so it 
 
 The subsequent live pricing-route verification reached `https://app.continuary.app/pricing` and initially displayed its loading state. No checkout action or subscription approval has been performed at this point.
 
+A later deployed-route retry also remained in its loading state and exposed no subscription control to the browser session. The page therefore could not be used as an alternative approval-link validation path, and no financial action was attempted.
+
+After the post-publish deployment, the live pricing route rendered successfully for the authenticated owner. It exposed the current subscription state and an interactive **Upgrade to Keeper** control. The control has not yet been activated in this verification record.
+
+With user approval, the Keeper upgrade control was activated. The interface entered its **Redirecting to PayPal** state, but the browser did not reach a PayPal approval page within the follow-up observation window. No approval, charge, activation, or cancellation action was performed. Application diagnostics must be inspected next to distinguish a delayed redirect from a rejected checkout request.
+
+Production diagnostics showed that the live backend successfully created the expected Keeper Founding Monthly plan, proving the invalid-plan failure no longer blocks plan resolution. The remaining browser failure was client-side: the page requested `window.open()` only after an asynchronous checkout mutation, a pattern browsers can block as a popup. The handoff now uses same-tab navigation to PayPal, which preserves the configured return URLs and avoids popup blocking.
+
+The authenticated home-route reload reached the application shell but remained in its initial loading state, so the current browser session could not safely reach the sign-out control needed to inspect the logged-out OAuth consent handoff.
+
 ## Bounded live verification status
 
 After the legacy fallback was removed, type-checking and the complete regression suite passed (31 test files, 453 tests). A user-approved, approval-link-only live PayPal verification was attempted without approving any payment. The sandbox transport reset its TLS connection to `api-m.paypal.com` before the application could request a fresh live plan identifier. No plan, subscription, approval, charge, or account entitlement was created by that failed transport attempt.

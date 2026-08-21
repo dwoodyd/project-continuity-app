@@ -108,7 +108,10 @@ export default function ProPage() {
       notify.info(`Redirecting to PayPal…`, { description: `Opening secure checkout for ${tierLabel}.` });
       const { approvalUrl } = await createSub.mutateAsync({ origin: window.location.origin, planKey });
       sessionStorage.setItem("pendingPlanKey", planKey);
-      window.open(approvalUrl, "_blank");
+      // The approval URL arrives after an async mutation, so a new-tab call here
+      // is treated as a popup by Safari and many privacy-focused browsers. Navigate
+      // the current tab instead; PayPal returns to the configured success/cancel URL.
+      window.location.assign(approvalUrl);
     } catch {
       notify.error("Could not start checkout. Please try again.");
     }
