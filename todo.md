@@ -2316,3 +2316,9 @@
 - [x] Raise Daily Rhythm phase-label and secondary metadata contrast in Studio Wall.
 - [x] Make all admin-area text, controls, and metadata legible in light mode.
 - [x] Add regression coverage and verify protected Today Wren and Focus Sessions surfaces remain unchanged.
+
+## Launch Blockers: PayPal Checkout + OAuth Identity (Aug 20, 2026)
+- [x] Audit live PayPal environment, configured plan identifiers, and webhook identity against the reported INVALID_RESOURCE_ID checkout failure.
+- [ ] Correct only verified stale or missing live PayPal plan and webhook configuration, then confirm each checkout variant can begin safely.
+- [ ] Correct the Manus OAuth app display name/logo configuration so consent identifies the app as Continuary rather than an icon URL.
+- [ ] Add or update regression coverage for any repository changes and record the safe verification results without modifying protected product surfaces.

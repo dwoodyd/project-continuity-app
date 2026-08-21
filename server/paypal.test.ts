@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 describe("PayPal credentials", () => {
   /**
    * Verifies that the required PayPal environment variables are present.
@@ -17,5 +20,12 @@ describe("PayPal credentials", () => {
   it("PAYPAL_ENV is a valid value", () => {
     const env = process.env.PAYPAL_ENV;
     expect(["sandbox", "live"]).toContain(env);
+  });
+
+  it("never uses retired single-plan secrets that can override live plan provisioning", () => {
+    const source = readFileSync(resolve(process.cwd(), "server/paypal.ts"), "utf8");
+    expect(source).toContain("Do not fall back to retired single-plan variables");
+    expect(source).not.toContain('key === "pro_founding_monthly" && process.env.PAYPAL_PLAN_ID');
+    expect(source).not.toContain('key === "keeper_founding_monthly" && process.env.PAYPAL_KEEPER_PLAN_ID');
   });
 });
