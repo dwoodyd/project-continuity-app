@@ -38,4 +38,17 @@ describe("Studio Wall regression coverage", () => {
     expect(source).toContain("Export as Markdown any time—on every plan, including Free.");
     expect(source).toContain("Markdown export — always free");
   });
+
+  it("links the published Permission to Start editions from the existing app mentions", () => {
+    const pricing = projectFile("client/src/pages/ProPage.tsx");
+    const exercise = projectFile("client/src/pages/BookStartPage.tsx");
+    for (const source of [pricing, exercise]) {
+      expect(source).toContain("https://www.soulengineer.online/books");
+      expect(source).toContain("https://a.co/d/0bvqj6jD");
+      expect(source).toContain('target="_blank"');
+      expect(source).toContain('rel="noopener noreferrer"');
+    }
+    expect(pricing).toContain("now available in");
+    expect(exercise).toContain("Permission to Start is now available");
+  });
 });

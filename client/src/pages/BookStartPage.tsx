@@ -72,6 +72,12 @@ export default function BookStartPage() {
               <p className="mt-3 max-w-xl text-sm leading-6 text-[#6B6F68] sm:text-base">
                 This first exercise does not need an account. Write one honest line. It stays on this device until you decide it is worth keeping.
               </p>
+              <p className="mt-3 text-sm text-[#6B6F68]">
+                Permission to Start is now available —{" "}
+                <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer" className="font-medium text-[#C8452B] underline underline-offset-2">get the digital edition</a>
+                {" "}or{" "}
+                <a href="https://a.co/d/0bvqj6jD" target="_blank" rel="noopener noreferrer" className="font-medium text-[#C8452B] underline underline-offset-2">the paperback</a>.
+              </p>
             </div>
           </div>
         </section>

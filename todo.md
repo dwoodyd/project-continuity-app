@@ -2322,3 +2322,8 @@
 - [x] Correct only verified stale or missing live PayPal plan and webhook configuration, then confirm each checkout variant can begin safely.
 - [x] Correct the Manus OAuth app display name/logo configuration so consent identifies the app as Continuary rather than an icon URL.
 - [x] Add or update regression coverage for any repository changes and record the safe verification results without modifying protected product surfaces.
+
+## Permission to Start Available Now (Aug 20, 2026)
+- [x] Inspect the supplied two-file additive patch against the current pricing footer and BookStart page markup.
+- [x] Update existing app mentions to state that Permission to Start is available now and link its digital and paperback editions in a new tab.
+- [x] Add focused regression coverage and verify type safety without changing protected product surfaces.

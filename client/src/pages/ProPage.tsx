@@ -542,7 +542,17 @@ export default function ProPage() {
               className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
               Permission to Start
             </a>
-            , the Companion Book.
+            {" "}— the companion book, now available in{" "}
+            <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
+              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
+              digital
+            </a>
+            {" "}and{" "}
+            <a href="https://a.co/d/0bvqj6jD" target="_blank" rel="noopener noreferrer"
+              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
+              paperback
+            </a>
+            .
           </p>
           <div className="flex items-center justify-center gap-6">
             <a href="https://www.soulengineer.online" target="_blank" rel="noopener noreferrer"
