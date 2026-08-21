@@ -32,6 +32,12 @@ The same-tab redirect reached the real PayPal approval page at `www.paypal.com/p
 
 For OAuth validation, the sandbox owner session was signed out and the public **Sign in to continue** handoff was opened. The browser navigated to the correct Manus OAuth authorization URL for the Continuary app ID, but the external authorization view returned to a blank browser surface before rendering its consent text. No account was selected and no sign-in was completed. The platform-managed application title remains set to `Continuary`; a real-user visual confirmation of the external consent copy is still required.
 
+The owner then confirmed the live consent screen and provided a screenshot that visibly reads **“Continue to Continuary”** alongside the Continuary icon. The trust-copy defect is resolved. The sandbox test session was subsequently restored without changing billing status.
+
+## Complete live plan validation
+
+With explicit owner approval, the remaining seven plan variants were exercised through the authenticated application checkout endpoint without opening, approving, or paying through any PayPal checkout page. Production logs confirmed successful live plan creation for every remaining catalog entry: Pro Founding Monthly and Annual; Keeper Founding Annual; Pro Retail Monthly and Annual; and Keeper Retail Monthly and Annual. No `INVALID_RESOURCE_ID` or subscription-creation error was logged. Together with the earlier real Keeper approval-page check, this confirms every plan variant can begin checkout successfully. No subscription was approved or activated during this verification.
+
 The authenticated home-route reload reached the application shell but remained in its initial loading state, so the current browser session could not safely reach the sign-out control needed to inspect the logged-out OAuth consent handoff.
 
 ## Bounded live verification status
