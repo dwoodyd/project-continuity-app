@@ -2321,4 +2321,4 @@
 - [x] Audit live PayPal environment, configured plan identifiers, and webhook identity against the reported INVALID_RESOURCE_ID checkout failure.
 - [ ] Correct only verified stale or missing live PayPal plan and webhook configuration, then confirm each checkout variant can begin safely.
 - [ ] Correct the Manus OAuth app display name/logo configuration so consent identifies the app as Continuary rather than an icon URL.
-- [ ] Add or update regression coverage for any repository changes and record the safe verification results without modifying protected product surfaces.
+- [x] Add or update regression coverage for any repository changes and record the safe verification results without modifying protected product surfaces.

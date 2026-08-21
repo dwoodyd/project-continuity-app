@@ -26,6 +26,12 @@ With user approval, the Keeper upgrade control was activated. The interface ente
 
 Production diagnostics showed that the live backend successfully created the expected Keeper Founding Monthly plan, proving the invalid-plan failure no longer blocks plan resolution. The remaining browser failure was client-side: the page requested `window.open()` only after an asynchronous checkout mutation, a pattern browsers can block as a popup. The handoff now uses same-tab navigation to PayPal, which preserves the configured return URLs and avoids popup blocking.
 
+Following publication of the same-tab handoff correction, the live Keeper upgrade action was invoked again with user approval. The interface entered its secure checkout redirect state; the next browser observation will determine whether navigation reaches PayPal. No approval, charge, activation, cancellation, or entitlement change has been performed.
+
+The same-tab redirect reached the real PayPal approval page at `www.paypal.com/pay`, which displayed **“Let’s check out with Continuary”** and provided an explicit **Cancel and return to Continuary** action. The approval page was not signed into and no payment was approved. The cancellation action was used to return to Continuary, so no subscription activation or entitlement change occurred.
+
+For OAuth validation, the sandbox owner session was signed out and the public **Sign in to continue** handoff was opened. The browser navigated to the correct Manus OAuth authorization URL for the Continuary app ID, but the external authorization view returned to a blank browser surface before rendering its consent text. No account was selected and no sign-in was completed. The platform-managed application title remains set to `Continuary`; a real-user visual confirmation of the external consent copy is still required.
+
 The authenticated home-route reload reached the application shell but remained in its initial loading state, so the current browser session could not safely reach the sign-out control needed to inspect the logged-out OAuth consent handoff.
 
 ## Bounded live verification status
