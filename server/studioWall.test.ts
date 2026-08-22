@@ -51,4 +51,12 @@ describe("Studio Wall regression coverage", () => {
     expect(pricing).toContain("now available in");
     expect(exercise).toContain("Permission to Start is now available");
   });
+
+  it("acknowledges plausible reader codes without claiming verification or changing their carry-through", () => {
+    const exercise = projectFile("client/src/pages/BookStartPage.tsx");
+    expect(exercise).toContain("bookCode.trim().length >= 4");
+    expect(exercise).toContain("Reader code noted — welcome.");
+    expect(exercise).not.toContain("Reader code verified");
+    expect(exercise).toContain('query.set("bookCode", bookCode)');
+  });
 });

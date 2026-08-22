@@ -91,6 +91,12 @@ export default function BookStartPage() {
             placeholder="From your copy of Permission to Start"
             className="mt-2 min-h-11 w-full border border-[#C9CCC5] bg-transparent px-3 text-sm text-[#2A2D28] outline-none placeholder:text-[#6B6F68] focus:border-[#C8452B]"
           />
+          {bookCode.trim().length >= 4 && (
+            <p className="mt-2 flex items-start gap-1.5 text-sm text-[#C8452B]">
+              <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>Reader code noted — welcome. Your draft will carry this when you take it with you.</span>
+            </p>
+          )}
           <label htmlFor="book-start-entry" className="block text-sm font-semibold text-[#2A2D28]">Your draft</label>
           <p className="mt-1 text-sm text-[#6B6F68]">A draft is enough. You are not making a promise.</p>
           <textarea

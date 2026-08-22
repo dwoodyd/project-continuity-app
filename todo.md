@@ -2332,3 +2332,8 @@
 - [x] Review existing public routes and the book exercise page to define a concise post-purchase reader journey.
 - [x] Add a public Start Here page with a clear first step, the existing exercise, and an optional Continuary entry point.
 - [x] Add route and regression coverage, then verify type safety and protected surfaces remain unchanged.
+
+## Permission to Start Reader-Code Recognition (Aug 22, 2026)
+- [x] Inspect the supplied single-file patch against the existing optional Book code field.
+- [x] Show the specified inline acknowledgement only when the existing reader code has at least four characters, without adding validation or a network call.
+- [x] Add focused regression coverage and verify type safety while preserving the existing `/apply` code carry-through.
