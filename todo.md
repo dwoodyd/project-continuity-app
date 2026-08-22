@@ -2327,3 +2327,8 @@
 - [x] Inspect the supplied two-file additive patch against the current pricing footer and BookStart page markup.
 - [x] Update existing app mentions to state that Permission to Start is available now and link its digital and paperback editions in a new tab.
 - [x] Add focused regression coverage and verify type safety without changing protected product surfaces.
+
+## Permission to Start Post-Purchase Start Here Page (Aug 21, 2026)
+- [x] Review existing public routes and the book exercise page to define a concise post-purchase reader journey.
+- [x] Add a public Start Here page with a clear first step, the existing exercise, and an optional Continuary entry point.
+- [x] Add route and regression coverage, then verify type safety and protected surfaces remain unchanged.

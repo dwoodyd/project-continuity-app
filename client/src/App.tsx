@@ -62,6 +62,7 @@ const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
 const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage"));
 const WaitlistPage        = lazy(() => import("./pages/WaitlistPage"));
 const BookStartPage       = lazy(() => import("./pages/BookStartPage"));
+const BookStartHerePage   = lazy(() => import("./pages/BookStartHerePage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -101,6 +102,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
   <Route path="/apply" component={ApplyPage} />
         {/* /waitlist is public — shown when founding slots are full */}
         <Route path="/waitlist" component={WaitlistPage} />
+        <Route path="/start-here" component={BookStartHerePage} />
         <Route path="/start" component={BookStartPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />

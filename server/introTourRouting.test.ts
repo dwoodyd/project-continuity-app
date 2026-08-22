@@ -20,4 +20,13 @@ describe("Replay Intro and Tour routing", () => {
     expect(settings).toContain('window.location.assign("/tour")');
     expect(settings).toContain('Take the tour');
   });
+
+  it("keeps the Permission to Start post-purchase route public and connected to the first exercise", () => {
+    const app = source("client/src/App.tsx");
+    const startHere = source("client/src/pages/BookStartHerePage.tsx");
+    expect(app).toContain('<Route path="/start-here" component={BookStartHerePage} />');
+    expect(startHere).toContain('path="/start-here"');
+    expect(startHere).toContain('href="/start"');
+    expect(startHere).toContain('href="/apply?source=permission-to-start-start-here"');
+  });
 });
