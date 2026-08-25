@@ -2117,3 +2117,11 @@
 - [x] Task B: Extract foundingSlots.ts shared cache module
 - [x] Task B: Update founding.ts to use getFoundingSlots()
 - [x] Task B: Add /api/public/founding-slots REST endpoint with CORS
+
+## Post-Reset Recovery (Aug 22)
+- [ ] Compare current GitHub HEAD with the documented recovery target and preserve any newer recovery work
+- [ ] Synchronize the workspace to the verified latest GitHub-backed code state
+- [ ] Run TypeScript and full test validation after synchronization
+- [ ] Verify production PayPal configuration and checkout approval-page readiness
+- [ ] Verify Manus OAuth consent branding, production sign-in, and known-account data integrity
+- [ ] Verify production assets, custom domains, and HTTPS after recovery
