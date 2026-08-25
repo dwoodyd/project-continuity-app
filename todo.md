@@ -2119,12 +2119,12 @@
 - [x] Task B: Add /api/public/founding-slots REST endpoint with CORS
 
 ## Post-Reset Recovery (Aug 22)
-- [ ] Compare current GitHub HEAD with the documented recovery target and preserve any newer recovery work
-- [ ] Synchronize the workspace to the verified latest GitHub-backed code state
-- [ ] Run TypeScript and full test validation after synchronization
+- [x] Compare current GitHub HEAD with the documented recovery target and preserve any newer recovery work
+- [x] Synchronize the workspace to the verified latest GitHub-backed code state
+- [x] Run TypeScript and full test validation after synchronization
 - [ ] Verify production PayPal configuration and checkout approval-page readiness
-- [ ] Verify Manus OAuth consent branding, production sign-in, and known-account data integrity
-- [ ] Verify production assets, custom domains, and HTTPS after recovery
+- [x] Verify Manus OAuth consent branding (manual known-account sign-in and data-integrity check remain owner confirmation)
+- [x] Verify production assets, custom domains, and HTTPS after recovery
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
