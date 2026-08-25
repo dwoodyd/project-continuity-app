@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 
 const DISMISS_KEY = "pwa-install-dismissed";
 const DISMISS_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const VISIT_COUNT_KEY = "pwa-install-visit-count";
+const SCROLL_THRESHOLD = 0.5;
 
 function isDismissed(): boolean {
   try {
@@ -46,29 +48,50 @@ export default function PWAInstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showIOS, setShowIOS] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [visitCount, setVisitCount] = useState(0);
+  const [hasEngaged, setHasEngaged] = useState(false);
+  const pathname = typeof window === "undefined" ? "" : window.location.pathname;
+  const eligible = pathname !== "/pricing" && visitCount >= 2 && hasEngaged && !isDismissed() && !isInStandaloneMode();
 
   useEffect(() => {
-    // Don't show if already installed or dismissed
-    if (isInStandaloneMode() || isDismissed()) return;
-
-    if (isIOS()) {
-      // iOS: show manual instructions after a short delay
-      const t = setTimeout(() => {
-        setShowIOS(true);
-        setVisible(true);
-      }, 3000);
-      return () => clearTimeout(t);
+    try {
+      const nextCount = Number(localStorage.getItem(VISIT_COUNT_KEY) ?? "0") + 1;
+      localStorage.setItem(VISIT_COUNT_KEY, String(nextCount));
+      setVisitCount(nextCount);
+    } catch {
+      setVisitCount(1);
     }
 
-    // Android/Chrome: listen for the native install prompt
+    const handleScroll = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollable > 0 && window.scrollY / scrollable >= SCROLL_THRESHOLD) {
+        setHasEngaged(true);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isInStandaloneMode() || isDismissed() || pathname === "/pricing") return;
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setVisible(true);
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!eligible) return;
+    if (isIOS()) {
+      setShowIOS(true);
+      setVisible(true);
+      return;
+    }
+    if (deferredPrompt) setVisible(true);
+  }, [deferredPrompt, eligible]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -104,7 +127,7 @@ export default function PWAInstallBanner() {
           </p>
           {showIOS ? (
             <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
-              Tap the <Share className="inline w-3.5 h-3.5 mb-0.5" /> Share button in Safari, then
+              Tap the <Share className="inline w-3.5 h-3.5 mb-0.5" aria-hidden="true" /> Share button in Safari, then
               choose <strong className="text-white/80">Add to Home Screen</strong>.
             </p>
           ) : (
@@ -118,7 +141,7 @@ export default function PWAInstallBanner() {
               onClick={handleInstall}
               className="mt-2 h-7 text-xs bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 gap-1.5"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5" aria-hidden="true" />
               Install app
             </Button>
           )}
@@ -128,7 +151,7 @@ export default function PWAInstallBanner() {
           className="shrink-0 text-white/40 hover:text-white/70 transition-colors mt-0.5"
           aria-label="Dismiss"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
     </div>

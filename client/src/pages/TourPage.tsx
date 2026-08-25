@@ -266,7 +266,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="luminousFloats" size="xl" feather featherDirection="radial" />
+              <WrenPlayer clip="luminousFloats" size="xl" stage={false} feather featherDirection="radial" />
               <div className="space-y-4">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Welcome to Continuary</p>
                 <h1 className="text-4xl md:text-5xl leading-tight font-brand">
@@ -734,7 +734,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="hoveringArchway" size="xl" feather featherDirection="bottom" />
+              <WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather featherDirection="bottom" />
               <div className="space-y-3">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
@@ -795,7 +795,7 @@ function Fade({ children }: { children: React.ReactNode }) {
 function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
   return (
     <div className="flex items-start gap-5">
-      <WrenPlayer clip={wren} size="sm" />
+      <WrenPlayer clip={wren} size="sm" stage={false} feather />
       <div className="space-y-1">
         <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>

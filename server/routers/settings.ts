@@ -26,6 +26,8 @@ export const settingsRouter = router({
       coldProjectThresholdDays: 5,
       weeklyReviewDay: "sunday" as const,
       fontSizePreference: "medium" as const,
+      dashboardLayout: null,
+      reducedVisualNoise: false,
       notificationsEnabled: true,
       morningNotifEnabled: true,
       middayNotifEnabled: true,
@@ -58,7 +60,11 @@ export const settingsRouter = router({
       distractionPatterns: z.array(z.string().max(200)),
       focusHoursStart: z.string().max(10),
       focusHoursEnd: z.string().max(10),
-      tonePreference: z.enum(["gentle", "direct", "firm"]),
+      wrenGentleDirect: z.number().int().min(0).max(100),
+      wrenBriefThorough: z.number().int().min(0).max(100),
+      wrenCalmEnergizing: z.number().int().min(0).max(100),
+      wrenFollowsChallenges: z.number().int().min(0).max(100),
+      wrenDefaultMode: z.enum(["doing", "reflecting", "grounding"]),
       timezone: z.string().max(50).optional(),
       workStyle: z.string().max(500).optional(),
       preferredFocusHours: z.enum(["morning", "midday", "afternoon", "evening", "varies"]).optional(),
@@ -72,7 +78,11 @@ export const settingsRouter = router({
         distractionPatterns: JSON.stringify(input.distractionPatterns),
         focusHoursStart: input.focusHoursStart,
         focusHoursEnd: input.focusHoursEnd,
-        tonePreference: input.tonePreference,
+        wrenGentleDirect: input.wrenGentleDirect,
+        wrenBriefThorough: input.wrenBriefThorough,
+        wrenCalmEnergizing: input.wrenCalmEnergizing,
+        wrenFollowsChallenges: input.wrenFollowsChallenges,
+        wrenDefaultMode: input.wrenDefaultMode,
         timezone: input.timezone ?? "America/New_York",
         onboardingCompleted: true,
       };
@@ -104,7 +114,6 @@ export const settingsRouter = router({
 
   updateSettings: protectedProcedure
     .input(z.object({
-      tonePreference: z.enum(["gentle", "direct", "firm"]).optional(),
       focusHoursStart: z.string().max(10).optional(),
       focusHoursEnd: z.string().max(10).optional(),
       morningCheckInTime: z.string().max(10).optional(),
@@ -113,6 +122,7 @@ export const settingsRouter = router({
       coldProjectThresholdDays: z.number().min(1).max(30).optional(),
       weeklyReviewDay: z.enum(["sunday", "saturday", "monday"]).optional(),
       fontSizePreference: z.enum(["small", "medium", "large"]).optional(),
+      reducedVisualNoise: z.boolean().optional(),
       notificationsEnabled: z.boolean().optional(),
       morningNotifEnabled: z.boolean().optional(),
       middayNotifEnabled: z.boolean().optional(),
@@ -128,6 +138,36 @@ export const settingsRouter = router({
         await updateUserProfile(ctx.user.id, input as any);
       } else {
         await upsertUserProfile({ userId: ctx.user.id, ...input } as any);
+      }
+      return { success: true };
+    }),
+
+  // ── Dashboard presentation ──────────────────────────────────────────────────
+  getDashboardLayout: protectedProcedure.query(async ({ ctx }) => {
+    const profile = await getUserProfile(ctx.user.id);
+    try {
+      const parsed = profile?.dashboardLayout ? JSON.parse(profile.dashboardLayout) : {};
+      return {
+        hidden: Array.isArray(parsed.hidden) ? parsed.hidden.filter((key: unknown) => typeof key === "string") : [],
+        order: Array.isArray(parsed.order) ? parsed.order.filter((key: unknown) => typeof key === "string") : [],
+      };
+    } catch {
+      return { hidden: [], order: [] };
+    }
+  }),
+
+  updateDashboardLayout: protectedProcedure
+    .input(z.object({
+      hidden: z.array(z.string().min(1).max(80)).max(24),
+      order: z.array(z.string().min(1).max(80)).max(24),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const dashboardLayout = JSON.stringify({ hidden: input.hidden, order: input.order });
+      const existing = await getUserProfile(ctx.user.id);
+      if (existing) {
+        await updateUserProfile(ctx.user.id, { dashboardLayout } as any);
+      } else {
+        await upsertUserProfile({ userId: ctx.user.id, dashboardLayout } as any);
       }
       return { success: true };
     }),

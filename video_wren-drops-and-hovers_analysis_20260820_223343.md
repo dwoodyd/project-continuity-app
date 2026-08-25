@@ -1,0 +1,3 @@
+The video does not contain any visible provider watermarks or text overlays.
+
+The visual composition features a bright, translucent orange 3D character centered against a solid, dark blue background. This minimalist setup, with its generous amount of negative space and uniform background color, makes it highly suitable for a wide, full-bleed Evidence Log hero. The solid background allows for easy cropping or extending to fit various screen widths without losing the central subject, and it provides excellent contrast for any text that might be placed over it.

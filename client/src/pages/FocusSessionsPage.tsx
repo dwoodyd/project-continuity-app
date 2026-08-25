@@ -752,7 +752,7 @@ export default function FocusSessionsPage() {
   return (
     <div
       className="h-full flex flex-col overflow-hidden"
-      style={{ background: "oklch(0.10 0.02 240)", color: "oklch(0.92 0.03 60)" }}
+      style={{ background: "var(--background)", color: "var(--foreground)" }}
     >
 
       {/* ── NON-ACTIVE header: shown for all non-active phases ─────────────── */}
@@ -834,7 +834,7 @@ export default function FocusSessionsPage() {
           {/* Floating utility bar */}
           <div
             className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2"
-            style={{ background: "linear-gradient(to bottom, oklch(0.08 0.015 240 / 0.92), transparent)" }}
+            style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 92%, transparent), transparent)" }}
           >
             <span className="text-xs font-mono" style={{ color: "oklch(0.50 0.04 240)" }}>
               {formatTime(secondsLeft)} remaining
@@ -865,34 +865,35 @@ export default function FocusSessionsPage() {
             </div>
           </div>
 
-          {/* LEFT — Wren full-bleed, object-cover, flush to all edges */}
-          <div className="relative overflow-hidden" style={{ background: "oklch(0.07 0.02 240)" }}>
+          {/* LEFT — Wren works alongside, rather than watches over, the session. */}
+          <div className="relative overflow-hidden" style={{ background: "var(--background)" }}>
+            <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 72% 22%, oklch(0.55 0.14 65 / 0.16), transparent 42%)" }} />
             <WrenPlayer
-              key={wrenActivity}
-              clip={ACTIVITY_CLIP[wrenActivity] as any}
-              size="full"
-              objectFit="cover"
-              wrapperClassName="absolute inset-0"
-              className="brightness-[1.15] saturate-[1.3]"
+              clip="cornerWave"
+              size="sm"
+              wrapperClassName="absolute top-4 right-4 z-10"
             />
+            <p className="absolute left-6 top-7 max-w-[13rem] text-sm leading-6" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
+              Wren is working alongside you.
+            </p>
             {/* Soft right-edge gradient scrim */}
             <div
               className="absolute inset-0 pointer-events-none"
-              style={{ background: "linear-gradient(90deg, transparent 55%, oklch(0.10 0.02 240 / 0.95))" }}
+              style={{ background: "linear-gradient(90deg, transparent 55%, color-mix(in srgb, var(--background) 95%, transparent))" }}
             />
             {/* Bottom gradient */}
             <div
               className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-              style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240 / 0.7), transparent)" }}
+              style={{ background: "linear-gradient(to top, color-mix(in srgb, var(--background) 70%, transparent), transparent)" }}
             />
             {/* Wren message bubble */}
             {wrenMessage && (
               <div
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 px-4 py-2.5 rounded-2xl text-sm text-center max-w-[220px]"
                 style={{
-                  background: "oklch(0.12 0.04 240 / 0.88)",
-                  border: "1px solid oklch(0.35 0.08 65 / 0.6)",
-                  color: "oklch(0.74 0.14 72)",
+                  background: "var(--card)",
+                  border: "1px solid color-mix(in srgb, var(--primary) 45%, var(--border))",
+                  color: "var(--accent-tint-text)",
                   backdropFilter: "blur(8px)",
                   animation: "fadeIn 0.4s ease",
                 }}
@@ -1123,7 +1124,7 @@ export default function FocusSessionsPage() {
           {phase !== "reveal" && (
             <div
               className="relative w-1/2 overflow-hidden"
-              style={{ background: "oklch(0.07 0.02 240)" }}
+              style={{ background: "var(--background)" }}
             >
               <WrenPlayer
                 key={wrenActivity}
@@ -1137,9 +1138,9 @@ export default function FocusSessionsPage() {
                 <div
                   className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 px-4 py-2.5 rounded-2xl text-sm text-center max-w-[220px]"
                   style={{
-                    background: "oklch(0.12 0.04 240 / 0.88)",
-                    border: "1px solid oklch(0.35 0.08 65 / 0.6)",
-                    color: "oklch(0.74 0.14 72)",
+                    background: "var(--card)",
+                    border: "1px solid color-mix(in srgb, var(--primary) 45%, var(--border))",
+                    color: "var(--accent-tint-text)",
                     backdropFilter: "blur(8px)",
                   }}
                 >
@@ -1148,11 +1149,11 @@ export default function FocusSessionsPage() {
               )}
               <div
                 className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-                style={{ background: "linear-gradient(to top, oklch(0.07 0.02 240 / 0.7), transparent)" }}
+                style={{ background: "linear-gradient(to top, color-mix(in srgb, var(--background) 70%, transparent), transparent)" }}
               />
               <div
                 className="absolute inset-0 pointer-events-none"
-                style={{ background: "linear-gradient(90deg, transparent 55%, oklch(0.10 0.02 240 / 0.95))" }}
+                style={{ background: "linear-gradient(90deg, transparent 55%, color-mix(in srgb, var(--background) 95%, transparent))" }}
               />
             </div>
           )}

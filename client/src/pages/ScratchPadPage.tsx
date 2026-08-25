@@ -12,7 +12,7 @@ import {
   ArrowUpDown, LayoutTemplate,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 type Note = {
   id: number;
@@ -138,7 +138,7 @@ function NoteCard({
         <div className="p-3 space-y-2">
           <Textarea ref={textareaRef} value={draft} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === "Escape") handleCancel(); if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleSave(); }}
-            className="text-sm resize-none min-h-[80px] border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none" rows={4} placeholder="Write anything..." />
+            className="user-writing text-base resize-none min-h-[80px] border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none" rows={4} />
           <div className="flex items-center gap-2 justify-end">
             <Button size="sm" variant="ghost" onClick={handleCancel} className="h-7 px-2 text-xs text-muted-foreground"><X className="w-3.5 h-3.5 mr-1" />Cancel</Button>
             <Button size="sm" onClick={handleSave} className="h-7 px-3 text-xs bg-primary hover:bg-primary/90 text-white"><Check className="w-3.5 h-3.5 mr-1" />Save</Button>
@@ -146,10 +146,10 @@ function NoteCard({
         </div>
       ) : (
         <button className={cn("w-full text-left p-3 pr-28", selectMode ? "pl-8" : "pl-6")} onClick={handleCardClick} aria-label="Edit note">
-          <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">
+          <p className="user-writing text-base text-foreground whitespace-pre-wrap break-words leading-relaxed">
             {note.content || <span className="text-muted-foreground italic">Empty note</span>}
           </p>
-          <p className="text-[10px] text-muted-foreground/50 mt-2">{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}</p>
+          <p className="text-xs text-muted-foreground/50 mt-2">{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true })}</p>
         </button>
       )}
 
@@ -190,6 +190,10 @@ const TEMPLATES = [
   { label: "Meeting notes",content: "Meeting: \nDate: \nAttendees: \n\nKey points:\n- \n\nActions:\n- " },
 ];
 
+function seededDraft() {
+  return `${format(new Date(), "EEEE, MMMM d, yyyy")}\n\nWhat I can begin before I feel ready:\n`;
+}
+
 // ── New note input ─────────────────────────────────────────────────────────────
 function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
   const [open, setOpen] = useState(false);
@@ -202,9 +206,9 @@ function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
   }
   if (!open) return (
     <div className="flex items-center gap-2">
-      <button onClick={() => setOpen(true)}
+      <button onClick={() => { setContent(seededDraft()); setOpen(true); }}
         className="flex-1 flex items-center gap-2.5 p-3 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-sm">
-        <Plus className="w-4 h-4 shrink-0" /><span>Jot something down</span>
+        <Plus className="w-4 h-4 shrink-0" /><span>Start today’s draft</span>
       </button>
       <div className="relative group">
         <button className="flex items-center gap-1.5 px-2.5 py-2 rounded-xl border border-dashed border-border hover:border-primary/30 hover:bg-primary/[0.03] text-muted-foreground hover:text-foreground transition-all text-xs">
@@ -223,7 +227,7 @@ function NewNoteInput({ onCreate }: { onCreate: (content: string) => void }) {
     <div className="rounded-xl border border-primary/30 bg-card shadow-sm shadow-primary/10 p-3 space-y-2">
       <Textarea ref={textareaRef} value={content} onChange={e => setContent(e.target.value)}
         onKeyDown={e => { if (e.key === "Escape") { setOpen(false); setContent(""); } if ((e.metaKey || e.ctrlKey) && e.key === "Enter") handleCreate(); }}
-        placeholder="Write anything..." className="text-sm resize-none min-h-[80px] border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none" rows={4} />
+        className="user-writing text-base resize-none min-h-[112px] border-0 bg-transparent p-0 focus-visible:ring-0 shadow-none" rows={5} />
       <div className="flex items-center gap-2 justify-end">
         <Button size="sm" variant="ghost" onClick={() => { setOpen(false); setContent(""); }} className="h-7 px-2 text-xs text-muted-foreground"><X className="w-3.5 h-3.5 mr-1" />Cancel</Button>
         <Button size="sm" onClick={handleCreate} className="h-7 px-3 text-xs bg-primary hover:bg-primary/90 text-white"><Check className="w-3.5 h-3.5 mr-1" />Add</Button>
@@ -447,14 +451,14 @@ export default function ScratchPadPage() {
       {/* Colour filter row */}
       {usedColours.length > 0 && (
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-muted-foreground/50 uppercase tracking-wider">Filter</span>
+          <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">Filter</span>
           {usedColours.map(c => (
             <button key={c.id} onClick={() => setColourFilter(colourFilter === c.id ? null : c.id)}
               className={cn("w-4 h-4 rounded-full transition-all hover:scale-110", colourFilter === c.id && "ring-2 ring-offset-1 ring-offset-background scale-110")}
               style={{ background: c.dot, outlineColor: c.dot }} title={`Filter by ${c.id}`} />
           ))}
           {colourFilter && (
-            <button onClick={() => setColourFilter(null)} className="text-[10px] text-muted-foreground/50 hover:text-foreground ml-1">Clear</button>
+            <button onClick={() => setColourFilter(null)} className="text-xs text-muted-foreground/50 hover:text-foreground ml-1">Clear</button>
           )}
         </div>
       )}
@@ -502,7 +506,7 @@ export default function ScratchPadPage() {
       )}
 
       {notes.length > 0 && !selectMode && (
-        <p className="text-[10px] text-muted-foreground/40 text-center pt-2">
+        <p className="text-xs text-muted-foreground/40 text-center pt-2">
           Hover a note: colour · pin · add to tomorrow · share to vault · send to vault · delete
         </p>
       )}

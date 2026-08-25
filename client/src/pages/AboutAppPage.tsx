@@ -227,8 +227,8 @@ export default function AboutAppPage() {
       <div className="max-w-2xl mx-auto px-6 pb-24 pt-12">
         {/* ── Hero ── */}
         <div className="text-center mb-14">
-          <div className="flex flex-col items-center mb-4">
-            <WrenPlayer clip="popsHead" size="xl" />
+          <div className="flex flex-col items-center mb-6">
+            <WrenPlayer clip="popsHead" size="hero" stage={false} feather fallbackStill="siliconeWatching" />
             <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
               Wren — your Continuary companion
             </p>
@@ -318,14 +318,10 @@ export default function AboutAppPage() {
             </p>
           </div>
 
-          {/* Hero Wren card — full-width cinematic intro */}
-          <div
-            className="rounded-2xl overflow-hidden mb-6 relative"
-            style={{
-              background: "oklch(0.12 0.04 264)",
-              border: "1px solid oklch(0.72 0.14 72 / 0.2)",
-              boxShadow: "0 0 60px oklch(0.72 0.14 72 / 0.08)",
-            }}
+          {/* Hero Wren scene — full-width cinematic presence */}
+          <section
+            className="relative isolate min-h-[360px] overflow-hidden mb-6 bg-[#161815]"
+            style={{ boxShadow: "0 0 60px oklch(0.72 0.14 72 / 0.08)" }}
           >
             {/* Ambient glow */}
             <div
@@ -334,23 +330,20 @@ export default function AboutAppPage() {
                 background: "radial-gradient(ellipse 60% 50% at 50% 0%, oklch(0.72 0.14 72 / 0.12) 0%, transparent 70%)",
               }}
             />
-            <div className="flex flex-col sm:flex-row items-center gap-0 sm:gap-6 p-6 sm:p-8 relative z-10">
-              {/* Video */}
-              <div
-                className="shrink-0 mb-4 sm:mb-0"
-                style={{
-                  width: 200,
-                  height: 200,
-                  borderRadius: "1.25rem",
-                  overflow: "hidden",
-                  boxShadow: "0 8px 40px oklch(0.72 0.14 72 / 0.25)",
-                  border: "1px solid oklch(0.72 0.14 72 / 0.2)",
-                }}
-              >
-                <WrenPlayer clip="luminousFloats" size="full" loop autoPlay feather featherDirection="radial" />
-              </div>
-              {/* Bio */}
-              <div className="flex-1 text-center sm:text-left">
+            <WrenPlayer
+              clip="luminousFloats"
+              size="full"
+              stage={false}
+              objectFit="cover"
+              loop
+              autoPlay
+              feather
+              featherDirection="bottom"
+              wrapperClassName="absolute inset-0 scale-110 origin-bottom-right opacity-60 sm:opacity-90"
+            />
+            <div className="absolute inset-0 pointer-events-none" aria-hidden="true" style={{ background: "linear-gradient(90deg, #161815 0%, rgba(22,24,21,0.92) 42%, rgba(22,24,21,0.26) 100%)" }} />
+            <div className="relative z-10 flex min-h-[360px] items-end p-6 text-left sm:p-8">
+              <div className="max-w-sm">
                 <div
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold mb-3"
                   style={{ background: "oklch(0.72 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)" }}
@@ -370,7 +363,7 @@ export default function AboutAppPage() {
                 </div>
               </div>
             </div>
-          </div>
+          </section>
 
           {/* Personality trait cards — 2 column grid */}
           <div className="mb-6">
@@ -378,24 +371,14 @@ export default function AboutAppPage() {
               Who she is
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
-              {WREN_TRAITS.map(({ icon: Icon, title, desc, clip, accent, accentBg, accentBorder }) => (
+              {WREN_TRAITS.map(({ icon: Icon, title, desc, accent, accentBg, accentBorder }) => (
                 <div
                   key={title}
                   className={`rounded-xl border ${accentBorder} p-4 flex gap-3`}
                   style={{ background: "oklch(0.14 0.03 264 / 0.8)" }}
                 >
-                  {/* Small video thumbnail */}
-                  <div
-                    className="shrink-0"
-                    style={{
-                      width: 64,
-                      height: 64,
-                      borderRadius: "0.75rem",
-                      overflow: "hidden",
-                      border: "1px solid oklch(0.72 0.14 72 / 0.15)",
-                    }}
-                  >
-                    <WrenPlayer clip={clip} size="full" loop autoPlay />
+                  <div className={`w-9 h-9 rounded-lg ${accentBg} flex items-center justify-center shrink-0`}>
+                    <Icon className={`w-4 h-4 ${accent}`} />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 mb-1">
@@ -421,21 +404,8 @@ export default function AboutAppPage() {
               Where you'll find her
             </p>
             <div className="space-y-4">
-              {WREN_APPEARANCES.map(({ location, desc, clip }) => (
+              {WREN_APPEARANCES.map(({ location, desc }) => (
                 <div key={location} className="flex items-center gap-4">
-                  {/* Tiny video */}
-                  <div
-                    className="shrink-0"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: "0.625rem",
-                      overflow: "hidden",
-                      border: "1px solid oklch(0.72 0.14 72 / 0.15)",
-                    }}
-                  >
-                    <WrenPlayer clip={clip} size="full" loop autoPlay />
-                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground mb-0.5">{location}</p>
                     <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>

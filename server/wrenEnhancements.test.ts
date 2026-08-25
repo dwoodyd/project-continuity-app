@@ -5,7 +5,7 @@
  * - What Wren Remembers: getMemorySnapshot shape
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { buildWrenToneDirective } from "./wrenTone";
+import { buildWrenToneDirective, getWrenToneBucketFromTone } from "./wrenTone";
 import { checkCrisisRisk } from "./crisisSafety";
 
 // ── Wren Tone Directive ───────────────────────────────────────────────────────
@@ -77,6 +77,29 @@ describe("buildWrenToneDirective", () => {
     expect(result).toContain("gentle");
     // "brief" dial produces "keep replies to 1–2 sentences" in the directive
     expect(result).toContain("1–2 sentences");
+  });
+});
+
+describe("getWrenToneBucketFromTone", () => {
+  const baseline = {
+    wrenGentleDirect: 50,
+    wrenBriefThorough: 50,
+    wrenCalmEnergizing: 50,
+    wrenFollowsChallenges: 50,
+    wrenDefaultMode: "reflecting" as const,
+  };
+
+  it("derives Gentle from the gentle/direct dial", () => {
+    expect(getWrenToneBucketFromTone({ ...baseline, wrenGentleDirect: 30 })).toBe("gentle");
+  });
+
+  it("derives Direct from centered dials", () => {
+    expect(getWrenToneBucketFromTone(baseline)).toBe("direct");
+  });
+
+  it("derives Firm from a direct dial or high challenge preference", () => {
+    expect(getWrenToneBucketFromTone({ ...baseline, wrenGentleDirect: 70 })).toBe("firm");
+    expect(getWrenToneBucketFromTone({ ...baseline, wrenFollowsChallenges: 80 })).toBe("firm");
   });
 });
 

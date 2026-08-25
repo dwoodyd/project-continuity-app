@@ -248,7 +248,7 @@ export function AIChatBox({
                     }
                   >
                     {message.role === "assistant" && (
-                      <div className="size-8 shrink-0 mt-1 flex items-center justify-center">
+                      <div className="size-20 shrink-0 mt-1 flex items-center justify-center">
                         <WrenPlayer clip="closesEyes" size="xs" />
                       </div>
                     )}
@@ -290,7 +290,7 @@ export function AIChatBox({
                       : undefined
                   }
                 >
-                  <div className="size-8 shrink-0 mt-1 flex items-center justify-center">
+                  <div className="size-20 shrink-0 mt-1 flex items-center justify-center">
                     <WrenPlayer clip="closesEyes" size="xs" />
                   </div>
                   <div className="rounded-lg bg-muted px-4 py-2.5">

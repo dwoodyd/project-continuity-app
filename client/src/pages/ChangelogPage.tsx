@@ -150,7 +150,8 @@ function EntryCard({ entry, isLatest }: { entry: ChangelogEntry; isLatest: boole
 
 export default function ChangelogPage() {
   return (
-    <div
+    <main
+      id="main-content"
       className="min-h-screen"
       style={{ background: "oklch(0.105 0.028 245)", color: "oklch(0.93 0.006 240)" }}
     >
@@ -167,7 +168,7 @@ export default function ChangelogPage() {
           className="inline-flex items-center gap-1.5 text-sm mb-10 transition-colors"
           style={{ color: "oklch(0.54 0.016 240)" }}
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
+          <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
           Back to app
         </Link>
 
@@ -211,6 +212,6 @@ export default function ChangelogPage() {
           </p>
         </footer>
       </div>
-    </div>
+    </main>
   );
 }

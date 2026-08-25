@@ -111,7 +111,7 @@ export default function AdminApplicationsPage() {
         <div className="flex items-center gap-3">
           {pendingCount > 0 && (
             <Badge
-              style={{ background: "oklch(0.74 0.14 72)", color: "#080a0f" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
               className="text-xs font-semibold"
             >
               {pendingCount} pending
@@ -183,7 +183,7 @@ export default function AdminApplicationsPage() {
                       ) : (
                         <span
                           className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-                          style={{ background: "rgba(255,255,255,0.04)", color: "rgba(240,237,230,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}
+                          style={{ background: "var(--muted)", color: "var(--muted-foreground)", border: "1px solid var(--border)" }}
                         >
                           FM · Not yet redeemed
                         </span>
@@ -216,7 +216,7 @@ export default function AdminApplicationsPage() {
                       <Button
                         size="sm"
                         className="text-xs font-semibold"
-                        style={{ background: "oklch(0.74 0.14 72)", color: "#080a0f" }}
+                        style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
                         onClick={() => handleApprove(app.id, app.name, app.email)}
                         disabled={approveMutation.isPending}
                       >

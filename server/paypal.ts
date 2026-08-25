@@ -89,13 +89,9 @@ export async function getPlanId(key: PlanKey): Promise<string> {
   if (planIdCache[key]) return planIdCache[key]!;
   const envKey = `PAYPAL_PLAN_${key.toUpperCase()}`;
   if (process.env[envKey]) { planIdCache[key] = process.env[envKey]!; return planIdCache[key]!; }
-  // Legacy single-plan env vars (backward compat)
-  if (key === "pro_founding_monthly" && process.env.PAYPAL_PLAN_ID) {
-    planIdCache[key] = process.env.PAYPAL_PLAN_ID; return planIdCache[key]!;
-  }
-  if (key === "keeper_founding_monthly" && process.env.PAYPAL_KEEPER_PLAN_ID) {
-    planIdCache[key] = process.env.PAYPAL_KEEPER_PLAN_ID; return planIdCache[key]!;
-  }
+  // Do not fall back to retired single-plan variables. A stale sandbox or deleted
+  // plan ID in either one would otherwise override live plan provisioning and
+  // make checkout fail with PayPal's INVALID_RESOURCE_ID response.
   const plan = PLAN_CATALOG[key];
   const token = await getAccessToken();
   const productRes = await paypalFetch(`${PAYPAL_BASE}/v1/catalogs/products`, {

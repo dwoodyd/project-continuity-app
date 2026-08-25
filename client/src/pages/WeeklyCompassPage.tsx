@@ -1,5 +1,6 @@
 import { trpc } from "@/lib/trpc";
-import WrenPlayer from "@/components/WrenPlayer";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
@@ -127,6 +128,11 @@ export default function WeeklyCompassPage() {
 
   const primaryProject = getProject(compass?.primaryProjectId);
   const secondaryProject = getProject(compass?.secondaryProjectId);
+  const activeProjects = (allProjects ?? []).filter((project) => project.status === "active");
+  const compassWeekStart = compass?.weekStart ? startOfWeek(new Date(compass.weekStart), { weekStartsOn: 1 }) : null;
+  const compassIsCurrent = !!compassWeekStart && compassWeekStart.getTime() === weekStart.getTime();
+  const guidanceClaimsNoProjects = /no active projects/i.test(compass?.generatedGuidance ?? "");
+  const needsFreshCompass = !!compass && (!compassIsCurrent || (activeProjects.length > 0 && guidanceClaimsNoProjects));
 
   const mustMove: string[] = (() => {
     try { return JSON.parse((compass as any)?.mustMove ?? "[]"); } catch { return []; }
@@ -227,28 +233,35 @@ export default function WeeklyCompassPage() {
 
       {/* Empty state */}
       {!isLoading && !compass && (
-        <div className="relative overflow-hidden p-10 rounded-2xl text-center" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264) 0%, oklch(0.45 0.22 280) 100%)'}}>
-          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 80% 20%, oklch(0.99 0 0) 0%, transparent 50%)'}} />
-          <div className="relative">
-            <div className="flex justify-center mb-2" style={{ WebkitMaskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)" }}>
-              <WrenPlayer clip="memoryOrb" size="xl" loop autoPlay />
-            </div>
-            <p className="text-base font-semibold text-white mb-2">No compass set for this week.</p>
-            <p className="text-sm text-white/70 mb-6 max-w-xs mx-auto">
-              Generate your weekly compass to get AI-powered recommendations on where to focus your energy.
-            </p>
-            <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 shadow-lg shadow-black/20">
-              {generate.isPending
-                ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
-                : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
-            </Button>
-          </div>
-        </div>
+        <IntroWrenScene
+          src={WREN_CLIPS.memoryOrb}
+          eyebrow="Weekly Compass"
+          title="One clear direction for the week."
+          body="Gather the threads that matter, then let the rest wait."
+          bleed
+        >
+          <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]">
+            {generate.isPending
+              ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
+              : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
+          </Button>
+        </IntroWrenScene>
       )}
 
       {/* Compass content */}
       {!isLoading && compass && (
         <>
+          {needsFreshCompass && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50/70 dark:bg-amber-900/15 border border-amber-300/70 dark:border-amber-800/40">
+              <RefreshCw className="w-4 h-4 text-amber-700 dark:text-amber-300 shrink-0" />
+              <p className="text-xs text-amber-900 dark:text-amber-100 flex-1">
+                Your projects or week have changed since this compass was made. Refresh it for a current direction.
+              </p>
+              <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={() => generate.mutate()} disabled={generate.isPending}>
+                Refresh
+              </Button>
+            </div>
+          )}
           {/* Confirmation status */}
           {compass.userConfirmedAt ? (
             <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50/60 dark:bg-emerald-900/15 border border-emerald-200/60 dark:border-emerald-800/40">
@@ -275,7 +288,7 @@ export default function WeeklyCompassPage() {
           )}
 
           {/* AI Guidance */}
-          {compass.generatedGuidance && (
+          {compass.generatedGuidance && !needsFreshCompass && (
             <div className="p-5 rounded-2xl border border-primary/30" style={{background: 'linear-gradient(135deg, oklch(0.51 0.24 264 / 0.10) 0%, oklch(0.72 0.17 65 / 0.06) 100%)'}}>
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-primary" />

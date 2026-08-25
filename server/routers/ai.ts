@@ -68,7 +68,7 @@ export const aiRouter = router({
       try {
         const response = await invokeLLM({
           messages: [
-            { role: "system", content: "Parse this captured idea and return JSON only. Be brief." },
+            { role: "system", content: "Parse this captured idea and return JSON only. Be brief. Write parsedIntent directly to the person who captured it: begin with an action or ‘You want to…’; never write ‘The user wants to…’ or refer to them in the third person." },
             {
               role: "user",
               content: `Parse this idea: "${input.content.substring(0, 500)}"

@@ -7,7 +7,26 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import "@fontsource/archivo/400.css";
+import "@fontsource/archivo/600.css";
+import "@fontsource/archivo/700.css";
+import "@fontsource/courier-prime/400.css";
+import "@fontsource/courier-prime/700.css";
 import "./index.css";
+
+function initializeAnalytics() {
+  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT;
+  const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID;
+  if (!endpoint || !websiteId) return;
+
+  const script = document.createElement("script");
+  script.defer = true;
+  script.src = `${endpoint.replace(/\/$/, "")}/umami`;
+  script.dataset.websiteId = websiteId;
+  document.head.appendChild(script);
+}
+
+initializeAnalytics();
 
 // ── Chunk-reload handler ──────────────────────────────────────────────────────
 // After a deploy, Vite renames hashed JS chunks. Open browser sessions that try

@@ -1,7 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { buildWrenToneDirective } from "@/lib/wrenToneClient";
+import { buildWrenToneDirective, WREN_TONE_PRESETS, type WrenTonePreset } from "@/lib/wrenToneClient";
 import {
   Bell,
   Calendar,
@@ -326,6 +326,12 @@ function WrenToneCard() {
     updateTone.mutate(local);
   }, [local, updateTone]);
 
+  const handleQuickPreset = useCallback((preset: WrenTonePreset) => {
+    const next = { ...WREN_TONE_PRESETS[preset] };
+    setLocal(next);
+    updateTone.mutate(next);
+  }, [updateTone]);
+
   const [previewResponse, setPreviewResponse] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
 
@@ -353,10 +359,45 @@ function WrenToneCard() {
   if (isLoading) return null;
 
   return (
-    <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+    <div id="wren-tone" className="p-5 rounded-xl bg-card border border-border space-y-4">
       <div>
         <p className="text-sm font-semibold text-foreground">Wren's Voice</p>
-        <p className="text-xs text-muted-foreground mt-0.5">Adjust how Wren communicates with you. Defaults feel right for most people.</p>
+        <p className="text-xs text-muted-foreground mt-0.5">One voice, used everywhere Wren talks with you.</p>
+      </div>
+
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-2">Quick preset</p>
+        <p className="text-[11px] text-muted-foreground mb-2.5">Choose a starting voice. These update the same controls below.</p>
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            { value: "gentle", label: "Gentle", desc: "Warm, supportive" },
+            { value: "direct", label: "Direct", desc: "Calm, factual" },
+            { value: "firm", label: "Firm", desc: "Concise, no fluff" },
+          ] as const).map(({ value, label, desc }) => {
+            const preset = WREN_TONE_PRESETS[value];
+            const selected = current.wrenGentleDirect === preset.wrenGentleDirect
+              && current.wrenBriefThorough === preset.wrenBriefThorough
+              && current.wrenCalmEnergizing === preset.wrenCalmEnergizing
+              && current.wrenFollowsChallenges === preset.wrenFollowsChallenges
+              && current.wrenDefaultMode === preset.wrenDefaultMode;
+            return (
+              <button
+                key={value}
+                onClick={() => handleQuickPreset(value)}
+                disabled={updateTone.isPending}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all disabled:opacity-60",
+                  selected
+                    ? "border-foreground/30 bg-foreground/5 text-foreground"
+                    : "border-border text-muted-foreground hover:border-foreground/20"
+                )}
+              >
+                <span className="text-sm font-medium">{label}</span>
+                <span className="text-[10px] opacity-70">{desc}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Mode selector */}
@@ -380,8 +421,9 @@ function WrenToneCard() {
         </div>
       </div>
 
-      {/* Sliders */}
+      {/* Fine-tune */}
       <div className="space-y-3">
+        <p className="text-xs font-medium text-muted-foreground">Fine-tune</p>
         {dials.map(({ key, left, right }) => (
           <div key={key}>
             <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
@@ -437,7 +479,7 @@ function WrenToneCard() {
 // ─── Settings Page ────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { user, logout } = useAuth();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const utils = trpc.useUtils();
   const { theme, toggleTheme } = useTheme();
   const { replayIntro } = useIntro();
@@ -554,6 +596,20 @@ export default function SettingsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
+  const openWrenTone = useCallback(() => {
+    setActiveTab("preferences");
+    requestAnimationFrame(() => document.getElementById("wren-tone")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("tab") !== "preferences") return;
+    setActiveTab("preferences");
+    if (window.location.hash === "#wren-tone") {
+      requestAnimationFrame(() => document.getElementById("wren-tone")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+  }, [location]);
+
   // Invite management (admin only)
   const isAdmin = (user as any)?.role === "admin";
   const [inviteLabel, setInviteLabel] = useState("");
@@ -617,6 +673,13 @@ export default function SettingsPage() {
             className="text-amber-500 hover:text-amber-400 underline underline-offset-2 transition-colors"
           >
             See what Wren remembers →
+          </button>
+          {" "}
+          <button
+            onClick={openWrenTone}
+            className="text-amber-500 hover:text-amber-400 underline underline-offset-2 transition-colors"
+          >
+            Tune how Wren talks →
           </button>
         </p>
       </div>
@@ -1036,18 +1099,67 @@ export default function SettingsPage() {
                   </div>
                   <button
                     onClick={() => updateSettings.mutate({ [key]: !(settings as any)?.[key] })}
+                    aria-label={`${(settings as any)?.[key] !== false ? "Disable" : "Enable"} ${label}`}
+                    aria-pressed={(settings as any)?.[key] !== false}
                     className={cn(
                       "w-10 h-6 rounded-full transition-colors relative shrink-0",
-                      (settings as any)?.[key] !== false ? "bg-foreground" : "bg-muted-foreground/30"
+                      (settings as any)?.[key] !== false ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35"
                     )}
                   >
-                    <span className={cn(
-                      "absolute top-0.5 w-5 h-5 rounded-full bg-background shadow transition-transform",
+                    <span aria-hidden="true" className={cn(
+                      "absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform",
+                      (settings as any)?.[key] !== false ? "bg-primary-foreground" : "bg-card",
                       (settings as any)?.[key] !== false ? "translate-x-4" : "translate-x-0.5"
                     )} />
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Visual comfort</p>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Make the app easier to read or quieter to look at. These choices save to your account.</p>
+            </div>
+            <div className="space-y-3">
+              {[
+                { key: "reducedVisualNoise", label: "Reduced visual noise", desc: "Soften accents and flatten decorative gradients." },
+              ].map(({ key, label, desc }) => {
+                const enabled = Boolean((settings as any)?.[key]);
+                return (
+                  <div key={key} className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{label}</p>
+                      <p className="text-xs text-muted-foreground">{desc}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => updateSettings.mutate({ [key]: !enabled })}
+                      aria-label={`${enabled ? "Disable" : "Enable"} ${label}`}
+                      aria-pressed={enabled}
+                      className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", enabled ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35")}
+                    >
+                      <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform", enabled ? "translate-x-4 bg-primary-foreground" : "translate-x-0.5 bg-card")} />
+                    </button>
+                  </div>
+                );
+              })}
+              <div className="flex items-center justify-between gap-4 py-2 border-b border-border last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Larger text</p>
+                  <p className="text-xs text-muted-foreground">Increase reading size across Continuary.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => updateSettings.mutate({ fontSizePreference: settings?.fontSizePreference === "large" ? "medium" : "large" })}
+                  aria-label={`${settings?.fontSizePreference === "large" ? "Disable" : "Enable"} larger text`}
+                  aria-pressed={settings?.fontSizePreference === "large"}
+                  className={cn("w-10 h-6 rounded-full transition-colors relative shrink-0", settings?.fontSizePreference === "large" ? "bg-primary shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_20%,transparent)]" : "bg-muted-foreground/35")}
+                >
+                  <span aria-hidden="true" className={cn("absolute top-0.5 w-5 h-5 rounded-full shadow transition-transform", settings?.fontSizePreference === "large" ? "translate-x-4 bg-primary-foreground" : "translate-x-0.5 bg-card")} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1148,34 +1260,7 @@ export default function SettingsPage() {
           {/* Weekly Digest */}
           <WeeklyDigestCard />
 
-          {/* Tone preference */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-3">
-            <p className="text-sm font-semibold text-foreground">AI Tone</p>
-            <p className="text-xs text-muted-foreground">How should the AI communicate with you?</p>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { value: "gentle", label: "Gentle", desc: "Warm, supportive" },
-                { value: "direct", label: "Direct", desc: "Calm, factual" },
-                { value: "firm", label: "Firm", desc: "Concise, no fluff" },
-              ].map(({ value, label, desc }) => (
-                <button
-                  key={value}
-                  onClick={() => updateSettings.mutate({ tonePreference: value as any })}
-                  className={cn(
-                    "flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-all",
-                    settings?.tonePreference === value
-                      ? "border-foreground/30 bg-foreground/5 text-foreground"
-                      : "border-border text-muted-foreground hover:border-foreground/20"
-                  )}
-                >
-                  <span className="text-sm font-medium">{label}</span>
-                  <span className="text-[10px] opacity-70">{desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Wren Tone Dials */}
+          {/* Quick preset + Wren Tone Dials */}
           <WrenToneCard />
 
           {/* Google Calendar Integration */}
@@ -1231,6 +1316,9 @@ export default function SettingsPage() {
               <Button variant="outline" size="sm" onClick={() => replayIntro()} className="text-xs gap-1.5">
                 <Play className="w-3 h-3" />
                 Replay intro
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => window.location.assign("/tour")} className="text-xs gap-1.5">
+                Take the tour
               </Button>
               <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => { navigator.clipboard.writeText(window.location.origin + "/intro"); notify.saved("Link copied"); }}>
                 Copy share link

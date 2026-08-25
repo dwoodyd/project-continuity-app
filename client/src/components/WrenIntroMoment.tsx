@@ -147,7 +147,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 200,
-      background: "oklch(0.07 0.022 240)",
+      background: "#161815",
       overflow: "hidden",
     }}>
       {/* Wren video — full bleed, screen blend */}

@@ -42,6 +42,10 @@ import {
   Trash2,
   CalendarClock,
   Mic,
+  Eye,
+  EyeOff,
+  GripVertical,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -75,6 +79,9 @@ import {
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
 import WrenPlayer from "@/components/WrenPlayer";
+import { TodayGreetingWren } from "@/components/TodayGreetingWren";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS } from "@/lib/wrenClips";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
@@ -82,6 +89,13 @@ import { CrisisSupportCard } from "@/components/CrisisSupportCard";
 import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import { BentoCard } from "@/components/BentoCard";
 import { useTransitionSound } from "@/hooks/useTransitionSound";
+import { PageMeta } from "@/components/PageMeta";
+import {
+  DASHBOARD_MODULES,
+  normalizeDashboardLayout,
+  presentationOrder,
+  type DashboardModuleKey,
+} from "@/lib/dashboardModules";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type CapacityLevel = "full" | "partial" | "low";
@@ -299,20 +313,20 @@ function CheckInCard({
       disabled={completed}
       className="flex-1 min-w-0 flex flex-col items-start gap-1.5 p-3 rounded-xl border text-left transition-all duration-150 overflow-hidden"
       style={completed
-        ? { background: "oklch(0.14 0.02 264 / 0.40)", borderColor: "oklch(1 0 0 / 0.07)", opacity: 0.6 }
+        ? { background: "var(--muted)", borderColor: "var(--border)", opacity: 0.82 }
         : highlighted
-          ? { background: "oklch(0.74 0.14 72 / 0.14)", borderColor: "oklch(0.74 0.14 72 / 0.40)", boxShadow: "0 0 0 1px oklch(0.74 0.14 72 / 0.20), 0 4px 16px oklch(0.74 0.14 72 / 0.12)" }
+          ? { background: "color-mix(in srgb, var(--primary) 14%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 40%, transparent)", boxShadow: "0 0 0 1px color-mix(in srgb, var(--primary) 20%, transparent), 0 4px 16px color-mix(in srgb, var(--primary) 12%, transparent)" }
           : { background: "var(--card)", borderColor: "var(--border)" }
       }
     >
       <div className="flex items-center gap-1.5 w-full">
         <Icon
           className="w-3.5 h-3.5 shrink-0"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.74 0.14 72)" : "oklch(0.55 0.01 270)" }}
+          style={{ color: completed ? "var(--muted-foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--muted-foreground)" }}
         />
         <span
           className="text-xs font-medium tracking-[-0.01em] truncate"
-          style={{ color: completed ? "oklch(0.55 0.01 270)" : highlighted ? "oklch(0.92 0.10 65)" : "oklch(0.65 0.01 270)" }}
+          style={{ color: completed ? "var(--foreground)" : highlighted ? "var(--accent-tint-text)" : "var(--foreground)" }}
         >
           {label}
         </span>
@@ -321,13 +335,16 @@ function CheckInCard({
           <ChevronUp className="ml-auto w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.88 0.16 65 / 0.70)" }} />
         )}
         {!open && active && !completed && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.74 0.14 72)" }} />
+          <div className="ml-auto w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "var(--accent-tint-text)" }} />
         )}
       </div>
       <p
         className="text-xs leading-tight pl-0.5 truncate w-full"
-        style={{ color: highlighted ? "oklch(0.78 0.10 65 / 0.75)" : "oklch(0.55 0.01 270 / 0.70)" }}
+          style={{ color: highlighted ? "var(--foreground)" : "color-mix(in srgb, var(--foreground) 74%, var(--muted-foreground))" }}
       >{timeHint}</p>
+      {completed && (
+        <WrenPlayer clip="blobJournal" size="xs" loop wrapperClassName="mt-1 self-end" />
+      )}
     </button>
   );
 }
@@ -719,10 +736,10 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
   });
   const allDone = localTasks.length > 0 && checkedIds.size >= localTasks.length;
   return (
-    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
+    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.56 0.18 28 / 0.20)" }}>
       <div className="flex items-center gap-2 mb-3">
-        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }} />
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.70)" }}>Here's what you set up last night</p>
+        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }} />
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }}>Here's what you set up last night</p>
         <button
           onClick={() => setAddingTask(true)}
           className="ml-auto flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-foreground/70 transition-colors"
@@ -743,12 +760,12 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
                   onClick={() => toggle(id)}
                   className="mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={done
-                    ? { background: "oklch(0.74 0.14 72 / 0.25)", borderColor: "oklch(0.74 0.14 72 / 0.60)" }
+                    ? { background: "oklch(0.56 0.18 28 / 0.25)", borderColor: "oklch(0.56 0.18 28 / 0.60)" }
                     : { borderColor: "oklch(1 0 0 / 0.22)" }
                   }
                   aria-label={done ? "Mark incomplete" : "Mark complete"}
                 >
-                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "oklch(0.74 0.14 72)" }} />}
+                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "#C8452B" }} />}
                 </button>
               )}
               {editingId === id ? (
@@ -841,14 +858,14 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
         <button
           onClick={() => setAddingTask(true)}
           className="w-full mt-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed text-muted-foreground/40 hover:text-muted-foreground/70 hover:border-foreground/20 transition-colors text-sm"
-          style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+          style={{ borderColor: "oklch(0.56 0.18 28 / 0.15)" }}
         >
           <Plus className="w-3.5 h-3.5 shrink-0" />
           <span>Add something for tomorrow</span>
         </button>
       )}
       {allDone && (
-        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
+        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
       )}
     </div>
   );
@@ -954,7 +971,7 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
           onClick={() => setShowDecision(!showDecision)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <BookOpen className="w-3.5 h-3.5" />
+          <BookOpen className="w-3.5 h-3.5" aria-hidden="true" />
           {showDecision ? "Hide" : "Log a decision made today"} <span className="opacity-50">(optional)</span>
         </button>
         {showDecision && (
@@ -999,7 +1016,7 @@ function MoodWidget() {
 
   function phaseColor(score: number) {
     if (score >= 7) return "oklch(0.75 0.18 145)";
-    if (score >= 4) return "oklch(0.74 0.14 72)";
+    if (score >= 4) return "#C8452B";
     return "oklch(0.65 0.18 30)";
   }
 
@@ -1042,6 +1059,7 @@ function MoodWidget() {
                 minWidth: 0,
               }}
               title={`Score ${n}`}
+              aria-label={`Log mood score ${n} out of 10`}
             />
           ))}
         </div>
@@ -1209,6 +1227,10 @@ export default function Home() {
   // "Pick different step" state for the Start Here card
   const [pickingStep, setPickingStep] = useState(false);
   const [customStep, setCustomStep] = useState("");
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [optInExpanded, setOptInExpanded] = useState(false);
+  const [draggedModule, setDraggedModule] = useState<DashboardModuleKey | null>(null);
+  const [justOneThingOpen, setJustOneThingOpen] = useState(false);
   // Ref to scroll the check-in form into view when opened from the bottom CTA
   const checkInRef = useRef<HTMLDivElement>(null);
   const openCheckIn = useCallback((type: CheckInStep) => {
@@ -1266,32 +1288,79 @@ export default function Home() {
   });
   const utils = trpc.useUtils();
   const { data: profile } = trpc.settings.getProfile.useQuery(undefined, { enabled: authed });
+  const { data: dashboardLayoutData } = trpc.settings.getDashboardLayout.useQuery(undefined, {
+    enabled: authed,
+    staleTime: 5 * 60 * 1000,
+  });
+  const dashboardLayout = useMemo(() => normalizeDashboardLayout(dashboardLayoutData), [dashboardLayoutData]);
+  const updateDashboardLayout = trpc.settings.updateDashboardLayout.useMutation({
+    onSuccess: () => utils.settings.getDashboardLayout.invalidate(),
+    onError: () => notify.error("Dashboard preferences could not be saved. Please try again."),
+  });
+  const isModuleVisible = useCallback(
+    (key: DashboardModuleKey) => !dashboardLayout.hidden.includes(key),
+    [dashboardLayout.hidden],
+  );
+  const persistDashboardLayout = useCallback(
+    (next: { hidden: DashboardModuleKey[]; order: DashboardModuleKey[] }) => {
+      updateDashboardLayout.mutate(next);
+    },
+    [updateDashboardLayout],
+  );
+  const toggleDashboardModule = useCallback(
+    (key: DashboardModuleKey) => {
+      const hidden = dashboardLayout.hidden.includes(key)
+        ? dashboardLayout.hidden.filter((item) => item !== key)
+        : [...dashboardLayout.hidden, key];
+      persistDashboardLayout({ hidden, order: dashboardLayout.order });
+    },
+    [dashboardLayout, persistDashboardLayout],
+  );
+  const reorderDashboardModule = useCallback(
+    (from: DashboardModuleKey, to: DashboardModuleKey) => {
+      const order = [...dashboardLayout.order];
+      const fromIndex = order.indexOf(from);
+      const toIndex = order.indexOf(to);
+      if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+      order.splice(fromIndex, 1);
+      order.splice(toIndex, 0, from);
+      persistDashboardLayout({ hidden: dashboardLayout.hidden, order });
+    },
+    [dashboardLayout, persistDashboardLayout],
+  );
 
   // ── Deferred queries (fire only after critical path resolves) ─────────────────
   // These are secondary data that don't block the initial render.
   const criticalReady = authed && !planLoading;
-  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery({ localDate: localDateStr }, { enabled: criticalReady });
-  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery({ localDate: localDateStr }, { enabled: criticalReady });
-  const { data: lastEveningClose } = trpc.checkIns.getLastEveningClose.useQuery(undefined, { enabled: authed, staleTime: 60_000 });
-  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: criticalReady });
-  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: criticalReady });
-  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: criticalReady });
+  const [optionalModulesReady, setOptionalModulesReady] = useState(false);
+  useEffect(() => {
+    if (!criticalReady) { setOptionalModulesReady(false); return; }
+    const timer = window.setTimeout(() => setOptionalModulesReady(true), 500);
+    return () => window.clearTimeout(timer);
+  }, [criticalReady]);
+  const deferredReady = criticalReady && optionalModulesReady;
+  const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery({ localDate: localDateStr }, { enabled: deferredReady });
+  const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery({ localDate: localDateStr }, { enabled: deferredReady });
+  const { data: lastEveningClose } = trpc.checkIns.getLastEveningClose.useQuery(undefined, { enabled: deferredReady, staleTime: 60_000 });
+  const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: deferredReady });
+  const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: deferredReady });
+  const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: deferredReady });
   const { data: activeThreadLock } = trpc.threadLock.getActive.useQuery(undefined, {
     enabled: authed,
     staleTime: 60_000,
     refetchOnWindowFocus: true, // re-check when user returns to the tab
   });
-  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: criticalReady });
-  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: criticalReady, staleTime: 60_000 });
-  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: criticalReady, staleTime: 5 * 60 * 1000 });
-  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { enabled: criticalReady, staleTime: 5 * 60 * 1000 });
-  const { data: healthScores } = trpc.insights.getHealthScores.useQuery(undefined, { enabled: criticalReady });
+  const { data: recentDecisions } = trpc.intelligence.getRecentDecisions.useQuery(undefined, { enabled: deferredReady });
+  const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, { enabled: deferredReady, staleTime: 60_000 });
+  const { data: focusArtifact } = trpc.focusSessions.getArtifact.useQuery(undefined, { enabled: deferredReady, staleTime: 5 * 60 * 1000 });
+  const { data: focusTodayStats } = trpc.focusSessions.getTodayStats.useQuery(undefined, { enabled: deferredReady, staleTime: 5 * 60 * 1000 });
+  const { data: healthScores } = trpc.insights.getHealthScores.useQuery(undefined, { enabled: deferredReady });
   const { data: clarityRec } = trpc.clarity.getModeRecommendation.useQuery(undefined, {
-    enabled: criticalReady,
+    enabled: deferredReady,
     staleTime: 30 * 60 * 1000,
   });
   // Reading Bridge first-time prompt
-  const { data: rbData } = trpc.readingBridge.get.useQuery(undefined, { enabled: !!user, staleTime: 10 * 60 * 1000 });
+  const { data: rbData } = trpc.readingBridge.get.useQuery(undefined, { enabled: deferredReady, staleTime: 10 * 60 * 1000 });
   const setRbChapter = trpc.readingBridge.set.useMutation();
   const [rbPromptDismissed, setRbPromptDismissed] = useState(() => localStorage.getItem("rb_prompt_dismissed") === "1");
   const showRbPrompt = !rbPromptDismissed &&
@@ -1319,6 +1388,20 @@ export default function Home() {
   const dismissThreadLock = trpc.threadLock.dismiss.useMutation({
     onSuccess: () => utils.threadLock.getActive.invalidate(),
   });
+
+  const [returningAfterGap, setReturningAfterGap] = useState(false);
+  const [reviewReturnBrief, setReviewReturnBrief] = useState(
+    () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("return-brief") === "1",
+  );
+  useEffect(() => {
+    const key = "continuary-last-dashboard-visit";
+    const previous = Number(window.localStorage.getItem(key) || 0);
+    setReturningAfterGap(previous > 0 && Date.now() - previous >= 6 * 60 * 60 * 1000);
+    window.localStorage.setItem(key, String(Date.now()));
+  }, []);
+  const latestScratchNote = scratchNotes?.[0];
+  const lastWrittenLine = latestScratchNote?.content.split("\n").find((line: string) => line.trim())?.trim();
+  const showReturnBrief = reviewReturnBrief || (returningAfterGap && Boolean(activeThreadLock || lastWrittenLine));
 
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
@@ -1670,6 +1753,7 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -1738,6 +1822,44 @@ export default function Home() {
     return null;
   })();
 
+  const justOneThing = (() => {
+    if (activeThreadLock) {
+      return {
+        label: "Pick up your thread",
+        detail: activeThreadLock.whatNext || activeThreadLock.whatDoing,
+        run: () => recallThreadLock.mutate({ id: activeThreadLock.id }),
+      };
+    }
+    const nextTask = visibleTasks.find((task: any) => !task.done);
+    if (nextTask) {
+      return {
+        label: nextTask.title,
+        detail: "One step is enough. Everything else can wait.",
+        run: () => completeTask(nextTask.id, nextTask.title),
+      };
+    }
+    const nextCheckIn: CheckInStep | null = !morningDone ? "morning" : !middayDone ? "midday" : !eveningDone ? "evening" : null;
+    if (nextCheckIn) {
+      const label = nextCheckIn === "morning" ? "Start your morning check-in" : nextCheckIn === "midday" ? "Take a midday pulse" : "Close the day gently";
+      return {
+        label,
+        detail: "You only need to answer the next question.",
+        run: () => setActiveCheckIn(nextCheckIn),
+      };
+    }
+    return {
+      label: "Capture what is on your mind",
+      detail: "No sorting needed yet. Just put it somewhere safe.",
+      run: () => navigate("/capture"),
+    };
+  })();
+
+  const enterJustOneThing = () => {
+    if (isPlanningMode) updateSettings.mutate({ planningMode: false });
+    if (topAlert === "spiral_offer" && !groundModeActive) enterGroundMode("contextual_offer");
+    setJustOneThingOpen(true);
+  };
+
   // ── Today dashboard skeleton (P2-E) ───────────────────────────────────────
   // Show a lightweight skeleton while the critical-path data loads.
   if (authed && planLoading) {
@@ -1774,12 +1896,126 @@ export default function Home() {
     );
   }
 
+  if (justOneThingOpen) {
+    return (
+      <main className="min-h-[70vh] px-4 py-10 sm:px-6 flex items-center justify-center">
+        <section className="w-full max-w-lg rounded-2xl border border-primary/25 bg-card p-6 sm:p-8 text-center card-shadow" aria-labelledby="just-one-title">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary">Just one thing</p>
+          <h1 id="just-one-title" className="mt-3 font-brand text-2xl font-semibold text-foreground">One step. Nothing else right now.</h1>
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{justOneThing.detail}</p>
+          <button
+            onClick={justOneThing.run}
+            className="mt-7 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            {justOneThing.label}
+          </button>
+          {groundModeActive && (
+            <p className="mt-4 text-xs text-muted-foreground">Ground Mode is active: facts, one action, no extra framing.</p>
+          )}
+          <button
+            onClick={() => setJustOneThingOpen(false)}
+            className="mt-5 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            Back to the full dashboard
+          </button>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <>
+    <PageMeta title="Today · Continuary" description="Your calm daily rhythm, next action, and project continuity space." path="/" />
     {showWrenIntro && (
-      <WrenIntroMoment onDone={() => setShowWrenIntro(false)} />
+      <WrenIntroMoment onDone={() => {
+        setShowWrenIntro(false);
+        if (sessionStorage.getItem("startWithOneThing") === "1") {
+          sessionStorage.removeItem("startWithOneThing");
+          setJustOneThingOpen(true);
+        }
+      }} />
     )}
-    <div className="px-4 sm:px-5 py-7 page-enter max-w-4xl mx-auto space-y-7 overflow-x-hidden">
+    <Dialog open={customizeOpen} onOpenChange={setCustomizeOpen}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Customize your dashboard</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Keep the parts that help. Hide what feels like too much. Drag modules into the order that makes sense for you.
+        </p>
+        <div className="space-y-2 pt-2" aria-label="Dashboard module preferences">
+          {dashboardLayout.order.map((key) => {
+            const module = DASHBOARD_MODULES.find((item) => item.key === key);
+            if (!module) return null;
+            const visible = isModuleVisible(key);
+            return (
+              <div
+                key={key}
+                draggable
+                onDragStart={() => setDraggedModule(key)}
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={() => {
+                  if (draggedModule) reorderDashboardModule(draggedModule, key);
+                  setDraggedModule(null);
+                }}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2.5",
+                  draggedModule === key && "opacity-50",
+                )}
+              >
+                <GripVertical className="w-4 h-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
+                <span className="flex-1 text-sm text-foreground">{module.label}</span>
+                <button
+                  type="button"
+                  onClick={() => toggleDashboardModule(key)}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+                  role="switch"
+                  aria-checked={visible}
+                  aria-label={`${visible ? "Hide" : "Show"} ${module.label} on dashboard`}
+                >
+                  {visible ? <Eye className="w-3.5 h-3.5" aria-hidden="true" /> : <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />}
+                  {visible ? "Shown" : "Hidden"}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-muted-foreground">Changes save automatically to your account.</p>
+      </DialogContent>
+    </Dialog>
+    <div className={`px-4 sm:px-5 py-7 page-enter flex flex-col gap-7 overflow-x-hidden ${showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"}`}>
+      {showReturnBrief && (
+        <IntroWrenScene
+          src={WREN_CLIPS.tuggingThread}
+          eyebrow={`Return brief · ${format(now, "EEEE, MMMM d")}`}
+          title="A week away. You returned anyway. That’s not small."
+          body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
+          className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
+          variant="return"
+        >
+          {lastWrittenLine && !activeThreadLock && (
+            <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-sm leading-6 text-[#FFF8EC]/90">
+              You left yourself a note. It is waiting in Scratch Pad when you are ready—one small next step is enough.
+            </p>
+          )}
+          <button
+            onClick={() => activeThreadLock ? recallThreadLock.mutate({ id: activeThreadLock.id }) : navigate("/scratch")}
+            disabled={recallThreadLock.isPending}
+            className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
+          >
+            Continue
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          {reviewReturnBrief && (
+            <button
+              onClick={() => setReviewReturnBrief(false)}
+              className="mt-4 block text-xs text-[#F5EEE2]/65 underline underline-offset-4 hover:text-[#F5EEE2]"
+            >
+              Close preview
+            </button>
+          )}
+        </IntroWrenScene>
+      )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
       {showTrialBanner && (
         <div
@@ -1881,12 +2117,10 @@ export default function Home() {
         </div>
       )}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <WrenPlayer clip="popsHead" size="sm" wrapperClassName="shrink-0 -mt-1" fallbackStill="luminousIdle" />
-          <div>
+      <div className="flex items-start justify-between" style={{ order: -10 }}>
+        <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
-            {greeting}, <span style={{ color: "oklch(0.74 0.14 72)" }}>{firstName}</span>.
+            {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
@@ -1895,35 +2129,51 @@ export default function Home() {
             {streakData && streakData.streak >= 2 && (
               <span
                 className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
+                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "#C8452B", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
                 title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
               >
                 🔥 {streakData.streak}d
               </span>
             )}
           </div>
-          </div>
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
         <div className="flex items-center gap-2 flex-wrap justify-end min-w-0">
+          <div
+            className="h-[102px] w-[102px] shrink-0 overflow-hidden bg-transparent"
+            data-testid="today-greeting-wren"
+            aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
+          >
+            <TodayGreetingWren clip={greetingWrenClip} />
+          </div>
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (
             <button
               onClick={() => enterGroundMode("manual")}
               title="Enter Ground Mode — facts only, no warmth"
+              aria-label="Enter Ground Mode — facts only, no warmth"
               className="p-1.5 rounded-lg transition-colors shrink-0"
               style={{ color: "oklch(0.45 0.04 240 / 0.70)", border: "1px solid oklch(0.35 0.04 240 / 0.30)" }}
             >
-              <Anchor className="w-3.5 h-3.5" />
+              <Anchor className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
           )}
+          <button
+            onClick={() => setCustomizeOpen(true)}
+            className="p-1.5 rounded-lg transition-colors shrink-0 text-muted-foreground hover:text-foreground hover:bg-foreground/5"
+            aria-label="Customize dashboard modules"
+            title="Customize dashboard"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
           {pendingIdeaCount > 0 && (
             <button
               onClick={() => navigate("/settings?tab=ideas")}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors shrink-0"
               title="Ideas waiting to be processed"
+              aria-label={`${pendingIdeaCount} idea${pendingIdeaCount === 1 ? "" : "s"} waiting to be processed`}
             >
-              <Lightbulb className="w-3 h-3" />
+              <Lightbulb className="w-3 h-3" aria-hidden="true" />
               {pendingIdeaCount}
             </button>
           )}
@@ -1945,49 +2195,50 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ── Primary Action Row (#3) ──────────────────────────────────────── */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* ── Primary Action: one context-aware next move ───────────────────── */}
+      <div className="flex items-center gap-2" style={{ order: -9 }}>
         <button
           onClick={() => {
-            const period = activePeriod as CheckInStep;
+            if (topAlert === "thread_lock" && activeThreadLock) {
+              recallThreadLock.mutate({ id: activeThreadLock.id });
+              return;
+            }
             const target = !morningDone ? "morning" : !middayDone ? "midday" : "evening";
             openCheckIn(target);
           }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: "oklch(0.74 0.14 72 / 0.12)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.22)" }}
+          style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--accent-tint-text)", border: "1px solid color-mix(in srgb, var(--primary) 22%, transparent)" }}
         >
-          <Sun className="w-3.5 h-3.5" />
-          Start check-in
+          {topAlert === "thread_lock" ? <Anchor className="w-3.5 h-3.5" aria-hidden="true" /> : <Sun className="w-3.5 h-3.5" aria-hidden="true" />}
+          {topAlert === "thread_lock" ? "Pick up your thread" : !morningDone ? "Start morning check-in" : !middayDone ? "Start midday pulse" : "Start evening close"}
         </button>
         <button
-          onClick={() => navigate("/clarity")}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: "oklch(0.18 0.02 240 / 0.80)", color: "oklch(0.80 0.04 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
+          onClick={enterJustOneThing}
+          className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
         >
-          <MessageCircle className="w-3.5 h-3.5" />
-          Ask Wren
+          Need just one thing?
         </button>
-        <button
-          onClick={() => navigate("/projects?new=1")}
-          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
-          style={{ background: "oklch(0.18 0.02 240 / 0.80)", color: "oklch(0.80 0.04 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
-        >
-          <FolderPlus className="w-3.5 h-3.5" />
-          New project
-        </button>
+        {!showReturnBrief && (
+          <button
+            onClick={() => setReviewReturnBrief(true)}
+            className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
+          >
+            Preview return brief
+          </button>
+        )}
       </div>
 
       {/* ── Primary Alert (single, priority-resolved) ────────────────────── */}
-      {topAlert === "thread_lock" && activeThreadLock && (
+      {!showReturnBrief && topAlert === "thread_lock" && activeThreadLock && (
         <div
           className="rounded-xl border overflow-hidden"
-          style={{ background: "oklch(0.12 0.04 72 / 0.5)", borderColor: "oklch(0.74 0.14 72 / 0.30)" }}
+          style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--primary) 30%, var(--border))" }}
         >
           {/* Header */}
           <div className="flex items-center gap-2 px-4 pt-3.5 pb-2">
-            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>You left a thread</p>
-            <span className="ml-auto text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
+            <Anchor className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "var(--accent-tint-text)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>You left a thread</p>
+            <span className="ml-auto text-[10px] text-muted-foreground">
               {(() => {
                 const diffMin = Math.round((Date.now() - activeThreadLock.createdAt) / 60_000);
                 return diffMin < 60 ? `${diffMin}m ago` : `${Math.round(diffMin / 60)}h ago`;
@@ -1996,23 +2247,23 @@ export default function Home() {
           </div>
           {/* Body */}
           <div className="px-4 pb-3 space-y-1.5">
-            <p className="text-sm leading-snug" style={{ color: "oklch(0.88 0.03 60)" }}>
+            <p className="text-sm leading-snug text-foreground">
               {activeThreadLock.whatDoing}
             </p>
-            <p className="text-xs leading-snug" style={{ color: "oklch(0.60 0.04 240)" }}>
+            <p className="text-xs leading-snug text-muted-foreground">
               Next: {activeThreadLock.whatNext}
             </p>
           </div>
           {/* Actions */}
           <div
             className="flex items-center gap-2 px-4 py-3 border-t"
-            style={{ borderColor: "oklch(0.74 0.14 72 / 0.15)" }}
+            style={{ borderColor: "color-mix(in srgb, var(--primary) 18%, var(--border))" }}
           >
             <button
               onClick={() => recallThreadLock.mutate({ id: activeThreadLock.id })}
               disabled={recallThreadLock.isPending}
               className="flex-1 text-xs font-semibold py-2 rounded-lg transition-all active:scale-95"
-              style={{ background: "oklch(0.74 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               Pick it up →
             </button>
@@ -2030,16 +2281,16 @@ export default function Home() {
         <button
           onClick={() => openCheckIn(activePeriod)}
           className="w-full text-left p-4 rounded-xl border transition-all duration-150 active:scale-[0.99] hover:brightness-110"
-          style={{ borderColor: "oklch(0.74 0.14 72 / 0.28)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}
+          style={{ borderColor: "color-mix(in srgb, var(--primary) 28%, var(--border))", background: "linear-gradient(135deg, color-mix(in srgb, var(--primary) 8%, transparent) 0%, color-mix(in srgb, var(--primary) 3%, transparent) 100%)" }}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
-              <Sun className="w-3.5 h-3.5 text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>
+              <Sun className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>
                 {activePeriod === "morning" ? "Morning check-in ready" : activePeriod === "midday" ? "Midday check-in ready" : "Evening close ready"}
               </p>
             </div>
-            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.6)" }} />
+            <ChevronRight className="w-4 h-4 shrink-0" style={{ color: "var(--accent-tint-text)" }} />
           </div>
           <p className="text-sm text-foreground">
             {activePeriod === "morning" ? "Set your capacity and focus for today." : activePeriod === "midday" ? "Check in on your energy and adjust your plan." : "Reflect on the day and set tomorrow's thread."}
@@ -2081,26 +2332,26 @@ export default function Home() {
       {topAlert === "spiral_offer" && (
         <div
           className="p-4 rounded-xl border"
-          style={{ background: "oklch(0.22 0.02 240 / 0.60)", borderColor: "oklch(0.45 0.04 240 / 0.50)" }}
+          style={{ background: "var(--card)", borderColor: "color-mix(in srgb, var(--primary) 26%, var(--border))" }}
         >
           <div className="flex items-start gap-3">
-            <Anchor className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "oklch(0.72 0.06 240)" }} />
+            <Anchor className="w-4 h-4 mt-0.5 shrink-0" style={{ color: "var(--accent-tint-text)" }} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium mb-0.5" style={{ color: "oklch(0.88 0.04 240)" }}>Ground Mode available</p>
-              <p className="text-xs leading-relaxed" style={{ color: "oklch(0.65 0.03 240)" }}>
+              <p className="text-sm font-medium mb-0.5 text-foreground">Ground Mode available</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
                 Your recent notes have some spiral signals. Ground Mode strips the AI back to facts only — no warmth, no framing, just what's observable and one next action.
               </p>
               <div className="flex items-center gap-3 mt-2.5">
                 <button
                   onClick={() => enterGroundMode("contextual_offer")}
                   className="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-                  style={{ background: "oklch(0.35 0.04 240 / 0.70)", color: "oklch(0.90 0.04 240)", border: "1px solid oklch(0.50 0.04 240 / 0.40)" }}
+                  style={{ background: "var(--primary)", color: "var(--primary-foreground)", border: "1px solid color-mix(in srgb, var(--primary) 72%, var(--border))" }}
                 >
                   Enter Ground Mode
                 </button>
                 <button
                   onClick={() => setGroundModeCrisisBreak(true)}
-                  className="text-xs" style={{ color: "oklch(0.55 0.03 240)" }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Not now
                 </button>
@@ -2110,15 +2361,15 @@ export default function Home() {
         </div>
       )}
       {topAlert === "weekly_review" && (
-        <div className="p-3 rounded-xl border" style={{ background: "oklch(0.74 0.14 72 / 0.06)", borderColor: "oklch(0.74 0.14 72 / 0.20)" }}>
+        <div className="p-3 rounded-xl border" style={{ background: "color-mix(in srgb, var(--primary) 6%, transparent)", borderColor: "color-mix(in srgb, var(--primary) 20%, transparent)" }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart2 className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
-              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72)" }}>Weekly review is ready for this week.</p>
+              <BarChart2 className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+              <p className="text-xs" style={{ color: "var(--accent-tint-text)" }}>Weekly review is ready for this week.</p>
             </div>
             <button
               onClick={() => navigate("/weekly-review")}
-              className="text-xs font-medium hover:underline" style={{ color: "oklch(0.74 0.14 72)" }}
+              className="text-xs font-medium hover:underline" style={{ color: "var(--accent-tint-text)" }}
             >Open</button>
           </div>
         </div>
@@ -2148,10 +2399,10 @@ export default function Home() {
       )}
       {/* ── AI Guidance (always shown when plan exists) ─────────────────────── */}
       {todayPlan?.generatedGuidance && (
-        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
+        <div className="relative p-4 rounded-xl overflow-hidden" style={{ background: "color-mix(in srgb, var(--primary) 6%, transparent)", border: "1px solid color-mix(in srgb, var(--primary) 18%, transparent)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Today's guidance</p>
+            <Sparkles className="w-3.5 h-3.5" style={{ color: "var(--accent-tint-text)" }} />
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--accent-tint-text)" }}>Today's guidance</p>
           </div>
           <p className="text-sm text-foreground leading-relaxed">{todayPlan.generatedGuidance}</p>
         </div>
@@ -2162,12 +2413,12 @@ export default function Home() {
         <div
           className="flex items-start justify-between gap-4 px-4 py-3.5 rounded-xl"
           style={{
-            background: "oklch(0.74 0.14 72 / 0.06)",
-            border: "1px solid oklch(0.74 0.14 72 / 0.18)",
+            background: "color-mix(in srgb, var(--primary) 6%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--primary) 18%, transparent)",
           }}
         >
           <div className="flex items-start gap-3 min-w-0">
-            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "oklch(0.74 0.14 72)" }} />
+            <BookOpen className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: "var(--accent-tint-text)" }} />
             <div className="min-w-0">
               <p className="text-sm text-foreground/90 leading-snug">
                 Reading <span className="italic">Permission to Start</span>? Tell Wren where you are and she'll keep it in mind.
@@ -2176,7 +2427,7 @@ export default function Home() {
                 <button
                   onClick={() => { dismissRbPrompt(false); navigate("/reading-bridge"); }}
                   className="text-xs font-medium px-3 py-1 rounded-md"
-                  style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "color-mix(in srgb, var(--primary) 18%, transparent)", color: "var(--accent-tint-text)" }}
                 >
                   Set my chapter
                 </button>
@@ -2192,8 +2443,9 @@ export default function Home() {
           <button
             onClick={() => dismissRbPrompt(false)}
             className="flex-shrink-0 text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-0.5"
+            aria-label="Dismiss Reading Bridge invitation"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
           </button>
         </div>
       )}
@@ -2244,25 +2496,25 @@ export default function Home() {
         return (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
-            style={{ background: "oklch(0.74 0.14 72 / 0.06)", border: "1px solid oklch(0.74 0.14 72 / 0.14)" }}
+            style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.14)" }}
           >
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="flex gap-1">
                 {steps.map((s, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "oklch(0.74 0.14 72)" : "oklch(0.74 0.14 72 / 0.25)" }} />
+                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "#C8452B" : "oklch(0.56 0.18 28 / 0.25)" }} />
                 ))}
               </div>
-              <p className="text-xs" style={{ color: "oklch(0.74 0.14 72 / 0.75)" }}>
+              <p className="text-xs" style={{ color: "oklch(0.56 0.18 28 / 0.75)" }}>
                 Getting started · {doneCount}/{steps.length}
                 {doneCount < steps.length && (
-                  <span style={{ color: "oklch(0.74 0.14 72 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
+                  <span style={{ color: "oklch(0.56 0.18 28 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
                 )}
               </p>
             </div>
             <button
               onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} window.location.reload(); }}
               className="shrink-0 transition-opacity"
-              style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}
+              style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}
               aria-label="Dismiss"
             >
               <X className="w-3.5 h-3.5" />
@@ -2274,7 +2526,7 @@ export default function Home() {
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
       {/* Daily Rhythm — full-width above masonry so check-in cells never truncate */}
       <BentoCard
-        className="w-full mb-3"
+        className="w-full mb-3 order-[-8]"
         icon={<Sun className="w-3.5 h-3.5" />}
         title="Daily Rhythm"
         headerRight={gamStatus?.rhythmToday && (
@@ -2333,8 +2585,8 @@ export default function Home() {
         </div>
       </BentoCard>
 
-      {/* Bento masonry grid — 3-col at xl (1280px+) → 2-col at md/lg (768-1279px) → 1-col mobile */}
-      <div className="columns-1 md:columns-2 xl:columns-3 gap-3">
+      {/* Ordered dashboard tiers: secondary context first, optional context by request. */}
+      <div className="flex flex-col gap-3">
 
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (
@@ -2345,7 +2597,7 @@ export default function Home() {
               <WrenPlayer clip="cartwheels" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
-                style={{ color: "oklch(0.74 0.14 72)" }}
+                style={{ color: "#C8452B" }}
               >
                 {wrenCelebration.message}
               </p>
@@ -2359,8 +2611,8 @@ export default function Home() {
             <h3 className="text-sm font-semibold text-foreground capitalize">
               {activeCheckIn} check-in
             </h3>
-            <button onClick={() => setActiveCheckIn(null)} className="text-muted-foreground hover:text-foreground p-1">
-              <ChevronUp className="w-4 h-4" />
+            <button onClick={() => setActiveCheckIn(null)} aria-label={`Collapse ${activeCheckIn} check-in`} className="text-muted-foreground hover:text-foreground p-1">
+              <ChevronUp className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
           {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} localDate={localDateStr} />}
@@ -2437,10 +2689,10 @@ export default function Home() {
       })()}
 
       {/* ── Today's Tasks ───────────────────────────────────────────────────── */}
-      {(tasks.length > 0 || true) && (
-        <div className="break-inside-avoid mb-3">
+      {isModuleVisible("tasks") && (tasks.length > 0 || true) && (
+        <div className="break-inside-avoid mb-3" style={{ order: presentationOrder("tasks", dashboardLayout) }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.60)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>
               Today's tasks
             </p>
             <div className="flex items-center gap-2">
@@ -2712,6 +2964,7 @@ export default function Home() {
         <button
           onClick={() => navigate("/focus")}
           className="w-full flex items-center justify-between p-4 rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors group shadow-md shadow-primary/20"
+          style={{ order: 25 }}
         >
           <div className="flex items-center gap-3">
             <Brain className="w-5 h-5" />
@@ -2725,19 +2978,19 @@ export default function Home() {
       )}
 
       {/* ── First Step Card ─────────────────────────────────────────────────── */}
-      {activeProjects && activeProjects.length > 0 && (() => {
+      {isModuleVisible("first_step") && activeProjects && activeProjects.length > 0 && (() => {
         const primaryProjectId = todayPlan?.primaryProjectId;
         const topProject = primaryProjectId
           ? activeProjects.find((p) => p.id === primaryProjectId) ?? activeProjects[0]
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border space-y-3" style={{ borderColor: "oklch(0.74 0.14 72 / 0.25)", background: "linear-gradient(135deg, oklch(0.74 0.14 72 / 0.08) 0%, oklch(0.74 0.14 72 / 0.03) 100%)" }}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ order: presentationOrder("first_step", dashboardLayout), borderColor: "oklch(0.56 0.18 28 / 0.25)", background: "linear-gradient(135deg, oklch(0.56 0.18 28 / 0.08) 0%, oklch(0.56 0.18 28 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-primary-foreground" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72)" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
                 className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -2891,45 +3144,10 @@ export default function Home() {
           />
         );
       })()}
-
-
-
-      {/* ── Wren Ambient Presence (time-of-day) ─────────────────────────── */}
-      {(() => {
-        const wrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
-        const wrenTagline = hour < 12 ? "Morning. The thread is ready." : hour < 17 ? "Your thread is holding." : "Wren is keeping this warm.";
-        return (
-          <BentoCard noPadding className="wren-ambient-card break-inside-avoid mb-3" style={{ height: 220, position: "relative", overflow: "hidden" }}>
-            {/* Subtle warm glow behind Wren */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: "radial-gradient(ellipse at 50% 80%, oklch(0.74 0.14 72 / 0.12) 0%, transparent 65%)" }}
-            />
-            {/* Wren fills the card — mix-blend-mode:screen removes the dark bg */}
-            <WrenPlayer
-              clip={wrenClip}
-              size="full"
-              loop
-              autoPlay
-              muted
-              feather
-              featherDirection="bottom"
-              wrapperClassName="absolute inset-0"
-            />
-            {/* Tagline pinned to bottom */}
-            <div className="absolute bottom-0 left-0 right-0 pb-3 text-center px-4 z-10"
-              style={{ background: "linear-gradient(to top, oklch(0.10 0.022 240 / 0.85) 0%, transparent 100%)" }}
-            >
-              <p className="text-xs font-log" style={{ color: "oklch(0.92 0.02 65 / 0.80)" }}>{wrenTagline}</p>
-            </div>
-          </BentoCard>
-        );
-      })()}
-
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
-      <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3">
+      {optInExpanded && isModuleVisible("emotional_cycle") && <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3" style={{ order: presentationOrder("emotional_cycle", dashboardLayout) }}>
         <MoodWidget />
-      </BentoCard>
+      </BentoCard>}
 
       {/* ── Tomorrow's Plan Card (from last night's evening check-in) ─────── */}
       {/* Show after evening close — even if empty, so user can always add to tomorrow */}
@@ -2938,14 +3156,14 @@ export default function Home() {
       )}
 
       {/* ── Scratch Pad Widget ────────────────────────────────────────────────────────────────── */}
-      {scratchNotes && scratchNotes.length > 0 && (() => {
+      {optInExpanded && isModuleVisible("scratch_pad") && scratchNotes && scratchNotes.length > 0 && (() => {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.10)" }}>
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ order: presentationOrder("scratch_pad", dashboardLayout), background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
-              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Scratch Pad</p>
+              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Scratch Pad</p>
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
@@ -2958,14 +3176,14 @@ export default function Home() {
       })()}
 
       {/* ── Knowledge Graph Shortcut ─────────────────────────────────────── */}
-      <a href="/vault" className="block no-underline break-inside-avoid mb-3">
-        <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }}>◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer break-inside-avoid mb-3">
+      {optInExpanded && isModuleVisible("knowledge_graph") && <a href="/vault" className="block no-underline break-inside-avoid mb-3" style={{ order: presentationOrder("knowledge_graph", dashboardLayout) }}>
+        <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }} aria-hidden="true">◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer break-inside-avoid mb-3">
           <p className="text-sm text-foreground/60">View your vault connections →</p>
         </BentoCard>
-      </a>
+      </a>}
 
       {/* ── Thread Strength — gentle arc + named-state dot meter (#5) ────────── */}
-      {gamStatus?.threadStrength && (() => {
+      {isModuleVisible("thread_strength") && gamStatus?.threadStrength && (() => {
         const STATES = ["gathering", "weaving", "holding"];
         // Map legacy backend states to the 3 honored states
         const rawState = gamStatus.threadStrength.state.toLowerCase();
@@ -2979,6 +3197,7 @@ export default function Home() {
         return (
           <BentoCard
           className="break-inside-avoid mb-3"
+            style={{ order: presentationOrder("thread_strength", dashboardLayout) }}
             icon={<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 2" /></svg>}
             title="Thread Strength"
           >
@@ -2987,7 +3206,7 @@ export default function Home() {
               <svg width={52} height={52} viewBox="0 0 52 52" className="-rotate-90 shrink-0">
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5} stroke="oklch(1 0 0 / 0.07)" />
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5}
-                  stroke="oklch(0.74 0.14 72 / 0.70)"
+                  stroke="oklch(0.56 0.18 28 / 0.70)"
                   strokeDasharray={`${dash} ${circ}`}
                   strokeLinecap="round"
                   style={{ transition: "stroke-dasharray 1.2s ease" }}
@@ -2995,7 +3214,7 @@ export default function Home() {
               </svg>
               {/* State label + dot meter */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold capitalize" style={{ color: "oklch(0.74 0.14 72)" }}>
+                <p className="text-sm font-semibold capitalize" style={{ color: "var(--accent-tint-text)" }}>
                   {mappedState.charAt(0).toUpperCase() + mappedState.slice(1)}
                 </p>
                 <div className="flex items-center gap-1 mt-1.5">
@@ -3007,8 +3226,8 @@ export default function Home() {
                         width: i === currentIdx ? 8 : 5,
                         height: i === currentIdx ? 8 : 5,
                         background: i <= currentIdx
-                          ? "oklch(0.74 0.14 72)"
-                          : "oklch(0.74 0.14 72 / 0.18)",
+                          ? "var(--accent-tint-text)"
+                          : "oklch(0.56 0.18 28 / 0.18)",
                       }}
                     />
                   ))}
@@ -3021,7 +3240,7 @@ export default function Home() {
             <button
               onClick={() => setReEntryOpen(true)}
               className="mt-3 w-full text-left text-xs py-2 px-3 rounded-lg transition-colors"
-              style={{ background: "oklch(0.74 0.14 72 / 0.08)", color: "oklch(0.74 0.14 72 / 0.65)" }}
+              style={{ background: "color-mix(in srgb, var(--primary) 8%, transparent)", color: "var(--accent-tint-text)" }}
             >
               ↺ Pick up the thread
             </button>
@@ -3034,9 +3253,9 @@ export default function Home() {
         <a
           href="/focus"
           className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90 break-inside-avoid mb-3"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.74 0.14 72 / 0.12)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.74 0.14 72 / 0.55)" }}>Focus sessions today</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Focus sessions today</p>
           <p className="text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>
             {focusTodayStats.todaySessions} session{focusTodayStats.todaySessions !== 1 ? "s" : ""} · {focusTodayStats.todayMinutes} min
             {focusArtifact && focusArtifact.totalSegments > 0 && ` · ${focusArtifact.totalSegments} woven total`}
@@ -3056,13 +3275,14 @@ export default function Home() {
       )}
 
       {/* ── Quietly Waiting — paused / holding threads (#6) ──────────────────── */}
-      {pausedProjects && pausedProjects.length > 0 && (() => {
+      {isModuleVisible("quietly_waiting") && pausedProjects && pausedProjects.length > 0 && (() => {
         const waiting = pausedProjects;
         return (
           <BentoCard
             className="break-inside-avoid mb-3"
             icon={<Pause className="w-3.5 h-3.5" />}
             title="Quietly Waiting"
+            style={{ order: presentationOrder("quietly_waiting", dashboardLayout) }}
           >
             <div className="space-y-2 pt-1">
               {waiting.slice(0, 3).map(p => (
@@ -3071,14 +3291,14 @@ export default function Home() {
                   onClick={() => navigate(`/projects/${p.id}`)}
                   className="w-full flex items-start gap-2.5 text-left group"
                 >
-                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.35)" }} />
+                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.35)" }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/80 truncate group-hover:text-foreground transition-colors">{p.title}</p>
                     {p.nextStep && (
                       <p className="text-xs text-muted-foreground/50 truncate mt-0.5">re-entry: {p.nextStep}</p>
                     )}
                   </div>
-                  <span className="text-xs shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.35)" }}>
+                  <span className="text-xs shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}>
                     paused
                   </span>
                 </button>
@@ -3103,19 +3323,19 @@ export default function Home() {
         </div>
       )}
       {/* ── Active Projects — momentum state bars ──────────────────────────── */}
-      {activeProjects && activeProjects.length > 0 && (() => {
+      {isModuleVisible("projects") && activeProjects && activeProjects.length > 0 && (() => {
         const stateLabel = (m: string) =>
           m === 'rising' ? 'weaving' :
           m === 'fading' ? 'holding' :
           m === 'stalled' ? 'holding' : 'gathering';
         const stateColor = (m: string): string =>
           m === 'rising' ? 'oklch(0.65 0.12 150)' :
-          m === 'fading' || m === 'stalled' ? 'oklch(0.74 0.14 72 / 0.70)' :
-          'oklch(0.74 0.14 72 / 0.40)';
+          m === 'fading' || m === 'stalled' ? 'oklch(0.56 0.18 28 / 0.70)' :
+          'oklch(0.56 0.18 28 / 0.40)';
         const stateFill = (m: string): number =>
           m === 'rising' ? 0.75 : m === 'fading' ? 0.45 : m === 'stalled' ? 0.25 : 0.55;
         return (
-          <BentoCard icon={<FolderPlus className="w-3.5 h-3.5" />} title="Projects">
+          <BentoCard icon={<FolderPlus className="w-3.5 h-3.5" />} title="Projects" style={{ order: presentationOrder("projects", dashboardLayout) }}>
             <div className="space-y-3">
               {activeProjects.slice(0, capacityLevel === "low" ? 1 : capacityLevel === "partial" ? 2 : 3).map((project) => {
                 const m = momentumByProject[project.id] ?? 'steady';
@@ -3158,12 +3378,23 @@ export default function Home() {
         );
       })()}
 
+      <button
+        onClick={() => setOptInExpanded((expanded) => !expanded)}
+        className="w-full flex items-center justify-between rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:border-primary/35 transition-colors"
+        style={{ order: 90 }}
+        aria-expanded={optInExpanded}
+      >
+        <span>{optInExpanded ? "Show less" : "Show more"}</span>
+        <ChevronDown className={cn("w-4 h-4 transition-transform", optInExpanded && "rotate-180")} aria-hidden="true" />
+      </button>
+
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
-      {clarityRec && !clarityNudgeDismissed && (
+      {optInExpanded && isModuleVisible("pattern_detected") && clarityRec && !clarityNudgeDismissed && (
         <BentoCard
           className="break-inside-avoid mb-3"
           icon={<Sparkles className="w-3.5 h-3.5" />}
           title="Pattern Detected"
+          style={{ order: presentationOrder("pattern_detected", dashboardLayout) }}
           headerRight={
             <button
               onClick={dismissClarityNudge}
@@ -3189,8 +3420,8 @@ export default function Home() {
       )}
 
       {/* ── Recent Decisions (right col) ────────────────────────────────────────────────────────── */}
-      {recentDecisions && recentDecisions.length > 0 && (
-        <div>
+      {optInExpanded && isModuleVisible("recent_decisions") && recentDecisions && recentDecisions.length > 0 && (
+        <div style={{ order: presentationOrder("recent_decisions", dashboardLayout) }}>
           <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent decisions</p>
           <div className="space-y-2">
             {recentDecisions.slice(0, 2).map((d: any) => (
@@ -3207,7 +3438,7 @@ export default function Home() {
       )}
 
        {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────────── */}
-      <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode" className="break-inside-avoid mb-3">
+      {optInExpanded && isModuleVisible("mode") && <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode" className="break-inside-avoid mb-3" style={{ order: presentationOrder("mode", dashboardLayout) }}>
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
@@ -3254,13 +3485,13 @@ export default function Home() {
             )} />
           </button>
         </div>
-      </BentoCard>
+      </BentoCard>}
       </div>
       {/* Empty state banner removed — the top-alert check_in_due card and Daily Rhythm tiles already surface the morning check-in. A third CTA was redundant and used an off-palette purple gradient. */}
 
       {/* ── Notification Permission Prompt ─────────────────────────────────── */}
       {showNotifPrompt && (
-        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.74 0.14 72 / 0.05)", border: "1px solid oklch(0.74 0.14 72 / 0.18)" }}>
+        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.56 0.18 28 / 0.05)", border: "1px solid oklch(0.56 0.18 28 / 0.18)" }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Bell className="w-5 h-5 text-primary" />

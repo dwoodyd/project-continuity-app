@@ -56,14 +56,14 @@ export default function WhatWrenRemembersPage() {
 
       {/* Header */}
       <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 border-b border-border" style={{ background: "var(--background)" }}>
-        <button onClick={() => navigate("/settings")} className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-          <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+        <button onClick={() => navigate("/settings")} className="p-1.5 rounded-lg hover:bg-muted transition-colors" aria-label="Back to settings">
+          <ArrowLeft className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
         </button>
         <div className="flex-1">
           <h1 className="text-base font-semibold text-foreground">What Wren Remembers</h1>
           <p className="text-xs text-muted-foreground">Wren uses this to personalise your experience</p>
         </div>
-        <WrenPlayer clip="popsHead" size="sm" fallbackStill="luminousIdle" />
+        <WrenPlayer clip="memoryOrb" size="sm" fallbackStill="luminousIdle" />
       </div>
 
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">

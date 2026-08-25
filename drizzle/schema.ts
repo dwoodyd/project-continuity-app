@@ -89,6 +89,10 @@ export const userProfiles = mysqlTable("user_profiles", {
   coldProjectThresholdDays: int("coldProjectThresholdDays").default(5),
   weeklyReviewDay: mysqlEnum("weeklyReviewDay", ["sunday", "saturday", "monday"]).default("sunday"),
   fontSizePreference: mysqlEnum("fontSizePreference", ["small", "medium", "large"]).default("medium"),
+  /** JSON: { hidden: string[]; order: string[] }, controls Home module presentation only. */
+  dashboardLayout: text("dashboardLayout"),
+  /** Reduces accent saturation and removes non-essential visual treatments. */
+  reducedVisualNoise: boolean("reducedVisualNoise").default(false).notNull(),
   notificationsEnabled: boolean("notificationsEnabled").default(true),
   morningNotifEnabled: boolean("morningNotifEnabled").default(true),
   middayNotifEnabled: boolean("middayNotifEnabled").default(true),

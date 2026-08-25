@@ -3,7 +3,7 @@ import { PageMeta } from "@/components/PageMeta";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <main id="main-content" className="min-h-screen bg-background text-foreground">
       <PageMeta
         title="Terms of Service"
         description="Continuary's terms of service — what you can expect from us and what we ask of you."
@@ -136,6 +136,6 @@ export default function TermsPage() {
 
         </section>
       </div>
-    </div>
+    </main>
   );
 }

@@ -626,7 +626,11 @@ describe("settings router — TC-1: 401 for unauthenticated requests", () => {
         distractionPatterns: ["social media"],
         focusHoursStart: "09:00",
         focusHoursEnd: "17:00",
-        tonePreference: "direct",
+        wrenGentleDirect: 50,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "doing",
       })
     );
   });
@@ -649,7 +653,7 @@ describe("settings router — TC-2: IDOR prevention", () => {
     vi.mocked(db.getUserProfile).mockResolvedValueOnce({ id: 1, userId: 1 } as any);
     vi.mocked(db.updateUserProfile).mockResolvedValueOnce(undefined);
     const caller = appRouter.createCaller(makeCtx({ id: 6 }));
-    await caller.settings.updateSettings({ tonePreference: "firm" });
+    await caller.settings.updateSettings({ timezone: "America/Chicago" });
     // updateUserProfile must be called with the authenticated userId, not a client-supplied one
     expect(db.updateUserProfile).toHaveBeenCalledWith(6, expect.any(Object));
   });
@@ -699,10 +703,16 @@ describe("settings router — TC-4: input validation", () => {
     );
   });
 
-  it("settings.updateSettings rejects invalid tonePreference enum", async () => {
+  it("settings.updateWrenTone rejects an out-of-range voice dial", async () => {
     const caller = appRouter.createCaller(makeCtx());
     await expectBadRequest(() =>
-      caller.settings.updateSettings({ tonePreference: "aggressive" as any })
+      caller.settings.updateWrenTone({
+        wrenGentleDirect: 101,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "reflecting",
+      })
     );
   });
 
@@ -720,7 +730,7 @@ describe("settings router — TC-4: input validation", () => {
     );
   });
 
-  it("settings.completeOnboarding rejects invalid tonePreference", async () => {
+  it("settings.completeOnboarding rejects an invalid voice dial", async () => {
     const caller = appRouter.createCaller(makeCtx());
     await expectBadRequest(() =>
       caller.settings.completeOnboarding({
@@ -728,7 +738,11 @@ describe("settings router — TC-4: input validation", () => {
         distractionPatterns: [],
         focusHoursStart: "09:00",
         focusHoursEnd: "17:00",
-        tonePreference: "harsh" as any,
+        wrenGentleDirect: -1,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "reflecting",
       })
     );
   });
@@ -741,7 +755,11 @@ describe("settings router — TC-4: input validation", () => {
         distractionPatterns: [],
         focusHoursStart: "09:00",
         focusHoursEnd: "17:00",
-        tonePreference: "direct",
+        wrenGentleDirect: 50,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "doing",
       })
     );
   });
@@ -754,7 +772,11 @@ describe("settings router — TC-4: input validation", () => {
         distractionPatterns: ["d".repeat(201)],
         focusHoursStart: "09:00",
         focusHoursEnd: "17:00",
-        tonePreference: "direct",
+        wrenGentleDirect: 50,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "doing",
       })
     );
   });
@@ -767,7 +789,11 @@ describe("settings router — TC-4: input validation", () => {
         distractionPatterns: [],
         focusHoursStart: "09:00",
         focusHoursEnd: "17:00",
-        tonePreference: "direct",
+        wrenGentleDirect: 50,
+        wrenBriefThorough: 50,
+        wrenCalmEnergizing: 50,
+        wrenFollowsChallenges: 50,
+        wrenDefaultMode: "doing",
       })
     );
   });

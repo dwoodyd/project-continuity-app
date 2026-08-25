@@ -47,8 +47,8 @@ interface CompanionState {
 }
 
 // ── Style tokens (match WrenPopout) ──────────────────────────────────────────
-const navy    = "#0C1322";
-const raise   = "#131C30";
+const navy    = "#161815";
+const raise   = "#20221F";
 const ink     = "#E6E9EF";
 const soft    = "#A8B5C4";
 const mute    = "#7A8BA0";

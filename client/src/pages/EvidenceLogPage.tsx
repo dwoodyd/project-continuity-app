@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { PageHeader } from "@/components/PageHeader";
-import WrenPlayer from "@/components/WrenPlayer";
+import { IntroWrenScene } from "@/components/IntroWrenScene";
+import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -218,7 +219,6 @@ function MonthlyEvidenceCard({
 
 export default function EvidenceLogPage() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showWrenCelebration, setShowWrenCelebration] = useState(false);
 
   const utils = trpc.useUtils();
 
@@ -252,92 +252,55 @@ export default function EvidenceLogPage() {
   const totalReturns = summaries?.reduce((acc, s) => acc + s.returnsAfterGap, 0) ?? 0;
   const totalHardDays = summaries?.reduce((acc, s) => acc + s.hardDaySessions, 0) ?? 0;
 
-  // Show Wren celebration once ever (localStorage) when the user first has evidence — not on every visit
-  useEffect(() => {
-    if (!summaries || summaries.length === 0) return;
-    const key = "continuary_evidence_celebrated_v1";
-    if (localStorage.getItem(key)) return;
-    localStorage.setItem(key, "1");
-    setShowWrenCelebration(true);
-    setTimeout(() => setShowWrenCelebration(false), 6000);
-  }, [summaries]);
-
   return (
     <div className="min-h-screen bg-background">
-      {/* Wren celebration — shown once per session when evidence exists; tap to dismiss */}
-      {showWrenCelebration && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center cursor-pointer"
-          style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
-          onClick={() => setShowWrenCelebration(false)}
+      <IntroWrenScene
+        src={WREN_CLIPS.evidenceClean}
+        poster={WREN_STILLS.evidenceCleanPoster}
+        eyebrow="Evidence Log"
+        title="This is your record. Every entry is proof."
+        body="The record holds what you did when the rest of your mind tries to lose it."
+        bleed
+        variant="return"
+        className="evidence-main-pane min-h-[min(84vh,860px)]"
+      >
+        <Button
+          onClick={handleGenerateCurrent}
+          disabled={isGenerating}
+          className="bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]"
         >
-          <WrenPlayer clip="checkmark" size="2xl" />
-          <p
-            className="mt-4 text-lg font-semibold text-center px-8"
-            style={{ color: "oklch(0.74 0.14 72)" }}
-          >
-            This is your record. Every entry is proof.
-          </p>
-          <p className="mt-2 text-xs text-center" style={{ color: "oklch(0.60 0.08 72)" }}>
-            Tap anywhere to continue
-          </p>
-        </div>
-      )}
+          {isGenerating ? "Updating…" : "Update this month"}
+        </Button>
+      </IntroWrenScene>
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
-        {/* Header */}
-        <div className="space-y-1">
+        {/* Utility row — the immersive hero already owns the page title and update action. */}
+        <div className="flex items-center justify-between gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Today
           </Link>
-          <PageHeader
-            title={
-              <span className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-amber-400" />
-                Evidence <span className="font-brand font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>Log</span>
-              </span>
-            }
-            subtitle="The record of who you actually are — not who you think you should be."
-            action={
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={handleGenerateCurrent}
-                  disabled={isGenerating}
-                  size="sm"
-                  className="shrink-0 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30"
-                  variant="outline"
-                >
-                  {isGenerating ? (
-                    <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                  ) : (
-                    <Flame className="w-3.5 h-3.5 mr-1.5" />
-                  )}
-                  Update this month
-                </Button>
-                <Button
-                  onClick={async () => {
-                    try {
-                      const result = await utils.evidence.exportMarkdown.fetch();
-                      const blob = new Blob([result.markdown], { type: "text/markdown" });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url;
-                      const _ed = new Date(); a.download = `continuary-evidence-log-${_ed.getFullYear()}-${String(_ed.getMonth()+1).padStart(2,"0")}-${String(_ed.getDate()).padStart(2,"0")}.md`;
-                      a.click();
-                      URL.revokeObjectURL(url);
-                      notify.saved("Evidence Log exported");
-                    } catch { notify.error("Export failed"); }
-                  }}
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
-                  title="Export as Markdown"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            }
-          />
+          <Button
+            onClick={async () => {
+              try {
+                const result = await utils.evidence.exportMarkdown.fetch();
+                const blob = new Blob([result.markdown], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                const _ed = new Date(); a.download = `continuary-evidence-log-${_ed.getFullYear()}-${String(_ed.getMonth()+1).padStart(2,"0")}-${String(_ed.getDate()).padStart(2,"0")}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+                notify.saved("Evidence Log exported");
+              } catch { notify.error("Export failed"); }
+            }}
+            size="sm"
+            variant="outline"
+            className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
+            title="Export as Markdown"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export
+          </Button>
         </div>
 
         {/* All-time summary pills */}

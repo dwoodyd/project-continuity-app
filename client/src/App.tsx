@@ -61,6 +61,8 @@ const OpenLoopsPage       = lazy(() => import("./pages/OpenLoopsPage"));
 const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
 const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage"));
 const WaitlistPage        = lazy(() => import("./pages/WaitlistPage"));
+const BookStartPage       = lazy(() => import("./pages/BookStartPage"));
+const BookStartHerePage   = lazy(() => import("./pages/BookStartHerePage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -100,6 +102,8 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
   <Route path="/apply" component={ApplyPage} />
         {/* /waitlist is public — shown when founding slots are full */}
         <Route path="/waitlist" component={WaitlistPage} />
+        <Route path="/start-here" component={BookStartHerePage} />
+        <Route path="/start" component={BookStartPage} />
         <Route path="/invite/:code" component={InviteRedeemPage} />
         <Route path="/redeem-referral" component={RedeemReferralPage} />
         <Route path="/intro">{() => null}</Route>
@@ -179,24 +183,36 @@ function App() {
     // Using sessionStorage so it fires once per session even if the profile
     // query hasn't resolved yet when Home mounts.
     sessionStorage.setItem("justCompletedOnboarding", "1");
+    sessionStorage.setItem("startWithOneThing", "1");
     setOnboardingDone(true);
     setPreviewMode(false);
+    if (typeof window !== "undefined" && window.location.pathname === "/intro") {
+      window.history.replaceState({}, "", "/");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
   }
 
   function handlePreviewIntro() {
     setPreviewMode(true);
+    if (typeof window !== "undefined" && window.location.pathname !== "/intro") {
+      window.history.pushState({}, "", "/intro");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    }
   }
 
   // /intro forces the flow for cold-traffic sharing links (e.g. bio, Product Hunt)
   const isIntroRoute = typeof window !== "undefined" && window.location.pathname === "/intro";
-  const showOnboarding = splashDone && ((!onboardingDone && isFirstSession) || previewMode || isIntroRoute);
+  const isHomeGate = typeof window !== "undefined" && window.location.pathname === "/";
+  const canStartEntryFlow = splashDone || !isHomeGate;
+  const showOnboarding = (isHomeGate || isIntroRoute) && canStartEntryFlow && ((!onboardingDone && isFirstSession) || previewMode || isIntroRoute);
 
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark" switchable>
         <TooltipProvider>
+          <a href="#main-content" className="skip-link">Skip to main content</a>
           <Toaster />
-          {!splashDone && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
+          {!splashDone && isHomeGate && <AnimatedSplash onComplete={handleSplashComplete} isFirstSession={isFirstSession} />}
           {showOnboarding && (
             <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "#080a0f" }}>
               <OnboardingPageWithCallback onDone={handleOnboardingDone} />

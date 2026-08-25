@@ -26,7 +26,7 @@ export function UpdatePrompt() {
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border border-amber-500/30 bg-[#0C1322]/95 backdrop-blur-md text-sm text-amber-100 max-w-sm w-[calc(100vw-2rem)]"
+      className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl shadow-xl border border-amber-500/30 bg-[#161815]/95 backdrop-blur-md text-sm text-amber-100 max-w-sm w-[calc(100vw-2rem)]"
       style={{ fontFamily: "'DM Mono', 'DM Sans', monospace" }}
     >
       <Sparkles className="shrink-0 text-amber-400" size={16} />

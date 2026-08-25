@@ -128,7 +128,7 @@ export function WrenThinking({
     return (
       <div style={{
         position: "fixed", inset: 0, zIndex: 150,
-        background: "oklch(0.07 0.022 240 / 0.88)",
+        background: "color-mix(in srgb, #161815 88%, transparent)",
         backdropFilter: "blur(8px)",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>

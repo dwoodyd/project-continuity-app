@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/select";
 import notify from "@/lib/notify";
 import { formatDistanceToNow } from "date-fns";
-import WrenPlayer from "@/components/WrenPlayer";
 
 type ProjectStatus = "idea" | "mapped" | "active" | "paused" | "completed" | "archived";
 
@@ -197,9 +196,9 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
             <span className={cn("w-2 h-2 rounded-full shrink-0", cfg.dot)} />
             <span className={cn("text-xs font-medium", cfg.color)}>{cfg.label}</span>
             {healthScore !== undefined && (
-              <span className="flex items-center gap-1 ml-1">
+              <span className="flex items-center gap-1 ml-1" title="Project health score out of 100">
                 <HealthDot score={healthScore} />
-                <span className="text-xs text-muted-foreground/60">{healthScore}</span>
+                <span className="text-xs text-muted-foreground/70">Health {healthScore}</span>
               </span>
             )}
             <span className={cn("text-xs font-medium ml-auto", priorityCfg)}>{project.priorityLevel}</span>
@@ -222,11 +221,7 @@ function ProjectCard({ project, onClick, healthScore }: { project: any; onClick:
           )}
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          {isStale ? (
-            <WrenPlayer clip="inflates" size="xs" />
-          ) : (
-            <ChevronRight className="w-4 h-4 text-muted-foreground mt-0.5 group-hover:translate-x-0.5 transition-transform" />
-          )}
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-0.5 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
       {isStale && (

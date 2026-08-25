@@ -2125,3 +2125,222 @@
 - [ ] Verify production PayPal configuration and checkout approval-page readiness
 - [ ] Verify Manus OAuth consent branding, production sign-in, and known-account data integrity
 - [ ] Verify production assets, custom domains, and HTTPS after recovery
+## UX Audit + UX Build Briefs (Aug 10, 2026)
+- [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
+- [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
+- [x] B4: Add persisted larger-text and reduced-visual-noise preferences to user profiles, settings procedures, and Settings UI.
+- [x] A1: Implement a calm dashboard core: greeting, one next action, and Daily Rhythm first; secondary modules lower; opt-in modules collapsed by default.
+- [x] A2: Add user-scoped persisted dashboardLayout JSON preference, get/update tRPC procedures, and a Customize UI for module visibility and ordering.
+- [x] A3: Replace flat sidebar navigation with collapsible Today, Work, Reflect, and Vault groups while preserving all command-palette destinations.
+- [x] A4: Add just-one-thing mode: one action, one step, explicit exit, and integrations with Overwhelm, Ground Mode, and Doing Mode.
+- [x] B1: Add meaningful accessible names to actionable dashboard and icon-only controls, plus decorative-icon semantics in primary dashboard and shell surfaces.
+- [x] Audit 3: Ensure first-run onboarding finishes on one concrete win and extend Wren-style empty-state invitations.
+- [x] Audit 4: Add durable offline Capture queueing and automatic reconnect sync for text and voice captures.
+- [x] Audit 5: Prioritize hero dashboard queries, defer below-the-fold requests, and preserve optimistic check-in, capture, and mood-log feedback.
+- [x] Audit 6: Add page-specific browser titles to internal application views.
+- [x] Quality: Add Vitest coverage for persisted dashboard layout normalization and ordering.
+
+## UX Closure + Revenue Readiness (Aug 16, 2026)
+- [x] Add accessible names to the four remaining unlabeled dashboard button controls.
+- [x] Prevent the internal browser-tab title helper from appending the Continuary brand twice.
+- [x] Verify production PAYPAL_WEBHOOK_ID configuration and webhook activation path without changing payment behavior.
+- [x] Document and complete code-side validation for the real-device offline Capture queue test.
+
+## Attached Audit Review (Aug 16, 2026)
+- [x] Review continuary-audit.html, verify its findings against the current application, and prepare any required follow-up scope.
+
+## Approved Public-Surface Audit Remediation (Aug 16, 2026)
+- [x] Replace the global timed boot splash with fast, route-aware, gesture-dismissible readiness behavior and remove timer-created audio.
+- [x] Gate the PWA install prompt by engagement and exclude /pricing.
+- [x] Make public inline styling CSP-safe and harden PageMeta against duplicated Continuary title suffixes.
+- [x] Fix /pricing mobile CTA overflow, single-H1 hierarchy, back-button label, and public-page semantic landmarks.
+- [x] Raise public-surface text and touch-target floors while preserving visual hierarchy.
+- [x] Add automated public-surface regression coverage for boot timing, CSP console errors, and mobile overflow.
+
+## Studio Wall Direction (Aug 16, 2026)
+- [x] Review the linked Studio Wall build instructions and implement every Continuary requirement exactly as specified.
+- [x] Add a no-account, book-code path that lets a cold reader complete one exercise and saves progress locally until sign-up.
+- [x] Make the Return Brief the default first screen after a gap, with last writing, open thread, and one Continue action.
+- [x] Ensure each new writing entry is pre-seeded with its date and a starter prompt rather than a blank page.
+- [x] Apply the Studio Wall visual system: #F4F5F2 paper, graphite/pencil text, red-pen next action only, Archivo interface type, and a typewriter face for user writing.
+- [x] Replace long/fading motion with 120–160ms mechanical card-pinning interactions and remove legacy navy/amber/serif treatments.
+- [x] Make free export explicit on the public pricing page and preserve 12px text, 4.5:1 contrast, and 44px tap-target floors.
+
+## Permanent Theme Requirement (Aug 16, 2026)
+- [x] Restore and retain a user-selectable light and dark mode in every future Continuary build; both modes must be intentionally designed, persisted, and accessible.
+
+## Cross-Theme Contrast + Wren Stage Remediation (Aug 17, 2026)
+- [x] Repair confirmed unreadable light-mode brand, link, and pricing badge styles; raise shared text contrast floors in both themes.
+- [x] Remove route-specific hard-locked theme classes so the persisted user choice governs every public and authenticated route.
+- [x] Add an intentional dark Wren stage with protected object-fit containment and no wing clipping in both modes.
+- [x] Add regression coverage for theme consistency and contrast-safe critical public copy.
+
+## Warm Interior + Wren Product Moments (Aug 17, 2026)
+- [x] Make warm navy and amber the intentional dark interior theme while retaining Studio Wall as the complete light option.
+- [x] Wire existing Wren assets to return-after-gap, check-in completion, focus-session, and memory/review moments.
+- [x] Audit both themes and document any authenticated product-flow testing that requires a test account.
+- [x] Keep the unauthenticated sign-in doorway intentionally quiet and light without altering the persisted authenticated theme, and remove unsupported social-proof UI.
+
+## Unified Dark Ground + Accent-Tint Hierarchy (Aug 17, 2026)
+- [x] Use warm near-black #161815 as the single dark ground across marketing, authenticated app, and Wren stages; remove navy seams.
+- [x] Replace accent text on accent-tinted interior surfaces with a lighter, contrast-safe accent step and add regression coverage for the hierarchy.
+
+## Strengthen Wren: Presence, Voice, Discoverability (Aug 17, 2026)
+- [x] Increase boxed Wren size presets while retaining contained, unclipped layouts in narrow companion surfaces.
+- [x] Make Wren’s tone dials the sole voice source of truth; derive quick-preset buckets for check-ins and intelligence flows.
+- [x] Rework Gentle/Direct/Firm as dial-writing quick presets in Settings and onboarding, keeping the legacy field only for compatibility.
+- [x] Make Wren tone controls directly reachable from the You & Wren settings section and support deep links to the preference card.
+- [x] Add regression coverage for Wren tone consistency, preset mapping, size changes, and tone-control discoverability.
+
+## Supplied Artifact Reconciliation (Aug 17, 2026)
+- [x] Review the supplied Continuary artifact against the current build and implement any remaining applicable requirements.
+
+## Wren Hero Presence (Aug 17, 2026)
+- [x] Add responsive hero and heroLg Wren size tiers while retaining the existing functional size tiers.
+- [x] Stage hero-scale Wren on the Dashboard return moment, onboarding, and Welcome/About without modifying Focus body-doubling surfaces.
+- [x] Remove incidental Wren cameos from minor dashboard, project-detail, and tour surfaces while retaining functional small Wren placements.
+- [x] Verify mobile and reduced-motion behavior, confirm protected Focus source files remain unchanged, and add regression coverage.
+
+## Emotional Cycle Phase Card Layout (Aug 18, 2026)
+- [x] Correct the phase-card layout so Wren media cannot overlap the phase heading, description, or dates at desktop and responsive widths.
+- [x] Add regression coverage for the media containment and phase-copy layout contract.
+
+## Dashboard Greeting Wren Companion (Aug 18, 2026)
+- [x] Restore a compact, contained Wren video beside the Dashboard greeting without changing the Return Brief hero treatment.
+- [x] Add regression coverage for the greeting companion’s responsive containment.
+
+## Restore Wren Video Presence (Aug 19, 2026)
+- [x] Restore approved ambient and full-bleed Wren video treatments that were removed by the prior scarcity-focused pass.
+- [x] Preserve readable text layering and contained informational-card media while validating restored Wren video behavior.
+
+## Replay Intro and Tour Access (Aug 19, 2026)
+- [x] Repair the Replay Intro action and verify the attached onboarding introduction route and video sequence remain available.
+- [x] Provide a clear, working in-app Tour entry point and add regression coverage for both routes.
+
+## Time-of-Day Dashboard Wren Rotation (Aug 19, 2026)
+- [x] Restore distinct morning, afternoon, and evening Wren clips beside the Dashboard greeting while preserving responsive containment.
+- [x] Add regression coverage for the hour-to-clip mapping and greeting companion layout.
+
+## Immersive Wren Scene Restoration (Aug 19, 2026)
+- [x] Review the attached in-app introduction and continuary.app as reference experiences for Wren’s full-bleed scene treatment.
+- [x] Replace selected boxed Wren media treatments with full-bleed, text-safe scene integrations that foreground the character over the container.
+- [x] Preserve functional content layouts, motion preferences, and regression coverage for immersive Wren placements.
+
+## Environmental Wren Field Treatment (Aug 19, 2026)
+- [x] Add a shared unframed Wren field pattern with edge-bleed video, a left-side text-safe zone, and warm near-black continuity.
+- [x] Rebuild Return Brief as a 45/55 full-bleed golden-thread scene and remove the compact Wren greeting avatar.
+- [x] Verify no selected Wren surface adds a border or radius, and confirm lighter accent text remains on accent-tinted active navigation, thread, and check-in surfaces.
+- [x] Add regression coverage for the environmental scene contract and responsive field composition.
+
+## Coherent Return Brief and Greeting Restoration (Aug 20, 2026)
+- [x] Restore the morning, afternoon, and evening Dashboard greeting rotation and retain it alongside the new Return Brief.
+- [x] Rebuild Return Brief as a portrait 3:4 golden-thread Wren field at 55–60% of the visual share, with the return copy in its negative space.
+- [x] Verify Wren clip and poster weights against a 500KB per-asset delivery budget, with a poster fallback for the Return Brief.
+- [x] Add regression coverage for portrait field geometry, greeting preservation, poster fallback, and media-size safeguards.
+
+## Intentional Wren Placement and Focus Lock (Aug 20, 2026)
+- [x] Preserve Focus Sessions, its components, styling, copy, and Wren treatment unchanged; ask before any future shared-code impact.
+- [x] Remove decorative Wren thumbnails from Project cards and the Emotional Cycle status card without changing their information layouts.
+- [x] Verify Wren remains only in composition-critical emotional moments and add regression coverage for Focus isolation and thumbnail removal.
+
+## Intro-Scale Wren Scenes and Playback (Aug 20, 2026)
+- [x] Preserve Focus Sessions and its dependencies unchanged while reusing the Intro scene treatment elsewhere.
+- [x] Reuse the full-bleed Intro composition on Evidence Log, Today return state, and Weekly Compass with the specified Wren clips and route-specific copy.
+- [x] Remove Today’s 102px Wren tile and the shared corner-wave from all non-Focus routes only; preserve the Focus Sessions corner-wave exactly as-is.
+- [x] Add explicit guarded video playback only inside Intro-derived scenes and fix word-split headline spacing in the Intro scene; do not modify the shared Wren player used by Focus Sessions.
+- [x] Add regression coverage for target scene composition, playback, headline spacing, Wren placement removal, and Focus isolation.
+
+## Final Intentional Wren Scene (Aug 20, 2026)
+- [x] Select one additional emotionally central non-Focus route for a single Intro-scale Wren composition.
+- [x] Implement the scene without adding Wren elsewhere, preserve Focus Sessions unchanged, and add regression coverage.
+
+## Today Return Brief Review Access (Aug 20, 2026)
+- [x] Make the new Today Return Brief available for review without permanently changing its normal re-entry trigger.
+- [x] Validate the review path and add regression coverage before continuing any other Wren visual work.
+
+## Today Return Brief Live Visibility Repair (Aug 20, 2026)
+- [x] Diagnose why the live Today dashboard does not display the Return Brief review scene when requested.
+- [x] Repair the reliable access path and add regression coverage for the live dashboard review experience.
+
+## Today Return Brief Edge-Bleed and Readability (Aug 20, 2026)
+- [x] Remove visible Return Brief framing and extend the Wren field edge-to-edge across the available app content region.
+- [x] Strengthen the text-safe overlay so title, supporting copy, thread note, and actions remain readable without covering Wren’s face.
+- [x] Add regression coverage for the unframed edge-bleed and readable overlay contract.
+
+## Full App Review Remediation (Aug 20, 2026)
+- [x] Complete light-mode contrast remediation for sidebar navigation, Daily Rhythm, return/close cards, labels, badges, and settings controls; preserve dark mode and Focus Sessions.
+- [x] Replace system phrasing in Ideas and Open Loops; route Weekly Compass guidance through Wren’s warm dial-derived voice.
+- [x] Prevent stale Emotional Cycle predictions and stale Weekly Compass project assertions from reaching the user.
+- [x] Replace raw Scratch Pad Return Brief content with a crafted re-entry summary; consolidate duplicate Clarity/Evidence header/CTA treatments.
+- [x] Standardize selected page headers and address named polish items: Project status label, Thread Lock spacing, humanized timestamps, and balanced empty-state layouts.
+- [x] Add regression coverage and verify Focus Sessions remains unchanged throughout the review remediation.
+- [x] Correct sidebar and Daily Rhythm light-mode contrast, replace raw Return Brief note content, and consolidate the Evidence Log duplicate hero/header treatment.
+- [x] Add focused regression coverage for light navigation, user voice, stale data, re-entry content, and Evidence hierarchy; verify Focus Sessions source remains unchanged.
+
+## Non-Negotiable Wren Placement Lock (Aug 20, 2026)
+- [x] Restore Wren’s morning, afternoon, and evening rotating video in the Today greeting corner.
+- [x] Permanently protect the Today greeting corner and all Focus Sessions layout, copy, components, styling, media treatment, and dependencies from future changes unless the user explicitly overrides the lock.
+- [x] Add regression coverage enforcing both protected surfaces and verify Focus Sessions source remains unchanged.
+
+## Final Studio Wall Contrast Pass (Aug 20, 2026)
+- [x] Give Today re-entry/status banners semantic Studio Wall surfaces and readable secondary copy.
+- [x] Give Ideas cards, note text, timestamps, and actions semantic Studio Wall contrast without changing dark mode behavior.
+- [x] Correct Emotional Cycle mood-score buttons and phase/time labels for clear light-mode contrast.
+- [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.
+
+## Non-Today Wren Hero Edge-Bleed (Aug 20, 2026)
+- [x] Remove visible borders and corner framing from non-Today immersive Wren hero videos.
+- [x] Extend each hero video to fade or bleed across its available content region while retaining a readable text-safe overlay.
+- [x] Add regression coverage and verify the protected Today greeting corner and Focus Sessions remain unchanged.
+
+## Evidence and Today Video Surface Refinement (Aug 20, 2026)
+- [x] Refine Evidence Log’s full-bleed hero so it is visually seamless across its available app-content region.
+- [x] Remove residual visual framing from the protected Today greeting rotation without moving, enlarging, or changing its time-of-day behavior.
+- [x] Add regression coverage and verify Focus Sessions and the locked Today greeting geometry remain unchanged.
+
+## Rendered Evidence and Today Video Verification (Aug 20, 2026)
+- [x] Inspect the actual rendered Evidence and Today routes to identify why the intended video refinements are not visibly apparent.
+- [x] Make a clearly observable rendered correction to Evidence and Today video framing/edge treatment without changing Focus Sessions.
+- [x] Visually verify the corrected result in a signed-in live session after publishing.
+- [x] Apply the user-approved source-driven Evidence and Today video-surface correction while preserving the protected Today greeting geometry and Focus Sessions.
+
+## Evidence Hero Right-Edge Seam (Aug 20, 2026)
+- [x] Extend the Evidence Log hero scene to the full desktop app-content boundary so no dark strip remains at the right edge.
+- [x] Add regression coverage and verify Focus Sessions remains unchanged.
+
+## Evidence Hero Parent Width Cap (Aug 20, 2026)
+- [x] Remove the actual Evidence hero parent-layout width cap confirmed by the signed-in screenshot so the scene fills the full main pane.
+- [x] Verify the right-side black column is absent in the signed-in live route and Focus Sessions remains unchanged.
+
+## Evidence Hero Asset Replacement (Aug 20, 2026)
+- [x] Select an appropriate unwatermarked licensed Wren asset for the Evidence Log hero; do not crop or conceal the visible Veo watermark.
+- [x] Replace the Evidence hero source while retaining the full main-pane composition and readable copy.
+- [x] Add regression coverage and verify Focus Sessions remains unchanged.
+
+## Final Light-Mode and Mobile Readability Pass (Aug 20, 2026)
+- [x] Give Today’s re-entry/status banner an explicit Studio Wall light variant rather than the remaining muddy brown surface.
+- [x] Add mobile bottom clearance so floating capture controls cannot cover cards, chevrons, or destructive actions.
+- [x] Raise Daily Rhythm phase-label and secondary metadata contrast in Studio Wall.
+- [x] Make all admin-area text, controls, and metadata legible in light mode.
+- [x] Add regression coverage and verify protected Today Wren and Focus Sessions surfaces remain unchanged.
+
+## Launch Blockers: PayPal Checkout + OAuth Identity (Aug 20, 2026)
+- [x] Audit live PayPal environment, configured plan identifiers, and webhook identity against the reported INVALID_RESOURCE_ID checkout failure.
+- [x] Correct only verified stale or missing live PayPal plan and webhook configuration, then confirm each checkout variant can begin safely.
+- [x] Correct the Manus OAuth app display name/logo configuration so consent identifies the app as Continuary rather than an icon URL.
+- [x] Add or update regression coverage for any repository changes and record the safe verification results without modifying protected product surfaces.
+
+## Permission to Start Available Now (Aug 20, 2026)
+- [x] Inspect the supplied two-file additive patch against the current pricing footer and BookStart page markup.
+- [x] Update existing app mentions to state that Permission to Start is available now and link its digital and paperback editions in a new tab.
+- [x] Add focused regression coverage and verify type safety without changing protected product surfaces.
+
+## Permission to Start Post-Purchase Start Here Page (Aug 21, 2026)
+- [x] Review existing public routes and the book exercise page to define a concise post-purchase reader journey.
+- [x] Add a public Start Here page with a clear first step, the existing exercise, and an optional Continuary entry point.
+- [x] Add route and regression coverage, then verify type safety and protected surfaces remain unchanged.
+
+## Permission to Start Reader-Code Recognition (Aug 22, 2026)
+- [x] Inspect the supplied single-file patch against the existing optional Book code field.
+- [x] Show the specified inline acknowledgement only when the existing reader code has at least four characters, without adding validation or a network call.
+- [x] Add focused regression coverage and verify type safety while preserving the existing `/apply` code carry-through.

@@ -3,7 +3,6 @@ import { trpc } from "@/lib/trpc";
 import { CrisisSupportCard } from "@/components/CrisisSupportCard";
 import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import notify from "@/lib/notify";
-import WrenPlayer from "@/components/WrenPlayer";
 import { ArrowLeft, Info } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -153,9 +152,9 @@ function ScorePicker({ value, onChange }: { value: number | null; onChange: (v: 
             borderRadius: "0.6rem",
             fontSize: "0.9rem",
             fontWeight: value === n ? 700 : 400,
-            border: value === n ? `2px solid ${phaseColor(n)}` : "1px solid rgba(255,255,255,0.1)",
-            background: value === n ? `${phaseColor(n)}22` : "rgba(255,255,255,0.04)",
-            color: value === n ? phaseColor(n) : "rgba(255,255,255,0.55)",
+            border: value === n ? `2px solid ${phaseColor(n)}` : "1px solid var(--border)",
+            background: value === n ? `color-mix(in srgb, ${phaseColor(n)} 16%, var(--card))` : "var(--card)",
+            color: value === n ? phaseColor(n) : "var(--foreground)",
             cursor: "pointer",
             transition: "all 0.15s ease",
           }}
@@ -250,26 +249,16 @@ export default function EmotionalCyclePage() {
 
         {/* Info panel */}
         {showInfo && (
-          <div className="rounded-xl p-4 text-sm leading-relaxed space-y-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.6)" }}>
-            <p><strong style={{ color: "rgba(255,255,255,0.85)" }}>What is this?</strong> Research by Professor Rex Hersey (University of Pennsylvania) found that human emotional cycles average about 5 weeks — from a peak of elation down to a trough of worry and back up again.</p>
+          <div className="rounded-xl p-4 text-sm leading-relaxed space-y-2 bg-card border border-border text-muted-foreground">
+            <p><strong className="text-foreground">What is this?</strong> Research by Professor Rex Hersey (University of Pennsylvania) found that human emotional cycles average about 5 weeks — from a peak of elation down to a trough of worry and back up again.</p>
             <p>By logging your mood daily, you'll start to see your personal rhythm. After a few months you can predict your next high and low with surprising accuracy — and plan your work accordingly.</p>
-            <p><strong style={{ color: "rgba(255,255,255,0.85)" }}>Scale:</strong> 1 = deep worry / 10 = peak elation. 4–6 is neutral territory.</p>
+            <p><strong className="text-foreground">Scale:</strong> 1 = deep worry / 10 = peak elation. 4–6 is neutral territory.</p>
           </div>
         )}
 
-        {/* Wren + cycle analysis */}
-        <div className="rounded-2xl p-4 flex gap-4 items-start" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <div className="shrink-0" style={{ width: 120, height: 120 }}>
-            <WrenPlayer
-              clip={cycle?.currentPhase === "high" ? "bouncingFunClean" : cycle?.currentPhase === "low" ? "inflates" : "holdingOrb"}
-              size="md"
-              loop
-              autoPlay
-              feather
-              featherDirection="radial"
-            />
-          </div>
-          <div className="flex-1 min-w-0 space-y-2">
+        {/* Cycle analysis */}
+        <div className="rounded-2xl p-4 bg-card border border-border">
+          <div className="min-w-0 space-y-2">
             {cycle?.hasEnoughData ? (
               <>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -297,7 +286,7 @@ export default function EmotionalCyclePage() {
                 )}
               </>
             ) : (
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.55)" }}>
+              <p className="text-sm text-muted-foreground">
                 {cycle?.message ?? "Log your mood each evening to reveal your emotional rhythm."}
               </p>
             )}
@@ -305,7 +294,7 @@ export default function EmotionalCyclePage() {
         </div>
 
         {/* Chart */}
-        <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-4 space-y-3 bg-card border border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">Your Cycle — Last 90 Days</h2>
             <span className="text-xs text-muted-foreground">{history.length} entries</span>
@@ -314,7 +303,7 @@ export default function EmotionalCyclePage() {
         </div>
 
         {/* Today's log */}
-        <div className="rounded-2xl p-4 space-y-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-4 space-y-4 bg-card border border-border">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
               {alreadyLogged ? "Update today's mood" : "Log today's mood"}
@@ -342,8 +331,8 @@ export default function EmotionalCyclePage() {
             disabled={!score || logMutation.isPending}
             className="w-full py-3 rounded-xl text-sm font-semibold transition-all"
             style={{
-              background: score ? "linear-gradient(135deg, oklch(0.65 0.14 72), oklch(0.80 0.14 72))" : "rgba(255,255,255,0.06)",
-              color: score ? "white" : "rgba(255,255,255,0.3)",
+              background: score ? "var(--primary)" : "var(--muted)",
+              color: score ? "var(--primary-foreground)" : "var(--muted-foreground)",
               cursor: score ? "pointer" : "not-allowed",
               boxShadow: score ? "0 4px 20px oklch(0.74 0.14 72 / 0.35)" : "none",
             }}
@@ -357,7 +346,7 @@ export default function EmotionalCyclePage() {
 
         {/* History list — last 14 entries */}
         {history.length > 0 && (
-          <div className="rounded-2xl p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="rounded-2xl p-4 space-y-3 bg-card border border-border">
             <h2 className="text-sm font-semibold text-foreground">Recent Entries</h2>
             <div className="space-y-2">
               {[...history].reverse().slice(0, 14).map(entry => (
@@ -369,7 +358,7 @@ export default function EmotionalCyclePage() {
                         key={i}
                         style={{
                           width: 10, height: 10, borderRadius: 2,
-                          background: i < entry.score ? phaseColor(entry.score) : "rgba(255,255,255,0.07)",
+                          background: i < entry.score ? phaseColor(entry.score) : "var(--muted)",
                         }}
                       />
                     ))}
@@ -384,7 +373,7 @@ export default function EmotionalCyclePage() {
         )}
 
         {/* Hersey attribution */}
-        <p className="text-center text-xs pb-6" style={{ color: "rgba(255,255,255,0.2)" }}>
+        <p className="text-center text-xs pb-6 text-muted-foreground/70">
           Based on emotional cycle research by Prof. Rex Hersey, University of Pennsylvania, and Prof. Edward R. Dewey, Foundation for the Study of Cycles.
         </p>
       </div>

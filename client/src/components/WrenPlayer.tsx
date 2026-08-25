@@ -10,7 +10,7 @@
  * All clips use mix-blend-mode: screen to remove black backgrounds.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WREN_CLIPS as NEW_CLIPS, WREN_STILLS, type WrenClipKey } from "@/lib/wrenClips";
 
@@ -65,6 +65,8 @@ const SIZE_CLASSES: Record<string, string> = {
   lg:    "w-52 h-52",
   xl:    "w-72 h-72",
   "2xl": "w-96 h-96",
+  hero:  "w-[clamp(240px,32vw,440px)] h-[clamp(240px,32vw,440px)]",
+  heroLg:"w-[clamp(300px,42vw,560px)] h-[clamp(300px,42vw,560px)]",
   full:  "w-full h-full",
 };
 
@@ -78,6 +80,11 @@ interface WrenPlayerProps {
   className?: string;
   /** Extra wrapper className */
   wrapperClassName?: string;
+  /**
+   * Wren's source lighting is authored against a dark field. Keep that stage
+   * in either app theme so her glow reads as deliberate, not washed out.
+   */
+  stage?: boolean;
   /**
    * CSS object-fit for the video element.
    * Defaults to "contain" (original behavior).
@@ -98,6 +105,8 @@ interface WrenPlayerProps {
   featherDirection?: "radial" | "bottom" | "top-bottom";
   /** Static PNG fallback shown while video loads */
   fallbackStill?: keyof typeof WREN_STILLS;
+  /** Optional first-frame poster used by the browser while the video buffers. */
+  poster?: string;
   onEnded?: () => void;
 }
 
@@ -109,14 +118,27 @@ export default function WrenPlayer({
   muted = true,
   className,
   wrapperClassName,
+  stage = true,
   feather = false,
   featherDirection = "radial",
   fallbackStill,
+  poster,
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
   const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
   const [videoReady, setVideoReady] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(media.matches);
+    updatePreference();
+    media.addEventListener("change", updatePreference);
+    return () => media.removeEventListener("change", updatePreference);
+  }, []);
 
   const maskStyle: React.CSSProperties = feather
     ? {
@@ -137,30 +159,42 @@ export default function WrenPlayer({
 
   return (
     <div
-      className={cn("flex items-center justify-center relative", SIZE_CLASSES[size], wrapperClassName)}
-      style={maskStyle}
+      className={cn(
+        "flex items-center justify-center relative overflow-visible",
+        stage && "wren-dark-stage",
+        SIZE_CLASSES[size],
+        wrapperClassName,
+      )}
     >
       {/* Static fallback shown while video loads — hidden once video is ready */}
-      {fallbackStill && !videoReady && (
+      {fallbackStill && (!videoReady || prefersReducedMotion) && (
         <img
           src={WREN_STILLS[fallbackStill]}
           alt="Wren"
           className="absolute inset-0 w-full h-full object-contain"
-          style={{ mixBlendMode: "screen" }}
+          style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
-      <video
-        key={src}
-        src={src}
-        autoPlay={autoPlay}
-        loop={loop}
-        muted={muted}
-        playsInline
-        onEnded={onEnded}
-        onCanPlay={() => setVideoReady(true)}
-        className={cn("w-full h-full relative", objectFit === "cover" ? "object-cover" : "object-contain", className)}
-        style={{ mixBlendMode: "screen" }}
-      />
+      {!prefersReducedMotion && (
+        <video
+          key={src}
+          src={src}
+          poster={poster}
+          autoPlay={autoPlay}
+          loop={loop}
+          muted={muted}
+          playsInline
+          onEnded={onEnded}
+          onCanPlay={() => setVideoReady(true)}
+          className={cn(
+            "w-full h-full",
+            "relative",
+            objectFit === "cover" ? "object-cover" : "object-contain",
+            className,
+          )}
+          style={{ ...maskStyle, mixBlendMode: "screen" }}
+        />
+      )}
     </div>
   );
 }

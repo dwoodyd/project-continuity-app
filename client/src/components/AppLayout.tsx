@@ -65,29 +65,59 @@ const BRAND_LOGO_SIGNIN = "/logo-navy.svg";
 
 // ── All nav items ────────────────────────────────────────────────────────────
 const ALL_NAV_ITEMS = [
-  { href: "/",             label: "Today",           icon: Brain,         section: "primary" },
-  { href: "/projects",     label: "Projects",        icon: Archive,       section: "primary" },
-  { href: "/clarity",      label: "Clarity Engine",  icon: Zap,           section: "primary" },
-  { href: "/vault",        label: "Knowledge Vault", icon: BookOpen,      section: "primary" },
-  { href: "/scratch",      label: "Scratch Pad",     icon: PenLine,       section: "primary" },
-  { href: "/ideas",        label: "Ideas",           icon: Sparkles,      section: "primary" },
-  { href: "/study",        label: "Single Focus Mode", icon: ClipboardList, section: "primary" },
-  { href: "/capture",     label: "Capture",         icon: Mic,           section: "primary" },
-  { href: "/loops",       label: "Open Loops",      icon: Repeat,        section: "primary" },
-  { href: "/focus",       label: "Focus Sessions",   icon: Users,         section: "primary" },
-  { href: "/thread-locks",   label: "Thread Locks",   icon: Anchor,        section: "secondary" },
-  { href: "/reading-bridge", label: "Reading Bridge", icon: BookOpen,      section: "secondary" },
-  { href: "/emotional-cycle", label: "Emotional Cycle", icon: BarChart2,    section: "secondary" },
-  { href: "/evidence",     label: "Evidence Log",   icon: ScrollText,    section: "secondary" },
-  { href: "/compass",      label: "Weekly Compass",  icon: Compass,       section: "secondary" },
-  { href: "/weekly",       label: "Weekly Review",   icon: Archive,       section: "secondary" },
-  { href: "/intelligence", label: "Intelligence",    icon: Lightbulb,     section: "secondary" },
-  { href: "/settings",     label: "You & Wren",      icon: Settings,      section: "secondary" },
-  { href: "/welcome",      label: "About",           icon: Home,          section: "secondary" },
-  { href: "/tour",         label: "Take the Tour",   icon: GraduationCap, section: "secondary" },
-  { href: "/pro",          label: "Pricing",         icon: Ticket,        section: "secondary" },
-  { href: "/founding-member", label: "Founding Member", icon: Star,          section: "secondary" },
+  { href: "/",                label: "Today",             icon: Brain,         group: "today" },
+  { href: "/capture",         label: "Capture",           icon: Mic,           group: "today" },
+  { href: "/study",           label: "Single Focus Mode", icon: ClipboardList, group: "today" },
+  { href: "/focus",           label: "Focus Sessions",    icon: Users,         group: "today" },
+  { href: "/projects",        label: "Projects",          icon: Archive,       group: "work" },
+  { href: "/loops",           label: "Open Loops",        icon: Repeat,        group: "work" },
+  { href: "/ideas",           label: "Ideas",             icon: Sparkles,      group: "work" },
+  { href: "/thread-locks",    label: "Thread Locks",      icon: Anchor,        group: "work" },
+  { href: "/clarity",         label: "Clarity Engine",    icon: Zap,           group: "reflect" },
+  { href: "/compass",         label: "Weekly Compass",    icon: Compass,       group: "reflect" },
+  { href: "/emotional-cycle", label: "Emotional Cycle",   icon: BarChart2,     group: "reflect" },
+  { href: "/evidence",        label: "Evidence Log",      icon: ScrollText,    group: "reflect" },
+  { href: "/reading-bridge",  label: "Reading Bridge",    icon: BookOpen,      group: "reflect" },
+  { href: "/vault",           label: "Knowledge Vault",   icon: BookOpen,      group: "vault" },
+  { href: "/scratch",         label: "Scratch Pad",       icon: PenLine,       group: "vault" },
+  { href: "/weekly",          label: "Weekly Review",     icon: Archive,       group: "more" },
+  { href: "/intelligence",    label: "Intelligence",      icon: Lightbulb,     group: "more" },
+  { href: "/settings",        label: "You & Wren",        icon: Settings,      group: "more" },
+  { href: "/welcome",         label: "About",             icon: Home,          group: "more" },
+  { href: "/tour",            label: "Take the Tour",     icon: GraduationCap, group: "more" },
+  { href: "/pro",             label: "Pricing",           icon: Ticket,        group: "more" },
+  { href: "/founding-member", label: "Founding Member",   icon: Star,          group: "more" },
 ] as const;
+
+const NAV_GROUPS = [
+  { key: "today", label: "Today" },
+  { key: "work", label: "Work" },
+  { key: "reflect", label: "Reflect" },
+  { key: "vault", label: "Vault" },
+  { key: "more", label: "More" },
+] as const;
+
+const INTERNAL_PAGE_TITLES: Record<string, string> = {
+  "/": "Today",
+  "/capture": "Capture",
+  "/projects": "Projects",
+  "/loops": "Open Loops",
+  "/ideas": "Ideas",
+  "/thread-locks": "Thread Locks",
+  "/study": "Single Focus Mode",
+  "/focus": "Focus Sessions",
+  "/clarity": "Clarity Engine",
+  "/compass": "Weekly Compass",
+  "/weekly": "Weekly Review",
+  "/emotional-cycle": "Emotional Cycle",
+  "/evidence": "Evidence Log",
+  "/reading-bridge": "Reading Bridge",
+  "/vault": "Knowledge Vault",
+  "/scratch": "Scratch Pad",
+  "/intelligence": "Intelligence",
+  "/settings": "Settings",
+  "/pro": "Membership",
+};
 
 // ── Mobile bottom-tab items (5 visible + Hub) ────────────────────────────────
 const PRIMARY_TABS = [
@@ -127,7 +157,14 @@ function WrenSidebarPresence() {
       <div style={{ WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)", maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%)" }}>
         <WrenPlayer clip="mainCornerWave" size="xs" loop autoPlay />
       </div>
-      <span className="text-[10px] tracking-wide" style={{ color: "oklch(1 0 0 / 0.22)" }}>Wren is here with you</span>
+      <a
+        href="/settings?tab=preferences#wren-tone"
+        className="text-[10px] tracking-wide hover:opacity-90 transition-opacity"
+        style={{ color: "oklch(1 0 0 / 0.40)" }}
+        aria-label="Tune how Wren talks"
+      >
+        Wren is here with you <span style={{ color: "var(--accent-tint-text)" }}>· Tune her voice →</span>
+      </a>
       {showTooltip && (
         <div
           className="absolute bottom-full left-2 mb-2 z-50"
@@ -159,10 +196,25 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const [, navigate] = useLocation();
   const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  useEffect(() => {
+    const exact = INTERNAL_PAGE_TITLES[location];
+    const matchingPath = Object.keys(INTERNAL_PAGE_TITLES)
+      .filter((path) => path !== "/" && location.startsWith(path))
+      .sort((a, b) => b.length - a.length)[0];
+    const title = exact ?? (matchingPath ? INTERNAL_PAGE_TITLES[matchingPath] : "Continuary");
+    document.title = title.includes("Continuary") ? title : `${title} · Continuary`;
+  }, [location]);
   const [ideaOpen, setIdeaOpen] = useState(false);
   const [threadLockOpen, setThreadLockOpen] = useState(false);
   const [fabMenuOpen, setFabMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [navExpanded, setNavExpanded] = useState<Record<string, boolean>>({
+    today: true,
+    work: true,
+    reflect: true,
+    vault: true,
+    more: false,
+  });
   // Persist amnesty-dismissed flag in sessionStorage so a page refresh within the same
   // browser session doesn't force the user through the re-entry screen again.
   const [amnestyDismissed, setAmnestyDismissed] = useState<boolean>(() => {
@@ -253,6 +305,13 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
+
+  // Keep persisted accessibility preferences active across every authenticated route.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.fontSize = profile?.fontSizePreference ?? "medium";
+    root.dataset.reducedVisualNoise = profile?.reducedVisualNoise ? "true" : "false";
+  }, [profile?.fontSizePreference, profile?.reducedVisualNoise]);
   const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 10,
@@ -357,51 +416,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // Show sign-in card for any unauthenticated route — wait for auth to resolve first
   if (!authLoading && !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem'}}>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem',background:'#F4F5F2',color:'#2A2D28'}}>
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
               <img src="/logo-navy.svg" alt="Continuary" className="w-20 h-20 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
-                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", color: "oklch(0.93 0.008 264)" }}>Continuary</span>
-                <p className="text-sm text-muted-foreground tracking-widest uppercase">Your Memory Companion</p>
+                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Archivo', system-ui, sans-serif", color:'#2A2D28' }}>Continuary</span>
+                <p className="text-sm tracking-widest uppercase" style={{ color:'#6B6F68' }}>Your Memory Companion</p>
               </div>
             </div>
-            <div className="w-full bg-card border border-border rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200">
-              <p className="text-sm text-muted-foreground text-center mb-5 leading-relaxed">
+            <div className="w-full rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200" style={{ background:'#E6E8E3', border:'1px solid #D3D6D0' }}>
+              <p className="text-sm text-center mb-5 leading-relaxed" style={{ color:'#6B6F68' }}>
                 Continuary keeps your thread. Pick up exactly where you left off.
               </p>
-              {/* Social proof — avatar stack + member count */}
-              <div className="flex items-center justify-center gap-3 mb-5" style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'0.75rem',marginBottom:'1.25rem'}}>
-                <div style={{display:'flex',marginLeft:'0'}}>
-                  {["JK","AM","TR","SL","OB"].map((initials, i) => (
-                    <div
-                      key={initials}
-                      style={{
-                        display:'flex',
-                        alignItems:'center',
-                        justifyContent:'center',
-                        width:28,
-                        height:28,
-                        borderRadius:'50%',
-                        border:'2px solid var(--card)',
-                        background:["#4F6BED","#7C5CBF","#2D9CDB","#27AE60","#E2704A"][i],
-                        fontSize:9,
-                        fontWeight:700,
-                        color:'#fff',
-                        marginLeft: i === 0 ? 0 : -8,
-                        zIndex: 5 - i,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {initials}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">{memberCountData?.count ?? 47} builders</span> in early access
-                </p>
-              </div>
               <a
                 href={getLoginUrl()}
                 onClick={() => {
@@ -409,32 +437,34 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     localStorage.setItem("continuary_return_path", location);
                   }
                 }}
-                className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground px-5 py-3 rounded-xl text-sm font-semibold hover:bg-primary/90 active:scale-[0.98] transition-all shadow-md shadow-primary/25"
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
+                style={{ background:'#C8452B', color:'#FFFFFF', boxShadow:'0 4px 12px rgb(200 69 43 / 0.20)' }}
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-            <a href="/landing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-2">← See what's inside</a>
-            <a href="/pricing" className="block text-center text-xs text-muted-foreground/40 hover:text-muted-foreground/70 transition-colors mt-1">See pricing →</a>
+            <a href="/welcome" className="block text-center text-xs transition-colors mt-2 hover:opacity-75" style={{ color:'#4B4F48' }}>← See what's inside</a>
+            <a href="/pricing" className="block text-center text-xs transition-colors mt-1 hover:opacity-75" style={{ color:'#4B4F48' }}>See pricing →</a>
             </div>
           </div>
           {onPreviewIntro && (
             <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
               <button
                 onClick={onPreviewIntro}
-                className="text-sm text-muted-foreground/50 hover:text-muted-foreground/80 transition-colors underline underline-offset-4 tracking-wide"
+                className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75"
+                style={{ color:'#6B6F68' }}
               >
                 ✦ Take the tour
               </button>
             </div>
           )}
-          <p className="text-center text-sm text-muted-foreground/50 mt-4 animate-fade-slide-up animate-delay-400">Built for minds that keep going.</p>
-          <p className="text-center text-sm text-muted-foreground/30 mt-3 animate-fade-slide-up animate-delay-400">
-            <a href="/privacy" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Privacy</a>
+          <p className="text-center text-sm mt-4 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>Built for minds that keep going.</p>
+          <p className="text-center text-sm mt-3 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>
+            <a href="/privacy" className="hover:opacity-75 underline underline-offset-2 transition-colors">Privacy</a>
             {" · "}
-            <a href="/terms" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors">Terms</a>
+            <a href="/terms" className="hover:opacity-75 underline underline-offset-2 transition-colors">Terms</a>
             {" · "}
-            <a href="/changelog" className="hover:text-muted-foreground/60 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
+            <a href="/changelog" className="hover:opacity-75 underline underline-offset-2 transition-colors inline-flex items-center gap-1.5">
               Changelog
               {/* Last updated date — always visible */}
               <span className="text-[9px]" style={{ color: "oklch(0.48 0.016 240)" }}>Jul 7</span>
@@ -442,7 +472,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "#C8452B" }}
                   title="What's new"
                 />
               )}
@@ -507,10 +537,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           onMouseLeave={() => isFocusRoute && setSidebarPeeking(false)}
         >
           {/* Brand header */}
-          <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid oklch(1 0 0 / 0.06)" }}>
+          <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-4" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
             <Link href="/" className="flex items-center gap-3 min-w-0">
               <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
-              <span className="hidden lg:block text-sm font-semibold truncate tracking-wide" style={{ color: "oklch(0.93 0.008 264)" }}>Continuary</span>
+              <span className="hidden lg:block text-sm font-semibold truncate tracking-wide text-sidebar-foreground">Continuary</span>
             </Link>
             {streak > 0 && (
               <span className="hidden lg:flex ml-auto shrink-0 items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.14 72)" }} title={`${streak}-day streak`}>
@@ -523,52 +553,53 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <div className="hidden lg:block px-2 pt-2 pb-1">
             <CommandPaletteTrigger />
           </div>
-          {/* Nav */}
-          <nav className="flex-1 px-1 lg:px-2 py-3 space-y-0.5">
-            <p className="hidden lg:block px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Daily</p>
-            {ALL_NAV_ITEMS.filter(i => i.section === "primary").map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
+          {/* Grouped navigation keeps the first scan calm; ⌘K still reaches every destination. */}
+          <nav className="flex-1 px-1 lg:px-2 py-3 space-y-2" aria-label="Primary navigation">
+            {NAV_GROUPS.map((group) => {
+              const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
+              const hasActiveItem = items.some((item) => isActive(item.href));
+              const expanded = navExpanded[group.key] || hasActiveItem;
               return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
-                  style={active
-                    ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
-                    : { color: "oklch(1 0 0 / 0.48)" }
-                  }
-                >
-                   <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span className="hidden lg:block">{label}</span>
-                  {href === "/scratch" && scratchCount > 0 && !active && (
-                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.74 0.14 72 / 0.18)", color: "oklch(0.74 0.14 72)" }}>{scratchCount}</span>
-                  )}
-                  {href === "/loops" && loopsCount > 0 && !active && (
-                    <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
-                  )}
-                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
-                </Link>
-              );
-            })}
-            <p className="hidden lg:block px-3 py-1.5 mt-3 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "oklch(1 0 0 / 0.22)" }}>Review</p>
-            {ALL_NAV_ITEMS.filter(i => i.section === "secondary").map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  title={label}
-                  className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
-                  style={active
-                    ? { background: "oklch(0.74 0.14 72 / 0.14)", color: "oklch(0.74 0.14 72)", fontWeight: 500 }
-                    : { color: "oklch(1 0 0 / 0.48)" }
-                  }
-                >
-                  <Icon className="w-4 h-4 shrink-0" style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.32)" }} />
-                  <span className="hidden lg:block">{label}</span>
-                  {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" style={{ background: "oklch(0.74 0.14 72)" }} />}
-                </Link>
+                <section key={group.key} className="space-y-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setNavExpanded((current) => ({ ...current, [group.key]: !expanded }))}
+                    className="hidden lg:flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-semibold uppercase tracking-widest text-left transition-colors"
+                    style={{ color: "var(--muted-foreground)" }}
+                    aria-expanded={expanded}
+                    aria-controls={`nav-group-${group.key}`}
+                  >
+                    {group.label}
+                    <ChevronRight className={cn("w-3 h-3 transition-transform", expanded && "rotate-90")} aria-hidden="true" />
+                  </button>
+                  <div id={`nav-group-${group.key}`} className={cn(!expanded && "hidden lg:hidden")}>
+                    {items.map(({ href, label, icon: Icon }) => {
+                      const active = isActive(href);
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          title={label}
+                          className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group"
+                          style={active
+                            ? { background: "var(--brand-muted)", color: "var(--accent-tint-text)", fontWeight: 600 }
+                            : { color: "var(--sidebar-foreground)" }
+                          }
+                        >
+                          <Icon className="w-4 h-4 shrink-0" aria-hidden="true" style={{ color: active ? "var(--accent-tint-text)" : "var(--muted-foreground)" }} />
+                          <span className="hidden lg:block">{label}</span>
+                          {href === "/scratch" && scratchCount > 0 && !active && (
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "var(--brand-muted)", color: "var(--accent-tint-text)" }}>{scratchCount}</span>
+                          )}
+                          {href === "/loops" && loopsCount > 0 && !active && (
+                            <span className="hidden lg:block ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "oklch(0.75 0.18 310 / 0.18)", color: "oklch(0.75 0.18 310)" }}>{loopsCount}</span>
+                          )}
+                          {active && <span className="hidden lg:block ml-auto w-1.5 h-1.5 rounded-full" aria-hidden="true" style={{ background: "var(--accent-tint-text)" }} />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
               );
             })}
 
@@ -577,9 +608,9 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               onClick={() => setFeedbackOpen(true)}
               title="Send Feedback"
               className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-3 py-2.5 rounded-xl text-sm transition-all duration-150 w-full text-left"
-              style={{ color: "oklch(1 0 0 / 0.48)" }}
+              style={{ color: "var(--sidebar-foreground)" }}
             >
-              <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "oklch(1 0 0 / 0.32)" }} />
+              <MessageSquare className="w-4 h-4 shrink-0" style={{ color: "var(--muted-foreground)" }} />
               <span className="hidden lg:block">Send Feedback</span>
             </button>
 
@@ -647,34 +678,36 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </nav>
 
           {/* Sidebar footer */}
-          <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid oklch(1 0 0 / 0.06)" }}>
+          <div className="px-1 lg:px-2 pb-3 pt-2 space-y-1" style={{ borderTop: "1px solid var(--sidebar-border)" }}>
             {/* Wren resting — hidden in icon-only mode */}
-            <div className="hidden lg:block">
-              <WrenSidebarPresence />
-            </div>
+            {location === "/focus" && (
+              <div className="hidden lg:block">
+                <WrenSidebarPresence />
+              </div>
+            )}
             {user && (
               <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.74 0.14 72 / 0.18)" }}>
-                  <span className="text-xs font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.18)" }}>
+                  <span className="text-xs font-semibold" style={{ color: "var(--accent-tint-text)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="hidden lg:block min-w-0 flex-1">
-                  <p className="text-xs font-medium truncate" style={{ color: "oklch(1 0 0 / 0.72)" }}>{user.name ?? "User"}</p>
+                  <p className="text-xs font-medium truncate" style={{ color: "var(--sidebar-foreground)" }}>{user.name ?? "User"}</p>
                   {user.role === "admin" && <p className="text-[10px] font-medium" style={{ color: "oklch(0.80 0.17 65 / 0.65)" }}>Admin</p>}
                 </div>
               </div>
             )}
             {/* Footer action buttons — icon-only at md, icon+label at lg */}
             <div className="flex flex-col lg:flex-row items-center gap-1 px-0.5 lg:px-1">
-              <button onClick={toggleTheme} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
-                {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" /> : <Moon className="w-3.5 h-3.5 shrink-0" />}
+              <button onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title={theme === "dark" ? "Switch to light" : "Switch to dark"}>
+                {theme === "dark" ? <Sun className="w-3.5 h-3.5 shrink-0" aria-hidden="true" /> : <Moon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />}
                 <span className="hidden lg:block">{theme === "dark" ? "Light" : "Dark"}</span>
               </button>
-              <button onClick={toggleLayoutMode} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Switch to compact view">
-                <PanelLeft className="w-3.5 h-3.5 shrink-0" />
+              <button onClick={toggleLayoutMode} aria-label="Switch to compact view" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title="Switch to compact view">
+                <PanelLeft className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Compact</span>
               </button>
-              <button onClick={() => logout()} className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl text-white/40 hover:text-white/80 hover:bg-white/[0.07] transition-colors text-xs" title="Sign out">
-                <LogOut className="w-3.5 h-3.5 shrink-0" />
+              <button onClick={() => logout()} aria-label="Sign out" className="w-full flex items-center justify-center lg:justify-start gap-1.5 py-2 rounded-xl transition-colors text-xs" style={{ color: "var(--muted-foreground)" }} title="Sign out">
+                <LogOut className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                 <span className="hidden lg:block">Sign out</span>
               </button>
             </div>
@@ -682,16 +715,16 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <a
               href="/changelog"
               className="hidden lg:flex items-center gap-1.5 px-1 py-1 text-[10px] transition-colors"
-              style={{ color: "oklch(1 0 0 / 0.22)" }}
+              style={{ color: "var(--muted-foreground)" }}
             >
               Changelog
               {/* Last updated date — always visible */}
-              <span style={{ color: "oklch(1 0 0 / 0.18)" }}>· Jul 7</span>
+              <span style={{ color: "var(--muted-foreground)" }}>· Jul 7</span>
               {/* Amber dot: visible for 3 days after the latest entry date */}
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "oklch(0.74 0.14 72)" }}
+                  style={{ background: "#C8452B" }}
                   title="What's new"
                 />
               )}
@@ -701,7 +734,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
         {/* Main content — takes full width on /focus since sidebar is hidden */}
         <main
-          className="bg-background"
+          id="main-content"
+          className={isFocusRoute ? "bg-background" : "bg-background pb-28 sm:pb-8"}
           style={{
             flex: 1,
             width: isFocusRoute ? "100%" : undefined,
@@ -715,7 +749,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         </main>
 
         {/* FAB — speed-dial with two capture options */}
-        <div className="fixed z-40 bottom-6 right-6 flex flex-col items-end gap-2">
+        <div className="fixed z-40 bottom-4 right-4 sm:bottom-6 sm:right-6 flex flex-col items-end gap-2">
           {/* Speed-dial options */}
           {fabMenuOpen && (
             <>
@@ -725,7 +759,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Hold That Thread (⌘⇧L)"
               >
-                <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Hold That Thread
               </button>
               <button
@@ -734,7 +768,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Voice or text capture"
               >
-                <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Capture
               </button>
               <button
@@ -743,7 +777,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Capture an idea"
               >
-                <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+                <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
                 Capture Idea
               </button>
             </>
@@ -752,7 +786,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <button
             onClick={() => setFabMenuOpen((v) => !v)}
             className="w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
-            style={{ background: "oklch(0.74 0.14 72)", boxShadow: "0 4px 20px oklch(0.74 0.14 72 / 0.45), 0 0 0 2px var(--background)" }}
+            style={{ background: "#C8452B", boxShadow: "0 4px 20px oklch(0.56 0.18 28 / 0.45), 0 0 0 2px var(--background)" }}
             title="Quick Capture"
             aria-label="Quick Capture"
           >
@@ -842,7 +876,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
+        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 
@@ -866,20 +900,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     else navigate(href);
                   }}
                   className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
-                  style={{ color: active ? "oklch(0.74 0.14 72)" : "oklch(1 0 0 / 0.35)" }}
+                  style={{ color: active ? "var(--accent-tint-text)" : "oklch(1 0 0 / 0.35)" }}
                 >
                   {/* Active pill background */}
                   {active && (
                     <span
                       className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-xl"
-                      style={{ background: "oklch(0.74 0.14 72 / 0.14)" }}
+                      style={{ background: "color-mix(in srgb, var(--primary) 14%, transparent)" }}
                     />
                   )}
                   {/* Top accent line */}
                   {active && (
                     <span
                       className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-b-full"
-                      style={{ background: "oklch(0.74 0.14 72)" }}
+                      style={{ background: "var(--accent-tint-text)" }}
                     />
                   )}
                   <Icon className="w-[18px] h-[18px] relative z-10" />
@@ -915,7 +949,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Anchor className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Hold That Thread
             </button>
             <button
@@ -923,7 +957,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Mic className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Capture
             </button>
             <button
@@ -931,14 +965,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Lightbulb className="w-3.5 h-3.5" style={{ color: "oklch(0.74 0.14 72)" }} />
+              <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
               Capture Idea
             </button>
           </>
         )}
         <button
           onClick={() => setFabMenuOpen((v) => !v)}
-          className="w-12 h-12 rounded-full bg-amber-400 text-amber-950 shadow-lg active:scale-95 transition-all flex items-center justify-center ring-2 ring-background shadow-amber-400/30"
+          className="w-12 h-12 rounded-md bg-primary text-primary-foreground shadow-sm active:translate-y-px transition-all flex items-center justify-center ring-2 ring-background"
         >
           {fabMenuOpen ? <X className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
         </button>

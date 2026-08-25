@@ -255,7 +255,7 @@ function EvidenceCard() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 72)" }}>Evidence Log</p>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 72)" }}>Evidence Log</p>
           <p className="text-xs text-muted-foreground mt-0.5">March 2025</p>
         </div>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 72 / 0.15)" }}>
@@ -306,7 +306,7 @@ function ThresholdCard() {
         </div>
         <div>
           <p className="text-xs font-bold text-foreground">Threshold Diagnosis</p>
-          <p className="text-[10px] text-muted-foreground">What's at the door?</p>
+          <p className="text-xs text-muted-foreground">What's at the door?</p>
         </div>
       </div>
 
@@ -325,7 +325,7 @@ function ThresholdCard() {
 
       <div className="mt-4 rounded-xl p-3 flex items-center gap-2" style={{ background: "oklch(0.72 0.14 72 / 0.12)", border: "1px solid oklch(0.72 0.14 72 / 0.25)" }}>
         <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.72 0.14 72)" }} />
-        <p className="text-[10px] font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
+        <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
           Named. Now you can begin.
         </p>
       </div>
@@ -379,28 +379,12 @@ export default function WelcomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+    <main id="main-content" className="public-theme-surface min-h-screen bg-background text-foreground overflow-x-hidden">
       <PageMeta
         title="Continuary — Built for Minds That Work Differently"
         description="A structured daily workspace for ADHD, focus struggles, and non-linear thinkers. Collect evidence of your identity as someone who keeps going."
         path="/welcome"
       />
-      <style>{`
-        .welcome-fade {
-          opacity: 0;
-          transform: translateY(24px);
-          transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .welcome-fade.is-visible { opacity: 1; transform: translateY(0); }
-        @keyframes animate-fade-slide-up {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-slide-up { animation: animate-fade-slide-up 0.8s cubic-bezier(0.16,1,0.3,1) both; }
-        .animate-delay-100 { animation-delay: 100ms; }
-        .animate-delay-200 { animation-delay: 200ms; }
-      `}</style>
-
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden bg-background"
@@ -409,26 +393,16 @@ export default function WelcomePage() {
         <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15 pointer-events-none" style={{ background: "oklch(0.72 0.14 72)", transform: "translate(-30%, 30%)" }} />
 
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
-          <div className="flex flex-col items-center mb-8 animate-fade-slide-up">
-            <WrenPlayer clip="popsHead" size="xl" />
-            <p className="text-xs font-medium mt-1" style={{ color: "oklch(0.72 0.10 65 / 0.7)" }}>
-              Wren — your Continuary companion
-            </p>
-            <p className="text-xs text-center mt-3 max-w-xs mx-auto leading-relaxed" style={{ color: "oklch(0.55 0.04 240)" }}>
-              She will not solve your problems. She will sit with you while you figure them out.
-              She will not tell you what to do. She will reflect back what you already know.
-              She will not celebrate your streaks. She will remember your thread.
-              She returns without rebuke — no matter how long you've been away.
-              And when you're ready to work, she's there — reading, writing, weaving — while you do.
-              She is not an assistant. She is a companion.
-            </p>
-            <p className="text-[10px] text-center mt-2 max-w-xs mx-auto" style={{ color: "oklch(0.45 0.03 240)" }}>
-              Wren is a companion, not a clinician. She doesn't diagnose, treat, or replace professional support.
-            </p>
-          </div>
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div className="order-1 flex flex-col items-center text-center animate-fade-slide-up">
+              <WrenPlayer clip="popsHead" size="hero" stage={false} feather fallbackStill="siliconeWatching" wrapperClassName="shrink-0" />
+              <p className="mt-3 text-xs font-medium" style={{ color: "oklch(0.72 0.10 65 / 0.8)" }}>Wren — your Continuary companion</p>
+              <p className="mt-2 max-w-sm text-xs leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>
+                She remembers your thread and returns without rebuke. A companion, not a clinician.
+              </p>
+            </div>
 
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-            <div className="flex-1 text-center lg:text-left animate-fade-slide-up animate-delay-100">
+            <div className="order-2 text-center lg:text-left animate-fade-slide-up animate-delay-100">
               <div
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border"
                 style={{ background: "oklch(0.72 0.14 72 / 0.15)", borderColor: "oklch(0.72 0.14 72 / 0.3)", color: "oklch(0.74 0.14 72)" }}
@@ -468,9 +442,9 @@ export default function WelcomePage() {
               </div>
             </div>
 
-            <div className="shrink-0 animate-fade-slide-up animate-delay-200">
-              <PhoneMockup />
-            </div>
+          </div>
+          <div className="mt-12 flex justify-center animate-fade-slide-up animate-delay-200">
+            <PhoneMockup />
           </div>
         </div>
       </section>
@@ -618,7 +592,7 @@ export default function WelcomePage() {
                     >
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
-                    <span className="text-[10px] font-bold tracking-widest text-muted-foreground">{step}</span>
+                    <span className="text-xs font-bold tracking-widest text-muted-foreground">{step}</span>
                   </div>
                   <h3 className="text-sm font-semibold text-foreground mb-2 leading-snug">{title}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{desc}</p>
@@ -819,6 +793,6 @@ export default function WelcomePage() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }
