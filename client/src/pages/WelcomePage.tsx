@@ -129,7 +129,7 @@ const FEATURES = [
   {
     icon: Clock,
     title: "Focus Sessions",
-    desc: "Dedicated 25, 50, or 90-minute blocks where you and Wren work side-by-side. She checks in at the halfway point and helps you close out with a clear next step.",
+    desc: "Dedicated 10, 30, 60, or 90-minute blocks where you and Wren work side-by-side. She checks in at the halfway point and helps you close out with a clear next step.",
     color: "text-violet-400",
     bg: "bg-violet-400/10",
   },
@@ -243,6 +243,8 @@ function PhoneMockup() {
 
 // ── Evidence Log mockup card ───────────────────────────────────────────────────
 function EvidenceCard() {
+  const currentMonth = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date());
+
   return (
     <div
       className="rounded-2xl p-6 shadow-2xl max-w-sm mx-auto"
@@ -256,7 +258,7 @@ function EvidenceCard() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.72 0.14 72)" }}>Evidence Log</p>
-          <p className="text-xs text-muted-foreground mt-0.5">March 2025</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{currentMonth}</p>
         </div>
         <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.72 0.14 72 / 0.15)" }}>
           <ScrollText className="w-4 h-4" style={{ color: "oklch(0.72 0.14 72)" }} />

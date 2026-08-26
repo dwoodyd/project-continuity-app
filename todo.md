@@ -2145,6 +2145,10 @@
 - [x] Reframe the cap-full invite gate as waitlist-first with manual code entry retained
 - [x] Align the in-app founding application copy with instant access while seats remain
 - [x] Add cap-boundary/concurrency coverage and run full validation
+
+## Welcome Page Currency (Aug 26)
+- [x] Correct the public Focus Sessions duration copy to 10, 30, 60, or 90 minutes
+- [x] Replace the stale Evidence Log sample month with a live current-month label
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
