@@ -49,10 +49,10 @@ export default function ApplyPage() {
             className="text-3xl font-bold"
             style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif", color: "oklch(0.97 0.01 80)" }}
           >
-            Application received.
+            You’re on the path in.
           </h1>
           <p className="text-base leading-relaxed" style={{ color: "oklch(0.75 0.01 240)" }}>
-            Thank you for applying to Continuary's founding cohort. We'll review your application and reach out within a few days with your invite code.
+            Founding seats are claimed instantly after sign-in while they remain. If the public allocation fills first, we’ll contact you when a seat opens.
           </p>
           <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
             Check your inbox — a confirmation has been sent to <strong style={{ color: "oklch(0.74 0.14 72)" }}>{email}</strong>.
@@ -72,13 +72,13 @@ export default function ApplyPage() {
               style={{ borderColor: "oklch(0.25 0.015 240)" }}
             >
               <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
-                Already have a referral code from a founding member?{" "}
-                <Link href="/redeem-referral">
+                Ready to claim a seat now?{" "}
+                <Link href="/">
                   <a
                     className="underline underline-offset-4 transition-colors"
                     style={{ color: "oklch(0.74 0.14 72)" }}
                   >
-                    Skip the queue →
+                    Sign in to Continuary →
                   </a>
                 </Link>
               </p>
@@ -127,7 +127,7 @@ export default function ApplyPage() {
             Apply for founding access.
           </h1>
           <p className="text-base leading-relaxed" style={{ color: "oklch(0.70 0.01 240)" }}>
-            Continuary is invite-only. Founding members get lifetime access at a locked rate, early feature input, and a direct line to the team. We review every application personally.
+            Continuary is invite-only. While founding seats remain, signing in claims one instantly at your locked rate. Once they’re full, you can join the waitlist for the next opening.
           </p>
         </div>
 

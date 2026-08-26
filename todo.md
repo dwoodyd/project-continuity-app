@@ -2137,6 +2137,14 @@
 - [x] Audit critical Manus-CDN assets and add a verified-still fallback for unavailable Wren video delivery
 - [x] Run drizzle-kit migrate and reconcile its migration ledger with the already-repaired live schema
 - [x] Restore Focus Sessions split-stage layout and a resilient left-side Wren companion scene
+
+## Frictionless Invite-Only Admission (Aug 26)
+- [x] Unify the founding-seat cap under one environment-configurable source (default 100)
+- [x] Add a race-safe, idempotent beta.claimFoundingSeat mutation and invalidate the slots cache after grants
+- [x] Auto-claim on first authenticated entry while preserving admin, referral, and manual-invite-code paths
+- [x] Reframe the cap-full invite gate as waitlist-first with manual code entry retained
+- [x] Align the in-app founding application copy with instant access while seats remain
+- [x] Add cap-boundary/concurrency coverage and run full validation
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

@@ -43,7 +43,7 @@ import {
   Mic,
   Repeat,
 } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useTheme } from "../contexts/ThemeContext";
 import { IntroContext } from "../contexts/IntroContext";
@@ -200,6 +200,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const [location] = useLocation();
   const [, navigate] = useLocation();
   const { isAuthenticated, loading: authLoading, logout, user } = useAuth();
+  const utils = trpc.useUtils();
+  const claimFoundingSeat = trpc.beta.claimFoundingSeat.useMutation();
+  const [admissionState, setAdmissionState] = useState<"idle" | "claiming" | "full" | "granted">("idle");
+  const admissionAttemptedRef = useRef(false);
   const { theme, toggleTheme } = useTheme();
   useEffect(() => {
     const exact = INTERNAL_PAGE_TITLES[location];
@@ -356,6 +360,43 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     profile?.onboardingCompleted === true &&
     profile?.aiConsentGiven === false;
 
+  const pendingManualInvite = typeof window !== "undefined" && !!sessionStorage.getItem("pendingInviteCode");
+  const needsAutomaticAdmission = !!(
+    isAuthenticated &&
+    user &&
+    user.role !== "admin" &&
+    !user.hasRedeemedInvite &&
+    !pendingManualInvite &&
+    location !== "/invite-gate" &&
+    !location.startsWith("/redeem-referral")
+  );
+
+  // Frictionless founding admission. This is intentionally before the onboarding
+  // gate: a new person either gets a seat and proceeds to onboarding, or sees the
+  // cap-full waitlist—not a temporary code wall.
+  useEffect(() => {
+    if (!needsAutomaticAdmission || admissionAttemptedRef.current) return;
+    admissionAttemptedRef.current = true;
+    setAdmissionState("claiming");
+
+    claimFoundingSeat.mutateAsync()
+      .then(async (result) => {
+        if (result.granted) {
+          setAdmissionState("granted");
+          await utils.auth.me.invalidate();
+          await utils.settings.getProfile.invalidate();
+          return;
+        }
+        setAdmissionState("full");
+        navigate("/invite-gate");
+      })
+      .catch(() => {
+        // Preserve a usable manual-code path if the admission request cannot run.
+        setAdmissionState("full");
+        navigate("/invite-gate");
+      });
+  }, [needsAutomaticAdmission, claimFoundingSeat, utils.auth.me, utils.settings.getProfile, navigate]);
+
   // Onboarding gate — admin users bypass entirely (they may not have a profile yet)
   useEffect(() => {
     if (
@@ -363,25 +404,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       user &&
       user.role === "admin"
     ) return; // admins skip onboarding
-    if (isAuthenticated && profile && profile.onboardingCompleted === false && location !== "/onboarding") {
+    if (!needsAutomaticAdmission && isAuthenticated && profile && profile.onboardingCompleted === false && location !== "/onboarding") {
       navigate("/onboarding");
     }
-  }, [isAuthenticated, user, profile, navigate, location]);
-
-  // Invite-only gate: block non-admin users who have not redeemed an invite code
-  // /about-app is no longer a forced gate — it is revisitable from the sidebar
-  useEffect(() => {
-    if (
-      isAuthenticated &&
-      user &&
-      user.role !== "admin" &&
-      !user.hasRedeemedInvite &&
-      location !== "/invite-gate" &&
-      location !== "/onboarding"
-    ) {
-      navigate("/invite-gate");
-    }
-  }, [isAuthenticated, user, navigate, location]);
+  }, [needsAutomaticAdmission, isAuthenticated, user, profile, navigate, location]);
 
   // Auth error toast
   useEffect(() => {
@@ -411,7 +437,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // This prevents the sequential flicker: authLoading → onboarding → invite-gate.
   // profileLoading is only relevant once we know the user is authenticated.
   const profileLoading = isAuthenticated && profile === undefined;
-  const authGateResolving = authLoading || profileLoading;
+  const autoAdmissionResolving = needsAutomaticAdmission && admissionState !== "full" && admissionState !== "granted";
+  const authGateResolving = authLoading || profileLoading || autoAdmissionResolving;
   const [authResolutionTimedOut, setAuthResolutionTimedOut] = useState(false);
   const [authRecoverySigningIn, setAuthRecoverySigningIn] = useState(false);
 

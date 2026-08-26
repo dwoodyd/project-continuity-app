@@ -30,9 +30,12 @@ export default function InviteGatePage() {
   const [raw, setRaw] = useState(() => stripFormatting(pending.toUpperCase()));
   const [entered, setEntered] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [waitlistMode, setWaitlistMode] = useState(!pending);
+  const [waitlistEmail, setWaitlistEmail] = useState("");
+  const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
   const [shake, setShake] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { logout, refresh } = useAuth();
+  const { logout, refresh, user } = useAuth();
   const utils = trpc.useUtils();
 
   const redeem = trpc.invites.redeem.useMutation({
@@ -63,12 +66,17 @@ export default function InviteGatePage() {
       setTimeout(() => setShake(false), 600);
     },
   });
+  const joinWaitlist = trpc.waitlist.join.useMutation({
+    onSuccess: () => setWaitlistSubmitted(true),
+    onError: (err) => notify.error(err.message || "We couldn't add you to the waitlist. Please try again."),
+  });
 
   // Auto-submit pending code from URL/session
   useEffect(() => {
     if (pending) {
       const clean = stripFormatting(pending.toUpperCase());
       setRaw(clean);
+      setWaitlistMode(false);
       if (clean.length === TOTAL_CHARS) {
         redeem.mutate({ code: clean });
       }
@@ -98,9 +106,10 @@ export default function InviteGatePage() {
   };
 
   useEffect(() => {
+    if (waitlistMode) return;
     const t = setTimeout(() => inputRef.current?.focus(), 600);
     return () => clearTimeout(t);
-  }, []);
+  }, [waitlistMode]);
 
   const chars = raw.split("");
 
@@ -184,7 +193,7 @@ export default function InviteGatePage() {
           zIndex: 1,
         }}
       >
-        {success ? "You're in." : "Enter your invite code."}
+        {success ? "You're in." : waitlistSubmitted ? "You're on the list." : waitlistMode ? "Founding seats are full for now." : "Enter your invite code."}
       </h1>
 
       {/* Sub */}
@@ -205,11 +214,50 @@ export default function InviteGatePage() {
       >
         {success
           ? "Taking you in now\u2026"
-          : "Continuary is currently invite-only. Paste or type your 24-character code below."}
+          : waitlistSubmitted
+            ? "We’ll email you the moment a founding seat opens."
+            : waitlistMode
+              ? "Join the waitlist and we’ll let you know the moment a seat opens."
+              : "Continuary is currently invite-only. Paste or type your 24-character code below."}
       </p>
 
+      {!success && waitlistMode && !waitlistSubmitted && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const email = waitlistEmail.trim() || user?.email || "";
+            if (!email) {
+              notify.error("Add an email so we can let you know when a seat opens.");
+              return;
+            }
+            joinWaitlist.mutate({ email, name: user?.name ?? undefined });
+          }}
+          style={{ width: "100%", maxWidth: "22rem", display: "flex", flexDirection: "column", gap: "0.75rem", position: "relative", zIndex: 1 }}
+        >
+          <input
+            type="email"
+            value={waitlistEmail}
+            onChange={(e) => setWaitlistEmail(e.target.value)}
+            placeholder={user?.email || "you@example.com"}
+            autoComplete="email"
+            className="w-full rounded-xl px-4 py-3 text-sm outline-none"
+            style={{ color: "rgba(255,255,255,0.92)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)" }}
+          />
+          <button
+            type="submit"
+            disabled={joinWaitlist.isPending}
+            style={{ width: "100%", padding: "1rem 1.5rem", borderRadius: "100px", border: "none", background: "linear-gradient(135deg, oklch(0.80 0.14 72) 0%, oklch(0.72 0.20 55) 100%)", color: "#080a0f", fontSize: "0.95rem", fontWeight: 700, cursor: joinWaitlist.isPending ? "wait" : "pointer" }}
+          >
+            {joinWaitlist.isPending ? "Joining\u2026" : "Join the waitlist"}
+          </button>
+          <button type="button" onClick={() => setWaitlistMode(false)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.48)", fontSize: "0.8rem", textDecoration: "underline", textUnderlineOffset: "3px", cursor: "pointer" }}>
+            Have an invite code?
+          </button>
+        </form>
+      )}
+
       {/* Code input area */}
-      <form
+      {!success && !waitlistMode && <form
         onSubmit={handleSubmit}
         style={{
           opacity: entered ? 1 : 0,
@@ -352,7 +400,7 @@ export default function InviteGatePage() {
             "Unlock access"
           )}
         </button>
-      </form>
+      </form>}
 
       {/* Sign out */}
       <div
@@ -369,13 +417,14 @@ export default function InviteGatePage() {
         }}
       >
         <p style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.22)", textAlign: "center" as const }}>
-          Don&apos;t have a code?{" "}
-          <a
-            href="/apply"
-            style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          {waitlistMode ? "Already have an invite code? " : "Don’t have a code? "}
+          <button
+            type="button"
+            onClick={() => setWaitlistMode((current) => !current)}
+            style={{ color: "rgba(255,255,255,0.45)", textDecoration: "underline", textUnderlineOffset: "3px", background: "none", border: "none", padding: 0, cursor: "pointer", font: "inherit" }}
           >
-            Apply for founding access
-          </a>
+            {waitlistMode ? "Enter it here" : "Join the waitlist"}
+          </button>
           {" "}or{" "}
           <a
             href="mailto:hello@continuary.app"

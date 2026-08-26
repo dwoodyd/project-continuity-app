@@ -13,13 +13,16 @@ import { getDb } from "../db";
 import { betaCodes, users } from "../../drizzle/schema";
 import { eq, and, isNull, lte, count } from "drizzle-orm";
 import crypto from "crypto";
+import { claimPublicFoundingSeat, FOUNDING_CAP, FOUNDING_TRIAL_DAYS } from "../foundingCap";
+import { invalidateFoundingSlots } from "../foundingSlots";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-export const FOUNDING_TRIAL_DAYS = 90;
-const COHORT_SIZE = 25;
 const COHORT_UNLOCK_DAYS = 14; // previous cohort must be this old before next opens
 const REFERRAL_BONUS_DAYS = 30;
 const MAX_COHORTS = 4;
+// Legacy manual-invite cohort pacing derives from the same public cap rather
+// than maintaining an independent 25 × 4 allocation.
+const COHORT_SIZE = Math.ceil(FOUNDING_CAP / MAX_COHORTS);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -55,6 +58,15 @@ async function assignCohort(db: NonNullable<Awaited<ReturnType<typeof getDb>>>):
   return null; // All cohorts full
 }
 
+/**
+ * Personal invite codes and referrals remain valid after public founding seats
+ * fill. Preserve staged cohort placement where possible; otherwise use cohort 1
+ * rather than rejecting a direct invitation.
+ */
+async function assignManualInviteCohort(db: NonNullable<Awaited<ReturnType<typeof getDb>>>): Promise<number> {
+  return (await assignCohort(db)) ?? 1;
+}
+
 /** Generate a unique referral code for a founding member. */
 function generateReferralCode(userId: number): string {
   const rand = crypto.randomBytes(4).toString("hex").toUpperCase();
@@ -63,6 +75,21 @@ function generateReferralCode(userId: number): string {
 
 // ── Router ────────────────────────────────────────────────────────────────────
 export const betaRouter = {
+  /**
+   * Frictionless public admission. A signed-in user receives a founding seat
+   * immediately while capacity remains; the conditional counter makes the last
+   * seat race-safe. Manual codes and referrals remain separate paths.
+   */
+  claimFoundingSeat: protectedProcedure.mutation(async ({ ctx }) => {
+    if (ctx.user.role === "admin" || ctx.user.isFoundingMember || ctx.user.inviteCode) {
+      return { granted: true, alreadyClaimed: true };
+    }
+
+    const result = await claimPublicFoundingSeat(ctx.user.id);
+    if (result.granted && !result.alreadyClaimed) invalidateFoundingSlots();
+    return result;
+  }),
+
   /** Redeem a founding member code. Assigns cohort, sets 90-day trial, generates referral code. */
   redeemCode: protectedProcedure
     .input(z.object({ code: z.string().min(1).max(64).toUpperCase() }))
@@ -81,13 +108,7 @@ export const betaRouter = {
       if (codeRow.usedBy) throw new TRPCError({ code: "CONFLICT", message: "This code has already been used." });
 
       // Assign cohort
-      const cohort = await assignCohort(db!);
-      if (cohort === null) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "All founding member cohorts are currently full or not yet open. You've been added to the waitlist.",
-        });
-      }
+      const cohort = await assignManualInviteCohort(db!);
 
       const now = new Date();
       const trialEndsAt = new Date(now.getTime() + FOUNDING_TRIAL_DAYS * 24 * 60 * 60 * 1000);
@@ -145,10 +166,7 @@ export const betaRouter = {
       }
 
       // Assign cohort for new member (same as referrer's cohort, or next available)
-      const cohort = referrer.foundingMemberCohort ?? await assignCohort(db!);
-      if (cohort === null) {
-        throw new TRPCError({ code: "PRECONDITION_FAILED", message: "No cohort slots available." });
-      }
+      const cohort = referrer.foundingMemberCohort ?? await assignManualInviteCohort(db!);
 
       const now = new Date();
       const trialEndsAt = new Date(now.getTime() + (FOUNDING_TRIAL_DAYS + REFERRAL_BONUS_DAYS) * 24 * 60 * 60 * 1000);

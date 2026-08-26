@@ -75,6 +75,18 @@ export const betaCodes = mysqlTable("betaCodes", {
 export type BetaCode = typeof betaCodes.$inferSelect;
 export type InsertBetaCode = typeof betaCodes.$inferInsert;
 
+// ─── Founding Seat Capacity ────────────────────────────────────────────────────
+/**
+ * A single locked counter for public, auto-claimed founding seats. Direct manual
+ * invites and referral grants intentionally bypass this public capacity so they
+ * can continue to work after the public founding cap is reached.
+ */
+export const foundingSeatCapacity = mysqlTable("founding_seat_capacity", {
+  id: int("id").primaryKey(),
+  claimed: int("claimed").default(0).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 // ─── User Profiles ────────────────────────────────────────────────────────────
 export const userProfiles = mysqlTable("user_profiles", {
   id: int("id").autoincrement().primaryKey(),
