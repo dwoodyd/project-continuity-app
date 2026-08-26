@@ -16,8 +16,9 @@ describe("Wren presence and coherent voice", () => {
     expect(player).toContain('hero:  "w-[clamp(240px,32vw,440px)] h-[clamp(240px,32vw,440px)]"');
     expect(player).toContain('heroLg:"w-[clamp(300px,42vw,560px)] h-[clamp(300px,42vw,560px)]"');
     expect(player).toContain('window.matchMedia("(prefers-reduced-motion: reduce)")');
-    expect(player).toContain('fallbackStill && (!videoReady || prefersReducedMotion)');
-    expect(player).toContain('{!prefersReducedMotion && (');
+    expect(player).toContain('fallbackStill && (!videoReady || prefersReducedMotion || videoFailed)');
+    expect(player).toContain('WREN_STILLS[fallbackStill ?? "siliconeNeutral"]');
+    expect(player).toContain('{!prefersReducedMotion && !videoFailed && (');
   });
 
   it("uses the reusable Intro-scale scene at the selected return and introduction moments", () => {

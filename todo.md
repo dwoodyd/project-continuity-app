@@ -2128,6 +2128,13 @@
 - [x] Fix authenticated dashboard stall: production Today view remains on skeleton loaders after sign-in
 - [x] Add bounded auth-resolution timeout and recoverable sign-in fallback so startup skeletons cannot persist indefinitely
 - [x] Clear stale session state before the recovery screen starts a new OAuth sign-in
+
+## Production Health Recovery (Aug 26)
+- [x] Inspect and apply all reviewed committed database migrations needed by production
+- [x] Verify user_profiles includes Wren and Reading Bridge columns required by settings.getProfile
+- [x] Verify settings.getProfile and the authenticated dashboard return successfully after migration
+- [x] Verify post-reset PayPal and AI configuration without exposing credential values
+- [x] Audit critical Manus-CDN assets and add a verified-still fallback for unavailable Wren video delivery
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

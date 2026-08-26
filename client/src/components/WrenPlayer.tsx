@@ -128,9 +128,15 @@ export default function WrenPlayer({
 }: WrenPlayerProps) {
   const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
   const [videoReady, setVideoReady] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
+
+  useEffect(() => {
+    setVideoReady(false);
+    setVideoFailed(false);
+  }, [src]);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -166,16 +172,16 @@ export default function WrenPlayer({
         wrapperClassName,
       )}
     >
-      {/* Static fallback shown while video loads — hidden once video is ready */}
-      {fallbackStill && (!videoReady || prefersReducedMotion) && (
+      {/* A verified still keeps Wren present when a CDN-delivered video is unavailable. */}
+      {(fallbackStill && (!videoReady || prefersReducedMotion || videoFailed) || videoFailed) && (
         <img
-          src={WREN_STILLS[fallbackStill]}
+          src={WREN_STILLS[fallbackStill ?? "siliconeNeutral"]}
           alt="Wren"
           className="absolute inset-0 w-full h-full object-contain"
           style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
-      {!prefersReducedMotion && (
+      {!prefersReducedMotion && !videoFailed && (
         <video
           key={src}
           src={src}
@@ -186,6 +192,7 @@ export default function WrenPlayer({
           playsInline
           onEnded={onEnded}
           onCanPlay={() => setVideoReady(true)}
+          onError={() => setVideoFailed(true)}
           className={cn(
             "w-full h-full",
             "relative",
