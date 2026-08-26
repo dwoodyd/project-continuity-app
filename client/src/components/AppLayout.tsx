@@ -56,6 +56,7 @@ import { trpc } from "@/lib/trpc";
 import notify from "@/lib/notify";
 import {
   AUTH_RESOLUTION_TIMEOUT_MS,
+  AUTH_SIGNOUT_ATTEMPT_TIMEOUT_MS,
   shouldShowAuthStartupRecovery,
 } from "@/lib/authStartupRecovery";
 import { CommandPaletteTrigger } from "./CommandPalette";
@@ -412,6 +413,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const profileLoading = isAuthenticated && profile === undefined;
   const authGateResolving = authLoading || profileLoading;
   const [authResolutionTimedOut, setAuthResolutionTimedOut] = useState(false);
+  const [authRecoverySigningIn, setAuthRecoverySigningIn] = useState(false);
 
   useEffect(() => {
     if (!authGateResolving) {
@@ -427,10 +429,20 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     return () => window.clearTimeout(timeout);
   }, [authGateResolving]);
 
-  const restartSignIn = () => {
+  const restartSignIn = async () => {
+    if (authRecoverySigningIn) return;
+    setAuthRecoverySigningIn(true);
     if (location && location !== "/" && location !== "/landing") {
       localStorage.setItem("continuary_return_path", location);
     }
+
+    // Clear the httpOnly session cookie through the server before starting OAuth.
+    // A short timeout guarantees an unresponsive stale session cannot trap someone
+    // on this recovery screen; the OAuth callback will issue a fresh cookie.
+    await Promise.race([
+      logout().catch(() => undefined),
+      new Promise<void>((resolve) => window.setTimeout(resolve, AUTH_SIGNOUT_ATTEMPT_TIMEOUT_MS)),
+    ]);
     window.location.assign(getLoginUrl());
   };
 
@@ -453,10 +465,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <button
             type="button"
             onClick={restartSignIn}
+            disabled={authRecoverySigningIn}
             className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold mt-6 hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
             style={{ background: "#C8452B", color: "#FFFFFF", boxShadow: "0 4px 12px rgb(200 69 43 / 0.20)" }}
           >
-            Sign in again
+            {authRecoverySigningIn ? "Resetting session…" : "Sign in again"}
             <ChevronRight className="w-4 h-4" />
           </button>
           <button

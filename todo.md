@@ -2127,6 +2127,7 @@
 - [x] Verify production assets, custom domains, and HTTPS after recovery
 - [x] Fix authenticated dashboard stall: production Today view remains on skeleton loaders after sign-in
 - [x] Add bounded auth-resolution timeout and recoverable sign-in fallback so startup skeletons cannot persist indefinitely
+- [x] Clear stale session state before the recovery screen starts a new OAuth sign-in
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
