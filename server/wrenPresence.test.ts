@@ -98,7 +98,8 @@ describe("Wren presence and coherent voice", () => {
     expect(clarity).toContain("You do not have to untangle it alone.");
     expect(clarity).toContain("bleed");
     expect(scratch).toContain('<WrenPlayer clip="bouncingFunClean" size="full"');
-    expect(focus).toContain("cornerWave");
+    expect(focus).toContain("ACTIVITY_CLIP[wrenActivity]");
+    expect(focus).toContain('fallbackStill="siliconeNeutral"');
     expect(companion).toContain("weaving");
     expect(popout).toContain("weaving");
     expect(focus).not.toContain('size="hero"');

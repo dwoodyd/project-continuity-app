@@ -27,12 +27,12 @@ import { cn } from "@/lib/utils";
 import UnstickModal from "@/components/UnstickModal";
 import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
 import WrenPopout from "@/components/WrenPopout";
-import WrenPlayer from "@/components/WrenPlayer";
+import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 
 // ── Focus activity clips ─────────────────────────────────────────────────────────────────────────────────
 type WrenActivity = "weaving" | "reading" | "writing" | "lookingup";
 // Activity → WrenClip mapping (writing maps to reading since .mov was removed)
-const ACTIVITY_CLIP: Record<WrenActivity, string> = {
+const ACTIVITY_CLIP: Record<WrenActivity, WrenClip> = {
   weaving:   "weaving",
   reading:   "reading",
   writing:   "reading",   // .mov removed — reading has the same calm energy
@@ -865,15 +865,20 @@ export default function FocusSessionsPage() {
             </div>
           </div>
 
-          {/* LEFT — Wren works alongside, rather than watches over, the session. */}
-          <div className="relative overflow-hidden" style={{ background: "var(--background)" }}>
-            <div className="absolute inset-0 opacity-40" style={{ background: "radial-gradient(circle at 72% 22%, oklch(0.55 0.14 65 / 0.16), transparent 42%)" }} />
-            <WrenPlayer
-              clip="cornerWave"
-              size="sm"
-              wrapperClassName="absolute top-4 right-4 z-10"
-            />
-            <p className="absolute left-6 top-7 max-w-[13rem] text-sm leading-6" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
+          {/* LEFT — Wren's full companion scene stays present throughout the session. */}
+          <div className="relative min-w-0 overflow-hidden" style={{ background: "var(--background)" }}>
+            <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 52% 46%, oklch(0.42 0.12 65 / 0.24), transparent 58%), radial-gradient(circle at 72% 22%, oklch(0.55 0.14 65 / 0.12), transparent 36%)" }} />
+            <div className="absolute inset-x-6 top-16 bottom-9 z-[1]">
+              <WrenPlayer
+                clip={ACTIVITY_CLIP[wrenActivity]}
+                size="full"
+                stage={false}
+                fallbackStill="siliconeNeutral"
+                wrapperClassName="h-full w-full"
+                className="drop-shadow-[0_18px_50px_rgba(212,168,83,0.18)]"
+              />
+            </div>
+            <p className="absolute left-6 top-7 z-[2] max-w-[15rem] text-sm leading-6" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
               Wren is working alongside you.
             </p>
             {/* Soft right-edge gradient scrim */}

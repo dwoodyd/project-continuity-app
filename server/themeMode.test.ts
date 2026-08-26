@@ -51,7 +51,8 @@ describe("permanent dual-theme contract", () => {
     expect(evidence).toContain("src={WREN_CLIPS.evidenceClean}");
     expect(evidence).toContain("poster={WREN_STILLS.evidenceCleanPoster}");
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
-    expect(focus).toContain('clip="cornerWave"');
+    expect(focus).toContain('clip={ACTIVITY_CLIP[wrenActivity]}');
+    expect(focus).toContain('fallbackStill="siliconeNeutral"');
     const memory = source("client/src/pages/WhatWrenRemembersPage.tsx");
     expect(memory).toContain('clip="memoryOrb"');
   });
