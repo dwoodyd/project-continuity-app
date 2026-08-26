@@ -19,6 +19,15 @@ describe("frictionless founding admission", () => {
     expect(source).toContain("return { granted: false, full: true }");
   });
 
+  it("returns a reserved public seat when a concurrent manual grant wins the same account", () => {
+    const source = read("server/foundingCap.ts");
+    expect(source).toContain("isNull(users.inviteCode)");
+    expect(source).toContain("const userGrant = await tx.update(users)");
+    expect(source).toContain("if (affectedRows(userGrant) !== 1)");
+    expect(source).toMatch(/UPDATE founding_seat_capacity[\s\S]*SET claimed = GREATEST\(claimed - 1, 0\)/);
+    expect(source).toContain("return { granted: true, alreadyClaimed: true }");
+  });
+
   it("keeps manual codes and referrals available after the public allocation is full", () => {
     const source = read("server/routers/beta.ts");
     expect(source).toContain("assignManualInviteCohort");

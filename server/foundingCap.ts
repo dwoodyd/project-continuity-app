@@ -6,7 +6,7 @@
  * working after the public founding allocation is full.
  */
 import crypto from "crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { foundingSeatCapacity, users } from "../drizzle/schema";
 import { getDb } from "./db";
 
@@ -63,7 +63,7 @@ export async function claimPublicFoundingSeat(userId: number): Promise<{ granted
 
     const now = new Date();
     const trialEndsAt = new Date(now.getTime() + FOUNDING_TRIAL_DAYS * 24 * 60 * 60 * 1000);
-    await tx.update(users).set({
+    const userGrant = await tx.update(users).set({
       isBeta: true,
       betaExpiresAt: trialEndsAt,
       isPro: true,
@@ -74,7 +74,23 @@ export async function claimPublicFoundingSeat(userId: number): Promise<{ granted
       trialEndsAt,
       inviteCode: "AUTO-FOUNDING",
       referralCode: makeReferralCode(userId),
-    }).where(and(eq(users.id, userId), eq(users.isFoundingMember, false)));
+    }).where(and(
+      eq(users.id, userId),
+      eq(users.isFoundingMember, false),
+      isNull(users.inviteCode),
+    ));
+
+    // A manual code or referral may have granted this same account while the
+    // counter transaction was in flight. Return the seat before committing so
+    // the public allocation never leaks a reservation.
+    if (affectedRows(userGrant) !== 1) {
+      await tx.execute(sql`
+        UPDATE founding_seat_capacity
+        SET claimed = GREATEST(claimed - 1, 0)
+        WHERE id = 1
+      `);
+      return { granted: true, alreadyClaimed: true };
+    }
 
     return { granted: true };
   });

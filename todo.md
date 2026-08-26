@@ -2145,7 +2145,7 @@
 - [x] Reframe the cap-full invite gate as waitlist-first with manual code entry retained
 - [x] Align the in-app founding application copy with instant access while seats remain
 - [x] Add cap-boundary/concurrency coverage and run full validation
-- [ ] Return a reserved public seat if a concurrent manual invite or referral grant wins the same account
+- [x] Return a reserved public seat if a concurrent manual invite or referral grant wins the same account
 
 ## Welcome Page Currency (Aug 26)
 - [x] Correct the public Focus Sessions duration copy to 10, 30, 60, or 90 minutes
