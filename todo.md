@@ -2156,6 +2156,13 @@
 - [x] Add deep links from Evidence, Clarity, Amnesty, and Daily Rhythm guidance into the app
 - [x] Convert the space grid into a functional in-app directory and remove acquisition targeting
 - [x] Remove drift-prone parameters and external pricing/application calls to action from /welcome
+
+## ApplyPage Admission Reconciliation (Aug 26)
+- [x] Reconcile public /apply with the frictionless sign-in-to-claim flow while founding seats remain
+- [x] Show waitlist joining rather than the legacy manual application form when founding seats are full
+- [x] Preserve manual invite-code access without presenting the legacy review form as instant admission
+- [x] Add focused regression coverage and validate the public admission states
+- [x] Complete final validation and checkpoint the resumed ApplyPage reconciliation
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

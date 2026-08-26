@@ -40,4 +40,23 @@ describe("frictionless founding admission", () => {
     expect(source).toContain("pendingManualInvite");
     expect(source).toContain('navigate("/invite-gate")');
   });
+
+  it("makes /apply use instant sign-in while seats remain and the waitlist when full", () => {
+    const source = read("client/src/pages/ApplyPage.tsx");
+    expect(source).toContain("trpc.founding.slots.useQuery");
+    expect(source).toContain("const seatsAreFull = slots?.remaining === 0");
+    expect(source).toContain('href={getLoginUrl()}');
+    expect(source).toContain("Sign in to claim your seat →");
+    expect(source).toContain("trpc.waitlist.join.useMutation");
+    expect(source).toContain("Founding seats are full.");
+    expect(source).toContain("Join the waitlist");
+    expect(source).not.toContain("applications.submit");
+    expect(source).not.toContain("Submit application");
+  });
+
+  it("keeps direct invitation and referral paths visible in both public admission states", () => {
+    const source = read("client/src/pages/ApplyPage.tsx");
+    expect(source).toContain('href="/invite-gate"');
+    expect(source).toContain('href="/redeem-referral"');
+  });
 });
