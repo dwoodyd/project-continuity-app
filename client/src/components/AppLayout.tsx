@@ -54,6 +54,10 @@ import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import ThreadLockModal from "./ThreadLockModal";
 import { trpc } from "@/lib/trpc";
 import notify from "@/lib/notify";
+import {
+  AUTH_RESOLUTION_TIMEOUT_MS,
+  shouldShowAuthStartupRecovery,
+} from "@/lib/authStartupRecovery";
 import { CommandPaletteTrigger } from "./CommandPalette";
 import WrenPlayer from "./WrenPlayer";
 import StreakMilestoneCelebration from "./StreakMilestoneCelebration";
@@ -407,9 +411,65 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // profileLoading is only relevant once we know the user is authenticated.
   const profileLoading = isAuthenticated && profile === undefined;
   const authGateResolving = authLoading || profileLoading;
+  const [authResolutionTimedOut, setAuthResolutionTimedOut] = useState(false);
 
-  if (authGateResolving) {
+  useEffect(() => {
+    if (!authGateResolving) {
+      setAuthResolutionTimedOut(false);
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => setAuthResolutionTimedOut(true),
+      AUTH_RESOLUTION_TIMEOUT_MS,
+    );
+
+    return () => window.clearTimeout(timeout);
+  }, [authGateResolving]);
+
+  const restartSignIn = () => {
+    if (location && location !== "/" && location !== "/landing") {
+      localStorage.setItem("continuary_return_path", location);
+    }
+    window.location.assign(getLoginUrl());
+  };
+
+  if (authGateResolving && !authResolutionTimedOut) {
     return <DashboardLayoutSkeleton />;
+  }
+
+  if (shouldShowAuthStartupRecovery(authGateResolving, authResolutionTimedOut)) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "1rem", background: "#F4F5F2", color: "#2A2D28" }}
+      >
+        <div className="w-full max-w-sm rounded-2xl p-6 text-center shadow-lg" style={{ background: "#E6E8E3", border: "1px solid #D3D6D0" }}>
+          <img src={BRAND_LOGO_SIGNIN} alt="Continuary" className="w-14 h-14 object-contain rounded-2xl mx-auto mb-4" />
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>Let’s restore your session</h1>
+          <p className="text-sm leading-relaxed mt-3" style={{ color: "#6B6F68" }}>
+            Continuary could not finish loading your account. Your work is safe — please sign in again to continue.
+          </p>
+          <button
+            type="button"
+            onClick={restartSignIn}
+            className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold mt-6 hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
+            style={{ background: "#C8452B", color: "#FFFFFF", boxShadow: "0 4px 12px rgb(200 69 43 / 0.20)" }}
+          >
+            Sign in again
+            <ChevronRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="text-xs underline underline-offset-4 mt-4 hover:opacity-75"
+            style={{ color: "#4B4F48" }}
+          >
+            Try reloading first
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // ── Unauthenticated landing ─────────────────────────────────────────────────
