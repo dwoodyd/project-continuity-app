@@ -2135,6 +2135,7 @@
 - [x] Verify settings.getProfile and the authenticated dashboard return successfully after migration
 - [x] Verify post-reset PayPal and AI configuration without exposing credential values
 - [x] Audit critical Manus-CDN assets and add a verified-still fallback for unavailable Wren video delivery
+- [x] Run drizzle-kit migrate and reconcile its migration ledger with the already-repaired live schema
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
