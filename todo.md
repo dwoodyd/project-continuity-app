@@ -2145,10 +2145,17 @@
 - [x] Reframe the cap-full invite gate as waitlist-first with manual code entry retained
 - [x] Align the in-app founding application copy with instant access while seats remain
 - [x] Add cap-boundary/concurrency coverage and run full validation
+- [ ] Return a reserved public seat if a concurrent manual invite or referral grant wins the same account
 
 ## Welcome Page Currency (Aug 26)
 - [x] Correct the public Focus Sessions duration copy to 10, 30, 60, or 90 minutes
 - [x] Replace the stale Evidence Log sample month with a live current-month label
+
+## Welcome In-App Orientation Reframe (Aug 26)
+- [x] Replace sales-oriented Welcome hero and calls to action with signed-in member orientation
+- [x] Add deep links from Evidence, Clarity, Amnesty, and Daily Rhythm guidance into the app
+- [x] Convert the space grid into a functional in-app directory and remove acquisition targeting
+- [x] Remove drift-prone parameters and external pricing/application calls to action from /welcome
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

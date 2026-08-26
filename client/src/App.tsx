@@ -96,9 +96,6 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
         {/* /pricing is a public marketing page — must be outside AppLayout so Googlebot and
             logged-out visitors see real pricing content, not the sign-in card. */}
         <Route path="/pricing" component={ProPage} />
-        {/* /welcome is the public marketing/about page — outside AppLayout so logged-out visitors
-            and Googlebot see the full page instead of the sign-in card. */}
-        <Route path="/welcome" component={WelcomePage} />
   <Route path="/apply" component={ApplyPage} />
         {/* /waitlist is public — shown when founding slots are full */}
         <Route path="/waitlist" component={WaitlistPage} />
@@ -116,6 +113,7 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
           <AppLayout onPreviewIntro={onPreviewIntro}>
             <Switch>
               <Route path="/" component={Home} />
+              <Route path="/welcome" component={WelcomePage} />
               <Route path="/vault" component={VaultPage} />
               <Route path="/projects" component={ProjectsPage} />
               <Route path="/projects/:id" component={ProjectDetailPage} />
