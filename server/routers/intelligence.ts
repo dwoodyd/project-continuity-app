@@ -39,6 +39,7 @@ import {
   updateProject,
 } from "../db";
 import { getWeekEvents, formatEventsForPrompt } from "../googleCalendar";
+import { getNowInTimezone } from "../utils/dateUtils";
 
 // ── Distraction Classification ─────────────────────────────────────────────────
 export const intelligenceRouter = router({
@@ -51,7 +52,8 @@ export const intelligenceRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       await checkLLMRateLimit(ctx.user.id);
-      const hour = new Date().getHours();
+      const profile = await getUserProfile(ctx.user.id);
+      const hour = getNowInTimezone(profile?.timezone ?? "UTC").hour;
       const timeOfDay: "morning" | "afternoon" | "evening" =
         hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening";
 
@@ -375,12 +377,15 @@ Return JSON: {
 
     const raw = JSON.parse((response.choices[0]?.message?.content as string) ?? "{}");
 
-    // Get Monday of current week
-    const now = new Date();
-    const day = now.getDay();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
-    monday.setHours(0, 0, 0, 0);
+    // Resolve the calendar week from the member's actual local date, not server time.
+    const profile = await getUserProfile(ctx.user.id);
+    const localDate = getNowInTimezone(profile?.timezone ?? "UTC").dateStr;
+    const [year, month, dayOfMonth] = localDate.split("-").map(Number);
+    const today = new Date(Date.UTC(year!, month! - 1, dayOfMonth!, 12));
+    const day = today.getUTCDay();
+    const monday = new Date(today);
+    monday.setUTCDate(today.getUTCDate() - (day === 0 ? 6 : day - 1));
+    monday.setUTCHours(0, 0, 0, 0);
 
     const id = await upsertWeeklyCompass({
       userId: ctx.user.id,

@@ -12,6 +12,8 @@ import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2, 
 import { Link } from "wouter";
 import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
 import { ActivityHeatmap } from "@/components/ActivityHeatmap";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -219,6 +221,7 @@ function MonthlyEvidenceCard({
 
 export default function EvidenceLogPage() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const { requireAiConsent } = useAiConsentGate();
 
   const utils = trpc.useUtils();
 
@@ -240,17 +243,22 @@ export default function EvidenceLogPage() {
   });
 
   const handleGenerateCurrent = async () => {
+    if (!requireAiConsent("Evidence summaries")) return;
     setIsGenerating(true);
     generateSummary.mutate({ month: undefined }); // current month
   };
 
   const handleRegenerate = (month: string) => {
+    if (!requireAiConsent("Evidence summaries")) return;
     generateSummary.mutate({ month });
   };
 
   const totalSessions = summaries?.reduce((acc, s) => acc + s.sessionsStarted, 0) ?? 0;
   const totalReturns = summaries?.reduce((acc, s) => acc + s.returnsAfterGap, 0) ?? 0;
   const totalHardDays = summaries?.reduce((acc, s) => acc + s.hardDaySessions, 0) ?? 0;
+  const hasEvidence = totalSessions > 0;
+  const identitySentenceCount = summaries?.filter((summary) => Boolean(summary.summaryLine)).length ?? 0;
+  const showFirstIdentityInvite = identitySentenceCount === 1;
 
   return (
     <div className="min-h-screen bg-background">
@@ -264,13 +272,15 @@ export default function EvidenceLogPage() {
         variant="return"
         className="evidence-main-pane min-h-[min(84vh,860px)]"
       >
-        <Button
-          onClick={handleGenerateCurrent}
-          disabled={isGenerating}
-          className="bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]"
-        >
-          {isGenerating ? "Updating…" : "Update this month"}
-        </Button>
+        {hasEvidence && (
+          <Button
+            onClick={handleGenerateCurrent}
+            disabled={isGenerating}
+            className="bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]"
+          >
+            {isGenerating ? "Updating…" : "Update this month"}
+          </Button>
+        )}
       </IntroWrenScene>
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
         {/* Utility row — the immersive hero already owns the page title and update action. */}
@@ -279,7 +289,7 @@ export default function EvidenceLogPage() {
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Today
           </Link>
-          <Button
+          {hasEvidence && <Button
             onClick={async () => {
               try {
                 const result = await utils.evidence.exportMarkdown.fetch();
@@ -300,7 +310,7 @@ export default function EvidenceLogPage() {
           >
             <Download className="w-3.5 h-3.5" />
             Export
-          </Button>
+          </Button>}
         </div>
 
         {/* All-time summary pills */}
@@ -347,26 +357,34 @@ export default function EvidenceLogPage() {
           ) : summaries && summaries.length > 0 ? (
             <div className="space-y-3">
               {summaries.map((summary) => (
-                <MonthlyEvidenceCard
-                  key={summary.id}
-                  summary={summary}
-                  onRegenerate={
-                    isCurrentMonth(summary.month)
-                      ? () => handleRegenerate(summary.month)
-                      : undefined
-                  }
-                  isRegenerating={isGenerating && generateSummary.variables?.month === summary.month}
-                />
+                <div key={summary.id} className="space-y-3">
+                  <MonthlyEvidenceCard
+                    summary={summary}
+                    onRegenerate={
+                      isCurrentMonth(summary.month)
+                        ? () => handleRegenerate(summary.month)
+                        : undefined
+                    }
+                    isRegenerating={isGenerating && generateSummary.variables?.month === summary.month}
+                  />
+                  {showFirstIdentityInvite && summary.summaryLine && (
+                    <UpgradeNudge
+                      moment="first-evidence-sentence"
+                      title="You made a record worth returning to."
+                      body="Your evidence holds a fuller picture over time. Keep going when deeper continuity would help."
+                    />
+                  )}
+                </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-12 space-y-3">
               <BookOpen className="w-10 h-10 text-muted-foreground/40 mx-auto" />
               <p className="text-sm text-muted-foreground">
-                Your evidence log is empty. Complete a focus session to start building your record.
+                Complete one Focus Session and your first identity sentence will appear here: a quiet record of who you are becoming when the rest of your mind tries to lose the thread.
               </p>
               <p className="text-xs text-muted-foreground/60">
-                Once you have sessions, click "Update this month" to generate your first identity summary.
+                No score to chase. Just one honest line to return to when you need it.
               </p>
             </div>
           )}

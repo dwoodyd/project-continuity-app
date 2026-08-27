@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
 import { WREN_CLIPS } from "@/lib/wrenClips";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
@@ -36,6 +37,7 @@ import {
 } from "lucide-react";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenThinking } from "@/components/WrenThinking";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 type Mode =
   | "overwhelm"
@@ -157,6 +159,7 @@ function NewSessionView({
   runSession: { isPending: boolean; mutate: (args: { mode: Mode; brainDump: string; projectId?: number }) => void };
   setView: (v: "new" | "result" | "history" | "patterns" | "weekly" | "threshold_history") => void;
 }) {
+  const { requireAiConsent } = useAiConsentGate();
   const handleRun = () => {
     if (!selectedMode) {
       notify.error("Please select a clarity mode first");
@@ -166,6 +169,7 @@ function NewSessionView({
       notify.error("Please share a bit more before we begin");
       return;
     }
+    if (!requireAiConsent("Clarity Engine")) return;
     runSession.mutate({ mode: selectedMode, brainDump: brainDump.trim(), projectId: selectedProjectId });
   };
 
@@ -1177,6 +1181,7 @@ export default function ClarityEnginePage() {
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>();
   const [showProjectPicker, setShowProjectPicker] = useState(false);
   const [convertPreviewData, setConvertPreviewData] = useState<{ projectTitle: string; nextStep: string } | null>(null);
+  const [showClarityUpgrade, setShowClarityUpgrade] = useState(false);
 
   const { data: projects } = trpc.projects.listActive.useQuery();
   const { data: patterns, isLoading: patternsLoading } = trpc.clarity.analyzePatterns.useQuery(
@@ -1214,11 +1219,7 @@ export default function ClarityEnginePage() {
     },
     onError: (err) => {
       if (err.message === 'FREE_LIMIT_REACHED') {
-        notify.info("Daily limit reached", {
-          description: "Free users get 2 Clarity Engine sessions/day. Upgrade to Pro for unlimited access.",
-          action: { label: "Upgrade →", onClick: () => window.location.href = '/pro' },
-          duration: 8000,
-        });
+        setShowClarityUpgrade(true);
       } else {
         notify.error("Something went wrong. Please try again.");
         console.error(err);
@@ -1280,6 +1281,15 @@ export default function ClarityEnginePage() {
       </IntroWrenScene>
     )}
     <div className="px-5 py-7 max-w-4xl mx-auto">
+      {showClarityUpgrade && (
+        <UpgradeNudge
+          moment="clarity-limit"
+          friction
+          className="mb-6"
+          title="You have used today’s Clarity sessions."
+          body="Pro adds more room to untangle what is next, without making your existing reflections any less useful."
+        />
+      )}
       {view === "new" && (
         <NewSessionView
           selectedMode={selectedMode}

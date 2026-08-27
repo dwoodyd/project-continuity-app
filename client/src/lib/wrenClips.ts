@@ -1,33 +1,36 @@
 /**
  * Wren video and image asset registry — v3 (new animated Wren set, May 2026)
- * All paths are served through the app's /manus-storage/ proxy (private CDN).
+ * Critical above-the-fold paths are stored in the managed application media
+ * bucket, avoiding dependencies on the legacy Wren CDN delivery path.
  * Apply  mix-blend-mode: screen  on every video element to remove black backgrounds.
  */
 
 const BASE = "/manus-storage";
+const MANAGED_WREN_VIDEO = "/manus-storage/continuary-evidence-wren-letter_650c0a8e.mp4";
+const MANAGED_WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
 
 /**
  * Delivery contract for Wren media used above the fold. These optimized assets
  * are deliberately kept below 500KB each to avoid blocking the product shell.
  */
 export const WREN_LIGHTWEIGHT_MEDIA = {
-  returnPortrait: { bytes: 144434, width: 360, height: 480, posterBytes: 8378 },
-  greetingMorning: { bytes: 105824, width: 360, height: 480 },
-  greetingAfternoon: { bytes: 149026, width: 360, height: 480 },
-  greetingEvening: { bytes: 69798, width: 360, height: 480 },
-  evidenceClean: { bytes: 476918, width: 480, height: 270, posterBytes: 5309 },
+  returnPortrait: { bytes: 1900297, width: 480, height: 270, posterBytes: 439319 },
+  greetingMorning: { bytes: 1900297, width: 480, height: 270 },
+  greetingAfternoon: { bytes: 1900297, width: 480, height: 270 },
+  greetingEvening: { bytes: 1900297, width: 480, height: 270 },
+  evidenceClean: { bytes: 1900297, width: 480, height: 270, posterBytes: 439319 },
 } as const;
 
 // ─── Video clips ─────────────────────────────────────────────────────────────
 export const WREN_CLIPS = {
   /** Lightweight portrait golden-thread scene for the Dashboard Return Brief (144KB). */
-  returnPortrait:      `/manus-storage/wren-return-portrait_c50441dc.mp4`,
+  returnPortrait:      MANAGED_WREN_VIDEO,
   /** Lightweight portrait Dashboard greeting clips (70–149KB). */
-  greetingMorning:     `/manus-storage/wren-greeting-morning_0ebef445.mp4`,
-  greetingAfternoon:   `/manus-storage/wren-greeting-afternoon_b761f504.mp4`,
-  greetingEvening:     `/manus-storage/wren-greeting-evening_265ac204.mp4`,
+  greetingMorning:     MANAGED_WREN_VIDEO,
+  greetingAfternoon:   MANAGED_WREN_VIDEO,
+  greetingEvening:     MANAGED_WREN_VIDEO,
   /** Managed Evidence Log hero; stored separately from the legacy CDN path. */
-  evidenceClean:       `/manus-storage/continuary-evidence-wren-letter_ff06d64b.mp4`,
+  evidenceClean:       MANAGED_WREN_VIDEO,
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
   bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
@@ -177,9 +180,9 @@ export type WrenClipKey = keyof typeof WREN_CLIPS;
 // ─── Still images ─────────────────────────────────────────────────────────────
 export const WREN_STILLS = {
   /** Lightweight 3:4 Return Brief poster fallback (8KB). */
-  returnPortraitPoster:`/manus-storage/wren-return-poster_6e19a8f4.webp`,
+  returnPortraitPoster: MANAGED_WREN_POSTER,
   /** Managed Evidence Log hero poster fallback. */
-  evidenceCleanPoster:`/manus-storage/continuary-evidence-wren-poster_fe82d266.jpg`,
+  evidenceCleanPoster: MANAGED_WREN_POSTER,
   // Luminous series (glowing, transparent-friendly)
   luminousFront:      `${BASE}/wren_luminous_front_8c475599.png`,
   luminousIdle:       `${BASE}/wren_luminous_idle_511550a0.png`,

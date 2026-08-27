@@ -126,7 +126,12 @@ export default function WrenPlayer({
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
-  const src = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.luminousFloats;
+  const requestedSrc = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.evidenceClean;
+  // Focus-session body-doubling has its own intentionally preserved clips. All
+  // other Wren scenes use the verified managed asset rather than legacy CDN paths.
+  const isProtectedFocusClip = clip === "weaving" || clip === "reading" || clip === "lookingup";
+  const src = isProtectedFocusClip ? requestedSrc : NEW_CLIPS.evidenceClean;
+  const resolvedPoster = isProtectedFocusClip ? poster : WREN_STILLS.evidenceCleanPoster;
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -175,7 +180,7 @@ export default function WrenPlayer({
       {/* A verified still keeps Wren present when a CDN-delivered video is unavailable. */}
       {(fallbackStill && (!videoReady || prefersReducedMotion || videoFailed) || videoFailed) && (
         <img
-          src={WREN_STILLS[fallbackStill ?? "siliconeNeutral"]}
+          src={isProtectedFocusClip ? WREN_STILLS[fallbackStill ?? "siliconeNeutral"] : WREN_STILLS.evidenceCleanPoster}
           alt="Wren"
           className="absolute inset-0 w-full h-full object-contain"
           style={{ ...maskStyle, mixBlendMode: "screen" }}
@@ -185,7 +190,7 @@ export default function WrenPlayer({
         <video
           key={src}
           src={src}
-          poster={poster}
+          poster={resolvedPoster}
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}

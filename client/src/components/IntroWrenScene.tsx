@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 
 type IntroWrenSceneProps = {
   src: string;
@@ -21,6 +22,9 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const isReturnScene = variant === "return";
+  const usesManagedSource = src.includes("continuary-evidence-wren-letter_650c0a8e");
+  const resolvedSrc = usesManagedSource ? src : WREN_CLIPS.evidenceClean;
+  const resolvedPoster = usesManagedSource ? poster : WREN_STILLS.evidenceCleanPoster;
 
   useEffect(() => {
     setVideoFailed(false);
@@ -34,9 +38,9 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
 
   return (
     <section data-wren-scene={bleed ? "edge-bleed" : "contained"} className={`relative isolate min-h-[min(72vh,680px)] overflow-hidden border-0 rounded-none bg-[#161815] text-[#F5EEE2] ${isReturnScene ? "min-h-[min(78vh,760px)]" : ""} ${bleed ? "w-[calc(100%+2.5rem)] -mx-5 sm:w-[calc(100%+4rem)] sm:-mx-8" : ""} ${className}`}>
-      {videoFailed && poster && (
+      {videoFailed && resolvedPoster && (
         <img
-          src={poster}
+          src={resolvedPoster}
           alt="Wren keeping watch over your Evidence Log"
           className={`absolute inset-0 h-full w-full object-cover mix-blend-screen ${isReturnScene ? "object-[68%_center]" : ""}`}
         />
@@ -44,8 +48,8 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
       {!videoFailed && (
         <video
           ref={videoRef}
-          src={src}
-          poster={poster}
+          src={resolvedSrc}
+          poster={resolvedPoster}
           autoPlay
           loop
           muted

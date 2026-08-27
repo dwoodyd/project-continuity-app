@@ -17,6 +17,7 @@ export const settingsRouter = router({
       id: 0,
       userId: ctx.user.id,
       timezone: "America/New_York",
+      timezoneDetectedAt: null,
       tonePreference: "direct" as const,
       focusHoursStart: "09:00",
       focusHoursEnd: "17:00",
@@ -38,6 +39,7 @@ export const settingsRouter = router({
       focusModeEnabled: true,
       driftDetectionEnabled: true,
       onboardingCompleted: false,
+      firstEngagementInviteSeen: false,
       planningMode: false,
       seenAbout: false,
       aiConsentGiven: false,
@@ -139,6 +141,31 @@ export const settingsRouter = router({
       } else {
         await upsertUserProfile({ userId: ctx.user.id, ...input } as any);
       }
+      return { success: true };
+    }),
+
+  captureTimezone: protectedProcedure
+    .input(z.object({ timezone: z.string().min(1).max(64) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        Intl.DateTimeFormat("en-US", { timeZone: input.timezone }).format();
+      } catch {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid timezone." });
+      }
+      const existing = await getUserProfile(ctx.user.id);
+      // Settings changes remain authoritative once we have recorded initial detection.
+      if (existing?.timezoneDetectedAt) return { timezone: existing.timezone, captured: false };
+      const data = { timezone: input.timezone, timezoneDetectedAt: new Date() };
+      if (existing) await updateUserProfile(ctx.user.id, data as any);
+      else await upsertUserProfile({ userId: ctx.user.id, ...data } as any);
+      return { timezone: input.timezone, captured: true };
+    }),
+
+  dismissFirstEngagementInvite: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const existing = await getUserProfile(ctx.user.id);
+      if (existing) await updateUserProfile(ctx.user.id, { firstEngagementInviteSeen: true } as any);
+      else await upsertUserProfile({ userId: ctx.user.id, firstEngagementInviteSeen: true } as any);
       return { success: true };
     }),
 

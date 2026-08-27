@@ -365,6 +365,20 @@
       "when": 1787797471157,
       "tag": "0051_silly_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1787870564785,
+      "tag": "0052_foamy_sheva_callister",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "5",
+      "when": 1787871102590,
+      "tag": "0053_majestic_iron_lad",
+      "breakpoints": true
     }
   ]
 }

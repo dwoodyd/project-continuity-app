@@ -37,6 +37,7 @@ import { captureRouter } from "./routers/capture";
 import { transcribeRouter } from "./routers/transcribe";
 import { loopsRouter } from "./routers/loops";
 import { foundingRouter } from "./routers/founding";
+import { conversionRouter } from "./routers/conversion";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -123,6 +124,7 @@ export const appRouter = router({
   loops: loopsRouter,
   crisis: crisisRouter,
   founding: foundingRouter,
+  conversion: conversionRouter,
 });
 
 export type AppRouter = typeof appRouter;

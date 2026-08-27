@@ -2188,6 +2188,27 @@
 ## Evidence Log Video Recovery (Aug 27)
 - [x] Diagnose and restore the missing Evidence Log video while retaining a visual fallback
 - [x] Add focused regression coverage and verify protected Focus Sessions and Today Wren surfaces remain unchanged
+
+## New User Polish Build (Aug 27)
+- [x] Detect and persist the browser timezone, then use the member's local clock for time-dependent surfaces and notifications
+- [x] Make Return Brief and preview copy reflect real absence rather than hard-coded time away
+- [x] Replace Getting started scorekeeping with a single first-engagement invitation that does not return as a backlog
+- [x] Standardize paused and parked work language to Quietly Waiting across filters, labels, and statuses
+- [x] Explain the Evidence Log identity-sentence payoff when empty and hide Export until entries exist
+- [x] Give manual-mode members graceful consent prompts at every AI feature entry point
+- [x] Move Wren media onto managed application delivery without altering protected Focus, PiP, or Wren body-doubling surfaces
+- [x] Add focused regression coverage, full validation, and a complete checkpoint
+
+## Conversion Timing Build (Aug 27)
+- [x] Track activation from three completed check-ins, one completed Focus Session, or a genuine return event
+- [x] Apply the supplied conversion surface map directly without a separate research pass
+- [x] Add one-per-session, dismissible, warm upgrade invitations that never appear before activation
+- [x] Show value-named invitations only at eligible Free-tier limits without blocking existing free capabilities
+- [x] Add soft, non-gating invitations below Return Brief and after the first Evidence identity sentence
+- [x] Add a founding-trial closing modal that protects the member's founding rate and keeps their work affirmatively theirs
+- [x] Preserve free check-ins, Projects, single weekly Focus Session, Scratch Pad, basic Compass, and all re-entry/crisis surfaces
+- [x] Add focused coverage, full validation, and checkpoint the combined conversion and new-user polish release
+- [x] Add activation-gated invitations for implemented Single Focus, Pop-out, and Clarity limits; retain free re-entry and omit prompts for unavailable retained-chat controls
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

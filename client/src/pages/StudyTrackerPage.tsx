@@ -19,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import AppLayout from "@/components/AppLayout";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDate(d: Date | string | null | undefined): string {
@@ -53,6 +54,7 @@ function SetupScreen({ onDone }: { onDone: () => void }) {
   const [cadence, setCadence] = useState<"daily" | "weekday" | "rhythm">("daily");
   const [wrenPrompts, setWrenPrompts] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [showDurationLimitNudge, setShowDurationLimitNudge] = useState(false);
   const isPro = (user as any)?.isPro || (user as any)?.isFoundingMember;
 
   const createMutation = trpc.study.createConfig.useMutation({
@@ -68,6 +70,10 @@ function SetupScreen({ onDone }: { onDone: () => void }) {
   const handleSubmit = () => {
     if (!topic.trim()) { notify.error("Tell Wren what you're focusing on."); return; }
     const finalDuration = showCustom ? (parseInt(customDuration) || 30) : duration;
+    if (!isPro && finalDuration > 60) {
+      setShowDurationLimitNudge(true);
+      return;
+    }
     createMutation.mutate({ focusTopic: topic.trim(), durationDays: finalDuration, cadence, wrenPrompts });
   };
 
@@ -153,6 +159,15 @@ function SetupScreen({ onDone }: { onDone: () => void }) {
               />
               <span className="text-sm opacity-50">days</span>
             </div>
+          )}
+          {showDurationLimitNudge && (
+            <UpgradeNudge
+              moment="single-focus-duration"
+              friction
+              className="mt-4"
+              title="Keep this focus for as long as it serves you."
+              body="Free includes up to 60 days for a single focus. Pro lets you carry a longer thread without rebuilding it."
+            />
           )}
         </div>
 

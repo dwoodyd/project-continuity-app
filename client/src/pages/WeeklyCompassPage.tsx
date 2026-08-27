@@ -23,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import notify from "@/lib/notify";
 import { format, startOfWeek, endOfWeek, formatDistanceToNow } from "date-fns";
 import { GlossaryTerm } from "@/components/TermTooltip";
+import { getBrowserTimezone, getNowInTimezone } from "@/lib/memberTime";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 // ─── Calendar Event Strip ──────────────────────────────────────────────
 function CalendarEventStrip() {
@@ -88,15 +90,16 @@ function CalendarEventStrip() {
 
 export default function WeeklyCompassPage() {
   const [, navigate] = useLocation();
+  const { requireAiConsent } = useAiConsentGate();
   const [confirming, setConfirming] = useState(false);
   const [showReward, setShowReward] = useState(false);
 
   const { data: compass, refetch, isLoading } = trpc.intelligence.getWeeklyCompass.useQuery();
   const { data: allProjects } = trpc.projects.list.useQuery();
-  const localDateStr = useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }, []);
+  const { data: profile } = trpc.settings.getProfile.useQuery();
+  const browserTimezone = useMemo(() => getBrowserTimezone(), []);
+  const timezone = profile?.timezoneDetectedAt ? (profile.timezone ?? browserTimezone) : browserTimezone;
+  const localDateStr = useMemo(() => getNowInTimezone(timezone).dateStr, [timezone]);
   const { data: todayPlan } = trpc.dailyPlan.getToday.useQuery({ localDate: localDateStr });
 
   const generate = trpc.intelligence.generateWeeklyCompass.useMutation({
@@ -106,6 +109,9 @@ export default function WeeklyCompassPage() {
     },
     onError: () => notify.error("Failed to generate compass. Try again."),
   });
+  const handleGenerate = () => {
+    if (requireAiConsent("Weekly Compass")) generate.mutate();
+  };
 
   const confirm = trpc.intelligence.confirmWeeklyCompass.useMutation({
     onSuccess: () => {
@@ -119,7 +125,7 @@ export default function WeeklyCompassPage() {
   const [editPrimary, setEditPrimary] = useState<number | null | undefined>(undefined);
   const [editSecondary, setEditSecondary] = useState<number | null | undefined>(undefined);
 
-  const now = new Date();
+  const now = useMemo(() => new Date(`${localDateStr}T12:00:00`), [localDateStr]);
   const weekStart = startOfWeek(now, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
 
@@ -213,7 +219,7 @@ export default function WeeklyCompassPage() {
         </div>
         <Button
           size="sm"
-          onClick={() => generate.mutate()}
+          onClick={handleGenerate}
           disabled={generate.isPending}
           className="gap-1.5 shrink-0"
         >
@@ -240,7 +246,7 @@ export default function WeeklyCompassPage() {
           body="Gather the threads that matter, then let the rest wait."
           bleed
         >
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending} className="gap-2 bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]">
+          <Button onClick={handleGenerate} disabled={generate.isPending} className="gap-2 bg-[#E8A030] text-[#161815] hover:bg-[#F1B14A]">
             {generate.isPending
               ? <><Loader2 className="w-4 h-4 animate-spin" />Generating...</>
               : <><Sparkles className="w-4 h-4" />Generate this week's compass</>}
@@ -257,7 +263,7 @@ export default function WeeklyCompassPage() {
               <p className="text-xs text-amber-900 dark:text-amber-100 flex-1">
                 Your projects or week have changed since this compass was made. Refresh it for a current direction.
               </p>
-              <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={() => generate.mutate()} disabled={generate.isPending}>
+              <Button size="sm" variant="outline" className="h-7 px-3 text-xs" onClick={handleGenerate} disabled={generate.isPending}>
                 Refresh
               </Button>
             </div>

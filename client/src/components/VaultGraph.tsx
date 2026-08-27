@@ -371,7 +371,7 @@ export function VaultGraph({ nodes, edges, onNodeClick }: Props) {
           { color: "#EAB308", label: "Active" },
           { color: "#3B82F6", label: "Mapped" },
           { color: "#F97316", label: "Today" },
-          { color: "#8B5CF6", label: "Parked" },
+          { color: "#8B5CF6", label: "Quietly Waiting" },
           { color: "#22C55E", label: "Done" },
           { color: "#6B7280", label: "Inbox" },
         ].map(({ color, label }) => (

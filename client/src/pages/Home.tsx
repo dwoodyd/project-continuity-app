@@ -78,10 +78,13 @@ import {
 } from "@/components/GamificationLayer";
 import { ReEntryFlow } from "@/components/ReEntryFlow";
 import { ThreadView } from "@/components/ThreadView";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
+import { FoundingRateInvite } from "@/components/FoundingRateInvite";
 import WrenPlayer from "@/components/WrenPlayer";
 import { TodayGreetingWren } from "@/components/TodayGreetingWren";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
 import { WREN_CLIPS } from "@/lib/wrenClips";
+import { getBrowserTimezone, getNowInTimezone, weekdayForLocalDate } from "@/lib/memberTime";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
@@ -558,7 +561,7 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
 }
 
 // ─── Midday Check-In Form ─────────────────────────────────────────────────────
-function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
+function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; localDate: string }) {
   const [workedOn, setWorkedOn] = useState("");
   const [wasOnPlan, setWasOnPlan] = useState<boolean | null>(null);
   const [interruptions, setInterruptions] = useState("");
@@ -576,7 +579,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm font-medium text-muted-foreground mb-2">What did you work on this morning?</p>
+        <p className="text-sm font-medium text-muted-foreground mb-2">What has moved since you started today?</p>
         <Textarea
           value={workedOn}
           onChange={(e) => setWorkedOn(e.target.value)}
@@ -670,9 +673,7 @@ function MiddayCheckIn({ onComplete }: { onComplete: () => void }) {
           if (interruptions.trim()) {
             classifyDistraction.mutate({ rawInput: interruptions, checkInType: "midday" });
           }
-          const d2 = new Date();
-          const localDate2 = `${d2.getFullYear()}-${String(d2.getMonth() + 1).padStart(2, '0')}-${String(d2.getDate()).padStart(2, '0')}`;
-          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel, localDate: localDate2 });
+          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel, localDate });
         }}
         disabled={submit.isPending}
         className="w-full"
@@ -872,7 +873,7 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
 }
 
 // ─── Evening Check-In Form ────────────────────────────────────────────────────
-function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
+function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; localDate: string }) {
   const [whatMoved, setWhatMoved] = useState("");
   const [whatRemains, setWhatRemains] = useState("");
   const [whatLearned, setWhatLearned] = useState("");
@@ -929,10 +930,8 @@ function EveningCheckIn({ onComplete }: { onComplete: () => void }) {
       firstTask,
       ...tomorrowTasks.filter((t) => t.title.trim().toLowerCase() !== tomorrowFirst.trim().toLowerCase()),
     ];
-    const dEve = new Date();
-    const localDateEve = `${dEve.getFullYear()}-${String(dEve.getMonth() + 1).padStart(2, '0')}-${String(dEve.getDate()).padStart(2, '0')}`;
-    saveTomorrowPlan.mutate({ tasks: allTomorrowTasks, localDate: localDateEve });
-    submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate: localDateEve });
+    saveTomorrowPlan.mutate({ tasks: allTomorrowTasks, localDate });
+    submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate });
   };
   return (
     <div className="space-y-4">
@@ -1223,6 +1222,9 @@ export default function Home() {
   const dismissMilestone = trpc.gamification.dismissMilestone.useMutation({
     onSuccess: () => refetchGam(),
   });
+  const dismissFirstEngagementInvite = trpc.settings.dismissFirstEngagementInvite.useMutation({
+    onSuccess: () => utils.settings.getProfile.invalidate(),
+  });
 
   // "Pick different step" state for the Start Here card
   const [pickingStep, setPickingStep] = useState(false);
@@ -1258,20 +1260,29 @@ export default function Home() {
     localStorage.setItem('continuary_notif_defer', Date.now().toString());
   };
 
-  const now = new Date();
-  const hour = now.getHours();
-  const activePeriod: CheckInStep = hour < 12 ? "morning" : hour < 17 ? "midday" : "evening";
-
   // Guard all queries behind auth — prevents TRPCClientError 10001 noise before session resolves
   const authed = !!user;
+
+  const { data: profile } = trpc.settings.getProfile.useQuery(undefined, { enabled: authed });
+  const [clockTick, setClockTick] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockTick(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const browserTimezone = useMemo(() => getBrowserTimezone(), []);
+  const memberTimezone = profile?.timezoneDetectedAt ? (profile.timezone ?? browserTimezone) : browserTimezone;
+  const memberNow = useMemo(() => getNowInTimezone(memberTimezone), [memberTimezone, clockTick]);
+  const memberDateLabel = useMemo(
+    () => new Intl.DateTimeFormat("en-US", { timeZone: memberTimezone, weekday: "long", month: "long", day: "numeric" }).format(new Date(clockTick)),
+    [memberTimezone, clockTick],
+  );
+  const hour = memberNow.hour;
+  const activePeriod: CheckInStep = hour < 12 ? "morning" : hour < 17 ? "midday" : "evening";
 
   // ── Critical-path queries (fire immediately on auth) ─────────────────────────
   // Pass the client's local YYYY-MM-DD so the server uses the user's actual calendar day,
   // not UTC (which can differ by up to ±14h from the user's local midnight).
-  const localDateStr = useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }, []);
+  const localDateStr = memberNow.dateStr;
   const { data: todayPlan, isLoading: planLoading, refetch: refetchPlan } = trpc.dailyPlan.getToday.useQuery(
     { localDate: localDateStr },
     { enabled: authed }
@@ -1287,7 +1298,6 @@ export default function Home() {
     staleTime: 5 * 60 * 1000,
   });
   const utils = trpc.useUtils();
-  const { data: profile } = trpc.settings.getProfile.useQuery(undefined, { enabled: authed });
   const { data: dashboardLayoutData } = trpc.settings.getDashboardLayout.useQuery(undefined, {
     enabled: authed,
     staleTime: 5 * 60 * 1000,
@@ -1393,19 +1403,25 @@ export default function Home() {
     onSuccess: () => utils.threadLock.getActive.invalidate(),
   });
 
-  const [returningAfterGap, setReturningAfterGap] = useState(false);
+  const [returnGapHours, setReturnGapHours] = useState(0);
   const [reviewReturnBrief, setReviewReturnBrief] = useState(
     () => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("return-brief") === "1",
   );
   useEffect(() => {
     const key = "continuary-last-dashboard-visit";
     const previous = Number(window.localStorage.getItem(key) || 0);
-    setReturningAfterGap(previous > 0 && Date.now() - previous >= 6 * 60 * 60 * 1000);
+    setReturnGapHours(previous > 0 ? (Date.now() - previous) / (60 * 60 * 1000) : 0);
     window.localStorage.setItem(key, String(Date.now()));
   }, []);
+  const returningAfterGap = returnGapHours >= 6;
   const latestScratchNote = scratchNotes?.[0];
   const lastWrittenLine = latestScratchNote?.content.split("\n").find((line: string) => line.trim())?.trim();
   const showReturnBrief = reviewReturnBrief || (returningAfterGap && Boolean(activeThreadLock || lastWrittenLine));
+  const returnBriefTitle = returningAfterGap
+    ? returnGapHours >= 24 * 7
+      ? "You have been away for a while. Your thread is still here."
+      : "You have been away a little while. Your thread is still here."
+    : "Here is what your return can look like after time away.";
 
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
@@ -1694,6 +1710,12 @@ export default function Home() {
   const eveningDone = todayCheckIns != null
     ? todayCheckIns.some((c) => c.type === "evening" && c.completedAt != null)
     : completedCheckIns.has("evening");
+  const activePeriodComplete = activePeriod === "morning" ? morningDone : activePeriod === "midday" ? middayDone : eveningDone;
+  const activePeriodActionLabel = activePeriod === "morning"
+    ? "Start morning check-in"
+    : activePeriod === "midday"
+      ? "Start midday pulse"
+      : "Start evening close";
 
   // Show notification permission prompt 2s after first morning check-in completes
   // 48h defer window stored in localStorage
@@ -1713,6 +1735,7 @@ export default function Home() {
     refetchCheckIns();
     refetchPlan();
     setReentrySurfaceRestored(true);
+    if (!profile?.firstEngagementInviteSeen) dismissFirstEngagementInvite.mutate();
     // Show Wren celebration overlay
     const celebrationMessages: Record<CheckInStep, string> = {
       morning: "Thread secured. Today has direction.",
@@ -1771,7 +1794,7 @@ export default function Home() {
   const hasBlockedProject = activeProjects?.some((p) => p.status === "active" && p.nextStep?.toLowerCase().includes("blocked"));
   const weeklyReviewDue = (() => {
     // Prompt weekly review on Sundays or if last review was >7 days ago
-    const dayOfWeek = now.getDay(); // 0 = Sunday
+    const dayOfWeek = weekdayForLocalDate(localDateStr); // 0 = Sunday in the member's local calendar
     return dayOfWeek === 0;
   })();
   // Spiral offer: check server-side detection (fires after blocker, before sanctuary nudge)
@@ -1818,7 +1841,9 @@ export default function Home() {
   type AlertType = "thread_lock" | "check_in_due" | "capacity_low" | "capacity_partial" | "blocker" | "spiral_offer" | "weekly_review" | "tomorrow_brief" | "sanctuary_nudge" | null;
   const topAlert: AlertType = (() => {
     if (activeThreadLock) return "thread_lock";
-    if (!morningDone) return "check_in_due";
+    if (activePeriod === "morning" && !morningDone) return "check_in_due";
+    if (activePeriod === "midday" && !middayDone) return "check_in_due";
+    if (activePeriod === "evening" && !eveningDone) return "check_in_due";
     if (todayPlan && capacityLevel === "low") return "capacity_low";
     if (todayPlan && capacityLevel === "partial") return "capacity_partial";
     if (hasBlockedProject) return "blocker";
@@ -1845,7 +1870,11 @@ export default function Home() {
         run: () => completeTask(nextTask.id, nextTask.title),
       };
     }
-    const nextCheckIn: CheckInStep | null = !morningDone ? "morning" : !middayDone ? "midday" : !eveningDone ? "evening" : null;
+    const nextCheckIn: CheckInStep | null = activePeriod === "morning"
+      ? (!morningDone ? "morning" : null)
+      : activePeriod === "midday"
+        ? (!middayDone ? "midday" : null)
+        : (!eveningDone ? "evening" : null);
     if (nextCheckIn) {
       const label = nextCheckIn === "morning" ? "Start your morning check-in" : nextCheckIn === "midday" ? "Take a midday pulse" : "Close the day gently";
       return {
@@ -2026,15 +2055,17 @@ export default function Home() {
       </DialogContent>
     </Dialog>
     <div className={`px-4 sm:px-5 py-7 page-enter flex flex-col gap-7 overflow-x-hidden ${showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"}`}>
+      <FoundingRateInvite />
       {showReturnBrief && (
-        <IntroWrenScene
-          src={WREN_CLIPS.tuggingThread}
-          eyebrow={`Return brief · ${format(now, "EEEE, MMMM d")}`}
-          title="A week away. You returned anyway. That’s not small."
-          body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
-          className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
-          variant="return"
-        >
+        <>
+          <IntroWrenScene
+            src={WREN_CLIPS.tuggingThread}
+            eyebrow={`${returningAfterGap ? "Return brief" : "Return brief preview"} · ${memberDateLabel}`}
+            title={returnBriefTitle}
+            body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
+            className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
+            variant="return"
+          >
           {lastWrittenLine && !activeThreadLock && (
             <p className="max-w-xl border-l-2 border-[#F3BF68]/70 pl-3 text-sm leading-6 text-[#FFF8EC]/90">
               You left yourself a note. It is waiting in Scratch Pad when you are ready—one small next step is enough.
@@ -2056,7 +2087,16 @@ export default function Home() {
               Close preview
             </button>
           )}
-        </IntroWrenScene>
+          </IntroWrenScene>
+          {returningAfterGap && (
+            <UpgradeNudge
+              moment="return-brief"
+              title="This is what Continuary does."
+              body="It holds your thread so coming back is never a rebuild. Keep it going when more depth would help."
+              className="mx-auto w-full max-w-3xl"
+            />
+          )}
+        </>
       )}
       {/* ── Beta / trial banner ──────────────────────────────────────────── */}
       {showTrialBanner && (
@@ -2166,7 +2206,7 @@ export default function Home() {
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
-              {format(now, "EEEE, MMMM d")}
+              {memberDateLabel}
             </p>
             {streakData && streakData.streak >= 2 && (
               <span
@@ -2245,14 +2285,13 @@ export default function Home() {
               recallThreadLock.mutate({ id: activeThreadLock.id });
               return;
             }
-            const target = !morningDone ? "morning" : !middayDone ? "midday" : "evening";
-            openCheckIn(target);
+            openCheckIn(activePeriod);
           }}
           className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all"
           style={{ background: "color-mix(in srgb, var(--primary) 12%, transparent)", color: "var(--accent-tint-text)", border: "1px solid color-mix(in srgb, var(--primary) 22%, transparent)" }}
         >
           {topAlert === "thread_lock" ? <Anchor className="w-3.5 h-3.5" aria-hidden="true" /> : <Sun className="w-3.5 h-3.5" aria-hidden="true" />}
-          {topAlert === "thread_lock" ? "Pick up your thread" : !morningDone ? "Start morning check-in" : !middayDone ? "Start midday pulse" : "Start evening close"}
+          {topAlert === "thread_lock" ? "Pick up your thread" : activePeriodComplete ? "Open Daily Rhythm" : activePeriodActionLabel}
         </button>
         <button
           onClick={enterJustOneThing}
@@ -2524,37 +2563,22 @@ export default function Home() {
         ))
       }
 
-      {/* ── Onboarding Banner (new users only, compact dismissible) ──────────── */}
+      {/* ── First engagement invitation (new members only, never scorekeeping) ── */}
       {(() => {
-        const hasProject = activeProjects && activeProjects.length > 0;
-        const dismissed = (() => { try { return !!localStorage.getItem('continuary_onboarding_done'); } catch { return false; } })();
-        if (dismissed || hasProject) return null;
-        const steps = [
-          { done: morningDone || middayDone || eveningDone, label: "First check-in" },
-          { done: !!hasProject, label: "Add a project" },
-          { done: !!(pendingIdeas && pendingIdeas.length > 0), label: "Capture an idea" },
-        ];
-        const doneCount = steps.filter(s => s.done).length;
+        const hasEngaged = morningDone || middayDone || eveningDone;
+        if (!profile || profile.firstEngagementInviteSeen || hasEngaged) return null;
         return (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
             style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.14)" }}
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="flex gap-1">
-                {steps.map((s, i) => (
-                  <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: s.done ? "#C8452B" : "oklch(0.56 0.18 28 / 0.25)" }} />
-                ))}
-              </div>
               <p className="text-xs" style={{ color: "oklch(0.56 0.18 28 / 0.75)" }}>
-                Getting started · {doneCount}/{steps.length}
-                {doneCount < steps.length && (
-                  <span style={{ color: "oklch(0.56 0.18 28 / 0.50)" }}> · next: {steps.find(s => !s.done)?.label}</span>
-                )}
+                This is your workspace. Start with a check-in when you are ready.
               </p>
             </div>
             <button
-              onClick={() => { try { localStorage.setItem('continuary_onboarding_done', '1'); } catch {} window.location.reload(); }}
+              onClick={() => dismissFirstEngagementInvite.mutate()}
               className="shrink-0 transition-opacity"
               style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}
               aria-label="Dismiss"
@@ -2587,7 +2611,7 @@ export default function Home() {
             label="Morning check-in"
             timeHint="Set capacity + focus"
             completed={morningDone}
-            active={!morningDone}
+            active={activePeriod === "morning" && !morningDone}
             open={activeCheckIn === "morning"}
             onOpen={() => openCheckIn("morning")}
             onClose={() => setActiveCheckIn(null)}
@@ -2598,7 +2622,7 @@ export default function Home() {
             label="Midday pulse"
             timeHint="Alignment pulse — on plan?"
             completed={middayDone}
-            active={morningDone && !middayDone}
+            active={activePeriod === "midday" && !middayDone}
             open={activeCheckIn === "midday"}
             onOpen={() => openCheckIn("midday")}
             onClose={() => setActiveCheckIn(null)}
@@ -2610,7 +2634,7 @@ export default function Home() {
               label="Evening close"
               timeHint="Close the loop. Acknowledge what moved."
               completed={eveningDone}
-              active={!eveningDone}
+              active={activePeriod === "evening" && !eveningDone}
               open={activeCheckIn === "evening"}
               onOpen={() => openCheckIn("evening")}
               onClose={() => setActiveCheckIn(null)}
@@ -2658,8 +2682,8 @@ export default function Home() {
             </button>
           </div>
           {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} localDate={localDateStr} />}
-          {activeCheckIn === "midday" && <MiddayCheckIn onComplete={() => handleCheckInComplete("midday")} />}
-          {activeCheckIn === "evening" && <EveningCheckIn onComplete={() => handleCheckInComplete("evening")} />}
+          {activeCheckIn === "midday" && <MiddayCheckIn onComplete={() => handleCheckInComplete("midday")} localDate={localDateStr} />}
+          {activeCheckIn === "evening" && <EveningCheckIn onComplete={() => handleCheckInComplete("evening")} localDate={localDateStr} />}
         </div>
       )}
 

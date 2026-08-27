@@ -42,7 +42,7 @@ const statusConfig: Record<ProjectStatus, { label: string; color: string; dot: s
   idea: { label: "Idea", color: "text-muted-foreground", dot: "bg-muted-foreground/40" },
   mapped: { label: "Mapped", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400" },
   active: { label: "Active", color: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-400" },
-  paused: { label: "Paused", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400" },
+  paused: { label: "Quietly Waiting", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400" },
   completed: { label: "Completed", color: "text-slate-500", dot: "bg-slate-400" },
   archived: { label: "Archived", color: "text-muted-foreground/50", dot: "bg-muted-foreground/20" },
 };

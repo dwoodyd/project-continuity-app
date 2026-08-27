@@ -18,6 +18,7 @@ import { format, subDays, startOfWeek, getISOWeek, getYear } from "date-fns";
 import DistractionInsightsCard from "@/components/DistractionInsightsCard";
 import WrenPlayer from "@/components/WrenPlayer";
 import { WrenThinking } from "@/components/WrenThinking";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds < 1) return "0m";
@@ -38,6 +39,7 @@ function getWeekKey(date: Date): string {
 
 export default function WeeklyReviewPage() {
   const [generating, setGenerating] = useState(false);
+  const { requireAiConsent } = useAiConsentGate();
   const [error, setError] = useState<string | null>(null);
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }).getTime());
   const weekKey = useMemo(() => getWeekKey(new Date()), []);
@@ -72,6 +74,7 @@ export default function WeeklyReviewPage() {
   const checkInDays = recentCheckIns?.length ?? 0;
 
   const handleGenerate = () => {
+    if (!requireAiConsent("Weekly Review")) return;
     setGenerating(true);
     setError(null);
     generateReview.mutate({ weekKey });

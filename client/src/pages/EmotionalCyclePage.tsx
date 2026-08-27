@@ -5,6 +5,7 @@ import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import notify from "@/lib/notify";
 import { ArrowLeft, Info } from "lucide-react";
 import { useLocation } from "wouter";
+import { getBrowserTimezone, getNowInTimezone } from "@/lib/memberTime";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function formatDate(iso: string) {
@@ -186,10 +187,10 @@ export default function EmotionalCyclePage() {
   const [note, setNote] = useState("");
   const [showInfo, setShowInfo] = useState(false);
 
-  const localDateStr = useMemo(() => {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }, []);
+  const { data: profile } = trpc.settings.getProfile.useQuery();
+  const browserTimezone = useMemo(() => getBrowserTimezone(), []);
+  const timezone = profile?.timezoneDetectedAt ? (profile.timezone ?? browserTimezone) : browserTimezone;
+  const localDateStr = useMemo(() => getNowInTimezone(timezone).dateStr, [timezone]);
   const todayQuery = trpc.moodLogs.getToday.useQuery({ localDate: localDateStr });
   const historyQuery = trpc.moodLogs.getHistory.useQuery({ days: 90 });
   const cycleQuery = trpc.moodLogs.getCycleAnalysis.useQuery();

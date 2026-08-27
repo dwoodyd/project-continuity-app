@@ -13,6 +13,35 @@
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
+export type TimezoneNow = { hour: number; minute: number; dateStr: string };
+
+/** Resolves the real current clock and calendar day in a member's IANA timezone. */
+export function getNowInTimezone(timezone: string, now: Date = new Date()): TimezoneNow {
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(now);
+    const value = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "0";
+    return {
+      hour: Number(value("hour")),
+      minute: Number(value("minute")),
+      dateStr: `${value("year")}-${value("month")}-${value("day")}`,
+    };
+  } catch {
+    return {
+      hour: now.getUTCHours(),
+      minute: now.getUTCMinutes(),
+      dateStr: now.toISOString().slice(0, 10),
+    };
+  }
+}
+
 /**
  * Returns today's date as YYYY-MM-DD using the **server's local timezone**.
  * This is a safe fallback — set TZ=America/Los_Angeles (or the user's zone) in env

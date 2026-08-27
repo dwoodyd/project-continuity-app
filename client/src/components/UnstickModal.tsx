@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 interface UnstickModalProps {
   task: { id: string; title: string; projectId?: number | null };
@@ -28,6 +29,7 @@ interface UnstickResult {
 }
 
 export default function UnstickModal({ task, onClose, entryMethod = "manual" }: UnstickModalProps) {
+  const { requireAiConsent } = useAiConsentGate();
   const [phase, setPhase] = useState<Phase>("idle");
   const [context, setContext] = useState("");
   const [result, setResult] = useState<UnstickResult | null>(null);
@@ -45,6 +47,7 @@ export default function UnstickModal({ task, onClose, entryMethod = "manual" }: 
   });
 
   const handleUnstick = (currentDepth = 0, taskTitle = task.title) => {
+    if (!requireAiConsent("Unstick")) return;
     setPhase("loading");
     setDepth(currentDepth);
     unstick.mutate({

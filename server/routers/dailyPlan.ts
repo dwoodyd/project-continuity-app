@@ -5,9 +5,10 @@ import {
   updateDailyPlan,
   upsertDailyPlan,
   getActiveProjects,
+  getUserProfile,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
-import { resolveDate, subtractDay } from "../utils/dateUtils";
+import { getNowInTimezone, resolveDate, subtractDay } from "../utils/dateUtils";
 
 // Tomorrow task schema (lighter — no done flag, no carryover tracking)
 const tomorrowTaskSchema = z.object({
@@ -263,7 +264,8 @@ export const dailyPlanRouter = router({
       const pending = tasks.filter(t => !t.done);
       if (pending.length === 0) return null;
 
-      const nowHour = new Date().getHours();
+      const profile = await getUserProfile(ctx.user.id);
+      const nowHour = getNowInTimezone(profile?.timezone ?? "UTC").hour;
       const isMorning = nowHour < 12;
       const energyFilter = input.currentEnergyLevel ?? (isMorning ? "high" : "low");
       const nowMs = Date.now();

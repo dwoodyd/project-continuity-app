@@ -92,6 +92,8 @@ export const userProfiles = mysqlTable("user_profiles", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   timezone: varchar("timezone", { length: 64 }).default("America/New_York"),
+  /** Records automatic browser-zone capture so an intentional Settings override is never replaced. */
+  timezoneDetectedAt: timestamp("timezoneDetectedAt"),
   tonePreference: mysqlEnum("tonePreference", ["gentle", "direct", "firm"]).default("direct"),
   focusHoursStart: varchar("focusHoursStart", { length: 8 }).default("09:00"),
   focusHoursEnd: varchar("focusHoursEnd", { length: 8 }).default("17:00"),
@@ -115,6 +117,8 @@ export const userProfiles = mysqlTable("user_profiles", {
   focusModeEnabled: boolean("focusModeEnabled").default(true),
   driftDetectionEnabled: boolean("driftDetectionEnabled").default(true),
   onboardingCompleted: boolean("onboardingCompleted").default(false),
+  /** Dismisses the one-time Today invitation after a first check-in or a quiet skip. */
+  firstEngagementInviteSeen: boolean("firstEngagementInviteSeen").default(false).notNull(),
   planningMode: boolean("planningMode").default(false),
   seenAbout: boolean("seenAbout").default(false),
   aiConsentGiven: boolean("aiConsentGiven").default(false),

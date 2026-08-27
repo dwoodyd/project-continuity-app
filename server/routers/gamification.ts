@@ -295,7 +295,7 @@ function pickReturn24h() {
 }
 function pickReturn3d() {
   const pool = [
-    "Three days away. You're back. That matters.",
+    "Some time away. You're back. That matters.",
     "The thread was waiting. You found it.",
     "You stepped away and came back. That's resilience.",
     "Welcome back. Nothing was lost.",
@@ -304,9 +304,9 @@ function pickReturn3d() {
 }
 function pickReturn7d() {
   const pool = [
-    "A week away. You returned anyway. That's not small.",
+    "You have been away for a while. You returned anyway. That's not small.",
     "You came back. The work is still here.",
-    "Seven days. The thread is still yours.",
+    "The thread is still yours.",
     "Welcome back. Drift happens. Return is what matters.",
   ];
   return pool[Math.floor(Date.now() / 1000) % pool.length];

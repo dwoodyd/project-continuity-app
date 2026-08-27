@@ -12,6 +12,7 @@ import {
 import { trpc } from "@/lib/trpc";
 import notify from "@/lib/notify";
 import { FirstMovableStepCard } from "./FirstMovableStepCard";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 interface FirstMovableStepModalProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function FirstMovableStepModal({
   projectId,
   onStartSession,
 }: FirstMovableStepModalProps) {
+  const { requireAiConsent } = useAiConsentGate();
   const [avoidedTask, setAvoidedTask] = useState(initialTask);
   const [result, setResult] = useState<GeneratedStep | null>(null);
 
@@ -51,6 +53,7 @@ export function FirstMovableStepModal({
       notify.error("Describe the task you are avoiding first");
       return;
     }
+    if (!requireAiConsent("First Movable Step")) return;
     setResult(null);
     generate.mutate({ avoidedTask: avoidedTask.trim(), projectId });
   }

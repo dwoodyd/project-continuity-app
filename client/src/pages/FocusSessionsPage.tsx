@@ -28,6 +28,7 @@ import UnstickModal from "@/components/UnstickModal";
 import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
 import WrenPopout from "@/components/WrenPopout";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
+import { UpgradeNudge } from "@/components/UpgradeNudge";
 
 // ── Focus activity clips ─────────────────────────────────────────────────────────────────────────────────
 type WrenActivity = "weaving" | "reading" | "writing" | "lookingup";
@@ -363,6 +364,7 @@ export default function FocusSessionsPage() {
   const [bookingDurationMinutes, setBookingDurationMinutes] = useState<10 | 30 | 60 | 90>(30);
   const [activeBookingId, setActiveBookingId] = useState<number | null>(null);
   const [showUnstickModal, setShowUnstickModal] = useState(false);
+  const [showPopoutUpgrade, setShowPopoutUpgrade] = useState(false);
   const [pipOpen, setPipOpen] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
   // ── Surface state ──────────────────────────────────────────────────────────────────
@@ -941,7 +943,10 @@ export default function FocusSessionsPage() {
             </span>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setPipOpen(true)}
+                onClick={() => {
+                  if (limitData?.isPro) setPipOpen(true);
+                  else setShowPopoutUpgrade(true);
+                }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
                 style={{ color: "oklch(0.72 0.14 72)", background: "oklch(0.10 0.03 72 / 0.6)", border: "1px solid oklch(0.30 0.10 72 / 0.4)" }}
                 title="Float Wren in a small window so you can work in other apps"
@@ -964,6 +969,15 @@ export default function FocusSessionsPage() {
               </button>
             </div>
           </div>
+          {showPopoutUpgrade && (
+            <UpgradeNudge
+              moment="wren-popout"
+              friction
+              className="absolute right-4 top-12 z-20 w-[min(22rem,calc(100%-2rem))]"
+              title="Take Wren with you when you switch windows."
+              body="Pro adds Pop-out Wren, so your companion can stay nearby while you work elsewhere."
+            />
+          )}
 
           {/* LEFT — Wren's full companion scene stays present throughout the session. */}
           <div className="relative min-w-0 overflow-hidden" style={{ background: "var(--background)" }}>
@@ -1285,27 +1299,13 @@ export default function FocusSessionsPage() {
                     Wren sits with you while you work.
                   </p>
                   {showPaywall ? (
-                    <div
-                      className="rounded-2xl p-5 text-center mb-4"
-                      style={{
-                        background: "oklch(0.12 0.03 240)",
-                        border: "1px solid oklch(0.22 0.05 240)",
-                      }}
-                    >
-                      <p className="text-xs font-semibold mb-1" style={{ color: "oklch(0.78 0.10 65)" }}>
-                        Free session used this week
-                      </p>
-                      <p className="text-[11px] mb-4 leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>
-                        Pro unlocks unlimited sessions
-                      </p>
-                      <button
-                        onClick={() => navigate("/pro")}
-                        className="w-full py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-opacity hover:opacity-90"
-                        style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
-                      >
-                        Unlock Pro →
-                      </button>
-                    </div>
+                    <UpgradeNudge
+                      moment="focus-weekly-limit"
+                      friction
+                      className="mb-4 text-left"
+                      title="You have used this week’s Focus Session."
+                      body="Pro makes Focus Sessions unlimited, so you can keep going when another supported work block would help."
+                    />
                   ) : (
                     <button
                       onClick={() => setPhase("intake")}
@@ -1432,9 +1432,13 @@ export default function FocusSessionsPage() {
                       )}
                     </section>
                   ) : (
-                    <p className="mt-3 text-center text-[10px] leading-relaxed" style={{ color: "oklch(0.42 0.04 240)" }}>
-                      Book-ahead Focus Sessions are available with Pro.
-                    </p>
+                    <UpgradeNudge
+                      moment="book-ahead"
+                      friction
+                      className="mt-3 text-left"
+                      title="Book ahead when the moment is right."
+                      body="A planned return can be easier to keep. Pro adds book-ahead Focus Sessions and a gentle Wren reminder."
+                    />
                   )}
 
                   {artifactData && artifactData.sessions.length > 0 && (

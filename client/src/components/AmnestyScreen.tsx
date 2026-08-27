@@ -71,13 +71,13 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
         `Parked during re-entry on ${new Date().toLocaleDateString()}.`,
       ].filter(Boolean);
       await addToVault.mutateAsync({
-        title: `Parked: ${project.title}`,
+        title: `Quietly Waiting: ${project.title}`,
         content: lines.join("\n"),
         sourceType: "paste",
         contentClass: "idea",
       });
       setParkedIds((prev) => { const next = new Set(prev); next.add(project.id); return next; });
-      notify.saved(`"${project.title}" parked to your Vault inbox.`);
+      notify.saved(`"${project.title}" is quietly waiting in your Vault inbox.`);
     } catch {
       notify.error("Could not park to Vault. Try again.");
     }
@@ -198,7 +198,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                     <p className="text-xs text-muted-foreground">Active projects</p>
                     <p className="text-[10px] text-muted-foreground/50">
                       <Archive className="w-2.5 h-2.5 inline mr-0.5" />
-                      park for later
+                      quietly waiting
                     </p>
                   </div>
                   <div className="space-y-1.5">
@@ -220,7 +220,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
                         <button
                           onClick={() => handleParkProject(p)}
                           disabled={parkedIds.has(p.id) || addToVault.isPending}
-                          title={parkedIds.has(p.id) ? "Parked to Vault" : "Park for later in Vault inbox"}
+                          title={parkedIds.has(p.id) ? "Quietly Waiting in Vault" : "Move to Quietly Waiting in Vault"}
                           className={cn(
                             "shrink-0 p-2 rounded-lg border transition-colors",
                             parkedIds.has(p.id)
@@ -307,7 +307,7 @@ export default function AmnestyScreen({ gapHours, onComplete }: AmnestyScreenPro
             </div>
             {parkedIds.size > 0 && (
               <p className="text-xs text-muted-foreground text-center">
-                {parkedIds.size} project{parkedIds.size > 1 ? "s" : ""} parked to your Vault inbox for later.
+                {parkedIds.size} project{parkedIds.size > 1 ? "s" : ""} quietly waiting in your Vault inbox for later.
               </p>
             )}
             <div className="space-y-2">

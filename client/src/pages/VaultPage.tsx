@@ -41,13 +41,14 @@ import {
 } from "@/components/ui/select";
 import notify from "@/lib/notify";
 import { format } from "date-fns";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 type SourceState = "inbox" | "mapped" | "parked" | "active" | "today" | "done" | "archived";
 
 const stateConfig: Record<SourceState, { label: string; className: string }> = {
   inbox: { label: "Inbox", className: "badge-inbox" },
   mapped: { label: "Mapped", className: "badge-mapped" },
-  parked: { label: "Parked", className: "badge-parked" },
+  parked: { label: "Quietly Waiting", className: "badge-parked" },
   active: { label: "Active", className: "badge-active" },
   today: { label: "Today", className: "badge-today" },
   done: { label: "Done", className: "badge-done" },
@@ -432,6 +433,7 @@ const SourceItemCard = React.memo(function SourceItemCard({
 // ─── Main Vault Page ──────────────────────────────────────────────────────────
 export default function VaultPage() {
   const utils = trpc.useUtils();
+  const { requireAiConsent } = useAiConsentGate();
   const [addOpen, setAddOpen] = useState(false);
   const [clipboardContent, setClipboardContent] = useState<string | undefined>(undefined);
   const [filterState, setFilterState] = useState<SourceState | "all" | "review" | "graph">("all");
@@ -456,6 +458,9 @@ export default function VaultPage() {
     onSuccess: () => { notify.saved("AI processed — tags and summary added."); refetch(); },
     onError: () => notify.error("AI processing failed."),
   });
+  const handleAiProcess = (id: number) => {
+    if (requireAiConsent("Vault AI processing")) aiProcess.mutate({ id });
+  };
 
   const markReviewed = trpc.vault.markReviewed.useMutation({
     onSuccess: () => { notify.saved("Marked as reviewed."); refetch(); refetchReview(); },
@@ -776,7 +781,7 @@ export default function VaultPage() {
               key={item.id}
               item={item}
               onUpdate={() => { refetch(); refetchReview(); }}
-              onProcess={(id) => aiProcess.mutate({ id })}
+              onProcess={handleAiProcess}
               onMarkReviewed={(id, projectId) => markReviewed.mutate({ id, confirmedProjectId: projectId ?? undefined })}
             />
           ))}
@@ -912,7 +917,7 @@ export default function VaultPage() {
                 <div className="flex flex-wrap gap-2 pt-2 border-t border-border">
                   {item.state === "inbox" && (
                     <Button size="sm" variant="outline" className="text-xs h-7 gap-1.5"
-                      onClick={() => { aiProcess.mutate({ id: item.id }); setSelectedGraphItem(null); }}>
+                      onClick={() => { handleAiProcess(item.id); setSelectedGraphItem(null); }}>
                       <Sparkles className="w-3 h-3" />AI Process
                     </Button>
                   )}

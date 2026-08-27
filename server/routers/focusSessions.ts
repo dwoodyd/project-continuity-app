@@ -18,6 +18,7 @@ import { bookedFocusSessions, focusSessions, focusSessionArtifact, threadStrengt
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { ENV } from "../_core/env";
+import { getNowInTimezone } from "../utils/dateUtils";
 
 // ── Time-of-day vibe ─────────────────────────────────────────────────────────
 function getWrenVibe(hour: number): { vibe: string; openingLine: string; defaultAmbient: string } {
@@ -433,11 +434,11 @@ export const focusSessionsRouter = router({
       })).max(20).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const hour = input.clientHour ?? new Date().getHours();
+      const profile = await getUserProfile(ctx.user.id);
+      const hour = getNowInTimezone(profile?.timezone ?? "UTC").hour;
       const { vibe } = getWrenVibe(hour);
 
       // ── Reading Bridge context (quiet, non-intrusive) ─────────────────────
-      const profile = await getUserProfile(ctx.user.id);
       let readingBridgeBlock = "";
       if (profile?.readingBridgeChapter || profile?.readingBridgeFinished) {
         if (profile.readingBridgeFinished) {
@@ -481,9 +482,10 @@ The user is currently reading "${chapter.title}" in "Permission to Start". This 
 
   // ── Get time-of-day vibe (for client to read default ambient + opening line) ─
   getSessionVibe: protectedProcedure
-    .input(z.object({ clientHour: z.number().min(0).max(23) }))
-    .query(({ input }) => {
-      return getWrenVibe(input.clientHour);
+    .input(z.object({ clientHour: z.number().min(0).max(23).optional() }).optional())
+    .query(async ({ ctx }) => {
+      const profile = await getUserProfile(ctx.user.id);
+      return getWrenVibe(getNowInTimezone(profile?.timezone ?? "UTC").hour);
     }),
 
   // ── Legacy: save (kept for backward compat) ─────────────────────────────────

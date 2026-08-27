@@ -27,6 +27,7 @@ import {
 } from "./db";
 import { eq } from "drizzle-orm";
 import { users } from "../drizzle/schema";
+import { getNowInTimezone } from "./utils/dateUtils";
 
 // ── VAPID configuration ───────────────────────────────────────────────────────
 function initVapid() {
@@ -70,39 +71,6 @@ function pickMessage(
 ): { title: string; body: string } {
   const pool = MESSAGES[type];
   return pool[rotation % pool.length];
-}
-
-// ── Time helpers ──────────────────────────────────────────────────────────────
-function getNowInTimezone(tz: string): { hour: number; minute: number; dateStr: string } {
-  try {
-    const now = new Date();
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: tz,
-      hour: "2-digit",
-      minute: "2-digit",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour12: false,
-    }).formatToParts(now);
-
-    const get = (type: string) => parseInt(parts.find((p) => p.type === type)?.value ?? "0");
-    const hour = get("hour") % 24;
-    const minute = get("minute");
-    const year = get("year");
-    const month = get("month");
-    const day = get("day");
-    const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return { hour, minute, dateStr };
-  } catch {
-    // Fallback to UTC
-    const now = new Date();
-    return {
-      hour: now.getUTCHours(),
-      minute: now.getUTCMinutes(),
-      dateStr: now.toISOString().slice(0, 10),
-    };
-  }
 }
 
 function parseTime(t: string): { hour: number; minute: number } {

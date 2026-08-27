@@ -46,7 +46,7 @@ describe("one-off booked Focus Sessions", () => {
     expect(page).toContain("Book a session");
     expect(page).toContain("Book this Focus Session");
     expect(page).toContain("bookingId");
-    expect(page).toContain("Book-ahead Focus Sessions are available with Pro.");
+    expect(page).toContain("Book ahead when the moment is right.");
     expect(page).not.toContain("Repeat weekly");
     expect(page).not.toContain("recurring");
     expect(pricing).toContain("Focus Sessions — book ahead");

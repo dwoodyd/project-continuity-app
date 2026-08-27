@@ -54,6 +54,7 @@ import IdeaSanctuaryModal from "./IdeaSanctuaryModal";
 import ThreadLockModal from "./ThreadLockModal";
 import { trpc } from "@/lib/trpc";
 import notify from "@/lib/notify";
+import { getBrowserTimezone } from "@/lib/memberTime";
 import {
   AUTH_RESOLUTION_TIMEOUT_MS,
   AUTH_SIGNOUT_ATTEMPT_TIMEOUT_MS,
@@ -314,6 +315,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
+  const captureTimezone = trpc.settings.captureTimezone.useMutation({
+    onSuccess: () => utils.settings.getProfile.invalidate(),
+  });
+
+  useEffect(() => {
+    if (!isAuthenticated || !profile || profile.timezoneDetectedAt || captureTimezone.isPending) return;
+    captureTimezone.mutate({ timezone: getBrowserTimezone() });
+  }, [isAuthenticated, profile, captureTimezone]);
 
   // Keep persisted accessibility preferences active across every authenticated route.
   useEffect(() => {
