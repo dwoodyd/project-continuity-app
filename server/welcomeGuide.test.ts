@@ -9,8 +9,9 @@ describe("member Welcome guide", () => {
   const page = read("client/src/pages/WelcomePage.tsx");
 
   it("uses orientation language and does not repeat pricing, application, or duration parameters", () => {
-    expect(page).toContain("Welcome back.");
-    expect(page).toContain("Here&apos;s how Continuary works.");
+    expect(page).toContain("The place that remembers");
+    expect(page).toContain("where you were.");
+    expect(page).toContain("Continuity across absence");
     expect(page).not.toContain("See pricing");
     expect(page).not.toContain("Get Started Free");
     expect(page).not.toContain("25, 50");

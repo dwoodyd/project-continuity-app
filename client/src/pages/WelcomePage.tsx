@@ -71,7 +71,7 @@ const SPACES = [
   { icon: DoorOpen, title: "Re-Entry", desc: "Use Today after a gap to find your last context and a gentle way back in.", href: "/" },
   { icon: Target, title: "Single Focus", desc: "Choose this when one topic needs protected attention over several days.", href: "/study" },
   { icon: Clock, title: "Focus Sessions", desc: "Start one when you want a contained work block with Wren alongside you.", href: "/focus" },
-  { icon: Layers, title: "Projects", desc: "Visit a project when you need its decisions, context, and next step in one place.", href: "/projects" },
+  { icon: Layers, title: "Projects", desc: "Find decisions, context, and the next step here. Paused work rests in Quietly Waiting until you return.", href: "/projects" },
 ];
 
 function EvidenceCard() {
@@ -148,7 +148,7 @@ function ThresholdCard() {
 export default function WelcomePage() {
   return (
     <main id="main-content" className="public-theme-surface min-h-screen bg-background text-foreground overflow-x-hidden">
-      <PageMeta title="Welcome to Continuary" description="A practical guide to finding your next step, returning after a gap, and using Continuary's spaces with intention." path="/welcome" />
+      <PageMeta title="Welcome to Continuary" description="A member guide to returning without rebuilding context, finding one next step, and keeping your thread intact." path="/welcome" />
 
       <section className="relative overflow-hidden bg-background">
         <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ background: "oklch(0.74 0.14 72 / 0.4)", transform: "translate(30%, -30%)" }} />
@@ -161,12 +161,12 @@ export default function WelcomePage() {
             </div>
             <div className="order-2 text-center lg:text-left animate-fade-slide-up animate-delay-100">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border" style={{ background: "oklch(0.72 0.14 72 / 0.15)", borderColor: "oklch(0.72 0.14 72 / 0.3)", color: "oklch(0.74 0.14 72)" }}>
-                <Sparkles className="w-3 h-3" /> A quick map of your space
+                <Sparkles className="w-3 h-3" /> Continuity across absence
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-6">
-                Welcome back.<br /><span style={{ color: "oklch(0.74 0.14 72)" }}>Here&apos;s how Continuary works.</span>
+                The place that remembers<br /><span style={{ color: "oklch(0.74 0.14 72)" }}>where you were.</span>
               </h1>
-              <p className="text-base text-white/65 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">Start with the part of the app that meets the moment you are in. Nothing here has to be used all at once.</p>
+              <p className="text-base text-white/65 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">Coming back does not require rebuilding context. Your thread, notes, and next step are still here when you are ready. Start with the part of your space that meets this moment.</p>
               <Link href="/"><Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.12 0.03 264)" }}>Open Today <ArrowRight className="w-4 h-4" /></Button></Link>
               <p className="mt-5 text-xs text-white/45">Return here anytime you need to re-find your footing.</p>
             </div>
@@ -217,7 +217,7 @@ export default function WelcomePage() {
           <FadeSection className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Your day in four beats</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Start, notice, close, and choose again.</h2>
-            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">Use the rhythm that is useful today. Missing one does not break the day.</p>
+            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">Use the rhythm that is useful today. Missing one does not break the day, and pausing a project simply moves it to Quietly Waiting.</p>
           </FadeSection>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {DAILY_RHYTHM.map(({ icon: Icon, title, desc, href, action }, index) => (
@@ -239,7 +239,7 @@ export default function WelcomePage() {
           <FadeSection className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Your app map</p>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Ten spaces. One continuous thread.</h2>
-            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">Choose the space that matches the kind of support you need right now.</p>
+            <p className="text-sm text-muted-foreground mt-3 max-w-lg mx-auto leading-relaxed">Choose the space that helps you preserve context, find your next step, or let work wait quietly until it is time.</p>
           </FadeSection>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {SPACES.map(({ icon: Icon, title, desc, href }, index) => (

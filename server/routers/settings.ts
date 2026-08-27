@@ -145,14 +145,15 @@ export const settingsRouter = router({
   // ── Dashboard presentation ──────────────────────────────────────────────────
   getDashboardLayout: protectedProcedure.query(async ({ ctx }) => {
     const profile = await getUserProfile(ctx.user.id);
+    if (!profile?.dashboardLayout) return null;
     try {
-      const parsed = profile?.dashboardLayout ? JSON.parse(profile.dashboardLayout) : {};
+      const parsed = JSON.parse(profile.dashboardLayout);
       return {
         hidden: Array.isArray(parsed.hidden) ? parsed.hidden.filter((key: unknown) => typeof key === "string") : [],
         order: Array.isArray(parsed.order) ? parsed.order.filter((key: unknown) => typeof key === "string") : [],
       };
     } catch {
-      return { hidden: [], order: [] };
+      return null;
     }
   }),
 

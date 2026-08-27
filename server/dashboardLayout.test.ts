@@ -8,7 +8,16 @@ import {
 describe("dashboard layout preferences", () => {
   it("uses the calm default module sequence when no preference exists", () => {
     const layout = normalizeDashboardLayout(null);
-    expect(layout.hidden).toEqual([]);
+    expect(layout.hidden).toEqual([
+      "daily_rhythm",
+      "thread_strength",
+      "quietly_waiting",
+      "emotional_cycle",
+      "knowledge_graph",
+      "pattern_detected",
+      "recent_decisions",
+      "mode",
+    ]);
     expect(layout.order).toEqual(DASHBOARD_MODULES.map((module) => module.key));
   });
 

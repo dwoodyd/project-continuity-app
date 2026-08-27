@@ -35,6 +35,13 @@ function scoreToState(score: number): string {
   return "Deepening";
 }
 
+function nonDegradingThreadState(previousState: string, candidateState: string): string {
+  const previousIndex = THREAD_STATES.findIndex((state) => state.toLowerCase() === previousState.toLowerCase());
+  const candidateIndex = THREAD_STATES.findIndex((state) => state.toLowerCase() === candidateState.toLowerCase());
+  if (previousIndex < 0 || candidateIndex < 0) return candidateState;
+  return THREAD_STATES[Math.max(previousIndex, candidateIndex)];
+}
+
 // ─── Milestone definitions ────────────────────────────────────────────────────
 const MILESTONE_COPY: Record<string, { title: string; body: string }> = {
   first_rhythm:       { title: "Your first full rhythm.", body: "Morning, midday, evening — you held the thread all day." },
@@ -121,7 +128,10 @@ async function updateThreadStrength(userId: number, eventType: string): Promise<
     baseScore = Math.max(0, Math.floor(baseScore * 0.85));
   }
   const newScore = Math.min(150, baseScore + points);
-  const newState = scoreToState(newScore);
+  // Continuity is never revoked on the surface. The score can still model
+  // recency internally, but the named relationship to the work may rise or
+  // hold—never visibly fall after someone has been away.
+  const newState = nonDegradingThreadState(current.state, scoreToState(newScore));
   await db.update(threadStrength)
     .set({ score: newScore, state: newState, lastUpdatedAt: new Date() })
     .where(eq(threadStrength.userId, userId));

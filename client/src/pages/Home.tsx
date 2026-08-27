@@ -1228,9 +1228,9 @@ export default function Home() {
   const [pickingStep, setPickingStep] = useState(false);
   const [customStep, setCustomStep] = useState("");
   const [customizeOpen, setCustomizeOpen] = useState(false);
-  const [optInExpanded, setOptInExpanded] = useState(false);
   const [draggedModule, setDraggedModule] = useState<DashboardModuleKey | null>(null);
   const [justOneThingOpen, setJustOneThingOpen] = useState(false);
+  const [reentrySurfaceRestored, setReentrySurfaceRestored] = useState(false);
   // Ref to scroll the check-in form into view when opened from the bottom CTA
   const checkInRef = useRef<HTMLDivElement>(null);
   const openCheckIn = useCallback((type: CheckInStep) => {
@@ -1291,6 +1291,10 @@ export default function Home() {
   const { data: dashboardLayoutData } = trpc.settings.getDashboardLayout.useQuery(undefined, {
     enabled: authed,
     staleTime: 5 * 60 * 1000,
+  });
+  const { data: amnestyData } = trpc.ai.checkAmnesty.useQuery(undefined, {
+    enabled: authed,
+    staleTime: 60 * 60 * 1000,
   });
   const dashboardLayout = useMemo(() => normalizeDashboardLayout(dashboardLayoutData), [dashboardLayoutData]);
   const updateDashboardLayout = trpc.settings.updateDashboardLayout.useMutation({
@@ -1588,6 +1592,7 @@ export default function Home() {
     // Optimistically flip the circle immediately — no waiting for server
     setOptimisticDone((prev) => ({ ...prev, [taskId]: true }));
     completeTaskMutation.mutate({ taskId, taskTitle, date: localDateStr });
+    setReentrySurfaceRestored(true);
     // Mark as pending-undo
     setPendingUndoTaskIds((prev) => new Set(Array.from(prev).concat(taskId)));
     // Show undo toast
@@ -1707,6 +1712,7 @@ export default function Home() {
     setActiveCheckIn(null);
     refetchCheckIns();
     refetchPlan();
+    setReentrySurfaceRestored(true);
     // Show Wren celebration overlay
     const celebrationMessages: Record<CheckInStep, string> = {
       morning: "Thread secured. Today has direction.",
@@ -1757,6 +1763,7 @@ export default function Home() {
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
+  const reentryModeActive = amnestyData?.needsAmnesty === true && !reentrySurfaceRestored;
 
   // ── Alert-priority resolver ────────────────────────────────────────────────
   // Priority order: Amnesty (handled before this page) → due check-in → capacity banner → blocker → review reminder → tomorrow brief → sanctuary nudge
@@ -1916,10 +1923,42 @@ export default function Home() {
             onClick={() => setJustOneThingOpen(false)}
             className="mt-5 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
           >
-            Back to the full dashboard
+            {reentryModeActive ? "Back to your re-entry space" : "Back to the full dashboard"}
           </button>
         </section>
       </main>
+    );
+  }
+
+  if (reentryModeActive) {
+    return (
+      <>
+        <PageMeta title="Today · Continuary" description="A calm re-entry space that remembers where you were and offers one next step." path="/" />
+        <main className="mx-auto flex min-h-[70vh] w-full max-w-4xl flex-col justify-center gap-5 px-4 py-8 sm:px-5">
+          <IntroWrenScene
+            src={WREN_CLIPS.tuggingThread}
+            eyebrow="Return brief"
+            title="You came back. The work is still here."
+            body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. One small next step is enough: ${activeThreadLock.whatNext}` : "Nothing is broken. You do not need to rebuild context before you begin—one small next step is enough."}
+            className="border-0 rounded-none"
+            variant="return"
+          >
+            <button
+              onClick={enterJustOneThing}
+              className="mt-5 inline-flex min-h-11 items-center gap-2 bg-[#E8A030] px-4 text-sm font-semibold text-[#161815] hover:bg-[#F1B14A]"
+            >
+              Just give me one thing
+              <ChevronRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </IntroWrenScene>
+          <button
+            onClick={() => setReentrySurfaceRestored(true)}
+            className="self-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          >
+            Restore everything
+          </button>
+        </main>
+      </>
     );
   }
 
@@ -1941,7 +1980,7 @@ export default function Home() {
           <DialogTitle>Customize your dashboard</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Keep the parts that help. Hide what feels like too much. Drag modules into the order that makes sense for you.
+          Your space begins lightly. Add the capabilities that feel useful, and leave the rest quiet until you invite them in.
         </p>
         <div className="space-y-2 pt-2" aria-label="Dashboard module preferences">
           {dashboardLayout.order.map((key) => {
@@ -1964,17 +2003,20 @@ export default function Home() {
                 )}
               >
                 <GripVertical className="w-4 h-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
-                <span className="flex-1 text-sm text-foreground">{module.label}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm text-foreground">{module.label}</span>
+                  {!visible && <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{module.invitation}</span>}
+                </span>
                 <button
                   type="button"
                   onClick={() => toggleDashboardModule(key)}
                   className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
                   role="switch"
                   aria-checked={visible}
-                  aria-label={`${visible ? "Hide" : "Show"} ${module.label} on dashboard`}
+                  aria-label={`${visible ? "Hide" : "Add"} ${module.label} on dashboard`}
                 >
                   {visible ? <Eye className="w-3.5 h-3.5" aria-hidden="true" /> : <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />}
-                  {visible ? "Shown" : "Hidden"}
+                  {visible ? "Shown" : "Add"}
                 </button>
               </div>
             );
@@ -2525,7 +2567,7 @@ export default function Home() {
 
       {/* Bento grid — 3-col desktop → 2-col tablet → 1-col mobile */}
       {/* Daily Rhythm — full-width above masonry so check-in cells never truncate */}
-      <BentoCard
+      {isModuleVisible("daily_rhythm") && <BentoCard
         className="w-full mb-3 order-[-8]"
         icon={<Sun className="w-3.5 h-3.5" />}
         title="Daily Rhythm"
@@ -2583,7 +2625,7 @@ export default function Home() {
             )}
           </div>
         </div>
-      </BentoCard>
+      </BentoCard>}
 
       {/* Ordered dashboard tiers: secondary context first, optional context by request. */}
       <div className="flex flex-col gap-3">
@@ -3145,7 +3187,7 @@ export default function Home() {
         );
       })()}
       {/* ── Emotional Cycle Widget ─────────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("emotional_cycle") && <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3" style={{ order: presentationOrder("emotional_cycle", dashboardLayout) }}>
+      {isModuleVisible("emotional_cycle") && <BentoCard icon={<Heart className="w-3.5 h-3.5" />} title="Emotional Cycle" noPadding className="break-inside-avoid mb-3" style={{ order: presentationOrder("emotional_cycle", dashboardLayout) }}>
         <MoodWidget />
       </BentoCard>}
 
@@ -3156,7 +3198,7 @@ export default function Home() {
       )}
 
       {/* ── Scratch Pad Widget ────────────────────────────────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("scratch_pad") && scratchNotes && scratchNotes.length > 0 && (() => {
+      {isModuleVisible("scratch_pad") && scratchNotes && (() => {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
@@ -3167,16 +3209,16 @@ export default function Home() {
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
-              {preview.map((note: any) => (
+              {preview.length > 0 ? preview.map((note: any) => (
                 <p key={note.id} className="text-sm text-foreground/70 leading-snug line-clamp-2 whitespace-pre-wrap">{note.content}</p>
-              ))}
+              )) : <p className="text-sm text-muted-foreground leading-relaxed">A quiet place for the thought you do not need to sort yet.</p>}
             </div>
           </a>
         );
       })()}
 
       {/* ── Knowledge Graph Shortcut ─────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("knowledge_graph") && <a href="/vault" className="block no-underline break-inside-avoid mb-3" style={{ order: presentationOrder("knowledge_graph", dashboardLayout) }}>
+      {isModuleVisible("knowledge_graph") && <a href="/vault" className="block no-underline break-inside-avoid mb-3" style={{ order: presentationOrder("knowledge_graph", dashboardLayout) }}>
         <BentoCard icon={<span style={{ fontSize: "1rem", lineHeight: 1 }} aria-hidden="true">◎</span>} title="Knowledge Graph" className="hover:border-primary/20 hover:bg-primary/[0.02] transition-all cursor-pointer break-inside-avoid mb-3">
           <p className="text-sm text-foreground/60">View your vault connections →</p>
         </BentoCard>
@@ -3378,18 +3420,8 @@ export default function Home() {
         );
       })()}
 
-      <button
-        onClick={() => setOptInExpanded((expanded) => !expanded)}
-        className="w-full flex items-center justify-between rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:border-primary/35 transition-colors"
-        style={{ order: 90 }}
-        aria-expanded={optInExpanded}
-      >
-        <span>{optInExpanded ? "Show less" : "Show more"}</span>
-        <ChevronDown className={cn("w-4 h-4 transition-transform", optInExpanded && "rotate-180")} aria-hidden="true" />
-      </button>
-
       {/* ── Clarity Engine Nudge (right col) ───────────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("pattern_detected") && clarityRec && !clarityNudgeDismissed && (
+      {isModuleVisible("pattern_detected") && clarityRec && !clarityNudgeDismissed && (
         <BentoCard
           className="break-inside-avoid mb-3"
           icon={<Sparkles className="w-3.5 h-3.5" />}
@@ -3420,7 +3452,7 @@ export default function Home() {
       )}
 
       {/* ── Recent Decisions (right col) ────────────────────────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("recent_decisions") && recentDecisions && recentDecisions.length > 0 && (
+      {isModuleVisible("recent_decisions") && recentDecisions && recentDecisions.length > 0 && (
         <div style={{ order: presentationOrder("recent_decisions", dashboardLayout) }}>
           <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">Recent decisions</p>
           <div className="space-y-2">
@@ -3438,7 +3470,7 @@ export default function Home() {
       )}
 
        {/* ── Planning / Doing Mode Toggle ─────────────────────────────────────────────────────────── */}
-      {optInExpanded && isModuleVisible("mode") && <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode" className="break-inside-avoid mb-3" style={{ order: presentationOrder("mode", dashboardLayout) }}>
+      {isModuleVisible("mode") && <BentoCard icon={<ToggleLeft className="w-3.5 h-3.5" />} title="Mode" className="break-inside-avoid mb-3" style={{ order: presentationOrder("mode", dashboardLayout) }}>
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
