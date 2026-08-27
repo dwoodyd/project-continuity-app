@@ -2184,6 +2184,10 @@
 - [x] Prevent displayed Thread Strength from visibly regressing
 - [x] Align signed-in /welcome copy and links to continuity across absence, including Quietly Waiting wording and no volatile sales parameters
 - [x] Add focused regression coverage, validate protected Focus/PiP/Wren body-doubling surfaces, and checkpoint the complete build
+
+## Evidence Log Video Recovery (Aug 27)
+- [x] Diagnose and restore the missing Evidence Log video while retaining a visual fallback
+- [x] Add focused regression coverage and verify protected Focus Sessions and Today Wren surfaces remain unchanged
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

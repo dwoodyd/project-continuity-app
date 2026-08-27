@@ -129,17 +129,22 @@ describe("Wren presence and coherent voice", () => {
     expect(sidebar).toContain('/settings?tab=preferences#wren-tone');
   });
 
-  it("keeps above-the-fold Wren media portrait-oriented, poster-backed, and below the delivery budget", () => {
+  it("keeps above-the-fold Wren media poster-backed and routes Evidence through the managed recovered asset", () => {
     const clips = source("client/src/lib/wrenClips.ts");
     const player = source("client/src/components/WrenPlayer.tsx");
+    const introScene = source("client/src/components/IntroWrenScene.tsx");
     expect(clips).toContain("export const WREN_LIGHTWEIGHT_MEDIA");
     expect(clips).toContain("returnPortrait: { bytes: 144434, width: 360, height: 480, posterBytes: 8378 }");
     expect(clips).toContain("evidenceClean: { bytes: 476918, width: 480, height: 270, posterBytes: 5309 }");
-    expect(clips).toContain("evidenceClean:       `/manus-storage/wren-evidence-clean_449464d9.mp4`");
+    expect(clips).toContain("evidenceClean:       `/manus-storage/continuary-evidence-wren-letter_ff06d64b.mp4`");
+    expect(clips).toContain("evidenceCleanPoster:`/manus-storage/continuary-evidence-wren-poster_fe82d266.jpg`");
     expect(clips).toContain("greetingMorning: { bytes: 105824, width: 360, height: 480 }");
     expect(clips).toContain("greetingAfternoon: { bytes: 149026, width: 360, height: 480 }");
     expect(clips).toContain("greetingEvening: { bytes: 69798, width: 360, height: 480 }");
     expect(player).toContain("poster?: string");
     expect(player).toContain("poster={poster}");
+    expect(introScene).toContain("const [videoFailed, setVideoFailed] = useState(false)");
+    expect(introScene).toContain("onError={() => setVideoFailed(true)}");
+    expect(introScene).toContain("videoFailed && poster");
   });
 });

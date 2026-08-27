@@ -26,8 +26,8 @@ export const WREN_CLIPS = {
   greetingMorning:     `/manus-storage/wren-greeting-morning_0ebef445.mp4`,
   greetingAfternoon:   `/manus-storage/wren-greeting-afternoon_b761f504.mp4`,
   greetingEvening:     `/manus-storage/wren-greeting-evening_265ac204.mp4`,
-  /** Verified unwatermarked lightweight Evidence Log hero (466KB). */
-  evidenceClean:       `/manus-storage/wren-evidence-clean_449464d9.mp4`,
+  /** Managed Evidence Log hero; stored separately from the legacy CDN path. */
+  evidenceClean:       `/manus-storage/continuary-evidence-wren-letter_ff06d64b.mp4`,
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
   bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
@@ -178,8 +178,8 @@ export type WrenClipKey = keyof typeof WREN_CLIPS;
 export const WREN_STILLS = {
   /** Lightweight 3:4 Return Brief poster fallback (8KB). */
   returnPortraitPoster:`/manus-storage/wren-return-poster_6e19a8f4.webp`,
-  /** Verified unwatermarked Evidence Log hero poster fallback (5KB). */
-  evidenceCleanPoster:`/manus-storage/wren-evidence-clean-poster_8d09620d.jpg`,
+  /** Managed Evidence Log hero poster fallback. */
+  evidenceCleanPoster:`/manus-storage/continuary-evidence-wren-poster_fe82d266.jpg`,
   // Luminous series (glowing, transparent-friendly)
   luminousFront:      `${BASE}/wren_luminous_front_8c475599.png`,
   luminousIdle:       `${BASE}/wren_luminous_idle_511550a0.png`,

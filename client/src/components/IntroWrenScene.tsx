@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type IntroWrenSceneProps = {
   src: string;
@@ -19,9 +19,11 @@ type IntroWrenSceneProps = {
  */
 export function IntroWrenScene({ src, poster, eyebrow, title, body, children, className = "", variant = "standard", bleed = false }: IntroWrenSceneProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoFailed, setVideoFailed] = useState(false);
   const isReturnScene = variant === "return";
 
   useEffect(() => {
+    setVideoFailed(false);
     const video = videoRef.current;
     if (!video) return;
     const startPlayback = () => { video.play().catch(() => {}); };
@@ -32,17 +34,27 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
 
   return (
     <section data-wren-scene={bleed ? "edge-bleed" : "contained"} className={`relative isolate min-h-[min(72vh,680px)] overflow-hidden border-0 rounded-none bg-[#161815] text-[#F5EEE2] ${isReturnScene ? "min-h-[min(78vh,760px)]" : ""} ${bleed ? "w-[calc(100%+2.5rem)] -mx-5 sm:w-[calc(100%+4rem)] sm:-mx-8" : ""} ${className}`}>
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="metadata"
-        className={`absolute inset-0 h-full w-full object-cover mix-blend-screen ${isReturnScene ? "object-[68%_center]" : ""}`}
-      />
+      {videoFailed && poster && (
+        <img
+          src={poster}
+          alt="Wren keeping watch over your Evidence Log"
+          className={`absolute inset-0 h-full w-full object-cover mix-blend-screen ${isReturnScene ? "object-[68%_center]" : ""}`}
+        />
+      )}
+      {!videoFailed && (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
+          onError={() => setVideoFailed(true)}
+          className={`absolute inset-0 h-full w-full object-cover mix-blend-screen ${isReturnScene ? "object-[68%_center]" : ""}`}
+        />
+      )}
       <div className={`pointer-events-none absolute inset-0 ${isReturnScene ? "bg-[linear-gradient(90deg,rgba(22,24,21,0.98)_0%,rgba(22,24,21,0.94)_30%,rgba(22,24,21,0.66)_47%,rgba(22,24,21,0.14)_67%,transparent_82%),linear-gradient(to_top,rgba(22,24,21,0.90)_0%,transparent_48%)]" : bleed ? "bg-[linear-gradient(90deg,rgba(22,24,21,0.96)_0%,rgba(22,24,21,0.82)_35%,rgba(22,24,21,0.40)_54%,transparent_76%),linear-gradient(to_top,rgba(22,24,21,0.86)_0%,transparent_55%)]" : "bg-[linear-gradient(to_top,rgba(22,24,21,0.96)_0%,rgba(22,24,21,0.46)_34%,transparent_70%)]"}`} />
       <div className={`relative z-10 flex min-h-[min(72vh,680px)] flex-col justify-end px-6 pb-8 pt-24 sm:px-10 sm:pb-12 ${isReturnScene ? "max-w-[45%] min-w-[19rem] justify-center pb-14 sm:pl-14 sm:pr-4" : "max-w-2xl"}`}>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#F3BF68]">{eyebrow}</p>
