@@ -2173,7 +2173,7 @@
 - [x] Reuse the existing every-minute push path to send a Wren reminder at the booked time
 - [x] Deep-link the reminder into a pre-filled Focus Session and build booking/upcoming-session controls
 - [x] Add focused regression coverage, validate migration and scheduled delivery behavior, then checkpoint
-- [ ] After the booking checkpoint is published, activate the platform-managed every-minute notification heartbeat
+- [x] After the booking checkpoint is published, activate the platform-managed every-minute notification heartbeat
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
