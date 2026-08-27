@@ -2174,7 +2174,7 @@
 - [x] Deep-link the reminder into a pre-filled Focus Session and build booking/upcoming-session controls
 - [x] Add focused regression coverage, validate migration and scheduled delivery behavior, then checkpoint
 - [x] After the booking checkpoint is published, activate the platform-managed every-minute notification heartbeat
-- [ ] Repair the deployed notification heartbeat cron-cookie permission failure and verify a successful callback
+- [x] Repair the deployed notification heartbeat cron-cookie permission failure and verify a successful callback
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
