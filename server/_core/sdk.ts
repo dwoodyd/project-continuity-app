@@ -340,17 +340,34 @@ class SDKServer {
   async authenticateRequest(
     req: Request
   ): Promise<AuthenticatedUser> {
-    // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
+
+    // Heartbeat uses a platform-issued cookie, not one signed with this app's
+    // JWT_SECRET. For scheduled endpoints, validate it through the OAuth
+    // service first and require the trusted task UID before granting cron access.
+    if (req.path.startsWith("/api/scheduled/")) {
+      if (!sessionCookie) throw ForbiddenError("Missing cron session cookie");
+      try {
+        const userInfo = await this.getUserInfoWithJwt(sessionCookie);
+        if (!userInfo.taskUid) throw ForbiddenError("Cron session missing task UID");
+        return buildCronUser(userInfo);
+      } catch (error) {
+        if (error instanceof Error && error.message === "Cron session missing task UID") throw error;
+        console.warn("[Auth] Scheduled callback token validation failed", String(error));
+        throw ForbiddenError("Invalid cron session cookie");
+      }
+    }
+
+    // Regular member authentication flow.
     const session = await this.verifySession(sessionCookie);
 
     if (!session) {
       throw ForbiddenError("Invalid session cookie");
     }
 
-    // Scheduled HTTP callbacks carry a platform-issued cron identity. They do
-    // not represent a real member and must never be synced into the user table.
+    // Backward-compatible support for a locally signed cron identity. Current
+    // Heartbeats are handled above with platform verification instead.
     if (session.openId.startsWith(CRON_OPEN_ID_PREFIX)) {
       const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
       if (!userInfo.taskUid) throw ForbiddenError("Cron session missing task UID");

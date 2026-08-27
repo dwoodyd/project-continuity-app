@@ -61,6 +61,9 @@ describe("one-off booked Focus Sessions", () => {
     expect(entrypoint).not.toContain("startNotificationCron();");
     expect(entrypoint).toContain('if (req.path.startsWith("/api/scheduled/")) return next()');
     expect(sdk).toContain('const CRON_OPEN_ID_PREFIX = "cron_"');
+    expect(sdk).toContain('if (req.path.startsWith("/api/scheduled/"))');
+    expect(sdk).toContain("const userInfo = await this.getUserInfoWithJwt(sessionCookie)");
+    expect(sdk).toContain("Invalid cron session cookie");
     expect(sdk).toContain("if (!userInfo.taskUid) throw ForbiddenError");
   });
 });
