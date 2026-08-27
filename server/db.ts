@@ -29,6 +29,7 @@ import {
   users,
   weeklyReviews,
   focusSessions,
+  bookedFocusSessions,
   distractionEvents,
   projectMemoryEvents,
   weeklyCompass,
@@ -42,6 +43,7 @@ import {
   Decision,
   InsertDecision,
   FocusSession,
+  BookedFocusSession,
   pushSubscriptions,
   notificationLog,
   projectHealthScores,
@@ -565,6 +567,104 @@ export async function saveFocusSession(session: {
     wasCompleted: session.wasCompleted ? 1 : 0,
   });
   return (result as any).insertId ?? 0;
+}
+
+// ── Booked Focus Sessions ─────────────────────────────────────────────────────
+export async function createBookedFocusSession(data: {
+  userId: number;
+  intention?: string | null;
+  durationMinutes: number;
+  scheduledFor: Date;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const [result] = await db.insert(bookedFocusSessions).values({
+    userId: data.userId,
+    intention: data.intention ?? null,
+    durationMinutes: data.durationMinutes,
+    scheduledFor: data.scheduledFor,
+    status: "scheduled",
+  });
+  return (result as { insertId?: number }).insertId ?? 0;
+}
+
+export async function getUpcomingBookedFocusSessions(userId: number, limit = 20): Promise<BookedFocusSession[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(bookedFocusSessions)
+    .where(and(
+      eq(bookedFocusSessions.userId, userId),
+      eq(bookedFocusSessions.status, "scheduled"),
+    ))
+    .orderBy(asc(bookedFocusSessions.scheduledFor))
+    .limit(limit);
+}
+
+export async function getBookedFocusSessionForUser(bookingId: number, userId: number): Promise<BookedFocusSession | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(bookedFocusSessions)
+    .where(and(eq(bookedFocusSessions.id, bookingId), eq(bookedFocusSessions.userId, userId)))
+    .limit(1);
+  return rows[0];
+}
+
+export async function cancelBookedFocusSession(bookingId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.update(bookedFocusSessions)
+    .set({ status: "cancelled", cancelledAt: new Date() })
+    .where(and(
+      eq(bookedFocusSessions.id, bookingId),
+      eq(bookedFocusSessions.userId, userId),
+      eq(bookedFocusSessions.status, "scheduled"),
+    ));
+  const packet = Array.isArray(result) ? result[0] as { affectedRows?: number } : result as { affectedRows?: number };
+  return (packet.affectedRows ?? 0) === 1;
+}
+
+export async function getDueBookedFocusSessions(userId: number, now = new Date()): Promise<BookedFocusSession[]> {
+  const db = await getDb();
+  if (!db) return [];
+  // A short grace window allows for a late cron tick without delivering stale reminders.
+  const graceFloor = new Date(now.getTime() - 5 * 60 * 1000);
+  return db.select().from(bookedFocusSessions)
+    .where(and(
+      eq(bookedFocusSessions.userId, userId),
+      eq(bookedFocusSessions.status, "scheduled"),
+      isNull(bookedFocusSessions.reminderSentAt),
+      gte(bookedFocusSessions.scheduledFor, graceFloor),
+      lte(bookedFocusSessions.scheduledFor, now),
+    ));
+}
+
+export async function claimBookedFocusSessionReminder(bookingId: number, userId: number, claimedAt = new Date()): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.update(bookedFocusSessions)
+    .set({ reminderSentAt: claimedAt })
+    .where(and(
+      eq(bookedFocusSessions.id, bookingId),
+      eq(bookedFocusSessions.userId, userId),
+      eq(bookedFocusSessions.status, "scheduled"),
+      isNull(bookedFocusSessions.reminderSentAt),
+    ));
+  const packet = Array.isArray(result) ? result[0] as { affectedRows?: number } : result as { affectedRows?: number };
+  return (packet.affectedRows ?? 0) === 1;
+}
+
+export async function markBookedFocusSessionStarted(bookingId: number, userId: number, focusSessionId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.update(bookedFocusSessions)
+    .set({ status: "started", startedAt: new Date(), focusSessionId })
+    .where(and(
+      eq(bookedFocusSessions.id, bookingId),
+      eq(bookedFocusSessions.userId, userId),
+      eq(bookedFocusSessions.status, "scheduled"),
+    ));
+  const packet = Array.isArray(result) ? result[0] as { affectedRows?: number } : result as { affectedRows?: number };
+  return (packet.affectedRows ?? 0) === 1;
 }
 
 // ── Distraction Events ────────────────────────────────────────────────────────

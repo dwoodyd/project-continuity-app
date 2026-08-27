@@ -2163,6 +2163,17 @@
 - [x] Preserve manual invite-code access without presenting the legacy review form as instant admission
 - [x] Add focused regression coverage and validate the public admission states
 - [x] Complete final validation and checkpoint the resumed ApplyPage reconciliation
+
+## App-Builder Queue Reconciliation (Aug 26)
+- [x] Audit and complete any outstanding book-ahead scheduling work while preserving the completed Welcome and post-reset tasks
+
+## Focus Sessions Book-Ahead v1 (Aug 26)
+- [x] Add a durable one-off booked Focus Session model and apply its additive production migration
+- [x] Add Pro-gated create, list, cancel, and due-delivery logic without recurrence fields or series management
+- [x] Reuse the existing every-minute push path to send a Wren reminder at the booked time
+- [x] Deep-link the reminder into a pre-filled Focus Session and build booking/upcoming-session controls
+- [x] Add focused regression coverage, validate migration and scheduled delivery behavior, then checkpoint
+- [ ] After the booking checkpoint is published, activate the platform-managed every-minute notification heartbeat
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

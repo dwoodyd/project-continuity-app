@@ -1,9 +1,20 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { assertProjectOwnedBy, createProjectMemoryEvent, getDb, logSurfaceEvent as logSurfaceEventDb, getEstimationCalibration, getUserProfile } from "../db";
+import {
+  assertProjectOwnedBy,
+  cancelBookedFocusSession,
+  createBookedFocusSession,
+  createProjectMemoryEvent,
+  getBookedFocusSessionForUser,
+  getDb,
+  getEstimationCalibration,
+  getUpcomingBookedFocusSessions,
+  getUserProfile,
+  logSurfaceEvent as logSurfaceEventDb,
+} from "../db";
 import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
-import { focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
+import { bookedFocusSessions, focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { ENV } from "../_core/env";
@@ -66,6 +77,22 @@ You may NOT:
 
 // Thread units per duration
 const THREAD_UNITS: Record<number, number> = { 10: 1, 30: 1, 60: 2, 90: 3 };
+const BOOKING_EARLY_START_TOLERANCE_MS = 5 * 60 * 1000;
+
+function hasProFocusBookingAccess(user: { openId: string; isPro: boolean; isFoundingMember: boolean; role: string; isBeta?: boolean }) {
+  return user.isPro || user.isFoundingMember || user.isBeta || user.role === "admin" || user.openId === ENV.ownerOpenId;
+}
+
+function requireProFocusBookingAccess(user: { openId: string; isPro: boolean; isFoundingMember: boolean; role: string; isBeta?: boolean }) {
+  if (!hasProFocusBookingAccess(user)) {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Book-ahead Focus Sessions are available with Pro." });
+  }
+}
+
+function affectedRows(result: unknown): number {
+  const packet = Array.isArray(result) ? result[0] as { affectedRows?: number } : result as { affectedRows?: number };
+  return packet?.affectedRows ?? 0;
+}
 
 // Compute the start of the current week (Monday 00:00 UTC)
 function getWeekStart(): Date {
@@ -106,6 +133,60 @@ export const focusSessionsRouter = router({
     return { canStart: usedThisWeek < 1, usedThisWeek, isPro: false };
   }),
 
+  // ── Book-ahead sessions (one-off only; recurrence is intentionally deferred) ──
+  listBookings: protectedProcedure.query(async ({ ctx }) => {
+    requireProFocusBookingAccess(ctx.user);
+    return getUpcomingBookedFocusSessions(ctx.user.id);
+  }),
+
+  createBooking: protectedProcedure
+    .input(z.object({
+      intention: z.string().trim().max(500).optional(),
+      durationMinutes: z.union([z.literal(10), z.literal(30), z.literal(60), z.literal(90)]),
+      scheduledFor: z.date(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      requireProFocusBookingAccess(ctx.user);
+      if (input.scheduledFor.getTime() <= Date.now() + 60_000) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Choose a time at least one minute from now." });
+      }
+      const latestAllowed = Date.now() + 90 * 24 * 60 * 60 * 1000;
+      if (input.scheduledFor.getTime() > latestAllowed) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Choose a session within the next 90 days." });
+      }
+      const id = await createBookedFocusSession({
+        userId: ctx.user.id,
+        intention: input.intention || null,
+        durationMinutes: input.durationMinutes,
+        scheduledFor: input.scheduledFor,
+      });
+      if (!id) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not save your booked session." });
+      return { id };
+    }),
+
+  cancelBooking: protectedProcedure
+    .input(z.object({ bookingId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      // A member may always cancel a booking they already own, including after a plan change.
+      const cancelled = await cancelBookedFocusSession(input.bookingId, ctx.user.id);
+      if (!cancelled) throw new TRPCError({ code: "NOT_FOUND", message: "That booked session is no longer available." });
+      return { ok: true };
+    }),
+
+  getBookingForLaunch: protectedProcedure
+    .input(z.object({ bookingId: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      requireProFocusBookingAccess(ctx.user);
+      const booking = await getBookedFocusSessionForUser(input.bookingId, ctx.user.id);
+      if (!booking || booking.status !== "scheduled") {
+        throw new TRPCError({ code: "NOT_FOUND", message: "That booked session is no longer available." });
+      }
+      if (booking.scheduledFor.getTime() > Date.now() + BOOKING_EARLY_START_TOLERANCE_MS) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "This Focus Session is not ready to begin yet." });
+      }
+      return booking;
+    }),
+
   // ── Start a session (creates the row, returns id) ───────────────────────────
   start: protectedProcedure
     .input(z.object({
@@ -113,6 +194,7 @@ export const focusSessionsRouter = router({
       projectId: z.number().optional(),
       durationMinutes: z.union([z.literal(10), z.literal(30), z.literal(60), z.literal(90)]),
       hardStop: z.number().optional(), // UTC ms — user's next hard commitment
+      bookingId: z.number().int().positive().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -120,21 +202,57 @@ export const focusSessionsRouter = router({
 
       if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
 
-      const threadUnits = THREAD_UNITS[input.durationMinutes] ?? 1;
+      return db.transaction(async (tx) => {
+        let intention = input.intention ?? null;
+        let durationMinutes = input.durationMinutes;
+        let bookingId: number | undefined;
 
-      const [result] = await db.insert(focusSessions).values({
-        userId: ctx.user.id,
-        projectId: input.projectId ?? null,
-        intention: input.intention ?? null,
-        durationMinutes: input.durationMinutes,
-        durationSeconds: input.durationMinutes * 60,
-        threadAddedUnits: threadUnits,
-        wasCompleted: 0,
-        hardStop: input.hardStop ?? null,
+        if (input.bookingId) {
+          requireProFocusBookingAccess(ctx.user);
+          const [booking] = await tx.select().from(bookedFocusSessions)
+            .where(and(
+              eq(bookedFocusSessions.id, input.bookingId),
+              eq(bookedFocusSessions.userId, ctx.user.id),
+              eq(bookedFocusSessions.status, "scheduled"),
+            ))
+            .limit(1);
+          if (!booking) throw new TRPCError({ code: "NOT_FOUND", message: "That booked session is no longer available." });
+          if (booking.scheduledFor.getTime() > Date.now() + BOOKING_EARLY_START_TOLERANCE_MS) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "This Focus Session is not ready to begin yet." });
+          }
+          intention = booking.intention;
+          durationMinutes = booking.durationMinutes as 10 | 30 | 60 | 90;
+          bookingId = booking.id;
+        }
+
+        const threadUnits = THREAD_UNITS[durationMinutes] ?? 1;
+        const [result] = await tx.insert(focusSessions).values({
+          userId: ctx.user.id,
+          projectId: input.projectId ?? null,
+          intention,
+          durationMinutes,
+          durationSeconds: durationMinutes * 60,
+          threadAddedUnits: threadUnits,
+          wasCompleted: 0,
+          hardStop: input.hardStop ?? null,
+        });
+        const sessionId = (result as { insertId: number }).insertId;
+
+        if (bookingId) {
+          const transition = await tx.update(bookedFocusSessions)
+            .set({ status: "started", startedAt: new Date(), focusSessionId: sessionId })
+            .where(and(
+              eq(bookedFocusSessions.id, bookingId),
+              eq(bookedFocusSessions.userId, ctx.user.id),
+              eq(bookedFocusSessions.status, "scheduled"),
+            ));
+          if (affectedRows(transition) !== 1) {
+            throw new TRPCError({ code: "CONFLICT", message: "That booked session was already started or cancelled." });
+          }
+        }
+
+        return { id: sessionId, bookingId };
       });
-
-      const sessionId = (result as { insertId: number }).insertId;
-      return { id: sessionId };
     }),
 
   // ── Complete a session ──────────────────────────────────────────────────────

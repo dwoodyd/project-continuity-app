@@ -336,6 +336,30 @@ export const focusSessions = mysqlTable("focus_sessions", {
 export type FocusSession = typeof focusSessions.$inferSelect;
 export type InsertFocusSession = typeof focusSessions.$inferInsert;
 
+// ─── Booked Focus Sessions ────────────────────────────────────────────────────
+// One-off sessions booked ahead by Pro members. All timestamps are stored in UTC;
+// the client renders them in the member's local time. Recurrence is intentionally
+// out of scope for v1.
+export const bookedFocusSessions = mysqlTable("booked_focus_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  intention: text("intention"),
+  durationMinutes: int("durationMinutes").notNull(),
+  scheduledFor: timestamp("scheduledFor").notNull(),
+  status: mysqlEnum("status", ["scheduled", "cancelled", "started"]).default("scheduled").notNull(),
+  reminderSentAt: timestamp("reminderSentAt"),
+  cancelledAt: timestamp("cancelledAt"),
+  startedAt: timestamp("startedAt"),
+  focusSessionId: int("focusSessionId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  index("booked_focus_sessions_due_idx").on(table.status, table.scheduledFor),
+  index("booked_focus_sessions_user_idx").on(table.userId, table.status, table.scheduledFor),
+]);
+export type BookedFocusSession = typeof bookedFocusSessions.$inferSelect;
+export type InsertBookedFocusSession = typeof bookedFocusSessions.$inferInsert;
+
 // ── Focus Session Artifact (one per user, rendered procedurally) ──────────────
 export const focusSessionArtifact = mysqlTable("focus_session_artifact", {
   id: int("id").autoincrement().primaryKey(),

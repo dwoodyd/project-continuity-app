@@ -34,6 +34,34 @@ export type VerifiedSession = {
   exp: number;
 };
 
+const CRON_OPEN_ID_PREFIX = "cron_";
+
+export type AuthenticatedUser = User & {
+  _sessionJti: string;
+  _sessionExp: number;
+  taskUid?: string;
+  isCron?: boolean;
+};
+
+function buildCronUser(userInfo: GetUserInfoWithJwtResponse): AuthenticatedUser {
+  const now = new Date();
+  return {
+    id: -1,
+    openId: userInfo.openId,
+    name: userInfo.name || "Continuary Scheduled Task",
+    email: null,
+    loginMethod: null,
+    role: "user",
+    createdAt: now,
+    updatedAt: now,
+    lastSignedIn: now,
+    _sessionJti: "cron",
+    _sessionExp: 0,
+    taskUid: userInfo.taskUid ?? undefined,
+    isCron: true,
+  } as AuthenticatedUser;
+}
+
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
 const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
 const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
@@ -311,7 +339,7 @@ class SDKServer {
    */
   async authenticateRequest(
     req: Request
-  ): Promise<User & { _sessionJti: string; _sessionExp: number }> {
+  ): Promise<AuthenticatedUser> {
     // Regular authentication flow
     const cookies = this.parseCookies(req.headers.cookie);
     const sessionCookie = cookies.get(COOKIE_NAME);
@@ -319,6 +347,17 @@ class SDKServer {
 
     if (!session) {
       throw ForbiddenError("Invalid session cookie");
+    }
+
+    // Scheduled HTTP callbacks carry a platform-issued cron identity. They do
+    // not represent a real member and must never be synced into the user table.
+    if (session.openId.startsWith(CRON_OPEN_ID_PREFIX)) {
+      const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
+      if (!userInfo.taskUid) throw ForbiddenError("Cron session missing task UID");
+      const cronUser = buildCronUser(userInfo);
+      cronUser._sessionJti = session.jti;
+      cronUser._sessionExp = session.exp;
+      return cronUser;
     }
 
     // Check session revocation blacklist
@@ -362,7 +401,7 @@ class SDKServer {
     return Object.assign(user, {
       _sessionJti: session.jti,
       _sessionExp: session.exp,
-    });
+    }) as AuthenticatedUser;
   }
 }
 

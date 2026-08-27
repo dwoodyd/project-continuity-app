@@ -57,7 +57,6 @@ const PRICING_TABLE: PricingRow[] = [
   { feature: "Focus Sessions — chat with Wren", free: true, pro: true, keeper: true },
   { feature: "Focus Sessions — Wren check-ins", free: true, pro: true, keeper: true },
   { feature: "Focus Sessions — book ahead", free: false, pro: true, keeper: true },
-  { feature: "Focus Sessions — recurring sessions", free: false, pro: true, keeper: true },
   { feature: "Focus Sessions — pop-out window", free: false, pro: true, keeper: true },
   { feature: "Focus Sessions — picture-in-picture (PIP)", free: false, pro: true, keeper: true },
   { feature: "Focus Sessions — export weave", free: false, pro: true, keeper: true },
@@ -352,7 +351,7 @@ export default function ProPage() {
                   {[
                     "Everything in Free — unlimited",
                     "Unlimited Focus Sessions",
-                    "Focus Sessions: book ahead, recurring, pop-out, PIP, export weave",
+                    "Focus Sessions: book ahead, pop-out, PIP, export weave",
                     "Single Focus Mode: 2 focuses, Wren prompts, 365-day max",
                     "Deep Intelligence reports",
                     "Priority support — direct founder access",

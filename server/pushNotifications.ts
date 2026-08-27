@@ -13,7 +13,9 @@
 import webpush from "web-push";
 import {
   getAllUsersWithPushSubscriptions,
+  getDueBookedFocusSessions,
   getPushSubscriptionsForUser,
+  claimBookedFocusSessionReminder,
   deletePushSubscription,
   logNotificationSent,
   getRecentNotificationLog,
@@ -150,6 +152,49 @@ async function sendPushToUser(
   await logNotificationSent({ userId, type });
 }
 
+async function sendDueBookedFocusSessionReminders(userId: number): Promise<void> {
+  const dueBookings = await getDueBookedFocusSessions(userId);
+  if (!dueBookings.length) return;
+
+  const subscriptions = await getPushSubscriptionsForUser(userId);
+  if (!subscriptions.length) return;
+
+  for (const booking of dueBookings) {
+    // Marking the reminder first is the idempotency gate: parallel cron handlers
+    // cannot send the same booked-session push twice.
+    const claimed = await claimBookedFocusSessionReminder(booking.id, userId);
+    if (!claimed) continue;
+
+    const payload = JSON.stringify({
+      title: "Your Focus Session is ready.",
+      body: booking.intention
+        ? `Wren is here to sit with you while you ${booking.intention}.`
+        : "Wren is here when you are ready to begin.",
+      tag: `booked-focus-session-${booking.id}`,
+      url: `/focus?bookingId=${booking.id}`,
+      type: "booked_focus_session",
+    });
+
+    const results = await Promise.allSettled(
+      subscriptions.map((subscription) =>
+        webpush.sendNotification(
+          { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+          payload,
+        ),
+      ),
+    );
+
+    for (let index = 0; index < results.length; index++) {
+      const result = results[index];
+      if (result.status !== "rejected") continue;
+      const error = result.reason as { statusCode?: number };
+      if (error?.statusCode === 410 || error?.statusCode === 404) {
+        await deletePushSubscription(userId, subscriptions[index].endpoint);
+      }
+    }
+  }
+}
+
 // ── Backoff state for DB failures ────────────────────────────────────────────
 let _consecutiveDbFailures = 0;
 const MAX_BACKOFF_TICKS = 5; // skip up to 5 consecutive ticks (~5 min) after DB failure
@@ -196,6 +241,12 @@ async function processUserNotifications(userId: number): Promise<void> {
   }
   if (!profile) return;
   if (!profile.notificationsEnabled) return;
+
+  try {
+    await sendDueBookedFocusSessionReminders(userId);
+  } catch (error) {
+    console.warn(`[Push] Booked Focus Session reminder check failed for user ${userId}:`, (error as Error).message);
+  }
 
   const tz = profile.timezone ?? "America/New_York";
   const { hour, minute, dateStr } = getNowInTimezone(tz);

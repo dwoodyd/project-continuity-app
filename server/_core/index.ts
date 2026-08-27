@@ -14,7 +14,7 @@ import { registerStorageProxy } from "./storageProxy";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { startNotificationCron } from "../pushNotifications";
+import { runNotificationCronTick } from "../pushNotifications";
 import { paypalRouter } from "../paypal";
 import { startWeeklyDigestCron } from "../weeklyDigest";
 import { startTrialReminderCron } from "../trialReminder";
@@ -338,6 +338,29 @@ async function startServer() {
     }
   });
 
+  // Platform-managed minute tick for check-in and booked Focus Session pushes.
+  // It runs outside this process so delivery survives autoscale restarts and idle
+  // shutdowns. The callback accepts only a verified scheduling-service identity.
+  app.post("/api/scheduled/notification-tick", async (req, res) => {
+    try {
+      const user = await sdk.authenticateRequest(req);
+      if (!user.isCron || !user.taskUid) {
+        return res.status(403).json({ error: "cron-only" });
+      }
+      await runNotificationCronTick();
+      return res.json({ ok: true });
+    } catch (error) {
+      const err = error as Error;
+      console.error("[Scheduled] notification-tick error:", err.message);
+      return res.status(500).json({
+        error: err.message,
+        stack: err.stack,
+        context: { path: req.path },
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
   // ── Origin / Referer allowlist (M3) ────────────────────────────────────────
   // Reject mutations from unknown cross-site origins to harden CSRF posture.
   // SameSite=Lax already blocks most cross-site cookie sends; this is defence-in-depth.
@@ -458,8 +481,8 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
-    // Start push notification cron (fires every minute, aligned to wall-clock minutes)
-    startNotificationCron();
+    // Notification delivery is triggered by the platform-managed heartbeat at
+    // /api/scheduled/notification-tick rather than an in-process timer.
     // Start weekly digest cron — sends Monday 8 AM summary to owner
     if (ENV.ownerOpenId) {
       getUserByOpenId(ENV.ownerOpenId).then((owner) => {

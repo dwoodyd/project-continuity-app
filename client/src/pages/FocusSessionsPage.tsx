@@ -298,6 +298,22 @@ type SessionPhase =
   | "closure"       // What-moved pick
   | "reveal";       // Artifact reveal
 
+function toLocalDateInput(date: Date): string {
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return offsetDate.toISOString().slice(0, 10);
+}
+
+function defaultBookingTime(): string {
+  const date = new Date(Date.now() + 60 * 60 * 1000);
+  date.setMinutes(Math.ceil(date.getMinutes() / 15) * 15, 0, 0);
+  return date.toTimeString().slice(0, 5);
+}
+
+function getBookingIdFromQuery(): number | null {
+  const value = Number(new URLSearchParams(window.location.search).get("bookingId"));
+  return Number.isSafeInteger(value) && value > 0 ? value : null;
+}
+
 export default function FocusSessionsPage() {
   const [, navigate] = useLocation();
   const { user } = useAuth();
@@ -310,12 +326,42 @@ export default function FocusSessionsPage() {
   const completeMutation = trpc.focusSessions.complete.useMutation();
   const wrenChatMutation = trpc.focusSessions.wrenChat.useMutation();
   const logSurfaceEventMutation = trpc.focusSessions.logSurfaceEvent.useMutation();
+  const [bookingId, setBookingId] = useState(getBookingIdFromQuery);
+  const bookingAccessEnabled = Boolean(limitData?.isPro);
+  const { data: upcomingBookings, refetch: refetchUpcomingBookings } = trpc.focusSessions.listBookings.useQuery(undefined, {
+    enabled: bookingAccessEnabled,
+    staleTime: 30_000,
+  });
+  const { data: bookedSessionForLaunch, error: bookedSessionLaunchError } = trpc.focusSessions.getBookingForLaunch.useQuery(
+    { bookingId: bookingId ?? 1 },
+    { enabled: bookingId !== null && bookingAccessEnabled, retry: false },
+  );
+  const createBookingMutation = trpc.focusSessions.createBooking.useMutation({
+    onSuccess: async () => {
+      await refetchUpcomingBookings();
+      notify.saved("Focus Session booked.");
+    },
+    onError: (error) => notify.error(error.message || "Couldn’t book that session — try again."),
+  });
+  const cancelBookingMutation = trpc.focusSessions.cancelBooking.useMutation({
+    onSuccess: async () => {
+      await refetchUpcomingBookings();
+      notify.saved("Booked session cancelled.");
+    },
+    onError: (error) => notify.error(error.message || "Couldn’t cancel that session — try again."),
+  });
 
   // ── Session state ─────────────────────────────────────────────────────────
   const [phase, setPhase] = useState<SessionPhase>("idle");
   const [intention, setIntention] = useState("");
   const [durationMinutes, setDurationMinutes] = useState<10 | 30 | 60 | 90>(10);
   const [hardStop, setHardStop] = useState<string>(""); // "HH:MM" local time
+  const [bookingPanelOpen, setBookingPanelOpen] = useState(false);
+  const [bookingDate, setBookingDate] = useState(() => toLocalDateInput(new Date()));
+  const [bookingTime, setBookingTime] = useState(defaultBookingTime);
+  const [bookingIntention, setBookingIntention] = useState("");
+  const [bookingDurationMinutes, setBookingDurationMinutes] = useState<10 | 30 | 60 | 90>(30);
+  const [activeBookingId, setActiveBookingId] = useState<number | null>(null);
   const [showUnstickModal, setShowUnstickModal] = useState(false);
   const [pipOpen, setPipOpen] = useState(false);
   const [sessionId, setSessionId] = useState<number | null>(null);
@@ -331,6 +377,30 @@ export default function FocusSessionsPage() {
   const [midSessionShown, setMidSessionShown] = useState(false);
   const [midSessionVisible, setMidSessionVisible] = useState(false);
   const [wrenMessage, setWrenMessage] = useState<string | null>(null);
+  const appliedBookingRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const syncBookingId = () => setBookingId(getBookingIdFromQuery());
+    window.addEventListener("popstate", syncBookingId);
+    return () => window.removeEventListener("popstate", syncBookingId);
+  }, []);
+
+  useEffect(() => {
+    if (!bookedSessionForLaunch || appliedBookingRef.current === bookedSessionForLaunch.id) return;
+    appliedBookingRef.current = bookedSessionForLaunch.id;
+    setIntention(bookedSessionForLaunch.intention ?? "");
+    setDurationMinutes(bookedSessionForLaunch.durationMinutes as 10 | 30 | 60 | 90);
+    setActiveBookingId(bookedSessionForLaunch.id);
+    setPhase("duration");
+    notify.saved("Your booked Focus Session is ready.");
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [bookedSessionForLaunch]);
+
+  useEffect(() => {
+    if (!bookedSessionLaunchError || bookingId === null) return;
+    notify.error(bookedSessionLaunchError.message || "That booked session is not ready yet.");
+    window.history.replaceState({}, "", window.location.pathname);
+  }, [bookedSessionLaunchError, bookingId]);
   // ── Chat state ────────────────────────────────────────────────────────────
   type ChatMsg = { role: "user" | "assistant"; content: string; ts: number };
   const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
@@ -560,6 +630,7 @@ export default function FocusSessionsPage() {
         intention: intention.trim() || undefined,
         durationMinutes,
         hardStop: hardStopMs,
+        bookingId: activeBookingId ?? undefined,
       });
       setSessionId(result.id);
       setSecondsLeft(durationMinutes * 60);
@@ -591,7 +662,36 @@ export default function FocusSessionsPage() {
     } catch (e) {
       notify.error("Couldn't start the session — try again.");
     }
-  }, [limitData, intention, durationMinutes, startMutation, scheduleNextActivity]);
+  }, [limitData, intention, durationMinutes, hardStop, startMutation, scheduleNextActivity, activeBookingId]);
+
+  const handleLaunchBookedSession = useCallback((booking: { id: number; intention: string | null; durationMinutes: number }) => {
+    setIntention(booking.intention ?? "");
+    setDurationMinutes(booking.durationMinutes as 10 | 30 | 60 | 90);
+    setActiveBookingId(booking.id);
+    setPhase("duration");
+  }, []);
+
+  const handleBookSession = useCallback(async (event: React.FormEvent) => {
+    event.preventDefault();
+    const [year, month, day] = bookingDate.split("-").map(Number);
+    const [hour, minute] = bookingTime.split(":").map(Number);
+    const scheduledFor = new Date(year, (month ?? 1) - 1, day ?? 1, hour ?? 0, minute ?? 0, 0, 0);
+    if (Number.isNaN(scheduledFor.getTime()) || scheduledFor.getTime() <= Date.now() + 60_000) {
+      notify.error("Choose a time at least one minute from now.");
+      return;
+    }
+    try {
+      await createBookingMutation.mutateAsync({
+        scheduledFor,
+        durationMinutes: bookingDurationMinutes,
+        intention: bookingIntention.trim() || undefined,
+      });
+      setBookingPanelOpen(false);
+      setBookingIntention("");
+    } catch {
+      // The mutation displays the actionable server error.
+    }
+  }, [bookingDate, bookingTime, bookingDurationMinutes, bookingIntention, createBookingMutation]);
 
   // ── Timer tick ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1214,6 +1314,127 @@ export default function FocusSessionsPage() {
                     >
                       Begin session
                     </button>
+                  )}
+
+                  {limitData?.isPro ? (
+                    <section className="mt-3 rounded-xl border p-3 text-left" style={{ borderColor: "oklch(0.22 0.05 240)", background: "oklch(0.11 0.02 240)" }}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold" style={{ color: "oklch(0.78 0.10 65)" }}>Book ahead</p>
+                          <p className="mt-0.5 text-[10px] leading-relaxed" style={{ color: "oklch(0.48 0.04 240)" }}>Choose a future time and Wren will send a reminder when it&apos;s ready.</p>
+                        </div>
+                        <button
+                          onClick={() => setBookingPanelOpen((open) => !open)}
+                          className="shrink-0 rounded-lg px-3 py-2 text-[11px] font-semibold"
+                          style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.78 0.10 65)", border: "1px solid oklch(0.30 0.08 72)" }}
+                        >
+                          {bookingPanelOpen ? "Close" : "Book a session"}
+                        </button>
+                      </div>
+
+                      {bookingPanelOpen && (
+                        <form onSubmit={handleBookSession} className="mt-4 space-y-3 border-t pt-3" style={{ borderColor: "oklch(0.20 0.04 240)" }}>
+                          <label className="block text-[11px]" style={{ color: "oklch(0.65 0.04 240)" }}>
+                            When
+                            <span className="mt-1.5 grid grid-cols-2 gap-2">
+                              <input
+                                type="date"
+                                value={bookingDate}
+                                min={toLocalDateInput(new Date())}
+                                onChange={(event) => setBookingDate(event.target.value)}
+                                required
+                                className="w-full rounded-lg px-2 py-2 text-[11px] outline-none"
+                                style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)", color: "oklch(0.85 0.04 60)", colorScheme: "dark" }}
+                              />
+                              <input
+                                type="time"
+                                value={bookingTime}
+                                onChange={(event) => setBookingTime(event.target.value)}
+                                required
+                                className="w-full rounded-lg px-2 py-2 text-[11px] outline-none"
+                                style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)", color: "oklch(0.85 0.04 60)", colorScheme: "dark" }}
+                              />
+                            </span>
+                          </label>
+                          <label className="block text-[11px]" style={{ color: "oklch(0.65 0.04 240)" }}>
+                            Session length
+                            <select
+                              value={bookingDurationMinutes}
+                              onChange={(event) => setBookingDurationMinutes(Number(event.target.value) as 10 | 30 | 60 | 90)}
+                              className="mt-1.5 w-full rounded-lg px-2 py-2 text-[11px] outline-none"
+                              style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)", color: "oklch(0.85 0.04 60)" }}
+                            >
+                              <option value={10}>10 minutes</option>
+                              <option value={30}>30 minutes</option>
+                              <option value={60}>60 minutes</option>
+                              <option value={90}>90 minutes</option>
+                            </select>
+                          </label>
+                          <label className="block text-[11px]" style={{ color: "oklch(0.65 0.04 240)" }}>
+                            Intention <span style={{ color: "oklch(0.42 0.04 240)" }}>(optional)</span>
+                            <textarea
+                              value={bookingIntention}
+                              onChange={(event) => setBookingIntention(event.target.value)}
+                              maxLength={500}
+                              rows={2}
+                              placeholder="What will you return to?"
+                              className="mt-1.5 w-full resize-none rounded-lg px-2 py-2 text-[11px] outline-none"
+                              style={{ background: "oklch(0.12 0.02 240)", border: "1px solid oklch(0.22 0.04 240)", color: "oklch(0.85 0.04 60)", caretColor: "oklch(0.72 0.14 72)" }}
+                            />
+                          </label>
+                          <button
+                            type="submit"
+                            disabled={createBookingMutation.isPending}
+                            className="w-full rounded-lg py-2.5 text-[11px] font-semibold disabled:opacity-50"
+                            style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.10 0.02 240)" }}
+                          >
+                            {createBookingMutation.isPending ? "Booking…" : "Book this Focus Session"}
+                          </button>
+                        </form>
+                      )}
+
+                      {upcomingBookings && upcomingBookings.length > 0 && (
+                        <div className="mt-4 border-t pt-3" style={{ borderColor: "oklch(0.20 0.04 240)" }}>
+                          <p className="text-[10px] uppercase tracking-widest" style={{ color: "oklch(0.42 0.04 240)" }}>Booked sessions</p>
+                          <div className="mt-2 space-y-2">
+                            {upcomingBookings.map((booking) => (
+                              <div key={booking.id} className="flex items-center gap-2 rounded-lg px-2.5 py-2" style={{ background: "oklch(0.09 0.015 240)" }}>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-[11px] font-medium" style={{ color: "oklch(0.78 0.10 65)" }}>
+                                    {booking.intention || "Focus Session"}
+                                  </p>
+                                  <p className="mt-0.5 text-[10px]" style={{ color: "oklch(0.45 0.04 240)" }}>
+                                    {new Date(booking.scheduledFor).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} · {booking.durationMinutes} min
+                                  </p>
+                                </div>
+                                {new Date(booking.scheduledFor).getTime() <= Date.now() + 5 * 60 * 1000 ? (
+                                  <button
+                                    onClick={() => handleLaunchBookedSession(booking)}
+                                    className="shrink-0 text-[10px] font-semibold underline underline-offset-2"
+                                    style={{ color: "oklch(0.78 0.10 65)" }}
+                                  >
+                                    Start
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => cancelBookingMutation.mutate({ bookingId: booking.id })}
+                                    disabled={cancelBookingMutation.isPending}
+                                    className="shrink-0 text-[10px] underline underline-offset-2 disabled:opacity-50"
+                                    style={{ color: "oklch(0.58 0.05 35)" }}
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </section>
+                  ) : (
+                    <p className="mt-3 text-center text-[10px] leading-relaxed" style={{ color: "oklch(0.42 0.04 240)" }}>
+                      Book-ahead Focus Sessions are available with Pro.
+                    </p>
                   )}
 
                   {artifactData && artifactData.sessions.length > 0 && (
