@@ -89,6 +89,10 @@ async function startServer() {
   const MANUS_DOMAINS = ["continuary.manus.space", "projcontinuity-vnvnaojz.manus.space"];
   app.use((req, res, next) => {
     const host = (req.headers["x-forwarded-host"] as string) || req.hostname;
+    // Heartbeat callbacks include a platform-issued cookie scoped to this project
+    // domain. Redirecting them to the public canonical site strips that identity
+    // before the scheduled endpoint can verify it.
+    if (req.path.startsWith("/api/scheduled/")) return next();
     if (MANUS_DOMAINS.some((d) => host === d || host.endsWith("." + d))) {
       const redirectUrl = `https://${CANONICAL_DOMAIN}${req.originalUrl}`;
       return res.redirect(301, redirectUrl);

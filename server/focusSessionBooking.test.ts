@@ -59,6 +59,7 @@ describe("one-off booked Focus Sessions", () => {
     expect(entrypoint).toContain('app.post("/api/scheduled/notification-tick"');
     expect(entrypoint).toContain("await runNotificationCronTick()");
     expect(entrypoint).not.toContain("startNotificationCron();");
+    expect(entrypoint).toContain('if (req.path.startsWith("/api/scheduled/")) return next()');
     expect(sdk).toContain('const CRON_OPEN_ID_PREFIX = "cron_"');
     expect(sdk).toContain("if (!userInfo.taskUid) throw ForbiddenError");
   });
