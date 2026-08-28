@@ -8,7 +8,7 @@ describe("native-quality mobile baseline", () => {
   it("gives inputs keyboard-safe scroll clearance and interactive controls immediate touch feedback", () => {
     const css = source("client", "src", "index.css");
     expect(css).toContain('scroll-padding-block: max(1rem, env(safe-area-inset-top)) max(8rem, env(safe-area-inset-bottom))');
-    expect(css).toContain('scroll-margin-block: max(5rem, env(safe-area-inset-top)) max(9rem, env(safe-area-inset-bottom))');
+    expect(css).toContain('scroll-margin-block: max(5rem, var(--safe-top)) max(9rem, var(--safe-bottom))');
     expect(css).toContain('touch-action: manipulation');
     expect(css).toContain('[data-slot="button"]:not(:disabled):active');
     expect(css).toContain('transform: scale(0.98)');
@@ -41,5 +41,28 @@ describe("native-quality mobile baseline", () => {
     expect(manifest).toContain('"orientation": "portrait"');
     expect(manifest).toContain('"theme_color": "#161815"');
     expect(manifest).toContain('"purpose": "any maskable"');
+  });
+
+  it("keeps the install prompt and loading shell theme-aware, non-blocking, and compact-safe", () => {
+    const install = source("client", "src", "components", "PWAInstallBanner.tsx");
+    const skeleton = source("client", "src", "components", "DashboardLayoutSkeleton.tsx");
+    const layout = source("client", "src", "components", "AppLayout.tsx");
+    expect(install).toContain('beforeinstallprompt');
+    expect(install).toContain('pb-[calc(1rem+env(safe-area-inset-bottom))]');
+    expect(install).toContain('min-h-11');
+    expect(install).toContain('background: "var(--popover)"');
+    expect(skeleton).toContain('hidden md:block w-[280px]');
+    expect(skeleton).toContain('flex-1 min-w-0 p-4');
+    expect(layout).toContain('isFocusRoute || !isDesktopMode ? undefined : { scrollbarGutter: "stable" }');
+  });
+
+  it("uses a shared 8pt-oriented mobile design foundation rather than introducing new one-off values", () => {
+    const css = source("client", "src", "index.css");
+    expect(css).toContain('--space-3: 1rem');
+    expect(css).toContain('--space-4: 1.5rem');
+    expect(css).toContain('--tap-target: 44px');
+    expect(css).toContain('--safe-bottom: max(0px, env(safe-area-inset-bottom))');
+    expect(css).toContain('--motion-standard: 220ms');
+    expect(css).toContain('--elevation-card:');
   });
 });

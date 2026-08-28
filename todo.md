@@ -2251,6 +2251,16 @@
 - [x] Preserve the approved opaque theme-matched navigation shell, reduced-motion behavior, skeleton state, and poster-backed Wren media fallback
 - [x] Align standalone PWA launch chrome and manifest colors with the warm Continuary ground while retaining portrait and maskable-icon support
 - [x] Add focused regression coverage and full validation without changing protected Focus, PiP, or Wren body-doubling behavior
+
+## Native Quality Mobile Audit (Aug 28)
+- [x] Establish a shared 8pt token system for spacing, typography, radii, elevation, semantic colors, motion, touch targets, and safe areas
+- [x] Introduce or extend reusable page, media, navigation, and sheet primitives so mobile safety rules live centrally
+- [x] Verify the installed-PWA foundation: standalone manifest, maskable icons, launch background, offline shell, service-worker update path, install prompt, and haptic-safe feedback
+- [x] Complete a source-backed Continuary mobile conformance matrix for representative signed-in and public routes, with real-device items documented separately
+- [x] Repair verified shared or route-specific defects without reopening approved navigation, Focus, PiP, or Wren body-doubling behavior
+- [x] Run automated responsive, reduced-motion, offline-shell, and performance-oriented source checks; document device-only validation separately
+- [x] Add regression coverage, checkpoint the audit release, and preserve the deferred owner-only PayPal approval-page test
+- [ ] Complete the documented real-device iOS Safari and Android Chrome installed-PWA conformance checks
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

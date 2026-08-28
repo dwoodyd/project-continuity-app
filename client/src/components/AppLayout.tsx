@@ -1003,7 +1003,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
+        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]"} style={isFocusRoute || !isDesktopMode ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 

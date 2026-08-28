@@ -113,25 +113,25 @@ export default function PWAInstallBanner() {
   return (
     <div
       className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"
-      style={{ background: "linear-gradient(to top, oklch(0.16 0.04 264) 80%, transparent)" }}
+      style={{ background: "linear-gradient(to top, var(--background) 82%, transparent)" }}
     >
-      <div className="max-w-lg mx-auto rounded-2xl border border-white/10 bg-[oklch(0.20_0.06_264)] shadow-2xl shadow-black/40 p-4 flex items-start gap-3 animate-spring-pop">
+      <div className="max-w-lg mx-auto rounded-2xl border p-4 flex items-start gap-3 animate-spring-pop" style={{ background: "var(--popover)", borderColor: "var(--border)", boxShadow: "var(--elevation-overlay)" }}>
         <img
           src="/icon-96.png"
           alt="Continuary"
           className="w-12 h-12 rounded-xl shrink-0"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white leading-snug">
+          <p className="text-sm font-semibold leading-snug" style={{ color: "var(--popover-foreground)" }}>
             Add Continuary to your home screen
           </p>
           {showIOS ? (
-            <p className="text-xs text-white/60 mt-0.5 leading-relaxed">
+            <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
               Tap the <Share className="inline w-3.5 h-3.5 mb-0.5" aria-hidden="true" /> Share button in Safari, then
-              choose <strong className="text-white/80">Add to Home Screen</strong>.
+              choose <strong style={{ color: "var(--popover-foreground)" }}>Add to Home Screen</strong>.
             </p>
           ) : (
-            <p className="text-xs text-white/60 mt-0.5">
+            <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>
               Install for faster access and offline support.
             </p>
           )}
@@ -139,7 +139,7 @@ export default function PWAInstallBanner() {
             <Button
               size="sm"
               onClick={handleInstall}
-              className="mt-2 h-7 text-xs bg-amber-400 hover:bg-amber-300 text-amber-950 font-semibold border-0 gap-1.5"
+              className="mt-3 min-h-11 text-sm bg-primary hover:bg-primary/90 text-primary-foreground font-semibold border-0 gap-1.5"
             >
               <Download className="w-3.5 h-3.5" aria-hidden="true" />
               Install app
@@ -148,7 +148,8 @@ export default function PWAInstallBanner() {
         </div>
         <button
           onClick={handleDismiss}
-          className="shrink-0 text-white/40 hover:text-white/70 transition-colors mt-0.5"
+          className="shrink-0 transition-colors mt-0.5"
+          style={{ color: "var(--muted-foreground)" }}
           aria-label="Dismiss"
         >
           <X className="w-4 h-4" aria-hidden="true" />
