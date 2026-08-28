@@ -191,11 +191,18 @@
     text-rendering: optimizeLegibility;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     scroll-behavior: smooth;
+    min-height: 100%;
+    scroll-padding-block: max(1rem, env(safe-area-inset-top)) max(8rem, env(safe-area-inset-bottom));
   }
   body {
     @apply bg-background text-foreground;
     font-family: 'Archivo', system-ui, -apple-system, sans-serif;
     line-height: 1.7;
+    min-height: 100dvh;
+    overscroll-behavior-y: contain;
+  }
+  input, textarea, select, [contenteditable="true"] {
+    scroll-margin-block: max(5rem, env(safe-area-inset-top)) max(9rem, env(safe-area-inset-bottom));
   }
   /* Studio Wall interface headings */
   .font-brand {
@@ -281,6 +288,13 @@
     /* Eliminate 300ms tap delay on iOS/Android — prevents first-click swallow */
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active,
+  a[href]:active,
+  [data-slot="button"]:not(:disabled):active {
+    transform: scale(0.98);
+    opacity: 0.92;
   }
   :focus-visible {
     outline: 3px solid oklch(0.74 0.14 72 / 0.92);
@@ -548,6 +562,11 @@ button:not([data-slot="button"]):not(:disabled):active {
   a[href] {
     min-height: 44px;
     min-width: 44px;
+  }
+  [data-slot="button"]:not(:disabled),
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    touch-action: manipulation;
   }
 }
 

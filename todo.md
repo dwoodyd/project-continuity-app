@@ -2245,6 +2245,12 @@
 - [x] Stack or hide inline heading thumbnails on mobile and replace every remaining watermarked thumbnail mapping
 - [x] Repair mobile Welcome tour header, scallop clearance, and progress/footer spacing
 - [x] Add focused regression coverage, run full validation, and preserve Round 1/2 navigation plus Focus/PiP/Wren behavior
+
+## Native Quality Mobile Standard (Aug 28)
+- [x] Apply shared mobile keyboard-safe scroll clearance, 44px coarse-pointer targets, immediate press feedback, and contained overscroll behavior
+- [x] Preserve the approved opaque theme-matched navigation shell, reduced-motion behavior, skeleton state, and poster-backed Wren media fallback
+- [x] Align standalone PWA launch chrome and manifest colors with the warm Continuary ground while retaining portrait and maskable-icon support
+- [x] Add focused regression coverage and full validation without changing protected Focus, PiP, or Wren body-doubling behavior
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
