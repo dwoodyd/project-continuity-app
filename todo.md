@@ -2261,6 +2261,12 @@
 - [x] Run automated responsive, reduced-motion, offline-shell, and performance-oriented source checks; document device-only validation separately
 - [x] Add regression coverage, checkpoint the audit release, and preserve the deferred owner-only PayPal approval-page test
 - [ ] Complete the documented real-device iOS Safari and Android Chrome installed-PWA conformance checks
+
+## Installed PWA Interaction Repair (Aug 28)
+- [x] Reset the active scroll container to the top on every normal app route change without disrupting active Focus sessions
+- [x] Add restrained haptic feedback for core mobile navigation and completion actions when the device supports it
+- [x] Add focused regression coverage, validate the installed-PWA interaction repair, and preserve Focus/PiP/body-doubling behavior
+- [ ] Recheck route scroll-to-top and supported-device haptics on the installed Android PWA after publication
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

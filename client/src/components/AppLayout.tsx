@@ -56,6 +56,7 @@ import ThreadLockModal from "./ThreadLockModal";
 import { trpc } from "@/lib/trpc";
 import notify from "@/lib/notify";
 import { getBrowserTimezone } from "@/lib/memberTime";
+import { triggerHaptic } from "@/lib/haptics";
 import {
   AUTH_RESOLUTION_TIMEOUT_MS,
   AUTH_SIGNOUT_ATTEMPT_TIMEOUT_MS,
@@ -282,6 +283,22 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   // Effective layout: user preference wins on large screens; small screens always compact
   const isDesktopMode = isLargeScreen && (userLayoutPref !== "compact");
+  const mainScrollRef = useRef<HTMLElement | null>(null);
+
+  // Wouter retains the compact shell between routes. Reset the internal page
+  // scroller (and window fallback) so each normal destination starts at top.
+  // An active Focus stage owns its own full-height scroll behavior and is not
+  // touched by this restoration.
+  useEffect(() => {
+    if (isFocusRoute) return;
+    const restoreTop = () => {
+      mainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    };
+    restoreTop();
+    const frame = window.requestAnimationFrame(restoreTop);
+    return () => window.cancelAnimationFrame(frame);
+  }, [location, isFocusRoute]);
 
   // First-run tooltip: show a brief toast when user enters compact mode for the first time
   const COMPACT_ONBOARDED_KEY = "continuary-compact-onboarded";
@@ -992,7 +1009,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <Monitor className="w-4 h-4" />
               </button>
             )}
-            <button onClick={toggleTheme} className="p-2 rounded-xl transition-colors" style={{ color: "var(--sidebar-foreground)" }} aria-label="Toggle theme">
+            <button onClick={() => { triggerHaptic(); toggleTheme?.(); }} className="p-2 rounded-xl transition-colors" style={{ color: "var(--sidebar-foreground)" }} aria-label="Toggle theme">
               {theme === "dark" ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
             <button onClick={() => logout()} className="p-2 rounded-xl transition-colors" style={{ color: "var(--sidebar-foreground)" }} aria-label="Sign out">
@@ -1003,7 +1020,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]"} style={isFocusRoute || !isDesktopMode ? undefined : { scrollbarGutter: "stable" }}>
+        <main ref={mainScrollRef} id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]"} style={isFocusRoute || !isDesktopMode ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 
@@ -1025,6 +1042,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <button
                   key={href}
                   onClick={() => {
+                    triggerHaptic();
                     if (opensDrawer) setMobileNavOpen(true);
                     else if (active) window.scrollTo({ top: 0, behavior: "smooth" });
                     else navigate(href);

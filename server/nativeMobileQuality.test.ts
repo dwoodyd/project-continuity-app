@@ -65,4 +65,22 @@ describe("native-quality mobile baseline", () => {
     expect(css).toContain('--motion-standard: 220ms');
     expect(css).toContain('--elevation-card:');
   });
+
+  it("returns normal app routes to the top without altering an active Focus stage", () => {
+    const layout = source("client", "src", "components", "AppLayout.tsx");
+    expect(layout).toContain('const mainScrollRef = useRef<HTMLElement | null>(null);');
+    expect(layout).toContain('if (isFocusRoute) return;');
+    expect(layout).toContain('mainScrollRef.current?.scrollTo({ top: 0, left: 0, behavior: "auto" });');
+    expect(layout).toContain('<main ref={mainScrollRef} id="main-content"');
+  });
+
+  it("uses optional, low-intensity haptic feedback only as a navigation enhancement", () => {
+    const haptics = source("client", "src", "lib", "haptics.ts");
+    const layout = source("client", "src", "components", "AppLayout.tsx");
+    expect(haptics).toContain('typeof navigator.vibrate !== "function"');
+    expect(haptics).toContain('prefers-reduced-motion: reduce');
+    expect(haptics).toContain('navigator.vibrate(kind === "success" ? [10, 24, 14] : 8);');
+    expect(layout).toContain('import { triggerHaptic } from "@/lib/haptics";');
+    expect(layout).toContain('triggerHaptic();\n                    if (opensDrawer)');
+  });
 });
