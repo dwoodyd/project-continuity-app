@@ -21,7 +21,7 @@ describe("mobile navigation and polish", () => {
     const layout = source("client", "src", "components", "AppLayout.tsx");
     expect(layout).toContain('background: "var(--sidebar)"');
     expect(layout).toContain('color: "var(--sidebar-foreground)"');
-    expect(layout).toContain('overscroll-contain pb-24 pr-16');
+    expect(layout).toContain('overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))] pr-20');
     expect(layout).toContain('bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 16px)"');
   });
 
@@ -50,5 +50,27 @@ describe("mobile navigation and polish", () => {
     expect(layout).toContain('href="/apply"');
     expect(layout).toContain('href="/tour"');
     expect(layout).toContain('Take the tour');
+  });
+
+  it("stacks immersive heroes and Focus controls on mobile without changing their desktop composition", () => {
+    const scene = source("client", "src", "components", "IntroWrenScene.tsx");
+    const focus = source("client", "src", "pages", "FocusSessionsPage.tsx");
+    const evidence = source("client", "src", "pages", "EvidenceLogPage.tsx");
+    expect(scene).toContain('left-1/2 w-screen max-w-none -translate-x-1/2');
+    expect(scene).toContain('h-56 w-full object-cover mix-blend-screen md:inset-0 md:h-full');
+    expect(scene).toContain('w-full min-w-0 max-w-none flex-col');
+    expect(scene).toContain('md:max-w-[45%] md:min-w-[19rem]');
+    expect(evidence).toContain('bleed');
+    expect(focus).toContain('flex flex-1 flex-col overflow-x-hidden md:grid');
+    expect(focus).toContain('flex flex-1 flex-col overflow-x-hidden md:flex-row');
+    expect(focus).toContain('hidden sm:flex items-center gap-2');
+    expect(focus).toContain('relative min-h-[18rem] min-w-0 overflow-hidden md:min-h-0');
+  });
+
+  it("keeps the capture FAB clear of mobile body content and out of full-screen Focus work", () => {
+    const layout = source("client", "src", "components", "AppLayout.tsx");
+    expect(layout).toContain('pb-[calc(11rem+env(safe-area-inset-bottom))] pr-20');
+    expect(layout).toContain('{!isFocusRoute && <div');
+    expect(layout).toContain('{!isFocusRoute && fabMenuOpen && (');
   });
 });

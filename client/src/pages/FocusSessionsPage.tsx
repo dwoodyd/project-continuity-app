@@ -910,7 +910,7 @@ export default function FocusSessionsPage() {
               </div>
             </div>
             {artifactData && artifactData.sessions.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
                 <WovenArtifact sessions={artifactData.sessions} totalSegments={artifactData.totalSegments} size="thumb" />
                 <div className="text-right">
                   <p className="text-xs font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>
@@ -926,16 +926,15 @@ export default function FocusSessionsPage() {
       {/* ── ACTIVE phase: full-bleed 50/50 grid ──────────────────────────────── */}
       {phase === "active" && (
         <div
-          className="flex-1 overflow-hidden"
+          className="flex flex-1 flex-col overflow-x-hidden md:grid"
           style={{
-            display: "grid",
             gridTemplateColumns: "1fr 1fr",
             gridTemplateRows: "1fr",
           }}
         >
           {/* Floating utility bar */}
           <div
-            className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-2"
+            className="relative z-10 flex flex-wrap items-center justify-between gap-2 px-4 py-2 md:absolute md:top-0 md:left-0 md:right-0"
             style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--background) 92%, transparent), transparent)" }}
           >
             <span className="text-xs font-mono" style={{ color: "oklch(0.50 0.04 240)" }}>
@@ -980,9 +979,9 @@ export default function FocusSessionsPage() {
           )}
 
           {/* LEFT — Wren's full companion scene stays present throughout the session. */}
-          <div className="relative min-w-0 overflow-hidden" style={{ background: "var(--background)" }}>
+          <div className="relative min-h-[18rem] min-w-0 overflow-hidden md:min-h-0" style={{ background: "var(--background)" }}>
             <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at 52% 46%, oklch(0.42 0.12 65 / 0.24), transparent 58%), radial-gradient(circle at 72% 22%, oklch(0.55 0.14 65 / 0.12), transparent 36%)" }} />
-            <div className="absolute inset-x-6 top-16 bottom-9 z-[1]">
+            <div className="absolute inset-x-6 top-12 bottom-9 z-[1] md:top-16">
               <WrenPlayer
                 clip={ACTIVITY_CLIP[wrenActivity]}
                 size="full"
@@ -992,7 +991,7 @@ export default function FocusSessionsPage() {
                 className="drop-shadow-[0_18px_50px_rgba(212,168,83,0.18)]"
               />
             </div>
-            <p className="absolute left-6 top-7 z-[2] max-w-[15rem] text-sm leading-6" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
+            <p className="absolute left-6 top-4 z-[2] max-w-[15rem] text-sm leading-6 md:top-7" style={{ color: "oklch(0.78 0.06 65 / 0.82)" }}>
               Wren is working alongside you.
             </p>
             {/* Soft right-edge gradient scrim */}
@@ -1031,8 +1030,8 @@ export default function FocusSessionsPage() {
 
           {/* RIGHT — timer + controls, vertically centered */}
           <div
-            className="flex flex-col items-center justify-center px-6 overflow-y-auto"
-            style={{ paddingTop: 48 }}
+            className="flex flex-col items-center justify-center px-5 py-7 overflow-y-auto md:px-6 md:py-0"
+            style={{ paddingTop: 0 }}
           >
             <div className="w-full max-w-xs text-center">
 
@@ -1237,12 +1236,12 @@ export default function FocusSessionsPage() {
 
       {/* ── NON-ACTIVE content: Wren panel + phase blocks ────────────────────── */}
       {phase !== "active" && (
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-x-hidden md:flex-row">
 
           {/* LEFT — Wren video panel (hidden on reveal) */}
           {phase !== "reveal" && (
             <div
-              className="relative w-1/2 overflow-hidden"
+              className="relative h-64 w-full shrink-0 overflow-hidden md:h-auto md:w-1/2"
               style={{ background: "var(--background)" }}
             >
               <WrenPlayer
@@ -1280,8 +1279,8 @@ export default function FocusSessionsPage() {
           {/* RIGHT — phase controls */}
           <div
             className={cn(
-              "flex flex-col items-center justify-center px-6 overflow-y-auto",
-              phase === "reveal" ? "w-full" : "w-1/2"
+              "flex w-full flex-col items-center justify-center px-5 py-7 overflow-y-auto md:px-6 md:py-0",
+              phase === "reveal" ? "md:w-full" : "md:w-1/2"
             )}
           >
             <div className="w-full max-w-xs">

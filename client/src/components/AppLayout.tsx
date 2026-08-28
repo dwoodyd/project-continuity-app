@@ -1003,7 +1003,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-24 pr-16"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
+        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))] pr-20"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 
@@ -1125,7 +1125,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
       {/* FAB — speed-dial with two capture options */}
       {/* bottom: nav-bar-height(52px) + safe-area + 16px gap so FAB never overlaps the nav */}
-      <div
+      {!isFocusRoute && <div
         className="fixed z-40 flex flex-col items-end gap-2"
         style={{
           bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 16px)",
@@ -1166,8 +1166,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         >
           {fabMenuOpen ? <X className="w-5 h-5" /> : <Lightbulb className="w-5 h-5" />}
         </button>
-      </div>
-      {fabMenuOpen && (
+      </div>}
+      {!isFocusRoute && fabMenuOpen && (
         <div className="fixed inset-0 z-30" onClick={() => setFabMenuOpen(false)} aria-hidden />
       )}
 

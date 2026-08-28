@@ -2229,6 +2229,14 @@
 - [x] Add focused regression coverage, run full validation, and checkpoint the complete mobile pass
 - [x] Audit the reported pricing media control: ProPage renders no app-owned audio/video/player, so no safe in-app overlay change was applied
 - [x] Center the app sign-in surface vertically and repair its internal See what's inside and Take the tour entry actions
+
+## Mobile Round 2 Layout Repair (Aug 28)
+- [x] Collapse all affected media-beside-text heroes and split layouts to capped-media-above, full-width-copy-below on mobile
+- [x] Repair Today return hero and Just One Thing width so no text, card, or action wraps into a narrow strip
+- [x] Repair Focus landing and active-session mobile composition, and hide the corrupt sessions thumbnail on mobile if necessary
+- [x] Guarantee page-body clearance around the FAB and bottom bar on all app routes
+- [x] Remove light-mode right-edge gutters from full-bleed Evidence and related hero surfaces
+- [x] Add focused regression coverage, run full validation, and confirm the approved navigation shell and Focus/PiP/Wren behavior remain unchanged
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

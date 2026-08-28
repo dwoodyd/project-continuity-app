@@ -36,11 +36,11 @@ describe("Wren presence and coherent voice", () => {
     expect(home).toContain('variant="return"');
     expect(home).toContain('showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"');
     expect(scene).toContain("video.play().catch(() => {})");
-    expect(scene).toContain("absolute inset-0 h-full w-full object-cover mix-blend-screen");
+    expect(scene).toContain("absolute inset-x-0 top-0 h-56 w-full object-cover mix-blend-screen md:inset-0 md:h-full");
     expect(scene).toContain('variant?: "standard" | "return"');
     expect(scene).toContain('bleed?: boolean');
     expect(scene).toContain('data-wren-scene={bleed ? "edge-bleed" : "contained"}');
-    expect(scene).toContain('w-[calc(100%+2.5rem)] -mx-5');
+    expect(scene).toContain('left-1/2 w-screen max-w-none -translate-x-1/2');
     expect(scene).toContain("border-0 rounded-none");
     expect(scene).toContain("bg-[linear-gradient(90deg,rgba(22,24,21,0.98)");
     expect(welcome).toContain('<WrenPlayer clip="evidenceClean" size="hero" stage={false} feather');
