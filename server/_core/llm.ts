@@ -1,4 +1,6 @@
 import { ENV } from "./env";
+import { getDb } from "../db";
+import { llmUsage } from "../../drizzle/schema";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -57,6 +59,12 @@ export type ToolChoice =
 
 export type InvokeParams = {
   messages: Message[];
+  /** Stable feature label used for operational cost attribution. */
+  feature?: string;
+  /** Member owning this request; null only for system/cron work. */
+  userId?: string | number | null;
+  /** Live catalog model ID. Rich generations default to Gemini Flash. */
+  model?: string;
   tools?: Tool[];
   toolChoice?: ToolChoice;
   tool_choice?: ToolChoice;
@@ -277,10 +285,13 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     output_schema,
     responseFormat,
     response_format,
+    feature = "unlabeled",
+    userId = null,
+    model = "gemini-3-flash-preview",
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model,
     messages: messages.map(normalizeMessage),
   };
 
@@ -296,7 +307,8 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
+  // Keep normal feature responses deliberately bounded. Long-form callers must opt in.
+  payload.max_tokens = params.maxTokens ?? params.max_tokens ?? 2048;
   payload.thinking = {
     "budget_tokens": 128
   }
@@ -341,5 +353,26 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     );
   }
 
-  return (await response.json()) as InvokeResult;
+  const result = (await response.json()) as InvokeResult;
+
+  // Accounting must never make an otherwise successful member request fail.
+  if (result.usage) {
+    void (async () => {
+      try {
+        const db = await getDb();
+        if (!db) return;
+        await db.insert(llmUsage).values({
+          userId: userId == null ? null : Number(userId),
+          endpoint: feature.slice(0, 128),
+          model: result.model || model,
+          inputTokens: result.usage?.prompt_tokens ?? 0,
+          outputTokens: result.usage?.completion_tokens ?? 0,
+        });
+      } catch (error) {
+        console.warn("[LLM] Usage accounting failed", error);
+      }
+    })();
+  }
+
+  return result;
 }

@@ -379,6 +379,13 @@
       "when": 1787871102590,
       "tag": "0053_majestic_iron_lad",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1787881026239,
+      "tag": "0054_kind_guardsmen",
+      "breakpoints": true
     }
   ]
 }

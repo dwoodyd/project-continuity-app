@@ -7,11 +7,9 @@
  *   Prevents runaway loops and rapid-fire abuse.
  *   Default: 10 LLM calls per 60-second window per user.
  *
- * Layer 2 — Daily cap (calendar-day counter)
- *   Hard ceiling on total AI calls per user per UTC day.
- *   Default: 100 calls/day per user.
- *   At 50% (50 calls) the owner receives a notification.
- *   At 100% the user is blocked for the rest of the day.
+ * Layer 2 — Daily heavy-generation budget (calendar-day counter)
+ *   Applies only to Free members on token-heavy generation routes. Cheap parsing
+ *   and classification calls retain burst protection but do not consume this budget.
  *
  * Both layers use in-memory state. This is correct for a single-instance
  * deployment. For horizontal scaling, replace with a shared Redis store.
@@ -41,17 +39,16 @@ interface DailyEntry {
 
 const dailyStore = new Map<string, DailyEntry>();
 
-const DAILY_CAP   = 100; // hard ceiling per user per UTC day
-const ALERT_AT    = 50;  // send owner notification at this threshold
+const FREE_HEAVY_DAILY_CAP = 8;
+const ALERT_AT = 6;
 
 function utcDateStr(): string {
   return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
 /**
- * Increment the daily counter for a user and enforce the hard cap.
- * Sends a one-time owner notification when the user crosses 50% of the cap.
- * Throws TOO_MANY_REQUESTS when the hard cap is reached.
+ * Increment the daily heavy-generation counter for a Free member.
+ * Paid, founding, and admin members do not consume this budget.
  */
 async function checkDailyCap(userId: string | number): Promise<void> {
   const key = String(userId);
@@ -68,17 +65,17 @@ async function checkDailyCap(userId: string | number): Promise<void> {
   dailyStore.set(key, current);
 
   // Hard cap — block the request
-  if (current.count > DAILY_CAP) {
+  if (current.count > FREE_HEAVY_DAILY_CAP) {
     // Fire-and-forget owner alert on first over-cap hit
-    if (current.count === DAILY_CAP + 1) {
+    if (current.count === FREE_HEAVY_DAILY_CAP + 1) {
       notifyOwner({
-        title: "🚨 AI Daily Cap Hit",
-        content: `User **${key}** has exceeded the daily AI cap of **${DAILY_CAP} calls** on ${today}. All further AI requests are blocked until midnight UTC.`,
+        title: "AI Free-tier Daily Budget Reached",
+        content: `A Free member exceeded the ${FREE_HEAVY_DAILY_CAP}-generation daily AI budget on ${today}. Further heavy generations are deferred until the next day.`,
       }).catch(() => {/* non-blocking */});
     }
     throw new TRPCError({
       code: "TOO_MANY_REQUESTS",
-      message: `You've reached the daily AI limit (${DAILY_CAP} requests). The limit resets at midnight UTC.`,
+      message: "That's today's AI — it resets tomorrow, or upgrade for more.",
     });
   }
 
@@ -86,8 +83,8 @@ async function checkDailyCap(userId: string | number): Promise<void> {
   if (current.count === ALERT_AT && !current.alertSent) {
     current.alertSent = true;
     notifyOwner({
-      title: "⚠️ AI Usage Alert — 50% Daily Cap",
-      content: `User **${key}** has made **${ALERT_AT}** AI calls today (${today}). Hard cap is ${DAILY_CAP}. No action needed yet — just a heads-up.`,
+      title: "AI Free-tier Usage Alert",
+      content: `A Free member has used ${ALERT_AT} of ${FREE_HEAVY_DAILY_CAP} heavy AI generations today (${today}).`,
     }).catch(() => {/* non-blocking */});
   }
 }
@@ -102,7 +99,30 @@ async function checkDailyCap(userId: string | number): Promise<void> {
  * NOTE: This function is synchronous for the burst check but async for the
  * daily cap (which fires a notification). Always await it.
  */
-export async function checkLLMRateLimit(userId: string | number): Promise<void> {
+export type LLMRateLimitOptions = {
+  heavy?: boolean;
+  hasPaidAccess?: boolean;
+};
+
+export type AIEntitledUser = {
+  id: string | number;
+  isPro?: boolean;
+  isFoundingMember?: boolean;
+  role?: string | null;
+};
+
+/** Apply the Free daily budget only where a rich generation can materially increase cost. */
+export async function checkHeavyLLMRateLimit(user: AIEntitledUser): Promise<void> {
+  await checkLLMRateLimit(user.id, {
+    heavy: true,
+    hasPaidAccess: Boolean(user.isPro || user.isFoundingMember || user.role === "admin"),
+  });
+}
+
+export async function checkLLMRateLimit(
+  userId: string | number,
+  { heavy = false, hasPaidAccess = false }: LLMRateLimitOptions = {},
+): Promise<void> {
   // Layer 1: burst check (synchronous)
   const key = String(userId);
   const now = Date.now();
@@ -121,8 +141,10 @@ export async function checkLLMRateLimit(userId: string | number): Promise<void> 
   entry.timestamps.push(now);
   burstStore.set(key, entry);
 
-  // Layer 2: daily cap (async — may send notification)
-  await checkDailyCap(userId);
+  // Layer 2 applies only to costly generations for Free members.
+  if (heavy && !hasPaidAccess) {
+    await checkDailyCap(userId);
+  }
 }
 
 /**
@@ -132,11 +154,12 @@ export async function checkLLMRateLimit(userId: string | number): Promise<void> 
  */
 export async function invokeLLMForUser(
   userId: string | number,
-  params: Parameters<typeof import("./llm").invokeLLM>[0]
+  params: Parameters<typeof import("./llm").invokeLLM>[0],
+  options?: LLMRateLimitOptions,
 ): Promise<ReturnType<typeof import("./llm").invokeLLM>> {
-  await checkLLMRateLimit(userId);
+  await checkLLMRateLimit(userId, options);
   const { invokeLLM } = await import("./llm");
-  return invokeLLM(params);
+  return invokeLLM({ ...params, userId });
 }
 
 /**

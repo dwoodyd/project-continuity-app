@@ -17,6 +17,7 @@ import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge"
 import { bookedFocusSessions, focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
 import { eq, desc, and, gte, sql } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
+import { checkHeavyLLMRateLimit } from "../_core/rateLimiter";
 import { ENV } from "../_core/env";
 import { getNowInTimezone } from "../utils/dateUtils";
 
@@ -468,7 +469,11 @@ The user is currently reading "${chapter.title}" in "Permission to Start". This 
         content: m.content,
       }));
 
+      await checkHeavyLLMRateLimit(ctx.user);
       const response = await invokeLLM({
+        feature: "focus_session_wren_chat",
+        userId: ctx.user.id,
+        maxTokens: 700,
         messages: [
           { role: "system", content: systemPrompt + readingBridgeBlock },
           ...history,

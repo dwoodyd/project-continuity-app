@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure } from "../_core/trpc";
-import { checkLLMRateLimit } from "../_core/rateLimiter";
+import { checkHeavyLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import { getWrenToneDirective } from "../wrenTone";
 import {
@@ -53,12 +53,15 @@ export const coworkingRouter = {
 
       if (input.generateNextStep && session.workingOn) {
         try {
-          await checkLLMRateLimit(ctx.user.id);
+          await checkHeavyLLMRateLimit(ctx.user);
           const activeProjects = await getActiveProjects(ctx.user.id);
           const projectContext = session.projectId
             ? activeProjects.find((p) => p.id === session.projectId)?.title ?? ""
             : "";
           const result = await invokeLLM({
+            feature: "coworking_next_step",
+            userId: ctx.user.id,
+            maxTokens: 400,
             messages: [
               {
                 role: "system",

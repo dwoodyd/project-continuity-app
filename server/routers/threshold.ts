@@ -83,6 +83,10 @@ Generate a First Movable Step and a Minimum Viable Contact version.`;
 
       try {
         const response = await invokeLLM({
+          feature: "first_movable_step",
+          userId: ctx.user.id,
+          model: "gpt-5-nano",
+          maxTokens: 700,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userMessage },
@@ -208,6 +212,10 @@ What would make this feel lighter: "${input.q3Response}"`;
 
       try {
         const response = await invokeLLM({
+          feature: "threshold_diagnosis",
+          userId: ctx.user.id,
+          model: "gpt-5-nano",
+          maxTokens: 800,
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userMessage },

@@ -45,9 +45,12 @@ export const clarityRouter = router({
         brainDump: z.string().min(10, "Please share at least a few sentences").max(8000, "Brain dump must be under 8,000 characters"),
         projectId: z.number().optional(),
       })
-    )
+     )
      .mutation(async ({ ctx, input }) => {
-      await checkLLMRateLimit(ctx.user.id);
+      await checkLLMRateLimit(ctx.user.id, {
+        heavy: true,
+        hasPaidAccess: ctx.user.isPro || ctx.user.isFoundingMember || ctx.user.role === "admin",
+      });
       if (input.projectId) await assertProjectOwnedBy(input.projectId, ctx.user.id);
       const db = await getDb();
       if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Service temporarily unavailable." });
@@ -102,6 +105,9 @@ Tone: warm, direct, non-clinical. No bullet points. No headers. No preamble. JSO
 
       try {
         const response = await invokeLLM({
+          feature: "clarity_map",
+          userId: ctx.user.id,
+          maxTokens: 1600,
           messages: [
             { role: "system", content: systemPrompt },
             {

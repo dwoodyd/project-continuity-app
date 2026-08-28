@@ -63,6 +63,22 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
+// ─── LLM Usage ────────────────────────────────────────────────────────────────
+/** Immutable operational ledger for model usage and per-member AI cost controls. */
+export const llmUsage = mysqlTable("llm_usage", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  endpoint: varchar("endpoint", { length: 128 }).notNull(),
+  model: varchar("model", { length: 128 }).notNull(),
+  inputTokens: int("inputTokens").notNull().default(0),
+  outputTokens: int("outputTokens").notNull().default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  index("llm_usage_user_created_idx").on(table.userId, table.createdAt),
+]);
+
+export type LlmUsage = typeof llmUsage.$inferSelect;
+
 // ─── Beta Codes ───────────────────────────────────────────────────────────────
 export const betaCodes = mysqlTable("betaCodes", {
   id: int("id").autoincrement().primaryKey(),

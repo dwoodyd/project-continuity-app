@@ -200,6 +200,10 @@ For each task, include a carryoverCount field (0 for new tasks, or the count fro
 Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{title: string, projectId: number|null, carryoverCount: number}], timeBlocks: [{label: string, duration: string}] }`;
 
       const response = await invokeLLM({
+        feature: "checkin_morning_plan",
+        userId: ctx.user.id,
+        model: "gpt-5-nano",
+        maxTokens: 900,
         messages: [
           { role: "system", content: "You are a calm, grounded productivity assistant. Return valid JSON only." },
           { role: "user", content: planPrompt },
@@ -391,6 +395,10 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
       const planContext = plan ? `Today's plan had tasks: ${plan.criticalTasks}` : "No morning plan was set.";
 
       const response = await invokeLLM({
+        feature: "checkin_midday_analysis",
+        userId: ctx.user.id,
+        model: "gpt-5-nano",
+        maxTokens: 650,
         messages: [
           {
             role: "system",
@@ -477,6 +485,10 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
       const tone = toneMap[toneBucket];
 
       const response = await invokeLLM({
+        feature: "checkin_evening_closure",
+        userId: ctx.user.id,
+        model: "gpt-5-nano",
+        maxTokens: 1100,
         messages: [
           {
             role: "system",

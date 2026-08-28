@@ -9,7 +9,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
-import { checkLLMRateLimit } from "../_core/rateLimiter";
+import { checkHeavyLLMRateLimit, checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import { getWrenToneBucket } from "../wrenTone";
 import {
@@ -61,6 +61,10 @@ export const intelligenceRouter = router({
       let category: "social_media" | "research_rabbit_hole" | "unplanned_task" | "communication" | "context_switch" | "unknown" = "unknown";
       try {
         const response = await invokeLLM({
+          feature: "distraction_classification",
+          userId: ctx.user.id,
+          model: "gpt-5-nano",
+          maxTokens: 300,
           messages: [
             {
               role: "system",
@@ -296,7 +300,7 @@ Return JSON: { decisions: string[] }`,
   }),
 
   generateWeeklyCompass: protectedProcedure.mutation(async ({ ctx }) => {
-    await checkLLMRateLimit(ctx.user.id);
+    await checkHeavyLLMRateLimit(ctx.user);
     const [activeProjects, recentSessions, recentPlans, calendarEvents, toneBucket] = await Promise.all([
       getActiveProjects(ctx.user.id),
       getRecentFocusSessions(ctx.user.id, 20),
@@ -319,6 +323,9 @@ Return JSON: { decisions: string[] }`,
       : "";
 
     const response = await invokeLLM({
+      feature: "weekly_compass",
+      userId: ctx.user.id,
+      maxTokens: 1800,
       messages: [
         {
           role: "system",

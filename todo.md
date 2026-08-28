@@ -2209,6 +2209,14 @@
 - [x] Preserve free check-ins, Projects, single weekly Focus Session, Scratch Pad, basic Compass, and all re-entry/crisis surfaces
 - [x] Add focused coverage, full validation, and checkpoint the combined conversion and new-user polish release
 - [x] Add activation-gated invitations for implemented Single Focus, Pop-out, and Clarity limits; retain free re-entry and omit prompts for unavailable retained-chat controls
+
+## AI Cost Controls Build (Aug 27)
+- [x] Persist per-request LLM usage with member, feature, model, input tokens, output tokens, and creation time
+- [x] Lower the core output-token default and give genuinely long generations explicit bounded ceilings
+- [x] Route supplied low-stakes parsing, classification, and crisis-prefilter calls to the live catalog's economical model while retaining conservative safety behavior
+- [x] Add a paid-aware daily budget only for heavy AI generations, with a graceful reset-or-upgrade response for Free members
+- [x] Preserve manual-mode zero-AI access and all non-AI Free functionality
+- [x] Add focused coverage, apply the additive usage migration, validate protected Focus/PiP behavior, and checkpoint
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

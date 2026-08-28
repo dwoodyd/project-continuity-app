@@ -78,6 +78,9 @@ export async function checkCrisisRisk(text: string): Promise<CrisisRisk> {
 
   try {
     const response = await invokeLLM({
+      feature: "crisis_safety_prefilter",
+      model: "gpt-5-nano",
+      maxTokens: 256,
       messages: [
         {
           role: "system",
@@ -117,8 +120,8 @@ Do NOT classify ordinary "I'm overwhelmed" or "I'm stressed" as elevated — tho
     if (risk === "elevated" || risk === "acute") return risk;
     return "none";
   } catch {
-    // Fail open — if classifier errors, don't block the user
-    return "none";
+    // A high-risk keyword matched. Preserve the safer path if classification is unavailable.
+    return "elevated";
   }
 }
 

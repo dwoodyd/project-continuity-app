@@ -200,6 +200,10 @@ export const captureRouter = router({
       try {
         const llmResult = await Promise.race([
           invokeLLM({
+            feature: "capture_atomization",
+            userId,
+            model: "gpt-5-nano",
+            maxTokens: 600,
             messages: [{ role: "user", content: prompt }],
           }),
           new Promise<never>((_, reject) =>
