@@ -39,7 +39,7 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
   return (
     <section
       data-wren-scene={bleed ? "edge-bleed" : "contained"}
-      className={`relative isolate min-h-0 overflow-hidden border-0 rounded-none bg-[#161815] text-[#F5EEE2] md:min-h-[min(72vh,680px)] ${isReturnScene ? "md:min-h-[min(78vh,760px)]" : ""} ${bleed ? "relative left-1/2 w-screen max-w-none -translate-x-1/2 sm:left-auto sm:w-[calc(100%+4rem)] sm:max-w-none sm:translate-x-0 sm:-mx-8" : ""} ${className}`}
+      className={`relative isolate min-h-0 w-full max-w-none overflow-hidden border-0 rounded-none bg-[#161815] text-[#F5EEE2] md:min-h-[min(72vh,680px)] ${isReturnScene ? "md:min-h-[min(78vh,760px)]" : ""} ${bleed ? "md:w-[calc(100%+4rem)] md:-mx-8" : ""} ${className}`}
     >
       {videoFailed && resolvedPoster && (
         <img

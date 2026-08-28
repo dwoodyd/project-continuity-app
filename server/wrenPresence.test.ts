@@ -40,7 +40,7 @@ describe("Wren presence and coherent voice", () => {
     expect(scene).toContain('variant?: "standard" | "return"');
     expect(scene).toContain('bleed?: boolean');
     expect(scene).toContain('data-wren-scene={bleed ? "edge-bleed" : "contained"}');
-    expect(scene).toContain('left-1/2 w-screen max-w-none -translate-x-1/2');
+    expect(scene).toContain('md:w-[calc(100%+4rem)] md:-mx-8');
     expect(scene).toContain("border-0 rounded-none");
     expect(scene).toContain("bg-[linear-gradient(90deg,rgba(22,24,21,0.98)");
     expect(welcome).toContain('<WrenPlayer clip="evidenceClean" size="hero" stage={false} feather');
@@ -89,7 +89,7 @@ describe("Wren presence and coherent voice", () => {
     expect(appLayout).toContain('{location === "/focus" && (');
     expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
     expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
-    expect(tour).toContain('<WrenPlayer clip={wren} size="sm" stage={false} feather');
+    expect(tour).toContain('<WrenPlayer clip="evidenceClean" size="sm" stage={false} feather />');
     expect(about).toContain('clip="luminousFloats"');
     expect(about).toContain('stage={false}');
     expect(about).not.toContain('WrenPlayer clip={clip} size="full"');

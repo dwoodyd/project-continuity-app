@@ -103,7 +103,7 @@ export default function ThreadLocksPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="w-full max-w-2xl mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button

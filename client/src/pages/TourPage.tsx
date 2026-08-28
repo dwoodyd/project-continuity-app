@@ -227,26 +227,26 @@ export default function TourPage() {
       />
     <div className="min-h-screen text-white font-sans overflow-x-hidden" style={{ background: "oklch(0.09 0.015 240)" }}>
       {/* Nav */}
-      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between px-6 py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.92)", borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
-        <div className="flex items-center gap-2.5">
-          <WrenPlayer clip="popsHead" size="xs" />
-          <span className="font-brand text-lg tracking-tight" style={{ color: "oklch(0.74 0.14 72)" }}>Continuary</span>
+      <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.98)", borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
+        <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
+          <WrenPlayer clip="evidenceClean" size="xs" wrapperClassName="hidden sm:block" />
+          <span className="truncate font-brand text-base tracking-tight sm:text-lg" style={{ color: "oklch(0.74 0.14 72)" }}>Continuary</span>
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/landing" className="text-sm transition-colors" style={{ color: "oklch(0.65 0.06 65)" }}>← Back</Link>
-          <Link href="/apply" className="text-sm px-4 py-1.5 rounded-full font-medium transition-colors" style={{ background: "oklch(0.74 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.3)" }}>
-            Apply for access
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <Link href="/landing" className="text-xs transition-colors sm:text-sm" style={{ color: "oklch(0.65 0.06 65)" }}>← Back</Link>
+          <Link href="/apply" className="rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors sm:px-4 sm:text-sm" style={{ background: "oklch(0.74 0.14 72 / 0.15)", color: "oklch(0.74 0.14 72)", border: "1px solid oklch(0.74 0.14 72 / 0.3)" }}>
+            <span className="sm:hidden">Apply</span><span className="hidden sm:inline">Apply for access</span>
           </Link>
         </div>
       </nav>
 
       {/* Progress bar */}
-      <div className="fixed top-[57px] inset-x-0 z-40 h-0.5" style={{ background: "oklch(0.74 0.14 72 / 0.08)" }}>
+      <div className="fixed top-[53px] inset-x-0 z-40 h-0.5 sm:top-[57px]" style={{ background: "oklch(0.74 0.14 72 / 0.08)" }}>
         <div className="h-full transition-all duration-500" style={{ width: `${((idx + 1) / STEPS.length) * 100}%`, background: "oklch(0.74 0.14 72 / 0.7)" }} />
       </div>
 
       {/* Step dots */}
-      <div className="fixed top-[65px] inset-x-0 z-40 flex justify-center gap-2 py-2">
+      <div className="fixed top-[61px] inset-x-0 z-40 flex justify-center gap-2 py-2 sm:top-[65px]">
         {STEPS.map((s, i) => (
           <button key={s} onClick={() => setStep(s)}
             className="rounded-full transition-all duration-300"
@@ -260,7 +260,7 @@ export default function TourPage() {
       </div>
 
       {/* Content */}
-      <main className="pt-28 pb-24 px-4 max-w-3xl mx-auto">
+      <main className="mx-auto max-w-3xl px-4 pt-28 pb-36">
 
         {/* ── 1. Welcome ── */}
         {step === "intro" && (
@@ -778,8 +778,8 @@ export default function TourPage() {
       </main>
 
       {step !== "invite" && (
-        <div className="fixed bottom-6 inset-x-0 flex justify-center pointer-events-none">
-          <div className="text-xs" style={{ color: "oklch(0.45 0.04 240)" }}>{idx + 1} / {STEPS.length} — {STEP_META[step].label}</div>
+        <div className="fixed bottom-0 inset-x-0 z-40 flex justify-center px-4 py-3 pointer-events-none" style={{ background: "oklch(0.09 0.015 240 / 0.98)" }}>
+          <div className="text-center text-xs" style={{ color: "oklch(0.45 0.04 240)" }}>{idx + 1} / {STEPS.length} — {STEP_META[step].label}</div>
         </div>
       )}
     </div>
@@ -792,10 +792,10 @@ function Fade({ children }: { children: React.ReactNode }) {
   return <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</div>;
 }
 
-function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
+function Header({ eyebrow, title, wren: _wren }: { eyebrow: string; title: string; wren: WrenClip }) {
   return (
-    <div className="flex items-start gap-5">
-      <WrenPlayer clip={wren} size="sm" stage={false} feather />
+    <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left">
+      <WrenPlayer clip="evidenceClean" size="sm" stage={false} feather />
       <div className="space-y-1">
         <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>

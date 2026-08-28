@@ -2237,6 +2237,14 @@
 - [x] Guarantee page-body clearance around the FAB and bottom bar on all app routes
 - [x] Remove light-mode right-edge gutters from full-bleed Evidence and related hero surfaces
 - [x] Add focused regression coverage, run full validation, and confirm the approved navigation shell and Focus/PiP/Wren behavior remain unchanged
+
+## Mobile Round 3 Punch List (Aug 28)
+- [x] Remove mobile left-anchoring and one-sided gutters from shared hero and content containers
+- [x] Ensure Evidence text and action controls remain fully visible within the mobile viewport
+- [x] Make Thread Locks cards and Return Brief detail use full symmetric mobile width in both themes
+- [x] Stack or hide inline heading thumbnails on mobile and replace every remaining watermarked thumbnail mapping
+- [x] Repair mobile Welcome tour header, scallop clearance, and progress/footer spacing
+- [x] Add focused regression coverage, run full validation, and preserve Round 1/2 navigation plus Focus/PiP/Wren behavior
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

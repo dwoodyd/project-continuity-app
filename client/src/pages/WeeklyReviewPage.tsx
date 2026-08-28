@@ -85,8 +85,8 @@ export default function WeeklyReviewPage() {
   return (
     <div className="px-5 py-7 space-y-7 page-enter max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <WrenPlayer clip="wrenLetter" size="md" />
+      <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:gap-4 sm:text-left">
+        <WrenPlayer clip="evidenceClean" size="md" />
         <div>
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
           <p className="text-sm text-muted-foreground mt-1">{weekLabel}</p>
@@ -214,7 +214,7 @@ export default function WeeklyReviewPage() {
         >
           <div className="relative">
             <div className="flex justify-center mb-4">
-              <WrenPlayer clip="wrenLetter" size="lg" />
+              <WrenPlayer clip="evidenceClean" size="lg" />
             </div>
             <p className="text-base font-semibold mb-1" style={{ color: "oklch(0.74 0.14 72)" }}>
               Ask Wren to read your week
