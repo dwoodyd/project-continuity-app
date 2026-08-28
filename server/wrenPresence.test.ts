@@ -43,7 +43,7 @@ describe("Wren presence and coherent voice", () => {
     expect(scene).toContain('w-[calc(100%+2.5rem)] -mx-5');
     expect(scene).toContain("border-0 rounded-none");
     expect(scene).toContain("bg-[linear-gradient(90deg,rgba(22,24,21,0.98)");
-    expect(welcome).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
+    expect(welcome).toContain('<WrenPlayer clip="evidenceClean" size="hero" stage={false} feather');
     expect(about).toContain('<WrenPlayer clip="popsHead" size="hero" stage={false} feather');
     expect(onboarding).toContain('<SmoothLoopVideo src={WREN_CLIPS.dropsAndHovers}');
     expect(onboarding).toContain('videoRef.current?.play().catch(() => {})');

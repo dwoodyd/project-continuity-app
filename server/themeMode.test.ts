@@ -25,7 +25,7 @@ describe("permanent dual-theme contract", () => {
   it("does not route public discovery outside the persisted app theme", () => {
     expect(source("client/src/pages/LandingPage.tsx")).toContain("return <WelcomePage />");
     const appLayout = source("client/src/components/AppLayout.tsx");
-    expect(appLayout).toContain('href="/welcome"');
+    expect(appLayout).toContain('href="/tour"');
     expect(appLayout).not.toContain('oklch(0.93 0.008 264)');
     expect(appLayout).not.toContain("text-muted-foreground/40 hover:text-muted-foreground/70");
   });

@@ -22,6 +22,7 @@ import {
   Home,
   Lightbulb,
   LogOut,
+  Menu,
   Monitor,
   Moon,
   MoreHorizontal,
@@ -125,17 +126,13 @@ const INTERNAL_PAGE_TITLES: Record<string, string> = {
   "/pro": "Membership",
 };
 
-// ── Mobile bottom-tab items (5 visible + Hub) ────────────────────────────────
+// ── Mobile bottom-tab items (core destinations + grouped navigation drawer) ──
 const PRIMARY_TABS = [
-  { href: "/",        label: "Today",    icon: Brain },
-  { href: "/projects",label: "Projects", icon: Archive },
-  { href: "/clarity", label: "Clarity",  icon: Zap },
-  { href: "/compass", label: "Compass",  icon: Compass },
-  { href: "/vault",   label: "Vault",    icon: BookOpen },
-  { href: "/hub",     label: "Hub",      icon: MoreHorizontal },
+  { href: "/",         label: "Today",   icon: Brain },
+  { href: "/capture",  label: "Capture", icon: Mic },
+  { href: "/focus",    label: "Focus",   icon: Users },
+  { href: "__more__",  label: "More",    icon: MoreHorizontal },
 ] as const;
-
-// MORE_ITEMS removed — replaced by Hub tab (/hub page)
 
 // ── Wren sidebar presence with meet-Wren tooltip ────────────────────────────
 const WREN_TOOLTIP_KEY = "continuary-wren-tooltip-seen";
@@ -218,6 +215,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const [threadLockOpen, setThreadLockOpen] = useState(false);
   const [fabMenuOpen, setFabMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location]);
   const [navExpanded, setNavExpanded] = useState<Record<string, boolean>>({
     today: true,
     work: true,
@@ -525,7 +526,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // Show sign-in card for any unauthenticated route — wait for auth to resolve first
   if (!authLoading && !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',padding:'1rem',background:'#F4F5F2',color:'#2A2D28'}}>
+      <div className="min-h-[100dvh] flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100dvh',padding:'1rem',background:'#F4F5F2',color:'#2A2D28'}}>
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
@@ -540,33 +541,35 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 Continuary keeps your thread. Pick up exactly where you left off.
               </p>
               <a
+                href="/apply"
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
+                style={{ background:'#C8452B', color:'#FFFFFF', boxShadow:'0 4px 12px rgb(200 69 43 / 0.20)' }}
+              >
+                Claim your founding seat
+                <ChevronRight className="w-4 h-4" />
+              </a>
+              <a
                 href={getLoginUrl()}
                 onClick={() => {
                   if (location && location !== "/" && location !== "/landing") {
                     localStorage.setItem("continuary_return_path", location);
                   }
                 }}
-                className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
-                style={{ background:'#C8452B', color:'#FFFFFF', boxShadow:'0 4px 12px rgb(200 69 43 / 0.20)' }}
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold border hover:opacity-90 active:scale-[0.98] transition-all mt-2"
+                style={{ background:'#E6E8E3', color:'#2A2D28', borderColor:'#D3D6D0' }}
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-            <a href="/welcome" className="block text-center text-xs transition-colors mt-2 hover:opacity-75" style={{ color:'#4B4F48' }}>← See what's inside</a>
+            <a href="/tour" className="block text-center text-xs transition-colors mt-3 hover:opacity-75" style={{ color:'#4B4F48' }}>← See what's inside</a>
             <a href="/pricing" className="block text-center text-xs transition-colors mt-1 hover:opacity-75" style={{ color:'#4B4F48' }}>See pricing →</a>
             </div>
           </div>
-          {onPreviewIntro && (
-            <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
-              <button
-                onClick={onPreviewIntro}
-                className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75"
-                style={{ color:'#6B6F68' }}
-              >
-                ✦ Take the tour
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
+            <a href="/tour" className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75" style={{ color:'#4B4F48' }}>
+              Take the tour
+            </a>
+          </div>
           <p className="text-center text-sm mt-4 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>Built for minds that keep going.</p>
           <p className="text-center text-sm mt-3 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>
             <a href="/privacy" className="hover:opacity-75 underline underline-offset-2 transition-colors">Privacy</a>
@@ -603,6 +606,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
+  const isPrimaryMobileRoute = PRIMARY_TABS.some((tab) => tab.href !== "__more__" && isActive(tab.href));
   // ── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
   if (isDesktopMode) {
     return (
@@ -930,8 +934,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         {/* Top header — hidden during active focus sessions */}
         {!isFocusRoute && (
         <header
-          className="flex items-center justify-between px-4 shrink-0 z-30 border-b border-white/10 nav-glass"
+          className="flex items-center justify-between px-4 shrink-0 z-30"
           style={{
+            background: "var(--sidebar)",
+            color: "var(--sidebar-foreground)",
+            borderBottom: "1px solid var(--sidebar-border)",
             paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
             paddingBottom: "12px",
           }}
@@ -945,6 +952,17 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             )}
           </Link>
           <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setMobileNavOpen(true)}
+              className="p-2 rounded-xl transition-colors"
+              style={{ color: "var(--sidebar-foreground)" }}
+              aria-label="Open navigation"
+              aria-expanded={mobileNavOpen}
+              aria-controls="mobile-navigation-drawer"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             {/* Sync / offline indicator */}
             {!isOnline && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-medium" title="Offline">
@@ -974,10 +992,10 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 <Monitor className="w-4 h-4" />
               </button>
             )}
-            <button onClick={toggleTheme} className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors" aria-label="Toggle theme">
+            <button onClick={toggleTheme} className="p-2 rounded-xl transition-colors" style={{ color: "var(--sidebar-foreground)" }} aria-label="Toggle theme">
               {theme === "dark" ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
             </button>
-            <button onClick={() => logout()} className="p-2 rounded-xl text-white/50 hover:text-white hover:bg-white/[0.08] transition-colors" aria-label="Sign out">
+            <button onClick={() => logout()} className="p-2 rounded-xl transition-colors" style={{ color: "var(--sidebar-foreground)" }} aria-label="Sign out">
               <LogOut className="w-4 h-4" />
             </button>
           </div>
@@ -985,31 +1003,36 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
 
         {/* Page content */}
-        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-20"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
+        <main id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-24 pr-16"} style={isFocusRoute ? undefined : { scrollbarGutter: "stable" }}>
           {children}
         </main>
 
         {/* Bottom tab bar — hidden during focus sessions */}
         {!isFocusRoute && (
         <nav
-          className="shrink-0 z-30 nav-glass"
+          className="shrink-0 z-30"
           style={{
-            borderTop: "1px solid oklch(1 0 0 / 0.08)",
+            background: "var(--sidebar)",
+            borderTop: "1px solid var(--sidebar-border)",
             paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
           }}
         >
           <div className="flex items-stretch justify-around px-0.5 pt-1">
             {PRIMARY_TABS.map(({ href, label, icon: Icon }) => {
-              const active = isActive(href);
+              const opensDrawer = href === "__more__";
+              const active = opensDrawer ? !isPrimaryMobileRoute : isActive(href);
               return (
                 <button
                   key={href}
                   onClick={() => {
-                    if (active) window.scrollTo({ top: 0, behavior: "smooth" });
+                    if (opensDrawer) setMobileNavOpen(true);
+                    else if (active) window.scrollTo({ top: 0, behavior: "smooth" });
                     else navigate(href);
                   }}
                   className="flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-all duration-150 relative min-h-[52px]"
-                  style={{ color: active ? "var(--accent-tint-text)" : "oklch(1 0 0 / 0.35)" }}
+                  style={{ color: active ? "var(--accent-tint-text)" : "var(--sidebar-foreground)" }}
+                  aria-label={opensDrawer ? "Open more navigation" : label}
+                  aria-current={active && !opensDrawer ? "page" : undefined}
                 >
                   {/* Active pill background */}
                   {active && (
@@ -1040,7 +1063,65 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
       </div>
 
-      {/* More drawer removed — replaced by Hub tab (/hub) */}
+      {/* Grouped desktop sidebar, adapted as a dismissible mobile drawer. */}
+      {mobileNavOpen && !isFocusRoute && (
+        <div className="fixed inset-0 z-50 lg:hidden" aria-modal="true" role="dialog" aria-label="Navigation menu">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/55"
+            aria-label="Close navigation"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <aside
+            id="mobile-navigation-drawer"
+            className="relative h-full w-[min(86vw,340px)] flex flex-col overflow-y-auto"
+            style={{
+              background: "var(--sidebar)",
+              color: "var(--sidebar-foreground)",
+              paddingTop: "max(env(safe-area-inset-top, 0px), 12px)",
+              paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)",
+            }}
+          >
+            <div className="flex items-center justify-between px-4 pb-3" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
+              <Link href="/" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 font-semibold">
+                <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
+                Continuary
+              </Link>
+              <button type="button" onClick={() => setMobileNavOpen(false)} className="p-2 rounded-xl" style={{ color: "var(--sidebar-foreground)" }} aria-label="Close navigation">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <nav className="flex-1 px-3 py-4 space-y-5" aria-label="All navigation">
+              {NAV_GROUPS.map((group) => {
+                const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
+                return (
+                  <section key={group.key}>
+                    <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--muted-foreground)" }}>{group.label}</p>
+                    <div className="space-y-0.5">
+                      {items.map(({ href, label, icon: Icon }) => {
+                        const active = isActive(href);
+                        return (
+                          <Link
+                            key={href}
+                            href={href}
+                            onClick={() => setMobileNavOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm"
+                            style={active ? { background: "var(--brand-muted)", color: "var(--accent-tint-text)", fontWeight: 600 } : { color: "var(--sidebar-foreground)" }}
+                            aria-current={active ? "page" : undefined}
+                          >
+                            <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                            <span>{label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              })}
+            </nav>
+          </aside>
+        </div>
+      )}
 
       {/* FAB — speed-dial with two capture options */}
       {/* bottom: nav-bar-height(52px) + safe-area + 16px gap so FAB never overlaps the nav */}

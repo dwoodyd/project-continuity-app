@@ -155,7 +155,7 @@ export default function WelcomePage() {
         <div className="relative max-w-5xl mx-auto px-6 pt-16 pb-24">
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
             <div className="order-1 flex flex-col items-center text-center animate-fade-slide-up">
-              <WrenPlayer clip="popsHead" size="hero" stage={false} feather fallbackStill="siliconeWatching" wrapperClassName="shrink-0" />
+              <WrenPlayer clip="evidenceClean" size="hero" stage={false} feather fallbackStill="evidenceCleanPoster" wrapperClassName="shrink-0" />
               <p className="mt-3 text-xs font-medium" style={{ color: "oklch(0.72 0.10 65 / 0.8)" }}>Wren — your Continuary companion</p>
               <p className="mt-2 max-w-sm text-xs leading-relaxed" style={{ color: "oklch(0.72 0.04 240)" }}>She remembers your thread and returns without rebuke. A companion, not a clinician.</p>
             </div>
@@ -163,12 +163,12 @@ export default function WelcomePage() {
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-6 border" style={{ background: "oklch(0.72 0.14 72 / 0.15)", borderColor: "oklch(0.72 0.14 72 / 0.3)", color: "oklch(0.74 0.14 72)" }}>
                 <Sparkles className="w-3 h-3" /> Continuity across absence
               </div>
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white leading-[1.1] mb-6">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground leading-[1.1] mb-6">
                 The place that remembers<br /><span style={{ color: "oklch(0.74 0.14 72)" }}>where you were.</span>
               </h1>
-              <p className="text-base text-white/65 leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">Coming back does not require rebuilding context. Your thread, notes, and next step are still here when you are ready. Start with the part of your space that meets this moment.</p>
+              <p className="text-base text-muted-foreground leading-relaxed mb-8 max-w-lg mx-auto lg:mx-0">Coming back does not require rebuilding context. Your thread, notes, and next step are still here when you are ready. Start with the part of your space that meets this moment.</p>
               <Link href="/"><Button size="lg" className="gap-2 px-8 font-semibold shadow-lg text-sm" style={{ background: "oklch(0.72 0.14 72)", color: "oklch(0.12 0.03 264)" }}>Open Today <ArrowRight className="w-4 h-4" /></Button></Link>
-              <p className="mt-5 text-xs text-white/45">Return here anytime you need to re-find your footing.</p>
+              <p className="mt-5 text-xs text-muted-foreground">Return here anytime you need to re-find your footing.</p>
             </div>
           </div>
         </div>
@@ -179,8 +179,8 @@ export default function WelcomePage() {
           <FadeSection><EvidenceCard /></FadeSection>
           <FadeSection delay={100} className="text-center lg:text-left">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Notice what is already moving</p>
-            <h2 className="text-3xl font-bold tracking-tight text-white mb-4">Your Evidence Log</h2>
-            <p className="text-base text-white/60 leading-relaxed mb-6">Once a month, this is where your sessions, returns, and hard-day effort become one honest sentence about the person you are practicing being.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">Your Evidence Log</h2>
+            <p className="text-base text-muted-foreground leading-relaxed mb-6">Once a month, this is where your sessions, returns, and hard-day effort become one honest sentence about the person you are practicing being.</p>
             <Link href="/evidence" className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>Open your Evidence Log <ArrowRight className="w-4 h-4" /></Link>
           </FadeSection>
         </div>
@@ -198,14 +198,14 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      <section className="py-16 px-6" style={{ background: "oklch(0.97 0.01 252)" }}>
+      <section className="py-16 px-6 bg-muted">
         <div className="max-w-3xl mx-auto"><FadeSection>
           <div className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-start gap-6" style={{ background: "var(--card)", border: "1px solid oklch(0.30 0.07 252)" }}>
             <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0" style={{ background: "oklch(0.72 0.14 72 / 0.15)" }}><HeartHandshake className="w-6 h-6" style={{ color: "oklch(0.72 0.14 72)" }} /></div>
             <div>
               <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "oklch(0.72 0.14 72)" }}>After a gap</p>
-              <h2 className="text-xl font-bold text-white mb-3 leading-snug">You came back. That&apos;s the whole thing.</h2>
-              <p className="text-sm text-white/60 leading-relaxed mb-4">Today holds your last context, open loops, and one gentle next step so you never have to reconstruct everything before you begin.</p>
+              <h2 className="text-xl font-bold text-foreground mb-3 leading-snug">You came back. That&apos;s the whole thing.</h2>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">Today holds your last context, open loops, and one gentle next step so you never have to reconstruct everything before you begin.</p>
               <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: "oklch(0.74 0.14 72)" }}>Find your way back in <ArrowRight className="w-4 h-4" /></Link>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function WelcomePage() {
         </div>
       </section>
 
-      <section className="py-20 px-6" style={{ background: "oklch(0.97 0.01 252)" }}>
+      <section className="py-20 px-6 bg-muted">
         <div className="max-w-4xl mx-auto">
           <FadeSection className="text-center mb-12">
             <p className="text-xs font-semibold tracking-widest uppercase text-primary mb-3">Your app map</p>

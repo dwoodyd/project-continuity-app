@@ -512,9 +512,15 @@ video {
    layered and premium. The sidebar CSS variable already provides the base
    colour; we just add translucency + blur.                                  */
 .nav-glass {
-  background: #E6E8E3 !important;
+  background: var(--sidebar) !important;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* Public pricing uses a calm paper surface; its long-form helper copy must remain
+   comfortably readable rather than inheriting the intentionally softer app-muted tone. */
+.public-theme-surface .text-\[\#6B6F68\] {
+  color: #4B4F48 !important;
 }
 
 /* ── Mechanical pin-in: short, direct, no theatrical fade ─────────────────── */

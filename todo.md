@@ -2217,6 +2217,18 @@
 - [x] Add a paid-aware daily budget only for heavy AI generations, with a graceful reset-or-upgrade response for Free members
 - [x] Preserve manual-mode zero-AI access and all non-AI Free functionality
 - [x] Add focused coverage, apply the additive usage migration, validate protected Focus/PiP behavior, and checkpoint
+
+## Mobile Navigation and Polish Build (Aug 28)
+- [x] Reuse the grouped sidebar as a mobile hamburger drawer with active state, route-change close, scrim, and safe-area support
+- [x] Add a persistent five-or-fewer-item core bottom tab bar with a drawer-opening More control
+- [x] Make top and bottom bars opaque, theme-matched, and contrast-safe in both light and dark modes
+- [x] Reserve responsive content space so the help FAB cannot cover copy or the bottom bar
+- [x] Correct light-mode contrast and coherent theming for signed-in Welcome and public pricing surfaces
+- [x] Replace the Welcome Wren clip with an unwatermarked managed asset and retain graceful fallback delivery
+- [x] Verify existing dark-card Today thread-state labels remain contrast-safe without changing Focus, PiP, or Wren body-doubling behavior
+- [x] Add focused regression coverage, run full validation, and checkpoint the complete mobile pass
+- [x] Audit the reported pricing media control: ProPage renders no app-owned audio/video/player, so no safe in-app overlay change was applied
+- [x] Center the app sign-in surface vertically and repair its internal See what's inside and Take the tour entry actions
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
