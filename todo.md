@@ -2267,6 +2267,10 @@
 - [x] Add restrained haptic feedback for core mobile navigation and completion actions when the device supports it
 - [x] Add focused regression coverage, validate the installed-PWA interaction repair, and preserve Focus/PiP/body-doubling behavior
 - [ ] Recheck route scroll-to-top and supported-device haptics on the installed Android PWA after publication
+
+## Focus Landing Mobile Copy Visibility Repair (Aug 28)
+- [x] Restore clear separation between the Focus landing Wren video and its headline/supporting copy on mobile
+- [x] Add focused regression coverage, validate desktop and active-session Focus preservation, and checkpoint the targeted repair
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

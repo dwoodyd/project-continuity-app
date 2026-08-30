@@ -1279,9 +1279,10 @@ export default function FocusSessionsPage() {
           {/* RIGHT — phase controls */}
           <div
             className={cn(
-              "flex w-full flex-col items-center justify-center px-5 py-7 overflow-y-auto md:px-6 md:py-0",
+              "relative z-10 mt-3 flex w-full flex-col items-center justify-center border-t bg-background px-5 py-7 overflow-y-auto md:mt-0 md:border-t-0 md:bg-transparent md:px-6 md:py-0",
               phase === "reveal" ? "md:w-full" : "md:w-1/2"
             )}
+            style={{ borderColor: "color-mix(in srgb, var(--border) 72%, transparent)" }}
           >
             <div className="w-full max-w-xs">
 
