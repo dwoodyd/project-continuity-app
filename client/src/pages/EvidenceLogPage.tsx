@@ -2,7 +2,7 @@ import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { PageHeader } from "@/components/PageHeader";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
-import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS, WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -263,8 +263,8 @@ export default function EvidenceLogPage() {
   return (
     <div className="min-h-screen bg-background">
       <IntroWrenScene
-        src={WREN_CLIPS.evidenceClean}
-        poster={WREN_STILLS.evidenceCleanPoster}
+        src={WREN_CLIPS[WREN_SURFACE_MEDIA.evidenceLog.clip]}
+        poster={WREN_STILLS[WREN_SURFACE_MEDIA.evidenceLog.fallbackStill]}
         eyebrow="Evidence Log"
         title="This is your record. Every entry is proof."
         body="The record holds what you did when the rest of your mind tries to lose it."

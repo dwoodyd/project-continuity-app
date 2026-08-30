@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
+import { WREN_STILLS } from "@/lib/wrenClips";
 
 type IntroWrenSceneProps = {
   src: string;
@@ -22,9 +22,8 @@ export function IntroWrenScene({ src, poster, eyebrow, title, body, children, cl
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
   const isReturnScene = variant === "return";
-  const usesManagedSource = src.includes("continuary-evidence-wren-letter_650c0a8e");
-  const resolvedSrc = usesManagedSource ? src : WREN_CLIPS.evidenceClean;
-  const resolvedPoster = usesManagedSource ? poster : WREN_STILLS.evidenceCleanPoster;
+  const resolvedSrc = src;
+  const resolvedPoster = poster ?? WREN_STILLS.evidenceCleanPoster;
 
   useEffect(() => {
     setVideoFailed(false);

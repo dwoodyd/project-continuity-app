@@ -2276,6 +2276,12 @@
 - [x] Audit tour slide media and verify the supplied Letter clip is visually watermark-free before use
 - [x] Restore deliberately varied, managed Wren video assignments across tour slides
 - [x] Add regression coverage requiring per-slide media variation and watermark-checked managed sources, then validate and checkpoint
+
+## Distinct Wren Media Restoration (Aug 30)
+- [x] Audit every named Wren surface for accidental shared fallback delivery and remaining watermark-bearing media
+- [x] Assign a distinct verified watermark-free managed clip to Today, Return Brief, Clarity, Evidence, Weekly Review, Focus, and every tour slide
+- [x] Preserve cover framing, poster fallback, muted autoplay inline loop, and protected Focus body-doubling behavior
+- [x] Add source-level regression coverage for per-surface uniqueness and complete full validation before checkpointing
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

@@ -12,7 +12,12 @@
 
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import { WREN_CLIPS as NEW_CLIPS, WREN_STILLS, type WrenClipKey } from "@/lib/wrenClips";
+import {
+  WREN_CLIPS as NEW_CLIPS,
+  WREN_STILLS,
+  isVerifiedWrenClip,
+  type WrenClipKey,
+} from "@/lib/wrenClips";
 
 // ─── Legacy clip map — maps old names to new equivalents ─────────────────────
 // This ensures any component still using old clip names continues to work.
@@ -107,11 +112,6 @@ interface WrenPlayerProps {
   fallbackStill?: keyof typeof WREN_STILLS;
   /** Optional first-frame poster used by the browser while the video buffers. */
   poster?: string;
-  /**
-   * Use a verified page-specific source rather than the shared managed fallback.
-   * Public tour slides opt in so their Wren scenes remain intentionally varied.
-   */
-  preferRequestedClip?: boolean;
   onEnded?: () => void;
 }
 
@@ -128,18 +128,18 @@ export default function WrenPlayer({
   featherDirection = "radial",
   fallbackStill,
   poster,
-  preferRequestedClip = false,
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
   const requestedSrc = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.evidenceClean;
-  // Focus-session body-doubling has its own intentionally preserved clips. Most
-  // other scenes use the verified managed fallback; tour slides may opt into a
-  // separately verified source so their media remains varied by subject.
+  // Focus-session body-doubling has its own intentionally preserved clips. All
+  // other autoplaying video sources must be from the independently reviewed
+  // registry; unreviewed legacy keys render their still instead of a duplicate
+  // or potentially watermarked fallback video.
   const isProtectedFocusClip = clip === "weaving" || clip === "reading" || clip === "lookingup";
-  const usesRequestedClip = isProtectedFocusClip || preferRequestedClip;
-  const src = usesRequestedClip ? requestedSrc : NEW_CLIPS.evidenceClean;
-  const resolvedPoster = usesRequestedClip ? poster : WREN_STILLS.evidenceCleanPoster;
+  const usesVerifiedVideo = isProtectedFocusClip || isVerifiedWrenClip(clip);
+  const src = requestedSrc;
+  const resolvedPoster = poster ?? WREN_STILLS[fallbackStill ?? "siliconeNeutral"];
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -185,16 +185,19 @@ export default function WrenPlayer({
         wrapperClassName,
       )}
     >
-      {/* A verified still keeps Wren present when a CDN-delivered video is unavailable. */}
-      {(fallbackStill && (!videoReady || prefersReducedMotion || videoFailed) || videoFailed) && (
+      {/* A reviewed still keeps Wren present when motion is reduced or video is unavailable. */}
+      {(!usesVerifiedVideo || !videoReady || prefersReducedMotion || videoFailed) && (
         <img
-          src={usesRequestedClip ? WREN_STILLS[fallbackStill ?? "siliconeNeutral"] : WREN_STILLS.evidenceCleanPoster}
+          src={resolvedPoster}
           alt="Wren"
-          className="absolute inset-0 w-full h-full object-contain"
+          className={cn(
+            "absolute inset-0 w-full h-full",
+            objectFit === "cover" ? "object-cover" : "object-contain",
+          )}
           style={{ ...maskStyle, mixBlendMode: "screen" }}
         />
       )}
-      {!prefersReducedMotion && !videoFailed && (
+      {usesVerifiedVideo && !prefersReducedMotion && !videoFailed && (
         <video
           key={src}
           src={src}

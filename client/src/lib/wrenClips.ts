@@ -209,3 +209,77 @@ export const WREN_STILLS = {
 } as const;
 
 export type WrenStillKey = keyof typeof WREN_STILLS;
+
+export type WrenMediaAssignment = {
+  clip: WrenClipKey;
+  fallbackStill: WrenStillKey;
+};
+
+/**
+ * Visual audit completed Aug 30, 2026. Only these source videos may autoplay
+ * outside the protected Focus body-doubling trio. All other registry entries
+ * retain their key for backward compatibility but resolve to a still until a
+ * clean export has been independently reviewed.
+ */
+export const VERIFIED_WREN_CLIP_KEYS = [
+  "tourLetter",
+  "perchedDoc",
+  "closesEyes",
+  "hoversJournal",
+  "holdingOrb",
+  "luminousFloats",
+  "dropsAndHovers",
+  "peeking",
+  "winksRipple",
+  "hoversThread",
+  "fliesHug",
+  "tapsGlass",
+  "hoveringArchway",
+  "glowingHovers",
+  "popsHead",
+  "cartwheels",
+  "morphsHeart",
+  "barrelRoll",
+  "rockets",
+  "swoopsTrail",
+  "inflates",
+  "stretchesWing",
+] as const satisfies readonly WrenClipKey[];
+
+export const isVerifiedWrenClip = (clip: string): clip is WrenClipKey =>
+  (VERIFIED_WREN_CLIP_KEYS as readonly string[]).includes(clip);
+
+/**
+ * Required product surfaces each declare their own reviewed media. These are
+ * intentionally not aliases: a page never inherits a generic Wren video.
+ */
+export const WREN_SURFACE_MEDIA = {
+  today:         { clip: "popsHead",       fallbackStill: "siliconeNeutral" },
+  returnBrief:   { clip: "hoversThread",   fallbackStill: "siliconeThread" },
+  clarityEngine: { clip: "closesEyes",     fallbackStill: "siliconeEyesClosed" },
+  evidenceLog:   { clip: "hoversJournal",  fallbackStill: "siliconeJournal" },
+  weeklyReview:  { clip: "holdingOrb",     fallbackStill: "siliconeMemory" },
+  focusLanding:  { clip: "luminousFloats", fallbackStill: "luminousIdle" },
+} as const satisfies Record<string, WrenMediaAssignment>;
+
+/**
+ * Every public tour step has a distinct reviewed Wren scene. Keep this map
+ * separate from the product-surface map so tour storytelling cannot collapse
+ * back to a shared page video during future media changes.
+ */
+export const WREN_TOUR_MEDIA = {
+  intro:          { clip: "tourLetter",      fallbackStill: "evidenceCleanPoster" },
+  problem:        { clip: "peeking",         fallbackStill: "siliconePeekSide" },
+  thread:         { clip: "dropsAndHovers",  fallbackStill: "siliconeThread" },
+  morning:        { clip: "winksRipple",     fallbackStill: "siliconeNeutral" },
+  evening:        { clip: "fliesHug",        fallbackStill: "siliconeFlyingPng" },
+  vault:          { clip: "hoveringArchway", fallbackStill: "siliconeLookingDown" },
+  graph:          { clip: "glowingHovers",   fallbackStill: "luminousSwoop" },
+  strength:       { clip: "cartwheels",      fallbackStill: "siliconeCheckpoints" },
+  evidence:       { clip: "swoopsTrail",     fallbackStill: "siliconeJournal" },
+  threshold:      { clip: "inflates",        fallbackStill: "siliconeEyesClosed" },
+  reentry:        { clip: "stretchesWing",   fallbackStill: "siliconeTugging" },
+  focus_sessions: { clip: "barrelRoll",      fallbackStill: "siliconeWatching" },
+  single_focus:   { clip: "tapsGlass",       fallbackStill: "siliconeLookingDown" },
+  invite:         { clip: "rockets",         fallbackStill: "luminousFront" },
+} as const satisfies Record<string, WrenMediaAssignment>;

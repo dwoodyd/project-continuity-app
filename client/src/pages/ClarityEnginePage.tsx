@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
-import { WREN_CLIPS } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS, WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
 import { VoiceDictationButton } from "@/components/VoiceDictationButton";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Button } from "@/components/ui/button";
@@ -1266,7 +1266,8 @@ export default function ClarityEnginePage() {
     )}
     {view === "new" && (
       <IntroWrenScene
-        src={WREN_CLIPS.perchedDoc}
+        src={WREN_CLIPS[WREN_SURFACE_MEDIA.clarityEngine.clip]}
+        poster={WREN_STILLS[WREN_SURFACE_MEDIA.clarityEngine.fallbackStill]}
         eyebrow="Clarity Engine"
         title="You do not have to untangle it alone."
         body="Put down what is loudest. We will find the signal together."

@@ -81,8 +81,8 @@ describe("mobile navigation and polish", () => {
     const tour = source("client", "src", "pages", "TourPage.tsx");
     expect(locks).toContain('w-full max-w-2xl mx-auto px-4 py-6');
     expect(weekly).toContain('flex flex-col items-center gap-3 text-center sm:flex-row');
-    expect(weekly).toContain('clip="evidenceClean"');
-    expect(tour).toContain('clip="evidenceClean" size="xs" wrapperClassName="hidden sm:block"');
+    expect(weekly).toContain('WREN_SURFACE_MEDIA.weeklyReview.clip');
+    expect(tour).toContain('src={WREN_STILLS.siliconeLogo}');
     expect(tour).toContain('flex flex-col items-center gap-3 text-center sm:flex-row');
     expect(tour).toContain('mx-auto max-w-3xl px-4 pt-28 pb-36');
     expect(tour).toContain('fixed bottom-0 inset-x-0 z-40 flex justify-center px-4 py-3');

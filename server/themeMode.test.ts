@@ -46,10 +46,10 @@ describe("permanent dual-theme contract", () => {
     const home = source("client/src/pages/Home.tsx");
     const evidence = source("client/src/pages/EvidenceLogPage.tsx");
     const clips = source("client/src/lib/wrenClips.ts");
-    expect(home).toContain("src={WREN_CLIPS.tuggingThread}");
+    expect(home).toContain("WREN_SURFACE_MEDIA.returnBrief.clip");
     expect(clips).toContain('tuggingThread:      `${BASE}/wren_tugging_thread_7bf624a9.mp4`');
-    expect(evidence).toContain("src={WREN_CLIPS.evidenceClean}");
-    expect(evidence).toContain("poster={WREN_STILLS.evidenceCleanPoster}");
+    expect(evidence).toContain("WREN_SURFACE_MEDIA.evidenceLog.clip");
+    expect(evidence).toContain("WREN_SURFACE_MEDIA.evidenceLog.fallbackStill");
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     expect(focus).toContain('clip={ACTIVITY_CLIP[wrenActivity]}');
     expect(focus).toContain('fallbackStill="siliconeNeutral"');

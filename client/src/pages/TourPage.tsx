@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 import { PageMeta } from "@/components/PageMeta";
+import { WREN_STILLS, WREN_TOUR_MEDIA } from "@/lib/wrenClips";
 
 type Step =
   | "intro"
@@ -25,21 +26,21 @@ const STEPS: Step[] = [
   "reentry","focus_sessions","single_focus","invite",
 ];
 
-const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
-  intro:          { label: "Welcome",             wren: "tourLetter"       },
-  problem:        { label: "The Problem",         wren: "closesEyes"       },
-  thread:         { label: "Your Thread",         wren: "perchedDoc"       },
-  morning:        { label: "Morning",             wren: "holdingOrb"       },
-  evening:        { label: "Evening",             wren: "hoversJournal"    },
-  vault:          { label: "Knowledge Vault",     wren: "perchedDoc"       },
-  graph:          { label: "Knowledge Graph",     wren: "holdingOrb"       },
-  strength:       { label: "Thread Strength",     wren: "closesEyes"       },
-  evidence:       { label: "Evidence Log",        wren: "hoversJournal"    },
-  threshold:      { label: "Threshold Diagnosis", wren: "closesEyes"       },
-  reentry:        { label: "Re-Entry",            wren: "tourLetter"       },
-  focus_sessions: { label: "Focus Sessions",      wren: "perchedDoc"       },
-  single_focus:   { label: "Single Focus Mode",   wren: "holdingOrb"       },
-  invite:         { label: "Begin",               wren: "tourLetter"       },
+const STEP_META: Record<Step, { label: string; wren: WrenClip; fallbackStill: keyof typeof WREN_STILLS }> = {
+  intro:          { label: "Welcome",             wren: WREN_TOUR_MEDIA.intro.clip,          fallbackStill: WREN_TOUR_MEDIA.intro.fallbackStill },
+  problem:        { label: "The Problem",         wren: WREN_TOUR_MEDIA.problem.clip,        fallbackStill: WREN_TOUR_MEDIA.problem.fallbackStill },
+  thread:         { label: "Your Thread",         wren: WREN_TOUR_MEDIA.thread.clip,         fallbackStill: WREN_TOUR_MEDIA.thread.fallbackStill },
+  morning:        { label: "Morning",             wren: WREN_TOUR_MEDIA.morning.clip,        fallbackStill: WREN_TOUR_MEDIA.morning.fallbackStill },
+  evening:        { label: "Evening",             wren: WREN_TOUR_MEDIA.evening.clip,        fallbackStill: WREN_TOUR_MEDIA.evening.fallbackStill },
+  vault:          { label: "Knowledge Vault",     wren: WREN_TOUR_MEDIA.vault.clip,          fallbackStill: WREN_TOUR_MEDIA.vault.fallbackStill },
+  graph:          { label: "Knowledge Graph",     wren: WREN_TOUR_MEDIA.graph.clip,          fallbackStill: WREN_TOUR_MEDIA.graph.fallbackStill },
+  strength:       { label: "Thread Strength",     wren: WREN_TOUR_MEDIA.strength.clip,       fallbackStill: WREN_TOUR_MEDIA.strength.fallbackStill },
+  evidence:       { label: "Evidence Log",        wren: WREN_TOUR_MEDIA.evidence.clip,       fallbackStill: WREN_TOUR_MEDIA.evidence.fallbackStill },
+  threshold:      { label: "Threshold Diagnosis", wren: WREN_TOUR_MEDIA.threshold.clip,      fallbackStill: WREN_TOUR_MEDIA.threshold.fallbackStill },
+  reentry:        { label: "Re-Entry",            wren: WREN_TOUR_MEDIA.reentry.clip,        fallbackStill: WREN_TOUR_MEDIA.reentry.fallbackStill },
+  focus_sessions: { label: "Focus Sessions",      wren: WREN_TOUR_MEDIA.focus_sessions.clip, fallbackStill: WREN_TOUR_MEDIA.focus_sessions.fallbackStill },
+  single_focus:   { label: "Single Focus Mode",   wren: WREN_TOUR_MEDIA.single_focus.clip,   fallbackStill: WREN_TOUR_MEDIA.single_focus.fallbackStill },
+  invite:         { label: "Begin",               wren: WREN_TOUR_MEDIA.invite.clip,         fallbackStill: WREN_TOUR_MEDIA.invite.fallbackStill },
 };
 
 const MORNING_DEMO =
@@ -229,7 +230,7 @@ export default function TourPage() {
       {/* Nav */}
       <nav className="fixed top-0 inset-x-0 z-50 flex items-center justify-between gap-2 px-4 py-3 sm:px-6 sm:py-4 backdrop-blur" style={{ background: "oklch(0.09 0.015 240 / 0.98)", borderBottom: "1px solid oklch(0.74 0.14 72 / 0.08)" }}>
         <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-          <WrenPlayer clip="evidenceClean" size="xs" wrapperClassName="hidden sm:block" />
+          <img src={WREN_STILLS.siliconeLogo} alt="" className="hidden size-10 object-contain sm:block" />
           <span className="truncate font-brand text-base tracking-tight sm:text-lg" style={{ color: "oklch(0.74 0.14 72)" }}>Continuary</span>
         </div>
         <div className="flex shrink-0 items-center gap-2 sm:gap-4">
@@ -266,7 +267,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="tourLetter" size="xl" stage={false} feather featherDirection="radial" preferRequestedClip />
+              <WrenPlayer clip={STEP_META.intro.wren} fallbackStill={STEP_META.intro.fallbackStill} size="xl" stage={false} feather featherDirection="radial" objectFit="cover" />
               <div className="space-y-4">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Welcome to Continuary</p>
                 <h1 className="text-4xl md:text-5xl leading-tight font-brand">
@@ -296,7 +297,7 @@ export default function TourPage() {
         {step === "problem" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Sound Familiar" title="The patterns that keep breaking your flow." wren="closesEyes" />
+              <Header eyebrow="Sound Familiar" title="The patterns that keep breaking your flow." {...STEP_META.problem} />
               <div className="grid md:grid-cols-2 gap-4">
                 {[
                   { icon: "⏸", title: "The Restart Tax", body: "You open a project and spend 20 minutes just remembering where you left off." },
@@ -320,7 +321,7 @@ export default function TourPage() {
         {step === "thread" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="The Thread" title="Continuity isn't a habit. It's a practice of returning." wren="carryingThread" />
+              <Header eyebrow="The Thread" title="Continuity isn't a habit. It's a practice of returning." {...STEP_META.thread} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Continuary doesn't ask you to be consistent. It asks you to <em className="not-italic font-medium" style={{ color: "oklch(0.74 0.14 72)" }}>return</em>. Every time you come back — even after days away — the thread picks up exactly where you left it.
               </p>
@@ -354,7 +355,7 @@ export default function TourPage() {
         {step === "morning" && (
           <Fade>
             <div className="space-y-6">
-              <Header eyebrow="Morning Check-In" title="What does today need to protect?" wren="popsHead" />
+              <Header eyebrow="Morning Check-In" title="What does today need to protect?" {...STEP_META.morning} />
               {!morningDone ? (
                 <>
                   <p className="text-sm" style={{ color: "oklch(0.55 0.04 240)" }}>This is a simulation — fill in anything to experience the flow.</p>
@@ -403,7 +404,7 @@ export default function TourPage() {
         {step === "evening" && (
           <Fade>
             <div className="space-y-6">
-              <Header eyebrow="Evening Check-In" title="Close the loop before you rest." wren="kissingScreen" />
+              <Header eyebrow="Evening Check-In" title="Close the loop before you rest." {...STEP_META.evening} />
               {!eveningDone ? (
                 <>
                   <p className="text-sm" style={{ color: "oklch(0.55 0.04 240)" }}>Simulate closing your day.</p>
@@ -436,7 +437,7 @@ export default function TourPage() {
         {step === "vault" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Knowledge Vault" title="Every thought you've ever had about your work, in one place." wren="perchedDoc" />
+              <Header eyebrow="Knowledge Vault" title="Every thought you've ever had about your work, in one place." {...STEP_META.vault} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 The Knowledge Vault is your intelligence layer — not a note-taking app, but a living base that connects your ideas, drafts, research, and decisions to your active projects.
               </p>
@@ -464,7 +465,7 @@ export default function TourPage() {
         {step === "graph" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." wren="holdingOrb" />
+              <Header eyebrow="Knowledge Graph" title="Your ideas don't exist in isolation. Neither should your notes." {...STEP_META.graph} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 As your Knowledge Vault grows, Continuary maps the connections between your entries — surfacing hidden links between ideas, decisions, and research you captured months apart.
               </p>
@@ -481,7 +482,7 @@ export default function TourPage() {
         {step === "strength" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Thread Strength" title="Not a score. A read." wren="bouncingFunClean" />
+              <Header eyebrow="Thread Strength" title="Not a score. A read." {...STEP_META.strength} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Thread Strength doesn't measure how much you did. It's a qualitative read on how connected you've stayed to your work — and how well you've returned after gaps.
               </p>
@@ -527,7 +528,7 @@ export default function TourPage() {
         {step === "evidence" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Evidence Log" title="Proof that you showed up." wren="perchedDoc" />
+              <Header eyebrow="Evidence Log" title="Proof that you showed up." {...STEP_META.evidence} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Every check-in, every session, every note you capture — Wren logs it as evidence. Not metrics. Evidence. The difference matters.
               </p>
@@ -566,7 +567,7 @@ export default function TourPage() {
         {step === "threshold" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Threshold Diagnosis" title="Wren knows the difference between tired and stuck." wren="closesEyes" />
+              <Header eyebrow="Threshold Diagnosis" title="Wren knows the difference between tired and stuck." {...STEP_META.threshold} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 When you open Continuary and something feels off, Wren doesn't push you to be productive. She reads the signals — your check-in language, your energy, your pattern — and names what she sees.
               </p>
@@ -617,7 +618,7 @@ export default function TourPage() {
         {step === "reentry" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Re-Entry" title="You're allowed to come back." wren="carryingThread" />
+              <Header eyebrow="Re-Entry" title="You're allowed to come back." {...STEP_META.reentry} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Most productivity systems punish you for disappearing. Continuary doesn't. When you've been away — a week, a month, longer — Wren doesn't ask where you've been. She asks where you want to go next.
               </p>
@@ -654,7 +655,7 @@ export default function TourPage() {
         {step === "focus_sessions" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Focus Sessions" title="Work side-by-side with Wren." wren="homeVideo" />
+              <Header eyebrow="Focus Sessions" title="Work side-by-side with Wren." {...STEP_META.focus_sessions} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 A Focus Session is a dedicated block of time where you and Wren work together. You set your intention,
                 choose 25, 50, or 90 minutes, and Wren stays present the whole time — weaving quietly on the right side of your screen,
@@ -692,7 +693,7 @@ export default function TourPage() {
         {step === "single_focus" && (
           <Fade>
             <div className="space-y-8">
-              <Header eyebrow="Single Focus Mode" title="One topic. One thread. Every day." wren="perchedDoc" />
+              <Header eyebrow="Single Focus Mode" title="One topic. One thread. Every day." {...STEP_META.single_focus} />
               <p className="leading-relaxed text-lg" style={{ color: "oklch(0.72 0.04 240)" }}>
                 Single Focus Mode is for people who need to go deep on one thing for an extended period.
                 You define your focus topic, set a daily cadence, and Wren holds the continuity language
@@ -734,7 +735,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="tourLetter" size="xl" stage={false} feather featherDirection="bottom" preferRequestedClip />
+              <WrenPlayer clip={STEP_META.invite.wren} fallbackStill={STEP_META.invite.fallbackStill} size="xl" stage={false} feather featherDirection="bottom" objectFit="cover" />
               <div className="space-y-3">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
@@ -792,10 +793,10 @@ function Fade({ children }: { children: React.ReactNode }) {
   return <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</div>;
 }
 
-function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
+function Header({ eyebrow, title, wren, fallbackStill }: { eyebrow: string; title: string; wren: WrenClip; fallbackStill: keyof typeof WREN_STILLS }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left">
-      <WrenPlayer clip={wren} size="sm" stage={false} feather preferRequestedClip />
+      <WrenPlayer clip={wren} fallbackStill={fallbackStill} size="sm" stage={false} feather objectFit="cover" />
       <div className="space-y-1">
         <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>

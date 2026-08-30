@@ -83,7 +83,7 @@ import { FoundingRateInvite } from "@/components/FoundingRateInvite";
 import WrenPlayer from "@/components/WrenPlayer";
 import { TodayGreetingWren } from "@/components/TodayGreetingWren";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
-import { WREN_CLIPS } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS, WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
 import { getBrowserTimezone, getNowInTimezone, weekdayForLocalDate } from "@/lib/memberTime";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
@@ -1782,7 +1782,7 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const greetingWrenClip = hour < 12 ? "popsHead" : hour < 17 ? "holdingOrb" : "closesEyes";
+  const greetingWrenClip = WREN_SURFACE_MEDIA.today.clip;
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -1965,7 +1965,8 @@ export default function Home() {
         <PageMeta title="Today · Continuary" description="A calm re-entry space that remembers where you were and offers one next step." path="/" />
         <main className="mx-auto flex min-h-[70vh] w-full max-w-4xl flex-col justify-center gap-5 px-4 py-8 sm:px-5">
           <IntroWrenScene
-            src={WREN_CLIPS.tuggingThread}
+            src={WREN_CLIPS[WREN_SURFACE_MEDIA.returnBrief.clip]}
+            poster={WREN_STILLS[WREN_SURFACE_MEDIA.returnBrief.fallbackStill]}
             eyebrow="Return brief"
             title="You came back. The work is still here."
             body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. One small next step is enough: ${activeThreadLock.whatNext}` : "Nothing is broken. You do not need to rebuild context before you begin—one small next step is enough."}
@@ -2059,7 +2060,8 @@ export default function Home() {
       {showReturnBrief && (
         <>
           <IntroWrenScene
-            src={WREN_CLIPS.tuggingThread}
+            src={WREN_CLIPS[WREN_SURFACE_MEDIA.returnBrief.clip]}
+            poster={WREN_STILLS[WREN_SURFACE_MEDIA.returnBrief.fallbackStill]}
             eyebrow={`${returningAfterGap ? "Return brief" : "Return brief preview"} · ${memberDateLabel}`}
             title={returnBriefTitle}
             body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
@@ -2226,7 +2228,7 @@ export default function Home() {
             data-testid="today-greeting-wren"
             aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
           >
-            <TodayGreetingWren clip={greetingWrenClip} />
+            <TodayGreetingWren clip={greetingWrenClip} fallbackStill={WREN_SURFACE_MEDIA.today.fallbackStill} />
           </div>
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (
