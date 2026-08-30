@@ -38,7 +38,7 @@ describe("Wren presence and distinct clean media", () => {
   it("maps every required product surface to a unique visually reviewed clip", () => {
     const registry = source("client/src/lib/wrenClips.ts");
     const surfaces = extractClipAssignments(registry, "WREN_SURFACE_MEDIA");
-    const expectedSurfaces = ["today", "returnBrief", "clarityEngine", "evidenceLog", "weeklyReview", "focusLanding"];
+    const expectedSurfaces = ["returnBrief", "clarityEngine", "evidenceLog", "weeklyReview"];
     expect(surfaces.map(({ surface }) => surface)).toEqual(expectedSurfaces);
     expect(new Set(surfaces.map(({ clip }) => clip)).size).toBe(expectedSurfaces.length);
 
@@ -46,14 +46,33 @@ describe("Wren presence and distinct clean media", () => {
     for (const { clip } of surfaces) expect(verified).toContain(clip);
   });
 
-  it("maps all fourteen public tour slides to unique visually reviewed clips without reusing a product surface source", () => {
+  it("keeps the protected Today greeting on its original morning, afternoon, and evening rotation", () => {
+    const registry = source("client/src/lib/wrenClips.ts");
+    const home = source("client/src/pages/Home.tsx");
+    const rotation = extractClipAssignments(registry, "WREN_TODAY_GREETING_MEDIA");
+
+    expect(rotation).toEqual([
+      { surface: "morning", clip: "popsHead" },
+      { surface: "afternoon", clip: "holdingOrb" },
+      { surface: "evening", clip: "closesEyes" },
+    ]);
+    expect(home).toContain("WREN_TODAY_GREETING_MEDIA.morning");
+    expect(home).toContain("WREN_TODAY_GREETING_MEDIA.afternoon");
+    expect(home).toContain("WREN_TODAY_GREETING_MEDIA.evening");
+    expect(home).toContain("hour < 12");
+    expect(home).toContain("hour < 17");
+  });
+
+  it("maps all fourteen public tour slides to unique visually reviewed clips without reusing a product surface or Today greeting source", () => {
     const registry = source("client/src/lib/wrenClips.ts");
     const surfaces = extractClipAssignments(registry, "WREN_SURFACE_MEDIA");
+    const greetingRotation = extractClipAssignments(registry, "WREN_TODAY_GREETING_MEDIA");
     const tour = extractClipAssignments(registry, "WREN_TOUR_MEDIA");
     const expectedSteps = ["intro", "problem", "thread", "morning", "evening", "vault", "graph", "strength", "evidence", "threshold", "reentry", "focus_sessions", "single_focus", "invite"];
     expect(tour.map(({ surface }) => surface)).toEqual(expectedSteps);
     expect(new Set(tour.map(({ clip }) => clip)).size).toBe(expectedSteps.length);
-    expect(new Set([...surfaces, ...tour].map(({ clip }) => clip)).size).toBe(expectedSteps.length + surfaces.length);
+    expect(new Set([...greetingRotation, ...surfaces, ...tour].map(({ clip }) => clip)).size)
+      .toBe(expectedSteps.length + surfaces.length + greetingRotation.length);
 
     const verified = new Set(extractVerifiedClipKeys(registry));
     for (const { clip } of tour) expect(verified).toContain(clip);
@@ -71,16 +90,17 @@ describe("Wren presence and distinct clean media", () => {
     const focus = source("client/src/pages/FocusSessionsPage.tsx");
     const tour = source("client/src/pages/TourPage.tsx");
 
-    expect(home).toContain("WREN_SURFACE_MEDIA.today.clip");
+    expect(home).toContain("WREN_TODAY_GREETING_MEDIA");
     expect(home).toContain("WREN_SURFACE_MEDIA.returnBrief.clip");
     expect(clarity).toContain("WREN_SURFACE_MEDIA.clarityEngine.clip");
     expect(evidence).toContain("WREN_SURFACE_MEDIA.evidenceLog.clip");
     expect(weekly).toContain("WREN_SURFACE_MEDIA.weeklyReview.clip");
     expect(focus).toContain('clip={ACTIVITY_CLIP[wrenActivity]}');
-    expect(focus).toContain('phase === "idle" ? WREN_SURFACE_MEDIA.focusLanding.clip : ACTIVITY_CLIP[wrenActivity]');
+    expect(focus).toContain('clip={ACTIVITY_CLIP[wrenActivity] as any}');
     expect(focus).toContain("weaving:   \"weaving\"");
     expect(focus).toContain("reading:   \"reading\"");
     expect(focus).toContain("lookingup: \"lookingup\"");
+    expect(focus).not.toContain("WREN_SURFACE_MEDIA");
     expect(tour).toContain("WREN_TOUR_MEDIA");
     expect(tour).toContain("...STEP_META.focus_sessions");
     expect(tour).toContain("...STEP_META.single_focus");

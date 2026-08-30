@@ -29,7 +29,6 @@ import { SurfaceCard, type SurfaceTrigger } from "@/components/SurfaceCard";
 import WrenPopout from "@/components/WrenPopout";
 import WrenPlayer, { type WrenClip } from "@/components/WrenPlayer";
 import { UpgradeNudge } from "@/components/UpgradeNudge";
-import { WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
 
 // ── Focus activity clips ─────────────────────────────────────────────────────────────────────────────────
 type WrenActivity = "weaving" | "reading" | "writing" | "lookingup";
@@ -1247,10 +1246,9 @@ export default function FocusSessionsPage() {
             >
               <WrenPlayer
                 key={wrenActivity}
-                clip={phase === "idle" ? WREN_SURFACE_MEDIA.focusLanding.clip : ACTIVITY_CLIP[wrenActivity]}
+                clip={ACTIVITY_CLIP[wrenActivity] as any}
                 size="full"
                 objectFit="cover"
-                fallbackStill={phase === "idle" ? WREN_SURFACE_MEDIA.focusLanding.fallbackStill : "siliconeNeutral"}
                 wrapperClassName="absolute inset-0"
                 className="brightness-[1.15] saturate-[1.3]"
               />

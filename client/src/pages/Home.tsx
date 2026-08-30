@@ -83,7 +83,7 @@ import { FoundingRateInvite } from "@/components/FoundingRateInvite";
 import WrenPlayer from "@/components/WrenPlayer";
 import { TodayGreetingWren } from "@/components/TodayGreetingWren";
 import { IntroWrenScene } from "@/components/IntroWrenScene";
-import { WREN_CLIPS, WREN_STILLS, WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS, WREN_SURFACE_MEDIA, WREN_TODAY_GREETING_MEDIA } from "@/lib/wrenClips";
 import { getBrowserTimezone, getNowInTimezone, weekdayForLocalDate } from "@/lib/memberTime";
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
@@ -1782,7 +1782,11 @@ export default function Home() {
   }, [tasks, taskLimit]);
   const hiddenTaskCount = tasks.length - visibleTasks.length;
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const greetingWrenClip = WREN_SURFACE_MEDIA.today.clip;
+  const greetingWrenMedia = hour < 12
+    ? WREN_TODAY_GREETING_MEDIA.morning
+    : hour < 17
+      ? WREN_TODAY_GREETING_MEDIA.afternoon
+      : WREN_TODAY_GREETING_MEDIA.evening;
   const firstName = user?.name?.split(" ")[0] ?? "there";
   // Unprocessed ideas badge count
   const pendingIdeaCount = pendingIdeas?.filter((i) => !i.resolvedStatus && i.parkedStatus).length ?? 0;
@@ -2228,7 +2232,7 @@ export default function Home() {
             data-testid="today-greeting-wren"
             aria-label={`Wren's ${hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"} greeting`}
           >
-            <TodayGreetingWren clip={greetingWrenClip} fallbackStill={WREN_SURFACE_MEDIA.today.fallbackStill} />
+            <TodayGreetingWren clip={greetingWrenMedia.clip} fallbackStill={greetingWrenMedia.fallbackStill} />
           </div>
           {/* Manual Ground Mode entry */}
           {!groundModeActive && (

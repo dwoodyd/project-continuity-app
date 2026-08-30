@@ -254,12 +254,21 @@ export const isVerifiedWrenClip = (clip: string): clip is WrenClipKey =>
  * intentionally not aliases: a page never inherits a generic Wren video.
  */
 export const WREN_SURFACE_MEDIA = {
-  today:         { clip: "popsHead",       fallbackStill: "siliconeNeutral" },
   returnBrief:   { clip: "hoversThread",   fallbackStill: "siliconeThread" },
-  clarityEngine: { clip: "closesEyes",     fallbackStill: "siliconeEyesClosed" },
+  clarityEngine: { clip: "luminousFloats", fallbackStill: "luminousIdle" },
   evidenceLog:   { clip: "hoversJournal",  fallbackStill: "siliconeJournal" },
-  weeklyReview:  { clip: "holdingOrb",     fallbackStill: "siliconeMemory" },
-  focusLanding:  { clip: "luminousFloats", fallbackStill: "luminousIdle" },
+  weeklyReview:  { clip: "winksRipple",    fallbackStill: "siliconeMemory" },
+} as const satisfies Record<string, WrenMediaAssignment>;
+
+/**
+ * The Today greeting is a deliberately protected three-state rotation. It is
+ * separate from the immersive page-surface map so the time-of-day treatment
+ * can never collapse back to a single shared clip.
+ */
+export const WREN_TODAY_GREETING_MEDIA = {
+  morning:   { clip: "popsHead",    fallbackStill: "siliconeNeutral" },
+  afternoon: { clip: "holdingOrb",  fallbackStill: "siliconeMemory" },
+  evening:   { clip: "closesEyes",  fallbackStill: "siliconeEyesClosed" },
 } as const satisfies Record<string, WrenMediaAssignment>;
 
 /**
@@ -271,8 +280,8 @@ export const WREN_TOUR_MEDIA = {
   intro:          { clip: "tourLetter",      fallbackStill: "evidenceCleanPoster" },
   problem:        { clip: "peeking",         fallbackStill: "siliconePeekSide" },
   thread:         { clip: "dropsAndHovers",  fallbackStill: "siliconeThread" },
-  morning:        { clip: "winksRipple",     fallbackStill: "siliconeNeutral" },
-  evening:        { clip: "fliesHug",        fallbackStill: "siliconeFlyingPng" },
+  morning:        { clip: "rockets",         fallbackStill: "siliconeNeutral" },
+  evening:        { clip: "morphsHeart",     fallbackStill: "siliconeFlyingPng" },
   vault:          { clip: "perchedDoc",      fallbackStill: "siliconeLookingDown" },
   graph:          { clip: "glowingHovers",   fallbackStill: "luminousSwoop" },
   strength:       { clip: "cartwheels",      fallbackStill: "siliconeCheckpoints" },

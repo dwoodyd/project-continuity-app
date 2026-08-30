@@ -2285,6 +2285,14 @@
 
 ## Final Tour Slide Hovering Wren Adjustment (Aug 30)
 - [x] Replace the final public tour slide’s media with a distinct verified hovering Wren clip, then revalidate the tour mapping
+
+## Today Greeting Rotation Verification (Aug 30)
+- [x] Confirm the protected Today screen morning, afternoon, and evening Wren rotation remains unchanged after the tour media adjustment
+
+## Clarity Clip and Focus Sessions Restoration (Aug 30)
+- [x] Replace the Clarity Engine Wren scene with a different verified watermark-free clip while retaining unique surface assignments
+- [x] Restore Focus Sessions to its protected original implementation and verify its active body-doubling and layout behavior
+- [x] Validate the corrected Clarity and Focus media behavior before checkpointing
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
