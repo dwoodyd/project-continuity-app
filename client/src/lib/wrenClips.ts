@@ -273,7 +273,7 @@ export const WREN_TOUR_MEDIA = {
   thread:         { clip: "dropsAndHovers",  fallbackStill: "siliconeThread" },
   morning:        { clip: "winksRipple",     fallbackStill: "siliconeNeutral" },
   evening:        { clip: "fliesHug",        fallbackStill: "siliconeFlyingPng" },
-  vault:          { clip: "hoveringArchway", fallbackStill: "siliconeLookingDown" },
+  vault:          { clip: "perchedDoc",      fallbackStill: "siliconeLookingDown" },
   graph:          { clip: "glowingHovers",   fallbackStill: "luminousSwoop" },
   strength:       { clip: "cartwheels",      fallbackStill: "siliconeCheckpoints" },
   evidence:       { clip: "swoopsTrail",     fallbackStill: "siliconeJournal" },
@@ -281,5 +281,5 @@ export const WREN_TOUR_MEDIA = {
   reentry:        { clip: "stretchesWing",   fallbackStill: "siliconeTugging" },
   focus_sessions: { clip: "barrelRoll",      fallbackStill: "siliconeWatching" },
   single_focus:   { clip: "tapsGlass",       fallbackStill: "siliconeLookingDown" },
-  invite:         { clip: "rockets",         fallbackStill: "luminousFront" },
+  invite:         { clip: "hoveringArchway", fallbackStill: "luminousFront" },
 } as const satisfies Record<string, WrenMediaAssignment>;

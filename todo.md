@@ -2282,6 +2282,9 @@
 - [x] Assign a distinct verified watermark-free managed clip to Today, Return Brief, Clarity, Evidence, Weekly Review, Focus, and every tour slide
 - [x] Preserve cover framing, poster fallback, muted autoplay inline loop, and protected Focus body-doubling behavior
 - [x] Add source-level regression coverage for per-surface uniqueness and complete full validation before checkpointing
+
+## Final Tour Slide Hovering Wren Adjustment (Aug 30)
+- [x] Replace the final public tour slide’s media with a distinct verified hovering Wren clip, then revalidate the tour mapping
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
