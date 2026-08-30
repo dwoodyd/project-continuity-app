@@ -87,9 +87,8 @@ describe("Wren presence and coherent voice", () => {
     expect(compass).toContain("src={WREN_CLIPS.memoryOrb}");
     expect(compass).toContain("bleed");
     expect(appLayout).toContain('{location === "/focus" && (');
-    expect(tour).toContain('<WrenPlayer clip="luminousFloats" size="xl" stage={false} feather');
-    expect(tour).toContain('<WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather');
-    expect(tour).toContain('<WrenPlayer clip="evidenceClean" size="sm" stage={false} feather />');
+    expect(tour).toContain('<WrenPlayer clip="tourLetter" size="xl" stage={false} feather');
+    expect(tour).toContain('<WrenPlayer clip={wren} size="sm" stage={false} feather preferRequestedClip />');
     expect(about).toContain('clip="luminousFloats"');
     expect(about).toContain('stage={false}');
     expect(about).not.toContain('WrenPlayer clip={clip} size="full"');
@@ -144,5 +143,22 @@ describe("Wren presence and coherent voice", () => {
     expect(introScene).toContain("const [videoFailed, setVideoFailed] = useState(false)");
     expect(introScene).toContain("onError={() => setVideoFailed(true)}");
     expect(introScene).toContain("videoFailed && resolvedPoster");
+  });
+
+  it("keeps public tour scenes intentionally varied and limited to verified watermark-free sources", () => {
+    const clips = source("client/src/lib/wrenClips.ts");
+    const player = source("client/src/components/WrenPlayer.tsx");
+    const tour = source("client/src/pages/TourPage.tsx");
+    expect(clips).toContain('continuary-tour-wren-letter_d613a446.mov');
+    expect(clips).toContain('tourLetter:          MANAGED_WREN_VIDEO');
+    expect(clips).not.toContain('continuary-evidence-wren-letter_650c0a8e.mp4');
+    expect(player).toContain('preferRequestedClip?: boolean');
+    expect(player).toContain('const usesRequestedClip = isProtectedFocusClip || preferRequestedClip');
+    expect(tour).toContain('intro:          { label: "Welcome",             wren: "tourLetter"');
+    expect(tour).toContain('problem:        { label: "The Problem",         wren: "closesEyes"');
+    expect(tour).toContain('vault:          { label: "Knowledge Vault",     wren: "perchedDoc"');
+    expect(tour).toContain('graph:          { label: "Knowledge Graph",     wren: "holdingOrb"');
+    expect(tour).toContain('evidence:       { label: "Evidence Log",        wren: "hoversJournal"');
+    expect(new Set(["tourLetter", "closesEyes", "perchedDoc", "holdingOrb", "hoversJournal"]).size).toBe(5);
   });
 });

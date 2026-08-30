@@ -2271,6 +2271,11 @@
 ## Focus Landing Mobile Copy Visibility Repair (Aug 28)
 - [x] Restore clear separation between the Focus landing Wren video and its headline/supporting copy on mobile
 - [x] Add focused regression coverage, validate desktop and active-session Focus preservation, and checkpoint the targeted repair
+
+## Tour Video Variation and Watermark Verification (Aug 30)
+- [x] Audit tour slide media and verify the supplied Letter clip is visually watermark-free before use
+- [x] Restore deliberately varied, managed Wren video assignments across tour slides
+- [x] Add regression coverage requiring per-slide media variation and watermark-checked managed sources, then validate and checkpoint
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

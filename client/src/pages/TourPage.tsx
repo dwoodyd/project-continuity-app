@@ -26,20 +26,20 @@ const STEPS: Step[] = [
 ];
 
 const STEP_META: Record<Step, { label: string; wren: WrenClip }> = {
-  intro:          { label: "Welcome",             wren: "luminousFloats"   },
+  intro:          { label: "Welcome",             wren: "tourLetter"       },
   problem:        { label: "The Problem",         wren: "closesEyes"       },
-  thread:         { label: "Your Thread",         wren: "carryingThread"   },
-  morning:        { label: "Morning",             wren: "popsHead"         },
-  evening:        { label: "Evening",             wren: "kissingScreen"    },
+  thread:         { label: "Your Thread",         wren: "perchedDoc"       },
+  morning:        { label: "Morning",             wren: "holdingOrb"       },
+  evening:        { label: "Evening",             wren: "hoversJournal"    },
   vault:          { label: "Knowledge Vault",     wren: "perchedDoc"       },
   graph:          { label: "Knowledge Graph",     wren: "holdingOrb"       },
-  strength:       { label: "Thread Strength",     wren: "bouncingFunClean" },
-  evidence:       { label: "Evidence Log",        wren: "perchedDoc"       },
+  strength:       { label: "Thread Strength",     wren: "closesEyes"       },
+  evidence:       { label: "Evidence Log",        wren: "hoversJournal"    },
   threshold:      { label: "Threshold Diagnosis", wren: "closesEyes"       },
-  reentry:        { label: "Re-Entry",            wren: "carryingThread"   },
-  focus_sessions: { label: "Focus Sessions",      wren: "homeVideo"        },
-  single_focus:   { label: "Single Focus Mode",   wren: "perchedDoc"       },
-  invite:         { label: "Begin",               wren: "hoveringArchway"  },
+  reentry:        { label: "Re-Entry",            wren: "tourLetter"       },
+  focus_sessions: { label: "Focus Sessions",      wren: "perchedDoc"       },
+  single_focus:   { label: "Single Focus Mode",   wren: "holdingOrb"       },
+  invite:         { label: "Begin",               wren: "tourLetter"       },
 };
 
 const MORNING_DEMO =
@@ -266,7 +266,7 @@ export default function TourPage() {
         {step === "intro" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="luminousFloats" size="xl" stage={false} feather featherDirection="radial" />
+              <WrenPlayer clip="tourLetter" size="xl" stage={false} feather featherDirection="radial" preferRequestedClip />
               <div className="space-y-4">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Welcome to Continuary</p>
                 <h1 className="text-4xl md:text-5xl leading-tight font-brand">
@@ -734,7 +734,7 @@ export default function TourPage() {
         {step === "invite" && (
           <Fade>
             <div className="flex flex-col items-center text-center gap-8">
-              <WrenPlayer clip="hoveringArchway" size="xl" stage={false} feather featherDirection="bottom" />
+              <WrenPlayer clip="tourLetter" size="xl" stage={false} feather featherDirection="bottom" preferRequestedClip />
               <div className="space-y-3">
                 <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>Founding Member Access</p>
                 <h2 className="text-3xl md:text-4xl font-brand leading-tight">
@@ -792,10 +792,10 @@ function Fade({ children }: { children: React.ReactNode }) {
   return <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">{children}</div>;
 }
 
-function Header({ eyebrow, title, wren: _wren }: { eyebrow: string; title: string; wren: WrenClip }) {
+function Header({ eyebrow, title, wren }: { eyebrow: string; title: string; wren: WrenClip }) {
   return (
     <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-5 sm:text-left">
-      <WrenPlayer clip="evidenceClean" size="sm" stage={false} feather />
+      <WrenPlayer clip={wren} size="sm" stage={false} feather preferRequestedClip />
       <div className="space-y-1">
         <p className="text-xs tracking-widest uppercase" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>{eyebrow}</p>
         <h2 className="text-2xl md:text-3xl font-brand leading-snug" style={{ color: "oklch(0.74 0.14 72)" }}>{title}</h2>

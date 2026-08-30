@@ -107,6 +107,11 @@ interface WrenPlayerProps {
   fallbackStill?: keyof typeof WREN_STILLS;
   /** Optional first-frame poster used by the browser while the video buffers. */
   poster?: string;
+  /**
+   * Use a verified page-specific source rather than the shared managed fallback.
+   * Public tour slides opt in so their Wren scenes remain intentionally varied.
+   */
+  preferRequestedClip?: boolean;
   onEnded?: () => void;
 }
 
@@ -123,15 +128,18 @@ export default function WrenPlayer({
   featherDirection = "radial",
   fallbackStill,
   poster,
+  preferRequestedClip = false,
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
   const requestedSrc = (WREN_CLIPS as Record<string, string>)[clip] ?? NEW_CLIPS.evidenceClean;
-  // Focus-session body-doubling has its own intentionally preserved clips. All
-  // other Wren scenes use the verified managed asset rather than legacy CDN paths.
+  // Focus-session body-doubling has its own intentionally preserved clips. Most
+  // other scenes use the verified managed fallback; tour slides may opt into a
+  // separately verified source so their media remains varied by subject.
   const isProtectedFocusClip = clip === "weaving" || clip === "reading" || clip === "lookingup";
-  const src = isProtectedFocusClip ? requestedSrc : NEW_CLIPS.evidenceClean;
-  const resolvedPoster = isProtectedFocusClip ? poster : WREN_STILLS.evidenceCleanPoster;
+  const usesRequestedClip = isProtectedFocusClip || preferRequestedClip;
+  const src = usesRequestedClip ? requestedSrc : NEW_CLIPS.evidenceClean;
+  const resolvedPoster = usesRequestedClip ? poster : WREN_STILLS.evidenceCleanPoster;
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
@@ -180,7 +188,7 @@ export default function WrenPlayer({
       {/* A verified still keeps Wren present when a CDN-delivered video is unavailable. */}
       {(fallbackStill && (!videoReady || prefersReducedMotion || videoFailed) || videoFailed) && (
         <img
-          src={isProtectedFocusClip ? WREN_STILLS[fallbackStill ?? "siliconeNeutral"] : WREN_STILLS.evidenceCleanPoster}
+          src={usesRequestedClip ? WREN_STILLS[fallbackStill ?? "siliconeNeutral"] : WREN_STILLS.evidenceCleanPoster}
           alt="Wren"
           className="absolute inset-0 w-full h-full object-contain"
           style={{ ...maskStyle, mixBlendMode: "screen" }}

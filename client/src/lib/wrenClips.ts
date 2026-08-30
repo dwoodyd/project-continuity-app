@@ -6,7 +6,8 @@
  */
 
 const BASE = "/manus-storage";
-const MANAGED_WREN_VIDEO = "/manus-storage/continuary-evidence-wren-letter_650c0a8e.mp4";
+/** Verified Aug 30: supplied Wren Letter clip contains no platform watermark. */
+const MANAGED_WREN_VIDEO = "/manus-storage/continuary-tour-wren-letter_d613a446.mov";
 const MANAGED_WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
 
 /**
@@ -31,6 +32,8 @@ export const WREN_CLIPS = {
   greetingEvening:     MANAGED_WREN_VIDEO,
   /** Managed Evidence Log hero; stored separately from the legacy CDN path. */
   evidenceClean:       MANAGED_WREN_VIDEO,
+  /** Verified watermark-free Letter clip used for public tour variation. */
+  tourLetter:          MANAGED_WREN_VIDEO,
   // ── User-uploaded custom clips ──────────────────────────────────────────────
   /** Wren bouncing and having fun — bright golden, wings spread (watermark-free) */
   bouncingFunClean:   `${BASE}/wren_bouncing_fun_52e9a11d.mp4`, // .mov normalized → mp4 equivalent
