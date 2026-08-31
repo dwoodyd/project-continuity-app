@@ -2293,6 +2293,16 @@
 - [x] Replace the Clarity Engine Wren scene with a different verified watermark-free clip while retaining unique surface assignments
 - [x] Restore Focus Sessions to its protected original implementation and verify its active body-doubling and layout behavior
 - [x] Validate the corrected Clarity and Focus media behavior before checkpointing
+
+## Cross-App Open Items Reconciliation (Aug 30)
+- [x] Review Open-Items-Both-Apps.md against the latest Continuary instructions and report completed, pending, and deferred work accurately
+- [x] Record the user's confirmation that the installed PWA works, while retaining unconfirmed iOS-specific, detailed device-checklist, and PayPal validation
+
+## Deployment Readiness Review (Aug 30)
+- [x] Confirm the current Continuary build is ready to publish apart from the intentionally deferred PayPal approval-page check
+
+## Release Follow-Through (Aug 30)
+- [ ] Receive the remaining user-confirmed device and PayPal approval checks after publication; no further code change is currently required
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
