@@ -5,11 +5,16 @@
  * Apply  mix-blend-mode: screen  on every video element to remove black backgrounds.
  */
 
-const BASE = "/manus-storage";
+/**
+ * Public Wren media intentionally travels through the application server rather
+ * than `/manus-storage`: production hosting intercepts that legacy path with a
+ * signed redirect that iOS Safari does not reliably resume for media ranges.
+ */
+const BASE = "/api/media";
 /** Verified Aug 30: supplied Wren Letter clip contains no platform watermark. */
 /** Verified Wren Letter source re-encoded as H.264/AAC MP4 with fast start for iOS Safari. */
-const MANAGED_WREN_VIDEO = "/manus-storage/continuary-wren-letter-h264_2b65a882.mp4";
-const MANAGED_WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
+const MANAGED_WREN_VIDEO = `${BASE}/continuary-wren-letter-h264_2b65a882.mp4`;
+const MANAGED_WREN_POSTER = `${BASE}/continuary-evidence-wren-poster_8ac53e1b.jpg`;
 
 /**
  * Delivery contract for Wren media used above the fold. These optimized assets
@@ -45,23 +50,23 @@ export const WREN_CLIPS = {
   /** Wren glowing and floating — cinematic splash / intro */
   luminousFloats:     `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
   /** Wren drops from above and hovers — alternate intro (permanent static asset) */
-  dropsAndHovers:     `/manus-storage/wren_drops_and_hovers_fe4c3cf4_f586589a.mp4`,
+  dropsAndHovers:     `${BASE}/wren_drops_and_hovers_fe4c3cf4_f586589a.mp4`,
   /** Wren peeking from the edge — name input background (permanent static asset) */
-  peeking:            `/manus-storage/wren_peeking_9a813da0_b6d5c634.mp4`,
+  peeking:            `${BASE}/wren_peeking_9a813da0_b6d5c634.mp4`,
   /** Wren winks with a jiggly ripple — tone interstitial reaction (permanent static asset) */
-  winksRipple:        `/manus-storage/wren_winks_ripple_44f66820_e99c470c.mp4`,
+  winksRipple:        `${BASE}/wren_winks_ripple_44f66820_e99c470c.mp4`,
   /** Wren closes eyes in concentration — tone selection / thoughtful (permanent static asset) */
-  closesEyes:         `/manus-storage/wren_closes_eyes_ce01aa87_b860edba.mp4`,
+  closesEyes:         `${BASE}/wren_closes_eyes_ce01aa87_b860edba.mp4`,
   /** Wren hovers with energy thread — focus hours step */
   hoversThread:       `${BASE}/wren_hovers_thread_29c4964a.mp4`,
   /** Wren perched on a digital document — project setup step (permanent static asset) */
-  perchedDoc:         `/manus-storage/wren_perched_doc_463f72f2_f5b7f8af.mp4`,
+  perchedDoc:         `${BASE}/wren_perched_doc_463f72f2_f5b7f8af.mp4`,
   /** Wren flies at camera for a hug — done/celebration screen (permanent static asset) */
-  fliesHug:           `/manus-storage/wren_flies_hug_af727f9c_5f7efdf8.mp4`,
+  fliesHug:           `${BASE}/wren_flies_hug_af727f9c_5f7efdf8.mp4`,
 
   // ── Home & Dashboard ────────────────────────────────────────────────────────
   /** Wren's main corner wave — ambient home dashboard widget (permanent static asset) */
-  mainCornerWave:     `/manus-storage/wren_main_corner_wave_b211fe78_a4cf1dad.mp4`,
+  mainCornerWave:     `${BASE}/wren_main_corner_wave_b211fe78_a4cf1dad.mp4`,
   /** Wren corner wave (alternate) */
   cornerWave:         `${BASE}/wren_corner_wave_0d698f99.mp4`,
   /** Wren taps screen and points down — CTA/prompt widget */
@@ -101,7 +106,7 @@ export const WREN_CLIPS = {
   /** Wren happy split in two — big milestone / level up */
   happySplit:         `${BASE}/wren_happy_split_65367046.mp4`,
   /** Wren bouncing having fun — emotional cycle high period (permanent static asset) */
-  bouncingFun:        `/manus-storage/wren_bouncing_fun_52e9a11d_9106eeb8.mp4`,
+  bouncingFun:        `${BASE}/wren_bouncing_fun_52e9a11d_9106eeb8.mp4`,
   /** Wren morphs into golden heart — love/appreciation moment */
   morphsHeart:        `${BASE}/wren_morphs_heart_9c861404.mp4`,
   /** Wren turns into heart (alternate) */
@@ -157,11 +162,11 @@ export const WREN_CLIPS = {
 
   // ── Focus session activity clips (used by FocusSessionsPage / WrenPopout / FocusCompanionPage)
   /** Wren weaving — body-doubling focus activity */
-  weaving:            `/manus-storage/wren-weaving_b532984b.mp4`,
+  weaving:            `${BASE}/wren-weaving_b532984b.mp4`,
   /** Wren reading — calm focus activity */
-  reading:            `/manus-storage/wren-reading_bd6af9a6.mp4`,
+  reading:            `${BASE}/wren-reading_bd6af9a6.mp4`,
   /** Wren looking up — mid-session check-in */
-  lookingup:          `/manus-storage/wren-lookingup_f1735040.mp4`,
+  lookingup:          `${BASE}/wren-lookingup_f1735040.mp4`,
 
   // ── Legacy aliases (backward compat — map to best new equivalent) ──────────
   floatingMemories:   `${BASE}/wren_glowing_hovers_6ea04f47.mp4`,

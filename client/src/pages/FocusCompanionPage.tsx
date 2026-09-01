@@ -21,12 +21,12 @@ import { useEffect, useRef, useState, useCallback } from "react";
 const CHANNEL_NAME = "wren-focus-companion";
 
 const WREN_VIDEOS: Record<string, string> = {
-  weaving:   "/manus-storage/wren-weaving_b532984b.mp4",
-  reading:   "/manus-storage/wren-reading_bd6af9a6.mp4",
-  writing:   "/manus-storage/wren-reading_bd6af9a6.mp4", // .mov normalized → reading clip
-  lookingup: "/manus-storage/wren-lookingup_f1735040.mp4",
+  weaving:   "/api/media/wren-weaving_b532984b.mp4",
+  reading:   "/api/media/wren-reading_bd6af9a6.mp4",
+  writing:   "/api/media/wren-reading_bd6af9a6.mp4", // .mov normalized → reading clip
+  lookingup: "/api/media/wren-lookingup_f1735040.mp4",
 };
-const WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
+const WREN_POSTER = "/api/media/continuary-evidence-wren-poster_8ac53e1b.jpg";
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60);

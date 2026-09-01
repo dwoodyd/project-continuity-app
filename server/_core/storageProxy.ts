@@ -45,8 +45,8 @@ export function resolveStorageContentType(key: string, upstreamContentType: stri
  * without authentication so unauthenticated users see the landing page.
  */
 export function registerStorageProxy(app: Express) {
-  app.get("/manus-storage/*", async (req: any, res) => {
-    const key = req.params[0];
+  const serveStorageKey = async (req: any, res: any) => {
+    const key = req.params[0] as string | undefined;
     if (!key) {
       res.status(400).send("Missing storage key");
       return;
@@ -102,7 +102,10 @@ export function registerStorageProxy(app: Express) {
       if (req.headers.range) {
         fetchHeaders["Range"] = req.headers.range as string;
       }
-      const fileResp = await fetch(url, { headers: fetchHeaders });
+      const fileResp = await fetch(url, {
+        method: req.method === "HEAD" ? "HEAD" : "GET",
+        headers: fetchHeaders,
+      });
       if (!fileResp.ok && fileResp.status !== 206) {
         console.error(`[StorageProxy] CDN error: ${fileResp.status} for key=${key}`);
         res.status(fileResp.status).send("CDN fetch error");
@@ -132,6 +135,7 @@ export function registerStorageProxy(app: Express) {
       if (acceptRanges) res.set("Accept-Ranges", acceptRanges);
       else res.set("Accept-Ranges", "bytes");
 
+      if (req.method === "HEAD") { res.end(); return; }
       if (!fileResp.body) { res.end(); return; }
 
       // Stream the response body with back-pressure handling
@@ -157,5 +161,15 @@ export function registerStorageProxy(app: Express) {
       console.error("[StorageProxy] failed:", err);
       if (!res.headersSent) res.status(502).send("Storage proxy error");
     }
-  });
+  };
+
+  // `/manus-storage/*` remains available for existing app links. Public iOS Wren
+  // media uses `/api/media/*` instead: the hosting edge intercepts the former and
+  // returns a signed 307 before Express can stream it. The API path is not
+  // intercepted, so Safari receives one same-origin response with the correct
+  // video/image MIME type and byte-range headers.
+  app.get("/manus-storage/*", serveStorageKey);
+  app.head("/manus-storage/*", serveStorageKey);
+  app.get("/api/media/*", serveStorageKey);
+  app.head("/api/media/*", serveStorageKey);
 }

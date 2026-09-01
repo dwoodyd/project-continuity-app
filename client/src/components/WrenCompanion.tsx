@@ -21,9 +21,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 // ── CDN asset paths ──────────────────────────────────────────────────────────
-const WREN_NEUTRAL_SVG = "/manus-storage/wren_neutral_f320ed04.svg";
-const WREN_STATES_WEBP = "/manus-storage/wren_states_58a50e1a.webp";
-const WREN_STATES2_WEBP = "/manus-storage/wren_states_2_849b6ba6.webp";
+const WREN_NEUTRAL_SVG = "/api/media/wren_neutral_f320ed04.svg";
+const WREN_STATES_WEBP = "/api/media/wren_states_58a50e1a.webp";
+const WREN_STATES2_WEBP = "/api/media/wren_states_2_849b6ba6.webp";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type WrenState = "neutral" | "guiding" | "celebrating" | "resting" | "nudging";

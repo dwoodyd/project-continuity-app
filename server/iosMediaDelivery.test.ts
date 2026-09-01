@@ -17,6 +17,7 @@ describe("iOS Wren media delivery", () => {
   });
 
   it("uses an iOS-compatible MP4 letter source and supported poster format", () => {
+    expect(WREN_CLIPS.tourLetter).toMatch(/^\/api\/media\//);
     expect(WREN_CLIPS.tourLetter).toMatch(/\.mp4$/);
     expect(WREN_STILLS.evidenceCleanPoster).toMatch(/\.(jpg|jpeg)$/);
   });
@@ -46,7 +47,11 @@ describe("iOS Wren media delivery", () => {
     expect(shell).toContain('bottom: "calc(max(env(safe-area-inset-bottom, 0px), 14px) + 52px + 16px)"');
 
     const serviceWorker = readProjectFile("client/public/sw.js");
-    expect(serviceWorker).toContain('const CACHE_VERSION = "continuity-v8"');
-    expect(serviceWorker).toContain('url.pathname.startsWith("/manus-storage/") || request.destination === "video"');
+    expect(serviceWorker).toContain('const CACHE_VERSION = "continuity-v9"');
+    expect(serviceWorker).toContain('url.pathname.startsWith("/api/media/")');
+
+    const proxy = readProjectFile("server/_core/storageProxy.ts");
+    expect(proxy).toContain('app.get("/api/media/*", serveStorageKey)');
+    expect(proxy).toContain('app.head("/api/media/*", serveStorageKey)');
   });
 });
