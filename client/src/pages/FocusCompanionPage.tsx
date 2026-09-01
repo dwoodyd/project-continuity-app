@@ -26,6 +26,7 @@ const WREN_VIDEOS: Record<string, string> = {
   writing:   "/manus-storage/wren-reading_bd6af9a6.mp4", // .mov normalized → reading clip
   lookingup: "/manus-storage/wren-lookingup_f1735040.mp4",
 };
+const WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -74,6 +75,8 @@ export default function FocusCompanionPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [connected, setConnected] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   const channelRef = useRef<BroadcastChannel | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -224,15 +227,30 @@ export default function FocusCompanionPage() {
         background: `radial-gradient(120% 90% at 50% 30%, rgba(217,164,65,.22), rgba(217,164,65,.04) 55%, transparent 72%)`,
         transition: "height 0.3s ease",
       }}>
-        <video
-          key={state.wrenActivity}
-          src={WREN_VIDEOS[state.wrenActivity] ?? WREN_VIDEOS.lookingup}
-          autoPlay loop muted playsInline
-          style={{
-            position: "absolute", inset: 0, width: "100%", height: "100%",
-            objectFit: "cover", mixBlendMode: "screen",
-          }}
-        />
+        {videoFailed ? (
+          !posterFailed && (
+            <img
+              src={WREN_POSTER}
+              alt=""
+              aria-hidden="true"
+              onError={() => setPosterFailed(true)}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "screen" }}
+            />
+          )
+        ) : (
+          <video
+            key={state.wrenActivity}
+            poster={WREN_POSTER}
+            autoPlay loop muted playsInline preload="metadata"
+            onError={() => setVideoFailed(true)}
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", mixBlendMode: "screen",
+            }}
+          >
+            <source src={WREN_VIDEOS[state.wrenActivity] ?? WREN_VIDEOS.lookingup} type="video/mp4" />
+          </video>
+        )}
         {/* bottom scrim */}
         <div style={{
           position: "absolute", left: 0, right: 0, bottom: 0, height: "46%",

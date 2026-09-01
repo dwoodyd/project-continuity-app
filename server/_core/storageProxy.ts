@@ -2,6 +2,32 @@ import type { Express } from "express";
 import { ENV } from "./env";
 import { sdk } from "./sdk";
 
+const GENERIC_CONTENT_TYPES = new Set([
+  "application/octet-stream",
+  "binary/octet-stream",
+]);
+
+/**
+ * The private storage origin historically reports several public Wren files as
+ * generic binary data. Chromium sniffs those files, while iOS Safari honors
+ * the declared type (especially with nosniff) and rejects otherwise-valid
+ * H.264 MP4 or PNG media. Preserve authoritative types, but correct generic
+ * responses from known file extensions at the app-domain proxy boundary.
+ */
+export function resolveStorageContentType(key: string, upstreamContentType: string | null): string {
+  const normalized = upstreamContentType?.split(";", 1)[0].trim().toLowerCase() ?? "";
+  if (normalized && !GENERIC_CONTENT_TYPES.has(normalized)) return upstreamContentType ?? "application/octet-stream";
+
+  const path = key.toLowerCase();
+  if (path.endsWith(".mp4")) return "video/mp4";
+  if (path.endsWith(".mov")) return "video/quicktime";
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+  if (path.endsWith(".png")) return "image/png";
+  if (path.endsWith(".webp")) return "image/webp";
+  if (path.endsWith(".svg")) return "image/svg+xml";
+  return upstreamContentType || "application/octet-stream";
+}
+
 /**
  * Storage proxy — serves Manus private storage files to the browser.
  *
@@ -84,7 +110,7 @@ export function registerStorageProxy(app: Express) {
       }
 
       // Step 3: pipe headers and body to the browser
-      const contentType = fileResp.headers.get("content-type") || "application/octet-stream";
+      const contentType = resolveStorageContentType(key, fileResp.headers.get("content-type"));
       const contentLength = fileResp.headers.get("content-length");
       const contentRange = fileResp.headers.get("content-range");
       const acceptRanges = fileResp.headers.get("accept-ranges");

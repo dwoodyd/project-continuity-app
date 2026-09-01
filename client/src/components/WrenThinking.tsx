@@ -10,7 +10,7 @@
  *   <WrenThinking size="lg" fullscreen />  — full-screen overlay for long ops
  */
 import { useEffect, useState } from "react";
-import { WREN_CLIPS } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 
 interface WrenThinkingProps {
   /** Custom label. Defaults to cycling through ambient phrases. */
@@ -46,6 +46,8 @@ export function WrenThinking({
 }: WrenThinkingProps) {
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
 
   // Cycle through ambient phrases every 2.8s if no custom label
   useEffect(() => {
@@ -89,21 +91,36 @@ export function WrenThinking({
           position: "absolute", inset: 0, zIndex: 1, pointerEvents: "none",
           background: "radial-gradient(circle at 50% 60%, oklch(0.74 0.14 72 / 0.18) 0%, transparent 70%)",
         }} />
-        <video
-          src={WREN_CLIPS.inflates}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            objectFit: "cover",
-            mixBlendMode: "screen",
-            zIndex: 2,
-          }}
-        />
+        {videoFailed ? (
+          !posterFailed && (
+            <img
+              src={WREN_STILLS.evidenceCleanPoster}
+              alt=""
+              aria-hidden="true"
+              onError={() => setPosterFailed(true)}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "screen", zIndex: 2 }}
+            />
+          )
+        ) : (
+          <video
+            poster={WREN_STILLS.evidenceCleanPoster}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            onError={() => setVideoFailed(true)}
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover",
+              mixBlendMode: "screen",
+              zIndex: 2,
+            }}
+          >
+            <source src={WREN_CLIPS.inflates} type="video/mp4" />
+          </video>
+        )}
       </div>
 
       {/* Label */}

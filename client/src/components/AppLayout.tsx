@@ -943,11 +943,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   return (
     <IntroContext.Provider value={{ replayIntro: onPreviewIntro ?? (() => {}) }}>
     <div
-      className="h-screen w-full flex flex-col items-center overflow-hidden"
+      className="min-h-[100svh] h-[100dvh] w-full flex flex-col items-center overflow-hidden"
       style={{ background: "var(--sidebar)" }}
     >
       {/* Phone column */}
-      <div className="w-full max-w-md h-full flex flex-col bg-background relative overflow-hidden shadow-2xl">
+      <div className="w-full max-w-md min-h-[100svh] h-[100dvh] flex flex-col bg-background relative overflow-hidden shadow-2xl">
         {/* Top header — hidden during active focus sessions */}
         {!isFocusRoute && (
         <header
@@ -1031,7 +1031,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           style={{
             background: "var(--sidebar)",
             borderTop: "1px solid var(--sidebar-border)",
-            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
+            paddingBottom: "max(env(safe-area-inset-bottom, 0px), 14px)",
           }}
         >
           <div className="flex items-stretch justify-around px-0.5 pt-1">
@@ -1146,7 +1146,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       {!isFocusRoute && <div
         className="fixed z-40 flex flex-col items-end gap-2"
         style={{
-          bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 16px)",
+          bottom: "calc(max(env(safe-area-inset-bottom, 0px), 14px) + 52px + 16px)",
           right: "max(calc(50vw - 224px + 16px), 16px)",
         }}
       >

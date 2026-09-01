@@ -13,7 +13,7 @@
  *   "— Wren"
  */
 import { useState, useEffect, useRef } from "react";
-import { WREN_CLIPS } from "@/lib/wrenClips";
+import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 import { ArrowRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -102,6 +102,8 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   const [lineIdx, setLineIdx] = useState(0);
   const [lineActive, setLineActive] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   const [showCTA, setShowCTA] = useState(false);
   const [exiting, setExiting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -156,21 +158,36 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
         opacity: videoVisible ? 1 : 0,
         transition: "opacity 1.8s ease",
       }}>
-        <video
-          ref={videoRef}
-          src="/manus-storage/wren_blob_flying_fun_6ea24231.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            objectFit: "cover", objectPosition: "center",
-            mixBlendMode: "screen",
-          }}
-        />
+        {videoFailed ? (
+          !posterFailed && (
+            <img
+              src={WREN_STILLS.evidenceCleanPoster}
+              alt=""
+              aria-hidden="true"
+              onError={() => setPosterFailed(true)}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", mixBlendMode: "screen" }}
+            />
+          )
+        ) : (
+          <video
+            ref={videoRef}
+            poster={WREN_STILLS.evidenceCleanPoster}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            onError={() => setVideoFailed(true)}
+            style={{
+              position: "absolute", inset: 0,
+              width: "100%", height: "100%",
+              objectFit: "cover", objectPosition: "center",
+              mixBlendMode: "screen",
+            }}
+          >
+            <source src={WREN_CLIPS.blobFlyingFun} type="video/mp4" />
+          </video>
+        )}
       </div>
 
       {/* Gradient overlays */}

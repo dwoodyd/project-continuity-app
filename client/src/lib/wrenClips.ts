@@ -7,7 +7,8 @@
 
 const BASE = "/manus-storage";
 /** Verified Aug 30: supplied Wren Letter clip contains no platform watermark. */
-const MANAGED_WREN_VIDEO = "/manus-storage/continuary-tour-wren-letter_d613a446.mov";
+/** Verified Wren Letter source re-encoded as H.264/AAC MP4 with fast start for iOS Safari. */
+const MANAGED_WREN_VIDEO = "/manus-storage/continuary-wren-letter-h264_2b65a882.mp4";
 const MANAGED_WREN_POSTER = "/manus-storage/continuary-evidence-wren-poster_8ac53e1b.jpg";
 
 /**

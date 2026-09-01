@@ -26,7 +26,8 @@ describe("native-quality mobile baseline", () => {
     const layout = source("client", "src", "components", "AppLayout.tsx");
     const scene = source("client", "src", "components", "IntroWrenScene.tsx");
     expect(layout).toContain('background: "var(--sidebar)"');
-    expect(layout).toContain('paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)"');
+    expect(layout).toContain('paddingBottom: "max(env(safe-area-inset-bottom, 0px), 14px)"');
+    expect(layout).toContain('min-h-[100svh] h-[100dvh]');
     expect(scene).toContain('poster={resolvedPoster}');
     expect(scene).toContain('onError={() => setVideoFailed(true)}');
   });

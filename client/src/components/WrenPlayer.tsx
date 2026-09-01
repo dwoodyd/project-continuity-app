@@ -142,6 +142,7 @@ export default function WrenPlayer({
   const resolvedPoster = poster ?? WREN_STILLS[fallbackStill ?? "siliconeNeutral"];
   const [videoReady, setVideoReady] = useState(false);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   );
@@ -149,6 +150,7 @@ export default function WrenPlayer({
   useEffect(() => {
     setVideoReady(false);
     setVideoFailed(false);
+    setPosterFailed(false);
   }, [src]);
 
   useEffect(() => {
@@ -186,10 +188,11 @@ export default function WrenPlayer({
       )}
     >
       {/* A reviewed still keeps Wren present when motion is reduced or video is unavailable. */}
-      {(!usesVerifiedVideo || !videoReady || prefersReducedMotion || videoFailed) && (
+      {(!usesVerifiedVideo || !videoReady || prefersReducedMotion || videoFailed) && !posterFailed && (
         <img
           src={resolvedPoster}
           alt="Wren"
+          onError={() => setPosterFailed(true)}
           className={cn(
             "absolute inset-0 w-full h-full",
             objectFit === "cover" ? "object-cover" : "object-contain",
@@ -200,12 +203,12 @@ export default function WrenPlayer({
       {usesVerifiedVideo && !prefersReducedMotion && !videoFailed && (
         <video
           key={src}
-          src={src}
           poster={resolvedPoster}
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}
           playsInline
+          preload="metadata"
           onEnded={onEnded}
           onCanPlay={() => setVideoReady(true)}
           onError={() => setVideoFailed(true)}
@@ -216,7 +219,9 @@ export default function WrenPlayer({
             className,
           )}
           style={{ ...maskStyle, mixBlendMode: "screen" }}
-        />
+        >
+          <source src={src} type="video/mp4" />
+        </video>
       )}
     </div>
   );

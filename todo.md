@@ -2303,6 +2303,13 @@
 
 ## Release Follow-Through (Aug 30)
 - [ ] Receive the remaining user-confirmed device and PayPal approval checks after publication; no further code change is currently required
+
+## iOS Media and Bottom Navigation Repair (Sep 1)
+- [x] Audit the active Wren media formats, delivery paths, poster fallbacks, service-worker behavior, and mobile viewport shell against the reported iPhone failure
+- [x] Make every Wren media surface resilient on iOS Safari with compatible video sources, loadable poster/still fallback, and non-broken error behavior
+- [x] Repair iOS Safari and installed-PWA bottom navigation clearance using safe-area-aware dynamic viewport sizing without altering protected Today or Focus behavior
+- [x] Extend the iOS media contract to all remaining direct Wren video components, including onboarding, Wren intro, loading, and companion surfaces
+- [ ] Add targeted regression coverage, validate media delivery and the full build, checkpoint, and request real-iPhone confirmation
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

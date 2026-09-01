@@ -14,9 +14,11 @@ type TodayGreetingWrenProps = {
 export function TodayGreetingWren({ clip, fallbackStill = "siliconeNeutral" }: TodayGreetingWrenProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoFailed, setVideoFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
 
   useEffect(() => {
     setVideoFailed(false);
+    setPosterFailed(false);
     const video = videoRef.current;
     if (!video) return;
     const startPlayback = () => video.play().catch(() => {});
@@ -30,27 +32,36 @@ export function TodayGreetingWren({ clip, fallbackStill = "siliconeNeutral" }: T
     maskImage: "radial-gradient(ellipse 76% 82% at 50% 50%, black 45%, transparent 100%)",
   };
 
-  return videoFailed ? (
-    <img
-      src={WREN_STILLS[fallbackStill]}
-      alt=""
-      aria-hidden="true"
-      className="h-full w-full object-cover mix-blend-screen"
-      style={sceneStyle}
-    />
-  ) : (
+  if (videoFailed) {
+    return posterFailed ? (
+      <span aria-hidden="true" className="block h-full w-full" />
+    ) : (
+      <img
+        src={WREN_STILLS[fallbackStill]}
+        alt=""
+        aria-hidden="true"
+        onError={() => setPosterFailed(true)}
+        className="h-full w-full object-cover mix-blend-screen"
+        style={sceneStyle}
+      />
+    );
+  }
+
+  return (
     <video
-      ref={videoRef}
-      src={WREN_CLIPS[clip]}
-      poster={WREN_STILLS[fallbackStill]}
-      autoPlay
-      loop
-      muted
-      playsInline
+        ref={videoRef}
+        poster={WREN_STILLS[fallbackStill]}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
       aria-hidden="true"
       onError={() => setVideoFailed(true)}
-      className="h-full w-full object-cover mix-blend-screen"
-      style={sceneStyle}
-    />
+        className="h-full w-full object-cover mix-blend-screen"
+        style={sceneStyle}
+      >
+        <source src={WREN_CLIPS[clip]} type="video/mp4" />
+      </video>
   );
 }

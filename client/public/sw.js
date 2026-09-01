@@ -1,7 +1,7 @@
 // Continuary — Service Worker
 // Handles: push notifications, offline capture queuing, background sync, app-shell caching
 
-const CACHE_VERSION = "continuity-v7";
+const CACHE_VERSION = "continuity-v8";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const OFFLINE_QUEUE_KEY = "offline-idea-queue";
 
@@ -46,6 +46,14 @@ self.addEventListener("fetch", (event) => {
     url.pathname.startsWith("/api/") ||
     url.pathname.startsWith("/__manus__/")
   ) {
+    return;
+  }
+
+  // Wren media must always be fetched fresh from the app-domain storage proxy.
+  // In particular, never retain a stale iOS-incompatible MIME response or a
+  // partial media response in Cache Storage.
+  if (url.pathname.startsWith("/manus-storage/") || request.destination === "video") {
+    event.respondWith(fetch(request));
     return;
   }
 

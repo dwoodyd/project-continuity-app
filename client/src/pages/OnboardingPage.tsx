@@ -78,24 +78,40 @@ function SmoothLoopVideo({ src, style }: {
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   useEffect(() => {
     setFailed(false);
+    setPosterFailed(false);
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = 0;
     v.play().catch(() => {});
   }, [src]);
-  // If video fails to load, hide it gracefully — the dark background and text remain visible
-  if (failed) return null;
+  // If video fails, keep a supported still instead of allowing Safari to
+  // display its broken-media glyph over the onboarding copy.
+  if (failed) {
+    return posterFailed ? null : (
+      <img
+        src={WREN_STILLS.evidenceCleanPoster}
+        alt=""
+        aria-hidden="true"
+        onError={() => setPosterFailed(true)}
+        style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center", mixBlendMode: "screen", ...style,
+        }}
+      />
+    );
+  }
   return (
     <video
       ref={videoRef}
-      src={src}
+      poster={WREN_STILLS.evidenceCleanPoster}
       autoPlay
       loop
       muted
       playsInline
-      preload="auto"
+      preload="metadata"
       onError={() => setFailed(true)}
       style={{
         position: "absolute", inset: 0, width: "100%", height: "100%",
@@ -103,7 +119,9 @@ function SmoothLoopVideo({ src, style }: {
         mixBlendMode: "screen",
         ...style,
       }}
-    />
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }
 
@@ -115,22 +133,38 @@ function OnceVideo({ src, style, onEnded }: {
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [failed, setFailed] = useState(false);
+  const [posterFailed, setPosterFailed] = useState(false);
   useEffect(() => {
+    setFailed(false);
+    setPosterFailed(false);
     videoRef.current?.play().catch(() => {});
   }, [src]);
   // If video fails, fire onEnded immediately so the flow isn't blocked
   useEffect(() => {
     if (failed && onEnded) onEnded();
   }, [failed, onEnded]);
-  if (failed) return null;
+  if (failed) {
+    return posterFailed ? null : (
+      <img
+        src={WREN_STILLS.evidenceCleanPoster}
+        alt=""
+        aria-hidden="true"
+        onError={() => setPosterFailed(true)}
+        style={{
+          position: "absolute", inset: 0, width: "100%", height: "100%",
+          objectFit: "cover", objectPosition: "center", mixBlendMode: "screen", ...style,
+        }}
+      />
+    );
+  }
   return (
     <video
       ref={videoRef}
-      src={src}
+      poster={WREN_STILLS.evidenceCleanPoster}
       autoPlay
       muted
       playsInline
-      preload="auto"
+      preload="metadata"
       onEnded={onEnded}
       onError={() => setFailed(true)}
       style={{
@@ -139,7 +173,9 @@ function OnceVideo({ src, style, onEnded }: {
         mixBlendMode: "screen",
         ...style,
       }}
-    />
+    >
+      <source src={src} type="video/mp4" />
+    </video>
   );
 }
 

@@ -13,7 +13,7 @@ describe("mobile navigation and polish", () => {
     expect(layout).toContain('aria-label="Close navigation"');
     expect(layout).toContain('NAV_GROUPS.map((group)');
     expect(layout).toContain('href: "__more__",  label: "More"');
-    expect(layout).toContain('paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)"');
+    expect(layout).toContain('paddingBottom: "max(env(safe-area-inset-bottom, 0px), 14px)"');
     expect(layout).toContain('min-h-[52px]');
   });
 
@@ -22,7 +22,8 @@ describe("mobile navigation and polish", () => {
     expect(layout).toContain('background: "var(--sidebar)"');
     expect(layout).toContain('color: "var(--sidebar-foreground)"');
     expect(layout).toContain('overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]');
-    expect(layout).toContain('bottom: "calc(max(env(safe-area-inset-bottom, 0px), 8px) + 52px + 16px)"');
+    expect(layout).toContain('bottom: "calc(max(env(safe-area-inset-bottom, 0px), 14px) + 52px + 16px)"');
+    expect(layout).toContain('min-h-[100svh] h-[100dvh]');
   });
 
   it("uses readable Welcome surfaces and an unwatermarked managed clip", () => {
