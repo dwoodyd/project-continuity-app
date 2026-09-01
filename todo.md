@@ -2302,21 +2302,21 @@
 - [x] Confirm the current Continuary build is ready to publish apart from the intentionally deferred PayPal approval-page check
 
 ## Release Follow-Through (Aug 30)
-- [ ] Receive the remaining user-confirmed device and PayPal approval checks after publication; no further code change is currently required
+- [ ] Complete the separately deferred non-owner PayPal approval-page check; no further code change is currently required
 
 ## iOS Media and Bottom Navigation Repair (Sep 1)
 - [x] Audit the active Wren media formats, delivery paths, poster fallbacks, service-worker behavior, and mobile viewport shell against the reported iPhone failure
 - [x] Make every Wren media surface resilient on iOS Safari with compatible video sources, loadable poster/still fallback, and non-broken error behavior
 - [x] Repair iOS Safari and installed-PWA bottom navigation clearance using safe-area-aware dynamic viewport sizing without altering protected Today or Focus behavior
 - [x] Extend the iOS media contract to all remaining direct Wren video components, including onboarding, Wren intro, loading, and companion surfaces
-- [ ] Add targeted regression coverage, validate media delivery and the full build, checkpoint, and request real-iPhone confirmation
+- [x] Add targeted regression coverage, validate media delivery and the full build, checkpoint, and receive real-iPhone confirmation
 
 ## iPhone Blank-Stage Follow-up (Sep 1)
 - [x] Trace the screenshot-confirmed iPhone blank Wren stages despite the corrected bottom-tab safe-area behavior
 - [x] Route all Wren video and still requests through an app-owned same-origin media stream with direct MIME, range, and HEAD support rather than the intercepted storage redirect
 - [x] Ensure every affected Wren stage retains its deterministic valid still fallback when iOS video playback cannot begin
 - [x] Add regression coverage and validate the direct media delivery path, TypeScript, and full test suite
-- [ ] Publish the direct-media correction and confirm real-iPhone Safari and installed-PWA Wren stages no longer render blank
+- [x] Publish the direct-media correction and confirm that real-iPhone Wren stages no longer render blank
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
