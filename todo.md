@@ -2322,7 +2322,7 @@
 - [x] Correct the Continuary install and service-worker configuration so the installed app opens in standalone display mode rather than Safari browser chrome
 - [x] Verify the active Continuary Wren media stream returns `video/mp4`, `Accept-Ranges: bytes`, and `Content-Range` on a ranged `206` response without altering Wren behavior
 - [ ] Correct the marketing site’s separately hosted managed-storage media path, which remains outside this Continuary workspace
-- [ ] Add regression coverage, validate the live delivery contract, checkpoint, and request a concise installed-PWA recheck
+- [x] Add regression coverage, validate the live delivery contract, checkpoint, and receive a confirmed standalone iPhone install recheck
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.
