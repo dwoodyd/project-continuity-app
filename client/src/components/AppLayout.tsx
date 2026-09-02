@@ -65,6 +65,7 @@ import {
 import { CommandPaletteTrigger } from "./CommandPalette";
 import WrenPlayer from "./WrenPlayer";
 import StreakMilestoneCelebration from "./StreakMilestoneCelebration";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./ui/drawer";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
 
@@ -875,7 +876,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             height: isFocusRoute ? "100%" : undefined,
           }}
         >
-          {children}
+          {isFocusRoute ? children : <div key={location} className="route-thread-enter">{children}</div>}
         </main>
 
         {/* FAB — speed-dial with two capture options */}
@@ -1021,7 +1022,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
         {/* Page content */}
         <main ref={mainScrollRef} id="main-content" className={isFocusRoute ? "flex-1 overflow-hidden h-full" : "flex-1 overflow-y-auto overscroll-contain pb-[calc(11rem+env(safe-area-inset-bottom))]"} style={isFocusRoute || !isDesktopMode ? undefined : { scrollbarGutter: "stable" }}>
-          {children}
+          {isFocusRoute ? children : <div key={location} className="route-thread-enter">{children}</div>}
         </main>
 
         {/* Bottom tab bar — hidden during focus sessions */}
@@ -1081,18 +1082,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         )}
       </div>
 
-      {/* Grouped desktop sidebar, adapted as a dismissible mobile drawer. */}
-      {mobileNavOpen && !isFocusRoute && (
-        <div className="fixed inset-0 z-50 lg:hidden" aria-modal="true" role="dialog" aria-label="Navigation menu">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/55"
-            aria-label="Close navigation"
-            onClick={() => setMobileNavOpen(false)}
-          />
-          <aside
+      {/* Vaul gives the compact More menu its native drag, velocity-dismiss, scrim, and scroll-lock behavior. */}
+      {!isFocusRoute && (
+        <Drawer open={mobileNavOpen} onOpenChange={setMobileNavOpen} direction="left">
+          <DrawerContent
             id="mobile-navigation-drawer"
-            className="relative h-full w-[min(86vw,340px)] flex flex-col overflow-y-auto"
+            className="h-[100dvh] w-[min(86vw,340px)] max-w-[340px] overflow-y-auto rounded-none border-r-0"
             style={{
               background: "var(--sidebar)",
               color: "var(--sidebar-foreground)",
@@ -1100,15 +1095,19 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)",
             }}
           >
-            <div className="flex items-center justify-between px-4 pb-3" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
-              <Link href="/" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 font-semibold">
-                <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
-                Continuary
-              </Link>
+            <DrawerHeader className="flex-row items-center justify-between px-4 pb-3 pt-0 text-left" style={{ borderBottom: "1px solid var(--sidebar-border)" }}>
+              <div>
+                <DrawerTitle className="sr-only">Navigation menu</DrawerTitle>
+                <DrawerDescription className="sr-only">Choose where to go next in Continuary.</DrawerDescription>
+                <Link href="/" onClick={() => setMobileNavOpen(false)} className="flex items-center gap-2 font-semibold">
+                  <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
+                  Continuary
+                </Link>
+              </div>
               <button type="button" onClick={() => setMobileNavOpen(false)} className="p-2 rounded-xl" style={{ color: "var(--sidebar-foreground)" }} aria-label="Close navigation">
                 <X className="w-5 h-5" />
               </button>
-            </div>
+            </DrawerHeader>
             <nav className="flex-1 px-3 py-4 space-y-5" aria-label="All navigation">
               {NAV_GROUPS.map((group) => {
                 const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
@@ -1137,8 +1136,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 );
               })}
             </nav>
-          </aside>
-        </div>
+          </DrawerContent>
+        </Drawer>
       )}
 
       {/* FAB — speed-dial with two capture options */}

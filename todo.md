@@ -2542,3 +2542,9 @@
 - [x] Inspect the supplied single-file patch against the existing optional Book code field.
 - [x] Show the specified inline acknowledgement only when the existing reader code has at least four characters, without adding validation or a network call.
 - [x] Add focused regression coverage and verify type safety while preserving the existing `/apply` code carry-through.
+
+## Interaction and Motion Polish — Continuary (Sep 1)
+- [x] Audit shared motion tokens, Sonner feedback, Vaul sheets, route transitions, and protected Wren/Focus/PiP experiences against the supplied craft brief
+- [x] Add centralized transform/opacity-only motion presets, reduced-motion behavior, and restrained press/list/route feedback in Continuary's thread-picked-up language
+- [x] Elevate Return Brief, Quietly Waiting, and check-in commit moments without changing protected Wren or PiP mechanics
+- [ ] Add regression coverage, validate the complete app, checkpoint the Continuary polish, and separately identify Lifewoven and Inner Wake scope

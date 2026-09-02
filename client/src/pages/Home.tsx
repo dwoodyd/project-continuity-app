@@ -67,6 +67,7 @@ import { FirstMovableStepModal } from "@/components/FirstMovableStepModal";
 import { ThresholdDiagnosisFlow } from "@/components/ThresholdDiagnosisFlow";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import {
   ReturnMarker,
   RhythmSegments,
@@ -385,7 +386,7 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
   const { data: projects } = trpc.projects.listActive.useQuery();
   const submit = trpc.checkIns.submitMorning.useMutation({
     onSuccess: (data) => {
-      notify.saved("Your day is set.", { description: "Wren's watching your back." });
+      notify.saved("Held.", { description: "Your day has a gentle shape." });
       if (notes.trim()) void checkMorningCrisis(notes);
       // If clarity mode was suggested and state is anxious/foggy/drained, offer nudge
       if (data.clarityModeSuggestion) {
@@ -571,7 +572,7 @@ function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; loca
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
-      notify.saved(data.response ?? "Midday check-in noted.");
+      notify.saved("Held.", { description: data.response ?? "The thread holds." });
       onComplete();
     },
     onError: () => notify.error("Didn't save — try once more."),
@@ -885,7 +886,7 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
   const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
-      notify.saved("Day closed.", { description: "Tomorrow's brief is ready when you are." });
+      notify.saved("Held.", { description: "Tomorrow's brief is ready when you are." });
       const combined = [whatMoved, whatRemains, whatLearned].filter(Boolean).join(" ");
       if (combined.trim()) void checkEveningCrisis(combined);
       onComplete();
@@ -1738,9 +1739,9 @@ export default function Home() {
     if (!profile?.firstEngagementInviteSeen) dismissFirstEngagementInvite.mutate();
     // Show Wren celebration overlay
     const celebrationMessages: Record<CheckInStep, string> = {
-      morning: "Thread secured. Today has direction.",
-      midday: "You checked in. The thread holds.",
-      evening: "Day closed. Wren will keep this warm until tomorrow.",
+      morning: "Held. One thing at a time.",
+      midday: "Held. The thread stays with you.",
+      evening: "Held. Wren will keep this warm until tomorrow.",
     };
     setWrenCelebration({ type, message: celebrationMessages[type] });
     setTimeout(() => setWrenCelebration(null), 3500);
@@ -1974,7 +1975,7 @@ export default function Home() {
             eyebrow="Return brief"
             title="You came back. The work is still here."
             body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. One small next step is enough: ${activeThreadLock.whatNext}` : "Nothing is broken. You do not need to rebuild context before you begin—one small next step is enough."}
-            className="border-0 rounded-none"
+            className="border-0 rounded-none thread-return-settle"
             variant="return"
           >
             <button
@@ -2008,14 +2009,14 @@ export default function Home() {
         }
       }} />
     )}
-    <Dialog open={customizeOpen} onOpenChange={setCustomizeOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Customize your dashboard</DialogTitle>
-        </DialogHeader>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+    <Drawer open={customizeOpen} onOpenChange={setCustomizeOpen} direction="bottom">
+      <DrawerContent className="max-h-[82dvh] overflow-y-auto">
+        <DrawerHeader className="text-left">
+          <DrawerTitle>Customize your dashboard</DrawerTitle>
+          <DrawerDescription className="text-sm leading-relaxed">
           Your space begins lightly. Add the capabilities that feel useful, and leave the rest quiet until you invite them in.
-        </p>
+          </DrawerDescription>
+        </DrawerHeader>
         <div className="space-y-2 pt-2" aria-label="Dashboard module preferences">
           {dashboardLayout.order.map((key) => {
             const module = DASHBOARD_MODULES.find((item) => item.key === key);
@@ -2056,9 +2057,9 @@ export default function Home() {
             );
           })}
         </div>
-        <p className="text-xs text-muted-foreground">Changes save automatically to your account.</p>
-      </DialogContent>
-    </Dialog>
+        <p className="px-4 pb-5 text-xs text-muted-foreground">Changes save automatically to your account.</p>
+      </DrawerContent>
+    </Drawer>
     <div className={`px-4 sm:px-5 py-7 page-enter flex flex-col gap-7 overflow-x-hidden ${showReturnBrief ? "max-w-none" : "max-w-4xl mx-auto"}`}>
       <FoundingRateInvite />
       {showReturnBrief && (
@@ -2069,7 +2070,7 @@ export default function Home() {
             eyebrow={`${returningAfterGap ? "Return brief" : "Return brief preview"} · ${memberDateLabel}`}
             title={returnBriefTitle}
             body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
-            className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5"
+            className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5 thread-return-settle"
             variant="return"
           >
           {lastWrittenLine && !activeThreadLock && (
@@ -2663,7 +2664,7 @@ export default function Home() {
           {/* ── Wren Celebration Overlay ─────────────────────────────────────── */}
           {wrenCelebration && (
             <div
-              className="fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
+              className="checkin-held-settle fixed inset-0 z-50 flex flex-col items-center justify-center pointer-events-none"
               style={{ background: "oklch(0.08 0.02 264 / 0.85)", backdropFilter: "blur(8px)" }}
             >
               <WrenPlayer clip="cartwheels" size="2xl" />
@@ -3356,7 +3357,7 @@ export default function Home() {
             title="Quietly Waiting"
             style={{ order: presentationOrder("quietly_waiting", dashboardLayout) }}
           >
-            <div className="space-y-2 pt-1">
+            <div className="thread-list-settle space-y-2 pt-1">
               {waiting.slice(0, 3).map(p => (
                 <button
                   key={p.id}

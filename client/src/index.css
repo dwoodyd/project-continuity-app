@@ -80,7 +80,9 @@
   --elevation-overlay: 0 12px 32px oklch(0 0 0 / 0.18);
   --motion-fast: 160ms;
   --motion-standard: 220ms;
+  --motion-gentle: 280ms;
   --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-thread: cubic-bezier(0.22, 1, 0.36, 1);
   --tap-target: 44px;
   --safe-top: max(0px, env(safe-area-inset-top));
   --safe-bottom: max(0px, env(safe-area-inset-bottom));
@@ -322,6 +324,16 @@
     transform: scale(0.98);
     opacity: 0.92;
   }
+
+  /* Connective-tissue feedback: only transform and opacity travel. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  [data-slot="button"]:not(:disabled) {
+    transition-property: transform, opacity;
+    transition-duration: var(--motion-fast);
+    transition-timing-function: var(--ease-thread);
+  }
   :focus-visible {
     outline: 3px solid oklch(0.74 0.14 72 / 0.92);
     outline-offset: 3px;
@@ -413,6 +425,24 @@ html[data-reduced-visual-noise="true"] [style*="linear-gradient"] {
   .animate-delay-300 { animation-delay: 0.3s; }
   .animate-delay-400 { animation-delay: 0.4s; }
   .animate-delay-500 { animation-delay: 0.5s; }
+
+  /* Continuary motion language: a thread being gently picked back up. */
+  @keyframes threadSettle {
+    from { opacity: 0.01; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .route-thread-enter,
+  .thread-return-settle,
+  .checkin-held-settle {
+    animation: threadSettle var(--motion-gentle) var(--ease-thread) both;
+    will-change: transform, opacity;
+  }
+  .thread-list-settle > * {
+    animation: threadSettle var(--motion-standard) var(--ease-thread) both;
+    will-change: transform, opacity;
+  }
+  .thread-list-settle > *:nth-child(2) { animation-delay: 40ms; }
+  .thread-list-settle > *:nth-child(3) { animation-delay: 80ms; }
 
   /* ── Premium card shadow ── */
   .card-shadow {
