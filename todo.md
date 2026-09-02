@@ -2551,8 +2551,8 @@
 
 ## Focus Pre-Session Wren Presence Repair (Sep 1)
 - [x] Replace the generic yellow pre-session fallback still with the intended Wren presence while retaining the protected active-session and PiP behavior
-- [ ] Add focused regression coverage, validate the repaired Focus landing, checkpoint, and obtain a concise real-device recheck
+- [x] Add focused regression coverage, validate the repaired Focus landing, checkpoint, and obtain a concise real-device recheck
 
 ## Focus Landing No-Holder Repair (Sep 1)
 - [x] Remove the screenshot-confirmed pre-session Wren holder still so the landing shows a neutral stage until the intended video is ready
-- [ ] Add regression coverage, validate active Focus/PiP preservation, checkpoint, and obtain a concise real-device recheck
+- [x] Add regression coverage, validate active Focus/PiP preservation, checkpoint, and obtain a concise real-device recheck
