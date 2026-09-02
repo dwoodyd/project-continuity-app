@@ -89,6 +89,8 @@ import { getBrowserTimezone, getNowInTimezone, weekdayForLocalDate } from "@/lib
 import { TomorrowPlanSection, type TomorrowTask } from "@/components/TomorrowPlanSection";
 import { GlossaryTerm } from "@/components/TermTooltip";
 import { WrenIntroMoment } from "@/components/WrenIntroMoment";
+import { GroundModeFlow } from "@/components/GroundModeFlow";
+import { CollapseModeGate } from "@/components/CollapseModeGate";
 import { CrisisSupportCard } from "@/components/CrisisSupportCard";
 import { useCrisisCheck } from "@/hooks/useCrisisCheck";
 import { BentoCard } from "@/components/BentoCard";
@@ -1294,10 +1296,6 @@ export default function Home() {
   );
   const { data: activeProjects } = trpc.projects.listActive.useQuery(undefined, { enabled: authed });
   const { data: pausedProjects } = trpc.projects.listPaused.useQuery(undefined, { enabled: authed });
-  const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
-    enabled: authed,
-    staleTime: 5 * 60 * 1000,
-  });
   const utils = trpc.useUtils();
   const { data: dashboardLayoutData } = trpc.settings.getDashboardLayout.useQuery(undefined, {
     enabled: authed,
@@ -1950,9 +1948,6 @@ export default function Home() {
           >
             {justOneThing.label}
           </button>
-          {groundModeActive && (
-            <p className="mt-4 text-xs text-muted-foreground">Ground Mode is active: facts, one action, no extra framing.</p>
-          )}
           <button
             onClick={() => setJustOneThingOpen(false)}
             className="mt-5 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
@@ -1986,6 +1981,12 @@ export default function Home() {
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </button>
           </IntroWrenScene>
+          <a
+            href="/read"
+            className="self-center text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Start today with The Read
+          </a>
           <button
             onClick={() => setReentrySurfaceRestored(true)}
             className="self-center text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
@@ -2000,6 +2001,7 @@ export default function Home() {
   return (
     <>
     <PageMeta title="Today · Continuary" description="Your calm daily rhythm, next action, and project continuity space." path="/" />
+    <CollapseModeGate onGround={() => enterGroundMode("manual")} />
     {showWrenIntro && (
       <WrenIntroMoment onDone={() => {
         setShowWrenIntro(false);
@@ -2181,30 +2183,7 @@ export default function Home() {
           </button>
         </div>
       )}
-      {/* ── Ground Mode Banner ─────────────────────────────────────────────── */}
-      {groundModeActive && (
-        <div
-          className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
-          style={{ background: "oklch(0.18 0.02 240 / 0.80)", border: "1px solid oklch(0.35 0.04 240 / 0.50)" }}
-        >
-          <div className="flex items-center gap-2">
-            <Anchor className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.65 0.05 240)" }} />
-            <span className="text-xs font-medium" style={{ color: "oklch(0.80 0.04 240)" }}>Ground Mode: facts only</span>
-            {groundModeEnteredAt && (
-              <span className="text-xs" style={{ color: "oklch(0.50 0.03 240)" }}>
-                · {Math.max(0, Math.round((15 * 60 * 1000 - (Date.now() - groundModeEnteredAt)) / 60000))}m left
-              </span>
-            )}
-          </div>
-          <button
-            onClick={() => exitGroundMode("manual")}
-            className="text-xs px-2.5 py-1 rounded-lg transition-colors"
-            style={{ color: "oklch(0.60 0.03 240)", border: "1px solid oklch(0.35 0.04 240 / 0.40)" }}
-          >
-            Exit
-          </button>
-        </div>
-      )}
+      {groundModeActive && <GroundModeFlow onExit={() => exitGroundMode("manual")} />}
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between" style={{ order: -10 }}>
         <div>
@@ -2215,15 +2194,6 @@ export default function Home() {
             <p className="text-sm text-muted-foreground">
               {memberDateLabel}
             </p>
-            {streakData && streakData.streak >= 2 && (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                style={{ background: "oklch(0.74 0.16 58 / 0.15)", color: "#C8452B", border: "1px solid oklch(0.74 0.16 58 / 0.3)" }}
-                title={`${streakData.streak}-day streak — longest: ${streakData.longestStreak} days`}
-              >
-                🔥 {streakData.streak}d
-              </span>
-            )}
           </div>
         </div>
         {/* Header right cluster — flex-wrap so chips never overflow on narrow screens */}
@@ -2239,8 +2209,8 @@ export default function Home() {
           {!groundModeActive && (
             <button
               onClick={() => enterGroundMode("manual")}
-              title="Enter Ground Mode — facts only, no warmth"
-              aria-label="Enter Ground Mode — facts only, no warmth"
+              title="Enter Ground Mode"
+              aria-label="Enter Ground Mode"
               className="p-1.5 rounded-lg transition-colors shrink-0"
               style={{ color: "oklch(0.45 0.04 240 / 0.70)", border: "1px solid oklch(0.35 0.04 240 / 0.30)" }}
             >

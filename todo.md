@@ -2556,3 +2556,12 @@
 ## Focus Landing No-Holder Repair (Sep 1)
 - [x] Remove the screenshot-confirmed pre-session Wren holder still so the landing shows a neutral stage until the intended video is ready
 - [x] Add regression coverage, validate active Focus/PiP preservation, checkpoint, and obtain a concise real-device recheck
+
+## Revision Brief 9 — Evidence-First ADHD Layer (Sep 2)
+- [x] Remove all user-visible streak, consecutive-day, and completion-percentage framing while preserving the evidence log and no-shame re-entry
+- [x] Rebuild Ground Mode as a one-tap, zero-input paced regulation flow that renders only user-authored calm-state material during the state
+- [x] Replace decomposition-first Unstick with an activation, fear, or physical-floor fork and progressive launch paths
+- [x] Extend Time Sense and Surface with non-score calibration, waiting-mode support, staged hyperfocus exit, and no time blocking
+- [x] Add durable Read, if-then, Threshold, Waiting Register, Court, Capture separation, Collapse, and passive-layer primitives with required routes and integrations
+- [x] Apply cross-cutting second-person, ease-first, re-entry, project-action, completion-evidence, and onboarding safeguards throughout affected surfaces
+- [ ] Generate and apply additive migrations; add comprehensive regression coverage; validate protected Focus/PiP/media behavior; checkpoint the complete revision

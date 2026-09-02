@@ -166,12 +166,113 @@ export const userProfiles = mysqlTable("user_profiles", {
   // ── Wren Memory ─────────────────────────────────────────────────────────────
   /** When true, Wren stops capturing new memory items */
   wrenMemoryPaused: boolean("wrenMemoryPaused").default(false).notNull(),
+  /** User-authored text shown verbatim during Ground Mode. No assistant content is generated there. */
+  calmStateReference: text("calmStateReference"),
+  /** Enables the deliberately reduced-surface collapse path until the member turns it off. */
+  collapseModeEnabled: boolean("collapseModeEnabled").default(false).notNull(),
+  collapseModeUpdatedAt: bigint("collapseModeUpdatedAt", { mode: "number" }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertUserProfile = typeof userProfiles.$inferInsert;
+
+// ─── Revision 9: Evidence-First State Records ─────────────────────────────────
+// These tables store only the member's authored operational context. They do not
+// create scores, streaks, or engagement targets.
+export const readDays = mysqlTable("read_days", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  date: varchar("date", { length: 10 }).notNull(),
+  color: mysqlEnum("color", ["gray", "orange", "green"]).notNull(),
+  source: mysqlEnum("source", ["manual", "check_in", "return"]).default("manual").notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+}, (table) => [index("read_days_user_date_idx").on(table.userId, table.date)]);
+export type ReadDay = typeof readDays.$inferSelect;
+
+export const readItems = mysqlTable("read_items", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  list: mysqlEnum("list", ["now", "waiting", "later"]).notNull(),
+  title: text("title").notNull(),
+  projectId: int("projectId").references(() => projects.id),
+  boundary: text("boundary"),
+  status: mysqlEnum("status", ["open", "complete", "removed"]).default("open").notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+}, (table) => [index("read_items_user_list_idx").on(table.userId, table.list, table.status)]);
+export type ReadItem = typeof readItems.$inferSelect;
+
+export const ifThenPlans = mysqlTable("if_then_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  ifSituation: text("ifSituation").notNull(),
+  thenAction: text("thenAction").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+});
+export type IfThenPlan = typeof ifThenPlans.$inferSelect;
+
+export const waitingRegisterItems = mysqlTable("waiting_register_items", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  title: text("title").notNull(),
+  waitingOn: text("waitingOn"),
+  boundary: text("boundary"),
+  followUpDate: varchar("followUpDate", { length: 10 }),
+  projectId: int("projectId").references(() => projects.id),
+  status: mysqlEnum("status", ["waiting", "resolved", "released"]).default("waiting").notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  updatedAt: bigint("updatedAt", { mode: "number" }).notNull(),
+}, (table) => [index("waiting_register_user_status_idx").on(table.userId, table.status)]);
+export type WaitingRegisterItem = typeof waitingRegisterItems.$inferSelect;
+
+export const thresholdPlans = mysqlTable("threshold_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  task: text("task").notNull(),
+  fork: mysqlEnum("fork", ["fear", "activation", "physical_floor", "unclear"]).notNull(),
+  protection: text("protection"),
+  smallestStart: text("smallestStart").notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type ThresholdPlan = typeof thresholdPlans.$inferSelect;
+
+export const courtEntries = mysqlTable("court_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  situation: text("situation").notNull(),
+  evidenceFor: text("evidenceFor"),
+  evidenceAgainst: text("evidenceAgainst"),
+  fairRead: text("fairRead").notNull(),
+  nextAction: text("nextAction"),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type CourtEntry = typeof courtEntries.$inferSelect;
+
+export const collapseCanaries = mysqlTable("collapse_canaries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  situation: text("situation").notNull(),
+  oneMove: text("oneMove").notNull(),
+  status: mysqlEnum("status", ["active", "complete", "dismissed"]).default("active").notNull(),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+  resolvedAt: bigint("resolvedAt", { mode: "number" }),
+}, (table) => [index("collapse_canary_user_status_idx").on(table.userId, table.status)]);
+export type CollapseCanary = typeof collapseCanaries.$inferSelect;
+
+export const hyperfocusExits = mysqlTable("hyperfocus_exits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id),
+  focusSessionId: int("focusSessionId").references(() => focusSessions.id),
+  stage: mysqlEnum("stage", ["notice", "body", "next", "close"]).notNull(),
+  note: text("note"),
+  createdAt: bigint("createdAt", { mode: "number" }).notNull(),
+});
+export type HyperfocusExit = typeof hyperfocusExits.$inferSelect;
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
 export const projects = mysqlTable("projects", {
@@ -1080,6 +1181,8 @@ export const captures = mysqlTable("captures", {
   durationS: int("durationS"),
   audioKey: varchar("audioKey", { length: 1000 }),
   transcript: text("transcript").notNull(),
+  /** Capture stays separate from any eventual decision, task, or project action. */
+  intent: mysqlEnum("intent", ["capture", "note", "task", "idea"]).default("capture").notNull(),
   processingState: mysqlEnum("processingState", ["raw", "sorted"]).notNull().default("raw"),
   duringFocusSessionId: int("duringFocusSessionId"),
   groundModeOfferedAt: bigint("groundModeOfferedAt", { mode: "number" }),

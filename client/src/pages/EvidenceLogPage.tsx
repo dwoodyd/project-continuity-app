@@ -228,9 +228,6 @@ export default function EvidenceLogPage() {
   const { data: summaries, isLoading: summariesLoading, refetch: refetchSummaries } =
     trpc.evidence.getMonthly.useQuery();
 
-  const { data: streakData, isLoading: streakLoading } =
-    trpc.evidence.getStreakData.useQuery();
-
   const generateSummary = trpc.evidence.generateSummary.useMutation({
     onSuccess: () => {
       refetchSummaries();

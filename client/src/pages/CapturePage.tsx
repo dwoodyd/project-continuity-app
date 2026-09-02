@@ -1,6 +1,6 @@
 /**
  * Capture screen (9.1)
- * Voice or text input → creates a capture → navigates to /capture/:id/sort
+ * Voice or text input → saves a capture. Sorting is always an explicit later choice.
  */
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useLocation } from "wouter";
@@ -31,6 +31,7 @@ export default function CapturePage() {
   const [textInput, setTextInput] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [captureId, setCaptureId] = useState<number | null>(null);
+  const [savedCaptureId, setSavedCaptureId] = useState<number | null>(null);
   const [offlineVoiceRecording, setOfflineVoiceRecording] = useState(false);
   const [queuedCaptureCount, setQueuedCaptureCount] = useState(0);
   const { crisisLevel, checkAndMaybeFlag, dismissCrisis } = useCrisisCheck("capture");
@@ -114,11 +115,16 @@ export default function CapturePage() {
       const result = await createCapture.mutateAsync({
         mode: "text",
         transcript: text,
+        intent: "capture",
       });
       await utils.capture.recent.invalidate();
       // Fire-and-forget crisis check before navigating
       void checkAndMaybeFlag(text);
-      navigate(`/capture/${result.id}/sort`);
+      setSavedCaptureId(result.id);
+      setTextInput("");
+      setMode("idle");
+      setRecordState("idle");
+      notify.saved("Captured. You can decide what it is later.");
     } catch {
       setError("Couldn't save your capture. Please try again.");
       setRecordState("idle");
@@ -273,9 +279,13 @@ export default function CapturePage() {
         durationS,
         transcript,
         audioKey: audioUrl,
+        intent: "capture",
       });
       await utils.capture.recent.invalidate();
-      navigate(`/capture/${finalResult.id}/sort`);
+      setSavedCaptureId(finalResult.id);
+      setMode("idle");
+      setRecordState("idle");
+      notify.saved("Captured. You can decide what it is later.");
     } catch (err: any) {
       setError(err?.message ?? "Transcription failed. Please try again.");
       setRecordState("idle");
@@ -298,7 +308,7 @@ export default function CapturePage() {
       <div>
         <h1 className="text-2xl font-bold text-foreground">Capture</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Say or type whatever's in your head. Wren will sort it.
+          Say or type whatever is here. Capture first; decide later.
         </p>
       </div>
 
@@ -329,8 +339,16 @@ export default function CapturePage() {
         <CrisisSupportCard level={crisisLevel} onDismiss={dismissCrisis} />
       )}
 
+      {savedCaptureId && mode === "idle" && !isProcessing && (
+        <div className="rounded-xl border border-primary/25 bg-primary/[0.05] p-4" data-testid="capture-saved-later">
+          <p className="font-medium text-foreground">Captured.</p>
+          <p className="mt-1 text-sm text-muted-foreground">You do not have to decide what it means right now.</p>
+          <div className="mt-3 flex gap-3"><a className="text-sm font-medium text-primary underline underline-offset-4" href={`/capture/${savedCaptureId}/sort`}>Sort it now</a><button className="text-sm text-muted-foreground underline underline-offset-4" onClick={() => setSavedCaptureId(null)}>Capture another</button></div>
+        </div>
+      )}
+
       {/* Mode selector */}
-      {mode === "idle" && !isProcessing && (
+      {mode === "idle" && !isProcessing && !savedCaptureId && (
         <div className="flex flex-col gap-3">
           {voiceAvailable && (
             <button

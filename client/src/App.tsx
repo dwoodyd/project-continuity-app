@@ -63,6 +63,7 @@ const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage")
 const WaitlistPage        = lazy(() => import("./pages/WaitlistPage"));
 const BookStartPage       = lazy(() => import("./pages/BookStartPage"));
 const BookStartHerePage   = lazy(() => import("./pages/BookStartHerePage"));
+const RevisionNinePage    = lazy(() => import("./pages/RevisionNinePage"));
 
 // Minimal fallback shown while a lazy chunk loads (avoids blank flash)
 function PageLoader() {
@@ -145,6 +146,11 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/capture/:id/sort" component={SortResultPage} />
               <Route path="/capture" component={CapturePage} />
               <Route path="/loops" component={OpenLoopsPage} />
+              <Route path="/read">{() => <RevisionNinePage initialSection="read" />}</Route>
+              <Route path="/waiting">{() => <RevisionNinePage initialSection="waiting" />}</Route>
+              <Route path="/threshold-plans">{() => <RevisionNinePage initialSection="threshold" />}</Route>
+              <Route path="/court">{() => <RevisionNinePage initialSection="court" />}</Route>
+              <Route path="/support">{() => <RevisionNinePage initialSection="support" />}</Route>
               <Route path="/404" component={NotFound} />
               <Route component={NotFound} />
             </Switch>

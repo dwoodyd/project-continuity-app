@@ -38,6 +38,7 @@ import { transcribeRouter } from "./routers/transcribe";
 import { loopsRouter } from "./routers/loops";
 import { foundingRouter } from "./routers/founding";
 import { conversionRouter } from "./routers/conversion";
+import { revisionNineRouter } from "./routers/revisionNine";
 import { revokeSession, getMemberCount } from "./db";
 import { protectedProcedure } from "./_core/trpc";
 
@@ -125,6 +126,7 @@ export const appRouter = router({
   crisis: crisisRouter,
   founding: foundingRouter,
   conversion: conversionRouter,
+  revisionNine: revisionNineRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -64,7 +64,6 @@ import {
 } from "@/lib/authStartupRecovery";
 import { CommandPaletteTrigger } from "./CommandPalette";
 import WrenPlayer from "./WrenPlayer";
-import StreakMilestoneCelebration from "./StreakMilestoneCelebration";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./ui/drawer";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
@@ -87,6 +86,10 @@ const ALL_NAV_ITEMS = [
   { href: "/emotional-cycle", label: "Emotional Cycle",   icon: BarChart2,     group: "reflect" },
   { href: "/evidence",        label: "Evidence Log",      icon: ScrollText,    group: "reflect" },
   { href: "/reading-bridge",  label: "Reading Bridge",    icon: BookOpen,      group: "reflect" },
+  { href: "/read",            label: "The Read",          icon: BookOpen,      group: "reflect" },
+  { href: "/waiting",         label: "Waiting Register",  icon: Anchor,        group: "work" },
+  { href: "/threshold-plans", label: "Threshold",         icon: Zap,           group: "work" },
+  { href: "/court",           label: "Court",             icon: ScrollText,    group: "reflect" },
   { href: "/vault",           label: "Knowledge Vault",   icon: BookOpen,      group: "vault" },
   { href: "/scratch",         label: "Scratch Pad",       icon: PenLine,       group: "vault" },
   { href: "/weekly",          label: "Weekly Review",     icon: Archive,       group: "more" },
@@ -121,6 +124,11 @@ const INTERNAL_PAGE_TITLES: Record<string, string> = {
   "/emotional-cycle": "Emotional Cycle",
   "/evidence": "Evidence Log",
   "/reading-bridge": "Reading Bridge",
+  "/read": "The Read",
+  "/waiting": "Waiting Register",
+  "/threshold-plans": "Threshold",
+  "/court": "Court",
+  "/support": "Support",
   "/vault": "Knowledge Vault",
   "/scratch": "Scratch Pad",
   "/intelligence": "Intelligence",
@@ -349,11 +357,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     root.dataset.fontSize = profile?.fontSizePreference ?? "medium";
     root.dataset.reducedVisualNoise = profile?.reducedVisualNoise ? "true" : "false";
   }, [profile?.fontSizePreference, profile?.reducedVisualNoise]);
-  const { data: streakData } = trpc.checkIns.getStreak.useQuery(undefined, {
-    enabled: isAuthenticated,
-    staleTime: 1000 * 60 * 10,
-  });
-  const streak = streakData?.streak ?? 0;
   const { data: scratchNotes } = trpc.scratchPad.list.useQuery(undefined, {
     enabled: isAuthenticated,
     staleTime: 60_000,
@@ -673,11 +676,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg shrink-0" />
               <span className="hidden lg:block text-sm font-semibold truncate tracking-wide text-sidebar-foreground">Continuary</span>
             </Link>
-            {streak > 0 && (
-              <span className="hidden lg:flex ml-auto shrink-0 items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "oklch(0.80 0.17 65 / 0.15)", color: "oklch(0.80 0.14 72)" }} title={`${streak}-day streak`}>
-                🔥 {streak}d
-              </span>
-            )}
           </div>
 
           {/* ⌘K Command palette trigger — hidden in icon-only mode */}
@@ -963,11 +961,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
         >
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
-            {streak > 0 && (
-              <span className="flex items-center gap-0.5 bg-amber-400/15 text-amber-400 text-[10px] font-semibold px-2 py-0.5 rounded-full" title={`${streak}-day streak`}>
-                🔥 {streak}d
-              </span>
-            )}
           </Link>
           <div className="flex items-center gap-1">
             <button
@@ -1194,7 +1187,6 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       {showAmnesty && amnestyData && (
         <AmnestyScreen gapHours={amnestyData.hoursSince ?? 48} onComplete={dismissAmnesty} />
       )}
-      <StreakMilestoneCelebration streak={streak} />
     </div>
     </IntroContext.Provider>
   );

@@ -51,7 +51,7 @@ describe("New User Polish build", () => {
     for (const page of ["WeeklyCompassPage.tsx", "EvidenceLogPage.tsx", "ClarityEnginePage.tsx", "WeeklyReviewPage.tsx", "VaultPage.tsx"]) {
       expect(source("client", "src", "pages", page)).toContain("useAiConsentGate");
     }
-    expect(source("client", "src", "components", "UnstickModal.tsx")).toContain("useAiConsentGate");
+    expect(source("client", "src", "components", "UnstickModal.tsx")).not.toContain("trpc.ai.unstickTask");
     expect(source("client", "src", "components", "FirstMovableStepModal.tsx")).toContain("useAiConsentGate");
   });
 

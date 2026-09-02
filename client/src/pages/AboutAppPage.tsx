@@ -119,7 +119,7 @@ const SPACES = [
 
 const PRINCIPLES = [
   "You don't need more time. You need a clearer next step.",
-  "Progress is not measured in streaks — it is measured in returns.",
+  "Progress is held in evidence — one return and one action at a time.",
   "The work is never lost. It is waiting for you to come back.",
 ];
 
@@ -136,8 +136,8 @@ const WREN_TRAITS = [
   },
   {
     icon: Flame,
-    title: "She celebrates your returns",
-    desc: "Every check-in is a win. When you hit a streak milestone — 3, 7, or 30 days — Wren shows up with a full celebration. You earned it.",
+    title: "She notices what moved",
+    desc: "A check-in or a small action becomes evidence you can return to. Wren marks the threshold crossing, not a run of days.",
     clip: "celebration2" as const,
     accent: "text-amber-400",
     accentBg: "bg-amber-400/10",
@@ -172,8 +172,8 @@ const WREN_TRAITS = [
   },
   {
     icon: Star,
-    title: "She marks your milestones",
-    desc: "Wren tracks what matters. First check-in, first project, first streak — she acknowledges every threshold with intention, not just a badge.",
+    title: "She marks your starting points",
+    desc: "Wren notices first check-ins, first projects, and each threshold crossing with intention, not a score or badge.",
     clip: "pathOfProgress" as const,
     accent: "text-emerald-400",
     accentBg: "bg-emerald-400/10",
@@ -186,7 +186,7 @@ const WREN_APPEARANCES = [
   { location: "Onboarding", desc: "She opens the experience and closes it — bookending your first day.", clip: "darkOpener" as const },
   { location: "Sidebar", desc: "A quiet ambient loop in the footer. Always present, never intrusive.", clip: "homeVideo" as const },
   { location: "Check-in complete", desc: "A small celebration every time you close out your day.", clip: "celebrate" as const },
-  { location: "Streak milestones", desc: "Full-screen celebration at 3, 7, and 30 consecutive days.", clip: "celebration2" as const },
+  { location: "Starting points", desc: "A quiet acknowledgement when you begin something meaningful.", clip: "celebration2" as const },
   { location: "Knowledge Vault", desc: "She greets you at the empty state — an invitation, not a void.", clip: "journal" as const },
   { location: "Clarity Engine", desc: "She's focused and ready when you need to clear the noise.", clip: "tablet" as const },
   { location: "Focus Sessions", desc: "She's your co-working partner. She weaves during your session, checks in at the halfway point, and closes out with you.", clip: "homeVideo" as const },

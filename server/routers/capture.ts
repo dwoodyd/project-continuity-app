@@ -56,6 +56,7 @@ export const captureRouter = router({
         durationS: z.number().int().positive().optional(),
         transcript: z.string().min(1).max(50000),
         audioKey: z.string().optional(),
+        intent: z.enum(["capture", "note", "task", "idea"]).optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -70,6 +71,7 @@ export const captureRouter = router({
         durationS: input.durationS ?? null,
         transcript: input.transcript,
         audioKey: input.audioKey ?? null,
+        intent: input.intent ?? "capture",
         processingState: "raw",
         duringFocusSessionId,
         createdAt: nowMs(),

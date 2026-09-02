@@ -1,16 +1,10 @@
 import { useState } from "react";
-import { trpc } from "@/lib/trpc";
-import { Loader2, Zap, ChevronDown, Timer, RefreshCw } from "lucide-react";
+import { ArrowRight, Footprints, HeartHandshake, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { trpc } from "@/lib/trpc";
 import { cn } from "@/lib/utils";
-import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 
 interface UnstickModalProps {
   task: { id: string; title: string; projectId?: number | null };
@@ -18,206 +12,90 @@ interface UnstickModalProps {
   entryMethod?: "manual" | "resolver_offer";
 }
 
-type Phase = "idle" | "loading" | "result";
+type Fork = "fear" | "activation" | "physical_floor" | "unclear";
+type Stage = "fork" | "name" | "move";
 
-interface UnstickResult {
-  microSteps: { step: number; action: string; duration: string; canDecomposeFurther: boolean }[];
-  firstAction: string;
-  timeboxOffer: string;
-  encouragement: string;
-  depth: number;
-}
+const FORKS: Array<{ key: Fork; title: string; detail: string; icon: typeof Zap }> = [
+  { key: "fear", title: "There is something at stake", detail: "Starting feels exposing, consequential, or hard to get right.", icon: HeartHandshake },
+  { key: "activation", title: "I cannot get traction", detail: "The task may be clear enough, but your system will not engage.", icon: Zap },
+  { key: "physical_floor", title: "My body is not available", detail: "Energy, hunger, sleep, pain, or overload needs attention first.", icon: Footprints },
+  { key: "unclear", title: "I cannot tell yet", detail: "You only need a first contact, not a full explanation.", icon: Sparkles },
+];
 
-export default function UnstickModal({ task, onClose, entryMethod = "manual" }: UnstickModalProps) {
-  const { requireAiConsent } = useAiConsentGate();
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [context, setContext] = useState("");
-  const [result, setResult] = useState<UnstickResult | null>(null);
-  const [depth, setDepth] = useState(0);
-  const [timeboxActive, setTimeboxActive] = useState(false);
-  const [timeboxSeconds, setTimeboxSeconds] = useState(300);
-  const [timeboxInterval, setTimeboxInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+const promptFor = (fork: Fork) => ({
+  fear: "What does beginning seem to risk? One short line is enough.",
+  activation: "What is the smallest physical contact with this work?",
+  physical_floor: "What would make your body 2% more available?",
+  unclear: "What is the nearest visible part of this task?",
+}[fork]);
 
-  const unstick = trpc.ai.unstickTask.useMutation({
-    onSuccess: (data) => {
-      setResult(data as UnstickResult);
-      setPhase("result");
-    },
-    onError: () => setPhase("idle"),
-  });
+const fallbackFor = (fork: Fork, task: string) => ({
+  fear: `Open “${task}” and name one imperfect first mark.`,
+  activation: `Put the materials for “${task}” in front of you.`,
+  physical_floor: "Take one body-supporting action, then return to the work without deciding anything else.",
+  unclear: `Open “${task}” and point to one visible place to begin.`,
+}[fork]);
 
-  const handleUnstick = (currentDepth = 0, taskTitle = task.title) => {
-    if (!requireAiConsent("Unstick")) return;
-    setPhase("loading");
-    setDepth(currentDepth);
-    unstick.mutate({
-      taskTitle,
-      projectId: task.projectId ?? undefined,
-      context: context || undefined,
-      depth: currentDepth,
-      entryMethod,
-    });
+export default function UnstickModal({ task, onClose }: UnstickModalProps) {
+  const [stage, setStage] = useState<Stage>("fork");
+  const [fork, setFork] = useState<Fork | null>(null);
+  const [note, setNote] = useState("");
+  const [smaller, setSmaller] = useState(false);
+  const savePlan = trpc.revisionNine.thresholdPlans.add.useMutation();
+
+  const chooseFork = (choice: Fork) => {
+    setFork(choice);
+    setStage("name");
   };
-
-  const handleStillTooBig = (stepAction: string) => {
-    const newDepth = depth + 1;
-    if (newDepth > 3) return;
-    handleUnstick(newDepth, stepAction);
+  const makeMove = () => {
+    if (!fork) return;
+    const smallestStart = note.trim() || fallbackFor(fork, task.title);
+    savePlan.mutate({ task: task.title, fork, protection: fork === "fear" ? note.trim() || undefined : undefined, smallestStart });
+    setStage("move");
   };
-
-  const handleTimebox = () => {
-    if (timeboxActive) {
-      if (timeboxInterval) clearInterval(timeboxInterval);
-      setTimeboxInterval(null);
-      setTimeboxActive(false);
-      setTimeboxSeconds(300);
-      return;
-    }
-    setTimeboxActive(true);
-    setTimeboxSeconds(300);
-    const interval = setInterval(() => {
-      setTimeboxSeconds((s) => {
-        if (s <= 1) { clearInterval(interval); setTimeboxActive(false); return 300; }
-        return s - 1;
-      });
-    }, 1000);
-    setTimeboxInterval(interval);
-  };
-
-  const handleClose = () => {
-    if (timeboxInterval) clearInterval(timeboxInterval);
-    onClose();
-  };
-
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
+  const currentMove = fork ? (note.trim() || fallbackFor(fork, task.title)) : "";
 
   return (
-    <Dialog open onOpenChange={(v) => { if (!v) handleClose(); }}>
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="sm:max-w-md p-0 flex flex-col max-h-[85vh]">
         <DialogHeader className="px-5 pt-5 pb-0 shrink-0">
-          <DialogTitle className="flex items-center gap-2 text-base font-semibold">
-            <Zap className="w-4 h-4 text-amber-500" />
-            Unstick Protocol
-            {depth > 0 && (
-              <span className="text-xs font-normal text-muted-foreground ml-1">
-                (going smaller — pass {depth})
-              </span>
-            )}
-          </DialogTitle>
-          <p className="text-xs text-muted-foreground mt-1 font-normal truncate">
-            "{task.title}"
-          </p>
+          <DialogTitle className="flex items-center gap-2 text-base font-semibold"><Zap className="w-4 h-4 text-amber-500" />Unstick</DialogTitle>
+          <p className="mt-1 truncate text-xs font-normal text-muted-foreground">{task.title}</p>
         </DialogHeader>
-
-        <div className="px-5 py-4 overflow-y-auto flex-1 space-y-4">
-          {phase === "idle" && (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Stuck is information. Let’s remove every decision from the next action.
-              </p>
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  What’s making it hard? <span className="font-normal">(optional)</span>
-                </label>
-                <Textarea
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                  placeholder="e.g. I don’t know where to start, it feels too big, I’m not sure what done looks like…"
-                  className="text-sm resize-none h-20"
-                  maxLength={500}
-                />
-              </div>
-              <Button onClick={() => handleUnstick(0)} className="w-full gap-2">
-                <Zap className="w-4 h-4" />
-                Find the smallest step
-              </Button>
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {stage === "fork" && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">Before making a plan, what is closest to true right now?</p>
+              {FORKS.map(({ key, title, detail, icon: Icon }) => (
+                <button key={key} type="button" onClick={() => chooseFork(key)} className="w-full rounded-xl border border-border bg-card p-3 text-left transition-colors hover:border-primary/45 hover:bg-primary/[0.04]">
+                  <span className="flex items-start gap-3"><Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" /><span><span className="block text-sm font-medium text-foreground">{title}</span><span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{detail}</span></span><ArrowRight className="ml-auto mt-1 h-3.5 w-3.5 text-muted-foreground" /></span>
+                </button>
+              ))}
             </div>
           )}
-
-          {phase === "loading" && (
-            <div className="flex items-center justify-center py-10 gap-3 text-muted-foreground">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">{depth > 0 ? "Going even smaller…" : "Removing all decisions…"}</span>
+          {stage === "name" && fork && (
+            <div className="space-y-4">
+              <p className="text-sm leading-relaxed text-muted-foreground">{promptFor(fork)}</p>
+              <Textarea value={note} onChange={(event) => setNote(event.target.value)} placeholder="A few words is enough." className="min-h-24 resize-none text-sm" maxLength={1000} autoFocus />
+              <Button className="w-full" onClick={makeMove}>Find the next contact <ArrowRight className="ml-1 h-4 w-4" /></Button>
+              <button type="button" className="w-full text-xs text-muted-foreground underline underline-offset-4" onClick={() => setStage("fork")}>Choose a different fit</button>
             </div>
           )}
-
-          {phase === "result" && result && (
+          {stage === "move" && (
             <div className="space-y-4">
-              <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                <p className="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-1.5 uppercase tracking-wide">
-                  Start here — right now
-                </p>
-                <p className="text-sm font-medium text-foreground leading-snug">{result.firstAction}</p>
+              <div className="rounded-xl border border-primary/30 bg-primary/[0.06] p-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-primary">One next contact</p>
+                <p className="mt-2 text-sm font-medium leading-relaxed text-foreground">{smaller ? "Touch one item you need for this. That is enough for now." : currentMove}</p>
               </div>
-
-              <div className={cn(
-                "flex items-center justify-between p-3 rounded-lg border transition-colors",
-                timeboxActive ? "bg-amber-500/10 border-amber-500/40" : "bg-muted/30 border-border"
-              )}>
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <Timer className={cn("w-4 h-4 shrink-0", timeboxActive ? "text-amber-500" : "text-muted-foreground")} />
-                  <span className="text-sm truncate">
-                    {timeboxActive
-                      ? <span className="font-log font-medium text-amber-600 dark:text-amber-400">{formatTime(timeboxSeconds)} remaining</span>
-                      : <span className="text-muted-foreground">{result.timeboxOffer}</span>
-                    }
-                  </span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn("text-xs h-7 px-2.5 shrink-0", timeboxActive && "text-amber-600 dark:text-amber-400")}
-                  onClick={handleTimebox}
-                >
-                  {timeboxActive ? "Stop" : "Start 5 min"}
-                </Button>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <a href="/focus" className="min-h-11 rounded-lg bg-primary px-3 py-2.5 text-center text-sm font-medium text-primary-foreground">Start with Wren</a>
+                <button type="button" onClick={() => setSmaller(true)} className={cn("min-h-11 rounded-lg border px-3 text-sm", smaller ? "border-primary text-primary" : "border-border text-muted-foreground")}>Still too much</button>
               </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Full breakdown</p>
-                {result.microSteps.map((step, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-lg bg-muted/30 group">
-                    <span className="w-5 h-5 rounded-full bg-foreground/10 text-xs font-medium flex items-center justify-center shrink-0 mt-0.5">
-                      {step.step}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm text-foreground">{step.action}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{step.duration}</p>
-                    </div>
-                    {step.canDecomposeFurther && depth < 3 && (
-                      <button
-                        onClick={() => handleStillTooBig(step.action)}
-                        className="shrink-0 text-xs text-muted-foreground hover:text-amber-500 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Still too big? Break this step down further"
-                      >
-                        <ChevronDown className="w-3 h-3" />
-                        <span>Smaller</span>
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {result.encouragement && (
-                <p className="text-xs text-muted-foreground italic border-t border-border pt-3">
-                  {result.encouragement}
-                </p>
-              )}
-
-              <button
-                onClick={() => { setPhase("idle"); setResult(null); setDepth(0); }}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <RefreshCw className="w-3 h-3" />
-                Try a different approach
-              </button>
+              <p className="text-center text-xs text-muted-foreground">You do not need to finish the task. You only need this contact.</p>
             </div>
           )}
         </div>
-
-        <div className="px-5 pb-5 flex justify-end border-t border-border pt-3 shrink-0">
-          <Button variant="ghost" size="sm" onClick={handleClose}>Close</Button>
-        </div>
+        <div className="flex justify-end border-t border-border px-5 pb-5 pt-3"><Button variant="ghost" size="sm" onClick={onClose}>Close</Button></div>
       </DialogContent>
     </Dialog>
   );
