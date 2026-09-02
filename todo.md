@@ -2317,6 +2317,12 @@
 - [x] Ensure every affected Wren stage retains its deterministic valid still fallback when iOS video playback cannot begin
 - [x] Add regression coverage and validate the direct media delivery path, TypeScript, and full test suite
 - [x] Publish the direct-media correction and confirm that real-iPhone Wren stages no longer render blank
+
+## Standalone PWA and Cross-Surface Media Verification (Sep 1)
+- [x] Correct the Continuary install and service-worker configuration so the installed app opens in standalone display mode rather than Safari browser chrome
+- [x] Verify the active Continuary Wren media stream returns `video/mp4`, `Accept-Ranges: bytes`, and `Content-Range` on a ranged `206` response without altering Wren behavior
+- [ ] Correct the marketing site’s separately hosted managed-storage media path, which remains outside this Continuary workspace
+- [ ] Add regression coverage, validate the live delivery contract, checkpoint, and request a concise installed-PWA recheck
 ## UX Audit + UX Build Briefs (Aug 10, 2026)
 - [x] B2: Add global prefers-reduced-motion behavior for animation, transition, and scroll effects.
 - [x] B3: Add visible focus-visible treatment and WCAG AA-safe muted text contrast across the application.

@@ -47,7 +47,7 @@ describe("iOS Wren media delivery", () => {
     expect(shell).toContain('bottom: "calc(max(env(safe-area-inset-bottom, 0px), 14px) + 52px + 16px)"');
 
     const serviceWorker = readProjectFile("client/public/sw.js");
-    expect(serviceWorker).toContain('const CACHE_VERSION = "continuity-v9"');
+    expect(serviceWorker).toContain('const CACHE_VERSION = "continuity-v10"');
     expect(serviceWorker).toContain('url.pathname.startsWith("/api/media/")');
 
     const proxy = readProjectFile("server/_core/storageProxy.ts");

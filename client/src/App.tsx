@@ -7,7 +7,7 @@ import AppLayout from "./components/AppLayout";
 import PWAInstallBanner from "./components/PWAInstallBanner";
 import { UpdatePrompt } from "./components/UpdatePrompt";
 import { AnimatedSplash } from "./components/AnimatedSplash";
-import { useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { OnboardingPageWithCallback } from "./pages/OnboardingPage";
 
 // ── Eagerly loaded: shown on first paint or critical auth path ─────────────
@@ -156,6 +156,14 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
 }
 
 function App() {
+  // Register the root-scoped worker for every visitor rather than waiting for
+  // notification settings or offline Capture. This gives new installs a
+  // complete PWA foundation before the user adds Continuary to their home screen.
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => undefined);
+  }, []);
+
   // Show splash once per browser session
   const [splashDone, setSplashDone] = useState(
     () => sessionStorage.getItem("splashShown") === "1"

@@ -11,7 +11,9 @@ import { useEffect, useState } from "react";
 import { X, Download, Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const DISMISS_KEY = "pwa-install-dismissed";
+// Bump the key when the install instructions change so a prior dismissal does
+// not hide the standalone-install repair from iPhone users.
+const DISMISS_KEY = "pwa-install-dismissed-v2";
 const DISMISS_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 const VISIT_COUNT_KEY = "pwa-install-visit-count";
 const SCROLL_THRESHOLD = 0.5;
@@ -51,7 +53,9 @@ export default function PWAInstallBanner() {
   const [visitCount, setVisitCount] = useState(0);
   const [hasEngaged, setHasEngaged] = useState(false);
   const pathname = typeof window === "undefined" ? "" : window.location.pathname;
-  const eligible = pathname !== "/pricing" && visitCount >= 2 && hasEngaged && !isDismissed() && !isInStandaloneMode();
+  const eligible = pathname !== "/pricing" && !isDismissed() && !isInStandaloneMode() && (
+    isIOS() || (visitCount >= 2 && hasEngaged)
+  );
 
   useEffect(() => {
     try {
@@ -127,8 +131,9 @@ export default function PWAInstallBanner() {
           </p>
           {showIOS ? (
             <p className="text-xs mt-0.5 leading-relaxed" style={{ color: "var(--muted-foreground)" }}>
-              Tap the <Share className="inline w-3.5 h-3.5 mb-0.5" aria-hidden="true" /> Share button in Safari, then
-              choose <strong style={{ color: "var(--popover-foreground)" }}>Add to Home Screen</strong>.
+              To open without Safari chrome, tap <Share className="inline w-3.5 h-3.5 mb-0.5" aria-hidden="true" /> in Safari, choose
+              <strong style={{ color: "var(--popover-foreground)" }}> Add to Home Screen</strong>, then select
+              <strong style={{ color: "var(--popover-foreground)" }}> Open as Web App</strong>. If an older icon opens Safari, remove it and add it again this way.
             </p>
           ) : (
             <p className="text-xs mt-0.5" style={{ color: "var(--muted-foreground)" }}>

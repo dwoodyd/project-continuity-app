@@ -1,7 +1,7 @@
 // Continuary — Service Worker
 // Handles: push notifications, offline capture queuing, background sync, app-shell caching
 
-const CACHE_VERSION = "continuity-v9";
+const CACHE_VERSION = "continuity-v10";
 const SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const OFFLINE_QUEUE_KEY = "offline-idea-queue";
 

@@ -35,13 +35,16 @@ describe("native-quality mobile baseline", () => {
   it("declares a standalone, portrait PWA with maskable icons and aligned launch chrome", () => {
     const index = source("client", "index.html");
     const manifest = source("client", "public", "manifest.json");
+    const app = source("client", "src", "App.tsx");
     expect(index).toContain('viewport-fit=cover');
     expect(index).toContain('name="theme-color" content="#161815"');
     expect(index).toContain('apple-mobile-web-app-capable" content="yes"');
     expect(manifest).toContain('"display": "standalone"');
+    expect(manifest).toContain('"display_override"');
     expect(manifest).toContain('"orientation": "portrait"');
     expect(manifest).toContain('"theme_color": "#161815"');
     expect(manifest).toContain('"purpose": "any maskable"');
+    expect(app).toContain('navigator.serviceWorker.register("/sw.js", { scope: "/" })');
   });
 
   it("keeps the install prompt and loading shell theme-aware, non-blocking, and compact-safe", () => {
@@ -49,6 +52,8 @@ describe("native-quality mobile baseline", () => {
     const skeleton = source("client", "src", "components", "DashboardLayoutSkeleton.tsx");
     const layout = source("client", "src", "components", "AppLayout.tsx");
     expect(install).toContain('beforeinstallprompt');
+    expect(install).toContain('pwa-install-dismissed-v2');
+    expect(install).toContain('Open as Web App');
     expect(install).toContain('pb-[calc(1rem+env(safe-area-inset-bottom))]');
     expect(install).toContain('min-h-11');
     expect(install).toContain('background: "var(--popover)"');
