@@ -1250,6 +1250,8 @@ export default function FocusSessionsPage() {
                 size="full"
                 objectFit="cover"
                 fallbackStill="siliconeWatching"
+                suppressInitialStill
+                showVideoPoster={false}
                 preload="auto"
                 wrapperClassName="absolute inset-0"
                 className="brightness-[1.15] saturate-[1.3]"

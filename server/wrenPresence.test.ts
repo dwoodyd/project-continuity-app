@@ -30,7 +30,7 @@ describe("Wren presence and distinct clean media", () => {
     expect(player).toContain("const usesVerifiedVideo = isProtectedFocusClip || isVerifiedWrenClip(clip)");
     expect(player).toContain("const src = requestedSrc");
     expect(player).toContain("{usesVerifiedVideo && !prefersReducedMotion && !videoFailed && (");
-    expect(player).toContain("poster={resolvedPoster}");
+    expect(player).toContain("poster={showVideoPoster ? resolvedPoster : undefined}");
     expect(player).toContain('objectFit === "cover" ? "object-cover" : "object-contain"');
     expect(player).not.toContain("preferRequestedClip");
   });
@@ -128,6 +128,7 @@ describe("Wren presence and distinct clean media", () => {
     expect(intro).toContain("loop");
     expect(intro).toContain("muted");
     expect(intro).toContain("playsInline");
-    expect(player).toContain("poster={resolvedPoster}");
+    expect(player).toContain("poster={showVideoPoster ? resolvedPoster : undefined}");
+    expect(player).toContain("suppressInitialStill?: boolean");
   });
 });

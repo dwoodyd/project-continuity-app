@@ -15,13 +15,15 @@ describe("Focus Sessions companion stage", () => {
     expect(page).toContain('absolute inset-x-6 top-12 bottom-9 z-[1] md:top-16');
   });
 
-  it("uses an intentional Wren still and eager preload before the session begins", () => {
+  it("keeps the pre-start stage neutral until Wren's intended video is ready", () => {
     const preStartPanel = page.slice(
       page.indexOf('{phase !== "active" && ('),
       page.indexOf('{/* RIGHT — phase controls */}'),
     );
 
     expect(preStartPanel).toContain('fallbackStill="siliconeWatching"');
+    expect(preStartPanel).toContain("suppressInitialStill");
+    expect(preStartPanel).toContain("showVideoPoster={false}");
     expect(preStartPanel).toContain('preload="auto"');
     expect(preStartPanel).toContain('clip={ACTIVITY_CLIP[wrenActivity] as any}');
   });

@@ -112,6 +112,10 @@ interface WrenPlayerProps {
   fallbackStill?: keyof typeof WREN_STILLS;
   /** Optional first-frame poster used by the browser while the video buffers. */
   poster?: string;
+  /** Hide the initial still during buffering while retaining it for failure and reduced-motion fallback. */
+  suppressInitialStill?: boolean;
+  /** Omit the native video poster when the surrounding stage should stay visually neutral while buffering. */
+  showVideoPoster?: boolean;
   /**
    * Metadata is sufficient for most ambient placements. Focus Sessions opts
    * into auto so its pre-start Wren presence is ready before the member
@@ -134,6 +138,8 @@ export default function WrenPlayer({
   featherDirection = "radial",
   fallbackStill,
   poster,
+  suppressInitialStill = false,
+  showVideoPoster = true,
   preload = "metadata",
   objectFit = "contain",
   onEnded,
@@ -195,7 +201,7 @@ export default function WrenPlayer({
       )}
     >
       {/* A reviewed still keeps Wren present when motion is reduced or video is unavailable. */}
-      {(!usesVerifiedVideo || !videoReady || prefersReducedMotion || videoFailed) && !posterFailed && (
+      {(!usesVerifiedVideo || prefersReducedMotion || videoFailed || (!videoReady && !suppressInitialStill)) && !posterFailed && (
         <img
           src={resolvedPoster}
           alt="Wren"
@@ -210,7 +216,7 @@ export default function WrenPlayer({
       {usesVerifiedVideo && !prefersReducedMotion && !videoFailed && (
         <video
           key={src}
-          poster={resolvedPoster}
+          poster={showVideoPoster ? resolvedPoster : undefined}
           autoPlay={autoPlay}
           loop={loop}
           muted={muted}
