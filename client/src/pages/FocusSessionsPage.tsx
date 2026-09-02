@@ -1249,6 +1249,8 @@ export default function FocusSessionsPage() {
                 clip={ACTIVITY_CLIP[wrenActivity] as any}
                 size="full"
                 objectFit="cover"
+                fallbackStill="siliconeWatching"
+                preload="auto"
                 wrapperClassName="absolute inset-0"
                 className="brightness-[1.15] saturate-[1.3]"
               />

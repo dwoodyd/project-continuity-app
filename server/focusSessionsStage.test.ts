@@ -15,6 +15,17 @@ describe("Focus Sessions companion stage", () => {
     expect(page).toContain('absolute inset-x-6 top-12 bottom-9 z-[1] md:top-16');
   });
 
+  it("uses an intentional Wren still and eager preload before the session begins", () => {
+    const preStartPanel = page.slice(
+      page.indexOf('{phase !== "active" && ('),
+      page.indexOf('{/* RIGHT — phase controls */}'),
+    );
+
+    expect(preStartPanel).toContain('fallbackStill="siliconeWatching"');
+    expect(preStartPanel).toContain('preload="auto"');
+    expect(preStartPanel).toContain('clip={ACTIVITY_CLIP[wrenActivity] as any}');
+  });
+
   it("keeps mobile landing copy in its own surfaced region below the Wren video", () => {
     expect(page).toContain('relative z-10 mt-3 flex w-full flex-col items-center justify-center border-t bg-background');
     expect(page).toContain('md:mt-0 md:border-t-0 md:bg-transparent');

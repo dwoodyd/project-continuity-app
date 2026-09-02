@@ -2260,13 +2260,13 @@
 - [x] Repair verified shared or route-specific defects without reopening approved navigation, Focus, PiP, or Wren body-doubling behavior
 - [x] Run automated responsive, reduced-motion, offline-shell, and performance-oriented source checks; document device-only validation separately
 - [x] Add regression coverage, checkpoint the audit release, and preserve the deferred owner-only PayPal approval-page test
-- [ ] Complete the documented real-device iOS Safari and Android Chrome installed-PWA conformance checks
+- [x] Complete the documented real-device iOS Safari and Android Chrome installed-PWA conformance checks; iPhone media/standalone and Android standalone, scroll, and haptics are confirmed
 
 ## Installed PWA Interaction Repair (Aug 28)
 - [x] Reset the active scroll container to the top on every normal app route change without disrupting active Focus sessions
 - [x] Add restrained haptic feedback for core mobile navigation and completion actions when the device supports it
 - [x] Add focused regression coverage, validate the installed-PWA interaction repair, and preserve Focus/PiP/body-doubling behavior
-- [ ] Recheck route scroll-to-top and supported-device haptics on the installed Android PWA after publication
+- [x] Recheck route scroll-to-top and supported-device haptics on the installed Android PWA after publication
 
 ## Focus Landing Mobile Copy Visibility Repair (Aug 28)
 - [x] Restore clear separation between the Focus landing Wren video and its headline/supporting copy on mobile
@@ -2547,4 +2547,8 @@
 - [x] Audit shared motion tokens, Sonner feedback, Vaul sheets, route transitions, and protected Wren/Focus/PiP experiences against the supplied craft brief
 - [x] Add centralized transform/opacity-only motion presets, reduced-motion behavior, and restrained press/list/route feedback in Continuary's thread-picked-up language
 - [x] Elevate Return Brief, Quietly Waiting, and check-in commit moments without changing protected Wren or PiP mechanics
-- [ ] Add regression coverage, validate the complete app, checkpoint the Continuary polish, and separately identify Lifewoven and Inner Wake scope
+- [x] Add regression coverage, validate the complete app, checkpoint the Continuary polish, and separately identify Lifewoven and Inner Wake scope
+
+## Focus Pre-Session Wren Presence Repair (Sep 1)
+- [x] Replace the generic yellow pre-session fallback still with the intended Wren presence while retaining the protected active-session and PiP behavior
+- [ ] Add focused regression coverage, validate the repaired Focus landing, checkpoint, and obtain a concise real-device recheck

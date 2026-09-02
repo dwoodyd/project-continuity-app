@@ -112,6 +112,12 @@ interface WrenPlayerProps {
   fallbackStill?: keyof typeof WREN_STILLS;
   /** Optional first-frame poster used by the browser while the video buffers. */
   poster?: string;
+  /**
+   * Metadata is sufficient for most ambient placements. Focus Sessions opts
+   * into auto so its pre-start Wren presence is ready before the member
+   * begins, rather than lingering on a generic loading still.
+   */
+  preload?: "auto" | "metadata" | "none";
   onEnded?: () => void;
 }
 
@@ -128,6 +134,7 @@ export default function WrenPlayer({
   featherDirection = "radial",
   fallbackStill,
   poster,
+  preload = "metadata",
   objectFit = "contain",
   onEnded,
 }: WrenPlayerProps) {
@@ -208,7 +215,7 @@ export default function WrenPlayer({
           loop={loop}
           muted={muted}
           playsInline
-          preload="metadata"
+          preload={preload}
           onEnded={onEnded}
           onCanPlay={() => setVideoReady(true)}
           onError={() => setVideoFailed(true)}

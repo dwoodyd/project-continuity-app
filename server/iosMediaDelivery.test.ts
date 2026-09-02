@@ -34,7 +34,12 @@ describe("iOS Wren media delivery", () => {
       "client/src/pages/FocusCompanionPage.tsx",
     ]) {
       const source = readProjectFile(relativePath);
-      expect(source).toContain('preload="metadata"');
+      if (relativePath.endsWith("WrenPlayer.tsx")) {
+        expect(source).toContain('preload = "metadata"');
+        expect(source).toContain("preload={preload}");
+      } else {
+        expect(source).toContain('preload="metadata"');
+      }
       expect(source).toContain('type="video/mp4"');
       expect(source).toContain("onError={() => setPosterFailed(true)}");
     }
