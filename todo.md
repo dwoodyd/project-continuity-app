@@ -2564,4 +2564,7 @@
 - [x] Extend Time Sense and Surface with non-score calibration, waiting-mode support, staged hyperfocus exit, and no time blocking
 - [x] Add durable Read, if-then, Threshold, Waiting Register, Court, Capture separation, Collapse, and passive-layer primitives with required routes and integrations
 - [x] Apply cross-cutting second-person, ease-first, re-entry, project-action, completion-evidence, and onboarding safeguards throughout affected surfaces
-- [ ] Generate and apply additive migrations; add comprehensive regression coverage; validate protected Focus/PiP/media behavior; checkpoint the complete revision
+- [x] Generate and apply additive migrations; add comprehensive regression coverage; validate protected Focus/PiP/media behavior; checkpoint the complete revision
+
+## Latest Repository Synchronization (Sep 2)
+- [ ] Synchronize the latest connected repository push, reconcile it with active Continuary protections, and validate the resulting build
