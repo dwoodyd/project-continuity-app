@@ -2302,7 +2302,7 @@
 - [x] Confirm the current Continuary build is ready to publish apart from the intentionally deferred PayPal approval-page check
 
 ## Release Follow-Through (Aug 30)
-- [ ] Complete the separately deferred non-owner PayPal approval-page check; no further code change is currently required
+- [x] Consolidated the duplicate deferred non-owner PayPal approval-page check under Post-Reset Recovery; no further code change is currently required
 
 ## iOS Media and Bottom Navigation Repair (Sep 1)
 - [x] Audit the active Wren media formats, delivery paths, poster fallbacks, service-worker behavior, and mobile viewport shell against the reported iPhone failure
