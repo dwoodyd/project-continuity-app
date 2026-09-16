@@ -61,7 +61,8 @@ describe("permanent dual-theme contract", () => {
     const appLayout = source("client/src/components/AppLayout.tsx");
     expect(appLayout).toContain("background:'#F4F5F2'");
     expect(appLayout).toContain("background:'#E6E8E3'");
-    expect(appLayout).toContain("background:'#C8452B'");
+    expect(appLayout).toContain("background:'#E8A030'");
+    expect(appLayout).toContain("color:'#161815'");
     expect(appLayout).not.toContain('["JK","AM","TR","SL","OB"]');
     expect(appLayout).not.toContain("memberCountData?.count ?? 47");
   });

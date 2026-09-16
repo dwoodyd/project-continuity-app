@@ -2568,3 +2568,6 @@
 
 ## Latest Repository Synchronization (Sep 2)
 - [x] Synchronize the latest connected repository push, reconcile it with active Continuary protections, and validate the resulting build
+
+## App Entry Brand Alignment (Sep 2)
+- [x] Align the primary founding-seat CTA and related admission states with the marketing site’s amber/gold action treatment without changing admission behavior

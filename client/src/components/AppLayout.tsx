@@ -564,7 +564,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               <a
                 href="/apply"
                 className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
-                style={{ background:'#C8452B', color:'#FFFFFF', boxShadow:'0 4px 12px rgb(200 69 43 / 0.20)' }}
+                style={{ background:'#E8A030', color:'#161815', boxShadow:'0 4px 12px rgb(232 160 48 / 0.24)' }}
               >
                 Claim your founding seat
                 <ChevronRight className="w-4 h-4" />
