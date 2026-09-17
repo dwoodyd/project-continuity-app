@@ -34,6 +34,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { checkLLMRateLimit } from "../_core/rateLimiter";
 import { invokeLLM } from "../_core/llm";
 import { resolveDate, addDay, getServerLocalDate } from "../utils/dateUtils";
+import { normalizeMorningPlanPayload } from "../utils/morningPlan";
 import { getWrenToneBucket } from "../wrenTone";
 
 // getTodayDate replaced by resolveDate from dateUtils
@@ -74,7 +75,6 @@ export const checkInsRouter = router({
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
       const [profile, activeProjects, weeklyCompass, recentDecisions, recentPlans, toneBucket] = await Promise.all([
         getUserProfile(ctx.user.id),
@@ -199,7 +199,13 @@ For each task, include a carryoverCount field (0 for new tasks, or the count fro
 
 Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{title: string, projectId: number|null, carryoverCount: number}], timeBlocks: [{label: string, duration: string}] }`;
 
-      const response = await invokeLLM({
+      // A generated plan is helpful, but it cannot be a prerequisite for
+      // saving the member's check-in. This protects their input during a
+      // transient model failure, rate limit, or incomplete structured response.
+      let parsed = normalizeMorningPlanPayload(undefined);
+      try {
+        await checkLLMRateLimit(ctx.user.id);
+        const response = await invokeLLM({
         feature: "checkin_morning_plan",
         userId: ctx.user.id,
         model: "gpt-5-nano",
@@ -249,10 +255,15 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
             },
           },
         },
-      });
+        });
 
-      const raw = (response.choices[0]?.message?.content as string) ?? "{}";
-      const parsed = JSON.parse(raw);
+        parsed = normalizeMorningPlanPayload(response.choices[0]?.message?.content);
+      } catch (error) {
+        console.warn("[Check-ins] Morning planning assistance unavailable; saving the check-in with a fallback plan.", {
+          userId: ctx.user.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
 
       // ── Build the task list (ADDITIVE-ONLY — the running list is sacred) ────
       //

@@ -72,9 +72,9 @@ export default function ApplyPage() {
             <p className="text-sm" style={{ color: "oklch(0.60 0.01 240)" }}>
               A confirmation has been sent to <strong style={{ color: "oklch(0.74 0.14 72)" }}>{email}</strong>.
             </p>
-            <Link href="/landing" className="inline-flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72)" }}>
+            <a href="https://continuary.app" className="inline-flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72)" }}>
               <ArrowLeft className="w-4 h-4" /> Back to Continuary
-            </Link>
+            </a>
           </div>
         </div>
       </>
@@ -93,9 +93,9 @@ export default function ApplyPage() {
         style={{ background: "oklch(0.09 0.015 240)", color: "oklch(0.97 0.01 80)" }}
       >
         <div className="max-w-md w-full space-y-8">
-          <Link href="/landing" className="inline-flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
+          <a href="https://continuary.app" className="inline-flex items-center gap-2 text-sm" style={{ color: "oklch(0.74 0.14 72 / 0.7)" }}>
             <ArrowLeft className="w-4 h-4" /> Back
-          </Link>
+          </a>
 
           {isLoadingSlots ? (
             <section className="space-y-3" aria-live="polite">

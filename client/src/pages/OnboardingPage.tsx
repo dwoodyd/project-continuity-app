@@ -24,6 +24,7 @@ import { useLocation } from "wouter";
 import notify from "@/lib/notify";
 import { WREN_CLIPS, WREN_STILLS } from "@/lib/wrenClips";
 import { WREN_TONE_PRESETS } from "@/lib/wrenToneClient";
+import { getLocalDateStr } from "@/lib/dateUtils";
 
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -687,7 +688,7 @@ function StepName({ name, setName, workStyle, setWorkStyle, onNext, onSkipAll }:
         <FrostedPanel>
           <Fade visible={visible} delay={0} style={{ marginBottom: "0.25rem" }}>
             <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
-              Step 1 of 3
+              Step 1 of 5
             </p>
           </Fade>
           <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
@@ -806,7 +807,7 @@ function StepTone({ tone, setTone, onNext, onBack, onSkipAll }: {
             </button>
             <Fade visible={visible} delay={0}>
               <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
-                Step 2 of 3
+                Step 2 of 5
               </p>
             </Fade>
           </div>
@@ -870,7 +871,7 @@ function StepFocus({ focusHour, setFocusHour, onNext, onBack, onSkipAll }: {
             </button>
             <Fade visible={visible} delay={0}>
               <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
-                Step 3 of 3
+                Step 3 of 5
               </p>
             </Fade>
           </div>
@@ -934,7 +935,7 @@ function StepProject({ name, projectTitle, setProjectTitle, projectWhy, setProje
         <FrostedPanel>
           <Fade visible={visible} delay={0} style={{ marginBottom: "0.25rem" }}>
             <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
-              First project
+              Step 4 of 5
             </p>
           </Fade>
           <Fade visible={visible} delay={80} style={{ marginBottom: "0.5rem" }}>
@@ -1025,7 +1026,7 @@ function StepFocusSessions({ onNext, onSkipAll }: { onNext: () => void; onSkipAl
       <LowerThird>
         <Fade visible={visible} delay={0} style={{ marginBottom: "0.5rem" }}>
           <p className="text-xs font-bold tracking-widest uppercase" style={{ color: "oklch(0.80 0.17 65 / 0.85)" }}>
-            One last thing
+            Step 5 of 5
           </p>
         </Fade>
         <Fade visible={visible} delay={100} style={{ marginBottom: "0.75rem" }}>
@@ -1174,6 +1175,7 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
       await utils.auth.me.invalidate();
       await utils.settings.getProfile.invalidate();
       if (createdProjectId) {
+        let seedNotes = projectNext?.trim() || (projectTitle.trim() ? `Starting project: ${projectTitle}` : undefined);
         try {
           const result = await generateStartHere.mutateAsync({
             projectId: createdProjectId,
@@ -1182,15 +1184,20 @@ function OnboardingPageInner({ onDone }: { onDone?: () => void } = {}) {
             userNextStep: projectNext || undefined,
             workStyle: workStyle || undefined,
           });
-          const seedNotes = projectNext?.trim() || result.nextStep?.trim()
-            || (projectTitle.trim() ? `Starting project: ${projectTitle}` : undefined);
+          seedNotes = projectNext?.trim() || result.nextStep?.trim() || seedNotes;
+        } catch {
+          // The project and onboarding are already durable. Continue without an
+          // optional generated first step if planning assistance is unavailable.
+        }
+        try {
           await submitMorning.mutateAsync({
             capacityLevel: "partial",
             primaryProjectId: createdProjectId,
             userNotes: seedNotes ?? undefined,
+            localDate: getLocalDateStr(),
           });
           await utils.dailyPlan.getToday.invalidate();
-        } catch { /* non-fatal */ }
+        } catch { /* non-fatal: onboarding and the new project remain complete */ }
       }
       goForward(6);
     } catch { /* error already toasted */ }

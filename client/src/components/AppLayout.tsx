@@ -144,6 +144,18 @@ const PRIMARY_TABS = [
   { href: "__more__",  label: "More",    icon: MoreHorizontal },
 ] as const;
 
+const DAY_ONE_NAV_HREFS = ["/", "/capture", "/projects", "/focus"] as const;
+const DAY_ONE_TABS = [
+  { href: "/",         label: "Today",   icon: Brain },
+  { href: "/capture",  label: "Capture", icon: Mic },
+  { href: "/projects", label: "Projects", icon: Archive },
+  { href: "/focus",    label: "Focus",   icon: Users },
+] as const;
+const DAY_ONE_NAV_ITEMS = DAY_ONE_NAV_HREFS.map((href) =>
+  ALL_NAV_ITEMS.find((item) => item.href === href)!,
+);
+const DAY_ONE_DURATION_MS = 24 * 60 * 60 * 1000;
+
 // ── Wren sidebar presence with meet-Wren tooltip ────────────────────────────
 const WREN_TOOLTIP_KEY = "continuary-wren-tooltip-seen";
 function WrenSidebarPresence() {
@@ -345,11 +357,22 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   const captureTimezone = trpc.settings.captureTimezone.useMutation({
     onSuccess: () => utils.settings.getProfile.invalidate(),
   });
+  const isDayOne = Boolean(
+    profile?.createdAt && Date.now() - new Date(profile.createdAt).getTime() < DAY_ONE_DURATION_MS,
+  );
+  const visibleNavGroups = isDayOne
+    ? [{ key: "getting-started", label: "Getting started", items: DAY_ONE_NAV_ITEMS }]
+    : NAV_GROUPS.map((group) => ({
+        ...group,
+        items: ALL_NAV_ITEMS.filter((item) => item.group === group.key),
+      }));
+  const visiblePrimaryTabs = isDayOne ? DAY_ONE_TABS : PRIMARY_TABS;
 
   useEffect(() => {
-    if (!isAuthenticated || !profile || profile.timezoneDetectedAt || captureTimezone.isPending) return;
-    captureTimezone.mutate({ timezone: getBrowserTimezone() });
-  }, [isAuthenticated, profile, captureTimezone]);
+    const deviceTimezone = getBrowserTimezone();
+    if (!isAuthenticated || !profile || captureTimezone.isPending || profile.timezone === deviceTimezone) return;
+    captureTimezone.mutate({ timezone: deviceTimezone });
+  }, [isAuthenticated, profile?.timezone, captureTimezone]);
 
   // Keep persisted accessibility preferences active across every authenticated route.
   useEffect(() => {
@@ -627,7 +650,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   const isActive = (href: string) =>
     href === "/" ? location === "/" : location.startsWith(href);
-  const isPrimaryMobileRoute = PRIMARY_TABS.some((tab) => tab.href !== "__more__" && isActive(tab.href));
+  const isPrimaryMobileRoute = visiblePrimaryTabs.some((tab) => tab.href !== "__more__" && isActive(tab.href));
   // ── DESKTOP LAYOUT ──────────────────────────────────────────────────────────
   if (isDesktopMode) {
     return (
@@ -684,9 +707,8 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           </div>
           {/* Grouped navigation keeps the first scan calm; ⌘K still reaches every destination. */}
           <nav className="flex-1 px-1 lg:px-2 py-3 space-y-2" aria-label="Primary navigation">
-            {NAV_GROUPS.map((group) => {
-              const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
-              const hasActiveItem = items.some((item) => isActive(item.href));
+            {visibleNavGroups.map((group) => {
+              const hasActiveItem = group.items.some((item) => isActive(item.href));
               const expanded = navExpanded[group.key] || hasActiveItem;
               return (
                 <section key={group.key} className="space-y-0.5">
@@ -702,7 +724,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                     <ChevronRight className={cn("w-3 h-3 transition-transform", expanded && "rotate-90")} aria-hidden="true" />
                   </button>
                   <div id={`nav-group-${group.key}`} className={cn(!expanded && "hidden lg:hidden")}>
-                    {items.map(({ href, label, icon: Icon }) => {
+                    {group.items.map(({ href, label, icon: Icon }) => {
                       const active = isActive(href);
                       return (
                         <Link
@@ -963,17 +985,19 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             <img src="/logo-navy.svg" alt="Continuary" className="h-8 w-8 object-contain rounded-lg" />
           </Link>
           <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => setMobileNavOpen(true)}
-              className="p-2 rounded-xl transition-colors"
-              style={{ color: "var(--sidebar-foreground)" }}
-              aria-label="Open navigation"
-              aria-expanded={mobileNavOpen}
-              aria-controls="mobile-navigation-drawer"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+            {!isDayOne && (
+              <button
+                type="button"
+                onClick={() => setMobileNavOpen(true)}
+                className="p-2 rounded-xl transition-colors"
+                style={{ color: "var(--sidebar-foreground)" }}
+                aria-label="Open navigation"
+                aria-expanded={mobileNavOpen}
+                aria-controls="mobile-navigation-drawer"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+            )}
             {/* Sync / offline indicator */}
             {!isOnline && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-[10px] font-medium" title="Offline">
@@ -1029,7 +1053,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           }}
         >
           <div className="flex items-stretch justify-around px-0.5 pt-1">
-            {PRIMARY_TABS.map(({ href, label, icon: Icon }) => {
+            {visiblePrimaryTabs.map(({ href, label, icon: Icon }) => {
               const opensDrawer = href === "__more__";
               const active = opensDrawer ? !isPrimaryMobileRoute : isActive(href);
               return (
@@ -1076,7 +1100,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
       </div>
 
       {/* Vaul gives the compact More menu its native drag, velocity-dismiss, scrim, and scroll-lock behavior. */}
-      {!isFocusRoute && (
+      {!isFocusRoute && !isDayOne && (
         <Drawer open={mobileNavOpen} onOpenChange={setMobileNavOpen} direction="left">
           <DrawerContent
             id="mobile-navigation-drawer"
@@ -1102,13 +1126,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               </button>
             </DrawerHeader>
             <nav className="flex-1 px-3 py-4 space-y-5" aria-label="All navigation">
-              {NAV_GROUPS.map((group) => {
-                const items = ALL_NAV_ITEMS.filter((item) => item.group === group.key);
+              {visibleNavGroups.map((group) => {
                 return (
                   <section key={group.key}>
                     <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: "var(--muted-foreground)" }}>{group.label}</p>
                     <div className="space-y-0.5">
-                      {items.map(({ href, label, icon: Icon }) => {
+                      {group.items.map(({ href, label, icon: Icon }) => {
                         const active = isActive(href);
                         return (
                           <Link

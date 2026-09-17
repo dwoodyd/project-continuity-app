@@ -1273,7 +1273,10 @@ export default function Home() {
     return () => window.clearInterval(timer);
   }, []);
   const browserTimezone = useMemo(() => getBrowserTimezone(), []);
-  const memberTimezone = profile?.timezoneDetectedAt ? (profile.timezone ?? browserTimezone) : browserTimezone;
+  // The greeting, date, and check-in window must reflect the device the member
+  // is currently using. The stored zone remains available to the server for
+  // notifications, but cannot override the live device clock here.
+  const memberTimezone = browserTimezone;
   const memberNow = useMemo(() => getNowInTimezone(memberTimezone), [memberTimezone, clockTick]);
   const memberDateLabel = useMemo(
     () => new Intl.DateTimeFormat("en-US", { timeZone: memberTimezone, weekday: "long", month: "long", day: "numeric" }).format(new Date(clockTick)),
@@ -1421,6 +1424,19 @@ export default function Home() {
       ? "You have been away for a while. Your thread is still here."
       : "You have been away a little while. Your thread is still here."
     : "Here is what your return can look like after time away.";
+  const returnBriefProject = activeThreadLock?.projectId
+    ? activeProjects?.find((project) => project.id === activeThreadLock.projectId)
+    : (todayPlan?.primaryProjectId
+      ? activeProjects?.find((project) => project.id === todayPlan.primaryProjectId)
+      : activeProjects?.[0]);
+  const returnBriefNextStep = activeThreadLock?.whatNext?.trim()
+    || returnBriefProject?.nextStep?.trim()
+    || lastWrittenLine;
+  const returnBriefBody = returnBriefProject
+    ? `Your project is ${returnBriefProject.title}.${returnBriefNextStep ? ` Next: ${returnBriefNextStep}` : " Its next step can wait here until you are ready."}`
+    : lastWrittenLine
+      ? `You left yourself this note: “${lastWrittenLine}”`
+      : "The thread is still here when you are ready to pick it back up.";
 
   // Auto-mark seenAbout when user lands on Home — /about-app is now optional/revisitable
   const markAboutSeen = trpc.settings.markAboutSeen.useMutation({
@@ -2071,7 +2087,7 @@ export default function Home() {
             poster={WREN_STILLS[WREN_SURFACE_MEDIA.returnBrief.fallbackStill]}
             eyebrow={`${returningAfterGap ? "Return brief" : "Return brief preview"} · ${memberDateLabel}`}
             title={returnBriefTitle}
-            body={activeThreadLock ? `You were working on ${activeThreadLock.whatDoing}. Next: ${activeThreadLock.whatNext}` : "The thread is still here when you are ready to pick it back up."}
+            body={returnBriefBody}
             className="break-inside-avoid -mx-4 border-0 rounded-none sm:-mx-5 thread-return-settle"
             variant="return"
           >

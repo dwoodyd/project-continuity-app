@@ -107,6 +107,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   const [showCTA, setShowCTA] = useState(false);
   const [exiting, setExiting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const completedRef = useRef(false);
   const markSeen = trpc.settings.markWrenIntroSeen.useMutation();
 
   // Fade in video
@@ -140,6 +141,8 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
   }, [lineIdx, lineActive]);
 
   const handleDone = () => {
+    if (completedRef.current) return;
+    completedRef.current = true;
     // Persist to DB (fire-and-forget — don't block UX on network)
     markSeen.mutate();
     setExiting(true);
@@ -173,10 +176,10 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
             ref={videoRef}
             poster={WREN_STILLS.evidenceCleanPoster}
             autoPlay
-            loop
             muted
             playsInline
             preload="metadata"
+            onEnded={handleDone}
             onError={() => setVideoFailed(true)}
             style={{
               position: "absolute", inset: 0,
@@ -222,15 +225,19 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
           top: "max(calc(env(safe-area-inset-top, 0px) + 1rem), 1.5rem)",
           right: "1.5rem",
           zIndex: 60,
-          color: "rgba(255,255,255,0.28)",
-          fontSize: "0.7rem",
-          letterSpacing: "0.12em",
-          background: "none", border: "none", cursor: "pointer",
-          padding: "0.5rem",
+          color: "rgba(255,255,255,0.95)",
+          fontSize: "0.75rem",
+          fontWeight: 600,
+          letterSpacing: "0.04em",
+          background: "rgba(10,12,10,0.72)",
+          border: "1px solid rgba(255,255,255,0.45)",
+          borderRadius: "999px",
+          cursor: "pointer",
+          padding: "0.6rem 0.9rem",
           fontFamily: "inherit",
         }}
       >
-        SKIP
+        Skip intro
       </button>
 
       {/* Lower-third text */}
