@@ -18,7 +18,7 @@ export default function BookStartHerePage() {
 
         <section className="mt-8 border border-[#D3D6D0] bg-[#E6E8E3] p-5 sm:p-8" aria-labelledby="start-here-title">
           <div className="flex items-start gap-3">
-            <BookOpen className="mt-0.5 h-5 w-5 text-[#C8452B]" aria-hidden="true" />
+            <BookOpen className="mt-0.5 h-5 w-5 text-[#D89218]" aria-hidden="true" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6B6F68]">Permission to Start</p>
               <h1 id="start-here-title" className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#2A2D28] sm:text-4xl">You have the book. Start here.</h1>
@@ -31,14 +31,14 @@ export default function BookStartHerePage() {
 
         <section className="mt-5 border border-[#D3D6D0] bg-[#F4F5F2] p-5 sm:p-8" aria-labelledby="first-step-title">
           <div className="flex items-start gap-3">
-            <Feather className="mt-0.5 h-5 w-5 text-[#C8452B]" aria-hidden="true" />
+            <Feather className="mt-0.5 h-5 w-5 text-[#D89218]" aria-hidden="true" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6B6F68]">Your first step</p>
               <h2 id="first-step-title" className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-[#2A2D28]">Write one line before you feel ready.</h2>
               <p className="mt-3 max-w-xl text-sm leading-6 text-[#6B6F68]">
                 The first exercise is private and does not need an account. A draft is enough.
               </p>
-              <a href="/start" className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 bg-[#C8452B] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]">
+              <a href="/start" className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 bg-[#D89218] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]">
                 Begin the first exercise
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </a>
@@ -52,7 +52,7 @@ export default function BookStartHerePage() {
             Continuary is a quiet companion for returning to what matters, one small continuation at a time.
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-            <a href="/welcome" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#C8452B] underline underline-offset-4 hover:text-[#AB3823]">
+            <a href="/welcome" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#D89218] underline underline-offset-4 hover:text-[#AB3823]">
               See how Continuary works
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>

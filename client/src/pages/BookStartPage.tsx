@@ -65,7 +65,7 @@ export default function BookStartPage() {
 
         <section className="mt-8 border border-[#D3D6D0] bg-[#E6E8E3] p-5 sm:p-8" aria-labelledby="book-start-title">
           <div className="flex items-start gap-3">
-            <Feather className="mt-0.5 h-5 w-5 text-[#C8452B]" aria-hidden="true" />
+            <Feather className="mt-0.5 h-5 w-5 text-[#D89218]" aria-hidden="true" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#6B6F68]">Permission to Start</p>
               <h1 id="book-start-title" className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-[#2A2D28] sm:text-4xl">Start before it feels finished.</h1>
@@ -74,9 +74,9 @@ export default function BookStartPage() {
               </p>
               <p className="mt-3 text-sm text-[#6B6F68]">
                 Permission to Start is now available —{" "}
-                <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer" className="font-medium text-[#C8452B] underline underline-offset-2">get the digital edition</a>
+                <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer" className="font-medium text-[#D89218] underline underline-offset-2">get the digital edition</a>
                 {" "}or{" "}
-                <a href="https://a.co/d/0bvqj6jD" target="_blank" rel="noopener noreferrer" className="font-medium text-[#C8452B] underline underline-offset-2">the paperback</a>.
+                <a href="https://a.co/d/0bvqj6jD" target="_blank" rel="noopener noreferrer" className="font-medium text-[#D89218] underline underline-offset-2">the paperback</a>.
               </p>
             </div>
           </div>
@@ -89,10 +89,10 @@ export default function BookStartPage() {
             value={bookCode}
             onChange={(event) => { setBookCode(event.target.value.toUpperCase()); setSaved(false); }}
             placeholder="From your copy of Permission to Start"
-            className="mt-2 min-h-11 w-full border border-[#C9CCC5] bg-transparent px-3 text-sm text-[#2A2D28] outline-none placeholder:text-[#6B6F68] focus:border-[#C8452B]"
+            className="mt-2 min-h-11 w-full border border-[#C9CCC5] bg-transparent px-3 text-sm text-[#2A2D28] outline-none placeholder:text-[#6B6F68] focus:border-[#D89218]"
           />
           {bookCode.trim().length >= 4 && (
-            <p className="mt-2 flex items-start gap-1.5 text-sm text-[#C8452B]">
+            <p className="mt-2 flex items-start gap-1.5 text-sm text-[#D89218]">
               <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
               <span>Reader code noted — welcome. Your draft will carry this when you take it with you.</span>
             </p>
@@ -103,7 +103,7 @@ export default function BookStartPage() {
             id="book-start-entry"
             value={content}
             onChange={(event) => { setContent(event.target.value); setSaved(false); }}
-            className="mt-5 min-h-56 w-full resize-y border-y border-[#C9CCC5] bg-transparent px-0 py-4 text-base leading-7 text-[#2A2D28] outline-none focus:border-[#C8452B]"
+            className="mt-5 min-h-56 w-full resize-y border-y border-[#C9CCC5] bg-transparent px-0 py-4 text-base leading-7 text-[#2A2D28] outline-none focus:border-[#D89218]"
             style={{ fontFamily: '"Courier Prime", "Courier New", monospace' }}
             spellCheck
           />
@@ -114,7 +114,7 @@ export default function BookStartPage() {
                 {saved ? <Check className="h-4 w-4" aria-hidden="true" /> : <Save className="h-4 w-4" aria-hidden="true" />}
                 {saved ? "Saved here" : "Save this draft"}
               </button>
-              <button onClick={continueWithAccount} className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#C8452B] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]">
+              <button onClick={continueWithAccount} className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#D89218] px-4 text-sm font-semibold text-white hover:bg-[#AB3823]">
                 Take it with you
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </button>

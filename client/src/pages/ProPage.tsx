@@ -75,7 +75,7 @@ const PRICING_TABLE: PricingRow[] = [
 ];
 
 function Cell({ value }: { value: string | boolean }) {
-  if (value === true) return <Check className="w-4 h-4 text-[#C8452B] mx-auto" />;
+  if (value === true) return <Check className="w-4 h-4 text-[#D89218] mx-auto" />;
   if (value === false) return <X className="w-4 h-4 text-[#6B6F68] mx-auto" />;
   return <span className="text-xs text-[#6B6F68] text-center block">{value as string}</span>;
 }
@@ -157,7 +157,7 @@ export default function ProPage() {
 
   if (isLoading && user) return (
     <div className="min-h-screen bg-[#F4F5F2] flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-[#C9CCC5] border-t-[#C8452B] rounded-full animate-spin" />
+      <div className="w-8 h-8 border-2 border-[#C9CCC5] border-t-[#D89218] rounded-full animate-spin" />
     </div>
   );
 
@@ -179,15 +179,15 @@ export default function ProPage() {
           <p className="text-xs text-[#6B6F68]">Simple, honest. No dark patterns.</p>
         </div>
         {isFoundingMember && (
-          <div className="flex items-center gap-1.5 px-2 py-1 border border-[#C8452B]/30 bg-[#F8E5DF]">
-            <Crown size={12} className="text-[#C8452B]" />
-            <span className="text-xs text-[#C8452B] font-semibold tracking-wide">FOUNDING MEMBER</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 border border-[#D89218]/30 bg-[#F8E5DF]">
+            <Crown size={12} className="text-[#D89218]" />
+            <span className="text-xs text-[#D89218] font-semibold tracking-wide">FOUNDING MEMBER</span>
           </div>
         )}
         {!isFoundingMember && isPro && (
           <div className="flex items-center gap-1.5">
-            <Star size={14} className="text-[#C8452B]" />
-            <span className="text-xs text-[#C8452B] font-medium">Pro active</span>
+            <Star size={14} className="text-[#D89218]" />
+            <span className="text-xs text-[#D89218] font-medium">Pro active</span>
           </div>
         )}
       </header>
@@ -195,7 +195,7 @@ export default function ProPage() {
       <div className="max-w-2xl mx-auto px-4 pt-8">
         {/* Non-founding member banner */}
         {!isFoundingMember && (
-          <div className="mb-6 px-4 py-3 rounded-xl border border-[#C8452B]/30 bg-[#F8E5DF] flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-6 px-4 py-3 rounded-xl border border-[#D89218]/30 bg-[#F8E5DF] flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-xs text-[#6B6F68]">
               {slots?.remaining === 0
                 ? "Founding seats are full. Join the waitlist and we'll reach out when one opens."
@@ -203,12 +203,12 @@ export default function ProPage() {
             </p>
             {slots?.remaining === 0 ? (
               <a href="/waitlist"
-                className="inline-flex min-h-11 items-center text-xs text-[#C8452B] font-semibold hover:text-[#C8452B] transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-[#D89218] font-semibold hover:text-[#D89218] transition-colors">
                 Join the waitlist →
               </a>
             ) : (
               <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center text-xs text-[#C8452B] font-semibold hover:text-[#C8452B] transition-colors">
+                className="inline-flex min-h-11 items-center text-xs text-[#D89218] font-semibold hover:text-[#D89218] transition-colors">
                 Apply for a slot →
               </a>
             )}
@@ -219,7 +219,7 @@ export default function ProPage() {
         <div className="text-center mb-8">
           {isFoundingMember ? (
             <>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C8452B]/30 text-[#C8452B] text-xs font-semibold tracking-wide mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D89218]/30 text-[#D89218] text-xs font-semibold tracking-wide mb-4">
                 <Crown className="w-3 h-3" /> Your founding rate is locked for life
               </div>
               <h1 className="font-brand text-3xl text-[#2A2D28] mb-3">
@@ -233,7 +233,7 @@ export default function ProPage() {
             </>
           ) : (
             <>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C8452B]/30 text-[#C8452B] text-xs font-semibold tracking-wide mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#D89218]/30 text-[#D89218] text-xs font-semibold tracking-wide mb-4">
                 <Sparkles className="w-3 h-3" /> Founding rates available now
               </div>
               <h1 className="font-brand text-3xl text-[#2A2D28] mb-3">Start free. Go deeper when you're ready.</h1>
@@ -242,9 +242,9 @@ export default function ProPage() {
                 {slotsError || slots === undefined ? (
                   <span>100 slots total — reviewed personally.</span>
                 ) : slots.remaining === 0 ? (
-                  <span className="text-[#C8452B] font-semibold">Founding seats are full — join the waitlist.</span>
+                  <span className="text-[#D89218] font-semibold">Founding seats are full — join the waitlist.</span>
                 ) : slots.remaining <= 5 ? (
-                  <span className="text-[#C8452B] font-semibold">Only {slots.remaining} founding {slots.remaining === 1 ? "seat" : "seats"} left.</span>
+                  <span className="text-[#D89218] font-semibold">Only {slots.remaining} founding {slots.remaining === 1 ? "seat" : "seats"} left.</span>
                 ) : (
                   <span>{slots.remaining} of 100 founding seats left.</span>
                 )}
@@ -327,11 +327,11 @@ export default function ProPage() {
           const retailStrike = billing === "annual" ? p.retailAnnual : p.retailMonthly; // always shown
           const cta = getCtaLabel("pro");
           return (
-            <div className="relative rounded-2xl border border-[#C8452B]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
+            <div className="relative rounded-2xl border border-[#D89218]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-[#2A2D28] text-sm">Pro</span>
-                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#C8452B] border-[#C8452B]/30">Founding Rate</Badge>
+                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#D89218] border-[#D89218]/30">Founding Rate</Badge>
                 </div>
                 <p className="text-xs text-[#6B6F68]">Your daily thread, always on.</p>
               </div>
@@ -345,7 +345,7 @@ export default function ProPage() {
                 {billing === "annual" && (
                   <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                 )}
-                <p className="text-xs text-[#C8452B]/60 mt-0.5">Founding rate — locked for life</p>
+                <p className="text-xs text-[#D89218]/60 mt-0.5">Founding rate — locked for life</p>
               </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
@@ -357,14 +357,14 @@ export default function ProPage() {
                     "Priority support — direct founder access",
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-[#6B6F68]">
-                      <Check size={11} className="text-[#C8452B] mt-0.5 shrink-0" />{f}
+                      <Check size={11} className="text-[#D89218] mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="space-y-1.5">
                   <Button
                     size="sm"
-                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#C8452B] hover:bg-[#AB3823] text-white"}`}
+                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#D89218] hover:bg-[#AB3823] text-white"}`}
                     onClick={() => !cta.disabled && handleUpgrade(getPlanKey("pro"), "Pro")}
                     disabled={cta.disabled || createSub.isPending}
                   >
@@ -389,11 +389,11 @@ export default function ProPage() {
           const retailStrike = billing === "annual" ? k.retailAnnual : k.retailMonthly; // always shown
           const cta = getCtaLabel("keeper");
           return (
-            <div className="relative rounded-2xl border border-[#C8452B]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
+            <div className="relative rounded-2xl border border-[#D89218]/30 bg-[#F8E5DF] p-5 flex flex-col gap-3">
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-semibold text-[#2A2D28] text-sm">Keeper</span>
-                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#C8452B] border-[#C8452B]/30">Founding Rate</Badge>
+                  <Badge variant="outline" className="text-xs bg-[#F8E5DF] text-[#D89218] border-[#D89218]/30">Founding Rate</Badge>
                 </div>
                 <p className="text-xs text-[#6B6F68]">For those who go deeper.</p>
               </div>
@@ -407,7 +407,7 @@ export default function ProPage() {
                 {billing === "annual" && (
                   <p className="text-xs text-emerald-400 font-semibold mt-0.5">≈ ${annualEquiv} / mo · <span className="text-emerald-300">save ~33%</span></p>
                 )}
-                <p className="text-xs text-[#C8452B]/60 mt-0.5">Founding rate — locked for life</p>
+                <p className="text-xs text-[#D89218]/60 mt-0.5">Founding rate — locked for life</p>
               </div>
                 <ul className="space-y-1.5 flex-1">
                   {[
@@ -418,14 +418,14 @@ export default function ProPage() {
                     "Monthly office hours with founder",
                   ].map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-[#6B6F68]">
-                      <Check size={11} className="text-[#C8452B] mt-0.5 shrink-0" />{f}
+                      <Check size={11} className="text-[#D89218] mt-0.5 shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
                 <div className="space-y-1.5">
                   <Button
                     size="sm"
-                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#C8452B] hover:bg-[#AB3823] text-white"}`}
+                    className={`w-full font-semibold ${cta.disabled ? "bg-[#E6E8E3] text-[#6B6F68] cursor-default" : "bg-[#D89218] hover:bg-[#AB3823] text-white"}`}
                     onClick={() => !cta.disabled && handleUpgrade(getPlanKey("keeper"), "Keeper")}
                     disabled={cta.disabled || createSub.isPending}
                   >
@@ -468,8 +468,8 @@ export default function ProPage() {
                 <div className="grid grid-cols-[1fr_auto_auto_auto] bg-[#E6E8E3]">
                   <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#6B6F68]">Feature</div>
                   <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#6B6F68] text-center w-20">Free</div>
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#C8452B] text-center w-20">Pro</div>
-                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#C8452B] text-center w-20">Keeper</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#D89218] text-center w-20">Pro</div>
+                  <div className="px-4 py-3 text-xs font-semibold uppercase tracking-widest text-[#D89218] text-center w-20">Keeper</div>
                 </div>
                 {PRICING_TABLE.map((row, i) => (
                   <div key={row.feature} className="grid grid-cols-[1fr_auto_auto_auto] border-t border-[#D3D6D0]"
@@ -538,17 +538,17 @@ export default function ProPage() {
         <p className="text-[#6B6F68] text-xs">
           Continuary works alongside{" "}
             <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
-              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
+              className="text-[#6B6F68] hover:text-[#D89218] transition-colors underline underline-offset-2">
               Permission to Start
             </a>
             {" "}— the companion book, now available in{" "}
             <a href="https://www.soulengineer.online/books" target="_blank" rel="noopener noreferrer"
-              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
+              className="text-[#6B6F68] hover:text-[#D89218] transition-colors underline underline-offset-2">
               digital
             </a>
             {" "}and{" "}
             <a href="https://a.co/d/0bvqj6jD" target="_blank" rel="noopener noreferrer"
-              className="text-[#6B6F68] hover:text-[#C8452B] transition-colors underline underline-offset-2">
+              className="text-[#6B6F68] hover:text-[#D89218] transition-colors underline underline-offset-2">
               paperback
             </a>
             .
@@ -559,7 +559,7 @@ export default function ProPage() {
               An app from Soul Engineer →
             </a>
             <a href="https://continuary.app/#apply" target="_blank" rel="noopener noreferrer"
-              className="text-xs text-[#6B6F68] hover:text-[#C8452B] transition-colors">
+              className="text-xs text-[#6B6F68] hover:text-[#D89218] transition-colors">
               Apply for founding member access →
             </a>
           </div>

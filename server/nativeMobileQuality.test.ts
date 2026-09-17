@@ -37,12 +37,12 @@ describe("native-quality mobile baseline", () => {
     const manifest = source("client", "public", "manifest.json");
     const app = source("client", "src", "App.tsx");
     expect(index).toContain('viewport-fit=cover');
-    expect(index).toContain('name="theme-color" content="#161815"');
+    expect(index).toContain('name="theme-color" content="#080F26"');
     expect(index).toContain('apple-mobile-web-app-capable" content="yes"');
     expect(manifest).toContain('"display": "standalone"');
     expect(manifest).toContain('"display_override"');
     expect(manifest).toContain('"orientation": "portrait"');
-    expect(manifest).toContain('"theme_color": "#161815"');
+    expect(manifest).toContain('"theme_color": "#080F26"');
     expect(manifest).toContain('"purpose": "any maskable"');
     expect(app).toContain('navigator.serviceWorker.register("/sw.js", { scope: "/" })');
   });

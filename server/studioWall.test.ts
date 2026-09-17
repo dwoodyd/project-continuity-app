@@ -20,11 +20,14 @@ describe("Studio Wall regression coverage", () => {
     expect(source).toContain("Start today’s draft");
   });
 
-  it("uses the Studio Wall paper, graphite, red-pen, and typewriter system", () => {
+  it("uses the marketing-aligned ivory, navy, amber, and typewriter system", () => {
     const source = projectFile("client/src/index.css");
-    expect(source).toContain("--background: #F4F5F2");
-    expect(source).toContain("--foreground: #2A2D28");
-    expect(source).toContain("--primary: #C8452B");
+    expect(source).toContain("--background: #FDF9F0");
+    expect(source).toContain("--foreground: #17213A");
+    expect(source).toContain("--primary: #D89218");
+    expect(source).toContain("--background: #080F26");
+    expect(source).toContain("--primary: #EFA201");
+    expect(source).toContain("'Cormorant Garamond', Georgia, serif");
     expect(source).toContain(".user-writing { font-family: 'Courier Prime'");
   });
 

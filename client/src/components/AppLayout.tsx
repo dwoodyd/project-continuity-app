@@ -535,12 +535,12 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4"
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "1rem", background: "#F4F5F2", color: "#2A2D28" }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "1rem", background: "#080F26", color: "#FDF4E0" }}
       >
-        <div className="w-full max-w-sm rounded-2xl p-6 text-center shadow-lg" style={{ background: "#E6E8E3", border: "1px solid #D3D6D0" }}>
+        <div className="w-full max-w-sm rounded-2xl p-6 text-center shadow-lg" style={{ background: "#0D1730", border: "1px solid #273A5B" }}>
           <img src={BRAND_LOGO_SIGNIN} alt="Continuary" className="w-14 h-14 object-contain rounded-2xl mx-auto mb-4" />
-          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Archivo', system-ui, sans-serif" }}>Let’s restore your session</h1>
-          <p className="text-sm leading-relaxed mt-3" style={{ color: "#6B6F68" }}>
+          <h1 className="text-xl font-semibold" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Let’s restore your session</h1>
+          <p className="text-sm leading-relaxed mt-3" style={{ color: "#B8C2D3" }}>
             Continuary could not finish loading your account. Your work is safe — please sign in again to continue.
           </p>
           <button
@@ -548,7 +548,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             onClick={restartSignIn}
             disabled={authRecoverySigningIn}
             className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold mt-6 hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
-            style={{ background: "#C8452B", color: "#FFFFFF", boxShadow: "0 4px 12px rgb(200 69 43 / 0.20)" }}
+            style={{ background: "#D89218", color: "#FFFFFF", boxShadow: "0 4px 12px rgb(200 69 43 / 0.20)" }}
           >
             {authRecoverySigningIn ? "Resetting session…" : "Sign in again"}
             <ChevronRight className="w-4 h-4" />
@@ -557,7 +557,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             type="button"
             onClick={() => window.location.reload()}
             className="text-xs underline underline-offset-4 mt-4 hover:opacity-75"
-            style={{ color: "#4B4F48" }}
+            style={{ color: "#B8C2D3" }}
           >
             Try reloading first
           </button>
@@ -570,24 +570,24 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
   // Show sign-in card for any unauthenticated route — wait for auth to resolve first
   if (!authLoading && !isAuthenticated) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100dvh',padding:'1rem',background:'#F4F5F2',color:'#2A2D28'}}>
+      <div className="min-h-[100dvh] flex items-center justify-center p-4" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100dvh',padding:'1rem',background:'#080F26',color:'#FDF4E0'}}>
         <div className="w-full max-w-sm">
           <div className="flex flex-col items-center gap-6" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'1.5rem'}}>
             <div className="flex flex-col items-center gap-3 animate-fade-slide-up" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.75rem'}}>
               <img src="/logo-navy.svg" alt="Continuary" className="w-20 h-20 object-contain rounded-2xl" />
               <div className="flex flex-col items-center gap-1" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'0.25rem'}}>
-                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Archivo', system-ui, sans-serif", color:'#2A2D28' }}>Continuary</span>
-                <p className="text-sm tracking-widest uppercase" style={{ color:'#6B6F68' }}>Your Memory Companion</p>
+                <span className="text-2xl font-semibold tracking-wide" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", color:'#FDF4E0' }}>Continuary</span>
+                <p className="text-sm tracking-widest uppercase" style={{ color:'#B8C2D3' }}>Your Memory Companion</p>
               </div>
             </div>
-            <div className="w-full rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200" style={{ background:'#E6E8E3', border:'1px solid #D3D6D0' }}>
-              <p className="text-sm text-center mb-5 leading-relaxed" style={{ color:'#6B6F68' }}>
+            <div className="w-full rounded-2xl p-6 shadow-lg animate-fade-slide-up animate-delay-200" style={{ background:'#0D1730', border:'1px solid #273A5B' }}>
+              <p className="text-sm text-center mb-5 leading-relaxed" style={{ color:'#B8C2D3' }}>
                 Continuary keeps your thread. Pick up exactly where you left off.
               </p>
               <a
                 href="/apply"
                 className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all shadow-md"
-                style={{ background:'#E8A030', color:'#161815', boxShadow:'0 4px 12px rgb(232 160 48 / 0.24)' }}
+                style={{ background:'#EFA201', color:'#080F26', boxShadow:'0 4px 12px rgb(232 160 48 / 0.24)' }}
               >
                 Claim your founding seat
                 <ChevronRight className="w-4 h-4" />
@@ -600,22 +600,22 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                   }
                 }}
                 className="flex items-center justify-center gap-2 w-full px-5 py-3 rounded-xl text-sm font-semibold border hover:opacity-90 active:scale-[0.98] transition-all mt-2"
-                style={{ background:'#E6E8E3', color:'#2A2D28', borderColor:'#D3D6D0' }}
+                style={{ background:'#0D1730', color:'#FDF4E0', borderColor:'#273A5B' }}
               >
                 Sign in to continue
                 <ChevronRight className="w-4 h-4" />
               </a>
-            <a href="/tour" className="block text-center text-xs transition-colors mt-3 hover:opacity-75" style={{ color:'#4B4F48' }}>← See what's inside</a>
-            <a href="/pricing" className="block text-center text-xs transition-colors mt-1 hover:opacity-75" style={{ color:'#4B4F48' }}>See pricing →</a>
+            <a href="/tour" className="block text-center text-xs transition-colors mt-3 hover:opacity-75" style={{ color:'#B8C2D3' }}>← See what's inside</a>
+            <a href="/pricing" className="block text-center text-xs transition-colors mt-1 hover:opacity-75" style={{ color:'#B8C2D3' }}>See pricing →</a>
             </div>
           </div>
           <div className="flex justify-center mt-5 animate-fade-slide-up animate-delay-400">
-            <a href="/tour" className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75" style={{ color:'#4B4F48' }}>
+            <a href="/tour" className="text-sm transition-colors underline underline-offset-4 tracking-wide hover:opacity-75" style={{ color:'#B8C2D3' }}>
               Take the tour
             </a>
           </div>
-          <p className="text-center text-sm mt-4 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>Built for minds that keep going.</p>
-          <p className="text-center text-sm mt-3 animate-fade-slide-up animate-delay-400" style={{ color:'#6B6F68' }}>
+          <p className="text-center text-sm mt-4 animate-fade-slide-up animate-delay-400" style={{ color:'#B8C2D3' }}>Built for minds that keep going.</p>
+          <p className="text-center text-sm mt-3 animate-fade-slide-up animate-delay-400" style={{ color:'#B8C2D3' }}>
             <a href="/privacy" className="hover:opacity-75 underline underline-offset-2 transition-colors">Privacy</a>
             {" · "}
             <a href="/terms" className="hover:opacity-75 underline underline-offset-2 transition-colors">Terms</a>
@@ -628,7 +628,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "#C8452B" }}
+                  style={{ background: "#D89218" }}
                   title="What's new"
                 />
               )}
@@ -838,7 +838,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
             )}
             {user && (
               <div className="flex items-center justify-center lg:justify-start gap-2.5 px-1 lg:px-3 py-2 rounded-xl">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.18)" }}>
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: "oklch(0.72 0.14 72 / 0.18)" }}>
                   <span className="text-xs font-semibold" style={{ color: "var(--accent-tint-text)" }}>{(user.name ?? "U").charAt(0).toUpperCase()}</span>
                 </div>
                 <div className="hidden lg:block min-w-0 flex-1">
@@ -875,7 +875,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               {new Date() <= new Date(new Date("2026-07-07").getTime() + 3 * 24 * 60 * 60 * 1000) && (
                 <span
                   className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse"
-                  style={{ background: "#C8452B" }}
+                  style={{ background: "#D89218" }}
                   title="What's new"
                 />
               )}
@@ -910,7 +910,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Hold That Thread (⌘⇧L)"
               >
-                <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+                <Anchor className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
                 Hold That Thread
               </button>
               <button
@@ -919,7 +919,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Voice or text capture"
               >
-                <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+                <Mic className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
                 Capture
               </button>
               <button
@@ -928,7 +928,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
                 style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
                 title="Capture an idea"
               >
-                <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+                <Lightbulb className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
                 Capture Idea
               </button>
             </>
@@ -937,7 +937,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
           <button
             onClick={() => setFabMenuOpen((v) => !v)}
             className="w-12 h-12 rounded-full text-white active:scale-95 transition-all flex items-center justify-center"
-            style={{ background: "#C8452B", boxShadow: "0 4px 20px oklch(0.56 0.18 28 / 0.45), 0 0 0 2px var(--background)" }}
+            style={{ background: "#D89218", boxShadow: "0 4px 20px oklch(0.72 0.14 72 / 0.45), 0 0 0 2px var(--background)" }}
             title="Quick Capture"
             aria-label="Quick Capture"
           >
@@ -1172,7 +1172,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Anchor className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+              <Anchor className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
               Hold That Thread
             </button>
             <button
@@ -1180,7 +1180,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Mic className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+              <Mic className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
               Capture
             </button>
             <button
@@ -1188,7 +1188,7 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
               className="flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-semibold shadow-lg active:scale-95 transition-all"
               style={{ background: "oklch(0.16 0.04 240)", color: "oklch(0.88 0.03 60)", border: "1px solid oklch(0.28 0.04 240)", boxShadow: "0 4px 16px oklch(0 0 0 / 0.4)" }}
             >
-              <Lightbulb className="w-3.5 h-3.5" style={{ color: "#C8452B" }} />
+              <Lightbulb className="w-3.5 h-3.5" style={{ color: "#D89218" }} />
               Capture Idea
             </button>
           </>

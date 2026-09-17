@@ -13,13 +13,14 @@ describe("permanent dual-theme contract", () => {
     expect(context).toContain('prev === "light" ? "dark" : "light"');
   });
 
-  it("keeps intentional Studio Wall tokens for both light and dark modes", () => {
+  it("keeps marketing-aligned ivory and navy tokens for both app modes", () => {
     const css = source("client/src/index.css");
-    expect(css).toContain("--background: #F4F5F2");
+    expect(css).toContain("--background: #FDF9F0");
     expect(css).toContain(".dark {");
-    expect(css).toContain("--background: #161815");
-    expect(css).toContain("--primary: #E8A030");
-    expect(css).toContain("--accent-tint-text: #F3BF68");
+    expect(css).toContain("--background: #080F26");
+    expect(css).toContain("--primary: #EFA201");
+    expect(css).toContain("--accent-tint-text: #F6BE53");
+    expect(css).toContain("'Cormorant Garamond', Georgia, serif");
   });
 
   it("does not route public discovery outside the persisted app theme", () => {
@@ -39,7 +40,7 @@ describe("permanent dual-theme contract", () => {
     expect(wren).toContain('stage && "wren-dark-stage"');
     expect(source("client/src/index.css")).toContain(".wren-dark-stage {");
     expect(source("client/src/index.css")).toContain("background: var(--ground)");
-    expect(source("client/src/index.css")).toContain("--ground: #161815");
+    expect(source("client/src/index.css")).toContain("--ground: #080F26");
   });
 
   it("maps existing Wren assets to the product moments they were commissioned for", () => {
@@ -57,12 +58,13 @@ describe("permanent dual-theme contract", () => {
     expect(memory).toContain('clip="memoryOrb"');
   });
 
-  it("keeps the sign-in doorway quiet, light, and free of fabricated social proof", () => {
+  it("keeps the sign-in doorway marketing-aligned and free of fabricated social proof", () => {
     const appLayout = source("client/src/components/AppLayout.tsx");
-    expect(appLayout).toContain("background:'#F4F5F2'");
-    expect(appLayout).toContain("background:'#E6E8E3'");
-    expect(appLayout).toContain("background:'#E8A030'");
-    expect(appLayout).toContain("color:'#161815'");
+    expect(appLayout).toContain("background:'#080F26'");
+    expect(appLayout).toContain("background:'#0D1730'");
+    expect(appLayout).toContain("background:'#EFA201'");
+    expect(appLayout).toContain("color:'#080F26'");
+    expect(appLayout).toContain("'Cormorant Garamond', Georgia, serif");
     expect(appLayout).not.toContain('["JK","AM","TR","SL","OB"]');
     expect(appLayout).not.toContain("memberCountData?.count ?? 47");
   });

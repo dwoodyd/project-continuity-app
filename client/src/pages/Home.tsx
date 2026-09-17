@@ -376,6 +376,34 @@ const workLocationConfig: Record<WorkLocation, { label: string; emoji: string }>
   other:       { label: "Other",        emoji: "📍" },
 };
 
+type MorningCheckInInput = {
+  capacityLevel: CapacityLevel;
+  primaryProjectId?: number;
+  userNotes?: string;
+  emotionalState?: EmotionalState;
+  mentalLoad?: MentalLoad;
+  workLocation?: WorkLocation;
+  localDate: string;
+};
+
+type MiddayCheckInInput = {
+  workedOn: string;
+  wasOnPlan: boolean;
+  interruptions?: string;
+  nextMove?: string;
+  energyLevel?: "high" | "medium" | "low";
+  hungerLevel?: "full" | "slightly_hungry" | "hungry";
+  localDate: string;
+};
+
+type EveningCheckInInput = {
+  whatMoved: string;
+  whatRemains: string;
+  whatLearned: string;
+  tomorrowFirst: string;
+  localDate: string;
+};
+
 function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: () => void; localDate?: string }) {
   const [capacity, setCapacity] = useState<CapacityLevel>("partial");
   const [notes, setNotes] = useState("");
@@ -386,6 +414,7 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
   const [, navigate] = useLocation();
   const { crisisLevel: morningCrisisLevel, checkAndMaybeFlag: checkMorningCrisis, dismissCrisis: dismissMorningCrisis } = useCrisisCheck("check_in_morning");
   const { data: projects } = trpc.projects.listActive.useQuery();
+  const retryRequestRef = useRef<MorningCheckInInput | null>(null);
   const submit = trpc.checkIns.submitMorning.useMutation({
     onSuccess: (data) => {
       notify.saved("Held.", { description: "Your day has a gentle shape." });
@@ -405,8 +434,21 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
       }
       onComplete();
     },
-    onError: () => notify.error("Didn't save — try once more."),
+    onError: () => notify.error("Your check-in didn't save — tap to retry.", {
+      description: "Your answers are still here.",
+      action: {
+        label: "Tap to retry",
+        onClick: () => {
+          const request = retryRequestRef.current;
+          if (request && !submit.isPending) submit.mutate(request);
+        },
+      },
+    }),
   });
+  const submitCheckIn = (request: MorningCheckInInput) => {
+    retryRequestRef.current = request;
+    submit.mutate(request);
+  };
   return (
     <div className="space-y-5">
       {/* Emotional State */}
@@ -547,7 +589,7 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
           const d = new Date();
           const computedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
           const localDate = localDateProp ?? computedDate;
-          submit.mutate({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation, localDate });
+          submitCheckIn({ capacityLevel: capacity, primaryProjectId: primaryId, userNotes: notes || undefined, emotionalState, mentalLoad, workLocation, localDate });
         }}
         disabled={submit.isPending}
         className="w-full bg-primary hover:bg-primary/90 text-white shadow-md shadow-primary/25"
@@ -572,13 +614,27 @@ function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; loca
   const [energyLevel, setEnergyLevel] = useState<"high" | "medium" | "low" | undefined>();
   const [hungerLevel, setHungerLevel] = useState<"full" | "slightly_hungry" | "hungry" | undefined>();
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
+  const retryRequestRef = useRef<MiddayCheckInInput | null>(null);
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
       notify.saved("Held.", { description: data.response ?? "The thread holds." });
       onComplete();
     },
-    onError: () => notify.error("Didn't save — try once more."),
+    onError: () => notify.error("Your check-in didn't save — tap to retry.", {
+      description: "Your answers are still here.",
+      action: {
+        label: "Tap to retry",
+        onClick: () => {
+          const request = retryRequestRef.current;
+          if (request && !submit.isPending) submit.mutate(request);
+        },
+      },
+    }),
   });
+  const submitCheckIn = (request: MiddayCheckInInput) => {
+    retryRequestRef.current = request;
+    submit.mutate(request);
+  };
   return (
     <div className="space-y-4">
       <div>
@@ -676,7 +732,7 @@ function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; loca
           if (interruptions.trim()) {
             classifyDistraction.mutate({ rawInput: interruptions, checkInType: "midday" });
           }
-          submit.mutate({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel, localDate });
+          submitCheckIn({ workedOn, wasOnPlan, interruptions: interruptions || undefined, nextMove: nextMove || undefined, energyLevel, hungerLevel, localDate });
         }}
         disabled={submit.isPending}
         className="w-full"
@@ -740,10 +796,10 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
   });
   const allDone = localTasks.length > 0 && checkedIds.size >= localTasks.length;
   return (
-    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.56 0.18 28 / 0.20)" }}>
+    <div className="p-4 rounded-xl border break-inside-avoid mb-3" style={{ background: "var(--card)", borderColor: "oklch(0.72 0.14 72 / 0.20)" }}>
       <div className="flex items-center gap-2 mb-3">
-        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }} />
-        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.70)" }}>Here's what you set up last night</p>
+        <Moon className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.72 0.14 72 / 0.70)" }} />
+        <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.72 0.14 72 / 0.70)" }}>Here's what you set up last night</p>
         <button
           onClick={() => setAddingTask(true)}
           className="ml-auto flex items-center gap-1 text-xs text-muted-foreground/50 hover:text-foreground/70 transition-colors"
@@ -764,12 +820,12 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
                   onClick={() => toggle(id)}
                   className="mt-0.5 shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={done
-                    ? { background: "oklch(0.56 0.18 28 / 0.25)", borderColor: "oklch(0.56 0.18 28 / 0.60)" }
+                    ? { background: "oklch(0.72 0.14 72 / 0.25)", borderColor: "oklch(0.72 0.14 72 / 0.60)" }
                     : { borderColor: "oklch(1 0 0 / 0.22)" }
                   }
                   aria-label={done ? "Mark incomplete" : "Mark complete"}
                 >
-                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "#C8452B" }} />}
+                  {done && <CheckCircle2 className="w-3 h-3" style={{ color: "#D89218" }} />}
                 </button>
               )}
               {editingId === id ? (
@@ -862,14 +918,14 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
         <button
           onClick={() => setAddingTask(true)}
           className="w-full mt-1 flex items-center gap-2 px-3 py-2.5 rounded-lg border border-dashed text-muted-foreground/40 hover:text-muted-foreground/70 hover:border-foreground/20 transition-colors text-sm"
-          style={{ borderColor: "oklch(0.56 0.18 28 / 0.15)" }}
+          style={{ borderColor: "oklch(0.72 0.14 72 / 0.15)" }}
         >
           <Plus className="w-3.5 h-3.5 shrink-0" />
           <span>Add something for tomorrow</span>
         </button>
       )}
       {allDone && (
-        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
+        <p className="text-xs mt-3 text-center" style={{ color: "oklch(0.72 0.14 72 / 0.60)" }}>All noted. Start your morning check-in when ready.</p>
       )}
     </div>
   );
@@ -886,6 +942,7 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
   const [showDecision, setShowDecision] = useState(false);
   const { crisisLevel: eveningCrisisLevel, checkAndMaybeFlag: checkEveningCrisis, dismissCrisis: dismissEveningCrisis } = useCrisisCheck("check_in_evening");
   const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
+  const retryRequestRef = useRef<EveningCheckInInput | null>(null);
   const submit = trpc.checkIns.submitEvening.useMutation({
     onSuccess: () => {
       notify.saved("Held.", { description: "Tomorrow's brief is ready when you are." });
@@ -893,8 +950,21 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
       if (combined.trim()) void checkEveningCrisis(combined);
       onComplete();
     },
-    onError: () => notify.error("Didn't save — try once more."),
+    onError: () => notify.error("Your check-in didn't save — tap to retry.", {
+      description: "Your answers are still here.",
+      action: {
+        label: "Tap to retry",
+        onClick: () => {
+          const request = retryRequestRef.current;
+          if (request && !submit.isPending) submit.mutate(request);
+        },
+      },
+    }),
   });
+  const submitCheckIn = (request: EveningCheckInInput) => {
+    retryRequestRef.current = request;
+    submit.mutate(request);
+  };
   const saveDecision = trpc.intelligence.saveDecision.useMutation();
   const extractDecisions = trpc.intelligence.extractDecisionsFromNotes.useMutation();
   const classifyDistraction = trpc.intelligence.classifyAndSaveDistraction.useMutation();
@@ -934,7 +1004,7 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
       ...tomorrowTasks.filter((t) => t.title.trim().toLowerCase() !== tomorrowFirst.trim().toLowerCase()),
     ];
     saveTomorrowPlan.mutate({ tasks: allTomorrowTasks, localDate });
-    submit.mutate({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate });
+    submitCheckIn({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate });
   };
   return (
     <div className="space-y-4">
@@ -1018,7 +1088,7 @@ function MoodWidget() {
 
   function phaseColor(score: number) {
     if (score >= 7) return "oklch(0.75 0.18 145)";
-    if (score >= 4) return "#C8452B";
+    if (score >= 4) return "#D89218";
     return "oklch(0.65 0.18 30)";
   }
 
@@ -2204,7 +2274,7 @@ export default function Home() {
       <div className="flex items-start justify-between" style={{ order: -10 }}>
         <div>
           <h1 className="text-[1.9rem] font-semibold tracking-[-0.02em] text-foreground leading-tight font-brand">
-            {greeting}, <span style={{ color: "#C8452B" }}>{firstName}</span>.
+            {greeting}, <span style={{ color: "#D89218" }}>{firstName}</span>.
           </h1>
           <div className="flex items-center gap-2 mt-1">
             <p className="text-sm text-muted-foreground">
@@ -2563,17 +2633,17 @@ export default function Home() {
         return (
           <div
             className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
-            style={{ background: "oklch(0.56 0.18 28 / 0.06)", border: "1px solid oklch(0.56 0.18 28 / 0.14)" }}
+            style={{ background: "oklch(0.72 0.14 72 / 0.06)", border: "1px solid oklch(0.72 0.14 72 / 0.14)" }}
           >
             <div className="flex items-center gap-2.5 min-w-0">
-              <p className="text-xs" style={{ color: "oklch(0.56 0.18 28 / 0.75)" }}>
+              <p className="text-xs" style={{ color: "oklch(0.72 0.14 72 / 0.75)" }}>
                 This is your workspace. Start with a check-in when you are ready.
               </p>
             </div>
             <button
               onClick={() => dismissFirstEngagementInvite.mutate()}
               className="shrink-0 transition-opacity"
-              style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}
+              style={{ color: "oklch(0.72 0.14 72 / 0.35)" }}
               aria-label="Dismiss"
             >
               <X className="w-3.5 h-3.5" />
@@ -2656,7 +2726,7 @@ export default function Home() {
               <WrenPlayer clip="cartwheels" size="2xl" />
               <p
                 className="mt-4 text-lg font-semibold text-center px-8"
-                style={{ color: "#C8452B" }}
+                style={{ color: "#D89218" }}
               >
                 {wrenCelebration.message}
               </p>
@@ -2751,7 +2821,7 @@ export default function Home() {
       {isModuleVisible("tasks") && (tasks.length > 0 || true) && (
         <div className="break-inside-avoid mb-3" style={{ order: presentationOrder("tasks", dashboardLayout) }}>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.60)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.72 0.14 72 / 0.60)" }}>
               Today's tasks
             </p>
             <div className="flex items-center gap-2">
@@ -3044,12 +3114,12 @@ export default function Home() {
           : activeProjects[0];
         if (!topProject?.nextStep) return null;
         return (
-          <div className="p-4 rounded-xl border space-y-3" style={{ order: presentationOrder("first_step", dashboardLayout), borderColor: "oklch(0.56 0.18 28 / 0.25)", background: "linear-gradient(135deg, oklch(0.56 0.18 28 / 0.08) 0%, oklch(0.56 0.18 28 / 0.03) 100%)" }}>
+          <div className="p-4 rounded-xl border space-y-3" style={{ order: presentationOrder("first_step", dashboardLayout), borderColor: "oklch(0.72 0.14 72 / 0.25)", background: "linear-gradient(135deg, oklch(0.72 0.14 72 / 0.08) 0%, oklch(0.72 0.14 72 / 0.03) 100%)" }}>
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-primary flex items-center justify-center shadow-sm">
                 <ArrowRight className="w-3 h-3 text-primary-foreground" />
               </div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C8452B" }}>Start here</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#D89218" }}>Start here</p>
               <button
                 onClick={() => { setPickingStep(!pickingStep); setCustomStep(""); }}
                 className="ml-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -3219,10 +3289,10 @@ export default function Home() {
         const pinned = (scratchNotes as any[]).filter(n => n.pinned);
         const preview = pinned.length > 0 ? pinned.slice(0, 2) : (scratchNotes as any[]).slice(0, 2);
         return (
-          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ order: presentationOrder("scratch_pad", dashboardLayout), background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.10)" }}>
+          <a href="/scratch" className="block p-4 rounded-xl border transition-all group break-inside-avoid mb-3" style={{ order: presentationOrder("scratch_pad", dashboardLayout), background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.72 0.14 72 / 0.10)" }}>
             <div className="flex items-center gap-2 mb-2">
-              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }} />
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Scratch Pad</p>
+              <PenLine className="w-3.5 h-3.5" style={{ color: "oklch(0.72 0.14 72 / 0.55)" }} />
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: "oklch(0.72 0.14 72 / 0.55)" }}>Scratch Pad</p>
               <span className="ml-auto text-sm text-muted-foreground/50 group-hover:text-primary/60 transition-colors">{scratchNotes.length} note{scratchNotes.length !== 1 ? 's' : ''} →</span>
             </div>
             <div className="space-y-1.5">
@@ -3265,7 +3335,7 @@ export default function Home() {
               <svg width={52} height={52} viewBox="0 0 52 52" className="-rotate-90 shrink-0">
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5} stroke="oklch(1 0 0 / 0.07)" />
                 <circle cx={26} cy={26} r={r} fill="none" strokeWidth={3.5}
-                  stroke="oklch(0.56 0.18 28 / 0.70)"
+                  stroke="oklch(0.72 0.14 72 / 0.70)"
                   strokeDasharray={`${dash} ${circ}`}
                   strokeLinecap="round"
                   style={{ transition: "stroke-dasharray 1.2s ease" }}
@@ -3286,7 +3356,7 @@ export default function Home() {
                         height: i === currentIdx ? 8 : 5,
                         background: i <= currentIdx
                           ? "var(--accent-tint-text)"
-                          : "oklch(0.56 0.18 28 / 0.18)",
+                          : "oklch(0.72 0.14 72 / 0.18)",
                       }}
                     />
                   ))}
@@ -3312,9 +3382,9 @@ export default function Home() {
         <a
           href="/focus"
           className="block p-4 rounded-xl border no-underline transition-opacity hover:opacity-90 break-inside-avoid mb-3"
-          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.56 0.18 28 / 0.12)" }}
+          style={{ background: "oklch(0.12 0.022 240 / 0.60)", borderColor: "oklch(0.72 0.14 72 / 0.12)" }}
         >
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.56 0.18 28 / 0.55)" }}>Focus sessions today</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "oklch(0.72 0.14 72 / 0.55)" }}>Focus sessions today</p>
           <p className="text-sm" style={{ color: "oklch(0.88 0.06 65)" }}>
             {focusTodayStats.todaySessions} session{focusTodayStats.todaySessions !== 1 ? "s" : ""} · {focusTodayStats.todayMinutes} min
             {focusArtifact && focusArtifact.totalSegments > 0 && ` · ${focusArtifact.totalSegments} woven total`}
@@ -3350,14 +3420,14 @@ export default function Home() {
                   onClick={() => navigate(`/projects/${p.id}`)}
                   className="w-full flex items-start gap-2.5 text-left group"
                 >
-                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.56 0.18 28 / 0.35)" }} />
+                  <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: "oklch(0.72 0.14 72 / 0.35)" }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground/80 truncate group-hover:text-foreground transition-colors">{p.title}</p>
                     {p.nextStep && (
                       <p className="text-xs text-muted-foreground/50 truncate mt-0.5">re-entry: {p.nextStep}</p>
                     )}
                   </div>
-                  <span className="text-xs shrink-0" style={{ color: "oklch(0.56 0.18 28 / 0.35)" }}>
+                  <span className="text-xs shrink-0" style={{ color: "oklch(0.72 0.14 72 / 0.35)" }}>
                     paused
                   </span>
                 </button>
@@ -3389,8 +3459,8 @@ export default function Home() {
           m === 'stalled' ? 'holding' : 'gathering';
         const stateColor = (m: string): string =>
           m === 'rising' ? 'oklch(0.65 0.12 150)' :
-          m === 'fading' || m === 'stalled' ? 'oklch(0.56 0.18 28 / 0.70)' :
-          'oklch(0.56 0.18 28 / 0.40)';
+          m === 'fading' || m === 'stalled' ? 'oklch(0.72 0.14 72 / 0.70)' :
+          'oklch(0.72 0.14 72 / 0.40)';
         const stateFill = (m: string): number =>
           m === 'rising' ? 0.75 : m === 'fading' ? 0.45 : m === 'stalled' ? 0.25 : 0.55;
         return (
@@ -3540,7 +3610,7 @@ export default function Home() {
 
       {/* ── Notification Permission Prompt ─────────────────────────────────── */}
       {showNotifPrompt && (
-        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.56 0.18 28 / 0.05)", border: "1px solid oklch(0.56 0.18 28 / 0.18)" }}>
+        <div className="relative p-5 rounded-2xl overflow-hidden" style={{ background: "oklch(0.72 0.14 72 / 0.05)", border: "1px solid oklch(0.72 0.14 72 / 0.18)" }}>
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
               <Bell className="w-5 h-5 text-primary" />

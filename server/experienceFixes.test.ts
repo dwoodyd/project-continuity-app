@@ -48,4 +48,12 @@ describe("September experience fixes", () => {
     expect(home).toContain("const returnBriefNextStep = activeThreadLock?.whatNext?.trim()");
     expect(home).toContain("body={returnBriefBody}");
   });
+
+  it("retains failed Today check-ins and exposes a direct retry action", () => {
+    const home = read("client/src/pages/Home.tsx");
+    expect(home.match(/retryRequestRef = useRef/g)).toHaveLength(3);
+    expect(home.match(/Your check-in didn't save — tap to retry\./g)).toHaveLength(3);
+    expect(home.match(/label: "Tap to retry"/g)).toHaveLength(3);
+    expect(home.match(/Your answers are still here\./g)).toHaveLength(3);
+  });
 });
