@@ -34,4 +34,26 @@ describe("PayPal credentials", () => {
     expect(source).toContain("window.location.assign(approvalUrl)");
     expect(source).not.toContain('window.open(approvalUrl, "_blank")');
   });
+
+  it("sends checkout returns to the confirmation route and public pricing fallback", () => {
+    const source = readFileSync(resolve(process.cwd(), "server/routers/paypal.ts"), "utf8");
+    expect(source).toContain('const returnUrl = `${input.origin}/pro/success`;');
+    expect(source).toContain('const cancelUrl = `${input.origin}/pricing`;');
+  });
+
+  it("gives a safe recovery state when PayPal returns without subscription_id", () => {
+    const source = readFileSync(resolve(process.cwd(), "client/src/pages/ProSuccessPage.tsx"), "utf8");
+    expect(source).toContain("if (!subscriptionId)");
+    expect(source).toContain("We couldn&apos;t find a PayPal confirmation.");
+    expect(source).toContain('navigate("/pro")');
+    expect(source).toContain("mailto:hello@continuary.app?subject=PayPal%20subscription%20return");
+  });
+
+  it("keeps entitlement aligned with cancellation, expiry, suspension, and reactivation events", () => {
+    const source = readFileSync(resolve(process.cwd(), "server/paypal.ts"), "utf8");
+    expect(source).toContain('event.event_type === "BILLING.SUBSCRIPTION.RE-ACTIVATED"');
+    expect(source).toContain('event.event_type === "BILLING.SUBSCRIPTION.SUSPENDED"');
+    expect(source).toContain('event.event_type === "BILLING.SUBSCRIPTION.CANCELLED"');
+    expect(source).toContain('event.event_type === "BILLING.SUBSCRIPTION.EXPIRED"');
+  });
 });

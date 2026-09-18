@@ -50,7 +50,10 @@ export const paypalRouter = router({
     }))
     .mutation(async ({ ctx, input }) => {
       const returnUrl = `${input.origin}/pro/success`;
-      const cancelUrl = `${input.origin}/pro/cancel`;
+      // Keep the cancellation landing public and consistent with the per-plan
+      // fallback configured in PayPal, so a cancelled checkout never hits an
+      // authenticated shell or a dead-end route.
+      const cancelUrl = `${input.origin}/pricing`;
       const approvalUrl = await createSubscriptionLink(ctx.user.id, input.planKey as PlanKey, returnUrl, cancelUrl);
       return { approvalUrl };
     }),

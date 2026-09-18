@@ -360,12 +360,16 @@ paypalRouter.post("/webhook", express.text({ type: "application/json" }), async 
     const userId = parseInt(userIdStr ?? "");
     const planKey = (planKeyStr && planKeyStr in PLAN_CATALOG) ? planKeyStr as PlanKey : undefined;
 
-    if (event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
+    if (
+      event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED" ||
+      event.event_type === "BILLING.SUBSCRIPTION.RE-ACTIVATED"
+    ) {
       if (!isNaN(userId)) await activateSubscription(event.resource.id, userId, planKey);
 
     } else if (
       event.event_type === "BILLING.SUBSCRIPTION.CANCELLED" ||
-      event.event_type === "BILLING.SUBSCRIPTION.EXPIRED"
+      event.event_type === "BILLING.SUBSCRIPTION.EXPIRED" ||
+      event.event_type === "BILLING.SUBSCRIPTION.SUSPENDED"
     ) {
       const dbInst = await getDb();
       if (!isNaN(userId) && dbInst)
