@@ -134,25 +134,26 @@ export default function ProPage() {
     return billing === "annual" ? p.planKeys.retailAnnual : p.planKeys.retailMonthly;
   };
 
-  // Pattern C CTA: "Reserve X at this rate" for founding members not yet active
+  // Checkout starts a live PayPal subscription, so every label and helper line
+  // must be clear that choosing a paid plan begins payment now.
   const getCtaLabel = (tier: "pro" | "keeper"): { label: string; sublabel?: string; disabled: boolean; variant: "current" | "upgrade" | "downgrade" | "lock" | "apply" } => {
     if (!user) return { label: "Apply for access", disabled: false, variant: "apply" };
     if (!isActive) {
       const tierName = tier === "pro" ? "Pro" : "Keeper";
       if (isFoundingMember) {
         return {
-          label: `Reserve ${tierName} at this rate`,
-          sublabel: "No card now — beta access stays free. Your founding rate is locked for life when you upgrade.",
+          label: `Choose ${tierName} at this rate`,
+          sublabel: "Secure checkout through PayPal. Your founding rate stays locked while you remain subscribed.",
           disabled: false, variant: "lock",
         };
       }
-      return { label: `Lock in ${tierName}`, disabled: false, variant: "lock" };
+      return { label: `Subscribe to ${tierName}`, disabled: false, variant: "lock" };
     }
     const currentTier = foundingTier ?? (isPro ? "pro" : null);
     if (currentTier === tier) return { label: "Your active plan", disabled: true, variant: "current" };
     if (tier === "keeper" && currentTier === "pro") return { label: "Upgrade to Keeper", disabled: false, variant: "upgrade" };
     if (tier === "pro" && currentTier === "keeper") return { label: "Switch to Pro", disabled: false, variant: "downgrade" };
-    return { label: `Lock in ${tier === "pro" ? "Pro" : "Keeper"}`, disabled: false, variant: "lock" };
+    return { label: `Subscribe to ${tier === "pro" ? "Pro" : "Keeper"}`, disabled: false, variant: "lock" };
   };
 
   if (isLoading && user) return (
@@ -223,12 +224,12 @@ export default function ProPage() {
                 <Crown className="w-3 h-3" /> Your founding rate is locked for life
               </div>
               <h1 className="font-brand text-3xl text-[#2A2D28] mb-3">
-                {isActive ? "Your thread is fully supported." : "Lock in your founding rate whenever you're ready."}
+                {isActive ? "Your thread is fully supported." : "Choose your founding plan whenever you're ready."}
               </h1>
               <p className="text-[#6B6F68] text-sm leading-relaxed max-w-sm mx-auto">
                 {isActive
                   ? "Founding rate. Locked for life. Thank you for being here."
-                  : "No card required during beta. Your founding rate is reserved — it never increases even as retail pricing rises."}
+                  : "Your founding rate stays locked while you remain subscribed — it never increases even as retail pricing rises."}
               </p>
             </>
           ) : (

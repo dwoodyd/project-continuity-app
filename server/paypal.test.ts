@@ -35,6 +35,14 @@ describe("PayPal credentials", () => {
     expect(source).not.toContain('window.open(approvalUrl, "_blank")');
   });
 
+  it("does not promise card-free beta access before a live PayPal subscription checkout", () => {
+    const source = readFileSync(resolve(process.cwd(), "client/src/pages/ProPage.tsx"), "utf8");
+    expect(source).not.toContain("No card required during beta");
+    expect(source).not.toContain("No card now — beta access stays free");
+    expect(source).toContain("Secure checkout through PayPal");
+    expect(source).toContain("Choose ${tierName} at this rate");
+  });
+
   it("sends checkout returns to the confirmation route and public pricing fallback", () => {
     const source = readFileSync(resolve(process.cwd(), "server/routers/paypal.ts"), "utf8");
     expect(source).toContain('const returnUrl = `${input.origin}/pro/success`;');
