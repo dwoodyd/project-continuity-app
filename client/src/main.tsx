@@ -7,6 +7,11 @@ import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
+import {
+  getTrpcRetryDelay,
+  shouldRetryTrpcMutation,
+  shouldRetryTrpcQuery,
+} from "./lib/trpcRetry";
 import "@fontsource/archivo/400.css";
 import "@fontsource/archivo/600.css";
 import "@fontsource/archivo/700.css";
@@ -61,6 +66,16 @@ const queryClient = new QueryClient({
       // focus event, which triggers stale-query refetches that re-render
       // AppLayout and steal focus from the active input after each character.
       refetchOnWindowFocus: false,
+      // Honor a server-provided Retry-After delay for 429 responses and cap
+      // every other retry with exponential backoff.
+      retry: shouldRetryTrpcQuery,
+      retryDelay: getTrpcRetryDelay,
+    },
+    mutations: {
+      // Mutations stay no-retry except for a confirmed 429, where the server
+      // rejected the request before execution and a bounded delayed retry is safe.
+      retry: shouldRetryTrpcMutation,
+      retryDelay: getTrpcRetryDelay,
     },
   },
 });

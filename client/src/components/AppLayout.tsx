@@ -67,6 +67,23 @@ import WrenPlayer from "./WrenPlayer";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "./ui/drawer";
 
 const LAYOUT_STORAGE_KEY = "continuary-layout-mode";
+const TIMEZONE_CAPTURE_SESSION_KEY_PREFIX = "continuary-timezone-capture";
+
+function hasAttemptedTimezoneCapture(userId: number): boolean {
+  try {
+    return sessionStorage.getItem(`${TIMEZONE_CAPTURE_SESSION_KEY_PREFIX}:${userId}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markTimezoneCaptureAttempted(userId: number) {
+  try {
+    sessionStorage.setItem(`${TIMEZONE_CAPTURE_SESSION_KEY_PREFIX}:${userId}`, "1");
+  } catch {
+    // Private browsing or storage restrictions should never restart the mutation.
+  }
+}
 
 // ── Brand logo ───────────────────────────────────────────────────────────────
 const BRAND_LOGO_SIGNIN = "/logo-navy.svg";
@@ -354,7 +371,11 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
     enabled: isAuthenticated,
     staleTime: 1000 * 60 * 5,
   });
+  const timezoneCaptureAttemptsRef = useRef(new Set<string>());
   const captureTimezone = trpc.settings.captureTimezone.useMutation({
+    // This low-priority settings sync is intentionally one-shot per session.
+    // It must never retry and compete with member-owned writes such as check-ins.
+    retry: false,
     onSuccess: () => utils.settings.getProfile.invalidate(),
   });
   const isDayOne = Boolean(
@@ -370,9 +391,14 @@ export default function AppLayout({ children, onPreviewIntro }: AppLayoutProps) 
 
   useEffect(() => {
     const deviceTimezone = getBrowserTimezone();
-    if (!isAuthenticated || !profile || captureTimezone.isPending || profile.timezone === deviceTimezone) return;
+    const userId = profile?.userId;
+    if (!isAuthenticated || !profile || !userId || profile.timezone === deviceTimezone) return;
+    const attemptKey = String(userId);
+    if (timezoneCaptureAttemptsRef.current.has(attemptKey) || hasAttemptedTimezoneCapture(userId)) return;
+    timezoneCaptureAttemptsRef.current.add(attemptKey);
+    markTimezoneCaptureAttempted(userId);
     captureTimezone.mutate({ timezone: deviceTimezone });
-  }, [isAuthenticated, profile?.timezone, captureTimezone]);
+  }, [isAuthenticated, profile?.userId, profile?.timezone, captureTimezone.mutate]);
 
   // Keep persisted accessibility preferences active across every authenticated route.
   useEffect(() => {

@@ -153,8 +153,10 @@ export const settingsRouter = router({
         throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid timezone." });
       }
       const existing = await getUserProfile(ctx.user.id);
-      // Settings changes remain authoritative once we have recorded initial detection.
-      if (existing?.timezoneDetectedAt) return { timezone: existing.timezone, captured: false };
+      // Device timezone is the source of truth for the member's live clock and
+      // notification schedule. A matching stored zone is already current; a real
+      // device-zone change is persisted exactly once by the guarded client sync.
+      if (existing?.timezone === input.timezone) return { timezone: existing.timezone, captured: false };
       const data = { timezone: input.timezone, timezoneDetectedAt: new Date() };
       if (existing) await updateUserProfile(ctx.user.id, data as any);
       else await upsertUserProfile({ userId: ctx.user.id, ...data } as any);

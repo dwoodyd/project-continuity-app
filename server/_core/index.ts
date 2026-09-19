@@ -289,9 +289,11 @@ async function startServer() {
     legacyHeaders: false,
     message: { error: "Too many requests. Please slow down." },
     store: makeUpstashStore("rl:api:", apiWindowMs),
-    // Skip the rate limit for the /api/version health-check endpoint so monitoring
-    // probes don't consume quota and accidentally trigger 429s for real users.
-    skip: (req) => req.path === "/version",
+    // Skip low-cost maintenance calls that must never consume the shared API quota
+    // and starve a member-owned write such as a check-in. The timezone endpoint is
+    // authenticated, validates a short IANA name, and the client sends it at most
+    // once per member/browser session.
+    skip: (req) => req.path === "/version" || req.path === "/settings.captureTimezone",
   });
 
   // Build version endpoint — lets clients detect new deploys proactively.
