@@ -9,6 +9,8 @@ describe("saved member records", () => {
     const router = source("server/routers/checkIns.ts");
     const page = source("client/src/pages/CheckInHistoryPage.tsx");
     const app = source("client/src/App.tsx");
+    const layout = source("client/src/components/AppLayout.tsx");
+    const weekly = source("client/src/pages/WeeklyReviewPage.tsx");
 
     expect(router).toContain("getHistory: protectedProcedure");
     expect(router).toContain("getById: protectedProcedure");
@@ -16,11 +18,18 @@ describe("saved member records", () => {
     expect(router).toContain("amendMidday: protectedProcedure");
     expect(router).toContain("amendEveningClose: protectedProcedure");
     expect(router).toContain("getCheckInById(input.id, ctx.user.id)");
+    expect(router).toContain('status: record.completedAt ? "saved" as const : "needs_attention" as const');
     expect(page).toContain("trpc.checkIns.getHistory.useQuery");
     expect(page).toContain("trpc.checkIns.getById.useQuery");
     expect(page).toContain("Edit this check-in");
+    expect(page).toContain("Needs review before it is marked saved");
+    expect(page).toContain("Finish and save");
     expect(app).toContain('path="/check-ins/:id"');
     expect(app).toContain('path="/check-ins"');
+    expect(layout).toContain('href: "/check-ins",       label: "Check-in Archive"');
+    expect(weekly).toContain('href="/check-ins"');
+    expect(weekly).toContain('href={`/check-ins/${checkIn.id}`}');
+    expect(weekly).toContain("Open &amp; edit");
   });
 
   it("writes direct check-in links into new Today movement events and keeps older rows useful", () => {

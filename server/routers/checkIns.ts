@@ -1012,17 +1012,18 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     return getHeatmapData(ctx.user.id);
   }),
 
-  /** A dated, member-owned index of submitted check-ins. Detail reads are explicit. */
+  /** A dated, member-owned index of submitted and recoverable unfinished check-ins. */
   getHistory: protectedProcedure
     .input(z.object({ limit: z.number().int().min(1).max(100).default(60) }).optional())
     .query(async ({ ctx, input }) => {
       const records = await getRecentCheckIns(ctx.user.id, input?.limit ?? 60);
-      return records.filter((record) => record.completedAt != null).map((record) => {
+      return records.map((record) => {
         const userInput = parseCheckInInput(record.userInput);
         return {
           id: record.id,
           date: record.date,
           type: record.type,
+          status: record.completedAt ? "saved" as const : "needs_attention" as const,
           completedAt: record.completedAt,
           createdAt: record.createdAt,
           updatedAt: record.updatedAt,
@@ -1071,6 +1072,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
           notes: input.userNotes?.trim() || undefined,
           workLocation: input.workLocation ?? undefined,
         }),
+        completedAt: existing.completedAt ?? new Date(),
       });
       const verified = await getCheckInById(existing.id, ctx.user.id);
       if (!verified?.completedAt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not verify the amended morning check-in." });
@@ -1103,6 +1105,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
         interruptionsNoted: input.interruptions?.trim() || null,
         generatedResponse: null,
         alignmentStatus: null,
+        completedAt: existing.completedAt ?? new Date(),
       });
       const verified = await getCheckInById(existing.id, ctx.user.id);
       if (!verified?.completedAt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not verify the amended midday check-in." });

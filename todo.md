@@ -2579,3 +2579,10 @@
 - [x] Repair the Android Court form with explicit multi-line minimum heights and expose the two evidence fields in saved fair reads.
 - [x] Label Evidence Log aggregate tiles by their saved-month period, so they do not conflict with a current-month zero state.
 - [x] Add saved-record navigation regressions and validate the complete project suite.
+
+## Historical Check-in Retention Audit and Archive Reachability (Sep 19)
+- [x] Audit the member-one check-in table, related daily plans and focus sessions, soft-delete markers, orphaned relations, migration source, and retained runtime-log coverage.
+- [x] Record the evidence-based finding: no May, July, or August check-in rows remain for member one; no soft-deleted or orphaned rows exist; historical server logs are not retained; and the timezone sync feature was introduced on Aug 27, so it cannot explain earlier gaps.
+- [x] Expose Check-in Archive in Reflect navigation and Weekly Review, and add direct “Open & edit” links to each visible Weekly Review check-in.
+- [x] Include recoverable unfinished check-ins in the archive with a clear review-and-save path instead of filtering them out.
+- [x] Add regression coverage and run complete validation before checkpointing.

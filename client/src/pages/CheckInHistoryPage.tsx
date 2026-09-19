@@ -227,6 +227,7 @@ export default function CheckInHistoryPage() {
                       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                     </div>
                     <p className="mt-1 text-sm font-medium text-foreground">{formatDate(entry.date)}</p>
+                    {entry.status === "needs_attention" && <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-300">Needs review before it is marked saved</p>}
                     <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">{entry.preview}</p>
                   </button>
                 );
@@ -255,10 +256,16 @@ export default function CheckInHistoryPage() {
                 </div>
                 {!editing && (
                   <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-                    <Pencil className="mr-1.5 h-3.5 w-3.5" /> Edit this check-in
+                    <Pencil className="mr-1.5 h-3.5 w-3.5" /> {detail.completedAt ? "Edit this check-in" : "Finish and save"}
                   </Button>
                 )}
               </div>
+
+              {!detail.completedAt && !editing && (
+                <div role="status" className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm leading-relaxed text-foreground">
+                  This check-in has your saved words, but the original save was not confirmed. Open it, review it, and save it again to finish the record.
+                </div>
+              )}
 
               {editing ? (
                 <div className="space-y-4">

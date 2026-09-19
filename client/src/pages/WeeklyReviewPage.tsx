@@ -20,6 +20,7 @@ import WrenPlayer from "@/components/WrenPlayer";
 import { WrenThinking } from "@/components/WrenThinking";
 import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 import { WREN_SURFACE_MEDIA } from "@/lib/wrenClips";
+import { Link } from "wouter";
 
 function formatDuration(seconds: number): string {
   if (!seconds || seconds < 1) return "0m";
@@ -92,6 +93,9 @@ export default function WeeklyReviewPage() {
           <h1 className="text-[1.75rem] font-semibold tracking-[-0.02em] text-foreground leading-tight">Weekly Review</h1>
           <p className="text-sm text-muted-foreground mt-1">{weekLabel}</p>
         </div>
+        <Link href="/check-ins" className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground sm:ml-auto">
+          Check-in archive
+        </Link>
       </div>
 
       {/* Stats */}
@@ -352,11 +356,14 @@ export default function WeeklyReviewPage() {
               const plainSummary = isPlainText && checkIn.userInput ? checkIn.userInput : null;
               return (
                 <div key={checkIn.id} className="p-4 rounded-xl border border-border bg-card space-y-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 min-w-0">
                     <div className={cn("w-2 h-2 rounded-full shrink-0", accentColor)} />
                     <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                       {typeLabel} · {format(new Date(checkIn.createdAt), "MMM d")}
                     </p>
+                    </div>
+                    <Link href={`/check-ins/${checkIn.id}`} className="shrink-0 text-xs font-medium text-primary hover:underline">Open &amp; edit</Link>
                   </div>
                   {fields.length > 0 && (
                     <div className="space-y-1.5 pt-1">
