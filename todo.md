@@ -2571,3 +2571,11 @@
 
 ## App Entry Brand Alignment (Sep 2)
 - [x] Align the primary founding-seat CTA and related admission states with the marketing site’s amber/gold action treatment without changing admission behavior
+
+## Saved Reflection Records and Check-in History (Sep 19)
+- [x] Add a member-owned dated check-in history and detail route, reachable from Today’s Evidence of Movement and the Evidence Log, with full raw responses visible.
+- [x] Add server-confirmed amendments for morning, midday, and evening check-ins while retaining the same dated record.
+- [x] Preserve every eligible Reflection record in visible lists: completed Read items, resolved/released Waiting entries, Threshold plans, complete Court records, and prior Collapse canaries.
+- [x] Repair the Android Court form with explicit multi-line minimum heights and expose the two evidence fields in saved fair reads.
+- [x] Label Evidence Log aggregate tiles by their saved-month period, so they do not conflict with a current-month zero state.
+- [x] Add saved-record navigation regressions and validate the complete project suite.

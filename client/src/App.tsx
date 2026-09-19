@@ -59,6 +59,7 @@ const CapturePage         = lazy(() => import("./pages/CapturePage"));
 const SortResultPage      = lazy(() => import("./pages/SortResultPage"));
 const OpenLoopsPage       = lazy(() => import("./pages/OpenLoopsPage"));
 const CaptureHistoryPage  = lazy(() => import("./pages/CaptureHistoryPage"));
+const CheckInHistoryPage  = lazy(() => import("./pages/CheckInHistoryPage"));
 const WhatWrenRemembersPage = lazy(() => import("./pages/WhatWrenRemembersPage"));
 const WaitlistPage        = lazy(() => import("./pages/WaitlistPage"));
 const BookStartPage       = lazy(() => import("./pages/BookStartPage"));
@@ -142,6 +143,8 @@ function Router({ onPreviewIntro }: { onPreviewIntro: () => void }) {
               <Route path="/hub" component={HubPage} />
               <Route path="/thread-locks" component={ThreadLocksPage} />
               <Route path="/reading-bridge" component={ReadingBridgePage} />
+              <Route path="/check-ins/:id" component={CheckInHistoryPage} />
+              <Route path="/check-ins" component={CheckInHistoryPage} />
               <Route path="/capture/history" component={CaptureHistoryPage} />
               <Route path="/capture/:id/sort" component={SortResultPage} />
               <Route path="/capture" component={CapturePage} />

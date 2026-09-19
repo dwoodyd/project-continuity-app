@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import notify from "@/lib/notify";
-import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2, Download } from "lucide-react";
+import { BookOpen, Flame, RefreshCw, TrendingUp, Zap, Heart, ArrowLeft, Share2, Download, CalendarDays } from "lucide-react";
 import { Link } from "wouter";
 import { ShareEvidenceModal } from "@/components/ShareEvidenceModal";
 import { ActivityHeatmap } from "@/components/ActivityHeatmap";
@@ -256,6 +256,12 @@ export default function EvidenceLogPage() {
   const hasEvidence = totalSessions > 0;
   const identitySentenceCount = summaries?.filter((summary) => Boolean(summary.summaryLine)).length ?? 0;
   const showFirstIdentityInvite = identitySentenceCount === 1;
+  const savedMonths = (summaries ?? []).map((summary) => summary.month).sort();
+  const summaryPeriod = savedMonths.length === 0
+    ? null
+    : savedMonths.length === 1
+      ? formatMonth(savedMonths[0])
+      : `${formatMonth(savedMonths[0])} – ${formatMonth(savedMonths[savedMonths.length - 1])}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -281,51 +287,59 @@ export default function EvidenceLogPage() {
       </IntroWrenScene>
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
         {/* Utility row — the immersive hero already owns the page title and update action. */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-3.5 h-3.5" />
             Back to Today
           </Link>
-          {hasEvidence && <Button
-            onClick={async () => {
-              try {
-                const result = await utils.evidence.exportMarkdown.fetch();
-                const blob = new Blob([result.markdown], { type: "text/markdown" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                const _ed = new Date(); a.download = `continuary-evidence-log-${_ed.getFullYear()}-${String(_ed.getMonth()+1).padStart(2,"0")}-${String(_ed.getDate()).padStart(2,"0")}.md`;
-                a.click();
-                URL.revokeObjectURL(url);
-                notify.saved("Evidence Log exported");
-              } catch { notify.error("Export failed"); }
-            }}
-            size="sm"
-            variant="outline"
-            className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
-            title="Export as Markdown"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export
-          </Button>}
+          <div className="flex items-center gap-2">
+            <Link href="/check-ins" className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-border/40 px-3 text-sm text-muted-foreground transition-colors hover:text-foreground">
+              <CalendarDays className="h-3.5 w-3.5" /> Check-in record
+            </Link>
+            {hasEvidence && <Button
+              onClick={async () => {
+                try {
+                  const result = await utils.evidence.exportMarkdown.fetch();
+                  const blob = new Blob([result.markdown], { type: "text/markdown" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  const _ed = new Date(); a.download = `continuary-evidence-log-${_ed.getFullYear()}-${String(_ed.getMonth()+1).padStart(2,"0")}-${String(_ed.getDate()).padStart(2,"0")}.md`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  notify.saved("Evidence Log exported");
+                } catch { notify.error("Export failed"); }
+              }}
+              size="sm"
+              variant="outline"
+              className="shrink-0 text-muted-foreground border-border/40 hover:text-foreground"
+              title="Export as Markdown"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export
+            </Button>}
+          </div>
         </div>
 
-        {/* All-time summary pills */}
+        {/* Aggregate summary is explicitly scoped to the saved months below. */}
         {!summariesLoading && summaries && summaries.length > 0 && (
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-              <div className="text-2xl font-bold text-amber-400">{totalSessions}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">sessions started</div>
+          <section aria-label="Aggregate evidence summary">
+            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Across saved monthly records{summaryPeriod ? ` · ${summaryPeriod}` : ""}</p>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
+                <div className="text-2xl font-bold text-amber-400">{totalSessions}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">sessions started</div>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
+                <div className="text-2xl font-bold text-amber-400">{totalReturns}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">returns after gaps</div>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
+                <div className="text-2xl font-bold text-amber-400">{totalHardDays}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">hard-day sessions</div>
+              </div>
             </div>
-            <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-              <div className="text-2xl font-bold text-amber-400">{totalReturns}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">returns after gaps</div>
-            </div>
-            <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-              <div className="text-2xl font-bold text-amber-400">{totalHardDays}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">hard-day sessions</div>
-            </div>
-          </div>
+          </section>
         )}
 
         {/* Activity heatmap */}

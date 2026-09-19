@@ -405,7 +405,7 @@ type EveningCheckInInput = {
   localDate: string;
 };
 
-function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: () => void; localDate?: string }) {
+function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: (checkInId: number) => void; localDate?: string }) {
   const [capacity, setCapacity] = useState<CapacityLevel>("partial");
   const [notes, setNotes] = useState("");
   const [primaryId, setPrimaryId] = useState<number | undefined>();
@@ -431,9 +431,9 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
               duration: 7000,
             }
           );
-        }, 1200);
+          }, 1200);
       }
-      onComplete();
+      onComplete(data.checkInId);
     },
     onError: () => notify.error("Your check-in didn't save — tap to retry.", {
       description: "Your answers are still here.",
@@ -607,7 +607,7 @@ function MorningCheckIn({ onComplete, localDate: localDateProp }: { onComplete: 
 }
 
 // ─── Midday Check-In Form ─────────────────────────────────────────────────────
-function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; localDate: string }) {
+function MiddayCheckIn({ onComplete, localDate }: { onComplete: (checkInId: number) => void; localDate: string }) {
   const [workedOn, setWorkedOn] = useState("");
   const [wasOnPlan, setWasOnPlan] = useState<boolean | null>(null);
   const [interruptions, setInterruptions] = useState("");
@@ -619,7 +619,7 @@ function MiddayCheckIn({ onComplete, localDate }: { onComplete: () => void; loca
   const submit = trpc.checkIns.submitMidday.useMutation({
     onSuccess: (data) => {
       notify.saved("Held.", { description: data.response ?? "The thread holds." });
-      onComplete();
+      onComplete(data.checkInId);
     },
     onError: () => notify.error("Your check-in didn't save — tap to retry.", {
       description: "Your answers are still here.",
@@ -933,7 +933,7 @@ function WrenHandoffCard({ tasks: initialTasks, localDate }: { tasks: Array<{ id
 }
 
 // ─── Evening Check-In Form ────────────────────────────────────────────────────
-function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; localDate: string }) {
+function EveningCheckIn({ onComplete, localDate }: { onComplete: (checkInId: number) => void; localDate: string }) {
   const [whatMoved, setWhatMoved] = useState("");
   const [whatRemains, setWhatRemains] = useState("");
   const [whatLearned, setWhatLearned] = useState("");
@@ -971,7 +971,7 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
       notify.saved("Held.", { description: "Your evening close is saved and ready for tomorrow." });
       const combined = [request.whatMoved, request.whatRemains, request.whatLearned].filter(Boolean).join(" ");
       if (combined.trim()) void checkEveningCrisis(combined);
-      onComplete();
+      onComplete(result.checkInId);
       return true;
     } catch (error) {
       console.error("[Evening close] Save verification failed", error);
@@ -1823,7 +1823,7 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [morningDone]);
 
-  const handleCheckInComplete = (type: CheckInStep) => {
+  const handleCheckInComplete = (type: CheckInStep, checkInId: number) => {
     setCompletedCheckIns((prev) => { const s = new Set(prev); s.add(type); return s; });
     setActiveCheckIn(null);
     refetchCheckIns();
@@ -1844,7 +1844,11 @@ export default function Home() {
       midday: "Midday pulse done",
       evening: "Evening close complete",
     };
-    recordEvent.mutate({ eventType: `rhythm_${type}`, label: rhythmLabels[type] });
+    recordEvent.mutate({
+      eventType: `rhythm_${type}`,
+      label: rhythmLabels[type],
+      metadata: JSON.stringify({ checkInId }),
+    });
     // After morning or evening check-in, gently surface unprocessed ideas when count > 3
     if ((type === "morning" || type === "evening") && pendingIdeaCount > 3) {
       setTimeout(() => {
@@ -2777,9 +2781,9 @@ export default function Home() {
               <ChevronUp className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
-          {activeCheckIn === "morning" && <MorningCheckIn onComplete={() => handleCheckInComplete("morning")} localDate={localDateStr} />}
-          {activeCheckIn === "midday" && <MiddayCheckIn onComplete={() => handleCheckInComplete("midday")} localDate={localDateStr} />}
-          {activeCheckIn === "evening" && <EveningCheckIn onComplete={() => handleCheckInComplete("evening")} localDate={localDateStr} />}
+          {activeCheckIn === "morning" && <MorningCheckIn onComplete={(checkInId) => handleCheckInComplete("morning", checkInId)} localDate={localDateStr} />}
+          {activeCheckIn === "midday" && <MiddayCheckIn onComplete={(checkInId) => handleCheckInComplete("midday", checkInId)} localDate={localDateStr} />}
+          {activeCheckIn === "evening" && <EveningCheckIn onComplete={(checkInId) => handleCheckInComplete("evening", checkInId)} localDate={localDateStr} />}
         </div>
       )}
 
@@ -3432,7 +3436,10 @@ export default function Home() {
           icon={<Zap className="w-3.5 h-3.5" />}
           title="Evidence of Movement"
         >
-          <MovementFeed events={gamStatus.recentEvents as any} />
+          <MovementFeed
+            events={gamStatus.recentEvents as any}
+            onOpenCheckIn={(checkInId) => navigate(checkInId ? `/check-ins/${checkInId}` : "/check-ins")}
+          />
         </BentoCard>
       )}
 

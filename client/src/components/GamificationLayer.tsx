@@ -147,7 +147,13 @@ function timeAgo(date: Date): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export function MovementFeed({ events }: { events: Array<{ id: number; label: string | null; eventType: string; createdAt: Date }> }) {
+export function MovementFeed({
+  events,
+  onOpenCheckIn,
+}: {
+  events: Array<{ id: number; label: string | null; eventType: string; metadata?: string | null; createdAt: Date }>;
+  onOpenCheckIn?: (checkInId?: number) => void;
+}) {
   if (events.length === 0) return null;
   const shown = events.slice(0, 5);
 
@@ -155,16 +161,29 @@ export function MovementFeed({ events }: { events: Array<{ id: number; label: st
     <div className="space-y-1">
       {shown.map(ev => {
         const Icon = EVENT_ICONS[ev.eventType] ?? Zap;
+        const isCheckIn = ev.eventType.startsWith("rhythm_");
+        let checkInId: number | undefined;
+        try {
+          const parsed = JSON.parse(ev.metadata ?? "{}");
+          if (typeof parsed?.checkInId === "number" && Number.isInteger(parsed.checkInId)) checkInId = parsed.checkInId;
+        } catch { /* Older event rows may not have metadata. */ }
+        const content = <>
+          <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.45)" }} />
+          <span className="text-xs flex-1 truncate" style={{ color: "oklch(1 0 0 / 0.50)" }}>
+            {ev.label ?? ev.eventType.replace(/_/g, " ")}
+          </span>
+          <span className="text-xs shrink-0" style={{ color: "oklch(1 0 0 / 0.22)" }}>
+            {timeAgo(ev.createdAt)}
+          </span>
+        </>;
         return (
-          <div key={ev.id} className="flex items-center gap-2.5 py-1">
-            <Icon className="w-3 h-3 shrink-0" style={{ color: "oklch(0.74 0.14 72 / 0.45)" }} />
-            <span className="text-xs flex-1 truncate" style={{ color: "oklch(1 0 0 / 0.50)" }}>
-              {ev.label ?? ev.eventType.replace(/_/g, " ")}
-            </span>
-            <span className="text-xs shrink-0" style={{ color: "oklch(1 0 0 / 0.22)" }}>
-              {timeAgo(ev.createdAt)}
-            </span>
-          </div>
+          isCheckIn && onOpenCheckIn ? (
+            <button key={ev.id} type="button" onClick={() => onOpenCheckIn(checkInId)} className="flex w-full items-center gap-2.5 rounded-md py-1 text-left transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60" aria-label={`Open saved ${ev.label ?? "check-in"}`}>
+              {content}
+            </button>
+          ) : (
+            <div key={ev.id} className="flex items-center gap-2.5 py-1">{content}</div>
+          )
         );
       })}
     </div>

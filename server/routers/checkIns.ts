@@ -69,6 +69,55 @@ function buildTomorrowTasks(first: string, tasks: EveningTomorrowTask[]): Array<
   return normalized;
 }
 
+function parseCheckInInput(value: string | null): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(value ?? "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {};
+  } catch {
+    return {};
+  }
+}
+
+function checkInPreview(type: "morning" | "midday" | "evening", input: Record<string, unknown>): string {
+  if (type === "morning") return typeof input.notes === "string" && input.notes.trim() ? input.notes : "Morning plan";
+  if (type === "midday") return typeof input.workedOn === "string" && input.workedOn.trim() ? input.workedOn : "Midday pulse";
+  return typeof input.whatMoved === "string" && input.whatMoved.trim() ? input.whatMoved : "Evening close";
+}
+
+/** Builds the complete, member-owned check-in record used by the history/detail view. */
+async function buildCheckInDetail(checkIn: Awaited<ReturnType<typeof getCheckInById>> extends infer T ? Exclude<T, undefined> : never, userId: number) {
+  const userInput = parseCheckInInput(checkIn.userInput);
+  const plan = await getDailyPlan(userId, checkIn.date);
+  const [primaryProject, secondaryProject] = await Promise.all([
+    plan?.primaryProjectId ? getProjectById(plan.primaryProjectId, userId) : Promise.resolve(undefined),
+    plan?.secondaryProjectId ? getProjectById(plan.secondaryProjectId, userId) : Promise.resolve(undefined),
+  ]);
+  let tomorrowActivities: Array<{ id?: string; title: string; projectId?: number | null; energyLevel?: string; estimatedMinutes?: number; notes?: string }> = [];
+  try {
+    const parsed = JSON.parse(plan?.tomorrowTasks ?? "[]");
+    if (Array.isArray(parsed)) tomorrowActivities = parsed.filter((item): item is typeof tomorrowActivities[number] => Boolean(item) && typeof item.title === "string");
+  } catch { /* legacy malformed JSON is shown without a task list */ }
+  return {
+    ...checkIn,
+    userInput,
+    preview: checkInPreview(checkIn.type, userInput),
+    plan: plan ? {
+      id: plan.id,
+      capacityLevel: plan.capacityLevel,
+      primaryProjectId: plan.primaryProjectId,
+      secondaryProjectId: plan.secondaryProjectId,
+      emotionalState: plan.emotionalState,
+      mentalLoad: plan.mentalLoad,
+      generatedGuidance: plan.generatedGuidance,
+    } : null,
+    projects: {
+      primary: primaryProject ? { id: primaryProject.id, title: primaryProject.title } : null,
+      secondary: secondaryProject ? { id: secondaryProject.id, title: secondaryProject.title } : null,
+    },
+    tomorrowActivities,
+  };
+}
+
 export const checkInsRouter = router({
   getToday: protectedProcedure
     .input(z.object({
@@ -963,15 +1012,101 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     return getHeatmapData(ctx.user.id);
   }),
 
+  /** A dated, member-owned index of submitted check-ins. Detail reads are explicit. */
+  getHistory: protectedProcedure
+    .input(z.object({ limit: z.number().int().min(1).max(100).default(60) }).optional())
+    .query(async ({ ctx, input }) => {
+      const records = await getRecentCheckIns(ctx.user.id, input?.limit ?? 60);
+      return records.filter((record) => record.completedAt != null).map((record) => {
+        const userInput = parseCheckInInput(record.userInput);
+        return {
+          id: record.id,
+          date: record.date,
+          type: record.type,
+          completedAt: record.completedAt,
+          createdAt: record.createdAt,
+          updatedAt: record.updatedAt,
+          preview: checkInPreview(record.type, userInput),
+        };
+      });
+    }),
+
   /** Returns one member-owned check-in for an explicit review or amendment. */
   getById: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
       const checkIn = await getCheckInById(input.id, ctx.user.id);
       if (!checkIn) throw new TRPCError({ code: "NOT_FOUND", message: "Check-in not found." });
-      let userInput: Record<string, unknown> = {};
-      try { userInput = JSON.parse(checkIn.userInput ?? "{}"); } catch { /* ignore malformed legacy content */ }
-      return { ...checkIn, userInput };
+      return buildCheckInDetail(checkIn, ctx.user.id);
+    }),
+
+  /** Correct a saved morning check-in without re-generating or overwriting its plan. */
+  amendMorning: protectedProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      capacityLevel: z.enum(["full", "partial", "low"]),
+      primaryProjectId: z.number().int().positive().nullable().optional(),
+      secondaryProjectId: z.number().int().positive().nullable().optional(),
+      userNotes: z.string().max(2000).optional(),
+      emotionalState: z.enum(["focused", "anxious", "foggy", "energized", "drained"]).nullable().optional(),
+      mentalLoad: z.enum(["light", "moderate", "heavy"]).nullable().optional(),
+      workLocation: z.enum(["home", "coffee_shop", "library", "office", "other"]).nullable().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getCheckInById(input.id, ctx.user.id);
+      if (!existing || existing.type !== "morning") throw new TRPCError({ code: "NOT_FOUND", message: "Morning check-in not found." });
+      const plan = await getDailyPlan(ctx.user.id, existing.date);
+      if (plan) {
+        await updateDailyPlan(plan.id, ctx.user.id, {
+          capacityLevel: input.capacityLevel,
+          primaryProjectId: input.primaryProjectId ?? null,
+          secondaryProjectId: input.secondaryProjectId ?? null,
+          emotionalState: input.emotionalState ?? null,
+          mentalLoad: input.mentalLoad ?? null,
+        });
+      }
+      await updateCheckIn(existing.id, ctx.user.id, {
+        userInput: JSON.stringify({
+          capacityLevel: input.capacityLevel,
+          notes: input.userNotes?.trim() || undefined,
+          workLocation: input.workLocation ?? undefined,
+        }),
+      });
+      const verified = await getCheckInById(existing.id, ctx.user.id);
+      if (!verified?.completedAt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not verify the amended morning check-in." });
+      return buildCheckInDetail(verified, ctx.user.id);
+    }),
+
+  /** Correct a saved midday pulse while retaining it as the same dated record. */
+  amendMidday: protectedProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      workedOn: z.string().trim().min(1).max(2000),
+      wasOnPlan: z.boolean(),
+      interruptions: z.string().max(2000).optional(),
+      nextMove: z.string().max(1000).optional(),
+      energyLevel: z.enum(["high", "medium", "low"]).nullable().optional(),
+      hungerLevel: z.enum(["full", "slightly_hungry", "hungry"]).nullable().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getCheckInById(input.id, ctx.user.id);
+      if (!existing || existing.type !== "midday") throw new TRPCError({ code: "NOT_FOUND", message: "Midday check-in not found." });
+      await updateCheckIn(existing.id, ctx.user.id, {
+        userInput: JSON.stringify({
+          workedOn: input.workedOn,
+          wasOnPlan: input.wasOnPlan,
+          interruptions: input.interruptions?.trim() || undefined,
+          nextMove: input.nextMove?.trim() || undefined,
+          energyLevel: input.energyLevel ?? undefined,
+          hungerLevel: input.hungerLevel ?? undefined,
+        }),
+        interruptionsNoted: input.interruptions?.trim() || null,
+        generatedResponse: null,
+        alignmentStatus: null,
+      });
+      const verified = await getCheckInById(existing.id, ctx.user.id);
+      if (!verified?.completedAt) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not verify the amended midday check-in." });
+      return buildCheckInDetail(verified, ctx.user.id);
     }),
 
   /**

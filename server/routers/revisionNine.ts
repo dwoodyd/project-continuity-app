@@ -50,7 +50,7 @@ export const revisionNineRouter = router({
       const db = await database();
       const [days, items] = await Promise.all([
         db.select().from(readDays).where(eq(readDays.userId, ctx.user.id)).orderBy(desc(readDays.date)).limit(42),
-        db.select().from(readItems).where(and(eq(readItems.userId, ctx.user.id), eq(readItems.status, "open"))).orderBy(desc(readItems.updatedAt)),
+        db.select().from(readItems).where(eq(readItems.userId, ctx.user.id)).orderBy(desc(readItems.updatedAt)).limit(60),
       ]);
       return { days, items };
     }),
@@ -98,6 +98,10 @@ export const revisionNineRouter = router({
       const db = await database();
       return db.select().from(waitingRegisterItems).where(and(eq(waitingRegisterItems.userId, ctx.user.id), eq(waitingRegisterItems.status, "waiting"))).orderBy(desc(waitingRegisterItems.updatedAt));
     }),
+    history: protectedProcedure.query(async ({ ctx }) => {
+      const db = await database();
+      return db.select().from(waitingRegisterItems).where(eq(waitingRegisterItems.userId, ctx.user.id)).orderBy(desc(waitingRegisterItems.updatedAt)).limit(60);
+    }),
     add: protectedProcedure.input(z.object({ title: textSchema, waitingOn: z.string().trim().max(1000).optional(), boundary: z.string().trim().max(1000).optional(), followUpDate: dateSchema.optional() })).mutation(async ({ ctx, input }) => {
       const db = await database();
       await db.insert(waitingRegisterItems).values({ userId: ctx.user.id, title: input.title, waitingOn: input.waitingOn || null, boundary: input.boundary || null, followUpDate: input.followUpDate || null, createdAt: now(), updatedAt: now() });
@@ -113,7 +117,7 @@ export const revisionNineRouter = router({
   thresholdPlans: router({
     list: protectedProcedure.query(async ({ ctx }) => {
       const db = await database();
-      return db.select().from(thresholdPlans).where(eq(thresholdPlans.userId, ctx.user.id)).orderBy(desc(thresholdPlans.createdAt)).limit(12);
+      return db.select().from(thresholdPlans).where(eq(thresholdPlans.userId, ctx.user.id)).orderBy(desc(thresholdPlans.createdAt)).limit(60);
     }),
     add: protectedProcedure.input(z.object({ task: textSchema, fork: z.enum(["fear", "activation", "physical_floor", "unclear"]), protection: z.string().trim().max(1000).optional(), smallestStart: textSchema })).mutation(async ({ ctx, input }) => {
       const db = await database();
@@ -125,7 +129,7 @@ export const revisionNineRouter = router({
   court: router({
     list: protectedProcedure.query(async ({ ctx }) => {
       const db = await database();
-      return db.select().from(courtEntries).where(eq(courtEntries.userId, ctx.user.id)).orderBy(desc(courtEntries.createdAt)).limit(12);
+      return db.select().from(courtEntries).where(eq(courtEntries.userId, ctx.user.id)).orderBy(desc(courtEntries.createdAt)).limit(60);
     }),
     add: protectedProcedure.input(z.object({ situation: textSchema, evidenceFor: z.string().trim().max(2000).optional(), evidenceAgainst: z.string().trim().max(2000).optional(), fairRead: textSchema, nextAction: z.string().trim().max(1000).optional() })).mutation(async ({ ctx, input }) => {
       const db = await database();
@@ -142,6 +146,10 @@ export const revisionNineRouter = router({
         db.select().from(collapseCanaries).where(and(eq(collapseCanaries.userId, ctx.user.id), eq(collapseCanaries.status, "active"))).orderBy(desc(collapseCanaries.createdAt)).limit(1),
       ]);
       return { enabled: profile?.collapseModeEnabled ?? false, active: active[0] ?? null };
+    }),
+    list: protectedProcedure.query(async ({ ctx }) => {
+      const db = await database();
+      return db.select().from(collapseCanaries).where(eq(collapseCanaries.userId, ctx.user.id)).orderBy(desc(collapseCanaries.createdAt)).limit(60);
     }),
     setEnabled: protectedProcedure.input(z.object({ enabled: z.boolean() })).mutation(async ({ ctx, input }) => {
       await upsertUserProfile({ userId: ctx.user.id });
