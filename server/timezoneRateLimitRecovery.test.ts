@@ -62,4 +62,13 @@ describe("timezone capture and 429 recovery", () => {
     expect(main).toContain("retryDelay: getTrpcRetryDelay");
     expect(main).toContain("retry: shouldRetryTrpcMutation");
   });
+
+  it("keeps low-priority timezone capture out of user-data batches", () => {
+    const main = read("client/src/main.tsx");
+    expect(main).toContain("splitLink({");
+    expect(main).toContain('operation.path === "settings.captureTimezone"');
+    expect(main).toContain("true: httpLink({");
+    expect(main).toContain('headers: { "x-continuary-priority": "background" }');
+    expect(main).toContain("false: httpBatchLink({");
+  });
 });

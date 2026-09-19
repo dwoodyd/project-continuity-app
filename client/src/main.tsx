@@ -2,7 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { HelmetProvider } from "react-helmet-async";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink, TRPCClientError } from "@trpc/client";
+import { httpBatchLink, httpLink, splitLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
@@ -109,15 +109,32 @@ queryClient.getMutationCache().subscribe(event => {
 
 const trpcClient = trpc.createClient({
   links: [
-    httpBatchLink({
-      url: "/api/trpc",
-      transformer: superjson,
-      fetch(input, init) {
-        return globalThis.fetch(input, {
-          ...(init ?? {}),
-          credentials: "include",
-        });
-      },
+    // Timezone capture is maintenance-only. Keep it out of tRPC batches so it
+    // cannot share a rate-limited response with a member-owned write such as a
+    // check-in, and so the server's narrow endpoint exemption remains exact.
+    splitLink({
+      condition: (operation) => operation.path === "settings.captureTimezone",
+      true: httpLink({
+        url: "/api/trpc",
+        transformer: superjson,
+        headers: { "x-continuary-priority": "background" },
+        fetch(input, init) {
+          return globalThis.fetch(input, {
+            ...(init ?? {}),
+            credentials: "include",
+          });
+        },
+      }),
+      false: httpBatchLink({
+        url: "/api/trpc",
+        transformer: superjson,
+        fetch(input, init) {
+          return globalThis.fetch(input, {
+            ...(init ?? {}),
+            credentials: "include",
+          });
+        },
+      }),
     }),
   ],
 });
