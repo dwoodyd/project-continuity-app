@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { getDb } from "../db";
 import { continuityEvents } from "../../drizzle/schema";
 import {
@@ -28,6 +29,8 @@ import {
   getDistractionEventsByUser,
   getStreak,
   getHeatmapData,
+  getCheckInById,
+  saveEveningClose,
 } from "../db";
 import { computeStats, generateIdentitySentence } from "./evidence";
 import { protectedProcedure, router } from "../_core/trpc";
@@ -38,6 +41,33 @@ import { normalizeMorningPlanPayload } from "../utils/morningPlan";
 import { getWrenToneBucket } from "../wrenTone";
 
 // getTodayDate replaced by resolveDate from dateUtils
+
+const eveningTomorrowTaskSchema = z.object({
+  id: z.string().max(100).optional(),
+  title: z.string().trim().min(1).max(300),
+  projectId: z.number().int().positive().nullable().optional(),
+  energyLevel: z.enum(["high", "low", "any"]).optional(),
+  estimatedMinutes: z.number().int().positive().max(720).optional(),
+  notes: z.string().max(500).optional(),
+});
+
+type EveningTomorrowTask = z.infer<typeof eveningTomorrowTaskSchema>;
+
+function buildTomorrowTasks(first: string, tasks: EveningTomorrowTask[]): Array<Required<Pick<EveningTomorrowTask, "id" | "title">> & EveningTomorrowTask> {
+  const firstTitle = first.trim();
+  const seen = new Set<string>();
+  const normalized: Array<Required<Pick<EveningTomorrowTask, "id" | "title">> & EveningTomorrowTask> = [];
+  const append = (task: EveningTomorrowTask, index: number) => {
+    const title = task.title.trim();
+    const key = title.toLocaleLowerCase();
+    if (!title || seen.has(key)) return;
+    seen.add(key);
+    normalized.push({ ...task, id: task.id ?? `tomorrow-${Date.now()}-${index}`, title });
+  };
+  append({ id: `tomorrow-first-${Date.now()}`, title: firstTitle, energyLevel: "any" }, 0);
+  tasks.forEach((task, index) => append(task, index + 1));
+  return normalized;
+}
 
 export const checkInsRouter = router({
   getToday: protectedProcedure
@@ -483,90 +513,94 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
       whatRemains: z.string().max(2000),
       whatLearned: z.string().max(2000),
       tomorrowFirst: z.string().max(1000),
+      tomorrowTasks: z.array(eveningTomorrowTaskSchema).max(20).default([]),
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      await checkLLMRateLimit(ctx.user.id);
       const date = resolveDate(input.localDate);
-      const [plan, toneBucket] = await Promise.all([
-        getDailyPlan(ctx.user.id, date),
-        getWrenToneBucket(ctx.user.id),
-      ]);
-      const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
-      const tone = toneMap[toneBucket];
-
-      const response = await invokeLLM({
-        feature: "checkin_evening_closure",
+      const tomorrowTasks = buildTomorrowTasks(input.tomorrowFirst, input.tomorrowTasks);
+      const saved = await saveEveningClose({
         userId: ctx.user.id,
-        model: "gpt-5-nano",
-        maxTokens: 1100,
-        messages: [
-          {
-            role: "system",
-            content: `You are a calm productivity assistant. Tone: ${tone}. 
-Generate an evening closure summary and tomorrow brief. Never use motivational language or exclamation points.
-Return JSON only.`,
-          },
-          {
-            role: "user",
-            content: `Evening closure.
-What moved today: "${input.whatMoved}"
-What remains: "${input.whatRemains}"
-What was learned or decided: "${input.whatLearned}"
-What goes first tomorrow: "${input.tomorrowFirst}"
+        date,
+        userInput: JSON.stringify({
+          whatMoved: input.whatMoved,
+          whatRemains: input.whatRemains,
+          whatLearned: input.whatLearned,
+          tomorrowFirst: input.tomorrowFirst,
+        }),
+        tomorrowTasks: JSON.stringify(tomorrowTasks),
+      });
 
-Generate:
-1. A 2-sentence progress summary
-2. The tomorrow brief (2-3 sentences that will greet the user tomorrow morning)
-3. 1-3 specific carryover tasks (verb-first, concrete)
-4. Any patterns or insights worth noting
-5. Any decisions detected in the "what was learned or decided" field (explicit choices, rulings, commitments)
-
-Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[], insights: string, detectedDecisions: string[] }`,
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "evening_closure",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                summary: { type: "string" },
-                tomorrowBrief: { type: "string" },
-                carryoverTasks: { type: "array", items: { type: "string" } },
-                insights: { type: "string" },
-                detectedDecisions: { type: "array", items: { type: "string" } },
+      // From this point on, enrichment is optional. The member's actual words,
+      // date, completion marker, and tomorrow handoff are already durable and
+      // have been read back by saveEveningClose before this response can succeed.
+      const fallback = {
+        summary: "Your evening close is saved.",
+        tomorrowBrief: "",
+        carryoverTasks: [] as string[],
+        insights: "",
+        detectedDecisions: [] as string[],
+      };
+      let parsed = fallback;
+      let plan = await getDailyPlan(ctx.user.id, date);
+      try {
+        await checkLLMRateLimit(ctx.user.id);
+        const toneBucket = await getWrenToneBucket(ctx.user.id);
+        const toneMap = { gentle: "warm and grounded", direct: "calm and direct", firm: "concise and firm" };
+        const response = await invokeLLM({
+          feature: "checkin_evening_closure",
+          userId: ctx.user.id,
+          model: "gpt-5-nano",
+          maxTokens: 1100,
+          messages: [
+            { role: "system", content: `You are a calm productivity assistant. Tone: ${toneMap[toneBucket]}. Generate an evening closure summary and tomorrow brief. Never use motivational language or exclamation points. Return JSON only.` },
+            { role: "user", content: `Evening closure.\nWhat moved today: "${input.whatMoved}"\nWhat remains: "${input.whatRemains}"\nWhat was learned or decided: "${input.whatLearned}"\nWhat goes first tomorrow: "${input.tomorrowFirst}"\n\nReturn JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[], insights: string, detectedDecisions: string[] }` },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "evening_closure",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  summary: { type: "string" }, tomorrowBrief: { type: "string" },
+                  carryoverTasks: { type: "array", items: { type: "string" } }, insights: { type: "string" },
+                  detectedDecisions: { type: "array", items: { type: "string" } },
+                },
+                required: ["summary", "tomorrowBrief", "carryoverTasks", "insights", "detectedDecisions"],
+                additionalProperties: false,
               },
-              required: ["summary", "tomorrowBrief", "carryoverTasks", "insights", "detectedDecisions"],
-              additionalProperties: false,
             },
           },
-        },
-      });
-
-      const raw = (response.choices[0]?.message?.content as string) ?? "{}";
-      const parsed = JSON.parse(raw);
-
-      const checkInId = await createCheckIn({
-        userId: ctx.user.id,
-        dailyPlanId: plan?.id,
-        date,
-        type: "evening",
-        userInput: JSON.stringify(input),
-        generatedResponse: parsed.summary,
-        extractedNextSteps: JSON.stringify(parsed.carryoverTasks),
-        completedAt: new Date(),
-      });
-
-      // Store tomorrow brief in daily plan
-      if (plan) {
-        await updateDailyPlan(plan.id, ctx.user.id, {
-          tomorrowBrief: parsed.tomorrowBrief,
-          tomorrowBriefGeneratedAt: new Date(),
+        });
+        const parsedResult = JSON.parse((response.choices[0]?.message?.content as string) ?? "{}");
+        parsed = {
+          summary: typeof parsedResult.summary === "string" ? parsedResult.summary : fallback.summary,
+          tomorrowBrief: typeof parsedResult.tomorrowBrief === "string" ? parsedResult.tomorrowBrief : "",
+          carryoverTasks: Array.isArray(parsedResult.carryoverTasks) ? parsedResult.carryoverTasks.filter((task: unknown) => typeof task === "string") : [],
+          insights: typeof parsedResult.insights === "string" ? parsedResult.insights : "",
+          detectedDecisions: Array.isArray(parsedResult.detectedDecisions) ? parsedResult.detectedDecisions.filter((decision: unknown) => typeof decision === "string") : [],
+        };
+        await updateCheckIn(saved.id, ctx.user.id, {
+          generatedResponse: parsed.summary,
+          extractedNextSteps: JSON.stringify(parsed.carryoverTasks),
+        });
+        if (plan) {
+          await updateDailyPlan(plan.id, ctx.user.id, {
+            tomorrowBrief: parsed.tomorrowBrief,
+            tomorrowBriefGeneratedAt: new Date(),
+          });
+        }
+      } catch (error) {
+        console.warn("[Check-ins] Evening enrichment unavailable after durable save.", {
+          userId: ctx.user.id,
+          checkInId: saved.id,
+          error: error instanceof Error ? error.message : String(error),
         });
       }
+
+      const checkInId = saved.id;
 
       // Record project memory event for primary project
       if (plan?.primaryProjectId) {
@@ -646,6 +680,7 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
       return {
         checkInId,
         ...parsed,
+        verified: true,
         // Return detected decisions so the frontend can prompt the user to confirm them
         detectedDecisions: (parsed.detectedDecisions ?? []) as string[],
       };
@@ -927,6 +962,78 @@ Return JSON: { summary: string, tomorrowBrief: string, carryoverTasks: string[],
   getHeatmapData: protectedProcedure.query(async ({ ctx }) => {
     return getHeatmapData(ctx.user.id);
   }),
+
+  /** Returns one member-owned check-in for an explicit review or amendment. */
+  getById: protectedProcedure
+    .input(z.object({ id: z.number().int().positive() }))
+    .query(async ({ ctx, input }) => {
+      const checkIn = await getCheckInById(input.id, ctx.user.id);
+      if (!checkIn) throw new TRPCError({ code: "NOT_FOUND", message: "Check-in not found." });
+      let userInput: Record<string, unknown> = {};
+      try { userInput = JSON.parse(checkIn.userInput ?? "{}"); } catch { /* ignore malformed legacy content */ }
+      return { ...checkIn, userInput };
+    }),
+
+  /**
+   * Lets a member correct a previously submitted evening close. The edited raw
+   * reflection and tomorrow handoff are saved atomically, then read back before
+   * returning success. AI prose is cleared because it may no longer match the
+   * member's corrected words.
+   */
+  amendEveningClose: protectedProcedure
+    .input(z.object({
+      id: z.number().int().positive(),
+      whatMoved: z.string().trim().min(1).max(2000),
+      whatRemains: z.string().max(2000),
+      whatLearned: z.string().max(2000),
+      tomorrowFirst: z.string().trim().min(1).max(1000),
+      tomorrowTasks: z.array(eveningTomorrowTaskSchema).max(20).default([]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const existing = await getCheckInById(input.id, ctx.user.id);
+      if (!existing || existing.type !== "evening") {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Evening close not found." });
+      }
+      const tomorrowTasks = buildTomorrowTasks(input.tomorrowFirst, input.tomorrowTasks);
+      const saved = await saveEveningClose({
+        checkInId: existing.id,
+        userId: ctx.user.id,
+        date: existing.date,
+        userInput: JSON.stringify({
+          whatMoved: input.whatMoved,
+          whatRemains: input.whatRemains,
+          whatLearned: input.whatLearned,
+          tomorrowFirst: input.tomorrowFirst,
+        }),
+        tomorrowTasks: JSON.stringify(tomorrowTasks),
+      });
+      await updateCheckIn(saved.id, ctx.user.id, {
+        generatedResponse: null,
+        extractedNextSteps: null,
+      });
+      const plan = await getDailyPlan(ctx.user.id, existing.date);
+      if (plan) {
+        await updateDailyPlan(plan.id, ctx.user.id, {
+          tomorrowBrief: null,
+          tomorrowBriefGeneratedAt: null,
+        });
+      }
+      const verified = await getCheckInById(saved.id, ctx.user.id);
+      if (!verified?.completedAt) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not verify the amended evening close." });
+      }
+      return {
+        id: verified.id,
+        date: verified.date,
+        completedAt: verified.completedAt,
+        whatMoved: input.whatMoved,
+        whatRemains: input.whatRemains,
+        whatLearned: input.whatLearned,
+        tomorrowFirst: input.tomorrowFirst,
+        tomorrowActivities: tomorrowTasks,
+        verified: true,
+      };
+    }),
 
   /**
    * Returns the user's most recent evening check-in with full raw content.

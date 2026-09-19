@@ -351,11 +351,102 @@ export async function createCheckIn(checkIn: InsertCheckIn): Promise<number> {
   return (result[0] as any).insertId;
 }
 
+export async function getCheckInById(id: number, userId: number): Promise<CheckIn | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(checkIns)
+    .where(and(eq(checkIns.id, id), eq(checkIns.userId, userId)))
+    .limit(1);
+  return result[0];
+}
+
 export async function updateCheckIn(id: number, userId: number, updates: Partial<InsertCheckIn>): Promise<void> {
   const db = await getDb();
-  if (!db) return;
+  if (!db) throw new Error("Database not available");
   await db.update(checkIns).set(updates)
     .where(and(eq(checkIns.id, id), eq(checkIns.userId, userId)));
+}
+
+/**
+ * The evening close is the member's durable record. Persist its raw answers and
+ * tomorrow handoff together, then read the exact row back before reporting it as
+ * saved. Re-submissions update the same local-day evening record instead of
+ * creating duplicates when a client must retry after an uncertain response.
+ */
+export async function saveEveningClose(input: {
+  userId: number;
+  date: string;
+  userInput: string;
+  tomorrowTasks: string;
+  checkInId?: number;
+}): Promise<CheckIn> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.transaction(async (tx) => {
+    const planRows = await tx.select().from(dailyPlans)
+      .where(and(eq(dailyPlans.userId, input.userId), eq(dailyPlans.date, input.date)))
+      .limit(1);
+    let dailyPlanId = planRows[0]?.id;
+    if (dailyPlanId) {
+      await tx.update(dailyPlans)
+        .set({ tomorrowTasks: input.tomorrowTasks })
+        .where(and(eq(dailyPlans.id, dailyPlanId), eq(dailyPlans.userId, input.userId)));
+    } else {
+      const result = await tx.insert(dailyPlans).values({
+        userId: input.userId,
+        date: input.date,
+        tomorrowTasks: input.tomorrowTasks,
+      });
+      dailyPlanId = Number((result[0] as { insertId?: number }).insertId);
+    }
+
+    const existingRows = await tx.select().from(checkIns)
+      .where(and(
+        eq(checkIns.userId, input.userId),
+        eq(checkIns.date, input.date),
+        eq(checkIns.type, "evening"),
+      ))
+      .orderBy(desc(checkIns.createdAt))
+      .limit(1);
+    const existing = input.checkInId
+      ? (await tx.select().from(checkIns)
+        .where(and(
+          eq(checkIns.id, input.checkInId),
+          eq(checkIns.userId, input.userId),
+          eq(checkIns.date, input.date),
+          eq(checkIns.type, "evening"),
+        ))
+        .limit(1))[0]
+      : existingRows[0];
+    if (input.checkInId && !existing) throw new Error("Evening close not found");
+    let checkInId: number;
+    if (existing) {
+      checkInId = existing.id;
+      await tx.update(checkIns).set({
+        dailyPlanId: dailyPlanId ?? null,
+        userInput: input.userInput,
+        completedAt: new Date(),
+      }).where(and(eq(checkIns.id, checkInId), eq(checkIns.userId, input.userId)));
+    } else {
+      const result = await tx.insert(checkIns).values({
+        userId: input.userId,
+        dailyPlanId: dailyPlanId ?? null,
+        date: input.date,
+        type: "evening",
+        userInput: input.userInput,
+        completedAt: new Date(),
+      });
+      checkInId = Number((result[0] as { insertId?: number }).insertId);
+    }
+
+    const savedRows = await tx.select().from(checkIns)
+      .where(and(eq(checkIns.id, checkInId), eq(checkIns.userId, input.userId)))
+      .limit(1);
+    const saved = savedRows[0];
+    if (!saved?.completedAt) throw new Error("Evening close write could not be verified");
+    return saved;
+  });
 }
 
 // ─── Idea Captures ────────────────────────────────────────────────────────────

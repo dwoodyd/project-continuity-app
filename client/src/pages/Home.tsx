@@ -401,6 +401,7 @@ type EveningCheckInInput = {
   whatRemains: string;
   whatLearned: string;
   tomorrowFirst: string;
+  tomorrowTasks: TomorrowTask[];
   localDate: string;
 };
 
@@ -940,30 +941,45 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
   const [tomorrowTasks, setTomorrowTasks] = useState<TomorrowTask[]>([]);
   const [decision, setDecision] = useState("");
   const [showDecision, setShowDecision] = useState(false);
+  const [isConfirmingSave, setIsConfirmingSave] = useState(false);
   const { crisisLevel: eveningCrisisLevel, checkAndMaybeFlag: checkEveningCrisis, dismissCrisis: dismissEveningCrisis } = useCrisisCheck("check_in_evening");
-  const saveTomorrowPlan = trpc.dailyPlan.saveTomorrowPlan.useMutation();
+  const utils = trpc.useUtils();
   const retryRequestRef = useRef<EveningCheckInInput | null>(null);
-  const submit = trpc.checkIns.submitEvening.useMutation({
-    onSuccess: () => {
-      notify.saved("Held.", { description: "Tomorrow's brief is ready when you are." });
-      const combined = [whatMoved, whatRemains, whatLearned].filter(Boolean).join(" ");
+  const submit = trpc.checkIns.submitEvening.useMutation();
+  const showSaveError = () => notify.error("We couldn't confirm your evening close — tap to retry.", {
+    description: "Your answers are still here. Nothing is marked complete until the saved record is read back.",
+    action: {
+      label: "Tap to retry",
+      onClick: () => {
+        const request = retryRequestRef.current;
+        if (request && !isConfirmingSave && !submit.isPending) void submitCheckIn(request);
+      },
+    },
+  });
+  const submitCheckIn = async (request: EveningCheckInInput): Promise<boolean> => {
+    retryRequestRef.current = request;
+    setIsConfirmingSave(true);
+    try {
+      const result = await submit.mutateAsync(request);
+      const persisted = await utils.checkIns.getToday.fetch({ localDate: request.localDate });
+      const saved = persisted.find((checkIn) => (
+        checkIn.id === result.checkInId
+        && checkIn.type === "evening"
+        && checkIn.completedAt != null
+      ));
+      if (!result.verified || !saved) throw new Error("Evening close did not read back as saved");
+      notify.saved("Held.", { description: "Your evening close is saved and ready for tomorrow." });
+      const combined = [request.whatMoved, request.whatRemains, request.whatLearned].filter(Boolean).join(" ");
       if (combined.trim()) void checkEveningCrisis(combined);
       onComplete();
-    },
-    onError: () => notify.error("Your check-in didn't save — tap to retry.", {
-      description: "Your answers are still here.",
-      action: {
-        label: "Tap to retry",
-        onClick: () => {
-          const request = retryRequestRef.current;
-          if (request && !submit.isPending) submit.mutate(request);
-        },
-      },
-    }),
-  });
-  const submitCheckIn = (request: EveningCheckInInput) => {
-    retryRequestRef.current = request;
-    submit.mutate(request);
+      return true;
+    } catch (error) {
+      console.error("[Evening close] Save verification failed", error);
+      showSaveError();
+      return false;
+    } finally {
+      setIsConfirmingSave(false);
+    }
   };
   const saveDecision = trpc.intelligence.saveDecision.useMutation();
   const extractDecisions = trpc.intelligence.extractDecisionsFromNotes.useMutation();
@@ -973,38 +989,13 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
       notify.error("Two things needed — what moved, and what goes first tomorrow.");
       return;
     }
-    // Save explicit decision if captured
-    if (decision.trim()) {
-      await saveDecision.mutateAsync({
-        content: decision,
-        source: "manual",
-      }).catch(() => {});
-    }
-    // Auto-extract decisions from "what did you learn or decide" field
-    if (whatLearned.trim() && whatLearned.length > 20) {
-      extractDecisions.mutate({ notes: whatLearned });
-    }
-    // Classify any interruptions noted in whatRemains as potential distractions
-    if (whatRemains.trim() && whatRemains.length > 10) {
-      classifyDistraction.mutate({ rawInput: whatRemains, checkInType: "evening" });
-    }
-    // Persist tomorrow's task list alongside the evening closure.
-    // Always include tomorrowFirst as the priority (first) task — verbatim, no AI rewriting.
-    // If the user also filled in TomorrowPlanSection tasks, merge them after.
-    const firstTask = {
-      id: `tomorrow-first-${Date.now()}`,
-      title: tomorrowFirst.trim(),
-      energyLevel: "any" as const,
-      estimatedMinutes: undefined,
-      notes: undefined,
-      projectId: undefined,
-    };
-    const allTomorrowTasks = [
-      firstTask,
-      ...tomorrowTasks.filter((t) => t.title.trim().toLowerCase() !== tomorrowFirst.trim().toLowerCase()),
-    ];
-    saveTomorrowPlan.mutate({ tasks: allTomorrowTasks, localDate });
-    submitCheckIn({ whatMoved, whatRemains, whatLearned, tomorrowFirst, localDate });
+    const saved = await submitCheckIn({ whatMoved, whatRemains, whatLearned, tomorrowFirst, tomorrowTasks, localDate });
+    if (!saved) return;
+    // These are optional enrichment steps. They run only after the member's
+    // reflection and tomorrow handoff have been durably saved and read back.
+    if (decision.trim()) void saveDecision.mutateAsync({ content: decision, source: "manual" }).catch(() => undefined);
+    if (whatLearned.trim() && whatLearned.length > 20) extractDecisions.mutate({ notes: whatLearned });
+    if (whatRemains.trim() && whatRemains.length > 10) classifyDistraction.mutate({ rawInput: whatRemains, checkInType: "evening" });
   };
   return (
     <div className="space-y-4">
@@ -1013,7 +1004,7 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
           <p className="text-sm font-medium text-muted-foreground">What moved today?</p>
           <VoiceDictationButton
             onTranscript={(text) => setWhatMoved((prev) => (prev ? `${prev} ${text}` : text))}
-            disabled={submit.isPending}
+            disabled={isConfirmingSave}
           />
         </div>
         <Textarea value={whatMoved} onChange={(e) => setWhatMoved(e.target.value)} placeholder="What actually got done..." className="text-sm resize-none" rows={2} />
@@ -1059,9 +1050,9 @@ function EveningCheckIn({ onComplete, localDate }: { onComplete: () => void; loc
           </div>
         )}
       </div>
-      <Button onClick={handleSubmit} disabled={submit.isPending || saveDecision.isPending} className="w-full" size="sm">
-        {submit.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-      Close the day
+      <Button onClick={() => void handleSubmit()} disabled={isConfirmingSave || submit.isPending} className="w-full" size="sm">
+        {isConfirmingSave ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+      {isConfirmingSave ? "Confirming saved close…" : "Close the day"}
     </Button>
     {eveningCrisisLevel && (
       <CrisisSupportCard level={eveningCrisisLevel} onDismiss={dismissEveningCrisis} className="mt-2" />
@@ -1286,6 +1277,11 @@ export default function Home() {
   const [showWrenIntro, setShowWrenIntro] = useState(false);
   // Evening Close review modal
   const [showEveningReview, setShowEveningReview] = useState(false);
+  const [amendingEveningClose, setAmendingEveningClose] = useState(false);
+  const [amendWhatMoved, setAmendWhatMoved] = useState("");
+  const [amendWhatRemains, setAmendWhatRemains] = useState("");
+  const [amendWhatLearned, setAmendWhatLearned] = useState("");
+  const [amendTomorrowFirst, setAmendTomorrowFirst] = useState("");
   // Gamification state
   const { data: gamStatus, refetch: refetchGam } = useGamificationStatus();
   const recordEvent = useRecordEvent();
@@ -1428,6 +1424,19 @@ export default function Home() {
   const { data: tomorrowBrief } = trpc.dailyPlan.getTomorrowBrief.useQuery({ localDate: localDateStr }, { enabled: deferredReady });
   const { data: tomorrowPlanTasks } = trpc.dailyPlan.getTomorrowPlan.useQuery({ localDate: localDateStr }, { enabled: deferredReady });
   const { data: lastEveningClose } = trpc.checkIns.getLastEveningClose.useQuery(undefined, { enabled: deferredReady, staleTime: 60_000 });
+  const amendEveningClose = trpc.checkIns.amendEveningClose.useMutation({
+    onSuccess: async () => {
+      await Promise.all([
+        utils.checkIns.getLastEveningClose.invalidate(),
+        utils.checkIns.getToday.invalidate(),
+        utils.dailyPlan.getTomorrowBrief.invalidate(),
+        utils.dailyPlan.getTomorrowPlan.invalidate(),
+      ]);
+      setAmendingEveningClose(false);
+      notify.saved("Saved close updated.", { description: "Your amended words have been read back and saved." });
+    },
+    onError: () => notify.error("Your saved close could not be updated.", { description: "The original entry is still intact. Please try again." }),
+  });
   const { data: weeklyPresence } = trpc.checkIns.weeklyPresence.useQuery(undefined, { enabled: deferredReady });
   const { data: evidenceMonth } = trpc.evidence.getCurrentMonth.useQuery(undefined, { enabled: deferredReady });
   const { data: pendingIdeas } = trpc.ai.listIdeas.useQuery(undefined, { enabled: deferredReady });
@@ -1852,6 +1861,30 @@ export default function Home() {
         );
       }, 1500);
     }
+  };
+
+  const beginEveningAmendment = () => {
+    if (!lastEveningClose) return;
+    setAmendWhatMoved(lastEveningClose.whatMoved ?? "");
+    setAmendWhatRemains(lastEveningClose.whatRemains ?? "");
+    setAmendWhatLearned(lastEveningClose.whatLearned ?? "");
+    setAmendTomorrowFirst(lastEveningClose.tomorrowFirst ?? "");
+    setAmendingEveningClose(true);
+  };
+
+  const saveEveningAmendment = () => {
+    if (!lastEveningClose || !amendWhatMoved.trim() || !amendTomorrowFirst.trim()) {
+      notify.error("What moved and what goes first tomorrow are needed to update this close.");
+      return;
+    }
+    amendEveningClose.mutate({
+      id: lastEveningClose.id,
+      whatMoved: amendWhatMoved,
+      whatRemains: amendWhatRemains,
+      whatLearned: amendWhatLearned,
+      tomorrowFirst: amendTomorrowFirst,
+      tomorrowTasks: lastEveningClose.tomorrowActivities ?? [],
+    });
   };
 
   const capacityLevel: CapacityLevel = (todayPlan?.capacityLevel as CapacityLevel) ?? "partial";
@@ -3651,9 +3684,45 @@ export default function Home() {
       {lastEveningClose && (
         <Dialog open={showEveningReview} onOpenChange={setShowEveningReview}>
           <DialogContent className="max-w-lg">
-            <DialogHeader>
+            <DialogHeader className="flex flex-row items-center justify-between gap-3 pr-6">
               <DialogTitle className="text-base font-semibold">Evening Close · {lastEveningClose.date}</DialogTitle>
+              {!amendingEveningClose && (
+                <button
+                  onClick={beginEveningAmendment}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> Amend
+                </button>
+              )}
             </DialogHeader>
+            {amendingEveningClose ? (
+              <div className="space-y-4 text-sm">
+                <p className="text-muted-foreground leading-relaxed">Correct or add to this saved close. The original stays visible until the updated record is confirmed.</p>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What moved</p>
+                  <Textarea value={amendWhatMoved} onChange={(event) => setAmendWhatMoved(event.target.value)} rows={3} maxLength={2000} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What remains</p>
+                  <Textarea value={amendWhatRemains} onChange={(event) => setAmendWhatRemains(event.target.value)} rows={2} maxLength={2000} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">What I learned</p>
+                  <Textarea value={amendWhatLearned} onChange={(event) => setAmendWhatLearned(event.target.value)} rows={2} maxLength={2000} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">First thing tomorrow</p>
+                  <Textarea value={amendTomorrowFirst} onChange={(event) => setAmendTomorrowFirst(event.target.value)} rows={2} maxLength={1000} />
+                </div>
+                <div className="flex justify-end gap-3 pt-1">
+                  <button onClick={() => setAmendingEveningClose(false)} disabled={amendEveningClose.isPending} className="text-sm text-muted-foreground hover:text-foreground transition-colors">Cancel</button>
+                  <Button size="sm" onClick={saveEveningAmendment} disabled={amendEveningClose.isPending}>
+                    {amendEveningClose.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                    Confirm update
+                  </Button>
+                </div>
+              </div>
+            ) : (
             <div className="space-y-4 text-sm">
               {lastEveningClose.whatMoved && (
                 <div>
@@ -3712,6 +3781,7 @@ export default function Home() {
                 </div>
               )}
             </div>
+            )}
           </DialogContent>
         </Dialog>
       )}
