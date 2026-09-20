@@ -60,9 +60,10 @@ describe("saved member records", () => {
     expect(workspace).toContain("evidenceAgainst");
   });
 
-  it("labels aggregate Evidence Log tiles instead of presenting them as the current month", () => {
+  it("keeps Evidence Log tiles and the displayed record on the same selected month", () => {
     const evidence = source("client/src/pages/EvidenceLogPage.tsx");
-    expect(evidence).toContain("Across saved monthly records");
+    expect(evidence).toContain("const activeSummary = summaries?.find((summary) => summary.month === activeMonth) ?? null");
+    expect(evidence).toContain("The tiles and record below always describe the same month.");
     expect(evidence).toContain('href="/check-ins"');
   });
 });

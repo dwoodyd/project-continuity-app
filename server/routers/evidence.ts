@@ -10,7 +10,7 @@ import {
   getEvidenceStreakData,
   getDb,
 } from "../db";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, lt } from "drizzle-orm";
 import { focusSessions, checkIns } from "../../drizzle/schema";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,7 +49,7 @@ export async function computeStats(userId: number, month: string) {
       and(
         eq(focusSessions.userId, userId),
         gte(focusSessions.startedAt, start),
-        lte(focusSessions.startedAt, end)
+        lt(focusSessions.startedAt, end)
       )
     )
     .orderBy(focusSessions.startedAt);
@@ -72,7 +72,7 @@ export async function computeStats(userId: number, month: string) {
         eq(checkIns.userId, userId),
         eq(checkIns.type, "morning"),
         gte(checkIns.createdAt, start),
-        lte(checkIns.createdAt, end)
+        lt(checkIns.createdAt, end)
       )
     );
 

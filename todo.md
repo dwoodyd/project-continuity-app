@@ -2586,3 +2586,10 @@
 - [x] Expose Check-in Archive in Reflect navigation and Weekly Review, and add direct “Open & edit” links to each visible Weekly Review check-in.
 - [x] Include recoverable unfinished check-ins in the archive with a clear review-and-save path instead of filtering them out.
 - [x] Add regression coverage and run complete validation before checkpointing.
+
+## Court, Changelog, Evidence, and Admin Study Repairs (Sep 19)
+- [x] Make all five Court record labels visible after saving; optional blank answers now read “Not recorded” instead of disappearing.
+- [x] Replace publicly rendered /changelog draft placeholder text with factual shipped-release content.
+- [x] Scope Evidence Log tiles and the displayed monthly record to the same member-selected month; repair exclusive month-end query boundaries.
+- [x] Restore a dedicated owner-only admin Study Tracker under `/admin/study`, separate from member-facing Single Focus Mode at `/study`.
+- [x] Add regressions and complete TypeScript plus full-suite validation before checkpointing.

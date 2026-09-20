@@ -26,8 +26,13 @@ function formatMonth(month: string): string {
   });
 }
 
+function currentBrowserMonth(): string {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function isCurrentMonth(month: string): boolean {
-  const _d = new Date(); return month === `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,"0")}`;
+  return month === currentBrowserMonth();
 }
 
 // ─── Streak Heatmap ───────────────────────────────────────────────────────────
@@ -221,6 +226,7 @@ function MonthlyEvidenceCard({
 
 export default function EvidenceLogPage() {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const { requireAiConsent } = useAiConsentGate();
 
   const utils = trpc.useUtils();
@@ -242,7 +248,7 @@ export default function EvidenceLogPage() {
   const handleGenerateCurrent = async () => {
     if (!requireAiConsent("Evidence summaries")) return;
     setIsGenerating(true);
-    generateSummary.mutate({ month: undefined }); // current month
+    generateSummary.mutate({ month: currentBrowserMonth() });
   };
 
   const handleRegenerate = (month: string) => {
@@ -250,18 +256,13 @@ export default function EvidenceLogPage() {
     generateSummary.mutate({ month });
   };
 
-  const totalSessions = summaries?.reduce((acc, s) => acc + s.sessionsStarted, 0) ?? 0;
-  const totalReturns = summaries?.reduce((acc, s) => acc + s.returnsAfterGap, 0) ?? 0;
-  const totalHardDays = summaries?.reduce((acc, s) => acc + s.hardDaySessions, 0) ?? 0;
+  const activeMonth = selectedMonth ?? currentBrowserMonth();
+  const activeSummary = summaries?.find((summary) => summary.month === activeMonth) ?? null;
+  const totalSessions = summaries?.reduce((acc, summary) => acc + summary.sessionsStarted, 0) ?? 0;
   const hasEvidence = totalSessions > 0;
   const identitySentenceCount = summaries?.filter((summary) => Boolean(summary.summaryLine)).length ?? 0;
   const showFirstIdentityInvite = identitySentenceCount === 1;
-  const savedMonths = (summaries ?? []).map((summary) => summary.month).sort();
-  const summaryPeriod = savedMonths.length === 0
-    ? null
-    : savedMonths.length === 1
-      ? formatMonth(savedMonths[0])
-      : `${formatMonth(savedMonths[0])} – ${formatMonth(savedMonths[savedMonths.length - 1])}`;
+  const monthOptions = Array.from(new Set([currentBrowserMonth(), ...(summaries ?? []).map((summary) => summary.month)])).sort().reverse();
 
   return (
     <div className="min-h-screen bg-background">
@@ -321,21 +322,31 @@ export default function EvidenceLogPage() {
           </div>
         </div>
 
-        {/* Aggregate summary is explicitly scoped to the saved months below. */}
-        {!summariesLoading && summaries && summaries.length > 0 && (
-          <section aria-label="Aggregate evidence summary">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Across saved monthly records{summaryPeriod ? ` · ${summaryPeriod}` : ""}</p>
+        {!summariesLoading && (
+          <section aria-label="Selected month evidence summary" className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evidence for {formatMonth(activeMonth)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">The tiles and record below always describe the same month.</p>
+              </div>
+              <label className="text-sm text-muted-foreground">
+                <span className="sr-only">Choose an Evidence Log month</span>
+                <select value={activeMonth} onChange={(event) => setSelectedMonth(event.target.value)} className="min-h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground">
+                  {monthOptions.map((month) => <option key={month} value={month}>{formatMonth(month)}{month === currentBrowserMonth() ? " · This month" : ""}</option>)}
+                </select>
+              </label>
+            </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-                <div className="text-2xl font-bold text-amber-400">{totalSessions}</div>
+                <div className="text-2xl font-bold text-amber-400">{activeSummary?.sessionsStarted ?? 0}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">sessions started</div>
               </div>
               <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-                <div className="text-2xl font-bold text-amber-400">{totalReturns}</div>
+                <div className="text-2xl font-bold text-amber-400">{activeSummary?.returnsAfterGap ?? 0}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">returns after gaps</div>
               </div>
               <div className="text-center p-3 rounded-xl bg-card/60 border border-border/40">
-                <div className="text-2xl font-bold text-amber-400">{totalHardDays}</div>
+                <div className="text-2xl font-bold text-amber-400">{activeSummary?.hardDaySessions ?? 0}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">hard-day sessions</div>
               </div>
             </div>
@@ -353,7 +364,7 @@ export default function EvidenceLogPage() {
           <ActivityHeatmap />
         </div>
 
-        {/* Monthly summaries */}
+        {/* Selected monthly record */}
         <div className="space-y-3">
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
             Monthly record
@@ -365,34 +376,30 @@ export default function EvidenceLogPage() {
                 <Skeleton key={i} className="h-48 w-full rounded-xl" />
               ))}
             </div>
-          ) : summaries && summaries.length > 0 ? (
+          ) : activeSummary ? (
             <div className="space-y-3">
-              {summaries.map((summary) => (
-                <div key={summary.id} className="space-y-3">
-                  <MonthlyEvidenceCard
-                    summary={summary}
-                    onRegenerate={
-                      isCurrentMonth(summary.month)
-                        ? () => handleRegenerate(summary.month)
-                        : undefined
-                    }
-                    isRegenerating={isGenerating && generateSummary.variables?.month === summary.month}
-                  />
-                  {showFirstIdentityInvite && summary.summaryLine && (
-                    <UpgradeNudge
-                      moment="first-evidence-sentence"
-                      title="You made a record worth returning to."
-                      body="Your evidence holds a fuller picture over time. Keep going when deeper continuity would help."
-                    />
-                  )}
-                </div>
-              ))}
+              <MonthlyEvidenceCard
+                summary={activeSummary}
+                onRegenerate={
+                  isCurrentMonth(activeSummary.month)
+                    ? () => handleRegenerate(activeSummary.month)
+                    : undefined
+                }
+                isRegenerating={isGenerating && generateSummary.variables?.month === activeSummary.month}
+              />
+              {showFirstIdentityInvite && activeSummary.summaryLine && (
+                <UpgradeNudge
+                  moment="first-evidence-sentence"
+                  title="You made a record worth returning to."
+                  body="Your evidence holds a fuller picture over time. Keep going when deeper continuity would help."
+                />
+              )}
             </div>
           ) : (
             <div className="text-center py-12 space-y-3">
               <BookOpen className="w-10 h-10 text-muted-foreground/40 mx-auto" />
               <p className="text-sm text-muted-foreground">
-                Complete one Focus Session and your first identity sentence will appear here: a quiet record of who you are becoming when the rest of your mind tries to lose the thread.
+                No Evidence Log record has been saved for {formatMonth(activeMonth)} yet. Complete a Focus Session, then update this month when you want a quiet record of what happened. Your first identity sentence will appear here when there is something to reflect back.
               </p>
               <p className="text-xs text-muted-foreground/60">
                 No score to chase. Just one honest line to return to when you need it.
