@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { insertFeedback, getFeedbackList, resolveFeedback } from "../db";
 import { notifyOwner } from "../_core/notification";
@@ -35,7 +36,9 @@ export const feedbackRouter = router({
 
   // Admin only: list all feedback
   list: protectedProcedure.query(async ({ ctx }) => {
-    if (ctx.user.role !== "admin") return [];
+    if (ctx.user.role !== "admin") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+    }
     return getFeedbackList(100);
   }),
 
@@ -43,7 +46,9 @@ export const feedbackRouter = router({
   resolve: protectedProcedure
     .input(z.object({ id: z.number(), resolved: z.boolean() }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.user.role !== "admin") throw new Error("Forbidden");
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin access required." });
+      }
       await resolveFeedback(input.id, input.resolved);
       return { success: true };
     }),

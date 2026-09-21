@@ -115,6 +115,25 @@ describe("durable evening close integrity", () => {
     expect(result).toMatchObject({ id: 412, verified: true, whatMoved: "Added a missing insight" });
   });
 
+  it("rejects a forged check-in id before any amendment write can affect another member's record", async () => {
+    vi.mocked(db.getCheckInById).mockResolvedValueOnce(undefined);
+    const caller = checkInsRouter.createCaller(ctx(72));
+
+    await expect(caller.amendEveningClose({
+      id: 412,
+      whatMoved: "Attempted cross-account amendment",
+      whatRemains: "",
+      whatLearned: "",
+      tomorrowFirst: "Do not write shared data",
+      tomorrowTasks: [],
+    })).rejects.toMatchObject({ code: "NOT_FOUND" });
+
+    expect(db.getCheckInById).toHaveBeenCalledWith(412, 72);
+    expect(db.saveEveningClose).not.toHaveBeenCalled();
+    expect(db.updateCheckIn).not.toHaveBeenCalled();
+    expect(db.updateDailyPlan).not.toHaveBeenCalled();
+  });
+
   it("requires a client read-back before the reassuring evening-close state is shown", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");

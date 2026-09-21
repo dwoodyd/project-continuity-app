@@ -2593,3 +2593,9 @@
 - [x] Scope Evidence Log tiles and the displayed monthly record to the same member-selected month; repair exclusive month-end query boundaries.
 - [x] Restore a dedicated owner-only admin Study Tracker under `/admin/study`, separate from member-facing Single Focus Mode at `/study`.
 - [x] Add regressions and complete TypeScript plus full-suite validation before checkpointing.
+
+## Feedback Authorization and Check-in Ownership Coverage (Sep 20)
+- [x] Make `feedback.list` return an explicit `FORBIDDEN` response to non-admin callers, consistent with the remaining admin procedures.
+- [x] Normalize non-admin feedback resolution to the same explicit `FORBIDDEN` response.
+- [x] Add server-side regression coverage proving a forged check-in amendment ID is read with the caller’s user ID and performs no write.
+- [x] Complete TypeScript, focused authorization checks, and full-suite validation before checkpointing.
