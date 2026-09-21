@@ -6,6 +6,8 @@ vi.mock("./db", async (importOriginal) => {
   return {
     ...actual,
     getDailyPlan: vi.fn(),
+    getCheckIns: vi.fn(),
+    getRecentCheckIns: vi.fn(),
     getWrenToneBucket: vi.fn(),
     saveEveningClose: vi.fn(),
     getCheckInById: vi.fn(),
@@ -74,6 +76,28 @@ beforeEach(() => {
 });
 
 describe("durable evening close integrity", () => {
+  it("rejects unrecognized or malformed check-in query input instead of silently accepting it", async () => {
+    const caller = checkInsRouter.createCaller(ctx());
+
+    await expect((caller.getWeek as any)({ timezone: 12345 })).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(caller.getToday({ timezone: 12345 } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(caller.getById({ id: 412, timezone: 12345 } as any)).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(db.getRecentCheckIns).not.toHaveBeenCalled();
+    expect(db.getCheckIns).not.toHaveBeenCalled();
+    expect(db.getCheckInById).not.toHaveBeenCalled();
+  });
+
+  it("uses strict object schemas for every shaped check-in payload and explicit undefined schemas for no-payload reads", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const source = fs.readFileSync(path.resolve(process.cwd(), "server/routers/checkIns.ts"), "utf8");
+
+    expect(source).toContain("const strictObject = <T extends z.ZodRawShape>(shape: T) => z.object(shape).strict();");
+    expect(source).not.toContain(".input(z.object(");
+    expect((source.match(/\.input\(z\.undefined\(\)\)/g) ?? []).length).toBeGreaterThanOrEqual(8);
+  });
+
   it("writes the canonical evening record and tomorrow handoff before optional LLM enrichment", async () => {
     const result = await checkInsRouter.createCaller(ctx()).submitEvening({
       whatMoved: "Drafted the project outline",

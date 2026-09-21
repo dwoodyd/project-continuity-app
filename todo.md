@@ -2599,3 +2599,10 @@
 - [x] Normalize non-admin feedback resolution to the same explicit `FORBIDDEN` response.
 - [x] Add server-side regression coverage proving a forged check-in amendment ID is read with the caller’s user ID and performs no write.
 - [x] Complete TypeScript, focused authorization checks, and full-suite validation before checkpointing.
+
+## Security Checklist Follow-up (Sep 21)
+- [x] Audit the supplied three-app checklist and limit Continuary implementation work to this repository.
+- [x] Make every shaped check-in payload strict and require undefined for no-payload check-in reads, so unexpected fields are rejected rather than silently stripped.
+- [x] Add server regressions for the reported malformed `timezone` payload and retain the forged-ID ownership denial coverage.
+- [x] Record an evidence-based Continuary builder attestation, including the TiDB native-RLS limitation, CORS scope, Git-history qualification, query safety, rendering boundary, and mutation-schema audit.
+- [x] Complete TypeScript, full-suite, and local-health validation before checkpointing.

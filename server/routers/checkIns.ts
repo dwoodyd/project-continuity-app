@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+// Reject unrecognized payload keys rather than silently stripping them.
+const strictObject = <T extends z.ZodRawShape>(shape: T) => z.object(shape).strict();
 import { TRPCError } from "@trpc/server";
 import { getDb } from "../db";
 import { continuityEvents } from "../../drizzle/schema";
@@ -42,7 +45,7 @@ import { getWrenToneBucket } from "../wrenTone";
 
 // getTodayDate replaced by resolveDate from dateUtils
 
-const eveningTomorrowTaskSchema = z.object({
+const eveningTomorrowTaskSchema = strictObject({
   id: z.string().max(100).optional(),
   title: z.string().trim().min(1).max(300),
   projectId: z.number().int().positive().nullable().optional(),
@@ -120,7 +123,7 @@ async function buildCheckInDetail(checkIn: Awaited<ReturnType<typeof getCheckInB
 
 export const checkInsRouter = router({
   getToday: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       // Client passes its local YYYY-MM-DD so the server uses the user's actual calendar day,
       // not the UTC date (which can differ by up to ±14 hours from the user's local midnight).
       localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -130,19 +133,23 @@ export const checkInsRouter = router({
       return getCheckIns(ctx.user.id, date);
     }),
 
-  getRecent: protectedProcedure.query(async ({ ctx }) => {
+  getRecent: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     return getRecentCheckIns(ctx.user.id, 14);
   }),
 
   // Returns check-ins from the past 7 days — same window used by the Wren letter generator
-  getWeek: protectedProcedure.query(async ({ ctx }) => {
+  getWeek: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     const all = await getRecentCheckIns(ctx.user.id, 50);
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     return all.filter(c => new Date(c.createdAt).getTime() >= weekAgo);
   }),
 
   submitMorning: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       capacityLevel: z.enum(["full", "partial", "low"]),
       primaryProjectId: z.number().optional(),
       secondaryProjectId: z.number().optional(),
@@ -463,7 +470,7 @@ Return JSON: { guidance: string, divergenceNote: string|null, criticalTasks: [{t
     }),
 
   submitMidday: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       workedOn: z.string().max(2000),
       wasOnPlan: z.boolean(),
       interruptions: z.string().max(2000).optional(),
@@ -557,7 +564,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   submitEvening: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       whatMoved: z.string().max(2000),
       whatRemains: z.string().max(2000),
       whatLearned: z.string().max(2000),
@@ -736,7 +743,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   completeTask: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       taskId: z.string().max(100),
       taskTitle: z.string().max(300).optional(),
       date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
@@ -771,7 +778,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   addTask: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       title: z.string().min(1).max(300),
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
@@ -824,7 +831,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   editTask: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       taskId: z.string().max(100),
       title: z.string().min(1).max(300),
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
@@ -843,7 +850,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   removeTask: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       taskId: z.string().max(100),
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
@@ -859,7 +866,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   pushTaskToTomorrow: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       taskId: z.string().max(100),
       localDate: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
@@ -897,7 +904,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     }),
 
   uncompleteTask: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       taskId: z.string().max(100),
       date: z.string().max(10).regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").optional(),
     }))
@@ -914,10 +921,14 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
       return { success: true };
     }),
 
-  weeklyPresence: protectedProcedure.query(async ({ ctx }) => {
+  weeklyPresence: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     return getWeeklyCheckInPresence(ctx.user.id);
   }),
-  weeklyThreadData: protectedProcedure.query(async ({ ctx }) => {
+  weeklyThreadData: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     const daysBack = ctx.user.isPro ? 30 : 7;
     return getWeeklyThreadData(ctx.user.id, daysBack);
   }),
@@ -926,7 +937,9 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
    * Returns distraction insights for the past 7 days:
    * top category, time-of-day breakdown, full category breakdown, and an insight sentence.
    */
-  getWeeklyDistractionInsights: protectedProcedure.query(async ({ ctx }) => {
+  getWeeklyDistractionInsights: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     const aggregates = await getDistractionWeeklyAggregates(ctx.user.id);
     if (aggregates.totalEvents === 0) {
       return {
@@ -1005,16 +1018,20 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
     };
   }),
 
-  getStreak: protectedProcedure.query(async ({ ctx }) => {
+  getStreak: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     return getStreak(ctx.user.id);
   }),
-  getHeatmapData: protectedProcedure.query(async ({ ctx }) => {
+  getHeatmapData: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     return getHeatmapData(ctx.user.id);
   }),
 
   /** A dated, member-owned index of submitted and recoverable unfinished check-ins. */
   getHistory: protectedProcedure
-    .input(z.object({ limit: z.number().int().min(1).max(100).default(60) }).optional())
+    .input(strictObject({ limit: z.number().int().min(1).max(100).default(60) }).optional())
     .query(async ({ ctx, input }) => {
       const records = await getRecentCheckIns(ctx.user.id, input?.limit ?? 60);
       return records.map((record) => {
@@ -1034,7 +1051,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
 
   /** Returns one member-owned check-in for an explicit review or amendment. */
   getById: protectedProcedure
-    .input(z.object({ id: z.number().int().positive() }))
+    .input(strictObject({ id: z.number().int().positive() }))
     .query(async ({ ctx, input }) => {
       const checkIn = await getCheckInById(input.id, ctx.user.id);
       if (!checkIn) throw new TRPCError({ code: "NOT_FOUND", message: "Check-in not found." });
@@ -1043,7 +1060,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
 
   /** Correct a saved morning check-in without re-generating or overwriting its plan. */
   amendMorning: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       id: z.number().int().positive(),
       capacityLevel: z.enum(["full", "partial", "low"]),
       primaryProjectId: z.number().int().positive().nullable().optional(),
@@ -1081,7 +1098,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
 
   /** Correct a saved midday pulse while retaining it as the same dated record. */
   amendMidday: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       id: z.number().int().positive(),
       workedOn: z.string().trim().min(1).max(2000),
       wasOnPlan: z.boolean(),
@@ -1119,7 +1136,7 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
    * member's corrected words.
    */
   amendEveningClose: protectedProcedure
-    .input(z.object({
+    .input(strictObject({
       id: z.number().int().positive(),
       whatMoved: z.string().trim().min(1).max(2000),
       whatRemains: z.string().max(2000),
@@ -1177,7 +1194,9 @@ Return JSON: { alignmentStatus: "aligned"|"recovering"|"redirect", response: str
    * Returns the user's most recent evening check-in with full raw content.
    * Used by the Evening Close review screen so users can read back what they wrote.
    */
-  getLastEveningClose: protectedProcedure.query(async ({ ctx }) => {
+  getLastEveningClose: protectedProcedure
+    .input(z.undefined())
+    .query(async ({ ctx }) => {
     const recent = await getRecentCheckIns(ctx.user.id, 30);
     const lastEvening = recent.find((c) => c.type === "evening");
     if (!lastEvening) return null;
