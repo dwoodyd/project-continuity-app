@@ -73,8 +73,8 @@ export default function CapturePage() {
             base64: await blobToBase64(draft.audioBlob),
             mimeType: draft.mimeType || "audio/webm",
           });
-          const { transcript } = await transcribe.mutateAsync({ audioUrl: upload.url, durationHint: draft.durationS ?? 0 });
-          await createCapture.mutateAsync({ mode: "voice", transcript, durationS: draft.durationS, audioKey: upload.url });
+          const { transcript } = await transcribe.mutateAsync({ audioKey: upload.key, durationHint: draft.durationS ?? 0 });
+          await createCapture.mutateAsync({ mode: "voice", transcript, durationS: draft.durationS, audioKey: upload.key });
         }
         await removeOfflineCapture(draft.id);
         synced += 1;
@@ -248,7 +248,7 @@ export default function CapturePage() {
     // Upload any remaining chunks that weren't uploaded during recording
     setRecordState("uploading");
     const combinedBlob = new Blob(blobs, { type: blobs[0]?.type || "audio/webm" });
-    let audioUrl: string | null = null;
+    let audioKey: string | null = null;
     try {
       const base64 = await blobToBase64(combinedBlob);
       const result = await uploadChunk.mutateAsync({
@@ -257,7 +257,7 @@ export default function CapturePage() {
         base64,
         mimeType: combinedBlob.type,
       });
-      audioUrl = result.url;
+      audioKey = result.key;
     } catch {
       setError("Couldn't upload your recording. Please try again.");
       setRecordState("idle");
@@ -268,7 +268,7 @@ export default function CapturePage() {
     setRecordState("transcribing");
     try {
       const { transcript } = await transcribe.mutateAsync({
-        audioUrl,
+        audioKey: audioKey!,
         durationHint: durationS,
       });
 
@@ -278,7 +278,7 @@ export default function CapturePage() {
         mode: "voice",
         durationS,
         transcript,
-        audioKey: audioUrl,
+        audioKey,
         intent: "capture",
       });
       await utils.capture.recent.invalidate();

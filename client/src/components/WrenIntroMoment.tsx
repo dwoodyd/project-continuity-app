@@ -188,7 +188,7 @@ export function WrenIntroMoment({ onDone }: WrenIntroMomentProps) {
               mixBlendMode: "screen",
             }}
           >
-            <source src={WREN_CLIPS.blobFlyingFun} type="video/mp4" />
+            <source src={WREN_CLIPS.luminousFloats} type="video/mp4" />
           </video>
         )}
       </div>

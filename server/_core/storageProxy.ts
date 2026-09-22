@@ -29,6 +29,22 @@ export function resolveStorageContentType(key: string, upstreamContentType: stri
 }
 
 /**
+ * Member-owned storage carries its owner id in the second key segment.
+ * `captures/` remains protected as a legacy private namespace so historical
+ * recordings cannot become public while new recordings live under `vault/`.
+ */
+export function privateStorageOwnerId(key: string): number | null {
+  const match = /^(?:vault|captures)\/(\d+)(?:\/|$)/.exec(key);
+  if (!match) return null;
+  const userId = Number(match[1]);
+  return Number.isSafeInteger(userId) && userId > 0 ? userId : null;
+}
+
+export function isPrivateStorageKey(key: string): boolean {
+  return key.startsWith("vault/") || key.startsWith("captures/");
+}
+
+/**
  * Storage proxy — serves Manus private storage files to the browser.
  *
  * Streams bytes server-side instead of redirecting to the signed CloudFront URL.
@@ -38,10 +54,10 @@ export function resolveStorageContentType(key: string, upstreamContentType: stri
  *
  * Supports HTTP Range requests so browsers can seek/scrub videos.
  *
- * SECURITY: keys that start with "vault/" are private user files.
+ * SECURITY: keys that start with "vault/" or legacy "captures/" are private user files.
  * The request must carry a valid session cookie and the userId embedded
  * in the key must match the authenticated user. Public app assets
- * (Wren SVG/webp/mp4, etc.) have no vault/ prefix and are served
+ * (Wren SVG/webp/mp4, etc.) have neither private prefix and are served
  * without authentication so unauthenticated users see the landing page.
  */
 export function registerStorageProxy(app: Express) {
@@ -52,15 +68,16 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    // SECURITY: vault files are private — require auth and verify ownership.
-    // Public app assets (Wren SVG/webp/mp4, etc.) have no vault/ prefix and
+    // SECURITY: vault and legacy capture files are private — require auth and
+    // verify ownership. Public app assets (Wren SVG/webp/mp4, etc.) have no
+    // private prefix and
     // are served freely so unauthenticated users see the landing page correctly.
-    if (key.startsWith("vault/")) {
+    const isPrivateFile = isPrivateStorageKey(key);
+    if (isPrivateFile) {
       try {
         const user = await sdk.authenticateRequest(req);
-        // Key format: vault/{userId}/...
-        const keyUserId = parseInt(key.split("/")[1] ?? "", 10);
-        if (!keyUserId || keyUserId !== user.id) {
+        const keyUserId = privateStorageOwnerId(key);
+        if (keyUserId === null || keyUserId !== user.id) {
           res.status(403).send("Forbidden");
           return;
         }
@@ -118,17 +135,15 @@ export function registerStorageProxy(app: Express) {
       const contentRange = fileResp.headers.get("content-range");
       const acceptRanges = fileResp.headers.get("accept-ranges");
 
-      const isVaultFile = key.startsWith("vault/");
-
       res.status(fileResp.status); // 200 or 206
       res.set("Content-Type", contentType);
-      // Vault files are private: no public caching, no cross-origin access.
-      // Public assets (Wren media) can be cached publicly.
-      if (isVaultFile) {
-        res.set("Cache-Control", "private, max-age=3600");
+      // Member-owned files are never cached or made readable cross-origin.
+      // The app only uses same-origin media, so no `/api/media/*` response needs
+      // a permissive Access-Control-Allow-Origin header.
+      if (isPrivateFile) {
+        res.set("Cache-Control", "private, no-store");
       } else {
         res.set("Cache-Control", "public, max-age=3600");
-        res.set("Access-Control-Allow-Origin", "*");
       }
       if (contentLength) res.set("Content-Length", contentLength);
       if (contentRange) res.set("Content-Range", contentRange);

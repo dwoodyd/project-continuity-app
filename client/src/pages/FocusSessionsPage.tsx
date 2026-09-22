@@ -986,8 +986,11 @@ export default function FocusSessionsPage() {
                 clip={ACTIVITY_CLIP[wrenActivity]}
                 size="full"
                 stage={false}
+                objectFit="cover"
                 fallbackStill="siliconeNeutral"
                 wrapperClassName="h-full w-full"
+                showVideoPoster={false}
+                preload="auto"
                 className="drop-shadow-[0_18px_50px_rgba(212,168,83,0.18)]"
               />
             </div>
@@ -1474,9 +1477,9 @@ export default function FocusSessionsPage() {
                             )}
                           </div>
                         ))}
-                        {artifactData.sessions.length > 4 && (
+                        {artifactData.totalSegments > 4 && (
                           <p className="text-[10px] text-center mt-0.5" style={{ color: "oklch(0.30 0.03 240)" }}>
-                            +{artifactData.sessions.length - 4} earlier
+                            +{artifactData.totalSegments - 4} earlier
                           </p>
                         )}
                       </div>

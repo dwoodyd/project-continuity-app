@@ -10,7 +10,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { DeepgramClient } from "@deepgram/sdk";
-import { storagePut } from "../storage";
+import { storageGet, storagePut } from "../storage";
 
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
 
@@ -24,42 +24,59 @@ function getDeepgramClient() {
   return new DeepgramClient({ apiKey: DEEPGRAM_API_KEY });
 }
 
+export function isOwnedCaptureAudioKey(key: string, userId: number): boolean {
+  const match = /^(?:vault\/(\d+)\/captures|captures\/(\d+))\/\d+\/chunk-\d+\.(?:webm|mp4)$/i.exec(key);
+  return (match?.[1] ?? match?.[2]) === String(userId);
+}
+
 export const transcribeRouter = router({
   /**
-   * Upload an audio blob (base64) to S3 and return the storage key + URL.
+   * Upload an audio blob (base64) to private storage and return its key only.
+   * The temporary provider URL never reaches the browser.
    * Called once per chunk from the frontend recorder.
    */
   uploadChunk: protectedProcedure
     .input(
       z.object({
-        captureId: z.number().int(),
+        captureId: z.number().int().positive(),
         chunkIndex: z.number().int().min(0),
         base64: z.string().max(10 * 1024 * 1024), // 10 MB base64 limit
-        mimeType: z.string().default("audio/webm"),
+        mimeType: z.string().regex(/^audio\/(?:webm|mp4)(?:;[a-z0-9=._-]+)*$/i).max(128).default("audio/webm"),
       })
     )
     .mutation(async ({ ctx, input }) => {
       const buffer = Buffer.from(input.base64, "base64");
       const ext = input.mimeType.includes("mp4") ? "mp4" : "webm";
-      const key = `captures/${ctx.user.id}/${input.captureId}/chunk-${input.chunkIndex}.${ext}`;
-      const { url } = await storagePut(key, buffer, input.mimeType);
-      return { key, url };
+      const key = `vault/${ctx.user.id}/captures/${input.captureId}/chunk-${input.chunkIndex}.${ext}`;
+      await storagePut(key, buffer, input.mimeType);
+      return { key };
     }),
 
   /**
-   * Transcribe a complete audio recording stored at the given S3 URL.
+   * Transcribe a complete audio recording owned by the requesting member.
+   * A temporary storage URL is created only on the server for Deepgram.
    * Returns the full transcript text.
    */
   transcribe: protectedProcedure
     .input(
       z.object({
-        audioUrl: z.string().url(),
+        audioKey: z.string().min(1).max(512),
         language: z.string().optional().default("en"),
         durationHint: z.number().optional(), // seconds, for timeout estimation
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      if (!isOwnedCaptureAudioKey(input.audioKey, ctx.user.id)) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "That recording is not available." });
+      }
       const deepgram = getDeepgramClient();
+
+      let audioUrl: string;
+      try {
+        ({ url: audioUrl } = await storageGet(input.audioKey));
+      } catch {
+        throw new TRPCError({ code: "NOT_FOUND", message: "That recording is no longer available." });
+      }
 
       const timeoutMs = Math.max(
         15000,
@@ -71,7 +88,7 @@ export const transcribeRouter = router({
         result = await Promise.race([
           deepgram.listen.v1.media.transcribeUrl(
             {
-              url: input.audioUrl,
+              url: audioUrl,
               model: "nova-3",
               language: input.language,
               smart_format: true,

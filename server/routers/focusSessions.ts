@@ -15,7 +15,7 @@ import {
 } from "../db";
 import { CHAPTER_CONCEPTS, PERMISSION_TO_START_CHAPTERS } from "./readingBridge";
 import { bookedFocusSessions, focusSessions, focusSessionArtifact, threadStrength, sourceItems, taskEstimates } from "../../drizzle/schema";
-import { eq, desc, and, gte, sql } from "drizzle-orm";
+import { eq, desc, and, gte, sql, or, lt } from "drizzle-orm";
 import { invokeLLM } from "../_core/llm";
 import { checkHeavyLLMRateLimit } from "../_core/rateLimiter";
 import { ENV } from "../_core/env";
@@ -370,31 +370,62 @@ export const focusSessionsRouter = router({
       return { ok: true };
     }),
 
-  // ── Get artifact data (all sessions for procedural rendering) ───────────────
-  getArtifact: protectedProcedure.query(async ({ ctx }) => {
+  // ── Get artifact data (bounded, cursor-paginated for procedural rendering) ──
+  getArtifact: protectedProcedure
+    .input(z.object({
+      limit: z.number().int().min(1).max(120).default(120),
+      beforeStartedAt: z.date().optional(),
+      beforeId: z.number().int().positive().optional(),
+    }).refine(
+      (input) => Boolean(input.beforeStartedAt) === Boolean(input.beforeId),
+      { message: "Artifact cursor requires both a timestamp and an id." },
+    ).optional())
+    .query(async ({ ctx, input }) => {
     const db = await getDb();
-    if (!db) return { sessions: [], totalSegments: 0 };
+    if (!db) return { sessions: [], totalSegments: 0, nextCursor: null };
+    const limit = input?.limit ?? 120;
+    const cursorClause = input?.beforeStartedAt && input.beforeId
+      ? or(
+          lt(focusSessions.startedAt, input.beforeStartedAt),
+          and(eq(focusSessions.startedAt, input.beforeStartedAt), lt(focusSessions.id, input.beforeId)),
+        )
+      : undefined;
 
-    const sessions = await db
+    const rows = await db
       .select({
         id: focusSessions.id,
+        startedAt: focusSessions.startedAt,
         durationMinutes: focusSessions.durationMinutes,
         whatMoved: focusSessions.whatMoved,
         completedAt: focusSessions.completedAt,
         threadAddedUnits: focusSessions.threadAddedUnits,
       })
       .from(focusSessions)
-      .where(and(eq(focusSessions.userId, ctx.user.id), eq(focusSessions.wasCompleted, 1)))
-      .orderBy(focusSessions.startedAt);
+      .where(and(eq(focusSessions.userId, ctx.user.id), eq(focusSessions.wasCompleted, 1), cursorClause))
+      .orderBy(desc(focusSessions.startedAt), desc(focusSessions.id))
+      .limit(limit + 1);
+
+    const page = rows.slice(0, limit);
+    const last = page[page.length - 1];
+    const hasMore = rows.length > limit;
+    const sessions = [...page].reverse();
 
     const artifact = await db
-      .select()
+      .select({ totalSegments: focusSessionArtifact.totalSegments })
       .from(focusSessionArtifact)
       .where(eq(focusSessionArtifact.userId, ctx.user.id));
 
+    const totalSegments = artifact[0]?.totalSegments ?? (await db
+      .select({ total: sql<number>`COUNT(*)` })
+      .from(focusSessions)
+      .where(and(eq(focusSessions.userId, ctx.user.id), eq(focusSessions.wasCompleted, 1))))[0]?.total ?? 0;
+
     return {
       sessions,
-      totalSegments: artifact[0]?.totalSegments ?? sessions.length,
+      totalSegments: Number(totalSegments),
+      nextCursor: hasMore && last
+        ? { beforeStartedAt: last.startedAt, beforeId: last.id }
+        : null,
     };
   }),
 
@@ -406,18 +437,19 @@ export const focusSessionsRouter = router({
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
 
-    const all = await db
-      .select()
+    const [stats] = await db
+      .select({
+        lifetimeSessions: sql<number>`COUNT(*)`,
+        todaySessions: sql<number>`COALESCE(SUM(CASE WHEN ${focusSessions.completedAt} >= ${todayStart} THEN 1 ELSE 0 END), 0)`,
+        todayMinutes: sql<number>`COALESCE(SUM(CASE WHEN ${focusSessions.completedAt} >= ${todayStart} THEN COALESCE(${focusSessions.durationMinutes}, 0) ELSE 0 END), 0)`,
+      })
       .from(focusSessions)
       .where(and(eq(focusSessions.userId, ctx.user.id), eq(focusSessions.wasCompleted, 1)));
 
-    const today = all.filter((s) => s.completedAt && s.completedAt >= todayStart);
-    const todayMinutes = today.reduce((sum, s) => sum + (s.durationMinutes ?? 0), 0);
-
     return {
-      todaySessions: today.length,
-      todayMinutes,
-      lifetimeSessions: all.length,
+      todaySessions: Number(stats?.todaySessions ?? 0),
+      todayMinutes: Number(stats?.todayMinutes ?? 0),
+      lifetimeSessions: Number(stats?.lifetimeSessions ?? 0),
     };
   }),
 

@@ -2606,3 +2606,13 @@
 - [x] Add server regressions for the reported malformed `timezone` payload and retain the forged-ID ownership denial coverage.
 - [x] Record an evidence-based Continuary builder attestation, including the TiDB native-RLS limitation, CORS scope, Git-history qualification, query safety, rendering boundary, and mutation-schema audit.
 - [x] Complete TypeScript, full-suite, and local-health validation before checkpointing.
+
+## Launch Hardening, Media Audit, and Staging Constraint (Sep 22)
+- [x] Enforce authenticated, owner-scoped access for capture audio; keep provider download URLs server-side and protect both legacy and new capture key layouts.
+- [x] Tighten `/api/media` behavior so public Wren media has no permissive CORS header while private capture paths require an authenticated owner.
+- [x] Replace screenshot-confirmed watermarked onboarding mappings (`bouncingFun`, `blobFlyingFun`) with audited `hoversThread` and `luminousFloats` sources.
+- [x] Restore explicit full-stage rendering for the protected active Focus companion without altering PiP mechanics or the verified neutral pre-video Focus landing.
+- [x] Replace unbounded Focus artifact and Today statistics reads with cursor-paginated and SQL aggregate queries; add and apply the two verified composite indexes in migration `0056_pink_fallen_one.sql`.
+- [x] Verify live `EXPLAIN` selects both Focus composite indexes and run the full suite: 57 files / 575 tests.
+- [ ] Run authenticated dashboard, check-in read-back, and AI-path load test only after a separate staging database and staging application environment are provisioned. Current project credentials cannot create a staging schema; production was deliberately not used as a substitute.
+- [ ] Confirm managed hosting instance/autoscaling plan and exact TiDB Cloud spending limit through the respective account consoles; these controls are not exposed through this project runtime or database connection.

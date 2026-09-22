@@ -856,7 +856,7 @@ function StepFocus({ focusHour, setFocusHour, onNext, onBack, onSkipAll }: {
   return (
     <VideoStage>
       <SkipAllButton onSkip={onSkipAll} />
-      <SmoothLoopVideo src={WREN_CLIPS.bouncingFun} />
+      <SmoothLoopVideo src={WREN_CLIPS.hoversThread} />
       <GradientOverlays top={false} />
 
       <div style={{

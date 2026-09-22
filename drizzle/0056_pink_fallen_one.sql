@@ -1,0 +1,2 @@
+CREATE INDEX `focus_sessions_user_completed_at_idx` ON `focus_sessions` (`userId`,`wasCompleted`,`completedAt`);--> statement-breakpoint
+CREATE INDEX `focus_sessions_user_completed_started_idx` ON `focus_sessions` (`userId`,`wasCompleted`,`startedAt`,`id`);

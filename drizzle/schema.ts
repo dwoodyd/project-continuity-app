@@ -453,7 +453,10 @@ export const focusSessions = mysqlTable("focus_sessions", {
   wasCompleted: int("wasCompleted").default(0).notNull(),
   hardStop: bigint("hardStop", { mode: "number" }), // optional hard stop timestamp (ms)
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, (table) => [
+  index("focus_sessions_user_completed_at_idx").on(table.userId, table.wasCompleted, table.completedAt),
+  index("focus_sessions_user_completed_started_idx").on(table.userId, table.wasCompleted, table.startedAt, table.id),
+]);
 export type FocusSession = typeof focusSessions.$inferSelect;
 export type InsertFocusSession = typeof focusSessions.$inferInsert;
 

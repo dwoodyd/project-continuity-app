@@ -13,6 +13,9 @@ describe("Focus Sessions companion stage", () => {
     expect(page).toContain('clip={ACTIVITY_CLIP[wrenActivity]}');
     expect(page).toContain('fallbackStill="siliconeNeutral"');
     expect(page).toContain('absolute inset-x-6 top-12 bottom-9 z-[1] md:top-16');
+    expect(page).toContain('objectFit="cover"');
+    expect(page).toContain('showVideoPoster={false}');
+    expect(page).toContain('preload="auto"');
   });
 
   it("keeps the pre-start stage neutral until Wren's intended video is ready", () => {
