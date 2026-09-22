@@ -240,7 +240,7 @@ export default function WeeklyCompassPage() {
       {/* Empty state */}
       {!isLoading && !compass && (
         <IntroWrenScene
-          src={WREN_CLIPS.memoryOrb}
+          src={WREN_CLIPS.holdingOrb}
           eyebrow="Weekly Compass"
           title="One clear direction for the week."
           body="Gather the threads that matter, then let the rest wait."

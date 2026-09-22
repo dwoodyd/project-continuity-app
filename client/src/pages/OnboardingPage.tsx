@@ -1071,7 +1071,7 @@ function DoneScreen({ name, onDone }: { name: string; onDone: () => void }) {
       {!videoEnded ? (
         <OnceVideo src={WREN_CLIPS.fliesHug} onEnded={() => setVideoEnded(true)} />
       ) : (
-        <SmoothLoopVideo src={WREN_CLIPS.mainCornerWave} />
+        <SmoothLoopVideo src={WREN_CLIPS.hoveringArchway} />
       )}
       <GradientOverlays />
 

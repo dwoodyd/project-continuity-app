@@ -51,8 +51,8 @@ export const WREN_CLIPS = {
   luminousFloats:     `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
   /** Wren drops from above and hovers — alternate intro (permanent static asset) */
   dropsAndHovers:     `${BASE}/wren_drops_and_hovers_fe4c3cf4_f586589a.mp4`,
-  /** Wren peeking from the edge — name input background (permanent static asset) */
-  peeking:            `${BASE}/wren_peeking_9a813da0_b6d5c634.mp4`,
+  /** Legacy peeking key mapped to the reviewed winking-ripple scene. */
+  peeking:            `${BASE}/wren_winks_ripple_44f66820_e99c470c.mp4`,
   /** Wren winks with a jiggly ripple — tone interstitial reaction (permanent static asset) */
   winksRipple:        `${BASE}/wren_winks_ripple_44f66820_e99c470c.mp4`,
   /** Wren closes eyes in concentration — tone selection / thoughtful (permanent static asset) */
@@ -65,8 +65,8 @@ export const WREN_CLIPS = {
   fliesHug:           `${BASE}/wren_flies_hug_af727f9c_5f7efdf8.mp4`,
 
   // ── Home & Dashboard ────────────────────────────────────────────────────────
-  /** Wren's main corner wave — ambient home dashboard widget (permanent static asset) */
-  mainCornerWave:     `${BASE}/wren_main_corner_wave_b211fe78_a4cf1dad.mp4`,
+  /** Legacy home-video key mapped to the reviewed archway scene. */
+  mainCornerWave:     `${BASE}/wren_hovering_archway_b1c86b40.mp4`,
   /** Wren corner wave (alternate) */
   cornerWave:         `${BASE}/wren_corner_wave_0d698f99.mp4`,
   /** Wren taps screen and points down — CTA/prompt widget */
@@ -77,8 +77,8 @@ export const WREN_CLIPS = {
   hitsScreen:         `${BASE}/wren_hits_screen_bbeaab44.mp4`,
   /** Wren wipes screen, points, and dances — feature tour / onboarding complete */
   wipesDances:        `${BASE}/wren_wipes_dances_3c262da6.mp4`,
-  /** Wren holding a glowing orb — intelligence / insight widget */
-  holdingOrb:         `${BASE}/wren_holding_orb_4c6ec928.mp4`,
+  /** Legacy holding-orb key mapped to the reviewed luminous-floats scene. */
+  holdingOrb:         `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
   /** Wren hovering under an archway — welcome / portal moment */
   hoveringArchway:    `${BASE}/wren_hovering_archway_b1c86b40.mp4`,
   /** Wren glowing and hovering — ambient background */
@@ -131,8 +131,8 @@ export const WREN_CLIPS = {
   // ── Emotional / Empathy ─────────────────────────────────────────────────────
   /** Wren inflates gently — emotional cycle low / empathy */
   inflates:           `${BASE}/wren_inflates_37c3a62a.mp4`,
-  /** Wren memory orb — memory / reflection */
-  memoryOrb:          `${BASE}/wren_memory_orb_92969214.mp4`,
+  /** Legacy memory-orb key mapped directly to a reviewed non-watermarked scene. */
+  memoryOrb:          `${BASE}/wren_luminous_floats_fdfcf0c1.mp4`,
   /** Wren carrying a thread — continuity / connection */
   carryingThread:     `${BASE}/wren_carrying_thread_4789c9c5.mp4`,
   /** Wren tugging a thread — pulling things together */
@@ -181,7 +181,7 @@ export const WREN_CLIPS = {
   celebration:        `${BASE}/wren_flies_hug_af727f9c.mp4`,
   celebration2:       `${BASE}/wren_cartwheels_feefa3ef.mp4`,
   reflection:         `${BASE}/wren_hovers_journal_ef4ca92d.mp4`,
-  idle:               `${BASE}/wren_main_corner_wave_b211fe78.mp4`,
+  idle:               `${BASE}/wren_hovering_archway_b1c86b40.mp4`,
 } as const;
 
 export type WrenClipKey = keyof typeof WREN_CLIPS;
